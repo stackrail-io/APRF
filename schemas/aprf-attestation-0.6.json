@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stackrail.io/aprf/attestation-schema/0.6",
+  "title": "APRF Self-Attestation Document",
+  "description": "Schema for aprf-self-attestation JSON exports from the Core Profile (optional lenses) assessment.",
+  "type": "object",
+  "required": [
+    "$schema",
+    "type",
+    "aprfVersion",
+    "certificationLevel",
+    "assessedAt",
+    "subject",
+    "assessor",
+    "input",
+    "result",
+    "statement",
+    "disclaimer"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri"
+    },
+    "type": {
+      "type": "string",
+      "const": "aprf-self-attestation"
+    },
+    "aprfVersion": {
+      "type": "string"
+    },
+    "certificationLevel": {
+      "type": "string",
+      "const": "self-attestation"
+    },
+    "assessedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "subject": {
+      "type": "object",
+      "required": [
+        "organization",
+        "systemName"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "organization": {
+          "type": "string"
+        },
+        "systemName": {
+          "type": "string"
+        },
+        "systemDescription": {
+          "type": "string"
+        }
+      }
+    },
+    "assessor": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "input": {
+      "type": "object",
+      "required": [
+        "criticality",
+        "outcomes"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "criticality": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "profileId": {
+          "type": "string"
+        },
+        "lensIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "outcomes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "checkId",
+              "passed"
+            ],
+            "properties": {
+              "checkId": {
+                "type": "string"
+              },
+              "passed": {
+                "type": "boolean"
+              },
+              "notApplicable": {
+                "type": "boolean",
+                "description": "When true, check is attested N/A and counts as gate-satisfied. Prefer documenting naReason."
+              },
+              "naReason": {
+                "type": "string"
+              },
+              "evidenceRef": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "required": [
+        "overallGatePassed",
+        "requiredCapability",
+        "capabilityAttained",
+        "blockers"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "overallGatePassed": {
+          "type": "boolean"
+        },
+        "requiredCapability": {
+          "type": "integer"
+        },
+        "capabilityAttained": {
+          "type": "integer"
+        },
+        "blockerCount": {
+          "type": "integer"
+        },
+        "criticalBlockerCount": {
+          "type": "integer"
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "domains": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "statement": {
+      "type": "string"
+    },
+    "disclaimer": {
+      "type": "string"
+    }
+  }
+}

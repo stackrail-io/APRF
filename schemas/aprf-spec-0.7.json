@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stackrail.io/aprf/spec-schema/0.7",
+  "title": "APRF Specification Document",
+  "description": "Schema for the AI Production Readiness Framework (APRF) machine-readable specification JSON.",
+  "type": "object",
+  "required": [
+    "$schema",
+    "id",
+    "name",
+    "question",
+    "governance",
+    "taxonomy",
+    "pillars"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri"
+    },
+    "id": {
+      "type": "string",
+      "const": "aprf"
+    },
+    "name": {
+      "type": "string"
+    },
+    "question": {
+      "type": "string"
+    },
+    "governance": {
+      "type": "object",
+      "required": [
+        "version",
+        "status",
+        "publisher"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "publisher": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "stewardship": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "taxonomy": {
+      "type": "object",
+      "required": [
+        "domains"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "domains": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "crossCutting": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "maturity": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "lenses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "crosswalks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "scoring": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "pillars": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "mandatoryChecks"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "mandatoryChecks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "recommendedChecks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}
