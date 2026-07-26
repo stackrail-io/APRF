@@ -32,7 +32,7 @@
       "frameworkSemVer": "APRF_GOVERNANCE.version — semantic version of the normative framework, check catalog, profiles, and scoring semantics.",
       "specSchemaId": "https://stackrail.io/aprf/spec-schema/0.7 — JSON Schema for the machine-readable APRF document shape; may lag framework SemVer when only content changes.",
       "attestationSchemaId": "https://stackrail.io/aprf/attestation-schema/0.6 — JSON Schema for aprf-self-attestation exports.",
-      "note": "Do not equate schema path versions (0.7 / 0.6) with APRF framework SemVer (e.g. 0.9.1). Validators and conformance claims should cite both."
+      "note": "Do not equate schema path versions (0.7 / 0.6) with APRF framework SemVer (e.g. 0.10.0). Validators and conformance claims should cite both."
     },
     "deprecation": {
       "policy": "Deprecated checks and pillars remain in the spec for at least one MINOR cycle (N−1), marked deprecated, with a replacement ID.",
@@ -4445,33 +4445,6 @@
       ],
       "mandatoryChecks": [
         {
-          "id": "DEP-M1",
-          "requirement": "A promotion path shall exist from non-prod to prod for prompts, models, and tools",
-          "artifact": "Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools",
-          "passCondition": "100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record",
-          "method": "hybrid",
-          "requiredFromLevel": 3,
-          "minCriticality": 2
-        },
-        {
-          "id": "DEP-M2",
-          "requirement": "Production changes shall be recorded (who/what/when) and linked to reviews",
-          "artifact": "Change log or ticket export for AI artifact releases",
-          "passCondition": "100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID)",
-          "method": "hybrid",
-          "requiredFromLevel": 3,
-          "minCriticality": 2
-        },
-        {
-          "id": "DEP-M3",
-          "requirement": "Infrastructure and AI config shall be defined as code or equivalent declarative config",
-          "artifact": "IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts",
-          "passCondition": "Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100%",
-          "method": "automated",
-          "requiredFromLevel": 3,
-          "minCriticality": 2
-        },
-        {
           "id": "CHG-M1",
           "requirement": "Prior production versions of prompts and model pins shall be retained and restorable",
           "artifact": "Version retention policy + registry listing of prior production versions",
@@ -4506,9 +4479,54 @@
           "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
+        },
+        {
+          "id": "DEP-M1",
+          "requirement": "A promotion path shall exist from non-prod to prod for prompts, models, and tools",
+          "artifact": "Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools",
+          "passCondition": "100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record",
+          "method": "hybrid",
+          "requiredFromLevel": 3,
+          "minCriticality": 2
+        },
+        {
+          "id": "DEP-M2",
+          "requirement": "Production changes shall be recorded (who/what/when) and linked to reviews",
+          "artifact": "Change log or ticket export for AI artifact releases",
+          "passCondition": "100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID)",
+          "method": "hybrid",
+          "requiredFromLevel": 3,
+          "minCriticality": 2
+        },
+        {
+          "id": "DEP-M3",
+          "requirement": "Infrastructure and AI config shall be defined as code or equivalent declarative config",
+          "artifact": "IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts",
+          "passCondition": "Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100%",
+          "method": "automated",
+          "requiredFromLevel": 3,
+          "minCriticality": 2
         }
       ],
       "recommendedChecks": [
+        {
+          "id": "CHG-R1",
+          "requirement": "One-click or single-command rollback for AI release units",
+          "artifact": "Rollback runbook or one-command script for AI release units + last rollback exercise log",
+          "passCondition": "AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO",
+          "method": "hybrid",
+          "requiredFromLevel": 4,
+          "minCriticality": 2
+        },
+        {
+          "id": "CHG-R2",
+          "requirement": "Feature flags for new agent behaviors",
+          "artifact": "Feature-flag config covering new agent behaviors + sample flag change audit trail",
+          "passCondition": "New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago",
+          "method": "hybrid",
+          "requiredFromLevel": 3,
+          "minCriticality": 2
+        },
         {
           "id": "DEP-R1",
           "requirement": "Canary or progressive delivery for high-traffic AI changes",
@@ -4534,24 +4552,6 @@
           "passCondition": "Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps",
           "method": "hybrid",
           "requiredFromLevel": 4,
-          "minCriticality": 2
-        },
-        {
-          "id": "CHG-R1",
-          "requirement": "One-click or single-command rollback for AI release units",
-          "artifact": "Rollback runbook or one-command script for AI release units + last rollback exercise log",
-          "passCondition": "AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO",
-          "method": "hybrid",
-          "requiredFromLevel": 4,
-          "minCriticality": 2
-        },
-        {
-          "id": "CHG-R2",
-          "requirement": "Feature flags for new agent behaviors",
-          "artifact": "Feature-flag config covering new agent behaviors + sample flag change audit trail",
-          "passCondition": "New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago",
-          "method": "hybrid",
-          "requiredFromLevel": 3,
           "minCriticality": 2
         }
       ],
@@ -5177,6 +5177,10 @@
     "pillarCount": 27,
     "mandatoryCheckCount": 108,
     "recommendedCheckCount": 69,
+    "ruleEngine": {
+      "package": "@stackrail/aprf-engine",
+      "note": "Normative rule bodies live in packages/aprf-engine/rules/; pillars hydrate checks at load time."
+    },
     "profileCount": 2,
     "coreProfileCheckCount": 40,
     "crosswalkCount": 6,
