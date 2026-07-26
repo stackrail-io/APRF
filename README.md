@@ -9,19 +9,15 @@ APRF is a vendor-neutral working draft for engineering readiness of AI systems. 
 
 ## Architecture
 
-APRF separates a long-lived **public standard** from evolving **implementations**:
+Three planes (hardened after adversarial review):
 
-| Layer | Name | In this repo? |
+| Plane | Contents | In this repo? |
 | --- | --- | --- |
-| L1 | **Pillars** — broad engineering domains (rarely change) | Yes (normative) |
-| L2 | **Requirements** — stable engineering principles (“shall”) | Yes (target; today folded into checks) |
-| L3 | **Checks** — measurable expectations + evidence contracts | Yes (normative) |
-| L4 | **Detections** — platform-specific how-to-verify (GitHub, AWS, LangChain, MCP, …) | **No** — plugins / products |
-| L5 | **Evidence** — immutable collected artifacts | **No** — collectors / products |
+| **Normative** | Pillars → Checks (Requirement labels optional); profiles/lenses | Yes |
+| **Binding** | Criticality, maturity floor, profile scope, N/A | Assessment-time |
+| **Operational** | Evidence (tiered), Detections, engine roles | **No** — plugins / products |
 
-Detections map to Checks as a **many-to-many graph**. Mandatory Checks never average into a vanity score.
-
-Full design (engines, SDKs, versioning, governance, diagrams): **[ARCHITECTURE.md](ARCHITECTURE.md)**.
+Gates stay binary (no org-wide readiness %). Platform names belong in Detections, not Checks. See **[ARCHITECTURE.md](ARCHITECTURE.md)** and the critique trail **[ARCHITECTURE-REVIEW.md](ARCHITECTURE-REVIEW.md)**.
 
 ## This repository
 

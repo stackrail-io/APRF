@@ -1,316 +1,226 @@
 # APRF architecture
 
-**Status:** design target (working draft)  
-**Framework SemVer today:** v0.10.0 (catalog still published as pillars + checks; Requirements layer is the next normative split)  
-**This document:** normative *architecture* — not Detection/plugin source code
+**Status:** hardened design target (post adversarial review)  
+**Framework SemVer today:** v0.10.0  
+**Companion:** [ARCHITECTURE-REVIEW.md](ARCHITECTURE-REVIEW.md) (panel critique → accepted changes)
 
-APRF is an **engineering readiness standard**, not a vulnerability scanner and not a compliance checkbox engine. The public framework must remain stable for years while implementations evolve independently.
+APRF is an **engineering readiness standard** for whether an AI application can safely operate in production. It is **not** a vulnerability scanner, **not** a CNAPP, and **not** a SOC 2 / ISO certification program.
 
-Design lessons adapted from Kubernetes, AWS Well-Architected, OWASP, CIS Benchmarks, OpenTelemetry, and NIST CSF:
-
-| Peer | Lesson for APRF |
-| --- | --- |
-| Kubernetes | Stable API surface; implementations evolve behind versioned contracts |
-| AWS Well-Architected | Shallow pillars; depth in questions — not product lock-in |
-| OWASP | Public, citable controls; tooling is separate from the standard |
-| CIS Benchmarks | Auditable recommendations + evidence expectations; scanners consume benchmarks |
-| OpenTelemetry | Semantic conventions stay stable; exporters/receivers are plugins |
-| NIST CSF | Functions/categories evolve slowly; profiles map to organizations |
+The public standard must remain citable for a decade. Implementations (collectors, detectors, UIs) must evolve without RFCs to the Pillar list.
 
 ## Hard invariants
 
-1. **Normative vs implementation split is absolute.** Layers 1–3 are the public standard. Layers 4–5 and runtime engines are products/plugins.
-2. **Gates stay binary.** Mandatory Checks are pass / fail / N/A. Scoring weight prioritizes remediation order and recommended posture — it never averages a failed mandatory Check into a vanity readiness percentage.
-3. **Stable IDs.** Once published in a MINOR+, Pillar / Requirement / Check IDs are immutable; deprecate, never reuse.
-4. **Many-to-many mappings.** Detections ↔ Checks is a **graph**, not a tree.
-5. **Evidence is immutable.** Append-only content-addressed artifacts; reinterpretation happens via new Detection runs, not mutation.
-
-## Where this lives
-
-| Concern | Home |
-| --- | --- |
-| L1 Pillars, L2 Requirements, L3 Checks, governance, RFCs | **This repository** ([stackrail-io/APRF](https://github.com/stackrail-io/APRF)) |
-| L4 Detections, L5 Evidence, Plugin SDK, marketplace | Product / plugin repos (not the public standard) |
-| Assess UI, engines, SEO | StackRail site / products (e.g. [stackrail.io/aprf](https://stackrail.io/aprf/)) |
-
-```mermaid
-flowchart LR
-  aprfRepo[APRF repo L1-L3]
-  site[Site Assess engines]
-  plugins[Detection plugins L4-L5]
-  aprfRepo -->|pinned catalog| site
-  aprfRepo -->|Check IDs| plugins
-  plugins --> site
-```
+1. **Normative vs operational split.** This repository owns Pillars, Checks (and optional Requirement *labels*), profiles/lenses, schemas, RFCs. Detections, Evidence stores, and engines are **products/plugins**.
+2. **Gates are binary.** Mandatory Checks are `pass` | `fail` | `na`. No org-wide “readiness %.”
+3. **Stable Check IDs.** Preserve the published namespace (`AUTHN-M1`, `SEC-M1`, …). Deprecate; never reuse; do not renumber to `SEC-001`.
+4. **Platform names stay out of Checks.** Principles in Checks; platforms only in Detections.
+5. **Plugin listing ≠ conformance.** Vocabulary: `reference` | `signed` | `reviewed` — never “certified ready.”
+6. **Evidence digests are immutable;** raw payloads may be ephemeral (tiered retention).
 
 ---
 
-## Five layers
+## Planes (not five equal layers)
+
+Adversarial review rejected a mandatory five-deep hierarchy for humans. The industry-standard shape is **three planes**:
 
 ```mermaid
 flowchart TB
-  subgraph normative [Normative plane - public APRF standard]
-    L1[L1 Pillars]
-    L2[L2 Requirements]
-    L3[L3 Checks]
-    L1 --> L2 --> L3
+  subgraph normative [Normative plane - this repo]
+    P[Pillars]
+    C[Checks]
+    R[Requirement labels optional]
+    Prof[Profiles and lenses]
+    P --> C
+    R -.-> C
+    Prof --> C
   end
 
-  subgraph implementation [Implementation plane - products and plugins]
-    L4[L4 Detections]
-    L5[L5 Evidence]
-    L5 --> L4
+  subgraph binding [Binding plane - how orgs apply the standard]
+    Scope[Criticality + maturity floor + profile]
   end
 
-  L4 -->|"satisfies many-to-many"| L3
+  subgraph operational [Operational plane - products and plugins]
+    E[Evidence tiered]
+    D[Detections]
+    Eng[Engine roles]
+    E --> D
+    D -->|"declared mapping anyOf allOf"| C
+    Eng --> E
+    Eng --> D
+  end
+
+  Scope --> C
 ```
 
-| Layer | Stabilizes | Changes when | Analogy |
-| --- | --- | --- | --- |
-| **L1 Pillars** | Taxonomy of engineering concern | Rare (decades); RFC + MAJOR only | WA pillars / NIST functions |
-| **L2 Requirements** | Engineering principles (“shall”) | Slow; RFC MINOR | WA design principles / CSF categories |
-| **L3 Checks** | Measurable expectations + evidence contract | Controlled; RFC MINOR/PATCH | CIS recommendations / OWASP controls |
-| **L4 Detections** | How to observe a Check on a platform | Continuous; plugin releases | OTel exporters / CIS Assessor rules |
-| **L5 Evidence** | Raw immutable observations | Every scan/collection | Logs, configs, traces as inputs |
-
-**Future-proofing without architecture change:**
-
-- New AI frameworks → Detection plugins + Evidence types; Checks unchanged if principles hold
-- New clouds / Kubernetes / languages → new collectors/detectors; same Check IDs
-- New models / MCP / A2A → Evidence schemas + Detections mapped to existing Checks
-- New deployment platforms → plugins only
-
-Scale targets (20 Pillars / 200+ Requirements / 500+ Checks / 5,000+ Detections / 100+ Plugins) are **data volume**, not new layers.
-
-### L1 — Pillar
-
-- `pillarId` (stable, e.g. `APRF-P-SEC`)
-- `name`, `summary`, `purpose`
-- `stability: frozen | active | deprecated`
-- Owns many Requirements
-
-Pillars almost never change. Adding a Pillar is an exceptional governance event.
-
-### L2 — Requirement
-
-- `requirementId` (e.g. `APRF-R-SEC-SECRETS-HARDCODE`)
-- `pillarId`
-- `principle` (normative “shall” prose)
-- `rationale`, `nonGoals`
-
-Stable over years; editorial clarifications via PATCH. Today’s inline check `requirement` string splits into L2 principle + L3 measurable Check.
-
-### L3 — Check (normative; part of APRF spec)
-
-- `checkId` (e.g. `SEC-001`)
-- `requirementId`
-- `title`, `description`
-- `severity` (critical | high | medium | low)
-- `category` (automated | manual | hybrid, plus taxonomy tags)
-- `requiredEvidence` (L5 artifact types)
-- `successCriteria`, `failureCriteria`
-- `scoringWeight` (recommended posture / prioritization — **not** for overriding gates)
-- `gateClass`: `mandatory` | `recommended`
-- `maturityFloor`, `minCriticality` (dual maturity × criticality)
-- `references`, `deprecated`, `replacedBy`
-
-### L4 — Detection (NOT in the public framework)
-
-- `detectionId`, `pluginId`, `targetPlatform`
-- `logicRef`, `evidenceConsumed[]`, `checkIds[]` (many-to-many)
-- `confidenceModel`, `falsePositiveGuidance`
-- Optional `producesEvidence[]`
-
-### L5 — Evidence
-
-- `evidenceId` (content hash), `type`, `source`, `collectedAt`
-- `payloadRef`, `provenance`
-- Never updated in place; superseded by new collection runs
-
-### Mapping graph (L4 ↔ L3)
-
-```mermaid
-flowchart LR
-  D1[DET-GH-secrets-scan]
-  D2[DET-AWS-SM-policy]
-  D3[DET-GHA-no-prod-creds]
-  C1[SEC-001]
-  C2[SEC-002]
-  C3[SEC-003]
-  D1 --> C1
-  D2 --> C2
-  D3 --> C3
-  D1 --> C3
-```
-
-Assessment asks: *for each in-scope Check, is there sufficient Evidence via any covering Detection (or attested manual path)?* Not: *did detector X run?*
-
----
-
-## Relationship to the published catalog today
-
-The current machine-readable catalog ([`spec/aprf-spec.json`](spec/aprf-spec.json)) collapses L2+L3 into one check object and has no L4/L5.
-
-| Today | Target |
-| --- | --- |
-| Domain + Pillar | L1 Pillar (domains become optional grouping metadata) |
-| Check requirement prose | L2 Requirement |
-| Check + artifact + pass condition | L3 Check |
-| Assess quiz / CI scripts | L4 Detections + Assessment Engine |
-| Attestation JSON | Report over L3 outcomes; Evidence refs optional |
-| Lenses / Profiles | Assessment profiles selecting Check sets (still normative) |
-
-This repository remains **Layers 1–3 + governance**. Products ship **Layers 4–5 + engines** separately.
-
----
-
-## Runtime engines (logical components)
-
-```mermaid
-flowchart TB
-  subgraph collect [1 Evidence Collection Engine]
-    Collectors[Collector plugins]
-    Store[(Immutable evidence store)]
-    Collectors --> Store
-  end
-
-  subgraph detect [2 Detection Engine]
-    DetPlugins[Detection plugins]
-    Store --> DetPlugins
-  end
-
-  subgraph map [3 Mapping Engine]
-    Graph[Check-Detection graph]
-    DetPlugins --> Graph
-  end
-
-  subgraph assess [4 Assessment Engine]
-    Scope[Profile + criticality + lenses]
-    Outcomes[Check outcomes pass fail NA]
-    Scope --> Outcomes
-    Graph --> Outcomes
-  end
-
-  subgraph score [5 Scoring Engine]
-    Gates[Mandatory gate ALL]
-    Rec[Recommended weighted posture]
-    Outcomes --> Gates
-    Outcomes --> Rec
-  end
-
-  subgraph rec [6 Recommendation Engine]
-    Remediations[Prioritized remediations]
-    Gates --> Remediations
-    Rec --> Remediations
-  end
-
-  subgraph report [7 Reporting Engine]
-    Attest[Attestation + reports]
-    Outcomes --> Attest
-    Remediations --> Attest
-  end
-```
-
-### 1. Evidence Collection Engine
-
-Schedules collectors; normalizes typed Evidence; content-hashes; records provenance. Pluggable by platform. Never interprets pass/fail.
-
-### 2. Detection Engine
-
-Loads Detection plugins against Evidence; emits findings (candidate Check satisfaction / violation) with confidence. Deterministic given Evidence + Detection version + config.
-
-### 3. Mapping Engine
-
-Owns the Check↔Detection graph and coverage analysis. Supports manual attestation as first-class “virtual detections.”
-
-### 4. Assessment Engine
-
-Resolves scope (profile, criticality, lenses, N/A policy). For each in-scope Check: Detection findings + manual attestations → outcome. Produces machine-readable assessment documents.
-
-### 5. Scoring Engine
-
-- **Gate:** `ALL(mandatory outcomes ∈ {pass, na})` — fail closed
-- **Capability attainment:** minimum across Pillars
-- **Recommended score:** severity-weighted recommended Checks only — never mixes into the gate
-- **Forbidden:** single blended “87% ready”
-
-### 6. Recommendation Engine
-
-Ordered backlog from failed Checks (severity, blast radius, dependencies). May cite which Detection failed without promoting Detection IDs into the standard.
-
-### 7. Reporting Engine
-
-Human reports, attestation JSON, evidence index, diffs vs prior assessment. Must cite **framework SemVer** and **schema versions** separately (e.g. APRF v0.10.0 vs [spec-schema/0.7](https://stackrail.io/aprf/spec-schema/0.7)).
-
-### 8. Plugin SDK
-
-Collector + Detection contracts: Evidence types, Check mappings, version, license, signature. Sandboxed execution; plugins must reference published L3 Check IDs.
-
-### 9. Rule Authoring SDK
-
-Author Detections against Check contracts; Evidence fixtures; false-positive corpus. Normative Check authoring stays in the **framework RFC process**, not the plugin SDK.
-
-### 10. Versioning strategy
-
-| Line | What | Bump when |
+| Plane | Contents | Change cadence |
 | --- | --- | --- |
-| **Framework SemVer** | L1–L3 catalog + gate semantics | MAJOR: ID/semantics break; MINOR: add Pillar/Req/Check; PATCH: editorial |
-| **Schema versions** | Document shapes (spec, attestation, evidence) | Only when JSON shape changes |
-| **Plugin SemVer** | L4/L5 implementations | Independent; declare `compatibleFramework` range |
+| **Normative** | Pillars, Checks, optional Requirement labels, profiles/lenses, crosswalks (informative) | Slow; RFC |
+| **Binding** | Which Checks apply (criticality, maturity floor, profile, N/A policy) | Per assessment |
+| **Operational** | Evidence, Detections, collectors, engines, UIs | Continuous; plugin SemVer |
 
-### 11. Backward compatibility
+### Why not mandatory Pillar → Requirement → Check?
 
-- Published Check IDs forever resolvable; deprecated Checks remain for an N−1 MINOR window
-- Assessments pin `aprfVersion`; re-eval under newer versions is explicit migration
-- Plugins mapping to removed Checks fail validation at load
-- Additive fields preferred; breaking schema → new schema path (e.g. `spec-schema/0.8`)
+OWASP/WA-style standards win with a **shallow public surface**. Requirements remain valuable as **documentation groupings** (`requirementId` on a Check) so principles can be explained once — they are **not** a required evaluation hop and not required in attestation gate logic.
 
-### 12. Plugin marketplace
+### Pillars (normative)
 
-Registry of signed plugins: metadata, platforms, Check coverage matrix, trust level. **Certification ≠ APRF conformance.** A certified plugin means SDK contract + mapping validity — not that a customer system is production-ready.
+- Stable taxonomy (~order 10–20). Almost never added.
+- New Pillar = exceptional RFC + stewardship consensus + “10-year stability” bar.
+- Soft **Check budget** per Pillar (~25–40) to prevent catalog bloat.
 
-### 13. Framework release process
+### Checks (normative)
 
-1. RFC (draft → review → accepted)
-2. Spec PR in this repo (Pillars / Requirements / Checks only)
-3. Validate IDs, integrity, crosswalks
-4. Tag framework SemVer; publish `spec/aprf-spec.json` + CHANGELOG
-5. Site/reference Assess syncs catalog; plugins update on their own cadence
+Machine-evaluable or attest-able expectations:
 
-### 14. Deprecation strategy
+- `checkId` (existing namespace)
+- `title`, `description` / principle prose
+- `gateClass`: `mandatory` | `recommended`
+- `severity` — remediation ordering only
+- `maturityFloor`, `minCriticality`
+- `successCriteria`, `failureCriteria` (prefer declarative, testable statements)
+- `requiredEvidenceTypes[]` (IDs from Evidence Type Registry)
+- `satisfactionPolicy`: `anyOf` (default) | `allOf` | `attestationOnly`
+- `references[]` (informative crosswalks)
+- Optional `requirementId` (label)
+- `deprecated` / `replacedBy`
 
-- Mark `deprecated` + `replacedBy` + sunset MINOR
-- Mandatory→recommended demotion requires RFC (gate semantics change)
-- Detections for deprecated Checks warn; after sunset, mappings rejected
+**Forbidden in Checks:** CVE IDs as gate criteria; “satisfies SOC 2 CC6.1”; product/platform names in titles; `scoringWeight` on **mandatory** Checks.
 
-### 15. Governance model
+### Profiles and lenses (normative selectors)
+
+Core / Regulated / custom profiles and lenses (RAG, Agents, …) are **sets of Check IDs**, not new layers and not Detections.
+
+### Detections (operational — not in this repo’s normative catalog)
+
+- `detectionId`, `pluginId`, `targetPlatform`, `namespace` (`scm` | `infra` | `ai-runtime` | …)
+- `kind`: `deterministic` | `stochastic`
+- `assurance`: `gate-eligible` | `signal-only`
+- `checkIds[]` — plugin-**declared** edges
+- Evidence consumed; FP guidance; version; signature metadata
+
+**Rules:**
+- Stochastic detections **cannot alone** satisfy a mandatory Check (`assurance` must be `signal-only` unless paired with deterministic corroboration or human attestation).
+- Many Detections → one Check; one Detection → many Checks (graph). Sufficiency is the Check’s `satisfactionPolicy`.
+
+### Evidence (operational)
+
+| Tier | Retention | Immutable? |
+| --- | --- | --- |
+| `ephemeral` | TTL (product-defined) | Content-addressed while held |
+| `digest` | Long-lived hash + metadata | Yes |
+| `attested` | Explicit pack (human/CI upload) | Yes |
+
+PII/residency handled by products; the standard requires digests in the Conformance Pack, not raw clouds of traces.
+
+### Evidence Type Registry (normative, this repo)
+
+Versioned IDs + JSON schemas for evidence *kinds* (e.g. `git.repo_snapshot`, `k8s.manifest`, `otel.trace_summary`, `prompt.bundle`) — analogous to OpenTelemetry semantic conventions. New platforms add types here **without** new Checks when principles already exist.
+
+---
+
+## Mapping and satisfaction
+
+```mermaid
+flowchart LR
+  D1[DET scm secrets]
+  D2[DET aws secrets manager]
+  D3[DET human attestation]
+  C1[SEC-M1]
+  D1 -->|gate-eligible| C1
+  D2 -->|gate-eligible| C1
+  D3 -->|attestation| C1
+```
+
+Default Check policy `anyOf`: one `gate-eligible` pass **or** valid attestation satisfies the Check. Coverage reports may show “no gate-eligible Detection for this stack” without failing until assessment runs.
+
+Plugins **declare** mappings; products **aggregate** and validate against the pinned catalog. The standard does **not** maintain a central 5,000-edge hand-edited table.
+
+---
+
+## Engine roles (reference — any vendor may implement)
+
+Engines are **roles**, not a required StackRail monolith.
+
+```mermaid
+flowchart LR
+  Collect[Collector role]
+  Detect[Detection role]
+  Map[Mapping validate role]
+  Assess[Assessment role]
+  Score[Scoring role]
+  Rec[Recommendation role]
+  Report[Reporting role]
+  Collect --> Detect --> Map --> Assess --> Score --> Rec --> Report
+```
+
+| Role | Responsibility |
+| --- | --- |
+| Collector | Produce Evidence (tiered) |
+| Detection | Emit findings with `checkIds`, kind, assurance |
+| Mapping validate | Join declarations to catalog; enforce satisfactionPolicy |
+| Assessment | Apply profile/criticality/N/A → outcomes |
+| Scoring | Gate = ALL mandatory ∈ {pass, na}; optional **per-Pillar** recommended backlog metrics — **never** one readiness % |
+| Recommendation | Order failed Checks by severity × criticality |
+| Reporting | Emit **Conformance Pack** |
+
+### Conformance Pack (enterprise artifact)
+
+Minimum normative output of an assessment:
+
+1. Pinned `aprfVersion` + profile/lens IDs  
+2. Gate result (`pass`/`fail`)  
+3. Blockers (failed mandatory Check IDs + titles)  
+4. Capability attained vs required (if used)  
+5. Evidence index of **digests** (and attested packs), not necessarily raw blobs  
+6. Explicit disclaimer: self-attestation ≠ third-party certification; crosswalks informative only  
+
+---
+
+## Versioning
+
+| Line | Scope |
+| --- | --- |
+| **Framework SemVer** | Pillars, Checks, profiles, gate semantics |
+| **Schema versions** | Spec / attestation / evidence-type document shapes (e.g. [spec-schema/0.7](https://stackrail.io/aprf/spec-schema/0.7)) — independent of framework SemVer |
+| **Plugin SemVer** | Collectors/Detections; declare `compatibleFramework` range |
+| **Evidence Type Registry SemVer** | Additive types preferred; breaking type changes get new type IDs |
+
+---
+
+## Budgets and anti-explosion rules
+
+- Soft cap Checks per Pillar; RFC must justify non-overlap.
+- MAX new Checks per MINOR without stewardship exception vote.
+- Platform/product names banned from Check titles.
+- New agent/cloud frameworks → Detections + Evidence types first; Checks only for new **principles**.
+- Detection namespaces discourage “one plugin one Check” spam.
+
+---
+
+## Governance
 
 ```mermaid
 flowchart TB
-  RFC[Public RFC]
+  RFC[RFC for Pillars Checks profiles]
   WG[Steward / working group]
-  Spec[Normative L1-L3 release]
-  Plug[Plugin authors]
-  Cert[Plugin review board]
-
-  RFC --> WG
-  WG -->|Pillars Requirements Checks| Spec
-  Plug -->|Detections Collectors| Cert
-  Spec -.->|Check IDs consumed by| Plug
-  Cert -->|Marketplace listing| Market[Plugin marketplace]
+  Cat[Normative catalog release]
+  Plug[Federated plugin repos]
+  RFC --> WG --> Cat
+  Plug -->|declare checkIds| Cat
 ```
 
-| Change type | Who proposes | Who approves | Bar |
-| --- | --- | --- | --- |
-| New **Pillar** | RFC | Steward + exceptional consensus | Taxonomy gap; 10-year stability test |
-| Evolve **Requirement** | RFC | Steward | Prefer new Requirement over rewrite |
-| New/change **Check** | RFC | Steward / technical review | Measurable success/failure; evidence types |
-| New **Detection** | Plugin PR / marketplace | Plugin maintainers (+ optional certification) | Valid mappings; fixtures; FP guidance |
-| **Plugin certification** | Vendor/community | Program separate from normative WG | SDK conformance, signature, coverage accuracy |
-| **Framework release** | Release captain | Steward quorum | SemVer + CHANGELOG + schema compatibility |
-| **Breaking changes** | RFC MAJOR | Steward + long review | Migration guide; dual-publish period |
+| Change | Approval |
+| --- | --- |
+| Pillar add/remove | Exceptional RFC + consensus |
+| Check add/change/deprecate | RFC; ID immutability |
+| Requirement labels | Editorial or PATCH/MINOR; non-gating |
+| Evidence type add | Registry PR; prefer additive |
+| Detection / collector | Plugin maintainers; optional `reviewed`/`signed` listing |
+| Breaking gate semantics | MAJOR + long review |
 
-Public RFCs for L1–L3; open contribution for L4–L5 without polluting the standard.
+Stewards do **not** review all Detection logic. They own catalog integrity and vocabulary discipline.
+
+Deprecation: `deprecated` + `replacedBy` + N−1 MINOR support window; mandatory→recommended needs RFC.
 
 ---
 
@@ -321,96 +231,82 @@ classDiagram
   class Pillar {
     +pillarId
     +name
-    +stability
-  }
-  class Requirement {
-    +requirementId
-    +principle
   }
   class Check {
     +checkId
-    +severity
     +gateClass
-    +successCriteria
-    +failureCriteria
-    +scoringWeight
+    +satisfactionPolicy
+    +maturityFloor
+    +minCriticality
+    +requirementId_optional
   }
   class Detection {
     +detectionId
-    +pluginId
+    +kind
+    +assurance
     +targetPlatform
-    +confidenceModel
+    +namespace
   }
   class Evidence {
     +evidenceId
-    +type
-    +contentHash
-    +collectedAt
+    +tier
+    +typeId
+    +digest
   }
-  class Plugin {
-    +pluginId
-    +semver
-    +compatibleFramework
-  }
-  class AssessmentProfile {
+  class Profile {
     +profileId
     +checkIds
   }
-  class Assessment {
+  class ConformancePack {
     +aprfVersion
-    +outcomes
     +gateResult
+    +blockers
+    +evidenceDigests
   }
 
-  Pillar "1" --> "*" Requirement : contains
-  Requirement "1" --> "*" Check : verified_by
-  Detection "*" --> "*" Check : satisfies
-  Detection "*" --> "*" Evidence : consumes
-  Plugin "1" --> "*" Detection : provides
-  AssessmentProfile "*" --> "*" Check : scopes
-  Assessment --> AssessmentProfile : uses
-  Assessment --> Check : evaluates
+  Pillar "1" --> "*" Check
+  Profile --> Check : selects
+  Detection "*" --> "*" Check : declares
+  Detection --> Evidence : consumes
+  ConformancePack --> Check : outcomes
 ```
 
-## End-to-end assessment sequence
+## Assessment sequence
 
 ```mermaid
 sequenceDiagram
   participant User
-  participant Collect as EvidenceCollection
-  participant Detect as DetectionEngine
-  participant Map as MappingEngine
-  participant Assess as AssessmentEngine
-  participant Score as ScoringEngine
-  participant Rec as RecommendationEngine
-  participant Report as ReportingEngine
+  participant Collect as CollectorRole
+  participant Detect as DetectionRole
+  participant Assess as AssessmentRole
+  participant Score as ScoringRole
+  participant Report as ReportingRole
 
   User->>Collect: collect targets
-  Collect->>Collect: store immutable Evidence
-  User->>Assess: select profile criticality lenses
-  Assess->>Detect: run applicable Detections
-  Detect->>Map: findings with checkIds
-  Map->>Assess: coverage + findings per Check
-  Assess->>Score: outcomes
-  Score->>Score: gate ALL mandatory
-  Score->>Rec: failures + weights
-  Rec->>Report: prioritized remediations
-  Report->>User: attestation + report
+  Collect->>Collect: ephemeral and digests
+  User->>Assess: profile criticality lenses
+  Assess->>Detect: run gate-eligible detections
+  Detect->>Assess: findings
+  Assess->>Score: outcomes via satisfactionPolicy
+  Score->>Score: ALL mandatory pass or na
+  Score->>Report: Conformance Pack
+  Report->>User: gate blockers digests
 ```
 
 ---
 
-## Explicit non-goals
+## Non-goals
 
-- Embedding cloud/vendor product APIs into the public spec
-- Treating Detection confidence as certification
-- Auto-filing CVEs or replacing AppSec scanners
-- Equating crosswalks (NIST / ISO / SOC 2) with readiness gates
+- Competing with SAST/SCA/CNAPP as a CVE or misconfiguration product
+- Org-wide vanity readiness scores
+- Embedding cloud APIs in the normative catalog
+- “Certified plugin ⇒ production ready”
+- Renumbering published Check IDs
 
 ---
 
 ## Design outcome
 
-A **stable public standard** (L1–L3) that can sit beside Well-Architected / OWASP / CIS for a decade, and an **unbounded implementation ecosystem** (L4–L5 + engines + marketplace) that absorbs new models, agent runtimes, clouds, and languages **without RFCs to the Pillar list**.
+A **shallow, stable, citable standard** (Pillars + Checks + profiles) with a **federated operational ecosystem** (Evidence types, Detections, engine roles) that absorbs new models, runtimes, and clouds **without Pillar churn** — positioned to sit beside Well-Architected, OWASP, and CIS as the AI production-readiness reference.
 
-Ratify material catalog changes via [RFCs](rfcs/). Site stewardship: [stackrail.io/aprf/rfc](https://stackrail.io/aprf/rfc/).
+Catalog content and ID migration from today’s collapsed check objects remain RFC work; this document freezes the **architecture**.
