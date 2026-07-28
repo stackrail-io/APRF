@@ -1,0 +1,60 @@
+id: "PRI-M3"
+category: "data-privacy"
+title: "Users or tenants must have deletion/export paths covering AI memory and logs where required"
+description: "Users or tenants shall have deletion/export paths covering AI memory and logs where required"
+whyItMatters: "PRI-M3 (Data Privacy, mandatory): Users or tenants shall have deletion/export paths
+  covering AI memory and logs where required Failing this leaves a production gap against:
+  Documented API/runbook covers AI memory and in-scope logs; test shows deletion/export completes
+  within SLA for a sample tenant/user (measured duration recorded)"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "Documented API/runbook covers AI memory and in-scope logs; test shows
+  deletion/export completes within SLA for a sample tenant/user (measured duration recorded)"
+evidenceRequired:
+  - "Deletion/export procedure + successful test execution record"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Deletion/export procedure + successful test execution record"
+manualVerification: "For PRI-M3 (Users or tenants must have deletion/export paths covering AI memory
+  and logs where required): inspect current evidence for [Deletion/export procedure + successful
+  test execution record] and confirm the pass condition holds — Documented API/runbook covers AI
+  memory and in-scope logs; test shows deletion/export completes within SLA for a sample tenant/user
+  (measured duration recorded)"
+falsePositiveGuidance: "PRI-M3 (Data Privacy): re-verify against a current artifact for this
+  specific Check (PRI-M3), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Users or tenants must have deletion/export paths covering AI
+    memory and logs where required (PRI-M3)"
+  - "Retain evidence artifacts required by this Check, starting with: Deletion/export procedure +
+    successful test execution record"
+  - "Schedule recurring manual verification for PRI-M3 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until PRI-M3 passes"
+references:
+  - title: "NIST AI RMF — privacy considerations"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Sensitive Information Disclosure"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "PRI-M1"
+  - "PRI-M2"
+  - "PRI-M4"
+  - "PRI-M5"
+  - "PRI-R1"
+tags:
+  - "data-privacy"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "vector-databases"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

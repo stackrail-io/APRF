@@ -1,0 +1,59 @@
+id: "COST-M2"
+category: "cost-optimization"
+title: "Cost must be monitored with alerts on anomaly and budget burn"
+description: "Cost shall be monitored with alerts on anomaly and budget burn"
+whyItMatters: "COST-M2 (Cost Optimization, mandatory): Cost shall be monitored with alerts on
+  anomaly and budget burn Failing this leaves a production gap against: Alerts exist for budget burn
+  and spend anomaly; synthetic or historical burn event would page/notify per runbook (alert test or
+  documented fire in last 90 days)"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "Alerts exist for budget burn and spend anomaly; synthetic or historical burn event
+  would page/notify per runbook (alert test or documented fire in last 90 days)"
+evidenceRequired:
+  - "Cost dashboard + alert policies for anomaly and budget burn"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Cost dashboard + alert policies for anomaly and budget burn"
+manualVerification: "For COST-M2 (Cost must be monitored with alerts on anomaly and budget burn):
+  inspect current evidence for [Cost dashboard + alert policies for anomaly and budget burn] and
+  confirm the pass condition holds — Alerts exist for budget burn and spend anomaly; synthetic or
+  historical burn event would page/notify per runbook (alert test or documented fire in last 90
+  days)"
+falsePositiveGuidance: "COST-M2 (Cost Optimization): re-verify against a current artifact for this
+  specific Check (COST-M2), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Cost must be monitored with alerts on anomaly and budget burn
+    (COST-M2)"
+  - "Retain evidence artifacts required by this Check, starting with: Cost dashboard + alert
+    policies for anomaly and budget burn"
+  - "Schedule recurring manual verification for COST-M2 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until COST-M2 passes"
+references:
+  - title: "AWS Well-Architected — Cost Optimization"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "FinOps Foundation practices"
+    url: "https://www.finops.org/"
+relatedRules:
+  - "COST-M1"
+  - "COST-M3"
+  - "COST-R1"
+  - "COST-R2"
+  - "COST-R3"
+tags:
+  - "cost-optimization"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

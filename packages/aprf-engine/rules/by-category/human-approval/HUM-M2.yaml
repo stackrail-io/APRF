@@ -1,0 +1,57 @@
+id: "HUM-M2"
+category: "human-approval"
+title: "Approval decisions must be logged with actor, context, and outcome"
+description: "Approval decisions shall be logged with actor, context, and outcome"
+whyItMatters: "HUM-M2 (Human Approval, mandatory): Approval decisions shall be logged with actor,
+  context, and outcome Failing this leaves a production gap against: 100% of sampled approvals in
+  last 30 days include actor ID, action context, and approve/deny outcome; schema validation test
+  passes"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "100% of sampled approvals in last 30 days include actor ID, action context, and
+  approve/deny outcome; schema validation test passes"
+evidenceRequired:
+  - "Approval audit log schema + sample records"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Approval audit log schema + sample records"
+manualVerification: "For HUM-M2 (Approval decisions must be logged with actor, context, and
+  outcome): inspect current evidence for [Approval audit log schema + sample records] and confirm
+  the pass condition holds — 100% of sampled approvals in last 30 days include actor ID, action
+  context, and approve/deny outcome; schema validation test passes"
+falsePositiveGuidance: "HUM-M2 (Human Approval): re-verify against a current artifact for this
+  specific Check (HUM-M2), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Approval decisions must be logged with actor, context, and
+    outcome (HUM-M2)"
+  - "Retain evidence artifacts required by this Check, starting with: Approval audit log schema +
+    sample records"
+  - "Schedule recurring manual verification for HUM-M2 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until HUM-M2 passes"
+references:
+  - title: "NIST AI RMF — Govern and Manage (human oversight)"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Excessive Agency"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "HUM-M1"
+  - "HUM-M3"
+  - "HUM-M4"
+  - "HUM-R1"
+  - "HUM-R3"
+tags:
+  - "human-approval"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "a2a"
+    - "mcp"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

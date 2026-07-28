@@ -1,5 +1,8 @@
 # Adversarial architecture review
 
+**Status:** historical critique trail (not normative)  
+**Authoritative architecture:** [ARCHITECTURE.md](ARCHITECTURE.md) — if this document conflicts with it, **ARCHITECTURE.md wins**.
+
 Panel simulation: AWS · Google Cloud · Anthropic · OpenAI · Microsoft · OWASP · CNCF · HashiCorp · GitHub · Snyk · Wiz.
 
 **Subject:** APRF five-layer design (Pillars → Requirements → Checks → Detections → Evidence + engines).  
@@ -126,7 +129,8 @@ Default: `anyOf` among Detections that declare `assurance: gate-eligible`.
 | --- | --- |
 | Still need principle docs without L2 hierarchy | **Requirement labels** + pillar narrative pages |
 | Stochastic evals still needed for AI quality | Allowed for recommended / with corroboration rules |
-| Who defines Evidence type registry? | **Evidence Type Registry** in this repo (IDs + schemas only), versioned like OTel semantic conventions |
+| Who defines Evidence type registry? | **Planned** Evidence Type Registry (IDs + schemas), versioned like OTel semantic conventions — **not shipped in this repo yet** (see ARCHITECTURE.md “Evidence Type Registry (planned)”). Until then, Checks use free-form `evidenceRequired[]`. |
+
 | Air-gapped enterprises | Catalog + schemas are offline-friendly files; collectors optional |
 | Fork risk if StackRail dominates RFCs | Existing stewardship phases + interim advisory; architecture docs reaffirm transfer intent |
 

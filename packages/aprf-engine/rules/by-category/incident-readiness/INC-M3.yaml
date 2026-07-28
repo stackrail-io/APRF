@@ -1,0 +1,53 @@
+id: "INC-M3"
+category: "incident-readiness"
+title: "Post-incident reviews must produce tracked actions against APRF pillars"
+description: "Post-incident reviews shall produce tracked actions against APRF pillars"
+whyItMatters: "INC-M3 (Incident Readiness, mandatory): Post-incident reviews shall produce tracked
+  actions against APRF pillars Failing this leaves a production gap against: 100% of SEV-eligible AI
+  incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or
+  explicit “no action” rationale"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked
+  action mapped to an APRF pillar or explicit “no action” rationale"
+evidenceRequired:
+  - "Post-incident review template + sample reviews with linked actions"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For INC-M3 (Post-incident reviews must produce tracked actions against APRF
+  pillars): inspect current evidence for [Post-incident review template + sample reviews with linked
+  actions] and confirm the pass condition holds — 100% of SEV-eligible AI incidents in last 90 days
+  have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale"
+falsePositiveGuidance: "INC-M3 (Incident Readiness): re-verify against a current artifact for this
+  specific Check (INC-M3), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Post-incident reviews must produce tracked actions against APRF
+    pillars (INC-M3)"
+  - "Retain evidence artifacts required by this Check, starting with: Post-incident review template
+    + sample reviews with linked actions"
+  - "Schedule recurring manual verification for INC-M3 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until INC-M3 passes"
+references:
+  - title: "Google SRE — Managing Incidents"
+    url: "https://sre.google/sre-book/managing-incidents/"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "INC-M1"
+  - "INC-M2"
+  - "INC-M4"
+  - "INC-R1"
+  - "INC-R3"
+tags:
+  - "incident-readiness"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "cicd"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

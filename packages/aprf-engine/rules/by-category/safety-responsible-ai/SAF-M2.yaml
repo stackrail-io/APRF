@@ -1,0 +1,57 @@
+id: "SAF-M2"
+category: "safety-responsible-ai"
+title: "Automated safety evaluation gates must run on relevant releases"
+description: "Automated safety evaluation gates shall run on relevant releases"
+whyItMatters: "SAF-M2 (Safety & Responsible AI, mandatory): Automated safety evaluation gates shall
+  run on relevant releases Failing this leaves a production gap against: Safety gate executed on
+  100% of in-scope releases in last 30 days; fail blocks promote unless time-boxed waiver (expiry ≤
+  14 days) with owner"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "Safety gate executed on 100% of in-scope releases in last 30 days; fail blocks
+  promote unless time-boxed waiver (expiry ≤ 14 days) with owner"
+evidenceRequired:
+  - "Safety suite definition with numeric thresholds + CI gate reports"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Safety suite definition with numeric thresholds + CI gate reports"
+manualVerification: "For SAF-M2 (Automated safety evaluation gates must run on relevant releases):
+  inspect current evidence for [Safety suite definition with numeric thresholds + CI gate reports]
+  and confirm the pass condition holds — Safety gate executed on 100% of in-scope releases in last
+  30 days; fail blocks promote unless time-boxed waiver (expiry ≤ 14 days) with owner"
+falsePositiveGuidance: "SAF-M2 (Safety & Responsible AI): re-verify against a current artifact for
+  this specific Check (SAF-M2), not a sibling control. Document named exceptions with owner and
+  expiry."
+recommendedFixes:
+  - "Implement and operationalize: Automated safety evaluation gates must run on relevant releases
+    (SAF-M2)"
+  - "Retain evidence artifacts required by this Check, starting with: Safety suite definition with
+    numeric thresholds + CI gate reports"
+  - "Schedule recurring manual verification for SAF-M2 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until SAF-M2 passes"
+references:
+  - title: "NIST AI RMF — Trustworthiness characteristics"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "ISO/IEC 42001 — AI management systems"
+    url: "https://www.iso.org/standard/81230.html"
+relatedRules:
+  - "SAF-M1"
+  - "SAF-M3"
+  - "SAF-M4"
+  - "SAF-R2"
+  - "SAF-R3"
+tags:
+  - "safety-responsible-ai"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "prompt-templates"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

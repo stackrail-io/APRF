@@ -1,0 +1,59 @@
+id: "EVL-R1"
+category: "evaluation"
+title: "EVL-R1: Separate eval tracks for regression, adversarial, and distribution-shift cases"
+description: "Separate eval tracks for regression, adversarial, and distribution-shift cases"
+whyItMatters: "EVL-R1 (Evaluation, recommended): Separate eval tracks for regression, adversarial,
+  and distribution-shift cases Failing this leaves a production gap against: All three tracks exist
+  with distinct corpora and owners; each track ran successfully on the last production model/prompt
+  promotion (≤90 days)"
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: "All three tracks exist with distinct corpora and owners; each track ran successfully
+  on the last production model/prompt promotion (≤90 days)"
+evidenceRequired:
+  - "Eval catalog showing separate tracks for regression, adversarial, and distribution-shift +
+    latest CI matrix"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Eval catalog showing separate tracks for regression, adversarial, and distribution-shift +
+          latest CI matrix"
+manualVerification: "For EVL-R1 (EVL-R1: Separate eval tracks for regression, adversarial, and
+  distribution-shift cases): inspect current evidence for [Eval catalog showing separate tracks for
+  regression, adversarial, and distribution-shift + latest CI matrix] and confirm the pass condition
+  holds — All three tracks exist with distinct corpora and owners; each track ran successfully on
+  the last production model/prompt promotion (≤90 days)"
+falsePositiveGuidance: "EVL-R1 (Evaluation): re-verify against a current artifact for this specific
+  Check (EVL-R1), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: EVL-R1: Separate eval tracks for regression, adversarial, and
+    distribution-shift cases (EVL-R1)"
+  - "Retain evidence artifacts required by this Check, starting with: Eval catalog showing separate
+    tracks for regression, adversarial, and distribution-shift + latest C…"
+  - "Schedule recurring manual verification for EVL-R1 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until EVL-R1 passes"
+references:
+  - title: "NIST AI RMF — Measure"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "Google SRE — Monitoring Distributed Systems (measurement culture)"
+    url: "https://sre.google/sre-book/monitoring-distributed-systems/"
+relatedRules:
+  - "EVL-M1"
+  - "EVL-M2"
+  - "EVL-M3"
+  - "EVL-M4"
+  - "EVL-R2"
+tags:
+  - "evaluation"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "cicd"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

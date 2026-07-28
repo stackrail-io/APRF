@@ -5,61 +5,51 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 (`APRF_GOVERNANCE.version`). JSON Schema path versions (`spec-schema/0.7`,
 `attestation-schema/0.6`) are independent — see `governance.schemaVersioning`.
 
-## [0.10.0] — 2026-07-25
+## [Unreleased]
+
+## [0.10.0] — 2026-07-28
+
+Public normative monorepo release: Check YAML catalog, publishable npm packages, and CI integrity gates.
+Published on npm as `@stackrail-io/aprf-engine@0.10.0` and `@stackrail-io/aprf-framework-definition@0.10.0`.
 
 ### Added
-- `CHANGELOG.md` and `npm run aprf:validate` (lenses + crosswalks).
-- GitHub Action `.github/workflows/aprf-validate.yml` (validate + spec drift check).
-- Assess UI profile choice: **Core** (40) or **Regulated** (61 Tier‑3).
-- Machine-readable crosswalks: **AWS Well-Architected** and **SLSA**.
-- Formal N/A for **TOL** and **MEM** gates (in addition to AGN/HUM).
-- `AprfCheck` deprecation fields (`deprecated`, `replacedBy`, `deprecationNote`).
-- Deprecation example: `INF-R1` → `SCI-R1`.
+- GitHub Actions [`.github/workflows/ci.yml`](.github/workflows/ci.yml): rule schema validation, generated catalog drift check, unit tests, integrity, and published-spec structure checks.
+- `npm run aprf:integrity` (`scripts/check-integrity.ts`).
+- `@stackrail-io/aprf-engine` self-tests (`scripts/self-test.ts`) covering catalog sort, attestation evaluate, and N/A ≠ pass.
+- Expanded root `README.md` (packages, Check model, how to add a Check, CI).
+- `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `NOTICE`.
+- `packages/aprf-engine/rules/_index/id-gaps.md` documenting intentional Check ID holes.
+- `schemas/aprf-rule-1.0.json` mirror of the Check / rule JSON Schema.
+- GitHub `CODEOWNERS` (placeholder), issue templates, and PR template.
+- Normative catalog mirrored from the StackRail site era: Core (40) / Regulated (61), lenses, crosswalks, N/A for AGN/HUM/TOL/MEM, Check deprecation fields.
 
-### Changed
-- `write-aprf-spec` refuses to write when validation fails.
-- `build` runs `aprf:spec` (validate + write).
-- Quiz helpers accept `profileId` / Regulated criticality.
+### Fixed
+- Removed retired personal email and product API endpoints from published `spec/aprf-spec.json`; stewardship `emailHint` required.
+- Normative engine no longer ships stub detectors; `evaluateRules` defaults to attestation-only.
+- Packages emit `dist/` with NodeNext exports, `engines`, `files`, and SemVer aligned to **0.10.0**.
+- Deterministic YAML catalog load order (sorted paths + rule IDs).
+- CI integrity gate: YAML catalog ↔ published spec Check IDs, profiles ⊆ catalog, lenses resolve.
+- `ARCHITECTURE.md` no longer claims a shipped Evidence Type Registry; documents shipped YAML schema vs target RFC fields.
+- Checks that claimed `automated`/`hybrid` with only `manual-attest` downgraded; loader enforces capability honesty.
+- Per-Check `whyItMatters`, `manualVerification`, `recommendedFixes`, and `falsePositiveGuidance` specialized (177 unique each).
+- Rule schema `$id` now `https://stackrail.io/aprf/rule-schema/1.0` (hosted on stackrail.io; legacy `rule.schema.json` redirects).
+- Lenses (RAG / Agents / Voice / Coding) exported from `@stackrail-io/aprf-framework-definition` and locked to `spec.lenses` in integrity CI.
+- Check `title` now differs from `description`; loader enforces title ≠ description.
+- Renamed npm packages to `@stackrail-io/aprf-engine` and `@stackrail-io/aprf-framework-definition`.
+- Check titles rewritten from descriptions (`shall` → `must`); unused detector allowlist ID `gha-permissions-scoped` removed.
+- `findingsToCheckOutcomes` preserves `status` / `error` (N/A and detector errors no longer look like bare fails only).
+- Package builds wipe `dist/` and omit source maps; orphan `loader` artifacts no longer linger after build.
+- `ARCHITECTURE-REVIEW.md` marked historical and aligned on Evidence Type Registry = planned.
 
-## [0.9.6] — 2026-07-25
+### Removed
+- `.github/workflows/validate-spec.yml` (superseded by `ci.yml`).
+- Stub detector runtimes from `@stackrail-io/aprf-engine` (catalog detector ID allowlist retained for YAML validation).
+- Deprecated aliases `PROFILE_CORE_SHELL`, `PROFILE_REGULATED_SHELL`, `PROFILE_SHELLS`, `getProfileShellById`.
 
-### Changed
-- Hand-rewrote remaining cadence-shell recommended checks (6).
+## [0.9.x] — 2026-07-25 (historical)
 
-## [0.9.5] — 2026-07-25
+Catalog prose rewrites and early profile/lens work (including former 0.9.0–0.9.6 patches and companion-site Assess packaging) authored during the site publishing era. Retained as a SemVer bookmark; see git history for per-patch detail.
 
-### Changed
-- Hand-rewrote named-owner recommended shells (6).
+## [0.8.x] — 2026-07 (historical)
 
-## [0.9.4] — 2026-07-25
-
-### Changed
-- Hand-rewrote versioned-suite recommended checks (18).
-
-## [0.9.3] — 2026-07-25
-
-### Changed
-- Hand-rewrote dated-artifact recommended checks (32).
-
-## [0.9.2] — 2026-07-25
-
-### Changed
-- Hand-rewrote P0 dashboard paste recommended stubs (DG/CTX/INC/DX).
-
-## [0.9.1] — 2026-07-25
-
-### Added
-- Client attestation JSON download; submit API returns full attestation.
-- Formal N/A for AGN/HUM; interim advisory open call; RFCs embedded in spec;
-  `governance.schemaVersioning`.
-
-## [0.9.0] — 2026-07-24
-
-### Added
-- Regulated profile (Core + 21 Tier‑3-only mandatories).
-- Measurable recommended-check pass conditions (generator upgrade from empty stubs).
-
-## [0.8.x] — 2026-07
-
-### Added
-- Coding-agent lens; Open RFC-0001; Assess lens wiring; SEO/AI citation packaging.
+Early RFC-0001 / coding-agent lens / Assess packaging notes from the companion site era.

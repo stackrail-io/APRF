@@ -1,0 +1,56 @@
+id: "SAF-R3"
+category: "safety-responsible-ai"
+title: "SAF-R3: Human review sampling of safety edge cases on a defined cadence"
+description: "Human review sampling of safety edge cases on a defined cadence"
+whyItMatters: "SAF-R3 (Safety & Responsible AI, recommended): Human review sampling of safety edge
+  cases on a defined cadence Failing this leaves a production gap against: Defined sample size and
+  cadence (≥ monthly or per release); last packet ≤90 days includes disposition for each fail/edge
+  case and links to backlog items when n…"
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: "Defined sample size and cadence (≥ monthly or per release); last packet ≤90 days
+  includes disposition for each fail/edge case and links to backlog items when needed"
+evidenceRequired:
+  - "Safety edge-case sampling plan + last review packet (sample size, labels, actions) with
+    reviewer names"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For SAF-R3 (SAF-R3: Human review sampling of safety edge cases on a defined
+  cadence): inspect current evidence for [Safety edge-case sampling plan + last review packet
+  (sample size, labels, actions) with reviewer names] and confirm the pass condition holds — Defined
+  sample size and cadence (≥ monthly or per release); last packet ≤90 days includes disposition for
+  each fail/edge case and links to backlog items when needed"
+falsePositiveGuidance: "SAF-R3 (Safety & Responsible AI): re-verify against a current artifact for
+  this specific Check (SAF-R3), not a sibling control. Document named exceptions with owner and
+  expiry."
+recommendedFixes:
+  - "Implement and operationalize: SAF-R3: Human review sampling of safety edge cases on a defined
+    cadence (SAF-R3)"
+  - "Retain evidence artifacts required by this Check, starting with: Safety edge-case sampling plan
+    + last review packet (sample size, labels, actions) with reviewer na…"
+  - "Schedule recurring manual verification for SAF-R3 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until SAF-R3 passes"
+references:
+  - title: "NIST AI RMF — Trustworthiness characteristics"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "ISO/IEC 42001 — AI management systems"
+    url: "https://www.iso.org/standard/81230.html"
+relatedRules:
+  - "SAF-M1"
+  - "SAF-M2"
+  - "SAF-M3"
+  - "SAF-M4"
+  - "SAF-R2"
+tags:
+  - "safety-responsible-ai"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "prompt-templates"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

@@ -1,0 +1,56 @@
+id: "HUM-M3"
+category: "human-approval"
+title: "Approval must not be bypassable via alternate agent or API paths"
+description: "Approval shall not be bypassable via alternate agent or API paths"
+whyItMatters: "HUM-M3 (Human Approval, mandatory): Approval shall not be bypassable via alternate
+  agent or API paths Failing this leaves a production gap against: Automated or reviewed tests
+  attempt bypass via alternate paths; 0 successful ungated high-impact executions"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "Automated or reviewed tests attempt bypass via alternate paths; 0 successful ungated
+  high-impact executions"
+evidenceRequired:
+  - "Bypass-path threat tests across UI, API, and agent entry points"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Bypass-path threat tests across UI, API, and agent entry points"
+manualVerification: "For HUM-M3 (Approval must not be bypassable via alternate agent or API paths):
+  inspect current evidence for [Bypass-path threat tests across UI, API, and agent entry points] and
+  confirm the pass condition holds — Automated or reviewed tests attempt bypass via alternate paths;
+  0 successful ungated high-impact executions"
+falsePositiveGuidance: "HUM-M3 (Human Approval): re-verify against a current artifact for this
+  specific Check (HUM-M3), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Approval must not be bypassable via alternate agent or API paths
+    (HUM-M3)"
+  - "Retain evidence artifacts required by this Check, starting with: Bypass-path threat tests
+    across UI, API, and agent entry points"
+  - "Schedule recurring manual verification for HUM-M3 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until HUM-M3 passes"
+references:
+  - title: "NIST AI RMF — Govern and Manage (human oversight)"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Excessive Agency"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "HUM-M1"
+  - "HUM-M2"
+  - "HUM-M4"
+  - "HUM-R1"
+  - "HUM-R3"
+tags:
+  - "human-approval"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "a2a"
+    - "mcp"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

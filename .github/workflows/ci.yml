@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate catalog and packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate YAML rules (schema + referential integrity)
+        run: npm run aprf:validate
+
+      - name: Rebuild generated catalog
+        run: npm run aprf:catalog
+
+      - name: Fail if generated catalog drifted
+        run: |
+          if ! git diff --quiet -- packages/aprf-engine/src/generated/catalog.ts; then
+            echo "::error::Generated catalog is out of date. Run 'npm run aprf:catalog' and commit the result."
+            git diff -- packages/aprf-engine/src/generated/catalog.ts
+            exit 1
+          fi
+          echo "Generated catalog is in sync."
+
+      - name: YAML catalog ↔ published spec ↔ profile integrity
+        run: npm run aprf:integrity
+
+      - name: Unit tests (aprf-engine + framework-definition)
+        run: npm run test:unit
+
+      - name: TypeScript build (publishable packages)
+        run: npm run build
+
+  spec-structure:
+    name: Spec JSON structure
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Structural checks on published spec and schemas
+        run: |
+          node <<'NODE'
+          const fs = require("fs");
+          const assert = (cond, msg) => {
+            if (!cond) {
+              console.error("FAIL:", msg);
+              process.exit(1);
+            }
+          };
+
+          const specText = fs.readFileSync("spec/aprf-spec.json", "utf8");
+          const spec = JSON.parse(specText);
+          const schema = JSON.parse(fs.readFileSync("schemas/aprf-spec-0.7.json", "utf8"));
+          const attestation = JSON.parse(
+            fs.readFileSync("schemas/aprf-attestation-0.6.json", "utf8")
+          );
+
+          assert(spec.governance?.version, "missing governance.version");
+          assert(
+            /^\d+\.\d+\.\d+$/.test(spec.governance.version),
+            `governance.version not SemVer: ${spec.governance.version}`
+          );
+          assert(Array.isArray(spec.pillars) && spec.pillars.length >= 1, "pillars empty");
+          assert(spec.$schema, "missing $schema");
+          assert(
+            String(spec.governance.schemaVersioning?.note || "").includes(
+              spec.governance.version
+            ),
+            "schemaVersioning.note must cite governance.version (prevents site/repo SemVer drift)"
+          );
+          assert(schema.$id, "spec schema missing $id");
+          assert(attestation.$id, "attestation schema missing $id");
+          assert(
+            /anu\.v\.apps@gmail\.com/i.test(
+              String(
+                spec.stewardship?.participation?.contact?.emailHint || ""
+              )
+            ),
+            "stewardship.participation.contact.emailHint must include anu.v.apps@gmail.com"
+          );
+          assert(
+            !/prasoonanand@/i.test(specText),
+            "published spec must not contain retired personal email addresses"
+          );
+          assert(
+            !/POST\s*\/api\/aprf\/submit/i.test(specText),
+            "published spec must not embed product API endpoints"
+          );
+
+          console.log(
+            `OK: APRF ${spec.governance.version}, ${spec.pillars.length} pillars, schemas parse`
+          );
+          NODE

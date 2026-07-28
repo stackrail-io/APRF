@@ -1,0 +1,46 @@
+# `@stackrail-io/aprf-engine`
+
+Normative **APRF Check catalog**: YAML rules, JSON Schema, loader/index, and evaluate helpers.
+
+Part of the public [APRF](https://github.com/stackrail-io/APRF) standard. Platform detectors and evidence collection live in product repos (e.g. StackRail `assessment-engine`), not here.
+
+`evaluateRules` is **attestation-only by default**. Pass `runDetectors: true` with a product `DetectorRegistry` to execute real detectors. This package ships only `manual-attest` plus a catalog allowlist of detector IDs for YAML validation.
+
+## Layout
+
+| Path | Role |
+|------|------|
+| `rules/by-category/**/*.yaml` | Check source of truth |
+| `rules/_schema/rule.schema.json` | Rule document schema |
+| `src/` | Types, index builder, catalog accessors, evaluate API |
+| `dist/` | Published JS + declarations (`npm run build`) |
+| `scripts/validate.ts` | Schema + referential validation |
+| `scripts/build-catalog.ts` | Generates `src/generated/catalog.ts` |
+
+## Commands
+
+From the APRF repo root:
+
+```bash
+npm install
+npm run aprf:validate    # schema + referential integrity
+npm run aprf:catalog     # regenerate src/generated/catalog.ts — commit if changed
+npm run aprf:integrity   # YAML ↔ published spec ↔ profiles
+npm run validate         # validate + catalog + integrity + framework-definition tests
+npm run build            # emit dist/ for npm consumers
+```
+
+CI (`.github/workflows/ci.yml`) runs the same checks on every PR and fails if the generated catalog is out of date.
+
+## Add a Check
+
+1. Copy an existing file under `rules/by-category/<category>/`.
+2. Use a new stable ID (`PREFIX-M#` / `PREFIX-R#`); never reuse deprecated IDs.
+3. Fill all required schema fields (`rules/_schema/rule.schema.json`).
+4. Run `npm run validate` and commit any catalog diff.
+
+See also [`rules/_index/id-gaps.md`](rules/_index/id-gaps.md) before allocating new IDs.
+
+## Consumers
+
+Product / marketing repos depend on this package (npm publish or local `file:` link) and must not redefine Check IDs or normative prose. Platform detectors live in product repos and map evidence to these Check IDs.

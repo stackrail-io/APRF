@@ -1,0 +1,56 @@
+id: "DX-M3"
+category: "platform-engineering"
+title: "Ownership and support channel must exist for the AI platform/paved road"
+description: "Ownership and support channel shall exist for the AI platform/paved road"
+whyItMatters: "DX-M3 (Platform Engineering, mandatory): Ownership and support channel shall exist
+  for the AI platform/paved road Failing this leaves a production gap against: Named owner team and
+  support channel documented; channel responds to a test ping within published SLA or has on-call
+  rotation listed"
+severity: "medium"
+weight: 2
+gate: "mandatory"
+passCondition: "Named owner team and support channel documented; channel responds to a test ping
+  within published SLA or has on-call rotation listed"
+evidenceRequired:
+  - "Platform ownership record + support channel (on-call, Slack, ticket queue)"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For DX-M3 (Ownership and support channel must exist for the AI platform/paved
+  road): inspect current evidence for [Platform ownership record + support channel (on-call, Slack,
+  ticket queue)] and confirm the pass condition holds — Named owner team and support channel
+  documented; channel responds to a test ping within published SLA or has on-call rotation listed"
+falsePositiveGuidance: "DX-M3 (Platform Engineering): re-verify against a current artifact for this
+  specific Check (DX-M3), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Ownership and support channel must exist for the AI
+    platform/paved road (DX-M3)"
+  - "Retain evidence artifacts required by this Check, starting with: Platform ownership record +
+    support channel (on-call, Slack, ticket queue)"
+  - "Schedule recurring manual verification for DX-M3 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until DX-M3 passes"
+references:
+  - title: "Google SRE Workbook — Soft skills / platform thinking parallels"
+    url: "https://sre.google/workbook/"
+  - title: "CNCF platforms white papers — paved roads concept"
+    url: "https://www.cncf.io/"
+relatedRules:
+  - "DX-M1"
+  - "DX-M2"
+  - "DX-R1"
+  - "DX-R2"
+  - "DX-R3"
+tags:
+  - "platform-engineering"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "github"
+    - "github-actions"
+    - "cicd"
+    - "kubernetes"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

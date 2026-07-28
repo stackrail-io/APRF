@@ -1,0 +1,67 @@
+id: "SCI-R2"
+category: "supply-chain"
+title: "SCI-R2: Machine-readable model bill of materials (MBOM) for production models"
+description: "Machine-readable model bill of materials (MBOM) for production models"
+whyItMatters: "SCI-R2 (Supply Chain Integrity, recommended): Machine-readable model bill of
+  materials (MBOM) for production models Failing this leaves a production gap against: 100% of
+  production model pins have an MBOM/SBOM artifact retained ≥90 days and linked from the model
+  registry entry"
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: "100% of production model pins have an MBOM/SBOM artifact retained ≥90 days and
+  linked from the model registry entry"
+evidenceRequired:
+  - "Machine-readable MBOM (or SBOM+model metadata) for each production model pin + retention
+    location"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-sbom-config"
+      params: {}
+    - id: "manual-attest"
+      params:
+        hint: "Machine-readable MBOM (or SBOM+model metadata) for each production model pin + retention
+          location"
+manualVerification: "For SCI-R2 (SCI: Machine-readable model bill of materials (MBOM) for production
+  models): inspect current evidence for [Machine-readable MBOM (or SBOM+model metadata) for each
+  production model pin + retention location] and confirm the pass condition holds — 100% of
+  production model pins have an MBOM/SBOM artifact retained ≥90 days and linked from the model
+  registry entry"
+falsePositiveGuidance: "SCI-R2 (Supply Chain Integrity): when automation and attestation disagree,
+  prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal
+  covers the gap."
+recommendedFixes:
+  - "Implement and operationalize: SCI-R2: Machine-readable model bill of materials (MBOM) for
+    production models (SCI-R2)"
+  - "Retain evidence artifacts required by this Check, starting with: Machine-readable MBOM (or
+    SBOM+model metadata) for each production model pin + retention location"
+  - "Wire or verify detectors declared on SCI-R2 so automation matches the pass condition"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until SCI-R2 passes"
+references:
+  - title: "SLSA — Supply-chain Levels for Software Artifacts"
+    url: "https://slsa.dev/"
+  - title: "CNCF Software Supply Chain Best Practices"
+    url: "https://www.cncf.io/"
+  - title: "OWASP LLM — Supply Chain Vulnerabilities"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "SCI-M1"
+  - "SCI-M2"
+  - "SCI-M3"
+  - "SCI-M4"
+  - "SCI-R1"
+tags:
+  - "supply-chain"
+  - "recommended"
+  - "hybrid"
+applicability:
+  technologies:
+    - "github"
+    - "github-actions"
+    - "cicd"
+    - "docker"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

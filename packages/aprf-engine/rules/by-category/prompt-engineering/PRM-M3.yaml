@@ -1,0 +1,59 @@
+id: "PRM-M3"
+category: "prompt-engineering"
+title: "Rollback to a prior prompt version must be possible without redeploying unrelated services"
+description: "Rollback to a prior prompt version shall be possible without redeploying unrelated services"
+whyItMatters: "PRM-M3 (Prompt Engineering, mandatory): Rollback to a prior prompt version shall be
+  possible without redeploying unrelated services Failing this leaves a production gap against:
+  Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in last
+  90 days"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "Prior prompt version restored in ≤ documented RTO without full app redeploy;
+  demonstrated in last 90 days"
+evidenceRequired:
+  - "Prompt rollback procedure + timed restore test"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-rollback-runbook"
+      params: {}
+    - id: "manual-attest"
+      params:
+        hint: "Prompt rollback procedure + timed restore test"
+manualVerification: "For PRM-M3 (Rollback to a prior prompt version must be possible without
+  redeploying unrelated services): inspect current evidence for [Prompt rollback procedure + timed
+  restore test] and confirm the pass condition holds — Prior prompt version restored in ≤ documented
+  RTO without full app redeploy; demonstrated in last 90 days"
+falsePositiveGuidance: "PRM-M3 (Prompt Engineering): when automation and attestation disagree,
+  prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal
+  covers the gap."
+recommendedFixes:
+  - "Implement and operationalize: Rollback to a prior prompt version must be possible without
+    redeploying unrelated services (PRM-M3)"
+  - "Retain evidence artifacts required by this Check, starting with: Prompt rollback procedure +
+    timed restore test"
+  - "Wire or verify detectors declared on PRM-M3 so automation matches the pass condition"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until PRM-M3 passes"
+references:
+  - title: "Google SRE Workbook — Managing Risk (change management parallels)"
+    url: "https://sre.google/workbook/"
+  - title: "OWASP LLM Prompt Injection guidance"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "PRM-M1"
+  - "PRM-M2"
+  - "PRM-R1"
+  - "PRM-R2"
+  - "PRM-R3"
+tags:
+  - "prompt-engineering"
+  - "mandatory"
+  - "hybrid"
+applicability:
+  technologies:
+    - "prompt-templates"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

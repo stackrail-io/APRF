@@ -1,0 +1,63 @@
+id: "REL-M3"
+category: "reliability-continuity"
+title: "Partial tool failures must be detected and must prevent false-success continuation"
+description: "Partial tool failures shall be detected and shall prevent false-success continuation"
+whyItMatters: "REL-M3 (Reliability & Continuity, mandatory): Partial tool failures shall be detected
+  and shall prevent false-success continuation Failing this leaves a production gap against: Tests
+  inject tool failure after partial success; agent does not report overall success in 100% of cases
+  without explicit compensation/approval"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "Tests inject tool failure after partial success; agent does not report overall
+  success in 100% of cases without explicit compensation/approval"
+evidenceRequired:
+  - "Agent/tool error-handling tests for partial failure"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Agent/tool error-handling tests for partial failure"
+manualVerification: "For REL-M3 (Partial tool failures must be detected and must prevent
+  false-success continuation): inspect current evidence for [Agent/tool error-handling tests for
+  partial failure] and confirm the pass condition holds — Tests inject tool failure after partial
+  success; agent does not report overall success in 100% of cases without explicit
+  compensation/approval"
+falsePositiveGuidance: "REL-M3 (Reliability & Continuity): re-verify against a current artifact for
+  this specific Check (REL-M3), not a sibling control. Document named exceptions with owner and
+  expiry."
+recommendedFixes:
+  - "Implement and operationalize: Partial tool failures must be detected and must prevent
+    false-success continuation (REL-M3)"
+  - "Retain evidence artifacts required by this Check, starting with: Agent/tool error-handling
+    tests for partial failure"
+  - "Schedule recurring manual verification for REL-M3 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until REL-M3 passes"
+references:
+  - title: "Google SRE Book — Addressing Cascading Failures"
+    url: "https://sre.google/sre-book/addressing-cascading-failures/"
+  - title: "AWS Well-Architected — Reliability"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "Google SRE — Disaster Recovery"
+    url: "https://sre.google/sre-book/disaster-recovery/"
+relatedRules:
+  - "REL-M1"
+  - "REL-M2"
+  - "REL-M4"
+  - "REL-M5"
+  - "REL-M6"
+tags:
+  - "reliability-continuity"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "kubernetes"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

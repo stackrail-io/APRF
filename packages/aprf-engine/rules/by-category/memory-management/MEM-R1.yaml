@@ -1,0 +1,59 @@
+id: "MEM-R1"
+category: "memory-management"
+title: "MEM-R1: Memory poisoning tests in the eval suite"
+description: "Memory poisoning tests in the eval suite"
+whyItMatters: "MEM-R1 (Memory Management, recommended): Memory poisoning tests in the eval suite
+  Failing this leaves a production gap against: ≥5 poisoning scenarios (cross-tenant write,
+  prompt-in-memory, stale trusted fact) are executed ≤90 days; critical fails block or require risk
+  acceptance"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "≥5 poisoning scenarios (cross-tenant write, prompt-in-memory, stale trusted fact)
+  are executed ≤90 days; critical fails block or require risk acceptance"
+evidenceRequired:
+  - "Memory-poisoning cases in the adversarial eval suite + latest run report with pass/fail per
+    case"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Memory-poisoning cases in the adversarial eval suite + latest run report with pass/fail per
+          case"
+manualVerification: "For MEM-R1 (MEM-R1: Memory poisoning tests in the eval suite): inspect current
+  evidence for [Memory-poisoning cases in the adversarial eval suite + latest run report with
+  pass/fail per case] and confirm the pass condition holds — ≥5 poisoning scenarios (cross-tenant
+  write, prompt-in-memory, stale trusted fact) are executed ≤90 days; critical fails block or
+  require risk acceptance"
+falsePositiveGuidance: "MEM-R1 (Memory Management): re-verify against a current artifact for this
+  specific Check (MEM-R1), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: MEM-R1: Memory poisoning tests in the eval suite (MEM-R1)"
+  - "Retain evidence artifacts required by this Check, starting with: Memory-poisoning cases in the
+    adversarial eval suite + latest run report with pass/fail per case"
+  - "Schedule recurring manual verification for MEM-R1 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until MEM-R1 passes"
+references:
+  - title: "NIST AI RMF — Govern and Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "MEM-M1"
+  - "MEM-M2"
+  - "MEM-M3"
+  - "MEM-M4"
+  - "MEM-R3"
+tags:
+  - "memory-management"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "vector-databases"
+    - "mcp"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

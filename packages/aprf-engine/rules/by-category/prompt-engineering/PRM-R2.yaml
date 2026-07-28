@@ -1,0 +1,59 @@
+id: "PRM-R2"
+category: "prompt-engineering"
+title: "PRM-R2: Prompt linting for length, forbidden patterns, and injection-prone constructs"
+description: "Prompt linting for length, forbidden patterns, and injection-prone constructs"
+whyItMatters: "PRM-R2 (Prompt Engineering, recommended): Prompt linting for length, forbidden
+  patterns, and injection-prone constructs Failing this leaves a production gap against: Lint runs
+  on every prompt change PR; blocking rules exist for secrets patterns and unbounded user
+  concatenation; last failing lint example retained"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "Lint runs on every prompt change PR; blocking rules exist for secrets patterns and
+  unbounded user concatenation; last failing lint example retained"
+evidenceRequired:
+  - "Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint
+    report"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint
+          report"
+manualVerification: "For PRM-R2 (PRM-R2: Prompt linting for length, forbidden patterns, and
+  injection-prone constructs): inspect current evidence for [Prompt-lint CI config (length,
+  forbidden patterns, injection-prone constructs) + latest lint report] and confirm the pass
+  condition holds — Lint runs on every prompt change PR; blocking rules exist for secrets patterns
+  and unbounded user concatenation; last failing lint example retained"
+falsePositiveGuidance: "PRM-R2 (Prompt Engineering): re-verify against a current artifact for this
+  specific Check (PRM-R2), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: PRM-R2: Prompt linting for length, forbidden patterns, and
+    injection-prone constructs (PRM-R2)"
+  - "Retain evidence artifacts required by this Check, starting with: Prompt-lint CI config (length,
+    forbidden patterns, injection-prone constructs) + latest lint report"
+  - "Schedule recurring manual verification for PRM-R2 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until PRM-R2 passes"
+references:
+  - title: "Google SRE Workbook — Managing Risk (change management parallels)"
+    url: "https://sre.google/workbook/"
+  - title: "OWASP LLM Prompt Injection guidance"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "PRM-M1"
+  - "PRM-M2"
+  - "PRM-M3"
+  - "PRM-R1"
+  - "PRM-R3"
+tags:
+  - "prompt-engineering"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "prompt-templates"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

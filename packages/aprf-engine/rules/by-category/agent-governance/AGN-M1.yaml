@@ -1,0 +1,60 @@
+id: "AGN-M1"
+category: "agent-governance"
+title: "Each production agent must have a documented charter: purpose, allowed tools, data scope,
+  and autonomy limits"
+description: "Each production agent shall have a documented charter: purpose, allowed tools, data
+  scope, and autonomy limits"
+whyItMatters: "AGN-M1 (Agent Governance, mandatory): Each production agent shall have a documented
+  charter: purpose, allowed tools, data scope, and autonomy limits Failing this leaves a production
+  gap against: 100% of production agents have a charter with purpose, tool allowlist reference, data
+  scope, and autonomy limits; inventory query returns 0 agents missing any…"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "100% of production agents have a charter with purpose, tool allowlist reference,
+  data scope, and autonomy limits; inventory query returns 0 agents missing any required field"
+evidenceRequired:
+  - "Agent inventory with charter fields per production agent"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Agent inventory with charter fields per production agent"
+manualVerification: "For AGN-M1 (Each production agent must have a documented charter: purpose,
+  allowed tools, data scope, and autonomy limits): inspect current evidence for [Agent inventory
+  with charter fields per production agent] and confirm the pass condition holds — 100% of
+  production agents have a charter with purpose, tool allowlist reference, data scope, and autonomy
+  limits; inventory query returns 0 agents missing any required field"
+falsePositiveGuidance: "AGN-M1 (Agent Governance): re-verify against a current artifact for this
+  specific Check (AGN-M1), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Each production agent must have a documented charter: purpose,
+    allowed tools, data scope, and autonomy limits (AGN-M1)"
+  - "Retain evidence artifacts required by this Check, starting with: Agent inventory with charter
+    fields per production agent"
+  - "Schedule recurring manual verification for AGN-M1 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until AGN-M1 passes"
+references:
+  - title: "OWASP LLM — Excessive Agency"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI RMF — Govern"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "AGN-M2"
+  - "AGN-M3"
+  - "AGN-M4"
+  - "AGN-R1"
+  - "AGN-R2"
+tags:
+  - "agent-governance"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "a2a"
+    - "mcp"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

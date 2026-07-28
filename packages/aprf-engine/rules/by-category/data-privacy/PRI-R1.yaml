@@ -1,0 +1,65 @@
+id: "PRI-R1"
+category: "data-privacy"
+title: "PRI-R1: Tokenization or redaction before model calls for high-sensitivity fields"
+description: "Tokenization or redaction before model calls for high-sensitivity fields"
+whyItMatters: "PRI-R1 (Data Privacy, recommended): Tokenization or redaction before model calls for
+  high-sensitivity fields Failing this leaves a production gap against: Documented high-sensitivity
+  fields never appear in cleartext in model request samples (≥50 sampled calls); pipeline fails
+  closed when redaction errors"
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: "Documented high-sensitivity fields never appear in cleartext in model request
+  samples (≥50 sampled calls); pipeline fails closed when redaction errors"
+evidenceRequired:
+  - "Pre-model tokenization/redaction pipeline config + sample of redacted payloads for
+    high-sensitivity fields"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "prompt-no-pii-patterns"
+      params: {}
+    - id: "manual-attest"
+      params:
+        hint: "Pre-model tokenization/redaction pipeline config + sample of redacted payloads for
+          high-sensitivity fields"
+manualVerification: "For PRI-R1 (PRI-R1: Tokenization or redaction before model calls for
+  high-sensitivity fields): inspect current evidence for [Pre-model tokenization/redaction pipeline
+  config + sample of redacted payloads for high-sensitivity fields] and confirm the pass condition
+  holds — Documented high-sensitivity fields never appear in cleartext in model request samples (≥50
+  sampled calls); pipeline fails closed when redaction errors"
+falsePositiveGuidance: "PRI-R1 (Data Privacy): when automation and attestation disagree, prefer the
+  stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the
+  gap."
+recommendedFixes:
+  - "Implement and operationalize: PRI-R1: Tokenization or redaction before model calls for
+    high-sensitivity fields (PRI-R1)"
+  - "Retain evidence artifacts required by this Check, starting with: Pre-model
+    tokenization/redaction pipeline config + sample of redacted payloads for high-sensitivity…"
+  - "Wire or verify detectors declared on PRI-R1 so automation matches the pass condition"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until PRI-R1 passes"
+references:
+  - title: "NIST AI RMF — privacy considerations"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Sensitive Information Disclosure"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "PRI-M1"
+  - "PRI-M2"
+  - "PRI-M3"
+  - "PRI-M4"
+  - "PRI-M5"
+tags:
+  - "data-privacy"
+  - "recommended"
+  - "hybrid"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "vector-databases"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

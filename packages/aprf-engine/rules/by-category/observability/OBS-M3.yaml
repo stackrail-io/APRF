@@ -1,0 +1,58 @@
+id: "OBS-M3"
+category: "observability"
+title: "Sensitive fields in traces must be redacted or access-controlled"
+description: "Sensitive fields in traces shall be redacted or access-controlled"
+whyItMatters: "OBS-M3 (Observability, mandatory): Sensitive fields in traces shall be redacted or
+  access-controlled Failing this leaves a production gap against: Synthetic secrets/PII in traced
+  fields are redacted or inaccessible to unauthorized roles at 100% in tests"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "Synthetic secrets/PII in traced fields are redacted or inaccessible to unauthorized
+  roles at 100% in tests"
+evidenceRequired:
+  - "Trace redaction/ACL config + synthetic sensitive-field test"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Trace redaction/ACL config + synthetic sensitive-field test"
+manualVerification: "For OBS-M3 (Sensitive fields in traces must be redacted or access-controlled):
+  inspect current evidence for [Trace redaction/ACL config + synthetic sensitive-field test] and
+  confirm the pass condition holds — Synthetic secrets/PII in traced fields are redacted or
+  inaccessible to unauthorized roles at 100% in tests"
+falsePositiveGuidance: "OBS-M3 (Observability): re-verify against a current artifact for this
+  specific Check (OBS-M3), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Sensitive fields in traces must be redacted or access-controlled
+    (OBS-M3)"
+  - "Retain evidence artifacts required by this Check, starting with: Trace redaction/ACL config +
+    synthetic sensitive-field test"
+  - "Schedule recurring manual verification for OBS-M3 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until OBS-M3 passes"
+references:
+  - title: "Google SRE Workbook — Observability"
+    url: "https://sre.google/workbook/observability/"
+  - title: "OpenTelemetry"
+    url: "https://opentelemetry.io/"
+relatedRules:
+  - "OBS-M1"
+  - "OBS-M2"
+  - "OBS-R1"
+  - "OBS-R2"
+  - "OBS-R3"
+tags:
+  - "observability"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "kubernetes"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

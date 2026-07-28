@@ -1,0 +1,55 @@
+id: "EXP-M3"
+category: "explainability"
+title: "Explanation content must not disclose secrets or unauthorized data"
+description: "Explanation content shall not disclose secrets or unauthorized data"
+whyItMatters: "EXP-M3 (Explainability & Transparency, mandatory): Explanation content shall not
+  disclose secrets or unauthorized data Failing this leaves a production gap against: Synthetic
+  secret/PII fixtures in explanation paths are redacted or blocked at 100% in tests; latest
+  production explanation sample scan shows 0 privileged secre…"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "Synthetic secret/PII fixtures in explanation paths are redacted or blocked at 100%
+  in tests; latest production explanation sample scan shows 0 privileged secret pattern hits"
+evidenceRequired:
+  - "Explanation redaction policy + automated secret/PII scan on explanation payloads"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Explanation redaction policy + automated secret/PII scan on explanation payloads"
+manualVerification: "For EXP-M3 (Explanation content must not disclose secrets or unauthorized
+  data): inspect current evidence for [Explanation redaction policy + automated secret/PII scan on
+  explanation payloads] and confirm the pass condition holds — Synthetic secret/PII fixtures in
+  explanation paths are redacted or blocked at 100% in tests; latest production explanation sample
+  scan shows 0 privileged secret pattern hits"
+falsePositiveGuidance: "EXP-M3 (Explainability & Transparency): re-verify against a current artifact
+  for this specific Check (EXP-M3), not a sibling control. Document named exceptions with owner and
+  expiry."
+recommendedFixes:
+  - "Implement and operationalize: Explanation content must not disclose secrets or unauthorized
+    data (EXP-M3)"
+  - "Retain evidence artifacts required by this Check, starting with: Explanation redaction policy +
+    automated secret/PII scan on explanation payloads"
+  - "Schedule recurring manual verification for EXP-M3 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until EXP-M3 passes"
+references:
+  - title: "NIST AI RMF — Explainability and Interpretability"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "EXP-M1"
+  - "EXP-M2"
+  - "EXP-M4"
+  - "EXP-R1"
+  - "EXP-R3"
+tags:
+  - "explainability"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"
