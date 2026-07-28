@@ -1,0 +1,58 @@
+id: "ORG-M1"
+category: "organizational-governance"
+title: "Documented AI policy covering acceptable use and prohibited applications must exist"
+description: "Documented AI policy covering acceptable use and prohibited applications shall exist"
+whyItMatters: "ORG-M1 (Organizational Governance, mandatory): Documented AI policy covering
+  acceptable use and prohibited applications shall exist Failing this leaves a production gap
+  against: Policy has version, owner, and review date ≤ 12 months; includes both acceptable-use and
+  prohibited-application sections"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "Policy has version, owner, and review date ≤ 12 months; includes both acceptable-use
+  and prohibited-application sections"
+evidenceRequired:
+  - "Approved AI acceptable-use / prohibited-applications policy"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-security-md-present"
+      params: {}
+    - id: "manual-attest"
+      params:
+        hint: "Approved AI acceptable-use / prohibited-applications policy"
+manualVerification: "For ORG-M1 (Documented AI policy covering acceptable use and prohibited
+  applications must exist): inspect current evidence for [Approved AI acceptable-use /
+  prohibited-applications policy] and confirm the pass condition holds — Policy has version, owner,
+  and review date ≤ 12 months; includes both acceptable-use and prohibited-application sections"
+falsePositiveGuidance: "ORG-M1 (Organizational Governance): when automation and attestation
+  disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which
+  signal covers the gap."
+recommendedFixes:
+  - "Implement and operationalize: Documented AI policy covering acceptable use and prohibited
+    applications must exist (ORG-M1)"
+  - "Retain evidence artifacts required by this Check, starting with: Approved AI acceptable-use /
+    prohibited-applications policy"
+  - "Wire or verify detectors declared on ORG-M1 so automation matches the pass condition"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until ORG-M1 passes"
+references:
+  - title: "ISO/IEC 42001 — AI management systems"
+    url: "https://www.iso.org/standard/81230.html"
+  - title: "NIST AI RMF — Govern"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "ORG-M2"
+  - "ORG-M3"
+  - "ORG-M4"
+  - "ORG-R1"
+  - "ORG-R3"
+tags:
+  - "organizational-governance"
+  - "mandatory"
+  - "hybrid"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

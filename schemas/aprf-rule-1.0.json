@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stackrail.io/aprf/rule-schema/1.0",
+  "title": "AprfRule",
+  "description": "Normative APRF Check / rule document (YAML catalog schema).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "category",
+    "title",
+    "description",
+    "whyItMatters",
+    "severity",
+    "weight",
+    "gate",
+    "passCondition",
+    "evidenceRequired",
+    "detection",
+    "manualVerification",
+    "falsePositiveGuidance",
+    "recommendedFixes",
+    "references",
+    "relatedRules",
+    "tags",
+    "applicability",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "category": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "whyItMatters": {
+      "type": "string",
+      "minLength": 1
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ]
+    },
+    "weight": {
+      "type": "number",
+      "minimum": 0
+    },
+    "gate": {
+      "type": "string",
+      "enum": [
+        "mandatory",
+        "recommended"
+      ]
+    },
+    "passCondition": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidenceRequired": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "detection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capability"
+      ],
+      "properties": {
+        "capability": {
+          "type": "string",
+          "enum": [
+            "automated",
+            "manual",
+            "hybrid",
+            "none"
+          ]
+        },
+        "detectors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "params": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "manualVerification": {
+      "type": "string"
+    },
+    "falsePositiveGuidance": {
+      "type": "string"
+    },
+    "recommendedFixes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "relatedRules": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "applicability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minCriticality",
+        "requiredFromLevel"
+      ],
+      "properties": {
+        "technologies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "github",
+              "terraform",
+              "docker",
+              "kubernetes",
+              "github-actions",
+              "azure-devops",
+              "aws",
+              "gcp",
+              "azure",
+              "prompt-templates",
+              "rag-pipelines",
+              "vector-databases",
+              "mcp",
+              "a2a",
+              "openapi",
+              "cicd"
+            ]
+          }
+        },
+        "minCriticality": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "requiredFromLevel": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lenses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated",
+        "draft"
+      ]
+    },
+    "deprecated": {
+      "type": "boolean"
+    },
+    "replacedBy": {
+      "type": "string"
+    },
+    "deprecationNote": {
+      "type": "string"
+    },
+    "introducedIn": {
+      "type": "string"
+    }
+  }
+}

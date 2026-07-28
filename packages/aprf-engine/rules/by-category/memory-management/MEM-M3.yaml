@@ -1,0 +1,57 @@
+id: "MEM-M3"
+category: "memory-management"
+title: "Writes to long-term memory must be validated against policy (who/what may write)"
+description: "Writes to long-term memory shall be validated against policy (who/what may write)"
+whyItMatters: "MEM-M3 (Memory Management, mandatory): Writes to long-term memory shall be validated
+  against policy (who/what may write) Failing this leaves a production gap against: Unauthorized
+  writers denied at 100% in tests; policy enumerates allowed writers and content classes for durable
+  memory"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "Unauthorized writers denied at 100% in tests; policy enumerates allowed writers and
+  content classes for durable memory"
+evidenceRequired:
+  - "Write-policy middleware config + deny tests"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Write-policy middleware config + deny tests"
+manualVerification: "For MEM-M3 (Be validated against policy (who/what may write)): inspect current
+  evidence for [Write-policy middleware config + deny tests] and confirm the pass condition holds —
+  Unauthorized writers denied at 100% in tests; policy enumerates allowed writers and content
+  classes for durable memory"
+falsePositiveGuidance: "MEM-M3 (Memory Management): re-verify against a current artifact for this
+  specific Check (MEM-M3), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Writes to long-term memory must be validated against policy
+    (who/what may write) (MEM-M3)"
+  - "Retain evidence artifacts required by this Check, starting with: Write-policy middleware config
+    + deny tests"
+  - "Schedule recurring manual verification for MEM-M3 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until MEM-M3 passes"
+references:
+  - title: "NIST AI RMF — Govern and Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "MEM-M1"
+  - "MEM-M2"
+  - "MEM-M4"
+  - "MEM-R1"
+  - "MEM-R3"
+tags:
+  - "memory-management"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "vector-databases"
+    - "mcp"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

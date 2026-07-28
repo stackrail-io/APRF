@@ -1,0 +1,52 @@
+name: Check proposal
+description: Propose a new Check or a material change to an existing Check
+title: "[Check] "
+labels: ["check"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read [CONTRIBUTING.md](../../CONTRIBUTING.md) and [ARCHITECTURE.md](../../ARCHITECTURE.md) first.
+        New Pillars or gate-semantics changes need an RFC, not only an issue.
+  - type: input
+    id: check-id
+    attributes:
+      label: Proposed or existing Check ID
+      description: e.g. SEC-M6 or new PREFIX-M# (see rules/_index/id-gaps.md)
+      placeholder: SEC-M6
+    validations:
+      required: true
+  - type: dropdown
+    id: change-type
+    attributes:
+      label: Change type
+      options:
+        - New Check
+        - Strengthen existing Check
+        - Deprecate / replace Check
+        - Editorial (prose only)
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Why it matters
+      description: Production risk if this control is missing
+    validations:
+      required: true
+  - type: textarea
+    id: pass-condition
+    attributes:
+      label: Proposed pass condition
+      description: Measurable artifact + outcome
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirm
+      options:
+        - label: I will not reuse a published Check ID
+          required: true
+        - label: Platform names stay out of the Check title (detections are product-side)
+          required: true

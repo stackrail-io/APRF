@@ -1,0 +1,139 @@
+categories:
+  - id: ai-security
+    pillarSlug: ai-security
+    domain: security
+    name: Adversarial Security
+    summary: Prevent prompt injection, jailbreaks, exfiltration, and model/tool abuse from becoming a
+      production incident.
+  - id: authentication
+    pillarSlug: authentication
+    domain: security
+    name: Authentication
+    summary: Strong identity for users, services, agents, and MCP callers.
+  - id: authorization
+    pillarSlug: authorization
+    domain: security
+    name: Authorization
+    summary: Enforce who/what may invoke which models, tools, data, and actions.
+  - id: secrets
+    pillarSlug: secrets
+    domain: security
+    name: Secrets
+    summary: Eliminate secret leakage into prompts, logs, tools, and client surfaces.
+  - id: tool-safety
+    pillarSlug: tool-safety
+    domain: security
+    name: Tool Safety
+    summary: Make tool/MCP invocation fail closed with least privilege and side-effect control.
+  - id: supply-chain
+    pillarSlug: supply-chain
+    domain: security
+    name: Supply Chain Integrity
+    summary: Prove provenance and integrity of models, containers, MCP servers, and AI dependencies.
+  - id: infrastructure
+    pillarSlug: infrastructure
+    domain: security
+    name: Infrastructure
+    summary: Harden runtime, network, isolation, and supply chain for AI workloads.
+  - id: safety-responsible-ai
+    pillarSlug: safety-responsible-ai
+    domain: safety
+    name: Safety & Responsible AI
+    summary: Prevent harmful content and unfair outcomes—NIST trustworthiness beyond adversarial security.
+  - id: explainability
+    pillarSlug: explainability
+    domain: safety
+    name: Explainability & Transparency
+    summary: Make AI decisions reconstructable for operators, users, and auditors—not only for debugging.
+  - id: data-privacy
+    pillarSlug: data-privacy
+    domain: data
+    name: Data Privacy
+    summary: Minimize, classify, and protect data flowing through AI pipelines.
+  - id: data-governance
+    pillarSlug: data-governance
+    domain: data
+    name: Data Governance & Quality
+    summary: Govern corpora, indexes, labels, and feedback loops—distinct from privacy controls.
+  - id: memory-management
+    pillarSlug: memory-management
+    domain: data
+    name: Memory Management
+    summary: Control retention, isolation, and poisoning of short- and long-term memory.
+  - id: model-governance
+    pillarSlug: model-governance
+    domain: model-lifecycle
+    name: Model Governance
+    summary: Own model selection, versioning, deprecation, and capability boundaries.
+  - id: prompt-engineering
+    pillarSlug: prompt-engineering
+    domain: model-lifecycle
+    name: Prompt Engineering
+    summary: Treat prompts as versioned production artifacts with regression control.
+  - id: context-engineering
+    pillarSlug: context-engineering
+    domain: model-lifecycle
+    name: Context Engineering
+    summary: Bound and structure what the model is allowed to see and use.
+  - id: evaluation
+    pillarSlug: evaluation
+    domain: model-lifecycle
+    name: Evaluation
+    summary: Continuously prove quality, safety, and task success before and after release.
+  - id: agent-governance
+    pillarSlug: agent-governance
+    domain: agents
+    name: Agent Governance
+    summary: Constrain goals, autonomy, loops, and escalation for agents and A2A.
+  - id: human-approval
+    pillarSlug: human-approval
+    domain: agents
+    name: Human Approval
+    summary: Require human gates for high-impact or irreversible actions.
+  - id: observability
+    pillarSlug: observability
+    domain: reliability
+    name: Observability
+    summary: "Make every decision path reconstructable: traces, prompts, tools, costs, outcomes."
+  - id: performance-slo
+    pillarSlug: performance-slo
+    domain: reliability
+    name: Performance & SLO Engineering
+    summary: Latency, throughput, and error budgets for AI features—SRE discipline applied to GenAI.
+  - id: reliability-continuity
+    pillarSlug: reliability-continuity
+    domain: reliability
+    name: Reliability & Continuity
+    summary: Survive provider outages and partial failures, and preserve critical AI capabilities under
+      sustained disruption.
+  - id: change-management
+    pillarSlug: change-management
+    domain: reliability
+    name: Change Management & Release
+    summary: Repeatable promotion of models, prompts, tools, and agents—with tested, fast rollback.
+  - id: incident-readiness
+    pillarSlug: incident-readiness
+    domain: reliability
+    name: Incident Readiness
+    summary: Detect, contain, and learn from AI-specific production incidents.
+  - id: cost-optimization
+    pillarSlug: cost-optimization
+    domain: cost
+    name: Cost Optimization
+    summary: Bound spend with budgets, caching, routing, and abuse controls.
+  - id: organizational-governance
+    pillarSlug: organizational-governance
+    domain: governance
+    name: Organizational Governance
+    summary: AI policy, ownership, risk acceptance, and continual improvement—ISO 42001-style management
+      system.
+  - id: compliance
+    pillarSlug: compliance
+    domain: governance
+    name: Compliance
+    summary: Produce auditable evidence of controls without equating compliance with readiness.
+  - id: platform-engineering
+    pillarSlug: platform-engineering
+    domain: null
+    name: Platform Engineering
+    summary: Make the safe path the easy path—paved roads that apply across every APRF domain.

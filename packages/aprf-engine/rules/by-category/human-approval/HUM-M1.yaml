@@ -1,0 +1,60 @@
+id: "HUM-M1"
+category: "human-approval"
+title: "High-impact action classes must be inventoried and gated by human approval in production"
+description: "High-impact action classes shall be inventoried and gated by human approval in production"
+whyItMatters: "HUM-M1 (Human Approval, mandatory): High-impact action classes shall be inventoried
+  and gated by human approval in production Failing this leaves a production gap against: 100% of
+  inventoried high-impact action classes have an approval gate in production; ungated execution
+  tests fail at 100%"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "100% of inventoried high-impact action classes have an approval gate in production;
+  ungated execution tests fail at 100%"
+evidenceRequired:
+  - "High-impact action inventory + gate wiring evidence"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-human-approval-config"
+      params: {}
+    - id: "manual-attest"
+      params:
+        hint: "High-impact action inventory + gate wiring evidence"
+manualVerification: "For HUM-M1 (High-impact action classes must be inventoried and gated by human
+  approval in production): inspect current evidence for [High-impact action inventory + gate wiring
+  evidence] and confirm the pass condition holds — 100% of inventoried high-impact action classes
+  have an approval gate in production; ungated execution tests fail at 100%"
+falsePositiveGuidance: "HUM-M1 (Human Approval): when automation and attestation disagree, prefer
+  the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the
+  gap."
+recommendedFixes:
+  - "Implement and operationalize: High-impact action classes must be inventoried and gated by human
+    approval in production (HUM-M1)"
+  - "Retain evidence artifacts required by this Check, starting with: High-impact action inventory +
+    gate wiring evidence"
+  - "Wire or verify detectors declared on HUM-M1 so automation matches the pass condition"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until HUM-M1 passes"
+references:
+  - title: "NIST AI RMF — Govern and Manage (human oversight)"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Excessive Agency"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "HUM-M2"
+  - "HUM-M3"
+  - "HUM-M4"
+  - "HUM-R1"
+  - "HUM-R3"
+tags:
+  - "human-approval"
+  - "mandatory"
+  - "hybrid"
+applicability:
+  technologies:
+    - "a2a"
+    - "mcp"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

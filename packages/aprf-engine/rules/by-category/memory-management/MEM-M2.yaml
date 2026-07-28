@@ -1,0 +1,57 @@
+id: "MEM-M2"
+category: "memory-management"
+title: "Retention and deletion policies must exist and be executable"
+description: "Retention and deletion policies shall exist and be executable"
+whyItMatters: "MEM-M2 (Memory Management, mandatory): Retention and deletion policies shall exist
+  and be executable Failing this leaves a production gap against: TTL/deletion job succeeds in test;
+  sample records older than retention are absent after job run; policy documents retention periods
+  per memory class"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "TTL/deletion job succeeds in test; sample records older than retention are absent
+  after job run; policy documents retention periods per memory class"
+evidenceRequired:
+  - "Retention policy + TTL job config + deletion test record"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Retention policy + TTL job config + deletion test record"
+manualVerification: "For MEM-M2 (Retention and deletion policies must exist and be executable):
+  inspect current evidence for [Retention policy + TTL job config + deletion test record] and
+  confirm the pass condition holds — TTL/deletion job succeeds in test; sample records older than
+  retention are absent after job run; policy documents retention periods per memory class"
+falsePositiveGuidance: "MEM-M2 (Memory Management): re-verify against a current artifact for this
+  specific Check (MEM-M2), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Retention and deletion policies must exist and be executable
+    (MEM-M2)"
+  - "Retain evidence artifacts required by this Check, starting with: Retention policy + TTL job
+    config + deletion test record"
+  - "Schedule recurring manual verification for MEM-M2 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until MEM-M2 passes"
+references:
+  - title: "NIST AI RMF — Govern and Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "MEM-M1"
+  - "MEM-M3"
+  - "MEM-M4"
+  - "MEM-R1"
+  - "MEM-R3"
+tags:
+  - "memory-management"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "vector-databases"
+    - "mcp"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

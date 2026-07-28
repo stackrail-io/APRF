@@ -1,0 +1,64 @@
+/**
+ * Detector IDs declared in Check YAML — allowlist for catalog validation only.
+ * Implementations live in product/plugin registries (e.g. assessment-engine),
+ * not in this normative package.
+ */
+export const CATALOG_DETECTOR_IDS = [
+  "manual-attest",
+  "http-auth-probe",
+  "iam-least-privilege",
+  "otel-services-present",
+  "docker-nonroot-user",
+  "mcp-filesystem-scope",
+  "mcp-tool-allowlist",
+  "prompt-versioned",
+  "secrets-not-embedded",
+  "docker-no-latest-tag",
+  "docker-image-digest-pinned",
+  "docker-no-secrets-in-env",
+  "cicd-no-pull-request-target",
+  "cicd-oidc-present",
+  "prompt-has-owner",
+  "iam-no-wildcard-resource",
+  "mcp-no-unrestricted-shell",
+  "repo-secret-scan-config",
+  "repo-dependency-update-config",
+  "repo-codeowners-present",
+  "repo-security-md-present",
+  "cicd-actions-sha-pinned",
+  "cicd-no-self-hosted-runner",
+  "docker-no-curl-pipe-shell",
+  "mcp-package-pinned",
+  "mcp-no-secrets-in-env",
+  "prompt-no-pii-patterns",
+  "repo-pre-commit-config",
+  "repo-vuln-scan-config",
+  "repo-eval-suite-present",
+  "repo-ai-config-as-code",
+  "docker-healthcheck-present",
+  "cicd-timeout-present",
+  "prompt-budget-hint",
+  "mcp-no-unrestricted-network",
+  "repo-policy-as-code",
+  "repo-incident-playbooks",
+  "repo-sbom-config",
+  "repo-scaffolding-templates",
+  "repo-otel-config",
+  "repo-rate-limit-config",
+  "docker-workdir-present",
+  "cicd-concurrency-present",
+  "repo-model-pin-config",
+  "repo-a2a-config",
+  "repo-rag-corpus-config",
+  "repo-chaos-tests",
+  "repo-human-approval-config",
+  "repo-harm-policy",
+  "repo-rollback-runbook",
+  "repo-network-policy",
+] as const;
+
+export type CatalogDetectorId = (typeof CATALOG_DETECTOR_IDS)[number];
+
+export function listCatalogDetectorIds(): string[] {
+  return [...CATALOG_DETECTOR_IDS];
+}

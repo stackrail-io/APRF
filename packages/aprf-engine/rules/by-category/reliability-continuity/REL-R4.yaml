@@ -1,0 +1,61 @@
+id: "REL-R4"
+category: "reliability-continuity"
+title: "REL-R4: Periodic continuity drills including provider loss"
+description: "Periodic continuity drills including provider loss"
+whyItMatters: "REL-R4 (Reliability & Continuity, recommended): Periodic continuity drills including
+  provider loss Failing this leaves a production gap against: Provider-loss (or equivalent)
+  continuity drill completed ≤90 days; RTO/RPO met or exceptions have named owners and expiry"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "Provider-loss (or equivalent) continuity drill completed ≤90 days; RTO/RPO met or
+  exceptions have named owners and expiry"
+evidenceRequired:
+  - "Continuity drill calendar + last provider-loss drill report with RTO/RPO results"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Continuity drill calendar + last provider-loss drill report with RTO/RPO results"
+manualVerification: "For REL-R4 (REL-R4: Periodic continuity drills including provider loss):
+  inspect current evidence for [Continuity drill calendar + last provider-loss drill report with
+  RTO/RPO results] and confirm the pass condition holds — Provider-loss (or equivalent) continuity
+  drill completed ≤90 days; RTO/RPO met or exceptions have named owners and expiry"
+falsePositiveGuidance: "REL-R4 (Reliability & Continuity): re-verify against a current artifact for
+  this specific Check (REL-R4), not a sibling control. Document named exceptions with owner and
+  expiry."
+recommendedFixes:
+  - "Implement and operationalize: REL-R4: Periodic continuity drills including provider loss
+    (REL-R4)"
+  - "Retain evidence artifacts required by this Check, starting with: Continuity drill calendar +
+    last provider-loss drill report with RTO/RPO results"
+  - "Schedule recurring manual verification for REL-R4 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until REL-R4 passes"
+references:
+  - title: "Google SRE Book — Addressing Cascading Failures"
+    url: "https://sre.google/sre-book/addressing-cascading-failures/"
+  - title: "AWS Well-Architected — Reliability"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "Google SRE — Disaster Recovery"
+    url: "https://sre.google/sre-book/disaster-recovery/"
+relatedRules:
+  - "REL-M1"
+  - "REL-M2"
+  - "REL-M3"
+  - "REL-M4"
+  - "REL-M5"
+tags:
+  - "reliability-continuity"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "kubernetes"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

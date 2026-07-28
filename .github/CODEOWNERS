@@ -1,0 +1,7 @@
+# Code owners for APRF
+
+Working-draft phase: review is coordinated by repository maintainers and the interim stewardship contact in `spec/aprf-spec.json` (`stewardship.participation.contact`).
+
+When interim advisory seats are filled, add GitHub team handles here (for example `@stackrail-io/aprf-stewards`) so required reviews apply automatically.
+
+Until then this file intentionally has **no enforced owner pattern**, so PRs are not blocked on a missing team.

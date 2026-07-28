@@ -1,0 +1,60 @@
+id: "DX-M2"
+category: "platform-engineering"
+title: "Local or CI self-serve checks must cover critical mandatory controls (auth, secrets, basic evals)"
+description: "Local or CI self-serve checks shall cover critical mandatory controls (auth, secrets,
+  basic evals)"
+whyItMatters: "DX-M2 (Platform Engineering, mandatory): Local or CI self-serve checks shall cover
+  critical mandatory controls (auth, secrets, basic evals) Failing this leaves a production gap
+  against: Default AI pipeline runs auth, secret-scan, and basic eval checks; failing any blocks
+  merge/promote in the golden-path template"
+severity: "medium"
+weight: 2
+gate: "mandatory"
+passCondition: "Default AI pipeline runs auth, secret-scan, and basic eval checks; failing any
+  blocks merge/promote in the golden-path template"
+evidenceRequired:
+  - "CI/local check config covering auth, secrets, and basic evals"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "CI/local check config covering auth, secrets, and basic evals"
+manualVerification: "For DX-M2 (Cover critical mandatory controls (auth, secrets, basic evals)):
+  inspect current evidence for [CI/local check config covering auth, secrets, and basic evals] and
+  confirm the pass condition holds — Default AI pipeline runs auth, secret-scan, and basic eval
+  checks; failing any blocks merge/promote in the golden-path template"
+falsePositiveGuidance: "DX-M2 (Platform Engineering): re-verify against a current artifact for this
+  specific Check (DX-M2), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Local or CI self-serve checks must cover critical mandatory
+    controls (auth, secrets, basic evals) (DX-M2)"
+  - "Retain evidence artifacts required by this Check, starting with: CI/local check config covering
+    auth, secrets, and basic evals"
+  - "Schedule recurring manual verification for DX-M2 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until DX-M2 passes"
+references:
+  - title: "Google SRE Workbook — Soft skills / platform thinking parallels"
+    url: "https://sre.google/workbook/"
+  - title: "CNCF platforms white papers — paved roads concept"
+    url: "https://www.cncf.io/"
+relatedRules:
+  - "DX-M1"
+  - "DX-M3"
+  - "DX-R1"
+  - "DX-R2"
+  - "DX-R3"
+tags:
+  - "platform-engineering"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "github"
+    - "github-actions"
+    - "cicd"
+    - "kubernetes"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

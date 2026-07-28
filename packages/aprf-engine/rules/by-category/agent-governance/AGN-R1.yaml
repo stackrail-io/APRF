@@ -1,0 +1,56 @@
+id: "AGN-R1"
+category: "agent-governance"
+title: "AGN-R1: Goal conflict detection and policy checks before plan execution"
+description: "Goal conflict detection and policy checks before plan execution"
+whyItMatters: "AGN-R1 (Agent Governance, recommended): Goal conflict detection and policy checks
+  before plan execution Failing this leaves a production gap against: Agent planner runs policy
+  checks before side-effecting tools; ≥1 synthetic conflict is denied in test or prod logs within 90
+  days; rules have a named owner"
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: "Agent planner runs policy checks before side-effecting tools; ≥1 synthetic conflict
+  is denied in test or prod logs within 90 days; rules have a named owner"
+evidenceRequired:
+  - "Pre-execution policy checks for agent plans (goal-conflict / disallowed-goal rules) + sample
+    deny/allow traces"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For AGN-R1 (AGN-R1: Goal conflict detection and policy checks before plan
+  execution): inspect current evidence for [Pre-execution policy checks for agent plans
+  (goal-conflict / disallowed-goal rules) + sample deny/allow traces] and confirm the pass condition
+  holds — Agent planner runs policy checks before side-effecting tools; ≥1 synthetic conflict is
+  denied in test or prod logs within 90 days; rules have a named owner"
+falsePositiveGuidance: "AGN-R1 (Agent Governance): re-verify against a current artifact for this
+  specific Check (AGN-R1), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: AGN-R1: Goal conflict detection and policy checks before plan
+    execution (AGN-R1)"
+  - "Retain evidence artifacts required by this Check, starting with: Pre-execution policy checks
+    for agent plans (goal-conflict / disallowed-goal rules) + sample deny/a…"
+  - "Schedule recurring manual verification for AGN-R1 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until AGN-R1 passes"
+references:
+  - title: "OWASP LLM — Excessive Agency"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI RMF — Govern"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "AGN-M1"
+  - "AGN-M2"
+  - "AGN-M3"
+  - "AGN-M4"
+  - "AGN-R2"
+tags:
+  - "agent-governance"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "a2a"
+    - "mcp"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

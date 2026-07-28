@@ -1,0 +1,65 @@
+id: "CHG-M1"
+category: "change-management"
+title: "Prior production versions of prompts and model pins must be retained and restorable"
+description: "Prior production versions of prompts and model pins shall be retained and restorable"
+whyItMatters: "CHG-M1 (Change Management & Release, mandatory): Prior production versions of prompts
+  and model pins shall be retained and restorable Failing this leaves a production gap against: ≥N
+  prior production versions retained per policy (minimum N=2); restore dry-run successfully loads
+  the immediate prior version in staging or prod-adjacent env"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "≥N prior production versions retained per policy (minimum N=2); restore dry-run
+  successfully loads the immediate prior version in staging or prod-adjacent env"
+evidenceRequired:
+  - "Version retention policy + registry listing of prior production versions"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Version retention policy + registry listing of prior production versions"
+manualVerification: "For CHG-M1 (Prior production versions of prompts and model pins must be
+  retained and restorable): inspect current evidence for [Version retention policy + registry
+  listing of prior production versions] and confirm the pass condition holds — ≥N prior production
+  versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior
+  version in staging or prod-adjacent env"
+falsePositiveGuidance: "CHG-M1 (Change Management & Release): re-verify against a current artifact
+  for this specific Check (CHG-M1), not a sibling control. Document named exceptions with owner and
+  expiry."
+recommendedFixes:
+  - "Implement and operationalize: Prior production versions of prompts and model pins must be
+    retained and restorable (CHG-M1)"
+  - "Retain evidence artifacts required by this Check, starting with: Version retention policy +
+    registry listing of prior production versions"
+  - "Schedule recurring manual verification for CHG-M1 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until CHG-M1 passes"
+references:
+  - title: "Google SRE Workbook — Configuration Management"
+    url: "https://sre.google/workbook/"
+  - title: "AWS Well-Architected — Operational Excellence"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "Google SRE — Emergency Response"
+    url: "https://sre.google/sre-book/emergency-response/"
+  - title: "AWS Well-Architected — Reliability"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+relatedRules:
+  - "DEP-M1"
+  - "DEP-M2"
+  - "DEP-M3"
+  - "CHG-M2"
+  - "CHG-M3"
+tags:
+  - "change-management"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "github"
+    - "github-actions"
+    - "azure-devops"
+    - "cicd"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

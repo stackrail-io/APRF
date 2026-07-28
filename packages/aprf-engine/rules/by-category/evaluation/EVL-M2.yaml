@@ -1,0 +1,56 @@
+id: "EVL-M2"
+category: "evaluation"
+title: "Release gates must enforce numeric minimum thresholds for quality and safety metrics"
+description: "Release gates shall enforce numeric minimum thresholds for quality and safety metrics"
+whyItMatters: "EVL-M2 (Evaluation, mandatory): Release gates shall enforce numeric minimum
+  thresholds for quality and safety metrics Failing this leaves a production gap against: Each
+  critical journey has ≥1 quality and ≥1 safety metric with numeric threshold; failing gate blocks
+  deploy in CI"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "Each critical journey has ≥1 quality and ≥1 safety metric with numeric threshold;
+  failing gate blocks deploy in CI"
+evidenceRequired:
+  - "Gate config with metric names and thresholds + CI reports"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Gate config with metric names and thresholds + CI reports"
+manualVerification: "For EVL-M2 (Release gates must enforce numeric minimum thresholds for quality
+  and safety metrics): inspect current evidence for [Gate config with metric names and thresholds +
+  CI reports] and confirm the pass condition holds — Each critical journey has ≥1 quality and ≥1
+  safety metric with numeric threshold; failing gate blocks deploy in CI"
+falsePositiveGuidance: "EVL-M2 (Evaluation): re-verify against a current artifact for this specific
+  Check (EVL-M2), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Release gates must enforce numeric minimum thresholds for quality
+    and safety metrics (EVL-M2)"
+  - "Retain evidence artifacts required by this Check, starting with: Gate config with metric names
+    and thresholds + CI reports"
+  - "Schedule recurring manual verification for EVL-M2 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until EVL-M2 passes"
+references:
+  - title: "NIST AI RMF — Measure"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "Google SRE — Monitoring Distributed Systems (measurement culture)"
+    url: "https://sre.google/sre-book/monitoring-distributed-systems/"
+relatedRules:
+  - "EVL-M1"
+  - "EVL-M3"
+  - "EVL-M4"
+  - "EVL-R1"
+  - "EVL-R2"
+tags:
+  - "evaluation"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "cicd"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

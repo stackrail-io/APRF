@@ -1,0 +1,61 @@
+id: "AGN-M4"
+category: "agent-governance"
+title: "A2A and multi-agent handoffs must authenticate peers and carry scoped capabilities"
+description: "A2A and multi-agent handoffs shall authenticate peers and carry scoped capabilities"
+whyItMatters: "AGN-M4 (Agent Governance, mandatory): A2A and multi-agent handoffs shall authenticate
+  peers and carry scoped capabilities Failing this leaves a production gap against: 100% of
+  production A2A/multi-agent handoff paths require authenticated peers; tests show unauthenticated
+  or over-scoped handoffs denied at 100%"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "100% of production A2A/multi-agent handoff paths require authenticated peers; tests
+  show unauthenticated or over-scoped handoffs denied at 100%"
+evidenceRequired:
+  - "A2A auth config + capability-token/schema examples + negative auth tests"
+detection:
+  capability: "automated"
+  detectors:
+    - id: "repo-a2a-config"
+      params: {}
+    - id: "manual-attest"
+      params:
+        hint: "A2A auth config + capability-token/schema examples + negative auth tests"
+manualVerification: "For AGN-M4 (A2A and multi-agent handoffs must authenticate peers and carry
+  scoped capabilities): inspect current evidence for [A2A auth config + capability-token/schema
+  examples + negative auth tests] and confirm the pass condition holds — 100% of production
+  A2A/multi-agent handoff paths require authenticated peers; tests show unauthenticated or
+  over-scoped handoffs denied at 100%"
+falsePositiveGuidance: "AGN-M4 (Agent Governance): confirm the detector target matches the
+  production path for this Check before waiving. Named exceptions need an owner and expiry ≤90
+  days."
+recommendedFixes:
+  - "Implement and operationalize: A2A and multi-agent handoffs must authenticate peers and carry
+    scoped capabilities (AGN-M4)"
+  - "Retain evidence artifacts required by this Check, starting with: A2A auth config +
+    capability-token/schema examples + negative auth tests"
+  - "Wire or verify detectors declared on AGN-M4 so automation matches the pass condition"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until AGN-M4 passes"
+references:
+  - title: "OWASP LLM — Excessive Agency"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI RMF — Govern"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "AGN-M1"
+  - "AGN-M2"
+  - "AGN-M3"
+  - "AGN-R1"
+  - "AGN-R2"
+tags:
+  - "agent-governance"
+  - "mandatory"
+  - "automated"
+applicability:
+  technologies:
+    - "a2a"
+    - "mcp"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

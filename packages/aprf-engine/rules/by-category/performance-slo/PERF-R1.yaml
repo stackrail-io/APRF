@@ -1,0 +1,61 @@
+id: "PERF-R1"
+category: "performance-slo"
+title: "PERF-R1: Error budgets formally gate release velocity for AI features"
+description: "Error budgets formally gate release velocity for AI features"
+whyItMatters: "PERF-R1 (Performance & SLO Engineering, recommended): Error budgets formally gate
+  release velocity for AI features Failing this leaves a production gap against: When error budget
+  for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk
+  acceptance; ≥1 gated event or drill in 90 days"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "When error budget for a critical AI journey is exhausted, release velocity is
+  blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days"
+evidenceRequired:
+  - "Error-budget policy linking AI SLOs to release freezes + last budget burn report that gated a
+    release"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Error-budget policy linking AI SLOs to release freezes + last budget burn report that gated a
+          release"
+manualVerification: "For PERF-R1 (PERF-R1: Error budgets formally gate release velocity for AI
+  features): inspect current evidence for [Error-budget policy linking AI SLOs to release freezes +
+  last budget burn report that gated a release] and confirm the pass condition holds — When error
+  budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit
+  risk acceptance; ≥1 gated event or drill in 90 days"
+falsePositiveGuidance: "PERF-R1 (Performance & SLO Engineering): re-verify against a current
+  artifact for this specific Check (PERF-R1), not a sibling control. Document named exceptions with
+  owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: PERF-R1: Error budgets formally gate release velocity for AI
+    features (PERF-R1)"
+  - "Retain evidence artifacts required by this Check, starting with: Error-budget policy linking AI
+    SLOs to release freezes + last budget burn report that gated a relea…"
+  - "Schedule recurring manual verification for PERF-R1 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until PERF-R1 passes"
+references:
+  - title: "Google SRE — Service Level Objectives"
+    url: "https://sre.google/sre-book/service-level-objectives/"
+  - title: "AWS Well-Architected — Performance Efficiency"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+relatedRules:
+  - "PERF-M1"
+  - "PERF-M2"
+  - "PERF-M3"
+  - "PERF-R2"
+  - "PERF-R3"
+tags:
+  - "performance-slo"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "cicd"
+    - "kubernetes"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

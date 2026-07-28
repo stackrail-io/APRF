@@ -1,0 +1,55 @@
+{
+  "name": "@stackrail-io/aprf-engine",
+  "version": "0.10.0",
+  "private": false,
+  "license": "Apache-2.0",
+  "description": "APRF normative Check catalog (YAML), loader, index, and evaluate helpers",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stackrail-io/APRF.git",
+    "directory": "packages/aprf-engine"
+  },
+  "homepage": "https://stackrail.io/aprf/",
+  "bugs": {
+    "url": "https://github.com/stackrail-io/APRF/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "rules",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "validate": "npx tsx scripts/validate.ts",
+    "build-catalog": "npx tsx scripts/build-catalog.ts",
+    "test:unit": "npx tsx scripts/self-test.ts",
+    "build": "rm -rf dist && npm run build-catalog && tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.19.3",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,52 @@
+id: "AGN-R3"
+category: "agent-governance"
+title: "AGN-R3: Formal RACI for agent ownership across teams"
+description: "Formal RACI for agent ownership across teams"
+whyItMatters: "AGN-R3 (Agent Governance, recommended): Formal RACI for agent ownership across teams
+  Failing this leaves a production gap against: Every production AI system ID has non-empty owner
+  fields for required domains; inventory query returns 0 orphans"
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: "Every production AI system ID has non-empty owner fields for required domains;
+  inventory query returns 0 orphans"
+evidenceRequired:
+  - "RACI or ownership register entry for the system"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For AGN-R3 (AGN-R3: Formal RACI for agent ownership across teams): inspect
+  current evidence for [RACI or ownership register entry for the system] and confirm the pass
+  condition holds — Every production AI system ID has non-empty owner fields for required domains;
+  inventory query returns 0 orphans"
+falsePositiveGuidance: "AGN-R3 (Agent Governance): re-verify against a current artifact for this
+  specific Check (AGN-R3), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: AGN-R3: Formal RACI for agent ownership across teams (AGN-R3)"
+  - "Retain evidence artifacts required by this Check, starting with: RACI or ownership register
+    entry for the system"
+  - "Schedule recurring manual verification for AGN-R3 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until AGN-R3 passes"
+references:
+  - title: "OWASP LLM — Excessive Agency"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI RMF — Govern"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "AGN-M1"
+  - "AGN-M2"
+  - "AGN-M3"
+  - "AGN-M4"
+  - "AGN-R1"
+tags:
+  - "agent-governance"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "a2a"
+    - "mcp"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

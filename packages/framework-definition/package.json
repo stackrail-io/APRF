@@ -1,0 +1,47 @@
+{
+  "name": "@stackrail-io/aprf-framework-definition",
+  "version": "0.10.0",
+  "private": false,
+  "license": "Apache-2.0",
+  "description": "APRF Framework Definition — Profiles, Lenses, Policy, Check applicability (open standard types)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stackrail-io/APRF.git",
+    "directory": "packages/framework-definition"
+  },
+  "homepage": "https://stackrail.io/aprf/",
+  "bugs": {
+    "url": "https://github.com/stackrail-io/APRF/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test:unit": "npx tsx scripts/self-test.ts",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.19.3",
+    "typescript": "^5"
+  }
+}

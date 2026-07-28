@@ -1,0 +1,57 @@
+id: "PRI-M2"
+category: "data-privacy"
+title: "Third-party model processing terms must be reviewed for training use and retention"
+description: "Third-party model processing terms shall be reviewed for training use and retention"
+whyItMatters: "PRI-M2 (Data Privacy, mandatory): Third-party model processing terms shall be
+  reviewed for training use and retention Failing this leaves a production gap against: 100% of
+  production model providers have a review record ≤ 12 months covering training use and retention; 0
+  unreviewed providers in the inventory"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "100% of production model providers have a review record ≤ 12 months covering
+  training use and retention; 0 unreviewed providers in the inventory"
+evidenceRequired:
+  - "Vendor terms review record (DPA/training/retention) with date and owner"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For PRI-M2 (Third-party model processing terms must be reviewed for training
+  use and retention): inspect current evidence for [Vendor terms review record
+  (DPA/training/retention) with date and owner] and confirm the pass condition holds — 100% of
+  production model providers have a review record ≤ 12 months covering training use and retention; 0
+  unreviewed providers in the inventory"
+falsePositiveGuidance: "PRI-M2 (Data Privacy): re-verify against a current artifact for this
+  specific Check (PRI-M2), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Third-party model processing terms must be reviewed for training
+    use and retention (PRI-M2)"
+  - "Retain evidence artifacts required by this Check, starting with: Vendor terms review record
+    (DPA/training/retention) with date and owner"
+  - "Schedule recurring manual verification for PRI-M2 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until PRI-M2 passes"
+references:
+  - title: "NIST AI RMF — privacy considerations"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Sensitive Information Disclosure"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "PRI-M1"
+  - "PRI-M3"
+  - "PRI-M4"
+  - "PRI-M5"
+  - "PRI-R1"
+tags:
+  - "data-privacy"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "vector-databases"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

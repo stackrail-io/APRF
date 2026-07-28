@@ -1,0 +1,60 @@
+id: "DX-R2"
+category: "platform-engineering"
+title: "DX-R2: Inner-loop eval runners developers can run before PR"
+description: "Inner-loop eval runners developers can run before PR"
+whyItMatters: "DX-R2 (Platform Engineering, recommended): Inner-loop eval runners developers can run
+  before PR Failing this leaves a production gap against: Developers can run the core eval subset
+  locally or in a one-command inner loop; last sampled AI PR (≤30 days) shows pre-PR eval evidence
+  or documented waiver"
+severity: "medium"
+weight: 2
+gate: "recommended"
+passCondition: "Developers can run the core eval subset locally or in a one-command inner loop; last
+  sampled AI PR (≤30 days) shows pre-PR eval evidence or documented waiver"
+evidenceRequired:
+  - "Local/inner-loop eval runner docs + package + sample developer run log before a recent PR"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Local/inner-loop eval runner docs + package + sample developer run log before a recent PR"
+manualVerification: "For DX-R2 (DX-R2: Inner-loop eval runners developers can run before PR):
+  inspect current evidence for [Local/inner-loop eval runner docs + package + sample developer run
+  log before a recent PR] and confirm the pass condition holds — Developers can run the core eval
+  subset locally or in a one-command inner loop; last sampled AI PR (≤30 days) shows pre-PR eval
+  evidence or documented waiver"
+falsePositiveGuidance: "DX-R2 (Platform Engineering): re-verify against a current artifact for this
+  specific Check (DX-R2), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: DX-R2: Inner-loop eval runners developers can run before PR
+    (DX-R2)"
+  - "Retain evidence artifacts required by this Check, starting with: Local/inner-loop eval runner
+    docs + package + sample developer run log before a recent PR"
+  - "Schedule recurring manual verification for DX-R2 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until DX-R2 passes"
+references:
+  - title: "Google SRE Workbook — Soft skills / platform thinking parallels"
+    url: "https://sre.google/workbook/"
+  - title: "CNCF platforms white papers — paved roads concept"
+    url: "https://www.cncf.io/"
+relatedRules:
+  - "DX-M1"
+  - "DX-M2"
+  - "DX-M3"
+  - "DX-R1"
+  - "DX-R3"
+tags:
+  - "platform-engineering"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "github"
+    - "github-actions"
+    - "cicd"
+    - "kubernetes"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

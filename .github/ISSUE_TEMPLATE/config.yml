@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: APRF stewardship / RFC process
+    url: https://stackrail.io/aprf/rfc/
+    about: Process questions, advisory seats, and formal RFCs
+  - name: Security report
+    url: https://github.com/stackrail-io/APRF/blob/main/SECURITY.md
+    about: How to report a vulnerability privately

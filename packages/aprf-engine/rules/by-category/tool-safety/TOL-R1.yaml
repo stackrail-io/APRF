@@ -1,0 +1,59 @@
+id: "TOL-R1"
+category: "tool-safety"
+title: "TOL-R1: Dry-run or simulation mode for destructive tools in lower environments"
+description: "Dry-run or simulation mode for destructive tools in lower environments"
+whyItMatters: "TOL-R1 (Tool Safety, recommended): Dry-run or simulation mode for destructive tools
+  in lower environments Failing this leaves a production gap against: 100% of tools classified
+  destructive expose dry-run or simulation in non-prod; last promotion of a destructive tool
+  includes a dry-run evidence link ≤90 days o…"
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: "100% of tools classified destructive expose dry-run or simulation in non-prod; last
+  promotion of a destructive tool includes a dry-run evidence link ≤90 days old"
+evidenceRequired:
+  - "Destructive-tool catalog marking dry-run/simulation support + sample lower-env dry-run logs"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Destructive-tool catalog marking dry-run/simulation support + sample lower-env dry-run logs"
+manualVerification: "For TOL-R1 (TOL-R1: Dry-run or simulation mode for destructive tools in lower
+  environments): inspect current evidence for [Destructive-tool catalog marking dry-run/simulation
+  support + sample lower-env dry-run logs] and confirm the pass condition holds — 100% of tools
+  classified destructive expose dry-run or simulation in non-prod; last promotion of a destructive
+  tool includes a dry-run evidence link ≤90 days old"
+falsePositiveGuidance: "TOL-R1 (Tool Safety): re-verify against a current artifact for this specific
+  Check (TOL-R1), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: TOL-R1: Dry-run or simulation mode for destructive tools in lower
+    environments (TOL-R1)"
+  - "Retain evidence artifacts required by this Check, starting with: Destructive-tool catalog
+    marking dry-run/simulation support + sample lower-env dry-run logs"
+  - "Schedule recurring manual verification for TOL-R1 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until TOL-R1 passes"
+references:
+  - title: "Model Context Protocol security considerations"
+    url: "https://modelcontextprotocol.io/"
+  - title: "OWASP LLM — Excessive Agency"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "TOL-M1"
+  - "TOL-M2"
+  - "TOL-M3"
+  - "TOL-M4"
+  - "TOL-M5"
+tags:
+  - "tool-safety"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "mcp"
+    - "a2a"
+    - "openapi"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

@@ -1,0 +1,61 @@
+id: "DG-R1"
+category: "data-governance"
+title: "DG-R1: Automated freshness and coverage metrics for critical corpora"
+description: "Automated freshness and coverage metrics for critical corpora"
+whyItMatters: "DG-R1 (Data Governance & Quality, recommended): Automated freshness and coverage
+  metrics for critical corpora Failing this leaves a production gap against: Each critical corpus
+  has a documented freshness SLO (e.g. max age hours); ≥95% of sampled docs meet the SLO in the last
+  7 days; alert fires on freshness breach"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "Each critical corpus has a documented freshness SLO (e.g. max age hours); ≥95% of
+  sampled docs meet the SLO in the last 7 days; alert fires on freshness breach"
+evidenceRequired:
+  - "Corpus freshness dashboard (or job report) + alert config export covering each critical corpus
+    ID"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Corpus freshness dashboard (or job report) + alert config export covering each critical
+          corpus ID"
+manualVerification: "For DG-R1 (DG-R1: Automated freshness and coverage metrics for critical
+  corpora): inspect current evidence for [Corpus freshness dashboard (or job report) + alert config
+  export covering each critical corpus ID] and confirm the pass condition holds — Each critical
+  corpus has a documented freshness SLO (e.g. max age hours); ≥95% of sampled docs meet the SLO in
+  the last 7 days; alert fires on freshness breach"
+falsePositiveGuidance: "DG-R1 (Data Governance & Quality): re-verify against a current artifact for
+  this specific Check (DG-R1), not a sibling control. Document named exceptions with owner and
+  expiry."
+recommendedFixes:
+  - "Implement and operationalize: DG-R1: Automated freshness and coverage metrics for critical
+    corpora (DG-R1)"
+  - "Retain evidence artifacts required by this Check, starting with: Corpus freshness dashboard (or
+    job report) + alert config export covering each critical corpus ID"
+  - "Schedule recurring manual verification for DG-R1 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until DG-R1 passes"
+references:
+  - title: "NIST AI RMF — Map and Measure (data)"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "ML systems engineering — data quality practices"
+    url: "https://ml-ops.org/"
+relatedRules:
+  - "DG-M1"
+  - "DG-M2"
+  - "DG-M3"
+  - "DG-R2"
+  - "DG-R3"
+tags:
+  - "data-governance"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "vector-databases"
+    - "rag-pipelines"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

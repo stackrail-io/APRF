@@ -1,0 +1,58 @@
+id: "AUTHZ-M2"
+category: "authorization"
+title: "Multi-tenant isolation must be tested for AI data and memory paths"
+description: "Multi-tenant isolation shall be tested for AI data and memory paths"
+whyItMatters: "AUTHZ-M2 (Authorization, mandatory): Multi-tenant isolation shall be tested for AI
+  data and memory paths Failing this leaves a production gap against: 0 successful unauthorized
+  cross-tenant reads/writes across ≥10 automated attack cases on AI data and memory paths"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "0 successful unauthorized cross-tenant reads/writes across ≥10 automated attack
+  cases on AI data and memory paths"
+evidenceRequired:
+  - "Cross-tenant attack test suite results for AI data stores and memory APIs"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Cross-tenant attack test suite results for AI data stores and memory APIs"
+manualVerification: "For AUTHZ-M2 (Multi-tenant isolation must be tested for AI data and memory
+  paths): inspect current evidence for [Cross-tenant attack test suite results for AI data stores
+  and memory APIs] and confirm the pass condition holds — 0 successful unauthorized cross-tenant
+  reads/writes across ≥10 automated attack cases on AI data and memory paths"
+falsePositiveGuidance: "AUTHZ-M2 (Authorization): re-verify against a current artifact for this
+  specific Check (AUTHZ-M2), not a sibling control. Document named exceptions with owner and
+  expiry."
+recommendedFixes:
+  - "Implement and operationalize: Multi-tenant isolation must be tested for AI data and memory
+    paths (AUTHZ-M2)"
+  - "Retain evidence artifacts required by this Check, starting with: Cross-tenant attack test suite
+    results for AI data stores and memory APIs"
+  - "Schedule recurring manual verification for AUTHZ-M2 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until AUTHZ-M2 passes"
+references:
+  - title: "OWASP Access Control Cheat Sheet"
+    url: "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "AUTHZ-M1"
+  - "AUTHZ-M3"
+  - "AUTHZ-M4"
+  - "AUTHZ-R1"
+  - "AUTHZ-R2"
+tags:
+  - "authorization"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "openapi"
+    - "mcp"
+    - "a2a"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

@@ -1,0 +1,57 @@
+id: "REL-M6"
+category: "reliability-continuity"
+title: "RTO/RPO objectives must exist for critical AI features"
+description: "RTO/RPO objectives shall exist for critical AI features"
+whyItMatters: "REL-M6 (Reliability & Continuity, mandatory): RTO/RPO objectives shall exist for
+  critical AI features Failing this leaves a production gap against: 100% of critical AI features
+  have numeric RTO and RPO documented and linked to a tested restore/failover procedure"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "100% of critical AI features have numeric RTO and RPO documented and linked to a
+  tested restore/failover procedure"
+evidenceRequired:
+  - "RTO/RPO catalog for critical AI features"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For REL-M6 (RTO/RPO objectives must exist for critical AI features): inspect
+  current evidence for [RTO/RPO catalog for critical AI features] and confirm the pass condition
+  holds — 100% of critical AI features have numeric RTO and RPO documented and linked to a tested
+  restore/failover procedure"
+falsePositiveGuidance: "REL-M6 (Reliability & Continuity): re-verify against a current artifact for
+  this specific Check (REL-M6), not a sibling control. Document named exceptions with owner and
+  expiry."
+recommendedFixes:
+  - "Implement and operationalize: RTO/RPO objectives must exist for critical AI features (REL-M6)"
+  - "Retain evidence artifacts required by this Check, starting with: RTO/RPO catalog for critical
+    AI features"
+  - "Schedule recurring manual verification for REL-M6 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until REL-M6 passes"
+references:
+  - title: "Google SRE Book — Addressing Cascading Failures"
+    url: "https://sre.google/sre-book/addressing-cascading-failures/"
+  - title: "AWS Well-Architected — Reliability"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "Google SRE — Disaster Recovery"
+    url: "https://sre.google/sre-book/disaster-recovery/"
+relatedRules:
+  - "REL-M1"
+  - "REL-M2"
+  - "REL-M3"
+  - "REL-M4"
+  - "REL-M5"
+tags:
+  - "reliability-continuity"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "kubernetes"
+  minCriticality: 3
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

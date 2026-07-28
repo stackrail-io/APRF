@@ -1,0 +1,70 @@
+id: "INF-R1"
+category: "infrastructure"
+title: "INF-R1: Signed model and container artifacts with verify-on-deploy"
+description: "Signed model and container artifacts with verify-on-deploy"
+whyItMatters: "INF-R1 (Infrastructure, recommended): Signed model and container artifacts with
+  verify-on-deploy Failing this leaves a production gap against: Unsigned model/container images
+  cannot schedule in production namespaces; policy verified by a failed admission test within 90
+  days"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "Unsigned model/container images cannot schedule in production namespaces; policy
+  verified by a failed admission test within 90 days"
+evidenceRequired:
+  - "Cluster/admission controller config requiring signed images + last failed-unsigned admission
+    event or drill"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Cluster/admission controller config requiring signed images + last failed-unsigned admission
+          event or drill"
+manualVerification: "For INF-R1 (INF-R1: Signed model and container artifacts with
+  verify-on-deploy): inspect current evidence for [Cluster/admission controller config requiring
+  signed images + last failed-unsigned admission event or drill] and confirm the pass condition
+  holds — Unsigned model/container images cannot schedule in production namespaces; policy verified
+  by a failed admission test within 90 days"
+falsePositiveGuidance: "INF-R1 (Infrastructure): re-verify against a current artifact for this
+  specific Check (INF-R1), not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: INF-R1: Signed model and container artifacts with
+    verify-on-deploy (INF-R1)"
+  - "Retain evidence artifacts required by this Check, starting with: Cluster/admission controller
+    config requiring signed images + last failed-unsigned admission event…"
+  - "Schedule recurring manual verification for INF-R1 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until INF-R1 passes"
+references:
+  - title: "CIS Benchmarks"
+    url: "https://www.cisecurity.org/cis-benchmarks"
+  - title: "CNCF security technical advisory guidance"
+    url: "https://www.cncf.io/"
+  - title: "AWS Well-Architected — Security"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+relatedRules:
+  - "INF-M1"
+  - "INF-M2"
+  - "INF-M3"
+  - "INF-M4"
+  - "INF-R3"
+tags:
+  - "infrastructure"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "kubernetes"
+    - "terraform"
+    - "docker"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "deprecated"
+deprecated: true
+replacedBy: "SCI-R1"
+deprecationNote: "Superseded by SCI-R1 (SLSA-aligned signed model/container verify-on-deploy).
+  Retained for N−1 readers; new assessments should use SCI-R1."
+introducedIn: "0.10.0"

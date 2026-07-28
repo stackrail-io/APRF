@@ -70,25 +70,25 @@ OWASP/WA-style standards win with a **shallow public surface**. Requirements rem
 
 ### Checks (normative)
 
-Machine-evaluable or attest-able expectations:
+Machine-evaluable or attest-able expectations.
 
-- `checkId` (existing namespace)
-- `title`, `description` / principle prose
-- `gateClass`: `mandatory` | `recommended`
-- `severity` — remediation ordering only
-- `maturityFloor`, `minCriticality`
-- `successCriteria`, `failureCriteria` (prefer declarative, testable statements)
-- `requiredEvidenceTypes[]` (IDs from Evidence Type Registry)
+**Shipped today (v0.10 YAML / `rule.schema.json`):** `id`, `title`, `description`, `whyItMatters`, `severity`, `weight`, `gate` (`mandatory` | `recommended`), `passCondition`, `evidenceRequired[]`, `detection`, `manualVerification`, `falsePositiveGuidance`, `recommendedFixes`, `references[]`, `relatedRules[]`, `tags[]`, `applicability` (`minCriticality`, `requiredFromLevel`, optional technologies/profiles/lenses), `status`, optional deprecation fields.
+
+**Target model (RFC / future — not yet the on-disk schema):**
+
+- `checkId` (alias of today’s `id`)
+- `gateClass` (alias of today’s `gate`)
+- `maturityFloor` / `minCriticality` (already partially shipped as `applicability.*`)
+- `successCriteria` / `failureCriteria` (today: `passCondition`)
+- `requiredEvidenceTypes[]` (IDs from a future Evidence Type Registry)
 - `satisfactionPolicy`: `anyOf` (default) | `allOf` | `attestationOnly`
-- `references[]` (informative crosswalks)
-- Optional `requirementId` (label)
-- `deprecated` / `replacedBy`
+- Optional `requirementId` (documentation label)
 
 **Forbidden in Checks:** CVE IDs as gate criteria; “satisfies SOC 2 CC6.1”; product/platform names in titles; `scoringWeight` on **mandatory** Checks.
 
 ### Profiles and lenses (normative selectors)
 
-Core / Regulated / custom profiles and lenses (RAG, Agents, …) are **sets of Check IDs**, not new layers and not Detections.
+Core / Regulated / custom profiles and lenses (RAG, Agents, …) are **sets of Check IDs**, not new layers and not Detections. In this repo they are exported from `@stackrail-io/aprf-framework-definition` and mirrored in `spec/aprf-spec.json`.
 
 ### Detections (operational — not in this repo’s normative catalog)
 
@@ -100,7 +100,7 @@ Core / Regulated / custom profiles and lenses (RAG, Agents, …) are **sets of C
 
 **Rules:**
 - Stochastic detections **cannot alone** satisfy a mandatory Check (`assurance` must be `signal-only` unless paired with deterministic corroboration or human attestation).
-- Many Detections → one Check; one Detection → many Checks (graph). Sufficiency is the Check’s `satisfactionPolicy`.
+- Many Detections → one Check; one Detection → many Checks (graph). Sufficiency is the Check’s `satisfactionPolicy` (target model) or attestation + product mapping today.
 
 ### Evidence (operational)
 
@@ -112,9 +112,9 @@ Core / Regulated / custom profiles and lenses (RAG, Agents, …) are **sets of C
 
 PII/residency handled by products; the standard requires digests in the Conformance Pack, not raw clouds of traces.
 
-### Evidence Type Registry (normative, this repo)
+### Evidence Type Registry (planned)
 
-Versioned IDs + JSON schemas for evidence *kinds* (e.g. `git.repo_snapshot`, `k8s.manifest`, `otel.trace_summary`, `prompt.bundle`) — analogous to OpenTelemetry semantic conventions. New platforms add types here **without** new Checks when principles already exist.
+**Not shipped in this repository yet.** Future normative home for versioned evidence *kind* IDs + JSON schemas (e.g. `git.repo_snapshot`, `k8s.manifest`, `otel.trace_summary`, `prompt.bundle`) — analogous to OpenTelemetry semantic conventions. Until that lands, Checks use free-form `evidenceRequired[]` strings. New platforms should prefer new evidence types (once registered) over new Checks when principles already exist.
 
 ---
 

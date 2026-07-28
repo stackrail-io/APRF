@@ -1,0 +1,59 @@
+id: "ORG-R3"
+category: "organizational-governance"
+title: "ORG-R3: Continual improvement backlog fed by incidents and eval failures"
+description: "Continual improvement backlog fed by incidents and eval failures"
+whyItMatters: "ORG-R3 (Organizational Governance, recommended): Continual improvement backlog fed by
+  incidents and eval failures Failing this leaves a production gap against: ≥80% of Sev-1/2 AI
+  incidents and critical eval fails in the last quarter produced a backlog item; ≥50% of those items
+  closed or have a dated plan"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a
+  backlog item; ≥50% of those items closed or have a dated plan"
+evidenceRequired:
+  - "Improvement backlog (tickets) linked from incidents and eval failures + sample of closed items
+    last quarter"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Improvement backlog (tickets) linked from incidents and eval failures + sample of closed
+          items last quarter"
+manualVerification: "For ORG-R3 (ORG-R3: Continual improvement backlog fed by incidents and eval
+  failures): inspect current evidence for [Improvement backlog (tickets) linked from incidents and
+  eval failures + sample of closed items last quarter] and confirm the pass condition holds — ≥80%
+  of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; ≥50%
+  of those items closed or have a dated plan"
+falsePositiveGuidance: "ORG-R3 (Organizational Governance): re-verify against a current artifact for
+  this specific Check (ORG-R3), not a sibling control. Document named exceptions with owner and
+  expiry."
+recommendedFixes:
+  - "Implement and operationalize: ORG-R3: Continual improvement backlog fed by incidents and eval
+    failures (ORG-R3)"
+  - "Retain evidence artifacts required by this Check, starting with: Improvement backlog (tickets)
+    linked from incidents and eval failures + sample of closed items last…"
+  - "Schedule recurring manual verification for ORG-R3 with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until ORG-R3 passes"
+references:
+  - title: "ISO/IEC 42001 — AI management systems"
+    url: "https://www.iso.org/standard/81230.html"
+  - title: "NIST AI RMF — Govern"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "ORG-M1"
+  - "ORG-M2"
+  - "ORG-M3"
+  - "ORG-M4"
+  - "ORG-R1"
+tags:
+  - "organizational-governance"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"
