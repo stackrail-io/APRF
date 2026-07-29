@@ -4,6 +4,9 @@
   "private": true,
   "description": "AI Production Readiness Framework — public normative monorepo (Checks, profiles, schemas)",
   "license": "Apache-2.0",
+  "engines": {
+    "node": ">=22"
+  },
   "workspaces": [
     "packages/*"
   ],

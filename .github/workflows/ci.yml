@@ -111,6 +111,24 @@ jobs:
             "published spec must not embed product API endpoints"
           );
 
+          const ruleSchemaPkg = fs.readFileSync(
+            "packages/aprf-engine/rules/_schema/rule.schema.json",
+            "utf8"
+          );
+          const ruleSchemaMirror = fs.readFileSync(
+            "schemas/aprf-rule-1.0.json",
+            "utf8"
+          );
+          assert(
+            ruleSchemaPkg === ruleSchemaMirror,
+            "schemas/aprf-rule-1.0.json must match packages/aprf-engine/rules/_schema/rule.schema.json"
+          );
+          const ruleSchema = JSON.parse(ruleSchemaMirror);
+          assert(
+            ruleSchema.$id === "https://stackrail.io/aprf/rule-schema/1.0",
+            `rule schema $id unexpected: ${ruleSchema.$id}`
+          );
+
           console.log(
             `OK: APRF ${spec.governance.version}, ${spec.pillars.length} pillars, schemas parse`
           );

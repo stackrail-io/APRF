@@ -1,18 +1,21 @@
 # `@stackrail-io/aprf-engine`
 
-Normative **APRF Check catalog**: YAML rules, JSON Schema, loader/index, and evaluate helpers.
+Normative **APRF Check catalog**: YAML rules, JSON Schema, generated TypeScript catalog, index, and evaluate helpers.
 
 Part of the public [APRF](https://github.com/stackrail-io/APRF) standard. Platform detectors and evidence collection live in product repos (e.g. StackRail `assessment-engine`), not here.
 
 `evaluateRules` is **attestation-only by default**. Pass `runDetectors: true` with a product `DetectorRegistry` to execute real detectors. This package ships only `manual-attest` plus a catalog allowlist of detector IDs for YAML validation.
 
+The on-disk YAML loader (`src/loader.ts`) is **repo tooling only** (validate / build-catalog). It is not part of the published `dist/` API — consumers use `getGeneratedCatalog()` / `getGeneratedRuleIndex()`.
+
 ## Layout
 
 | Path | Role |
 |------|------|
-| `rules/by-category/**/*.yaml` | Check source of truth |
+| `rules/by-category/**/*.yaml` | Check source of truth (also shipped in the npm tarball) |
 | `rules/_schema/rule.schema.json` | Rule document schema |
 | `src/` | Types, index builder, catalog accessors, evaluate API |
+| `src/loader.ts` | Node-only YAML loader for repo scripts (not published) |
 | `dist/` | Published JS + declarations (`npm run build`) |
 | `scripts/validate.ts` | Schema + referential validation |
 | `scripts/build-catalog.ts` | Generates `src/generated/catalog.ts` |
@@ -26,7 +29,8 @@ npm install
 npm run aprf:validate    # schema + referential integrity
 npm run aprf:catalog     # regenerate src/generated/catalog.ts — commit if changed
 npm run aprf:integrity   # YAML ↔ published spec ↔ profiles
-npm run validate         # validate + catalog + integrity + framework-definition tests
+npm run test:unit        # aprf-engine + framework-definition self-tests
+npm run validate         # aprf:validate + catalog + integrity + test:unit
 npm run build            # emit dist/ for npm consumers
 ```
 

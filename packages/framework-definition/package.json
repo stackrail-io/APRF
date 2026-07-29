@@ -1,6 +1,6 @@
 {
   "name": "@stackrail-io/aprf-framework-definition",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "private": false,
   "license": "Apache-2.0",
   "description": "APRF Framework Definition — Profiles, Lenses, Policy, Check applicability (open standard types)",
@@ -29,6 +29,7 @@
   "files": [
     "dist",
     "LICENSE",
+    "NOTICE",
     "README.md"
   ],
   "publishConfig": {
