@@ -93,17 +93,53 @@ Also note which plugins ran vs need user input.
 
 After repo search, build the list of in-scope Checks that would otherwise be **`NOT_DEMONSTRATED`** (insufficient evidence). **Do not finalize the report until you ask** (batch; mandatory / critical first).
 
-For **each** such Check, ask in this exact shape (customer answers only one of three):
+**Verbatim catalog only — never paraphrase Phase 2b text.**
+
+For each Check, open its YAML under `packages/aprf-engine/rules/` and copy **exactly**:
+
+| Ask field | Source |
+| --- | --- |
+| Check id | YAML `id` |
+| Title line | YAML `title` **character-for-character** (full sentence; no shorten, no “beyond …”, no rewrite) |
+| Required to pass | YAML `evidenceRequired` items joined, and/or full `passCondition` — not a summary |
+
+**Forbidden examples** (do not do this):
 
 ```text
-APRF Check <CHECK-ID> — <title>
-Required to pass: <evidenceRequired / passCondition summary>
-
-Do you have this control / evidence today?
-  A) YES — we have it (optional: paste path or add under aprf-assessment/imports/custom/)
-  B) NO — we do not have it
-  C) DON'T KNOW / unsure
+# BAD — paraphrased
+1. SEC2-M1 — Production secrets in a secrets manager (not repos/prompts)
+11. PRI-M3 — Deletion/export covering AI memory/logs (beyond delete_investigation)
 ```
+
+**Required shape** (do this):
+
+```text
+Phase 2b — need your answers (A / B / C per Check)
+
+A) YES — we have it (optional: path under aprf-assessment/imports/custom/)
+B) NO — we do not have it
+C) DON'T KNOW / unsure
+
+1. SEC2-M1 — Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks
+   Required to pass: Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths
+   Pass condition: 0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the secrets manager
+2. …
+```
+
+Batch in one message; allow replies like `all C`, `SEC2-M1:A`, or a full A/B/C map. Optional path under `aprf-assessment/imports/custom/`.
+
+**How does a `detection.capability: manual` Check ever PASS?**
+
+`manual` means **no automated detector can fully prove the passCondition** — not “chat YES = PASS.” The Check still needs the **artifacts** named in `evidenceRequired` / `passCondition` (runbook, test record, screenshot, signed verification note, export under `imports/custom/`, etc.). The assessor (human or agent) **reads** those artifacts per `manualVerification`.
+
+| Situation | Status |
+| --- | --- |
+| Artifacts satisfy `passCondition` (in-repo or supplied under `imports/custom/`) | **`PASS`** — even when `capability: manual` |
+| User says YES but supplies no artifact | **`PARTIAL`** (attestation only) |
+| User says NO | **`FAIL`** |
+| Don't know / nothing found | **`NOT_DEMONSTRATED`** |
+
+Same bar for `automated` / `hybrid`: chat YES alone never upgrades to PASS. SEC2-M1 is `automated` — it expects scan/config evidence (detectors + `evidenceRequired`), not a verbal attestation.
 
 **Answer → status mapping** (record on the control as `userAttestation`):
 
@@ -178,9 +214,38 @@ ELSE → NOT_DEMONSTRATED (+ requiredEvidenceMissing)
 
 Never invent FAIL from “best practice.” **NO** from the customer is an explicit FAIL. **DON'T KNOW** stays NOT_DEMONSTRATED.
 
+**Copy the Check verbatim from catalog YAML** into each control (never paraphrase or shorten):
+
+| Control field | Source in Check YAML |
+| --- | --- |
+| `title` | `title` **exactly** |
+| `description` | `description` **exactly** — show in report |
+| `whyItMatters` | `whyItMatters` **exactly** — show in report |
+| `references` | `references` **exactly** — show in report |
+| `passCondition` | `passCondition` |
+| `evidenceRequired` | `evidenceRequired` (full list) |
+| `recommendedFixes` | `recommendedFixes` (full list — **required**) |
+| `manualVerification` | `manualVerification` |
+| `falsePositiveGuidance` | `falsePositiveGuidance` |
+| `category` | Check YAML `category` (pillar id, e.g. `data-privacy`) — **not** the same as domain |
+| `domain` | From `categories.yaml` mapping (`data-privacy` → `data`). Report shows **Category** (Data Privacy) and domain as grouping. |
+| `gate` / `severity` | same fields |
+
+**Map catalog → report wording** (do not invent shorter substitutes):
+
+| Report field | How to populate |
+| --- | --- |
+| `recommendedAction` | Join **all** `recommendedFixes` (numbered or bulleted). Do not rewrite. |
+| `remediation.fix` | First `recommendedFixes[0]` verbatim (or the join if a single string is required). |
+| `remediation.example` | Optional **repo-specific** path/snippet only (additive). |
+| `remediation.reference` | Check id + first catalog `references[].url` when present. |
+| `reasoning` | Start from catalog: quote `passCondition` and what evidence showed vs it. Append `manualVerification` when status is FAIL/PARTIAL/NOT_DEMONSTRATED. Assessment-only extras (file paths) come **after** the catalog text. |
+
+Assessment-only fields (`status`, `evidenceFound`, `userAttestation`, owner/effort) are additive — they must not replace catalog text.
+
 **Emit every in-scope Check** in `controls[]` — including **`PASS`** and **`NOT_APPLICABLE`**. Do not drop PASSes from `assessment.json` / the Controls & Findings table. Findings packs tag gaps; they do not replace the full control list.
 
-**Attestation vs PASS:** YES without an artifact is **`PARTIAL`**, not PASS. Only repo/runtime evidence (or YES + artifact that satisfies passCondition) may be **`PASS`**. Re-runs often convert prior “attested PASS” rows into PARTIAL — check the **Passed** and **Partial** filter chips in REPORT.html.
+**Attestation vs PASS:** YES without an artifact is **`PARTIAL`**, not PASS. **`detection.capability: manual` does not change that** — manual Checks PASS when `evidenceRequired` artifacts exist and satisfy `passCondition` (agent/human verifies via `manualVerification`). Only bare chat YES is insufficient for any capability.
 
 **Confidence:** compute `confidenceScore` then `confidence` via `confidence.yaml` (class base × freshness decay + corroboration). Emit both.
 
@@ -188,9 +253,9 @@ Never invent FAIL from “best practice.” **NO** from the customer is an expli
 
 | Field | Content |
 | --- | --- |
-| `fix` | Concrete change |
-| `example` | Snippet, pattern, or link to in-repo golden path |
-| `reference` | APRF Check id + optional external doc URL from Check YAML |
+| `fix` | **Verbatim** from Check YAML `recommendedFixes` (prefer full list or `[0]`) — not a paraphrased one-liner |
+| `example` | Optional in-repo path/snippet only |
+| `reference` | Check id + optional URL from Check YAML `references` |
 | `owner` | CODEOWNERS / team if known, else `unassigned` |
 | `priority` | P0–P3 |
 | `estimatedEffort` | `S` (\<1d) / `M` (1–3d) / `L` (1–2w) / `XL` |

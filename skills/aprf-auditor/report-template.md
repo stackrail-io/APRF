@@ -61,16 +61,16 @@
 
 List every in-scope control once. Tags on the listing: `Production blocker` · `Critical` · `High` · `Medium` · `Low` · `Quick win`. Sort: Production blockers → Critical → High → Medium → Low → Quick wins → other.
 
-**HTML (`REPORT.html`):** render as a **table** (Check · Title · Domain · Status · Confidence · Tags · Priority). Row click opens a **flyout** with evidence / reasoning / remediation. Do not inline long control bodies in the table.
+**HTML (`REPORT.html`):** table columns Check · Title · **Category** (Check YAML `category`, e.g. Data Privacy) with domain subtitle · Status · Confidence · Tags · Priority. Flyout leads with catalog **title, description, whyItMatters, references** (verbatim) — do not invent rule text. Domain (e.g. Data) is the APRF grouping above categories like `data-privacy`.
 
 **Markdown (`REPORT.md`):** table listing + detail sections below.
 
 ### Listing
 
-| Check | Title | Domain | Status | Confidence | Tags | Priority |
-| --- | --- | --- | --- | --- | --- | --- |
+| Check | Title | Category | Domain | Status | Confidence | Tags | Priority |
+| --- | --- | --- | --- | --- | --- | --- | --- |
 {{#controls}}
-| {{checkId}} | {{title}} | {{domain}} | {{status}} | {{confidence}} | _(tags)_ | {{priority}} |
+| {{checkId}} | {{title}} | {{category}} | {{domain}} | {{status}} | {{confidence}} | _(tags)_ | {{priority}} |
 {{/controls}}
 
 {{#controls}}
@@ -79,10 +79,23 @@ List every in-scope control once. Tags on the listing: `Production blocker` · `
 | Field | Value |
 | --- | --- |
 | Category | {{category}} |
+| Domain | {{domain}} _(APRF grouping; e.g. data-privacy → Data)_ |
 | Gate | {{gate}} · {{severity}} |
 | Status | **{{status}}** |
 | Confidence | {{confidence}} |
 | Priority | {{priority}} |
+
+{{#description}}
+**Description (catalog):** {{description}}
+{{/description}}
+
+{{#whyItMatters}}
+**Why it matters (catalog):** {{whyItMatters}}
+{{/whyItMatters}}
+
+{{#references}}
+**References (catalog):** {{title}} {{url}}
+{{/references}}
 
 **Evidence found**
 
@@ -103,7 +116,27 @@ List every in-scope control once. Tags on the listing: `Production blocker` · `
 
 **Reasoning:** {{reasoning}}
 
-**Recommended action:** {{recommendedAction}}
+**Recommended action:** {{#recommendedFixes}}{{.}} {{/recommendedFixes}}{{^recommendedFixes}}{{recommendedAction}}{{/recommendedFixes}}
+
+{{#recommendedFixes}}
+**Recommended fixes (catalog)**
+
+{{#recommendedFixes}}
+1. {{.}}
+{{/recommendedFixes}}
+{{/recommendedFixes}}
+
+{{#passCondition}}
+**Pass condition (catalog):** {{passCondition}}
+{{/passCondition}}
+
+{{#evidenceRequired}}
+**Evidence required (catalog)**
+
+{{#evidenceRequired}}
+- {{.}}
+{{/evidenceRequired}}
+{{/evidenceRequired}}
 
 {{#naReason}}
 **N/A rationale:** {{naReason}}

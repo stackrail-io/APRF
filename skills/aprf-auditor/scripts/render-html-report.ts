@@ -5,9 +5,21 @@
  *   npx tsx skills/aprf-auditor/scripts/render-html-report.ts \
  *     --in ./aprf-assessment/assessment.json \
  *     --out ./aprf-assessment/REPORT.html
+ *
+ * Catalog fields (title, description, whyItMatters, …) are merged from
+ * packages/aprf-engine/rules/by-category Check YAML so incomplete agent
+ * assessment.json still shows full Check text.
  */
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import {
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+  readdirSync,
+  existsSync,
+} from "node:fs";
+import { dirname, resolve, join, extname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { parse as parseYaml } from "yaml";
 
 const STACKRAIL = {
   home: "https://stackrail.io",
@@ -16,6 +28,97 @@ const STACKRAIL = {
   assess: "https://stackrail.io/aprf/assess/",
   github: "https://github.com/stackrail-io/APRF",
 };
+
+const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
+const SKILL_ROOT = resolve(SCRIPT_DIR, "..");
+const REPO_ROOT = resolve(SKILL_ROOT, "../..");
+const RULES_ROOT = resolve(REPO_ROOT, "packages/aprf-engine/rules/by-category");
+
+type CatalogRule = {
+  id: string;
+  category?: string;
+  title?: string;
+  description?: string;
+  whyItMatters?: string;
+  passCondition?: string;
+  evidenceRequired?: string[];
+  recommendedFixes?: string[];
+  manualVerification?: string;
+  falsePositiveGuidance?: string;
+  gate?: string;
+  severity?: string;
+  references?: Array<{ title?: string; url?: string } | string>;
+};
+
+function walkYamlFiles(dir: string, out: string[] = []): string[] {
+  if (!existsSync(dir)) return out;
+  for (const ent of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(dir, ent.name);
+    if (ent.isDirectory()) walkYamlFiles(p, out);
+    else if (ent.isFile() && (extname(ent.name) === ".yaml" || extname(ent.name) === ".yml")) {
+      out.push(p);
+    }
+  }
+  return out;
+}
+
+function loadCatalogById(rulesRoot = RULES_ROOT): Map<string, CatalogRule> {
+  const map = new Map<string, CatalogRule>();
+  for (const file of walkYamlFiles(rulesRoot)) {
+    try {
+      const doc = parseYaml(readFileSync(file, "utf8")) as CatalogRule;
+      if (doc?.id) map.set(String(doc.id), doc);
+    } catch {
+      /* skip unreadable */
+    }
+  }
+  return map;
+}
+
+/** Prefer catalog YAML over agent paraphrases for normative Check fields. */
+function enrichControlsFromCatalog(
+  controls: Control[],
+  catalog: Map<string, CatalogRule>,
+): Control[] {
+  return controls.map((c) => {
+    const rule = catalog.get(c.checkId);
+    if (!rule) return c;
+    const recommendedFixes =
+      rule.recommendedFixes?.length ? rule.recommendedFixes : c.recommendedFixes;
+    const recommendedAction =
+      recommendedFixes?.length ?
+        recommendedFixes.map((f, i) => `${i + 1}) ${f}`).join(" ")
+      : c.recommendedAction;
+    const remFix =
+      recommendedFixes?.length ? recommendedFixes[0] : c.remediation?.fix;
+    return {
+      ...c,
+      title: rule.title || c.title,
+      category: rule.category || c.category,
+      gate: rule.gate || c.gate,
+      severity: rule.severity || c.severity,
+      description: rule.description ?? c.description,
+      whyItMatters: rule.whyItMatters ?? c.whyItMatters,
+      passCondition: rule.passCondition ?? c.passCondition,
+      evidenceRequired: rule.evidenceRequired ?? c.evidenceRequired,
+      recommendedFixes,
+      manualVerification: rule.manualVerification ?? c.manualVerification,
+      falsePositiveGuidance:
+        rule.falsePositiveGuidance ?? c.falsePositiveGuidance,
+      references: rule.references ?? c.references,
+      recommendedAction,
+      remediation:
+        c.remediation || remFix ?
+          {
+            fix: remFix || c.remediation?.fix || "",
+            example: c.remediation?.example,
+            owner: c.remediation?.owner,
+            estimatedEffort: c.remediation?.estimatedEffort,
+          }
+        : c.remediation,
+    };
+  });
+}
 
 type Finding = {
   checkId: string;
@@ -40,6 +143,15 @@ type Control = {
   reasoning: string;
   recommendedAction: string;
   naReason?: string;
+  /** Verbatim from Check YAML — required for faithful reporting */
+  passCondition?: string;
+  evidenceRequired?: string[];
+  recommendedFixes?: string[];
+  manualVerification?: string;
+  falsePositiveGuidance?: string;
+  description?: string;
+  whyItMatters?: string;
+  references?: Array<{ title?: string; url?: string } | string>;
   evidenceFound?: Array<{ ref: string; excerpt?: string }>;
   requiredEvidenceMissing?: string[];
   remediation?: {
@@ -290,7 +402,38 @@ function discoveryList(
   return `<p><strong>${esc(label)}:</strong> ${body}${note ? ` <span class="meta">— ${esc(note)}</span>` : ""}</p>`;
 }
 
-/** Category (pillar) → APRF domain id — mirrors packages/aprf-engine/rules/_index/categories.yaml */
+/** Category id → display name — mirrors packages/aprf-engine/rules/_index/categories.yaml */
+const CATEGORY_LABEL: Record<string, string> = {
+  "ai-security": "Adversarial Security",
+  authentication: "Authentication",
+  authorization: "Authorization",
+  secrets: "Secrets",
+  "tool-safety": "Tool Safety",
+  "supply-chain": "Supply Chain Integrity",
+  infrastructure: "Infrastructure",
+  "safety-responsible-ai": "Safety & Responsible AI",
+  explainability: "Explainability & Transparency",
+  "data-privacy": "Data Privacy",
+  "data-governance": "Data Governance & Quality",
+  "memory-management": "Memory Management",
+  "model-governance": "Model Governance",
+  "prompt-engineering": "Prompt Engineering",
+  "context-engineering": "Context Engineering",
+  evaluation: "Evaluation",
+  "agent-governance": "Agent Governance",
+  "human-approval": "Human Approval",
+  observability: "Observability",
+  "performance-slo": "Performance & SLO Engineering",
+  "reliability-continuity": "Reliability & Continuity",
+  "change-management": "Change Management & Release",
+  "incident-readiness": "Incident Readiness",
+  "cost-optimization": "Cost Optimization",
+  "organizational-governance": "Organizational Governance",
+  compliance: "Compliance",
+  "platform-engineering": "Platform Engineering",
+};
+
+/** Category (pillar) → APRF domain id — mirrors categories.yaml */
 const DOMAIN_BY_CATEGORY: Record<string, string> = {
   "ai-security": "security",
   authentication: "security",
@@ -334,6 +477,11 @@ function controlDomain(c: Control): string {
     DOMAIN_BY_CATEGORY[c.category] ||
     c.category;
   return titleCaseDomain(raw);
+}
+
+/** Human category from Check YAML `category` (pillar), not the rolled-up domain. */
+function controlCategory(c: Control): string {
+  return CATEGORY_LABEL[c.category] || titleCaseDomain(c.category);
 }
 
 function tagClass(tag: string): string {
@@ -386,20 +534,77 @@ function controlDetailBody(c: Control): string {
     c.requiredEvidenceMissing?.length ?
       `<p><strong>Evidence still required</strong></p><ul>${c.requiredEvidenceMissing.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>`
     : "";
-  const rem = c.remediation
-    ? `<p><strong>Remediation:</strong> ${esc(c.remediation.fix)}${c.remediation.owner ? ` · owner ${esc(c.remediation.owner)}` : ""}${c.remediation.estimatedEffort ? ` · effort ${esc(c.remediation.estimatedEffort)}` : ""}</p>`
+  const evidenceRequired =
+    c.evidenceRequired?.length ?
+      `<p><strong>Evidence required</strong></p><ul>${c.evidenceRequired.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>`
     : "";
+  const recommendedFixes =
+    c.recommendedFixes?.length ?
+      `<p><strong>Recommended fixes</strong></p><ol>${c.recommendedFixes.map((m) => `<li>${esc(m)}</li>`).join("")}</ol>`
+    : "";
+  const refs =
+    c.references?.length ?
+      `<p><strong>References</strong></p><ul>${c.references
+        .map((r) => {
+          if (typeof r === "string") return `<li>${esc(r)}</li>`;
+          const label = r.title || r.url || "link";
+          return r.url
+            ? `<li><a href="${esc(r.url)}" rel="noopener">${esc(label)}</a></li>`
+            : `<li>${esc(label)}</li>`;
+        })
+        .join("")}</ul>`
+    : "";
+  const catalogMissing =
+    !c.description &&
+    !c.whyItMatters &&
+    !c.passCondition &&
+    !c.recommendedFixes?.length &&
+    !c.evidenceRequired?.length &&
+    !c.references?.length;
+  const catalog = `
+  <p><strong>Title:</strong> ${esc(c.title)}</p>
+  <p class="meta">Category: <code>${esc(c.category)}</code> (${esc(controlCategory(c))}) · Domain: ${esc(controlDomain(c))}</p>
+  ${c.description ? `<p><strong>Description:</strong> ${esc(c.description)}</p>` : ""}
+  ${c.whyItMatters ? `<p><strong>Why it matters:</strong> ${esc(c.whyItMatters)}</p>` : ""}
+  ${refs}
+  ${c.passCondition ? `<p><strong>Pass condition:</strong> ${esc(c.passCondition)}</p>` : ""}
+  ${evidenceRequired}
+  ${c.manualVerification ? `<p><strong>Manual verification:</strong> ${esc(c.manualVerification)}</p>` : ""}
+  ${c.falsePositiveGuidance ? `<p><strong>False-positive guidance:</strong> ${esc(c.falsePositiveGuidance)}</p>` : ""}
+  ${recommendedFixes}`;
+
+  // Assessment-only block — do not repeat recommendedFixes here.
+  const remMeta = [
+    c.remediation?.owner ? `owner ${esc(c.remediation.owner)}` : "",
+    c.remediation?.estimatedEffort ?
+      `effort ${esc(c.remediation.estimatedEffort)}`
+    : "",
+    c.priority ? `priority ${esc(c.priority)}` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const rem =
+    remMeta || c.remediation?.example ?
+      `<p><strong>Remediation tracking:</strong> ${remMeta || "—"}${c.remediation?.example ? `<br/><span class="meta">Repo note: ${esc(c.remediation.example)}</span>` : ""}</p>`
+    : "";
+
   return `
-  <p class="meta">${esc(c.category)} · ${esc(c.gate)} · ${esc(c.severity)} ·
+  <p class="meta">${esc(controlCategory(c))} · ${esc(c.gate)} · ${esc(c.severity)} ·
     <span class="pill ${statusClass(c.status)}">${esc(c.status)}</span> ·
     confidence ${esc(c.confidence)}${c.confidenceScore != null ? ` (${esc(c.confidenceScore)})` : ""} ·
     ${esc(c.priority)}</p>
-  <p><strong>Evidence</strong></p>${evidence}
-  ${missing}
-  <p><strong>Reasoning:</strong> ${esc(c.reasoning)}</p>
-  <p><strong>Recommended action:</strong> ${esc(c.recommendedAction)}</p>
-  ${c.naReason ? `<p><strong>N/A rationale:</strong> ${esc(c.naReason)}</p>` : ""}
-  ${rem}`;
+  <section class="assessment-findings">
+    <h4>This assessment</h4>
+    <p><strong>Evidence found</strong></p>${evidence}
+    ${missing}
+    <p><strong>Reasoning:</strong> ${esc(c.reasoning)}</p>
+    ${c.naReason ? `<p><strong>N/A rationale:</strong> ${esc(c.naReason)}</p>` : ""}
+    ${rem}
+  </section>
+  <section class="catalog-rule">
+    <h4>APRF Check (catalog)</h4>
+    ${catalogMissing ? `<p class="empty">Catalog fields missing — Check YAML not found for ${esc(c.checkId)}.</p>` : catalog}
+  </section>`;
 }
 
 /** Table listing + hidden detail panels for the flyout. */
@@ -414,7 +619,7 @@ function controlsTableAndFlyout(
       return `<tr class="control-row" tabindex="0" role="button" data-control-id="${esc(c.checkId)}" data-status="${esc(c.status)}" aria-label="Open details for ${esc(c.checkId)}">
   <td><code>${esc(c.checkId)}</code></td>
   <td>${esc(c.title)}</td>
-  <td>${esc(controlDomain(c))}</td>
+  <td>${esc(controlCategory(c))}<span class="domain-sub">${esc(controlDomain(c))} domain</span></td>
   <td><span class="pill ${statusClass(c.status)}">${esc(c.status)}</span></td>
   <td>${esc(c.confidence)}${c.confidenceScore != null ? ` <span class="meta">(${esc(c.confidenceScore)})</span>` : ""}</td>
   <td>${tagPills(tags) || `<span class="empty">—</span>`}</td>
@@ -431,13 +636,14 @@ function controlsTableAndFlyout(
   <button type="button" class="filter-chip" data-filter="NOT_DEMONSTRATED">Not demonstrated <strong>${statusCounts.NOT_DEMONSTRATED ?? 0}</strong></button>
   <button type="button" class="filter-chip" data-filter="NOT_APPLICABLE">N/A <strong>${statusCounts.NOT_APPLICABLE ?? 0}</strong></button>
 </div>
+<div class="panel">
 <div class="table-wrap">
 <table class="controls-table">
   <thead>
     <tr>
       <th>Check</th>
       <th>Title</th>
-      <th>Domain</th>
+      <th>Category</th>
       <th>Status</th>
       <th>Confidence</th>
       <th>Tags</th>
@@ -449,7 +655,8 @@ ${rows}
   </tbody>
 </table>
 </div>
-<p class="meta">Click a row for evidence, reasoning, and remediation. Use status chips to show Passed / Failed / Partial / …</p>`;
+</div>
+<p class="help">Category is the Check YAML <code>category</code> (e.g. Data Privacy). Domain is the APRF grouping (e.g. Data). Click a row for assessment findings and full catalog text.</p>`;
 
   const panels = ordered
     .map(
@@ -497,6 +704,11 @@ function stackrailLinks(): string {
 }
 
 function render(a: Assessment): string {
+  const catalog = loadCatalogById();
+  a = {
+    ...a,
+    controls: enrichControlsFromCatalog(a.controls, catalog),
+  };
   const gate = a.executiveSummary.overallGatePassed ? "PASS" : "FAIL";
   const gateClass = a.executiveSummary.overallGatePassed ? "ok" : "bad";
   const lenses = (a.scope.lensIds ?? []).join(", ") || "none";
@@ -537,184 +749,308 @@ function render(a: Assessment): string {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>APRF Assessment — ${esc(a.subject.name)}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --ink: #1a1f24;
-      --muted: #5c6670;
-      --line: #d9dee3;
-      --bg: #f7f5f1;
+      --ink: #15202b;
+      --muted: #5a6a78;
+      --line: #e2e8ee;
+      --line-strong: #c5d0da;
+      --bg: #eef2f5;
+      --bg-accent: #dce8ef;
       --card: #ffffff;
-      --ok: #1b6b3a;
-      --bad: #9b1c1c;
-      --warn: #8a5a00;
-      --na: #4a5560;
-      --accent: #0f3d4c;
+      --ok: #0d6b3c;
+      --ok-bg: #e6f5ec;
+      --bad: #b42318;
+      --bad-bg: #fdeceb;
+      --warn: #9a6700;
+      --warn-bg: #fff6e0;
+      --na: #4b5c6b;
+      --na-bg: #eef1f4;
+      --accent: #0b4f63;
+      --accent-soft: #e4f1f5;
+      --shadow: 0 1px 2px rgba(21, 32, 43, 0.04), 0 8px 24px rgba(21, 32, 43, 0.06);
+      --sans: "DM Sans", "Segoe UI", sans-serif;
+      --serif: "Newsreader", Georgia, serif;
+      --mono: ui-monospace, Menlo, Consolas, monospace;
+      --radius: 10px;
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      font-family: "Source Serif 4", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      font-family: var(--sans);
       color: var(--ink);
       background:
-        radial-gradient(1200px 500px at 10% -10%, #e7eef1 0%, transparent 55%),
-        radial-gradient(900px 400px at 100% 0%, #efe8df 0%, transparent 50%),
+        radial-gradient(900px 420px at 8% -8%, var(--bg-accent) 0%, transparent 60%),
+        radial-gradient(700px 380px at 100% 0%, #e8eef2 0%, transparent 55%),
         var(--bg);
       line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
     }
-    header, main, footer { max-width: 980px; margin: 0 auto; padding: 1.5rem; }
-    header { padding-top: 2.5rem; border-bottom: 1px solid var(--line); }
+    a { color: var(--accent); }
+    a:hover { text-decoration: underline; }
+    .shell { max-width: 1120px; margin: 0 auto; padding: 1.75rem 1.5rem 3rem; }
+    header.hero {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: calc(var(--radius) + 4px);
+      box-shadow: var(--shadow);
+      padding: 1.75rem 1.85rem 1.5rem;
+      margin-bottom: 1.75rem;
+      animation: rise 0.45s ease both;
+    }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+    .brand-row {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 0.75rem 1.25rem; margin-bottom: 0.85rem;
+    }
     .brand {
-      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-size: 0.75rem;
-      color: var(--accent);
-      font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      font-size: 0.72rem; color: var(--accent); font-weight: 700;
     }
+    .brand a { color: inherit; text-decoration: none; }
+    .gate-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em;
+      padding: 0.35rem 0.7rem; border-radius: 999px;
+    }
+    .gate-badge.ok { background: var(--ok-bg); color: var(--ok); }
+    .gate-badge.bad { background: var(--bad-bg); color: var(--bad); }
     .sr-links {
-      display: flex; flex-wrap: wrap; gap: 0.75rem 1.1rem;
-      margin: 0.75rem 0 0.25rem;
-      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
-      font-size: 0.85rem;
+      display: flex; flex-wrap: wrap; gap: 0.55rem 1rem;
+      margin: 0.35rem 0 0.85rem; font-size: 0.84rem;
     }
-    .sr-links a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
-    .sr-links a:hover { border-bottom-color: var(--accent); }
+    .sr-links a { text-decoration: none; border-bottom: 1px solid transparent; }
+    .sr-links a:hover { border-bottom-color: var(--accent); text-decoration: none; }
     h1 {
-      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
-      font-weight: 650; font-size: 1.85rem;
-      margin: 0.4rem 0 0.75rem; letter-spacing: -0.02em;
+      font-weight: 700; font-size: clamp(1.65rem, 2.5vw, 2.15rem);
+      margin: 0 0 0.65rem; letter-spacing: -0.03em; line-height: 1.15;
+    }
+    .meta-chips {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.75rem 0 0.5rem;
+    }
+    .chip {
+      display: inline-flex; align-items: center;
+      background: var(--accent-soft); color: var(--accent);
+      border: 1px solid #c9dde5; border-radius: 999px;
+      padding: 0.22rem 0.65rem; font-size: 0.75rem; font-weight: 600;
+    }
+    .lede {
+      font-family: var(--serif); font-size: 1.05rem; color: var(--muted);
+      margin: 0.65rem 0 0; max-width: 62ch;
     }
     h2 {
-      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
-      font-size: 1.15rem; margin-top: 2.25rem;
-      border-bottom: 1px solid var(--line); padding-bottom: 0.35rem;
+      font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em;
+      margin: 2.35rem 0 0.95rem; padding-bottom: 0.45rem;
+      border-bottom: 2px solid var(--ink);
+      display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
     }
-    h3 { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; font-size: 1rem; margin: 0 0 0.75rem; }
-    .meta, .empty, footer { color: var(--muted); font-size: 0.95rem; }
+    h2 .hint { font-size: 0.78rem; font-weight: 500; color: var(--muted); border: 0; letter-spacing: 0; }
+    h3 { font-size: 0.95rem; font-weight: 650; margin: 0 0 0.75rem; }
+    .meta, .empty, footer { color: var(--muted); font-size: 0.9rem; }
     .banner {
-      background: #fff4e5; border-left: 4px solid #c47b16;
-      padding: 0.85rem 1rem; margin: 1rem 0;
-      font-family: "IBM Plex Sans", "Segoe UI", sans-serif; font-size: 0.92rem;
+      background: var(--warn-bg); border: 1px solid #efd9a0; border-left: 4px solid var(--warn);
+      padding: 0.8rem 1rem; margin: 1rem 0 0; border-radius: 0 var(--radius) var(--radius) 0;
+      font-size: 0.9rem;
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 0.75rem; margin: 1rem 0 1.25rem;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.75rem; margin: 0.25rem 0 1.1rem;
     }
     .viz-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1rem; margin: 1rem 0 1.5rem;
+      gap: 1rem; margin: 0.25rem 0 0.5rem;
     }
     .viz-card, .stat {
-      background: var(--card); border: 1px solid var(--line); padding: 0.95rem 1.05rem;
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 1rem 1.1rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .stat:hover, .viz-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(21,32,43,0.05), 0 12px 28px rgba(21,32,43,0.08);
     }
     .stat .label {
-      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
-      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); font-weight: 650;
     }
-    .stat .value { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; font-size: 1.25rem; font-weight: 650; }
+    .stat .value { font-size: 1.35rem; font-weight: 700; margin-top: 0.25rem; letter-spacing: -0.02em; }
     .viz-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
     .donut { width: 140px; height: 140px; flex: 0 0 auto; }
-    .donut-center { font-family: "IBM Plex Sans", sans-serif; font-size: 14px; font-weight: 700; fill: var(--ink); }
-    .donut-sub { font-family: "IBM Plex Sans", sans-serif; font-size: 7px; fill: var(--muted); }
-    .legend { list-style: none; padding: 0; margin: 0; font-family: "IBM Plex Sans", sans-serif; font-size: 0.85rem; }
-    .legend li { margin: 0.25rem 0; display: flex; align-items: center; gap: 0.45rem; }
-    .swatch { width: 0.7rem; height: 0.7rem; display: inline-block; border-radius: 2px; }
+    .donut-center { font-family: var(--sans); font-size: 14px; font-weight: 700; fill: var(--ink); }
+    .donut-sub { font-family: var(--sans); font-size: 7px; fill: var(--muted); }
+    .legend { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; }
+    .legend li { margin: 0.28rem 0; display: flex; align-items: center; gap: 0.45rem; }
+    .swatch { width: 0.7rem; height: 0.7rem; display: inline-block; border-radius: 3px; }
     .bars { display: flex; flex-direction: column; gap: 0.55rem; }
-    .bar-row { display: grid; grid-template-columns: 7.5rem 1fr 5.5rem; gap: 0.5rem; align-items: center; font-family: "IBM Plex Sans", sans-serif; font-size: 0.82rem; }
+    .bar-row { display: grid; grid-template-columns: 7.5rem 1fr 5.5rem; gap: 0.5rem; align-items: center; font-size: 0.82rem; }
     .bar-label { color: var(--muted); }
-    .bar-track { height: 0.65rem; background: #e8ecef; border-radius: 99px; overflow: hidden; }
+    .bar-track { height: 0.55rem; background: #e8ecef; border-radius: 99px; overflow: hidden; }
     .bar-fill { height: 100%; border-radius: 99px; background: var(--accent); }
     .bar-fill.ok { background: var(--ok); }
     .bar-fill.bad { background: var(--bad); }
-    .bar-val { text-align: right; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .bar-val { text-align: right; font-variant-numeric: tabular-nums; }
     .gauge-wrap { text-align: center; }
     .gauge { width: 200px; max-width: 100%; }
-    .gauge-val { font-family: "IBM Plex Sans", sans-serif; font-size: 18px; font-weight: 700; fill: var(--ink); }
+    .gauge-val { font-family: var(--sans); font-size: 18px; font-weight: 700; fill: var(--ink); }
+    .panel {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      overflow: hidden; margin: 0.25rem 0 0.5rem;
+    }
     table { width: 100%; border-collapse: collapse; background: var(--card); }
-    th, td { text-align: left; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--line); font-family: "IBM Plex Sans", "Segoe UI", sans-serif; font-size: 0.92rem; }
-    th { color: var(--muted); font-weight: 600; }
-    .table-wrap { overflow-x: auto; border: 1px solid var(--line); background: var(--card); }
+    th, td {
+      text-align: left; padding: 0.7rem 0.85rem; border-bottom: 1px solid var(--line);
+      font-size: 0.88rem; vertical-align: top;
+    }
+    th {
+      color: var(--muted); font-weight: 650; font-size: 0.72rem;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      background: #f4f7f9; position: sticky; top: 0; z-index: 2;
+    }
+    .table-wrap { overflow-x: auto; max-height: min(70vh, 820px); overflow-y: auto; }
     .controls-table { margin: 0; }
-    .controls-table th { white-space: nowrap; background: #f0eeea; }
-    .control-row { cursor: pointer; }
-    .control-row:hover, .control-row:focus { background: #f3f7f8; outline: none; }
+    .controls-table td:nth-child(2) { min-width: 16rem; max-width: 28rem; font-weight: 500; line-height: 1.4; }
+    .controls-table .domain-sub { display: block; margin-top: 0.2rem; font-size: 0.75rem; color: var(--muted); font-weight: 500; }
+    .control-row { cursor: pointer; transition: background 0.12s ease; }
+    .control-row:hover, .control-row:focus { background: #f3f8fa; outline: none; }
     .control-row:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+    .control-row.active { background: var(--accent-soft); }
     .control-row[hidden] { display: none; }
     .status-filter {
-      display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.75rem 0 0.85rem;
-      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 0.85rem;
+      padding: 0.35rem; background: var(--card); border: 1px solid var(--line);
+      border-radius: 999px; width: fit-content; max-width: 100%;
+      box-shadow: var(--shadow);
     }
     .filter-chip {
-      border: 1px solid var(--line); background: var(--card); color: var(--ink);
-      padding: 0.35rem 0.65rem; cursor: pointer; font-size: 0.82rem;
+      border: 0; background: transparent; color: var(--muted);
+      padding: 0.4rem 0.75rem; cursor: pointer; font-size: 0.8rem; font-weight: 600;
+      border-radius: 999px; font-family: var(--sans);
+      transition: background 0.15s ease, color 0.15s ease;
     }
-    .filter-chip strong { font-variant-numeric: tabular-nums; }
-    .filter-chip:hover { background: #f3f7f8; }
-    .filter-chip.active { border-color: var(--accent); color: var(--accent); background: #e7eef1; }
+    .filter-chip strong { font-variant-numeric: tabular-nums; margin-left: 0.2rem; }
+    .filter-chip:hover { background: var(--bg); color: var(--ink); }
+    .filter-chip.active { background: var(--accent); color: #fff; }
     .pill {
-      display: inline-block; font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
-      font-size: 0.72rem; font-weight: 650; letter-spacing: 0.04em;
-      padding: 0.15rem 0.45rem; border: 1px solid currentColor;
-      margin: 0.1rem 0.15rem 0.1rem 0;
+      display: inline-block; font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.03em; padding: 0.2rem 0.5rem; border-radius: 6px;
+      margin: 0.08rem 0.12rem 0.08rem 0; border: 0;
     }
+    .pill.ok { color: var(--ok); background: var(--ok-bg); }
+    .pill.bad { color: var(--bad); background: var(--bad-bg); }
+    .pill.warn { color: var(--warn); background: var(--warn-bg); }
+    .pill.muted, .pill.na { color: var(--na); background: var(--na-bg); }
     .ok { color: var(--ok); } .bad { color: var(--bad); } .warn { color: var(--warn); }
     .muted, .na { color: var(--na); }
-    .prio { font-family: "IBM Plex Sans", sans-serif; font-size: 0.75rem; color: var(--muted); }
-    code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.88em; }
-    ul { padding-left: 1.2rem; }
-    footer a { color: var(--accent); }
+    .prio { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+    code { font-family: var(--mono); font-size: 0.84em; background: #f0f4f7; padding: 0.08em 0.35em; border-radius: 4px; }
+    ul { padding-left: 1.15rem; }
+    .help { margin: 0.65rem 0 0; font-size: 0.82rem; color: var(--muted); }
+    .roadmap-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0.85rem;
+    }
+    .block {
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 1rem 1.1rem; box-shadow: var(--shadow);
+    }
+    footer {
+      margin-top: 2.75rem; padding-top: 1.25rem; border-top: 1px solid var(--line-strong);
+      font-size: 0.85rem;
+    }
     .flyout-backdrop {
-      position: fixed; inset: 0; background: rgba(26, 31, 36, 0.35);
-      opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 40;
+      position: fixed; inset: 0; background: rgba(15, 28, 38, 0.42);
+      backdrop-filter: blur(2px);
+      opacity: 0; pointer-events: none; transition: opacity 0.22s ease; z-index: 40;
     }
     .flyout-backdrop.open { opacity: 1; pointer-events: auto; }
     .flyout {
-      position: fixed; top: 0; right: 0; height: 100%; width: min(420px, 94vw);
+      position: fixed; top: 0; right: 0; height: 100%; width: min(520px, 96vw);
       background: var(--card); border-left: 1px solid var(--line);
-      box-shadow: -8px 0 24px rgba(26, 31, 36, 0.12);
-      transform: translateX(100%); transition: transform 0.22s ease;
+      box-shadow: -12px 0 40px rgba(15, 28, 38, 0.14);
+      transform: translateX(100%); transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
       z-index: 50; display: flex; flex-direction: column;
-      font-family: "Source Serif 4", Georgia, serif;
     }
     .flyout.open { transform: translateX(0); }
     .flyout-header {
       display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;
-      padding: 1.1rem 1.15rem; border-bottom: 1px solid var(--line);
-      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      padding: 1.15rem 1.25rem; border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #f7fafb 0%, #fff 100%);
     }
-    .flyout-header h3 { margin: 0; font-size: 1rem; line-height: 1.35; }
+    .flyout-header h3 {
+      margin: 0; font-size: 1.02rem; line-height: 1.35; font-weight: 700;
+      letter-spacing: -0.015em;
+    }
     .flyout-close {
-      border: 1px solid var(--line); background: #f7f5f1; color: var(--ink);
-      font-family: "IBM Plex Sans", sans-serif; font-size: 0.85rem;
-      padding: 0.35rem 0.55rem; cursor: pointer; flex: 0 0 auto;
+      border: 1px solid var(--line); background: #fff; color: var(--ink);
+      font-family: var(--sans); font-size: 0.82rem; font-weight: 600;
+      padding: 0.4rem 0.7rem; cursor: pointer; border-radius: 8px; flex: 0 0 auto;
+      transition: background 0.15s ease;
     }
-    .flyout-close:hover { background: #ebe7e0; }
-    .flyout-body { padding: 1.1rem 1.15rem 2rem; overflow-y: auto; flex: 1; }
+    .flyout-close:hover { background: var(--bg); }
+    .flyout-body {
+      padding: 1.15rem 1.25rem 2.25rem; overflow-y: auto; flex: 1;
+      font-family: var(--serif); font-size: 0.98rem;
+    }
+    .flyout-body .meta { font-family: var(--sans); font-size: 0.82rem; }
+    .flyout-body h4 {
+      font-family: var(--sans); font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--muted); margin: 0.15rem 0 0.7rem; font-weight: 700;
+    }
+    .flyout-body p { margin: 0.45rem 0; }
+    .flyout-body strong { font-family: var(--sans); font-size: 0.86rem; }
+    .assessment-findings { margin: 0.15rem 0 1.15rem; }
+    .catalog-rule {
+      background: #f5f8fa; border: 1px solid var(--line);
+      padding: 0.9rem 1rem; margin: 0.35rem 0 0; border-radius: var(--radius);
+    }
     .flyout-panels { display: none; }
+    @media (max-width: 720px) {
+      .shell { padding: 1rem; }
+      .status-filter { border-radius: var(--radius); }
+      .controls-table td:nth-child(2) { min-width: 12rem; }
+    }
     @media print {
       body { background: white; }
-      .stat, .viz-card, .table-wrap { break-inside: avoid; }
-      .flyout, .flyout-backdrop { display: none !important; }
+      .stat, .viz-card, .panel, .block { break-inside: avoid; box-shadow: none; }
+      .flyout, .flyout-backdrop, .status-filter { display: none !important; }
       .flyout-panels { display: block !important; }
       .flyout-panel { display: block !important; border: 1px solid var(--line); padding: 0.85rem; margin: 0.75rem 0; page-break-inside: avoid; }
       .flyout-panel[hidden] { display: block !important; }
+      .table-wrap { max-height: none; overflow: visible; }
     }
   </style>
-</head><body>
-  <header>
-    <div class="brand">APRF Auditor · <a href="${STACKRAIL.home}" rel="noopener">StackRail</a></div>
+</head>
+<body>
+  <div class="shell">
+  <header class="hero">
+    <div class="brand-row">
+      <div class="brand">APRF Auditor · <a href="${STACKRAIL.home}" rel="noopener">StackRail</a></div>
+      <div class="gate-badge ${gateClass}" title="Overall mandatory gate">Gate ${gate}</div>
+    </div>
     <h1>${esc(a.subject.name)}</h1>
     ${stackrailLinks()}
-    <p class="meta">
-      APRF ${esc(a.aprfVersion)} · skill ${esc(a.skillVersion)} · ${esc(a.assessedAt)}<br/>
-      ${esc(a.subject.path)}${a.subject.gitCommit ? ` · <code>${esc(a.subject.gitCommit)}</code>` : ""}<br/>
-      systemType=${esc(a.scope.systemType ?? "—")} · assessmentKind=${esc(a.scope.assessmentKind ?? "—")}<br/>
-      ${esc(a.scope.profileId)}${a.scope.scopeId ? ` (${esc(a.scope.scopeId)})` : ""} · tier ${esc(a.scope.criticality)} · lenses: ${esc(lenses)}
-    </p>
+    <div class="meta-chips">
+      <span class="chip">APRF ${esc(a.aprfVersion)}</span>
+      <span class="chip">skill ${esc(a.skillVersion)}</span>
+      <span class="chip">${esc(a.scope.profileId)}${a.scope.scopeId ? ` · ${esc(a.scope.scopeId)}` : ""}</span>
+      <span class="chip">tier ${esc(a.scope.criticality)}</span>
+      <span class="chip">${esc(a.scope.systemType ?? "—")}</span>
+      <span class="chip">lenses: ${esc(lenses)}</span>
+    </div>
+    <p class="meta" style="margin:0.35rem 0 0">${esc(a.assessedAt)}${a.subject.gitCommit ? ` · <code>${esc(a.subject.gitCommit)}</code>` : ""}<br/><span style="word-break:break-all">${esc(a.subject.path)}</span></p>
     ${banner}
-    <p class="meta">Self-attested local assessment against the public <a href="${STACKRAIL.aprf}" rel="noopener">APRF</a> catalog — not third-party certification, not a StackRail cloud product run. Framework home: <a href="${STACKRAIL.github}" rel="noopener">github.com/stackrail-io/APRF</a>.</p>
+    <p class="lede">Self-attested local assessment against the public <a href="${STACKRAIL.aprf}" rel="noopener">APRF</a> catalog — not third-party certification. Framework: <a href="${STACKRAIL.github}" rel="noopener">github.com/stackrail-io/APRF</a>.</p>
   </header>
   <main>
     <h2>Executive summary</h2>
@@ -730,7 +1066,7 @@ function render(a: Assessment): string {
       ${a.executiveSummary.overallGrade != null ? ` · Grade (secondary): ${esc(a.executiveSummary.overallGrade)}` : ""}
       ${a.executiveSummary.riskLevel != null ? ` · Risk (secondary): ${esc(a.executiveSummary.riskLevel)}` : ""}
     </p>
-    <p>${esc(a.executiveSummary.narrative)}</p>
+    <p class="lede" style="max-width:72ch">${esc(a.executiveSummary.narrative)}</p>
 
     <h2>Visual overview</h2>
     <div class="viz-grid">
@@ -740,10 +1076,12 @@ function render(a: Assessment): string {
     </div>
 
     <h2>Domain scores</h2>
+    <div class="panel">
     <table>
       <thead><tr><th>Domain</th><th>Score</th><th>Mandatory gate</th></tr></thead>
       <tbody>${domainsTable}</tbody>
     </table>
+    </div>
 
     <h2>Discovery</h2>
     ${discoveryList("Found", a.discovery?.found)}
@@ -758,16 +1096,18 @@ function render(a: Assessment): string {
       "in-scope Checks — gate-relevant",
     )}
 
-    <h2>Controls &amp; Findings</h2>
+    <h2>Controls &amp; Findings <span class="hint">Click a row for details</span></h2>
     ${controlsTable}
 
     <h2>Roadmaps</h2>
+    <div class="roadmap-grid">
     ${roadmap("30 days", a.roadmaps.days30)}
     ${roadmap("90 days", a.roadmaps.days90)}
     ${roadmap("Long term", a.roadmaps.longTerm)}
+    </div>
 
     <h2>Excluded checks (non-AI subset)</h2>
-    ${excluded}
+    <div class="block">${excluded}</div>
 
     <h2>Disclaimer</h2>
     <p class="meta">${esc(a.disclaimer)}</p>
@@ -778,6 +1118,7 @@ function render(a: Assessment): string {
     <a href="${STACKRAIL.home}" rel="noopener">stackrail.io</a> ·
     <a href="${STACKRAIL.github}" rel="noopener">APRF on GitHub</a>
   </footer>
+  </div>
 
   <div class="flyout-backdrop" id="flyout-backdrop" hidden></div>
   <aside class="flyout" id="control-flyout" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="flyout-title">
@@ -804,6 +1145,9 @@ function render(a: Assessment): string {
         if (!panel) return;
         title.textContent = panel.getAttribute("data-title") || id;
         body.innerHTML = panel.innerHTML;
+        document.querySelectorAll(".control-row").forEach(function (r) {
+          r.classList.toggle("active", r.getAttribute("data-control-id") === id);
+        });
         backdrop.hidden = false;
         requestAnimationFrame(function () {
           backdrop.classList.add("open");
@@ -817,6 +1161,9 @@ function render(a: Assessment): string {
         backdrop.classList.remove("open");
         flyout.classList.remove("open");
         flyout.setAttribute("aria-hidden", "true");
+        document.querySelectorAll(".control-row.active").forEach(function (r) {
+          r.classList.remove("active");
+        });
         setTimeout(function () { backdrop.hidden = true; }, 220);
       }
 
@@ -855,7 +1202,8 @@ function render(a: Assessment): string {
 </body>
 </html>
 `;
-}function parseArgs(argv: string[]) {
+}
+function parseArgs(argv: string[]) {
   let input = resolve(process.cwd(), "aprf-assessment/assessment.json");
   let output = resolve(process.cwd(), "aprf-assessment/REPORT.html");
   for (let i = 2; i < argv.length; i++) {

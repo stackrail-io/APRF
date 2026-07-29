@@ -22,9 +22,9 @@ Illustrative fixture: SEC2-M1 NOT_DEMONSTRATED; AGN-M1 NOT_APPLICABLE.
 
 ## Controls & Findings (sample)
 
-| Check | Title | Domain | Status | Confidence | Tags | Priority |
-| --- | --- | --- | --- | --- | --- | --- |
-| SEC2-M1 | Production secrets must live in a secrets manager… | Security | NOT_DEMONSTRATED | low | Production blocker · Critical | P1 |
+| Check | Title | Category | Domain | Status | Confidence | Tags | Priority |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| SEC2-M1 | Production secrets must live in a secrets manager… | Secrets | Security | NOT_DEMONSTRATED | low | Production blocker · Critical | P1 |
 
 ### SEC2-M1 — Production secrets must live in a secrets manager…
 

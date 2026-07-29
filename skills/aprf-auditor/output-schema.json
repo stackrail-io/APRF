@@ -192,6 +192,52 @@
             "type": "string",
             "description": "APRF domain (security, agents, reliability, …). Optional; HTML report derives from category when omitted."
           },
+          "description": {
+            "type": "string",
+            "description": "Verbatim description from Check YAML"
+          },
+          "whyItMatters": {
+            "type": "string",
+            "description": "Verbatim whyItMatters from Check YAML"
+          },
+          "passCondition": {
+            "type": "string",
+            "description": "Verbatim passCondition from Check YAML — required"
+          },
+          "evidenceRequired": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Verbatim evidenceRequired list from Check YAML"
+          },
+          "recommendedFixes": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Verbatim recommendedFixes from Check YAML — source for recommendedAction and remediation.fix"
+          },
+          "manualVerification": {
+            "type": "string",
+            "description": "Verbatim manualVerification from Check YAML — used in reasoning for gaps"
+          },
+          "falsePositiveGuidance": {
+            "type": "string",
+            "description": "Verbatim falsePositiveGuidance from Check YAML"
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                { "type": "string" },
+                {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "title": { "type": "string" },
+                    "url": { "type": "string" }
+                  }
+                }
+              ]
+            }
+          },
           "gate": { "type": "string", "enum": ["mandatory", "recommended"] },
           "severity": {
             "type": "string",

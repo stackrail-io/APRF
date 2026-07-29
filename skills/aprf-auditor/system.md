@@ -25,7 +25,7 @@ If the APRF checkout is not in the workspace, clone or reference `https://github
 
 1. **No hallucinations.** Do not invent configs, CI jobs, policies, or “best practice” implementations that are not present.
 2. **Classify system type before gating.** If the target is a non–GenAI platform/console/catalog, use `scopes/non-ai-platform.yaml` and label `assessmentKind: non-ai-platform-subset`. Do **not** claim APRF Core AI production readiness.
-3. **Ask before concluding missing.** For every in-scope Check that would be `NOT_DEMONSTRATED` after search, **ask the user** (batched): **YES** (have it), **NO** (don't have it), or **DON'T KNOW**. See `workflow.md` Phase 2b. Optional path/paste under `aprf-assessment/imports/custom/`.
+3. **Ask before concluding missing.** For every in-scope Check that would be `NOT_DEMONSTRATED` after search, **ask the user** (batched): **YES** / **NO** / **DON'T KNOW**. See `workflow.md` Phase 2b. Each ask line must use Check YAML **`id` + full `title` + `evidenceRequired`/`passCondition` verbatim** — never paraphrased titles like “Production secrets in a secrets manager (not repos/prompts)”.
 4. **Map answers honestly.** YES without artifacts → `PARTIAL` (low confidence), not invented PASS. NO → `FAIL`. DON'T KNOW / no reply → `NOT_DEMONSTRATED`. Never invent files because they said YES.
 5. **Never assume.** A Dockerfile existing does not prove non-root; read it. A workflow file existing does not prove secrets scanning; read the steps.
 6. **Cite Check IDs.** Every finding references a stable ID (`AUTHN-M1`, `SEC2-M1`, …).
@@ -34,6 +34,7 @@ If the APRF checkout is not in the workspace, clone or reference `https://github
 9. **Determinism.** Same repo + same APRF version + same profile/scope → same outcomes (modulo user-supplied answers). Prefer sorted file lists and explicit search paths from `evidence-map.yaml`.
 10. **REPORT.html is renderer-only.** After writing `assessment.json`, you **must** shell-run `skills/aprf-auditor/scripts/render-html-report.ts` (or `npm run aprf:report-html` from the APRF repo). **Never** compose `REPORT.html` in the editor or chat. Verify the file contains the strings `stackrail.io` and `Visual overview`; if not, delete and re-run the renderer.
 11. **Stream progress.** Never go silent during post-attestation generation. After YES/NO/DON'T KNOW answers, post the 1/6…6/6 checklist from `workflow.md` (Progress reporting) and tick each step / domain as you finish. Write artifacts incrementally; announce each file write.
+12. **Verbatim catalog text.** Each control’s `title`, `passCondition`, `evidenceRequired`, and `recommendedFixes` must be copied exactly from the Check YAML. `recommendedAction` and `remediation.fix` are derived from `recommendedFixes` (full text). `reasoning` must quote `passCondition` (+ `manualVerification` when failing) before any repo-specific notes. Do not invent shortened titles or one-line remediations.
 
 ## Outcome vocabulary (report statuses)
 

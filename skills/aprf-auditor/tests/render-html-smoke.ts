@@ -40,11 +40,24 @@ for (const needle of [
   "Not observed",
   "controls-table",
   "control-flyout",
-  "Click a row for evidence",
+  "Click a row for assessment findings",
+  // Catalog enrichment from Check YAML (even if assessment.json omitted fields)
+  "Why it matters",
+  "Pass condition",
+  "Recommended fixes",
+  "This assessment",
+  "0 privileged production secrets found in repos",
+  "DM Sans",
+  "gate-badge",
 ]) {
   if (!html.includes(needle)) {
     throw new Error(`HTML missing ${needle}`);
   }
+}
+if (html.includes("Catalog fields missing")) {
+  throw new Error(
+    "HTML should enrich catalog fields from Check YAML; found missing-catalog banner",
+  );
 }
 
 console.log("aprf-auditor HTML report smoke OK");
