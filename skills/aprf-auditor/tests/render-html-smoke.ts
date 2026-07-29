@@ -38,6 +38,9 @@ for (const needle of [
   "Criticality",
   "Required capability",
   "Not observed",
+  "controls-table",
+  "control-flyout",
+  "Click a row for evidence",
 ]) {
   if (!html.includes(needle)) {
     throw new Error(`HTML missing ${needle}`);

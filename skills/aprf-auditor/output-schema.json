@@ -188,6 +188,10 @@
           "checkId": { "type": "string" },
           "title": { "type": "string" },
           "category": { "type": "string" },
+          "domain": {
+            "type": "string",
+            "description": "APRF domain (security, agents, reliability, …). Optional; HTML report derives from category when omitted."
+          },
           "gate": { "type": "string", "enum": ["mandatory", "recommended"] },
           "severity": {
             "type": "string",

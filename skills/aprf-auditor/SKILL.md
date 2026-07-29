@@ -43,6 +43,7 @@ Collectors: local by default; `aprf-assessment/imports/<plugin>/` for runtime ex
 - **Precedence:** runtime → ci → iac → runtime-config → policy → code → docs → user.
 - **Never invent or assume evidence.** For each Check that would be `NOT_DEMONSTRATED`, ask **YES / NO / DON'T KNOW** (Phase 2b) before finalizing.
 - **YES** (no artifact) → `PARTIAL` (low confidence). **NO** → `FAIL`. **DON'T KNOW** → `NOT_DEMONSTRATED`.
+- **Emit every in-scope Check** in `controls[]`, including `PASS` / `NOT_APPLICABLE` — never omit PASSes from the report table.
 - **Stream progress** after attestations (workflow Progress reporting): post 1/6…6/6 checklist and tick steps/domains; never silent “Generating…” with no updates.
 - Objective **confidence** from evidence class × freshness.
 - Every finding cites a real Check ID; remediation includes fix / example / owner / effort.

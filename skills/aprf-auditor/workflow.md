@@ -178,6 +178,10 @@ ELSE → NOT_DEMONSTRATED (+ requiredEvidenceMissing)
 
 Never invent FAIL from “best practice.” **NO** from the customer is an explicit FAIL. **DON'T KNOW** stays NOT_DEMONSTRATED.
 
+**Emit every in-scope Check** in `controls[]` — including **`PASS`** and **`NOT_APPLICABLE`**. Do not drop PASSes from `assessment.json` / the Controls & Findings table. Findings packs tag gaps; they do not replace the full control list.
+
+**Attestation vs PASS:** YES without an artifact is **`PARTIAL`**, not PASS. Only repo/runtime evidence (or YES + artifact that satisfies passCondition) may be **`PASS`**. Re-runs often convert prior “attested PASS” rows into PARTIAL — check the **Passed** and **Partial** filter chips in REPORT.html.
+
 **Confidence:** compute `confidenceScore` then `confidence` via `confidence.yaml` (class base × freshness decay + corroboration). Emit both.
 
 **Remediation** (required on FAIL / PARTIAL / NOT_DEMONSTRATED):
@@ -197,7 +201,7 @@ Use `scoring.yaml`. Gate PASS iff every applicable mandatory is `PASS` or `NOT_A
 
 ## Phase 5 — Controls & Findings packs
 
-Group findings packs into tags on each control: Production blocker · Critical · High · Medium · Low · Quick win. Emit a single **Controls & Findings** section — tags on the listing, full control detail below (not separate pack subsections).
+Group findings packs into tags on each control: Production blocker · Critical · High · Medium · Low · Quick win. Emit a single **Controls & Findings** section — **HTML:** table listing + detail flyout; **Markdown:** table + detail sections (not separate Controls + Findings).
 
 ## Phase 6 — Roadmaps
 

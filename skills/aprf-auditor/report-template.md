@@ -59,14 +59,18 @@
 
 ## Controls & Findings
 
-List every in-scope control once. Put tags on the **listing** (not in the control body): `Production blocker` · `Critical` · `High` · `Medium` · `Low` · `Quick win`. Sort listing: Production blockers → Critical → High → Medium → Low → Quick wins → other.
+List every in-scope control once. Tags on the listing: `Production blocker` · `Critical` · `High` · `Medium` · `Low` · `Quick win`. Sort: Production blockers → Critical → High → Medium → Low → Quick wins → other.
+
+**HTML (`REPORT.html`):** render as a **table** (Check · Title · Domain · Status · Confidence · Tags · Priority). Row click opens a **flyout** with evidence / reasoning / remediation. Do not inline long control bodies in the table.
+
+**Markdown (`REPORT.md`):** table listing + detail sections below.
 
 ### Listing
 
-| Check | Status | Tags |
-| --- | --- | --- |
+| Check | Title | Domain | Status | Confidence | Tags | Priority |
+| --- | --- | --- | --- | --- | --- | --- |
 {{#controls}}
-| [{{checkId}}](#{{checkId}}) | {{status}} | _(tags from findings packs / severity)_ |
+| {{checkId}} | {{title}} | {{domain}} | {{status}} | {{confidence}} | _(tags)_ | {{priority}} |
 {{/controls}}
 
 {{#controls}}

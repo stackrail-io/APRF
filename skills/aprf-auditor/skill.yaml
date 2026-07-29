@@ -46,6 +46,7 @@ invariants:
   - When evidence is not found after a thorough search, ask YES / NO / DON'T KNOW per Check (workflow Phase 2b) before finalizing NOT_DEMONSTRATED.
   - YES without artifacts → PARTIAL (low confidence); NO → FAIL; DON'T KNOW → NOT_DEMONSTRATED.
   - After attestations, stream progress (workflow Progress reporting checklist 1/6…6/6); never silent multi-minute generation.
+  - Emit every in-scope Check in controls[] including PASS / NOT_APPLICABLE; YES without artifacts is PARTIAL not PASS.
   - Never assume implementation from filenames alone without reading content.
   - Every finding cites a stable Check ID (e.g. SEC2-M1).
   - Mandatory gate outcomes are binary for gate math; report statuses may be richer.

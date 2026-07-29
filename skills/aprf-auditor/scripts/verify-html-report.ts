@@ -21,6 +21,8 @@ const required = [
   "Control status mix",
   "APRF Auditor",
   "<!DOCTYPE html>",
+  "controls-table",
+  "control-flyout",
 ];
 
 const missing = required.filter((n) => !html.includes(n));

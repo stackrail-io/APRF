@@ -29,6 +29,8 @@ type Control = {
   checkId: string;
   title: string;
   category: string;
+  /** APRF domain (security, agents, …). Falls back from category when omitted. */
+  domain?: string;
   gate: string;
   severity: string;
   status: string;
@@ -288,6 +290,52 @@ function discoveryList(
   return `<p><strong>${esc(label)}:</strong> ${body}${note ? ` <span class="meta">— ${esc(note)}</span>` : ""}</p>`;
 }
 
+/** Category (pillar) → APRF domain id — mirrors packages/aprf-engine/rules/_index/categories.yaml */
+const DOMAIN_BY_CATEGORY: Record<string, string> = {
+  "ai-security": "security",
+  authentication: "security",
+  authorization: "security",
+  secrets: "security",
+  "tool-safety": "security",
+  "supply-chain": "security",
+  infrastructure: "security",
+  "safety-responsible-ai": "safety",
+  explainability: "safety",
+  "data-privacy": "data",
+  "data-governance": "data",
+  "memory-management": "data",
+  "model-governance": "model-lifecycle",
+  "prompt-engineering": "model-lifecycle",
+  "context-engineering": "model-lifecycle",
+  evaluation: "model-lifecycle",
+  "agent-governance": "agents",
+  "human-approval": "agents",
+  observability: "reliability",
+  "performance-slo": "reliability",
+  "reliability-continuity": "reliability",
+  "change-management": "reliability",
+  "incident-readiness": "reliability",
+  "cost-optimization": "cost",
+  "organizational-governance": "governance",
+  compliance: "governance",
+  "platform-engineering": "platform",
+};
+
+function titleCaseDomain(domain: string): string {
+  return domain
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function controlDomain(c: Control): string {
+  const raw =
+    (c.domain && c.domain.trim()) ||
+    DOMAIN_BY_CATEGORY[c.category] ||
+    c.category;
+  return titleCaseDomain(raw);
+}
+
 function tagClass(tag: string): string {
   switch (tag.toLowerCase()) {
     case "production blocker":
@@ -312,6 +360,7 @@ function collectTags(a: Assessment): Map<string, string[]> {
     if (!cur.some((t) => t.toLowerCase() === tag.toLowerCase())) cur.push(tag);
     tags.set(id, cur);
   };
+  // Pack tags only — do not mirror Status (PASS/FAIL/…) here.
   for (const f of a.findings.productionBlockers ?? [])
     add(f.checkId, "Production blocker");
   for (const f of a.findings.critical ?? []) add(f.checkId, "Critical");
@@ -319,14 +368,6 @@ function collectTags(a: Assessment): Map<string, string[]> {
   for (const f of a.findings.medium ?? []) add(f.checkId, "Medium");
   for (const f of a.findings.low ?? []) add(f.checkId, "Low");
   for (const f of a.findings.quickWins ?? []) add(f.checkId, "Quick win");
-  for (const c of a.controls) {
-    if (tags.has(c.checkId)) continue;
-    const sev = (c.severity || "medium").toLowerCase();
-    add(
-      c.checkId,
-      sev.charAt(0).toUpperCase() + sev.slice(1),
-    );
-  }
   return tags;
 }
 
@@ -336,7 +377,7 @@ function tagPills(tags: string[]): string {
     .join(" ");
 }
 
-function controlCard(c: Control): string {
+function controlDetailBody(c: Control): string {
   const evidence =
     c.evidenceFound?.length ?
       `<ul>${c.evidenceFound.map((e) => `<li><code>${esc(e.ref)}</code>${e.excerpt ? ` — ${esc(e.excerpt)}` : ""}</li>`).join("")}</ul>`
@@ -348,8 +389,7 @@ function controlCard(c: Control): string {
   const rem = c.remediation
     ? `<p><strong>Remediation:</strong> ${esc(c.remediation.fix)}${c.remediation.owner ? ` · owner ${esc(c.remediation.owner)}` : ""}${c.remediation.estimatedEffort ? ` · effort ${esc(c.remediation.estimatedEffort)}` : ""}</p>`
     : "";
-  return `<article class="control" id="${esc(c.checkId)}">
-  <h3><code>${esc(c.checkId)}</code> — ${esc(c.title)}</h3>
+  return `
   <p class="meta">${esc(c.category)} · ${esc(c.gate)} · ${esc(c.severity)} ·
     <span class="pill ${statusClass(c.status)}">${esc(c.status)}</span> ·
     confidence ${esc(c.confidence)}${c.confidenceScore != null ? ` (${esc(c.confidenceScore)})` : ""} ·
@@ -359,24 +399,89 @@ function controlCard(c: Control): string {
   <p><strong>Reasoning:</strong> ${esc(c.reasoning)}</p>
   <p><strong>Recommended action:</strong> ${esc(c.recommendedAction)}</p>
   ${c.naReason ? `<p><strong>N/A rationale:</strong> ${esc(c.naReason)}</p>` : ""}
-  ${rem}
-</article>`;
+  ${rem}`;
 }
 
-/** Sort: production blockers first, then Critical→Low, then quick wins, then rest. */
+/** Table listing + hidden detail panels for the flyout. */
+function controlsTableAndFlyout(
+  ordered: Control[],
+  tagsById: Map<string, string[]>,
+  statusCounts: Record<string, number>,
+): { table: string; panels: string } {
+  const rows = ordered
+    .map((c) => {
+      const tags = tagsById.get(c.checkId) ?? [];
+      return `<tr class="control-row" tabindex="0" role="button" data-control-id="${esc(c.checkId)}" data-status="${esc(c.status)}" aria-label="Open details for ${esc(c.checkId)}">
+  <td><code>${esc(c.checkId)}</code></td>
+  <td>${esc(c.title)}</td>
+  <td>${esc(controlDomain(c))}</td>
+  <td><span class="pill ${statusClass(c.status)}">${esc(c.status)}</span></td>
+  <td>${esc(c.confidence)}${c.confidenceScore != null ? ` <span class="meta">(${esc(c.confidenceScore)})</span>` : ""}</td>
+  <td>${tagPills(tags) || `<span class="empty">—</span>`}</td>
+  <td>${esc(c.priority)}</td>
+</tr>`;
+    })
+    .join("\n");
+
+  const table = `<div class="status-filter" role="group" aria-label="Filter by status">
+  <button type="button" class="filter-chip active" data-filter="all">All <strong>${ordered.length}</strong></button>
+  <button type="button" class="filter-chip" data-filter="PASS">Passed <strong>${statusCounts.PASS ?? 0}</strong></button>
+  <button type="button" class="filter-chip" data-filter="FAIL">Failed <strong>${statusCounts.FAIL ?? 0}</strong></button>
+  <button type="button" class="filter-chip" data-filter="PARTIAL">Partial <strong>${statusCounts.PARTIAL ?? 0}</strong></button>
+  <button type="button" class="filter-chip" data-filter="NOT_DEMONSTRATED">Not demonstrated <strong>${statusCounts.NOT_DEMONSTRATED ?? 0}</strong></button>
+  <button type="button" class="filter-chip" data-filter="NOT_APPLICABLE">N/A <strong>${statusCounts.NOT_APPLICABLE ?? 0}</strong></button>
+</div>
+<div class="table-wrap">
+<table class="controls-table">
+  <thead>
+    <tr>
+      <th>Check</th>
+      <th>Title</th>
+      <th>Domain</th>
+      <th>Status</th>
+      <th>Confidence</th>
+      <th>Tags</th>
+      <th>Priority</th>
+    </tr>
+  </thead>
+  <tbody>
+${rows}
+  </tbody>
+</table>
+</div>
+<p class="meta">Click a row for evidence, reasoning, and remediation. Use status chips to show Passed / Failed / Partial / …</p>`;
+
+  const panels = ordered
+    .map(
+      (c) =>
+        `<div class="flyout-panel" id="detail-${esc(c.checkId)}" hidden data-title="${esc(c.checkId)} — ${esc(c.title)}">
+${controlDetailBody(c)}
+</div>`,
+    )
+    .join("\n");
+
+  return { table, panels };
+}
+
+/** Sort: blockers → open gaps by severity → partial → passed → N/A. */
 function sortControls(controls: Control[], tags: Map<string, string[]>): Control[] {
-  const rank = (id: string): number => {
-    const t = (tags.get(id) ?? []).map((x) => x.toLowerCase());
+  const rank = (c: Control): number => {
+    const t = (tags.get(c.checkId) ?? []).map((x) => x.toLowerCase());
     if (t.includes("production blocker")) return 0;
-    if (t.includes("critical")) return 1;
-    if (t.includes("high")) return 2;
-    if (t.includes("medium")) return 3;
-    if (t.includes("low")) return 4;
-    if (t.includes("quick win")) return 5;
-    return 6;
+    if (c.status === "FAIL") return 1;
+    if (c.status === "NOT_DEMONSTRATED") return 2;
+    if (c.status === "PARTIAL") return 3;
+    if (t.includes("critical")) return 4;
+    if (t.includes("high")) return 5;
+    if (t.includes("medium")) return 6;
+    if (t.includes("low")) return 7;
+    if (t.includes("quick win")) return 8;
+    if (c.status === "PASS") return 9;
+    if (c.status === "NOT_APPLICABLE") return 10;
+    return 11;
   };
   return [...controls].sort((a, b) => {
-    const d = rank(a.checkId) - rank(b.checkId);
+    const d = rank(a) - rank(b);
     return d !== 0 ? d : a.checkId.localeCompare(b.checkId);
   });
 }
@@ -413,14 +518,11 @@ function render(a: Assessment): string {
 
   const tagsById = collectTags(a);
   const ordered = sortControls(a.controls, tagsById);
-  const listing = ordered
-    .map((c) => {
-      const tags = tagsById.get(c.checkId) ?? [];
-      return `<li><a href="#${esc(c.checkId)}">${esc(c.checkId)}</a> <span class="pill ${statusClass(c.status)}">${esc(c.status)}</span> ${tagPills(tags)}</li>`;
-    })
-    .join("");
-  const controlsHtml = ordered.map((c) => controlCard(c)).join("\n");
-
+  const { table: controlsTable, panels: flyoutPanels } = controlsTableAndFlyout(
+    ordered,
+    tagsById,
+    statusCounts,
+  );
   const excluded =
     a.scope.excludedCheckIds?.length ?
       `<ul>${a.scope.excludedCheckIds.map((e) => `<li><strong>${esc(e.id)}</strong> — ${esc(e.reason)}</li>`).join("")}</ul>`
@@ -533,27 +635,74 @@ function render(a: Assessment): string {
     table { width: 100%; border-collapse: collapse; background: var(--card); }
     th, td { text-align: left; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--line); font-family: "IBM Plex Sans", "Segoe UI", sans-serif; font-size: 0.92rem; }
     th { color: var(--muted); font-weight: 600; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); background: var(--card); }
+    .controls-table { margin: 0; }
+    .controls-table th { white-space: nowrap; background: #f0eeea; }
+    .control-row { cursor: pointer; }
+    .control-row:hover, .control-row:focus { background: #f3f7f8; outline: none; }
+    .control-row:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+    .control-row[hidden] { display: none; }
+    .status-filter {
+      display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.75rem 0 0.85rem;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+    }
+    .filter-chip {
+      border: 1px solid var(--line); background: var(--card); color: var(--ink);
+      padding: 0.35rem 0.65rem; cursor: pointer; font-size: 0.82rem;
+    }
+    .filter-chip strong { font-variant-numeric: tabular-nums; }
+    .filter-chip:hover { background: #f3f7f8; }
+    .filter-chip.active { border-color: var(--accent); color: var(--accent); background: #e7eef1; }
     .pill {
       display: inline-block; font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
       font-size: 0.72rem; font-weight: 650; letter-spacing: 0.04em;
       padding: 0.15rem 0.45rem; border: 1px solid currentColor;
+      margin: 0.1rem 0.15rem 0.1rem 0;
     }
     .ok { color: var(--ok); } .bad { color: var(--bad); } .warn { color: var(--warn); }
     .muted, .na { color: var(--na); }
     .prio { font-family: "IBM Plex Sans", sans-serif; font-size: 0.75rem; color: var(--muted); }
-    .control { background: var(--card); border: 1px solid var(--line); padding: 1rem 1.1rem; margin: 0.85rem 0; }
     code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.88em; }
     ul { padding-left: 1.2rem; }
-    .toc a { color: var(--accent); text-decoration: none; }
-    .toc a:hover { text-decoration: underline; }
     footer a { color: var(--accent); }
+    .flyout-backdrop {
+      position: fixed; inset: 0; background: rgba(26, 31, 36, 0.35);
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 40;
+    }
+    .flyout-backdrop.open { opacity: 1; pointer-events: auto; }
+    .flyout {
+      position: fixed; top: 0; right: 0; height: 100%; width: min(420px, 94vw);
+      background: var(--card); border-left: 1px solid var(--line);
+      box-shadow: -8px 0 24px rgba(26, 31, 36, 0.12);
+      transform: translateX(100%); transition: transform 0.22s ease;
+      z-index: 50; display: flex; flex-direction: column;
+      font-family: "Source Serif 4", Georgia, serif;
+    }
+    .flyout.open { transform: translateX(0); }
+    .flyout-header {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;
+      padding: 1.1rem 1.15rem; border-bottom: 1px solid var(--line);
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+    }
+    .flyout-header h3 { margin: 0; font-size: 1rem; line-height: 1.35; }
+    .flyout-close {
+      border: 1px solid var(--line); background: #f7f5f1; color: var(--ink);
+      font-family: "IBM Plex Sans", sans-serif; font-size: 0.85rem;
+      padding: 0.35rem 0.55rem; cursor: pointer; flex: 0 0 auto;
+    }
+    .flyout-close:hover { background: #ebe7e0; }
+    .flyout-body { padding: 1.1rem 1.15rem 2rem; overflow-y: auto; flex: 1; }
+    .flyout-panels { display: none; }
     @media print {
       body { background: white; }
-      .control, .stat, .viz-card { break-inside: avoid; }
+      .stat, .viz-card, .table-wrap { break-inside: avoid; }
+      .flyout, .flyout-backdrop { display: none !important; }
+      .flyout-panels { display: block !important; }
+      .flyout-panel { display: block !important; border: 1px solid var(--line); padding: 0.85rem; margin: 0.75rem 0; page-break-inside: avoid; }
+      .flyout-panel[hidden] { display: block !important; }
     }
   </style>
-</head>
-<body>
+</head><body>
   <header>
     <div class="brand">APRF Auditor · <a href="${STACKRAIL.home}" rel="noopener">StackRail</a></div>
     <h1>${esc(a.subject.name)}</h1>
@@ -610,8 +759,7 @@ function render(a: Assessment): string {
     )}
 
     <h2>Controls &amp; Findings</h2>
-    <nav class="toc"><ol>${listing}</ol></nav>
-    ${controlsHtml}
+    ${controlsTable}
 
     <h2>Roadmaps</h2>
     ${roadmap("30 days", a.roadmaps.days30)}
@@ -630,12 +778,84 @@ function render(a: Assessment): string {
     <a href="${STACKRAIL.home}" rel="noopener">stackrail.io</a> ·
     <a href="${STACKRAIL.github}" rel="noopener">APRF on GitHub</a>
   </footer>
+
+  <div class="flyout-backdrop" id="flyout-backdrop" hidden></div>
+  <aside class="flyout" id="control-flyout" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="flyout-title">
+    <div class="flyout-header">
+      <h3 id="flyout-title">Control details</h3>
+      <button type="button" class="flyout-close" id="flyout-close" aria-label="Close details">Close</button>
+    </div>
+    <div class="flyout-body" id="flyout-body"></div>
+  </aside>
+  <div class="flyout-panels" id="flyout-panels">${flyoutPanels}</div>
+
+  <script>
+    (function () {
+      var backdrop = document.getElementById("flyout-backdrop");
+      var flyout = document.getElementById("control-flyout");
+      var body = document.getElementById("flyout-body");
+      var title = document.getElementById("flyout-title");
+      var closeBtn = document.getElementById("flyout-close");
+      var panels = document.getElementById("flyout-panels");
+      if (!backdrop || !flyout || !body || !title || !closeBtn || !panels) return;
+
+      function openFlyout(id) {
+        var panel = document.getElementById("detail-" + id);
+        if (!panel) return;
+        title.textContent = panel.getAttribute("data-title") || id;
+        body.innerHTML = panel.innerHTML;
+        backdrop.hidden = false;
+        requestAnimationFrame(function () {
+          backdrop.classList.add("open");
+          flyout.classList.add("open");
+        });
+        flyout.setAttribute("aria-hidden", "false");
+        closeBtn.focus();
+      }
+
+      function closeFlyout() {
+        backdrop.classList.remove("open");
+        flyout.classList.remove("open");
+        flyout.setAttribute("aria-hidden", "true");
+        setTimeout(function () { backdrop.hidden = true; }, 220);
+      }
+
+      document.querySelectorAll(".control-row").forEach(function (row) {
+        row.addEventListener("click", function () {
+          openFlyout(row.getAttribute("data-control-id"));
+        });
+        row.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openFlyout(row.getAttribute("data-control-id"));
+          }
+        });
+      });
+      closeBtn.addEventListener("click", closeFlyout);
+      backdrop.addEventListener("click", closeFlyout);
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && flyout.classList.contains("open")) closeFlyout();
+      });
+
+      document.querySelectorAll(".filter-chip").forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          var filter = chip.getAttribute("data-filter") || "all";
+          document.querySelectorAll(".filter-chip").forEach(function (c) {
+            c.classList.toggle("active", c === chip);
+          });
+          document.querySelectorAll(".control-row").forEach(function (row) {
+            var status = row.getAttribute("data-status");
+            if (filter === "all" || status === filter) row.removeAttribute("hidden");
+            else row.setAttribute("hidden", "");
+          });
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
 `;
-}
-
-function parseArgs(argv: string[]) {
+}function parseArgs(argv: string[]) {
   let input = resolve(process.cwd(), "aprf-assessment/assessment.json");
   let output = resolve(process.cwd(), "aprf-assessment/REPORT.html");
   for (let i = 2; i < argv.length; i++) {
