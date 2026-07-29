@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ## [Unreleased]
 
+### Fixed
+- `@stackrail-io/aprf-engine` no longer advertises a published disk loader; `src/loader.ts` remains repo-script tooling only. Moved `ajv` / `ajv-formats` / `yaml` to `devDependencies` (patch **0.10.1**).
+- Attestation schema 0.6: N/A is not a pass (`passed` must be `false` when `notApplicable` is true); removed “gate-satisfied” wording that contradicted evaluate helpers.
+- Package README `validate` script description now matches root `package.json` (includes both packages’ `test:unit`).
+- Root `package.json` declares `engines.node: >=22` (aligned with packages and README).
+- CI asserts `schemas/aprf-rule-1.0.json` matches `packages/aprf-engine/rules/_schema/rule.schema.json`.
+- npm packages ship `NOTICE` alongside `LICENSE` (`aprf-engine` / `aprf-framework-definition` **0.10.1**).
+
 ## [0.10.0] — 2026-07-28
 
 Public normative monorepo release: Check YAML catalog, publishable npm packages, and CI integrity gates.

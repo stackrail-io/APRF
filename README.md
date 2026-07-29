@@ -35,7 +35,7 @@ This is the **normative public home** for APRF releases (Layers 1–3 + governan
 
 | Path | Contents |
 | --- | --- |
-| [`packages/aprf-engine/`](packages/aprf-engine/) | Check YAML catalog, schema, loader/index/evaluate (`@stackrail-io/aprf-engine`) |
+| [`packages/aprf-engine/`](packages/aprf-engine/) | Check YAML catalog, schema, generated catalog, index/evaluate (`@stackrail-io/aprf-engine`) |
 | [`packages/framework-definition/`](packages/framework-definition/) | Profiles, lenses, Policy (`@stackrail-io/aprf-framework-definition`) |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Three-plane architecture and runtime component design |
 | [`SECURITY.md`](SECURITY.md) / [`CONTRIBUTING.md`](CONTRIBUTING.md) | Vulnerability reporting and contribution guide |
@@ -56,7 +56,7 @@ npm install @stackrail-io/aprf-engine @stackrail-io/aprf-framework-definition
 
 | Package | Role |
 | --- | --- |
-| `@stackrail-io/aprf-engine` | YAML Checks as the source of truth; JSON Schema; load/index/evaluate helpers; generated TypeScript catalog |
+| `@stackrail-io/aprf-engine` | YAML Checks as the source of truth; JSON Schema; generated TypeScript catalog; index/evaluate helpers |
 | `@stackrail-io/aprf-framework-definition` | Core (40) / Regulated (61) profiles, lenses (RAG/Agents/Voice/Coding), Policy overlays, Check applicability |
 
 Today the catalog holds **177 Checks** across **27 categories** (pillars). New Checks are data files — no engine code changes required.

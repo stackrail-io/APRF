@@ -1,5 +1,7 @@
 /**
- * Node-only YAML rule loader. Do not import from browser bundles.
+ * Node-only YAML rule loader for repo scripts (validate / build-catalog).
+ * Intentionally excluded from the published `dist/` API — npm consumers use
+ * `getGeneratedCatalog()` / `getGeneratedRuleIndex()`. Do not import from browser bundles.
  */
 import { readFileSync, readdirSync, existsSync } from "fs";
 import { join, dirname } from "path";

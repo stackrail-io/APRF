@@ -114,7 +114,7 @@
               },
               "notApplicable": {
                 "type": "boolean",
-                "description": "When true, check is attested N/A and counts as gate-satisfied. Prefer documenting naReason."
+                "description": "When true, the check is attested N/A. N/A is not a pass — `passed` must be false. Prefer documenting naReason. Whether N/A removes the check from the mandatory gate set is a scoring concern; never treat N/A as a successful pass."
               },
               "naReason": {
                 "type": "string"
@@ -123,7 +123,24 @@
                 "type": "string"
               }
             },
-            "additionalProperties": true
+            "additionalProperties": true,
+            "if": {
+              "properties": {
+                "notApplicable": {
+                  "const": true
+                }
+              },
+              "required": [
+                "notApplicable"
+              ]
+            },
+            "then": {
+              "properties": {
+                "passed": {
+                  "const": false
+                }
+              }
+            }
           }
         }
       }
