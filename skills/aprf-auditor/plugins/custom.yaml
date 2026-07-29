@@ -1,0 +1,18 @@
+id: custom
+title: Out-of-plugin / catch-all customer evidence
+version: "0.2.0"
+executor: collectors/import-ingest.ts
+evidenceClass: user
+inputs:
+  - "aprf-assessment/imports/custom/** (any file the customer provides that has no dedicated plugin)"
+collect:
+  - "Ingest every file under imports/custom/ as user-class evidence nodes"
+  - "Agent maps nodes to Checks via passCondition / evidenceRequired (plugins are not a whitelist)"
+  - "Confidence follows user class (0.30 base); cannot override FAIL from higher-rank evidence"
+emits:
+  nodeClass: user
+  refPattern: "imports/custom/*"
+  signals: [user-provided-artifact, out-of-plugin, custom-catch-all]
+mapsToChecks: ["*"]
+whenUnavailable: "Optional — skip if empty; do not FAIL merely because custom/ is unused"
+builtin: true

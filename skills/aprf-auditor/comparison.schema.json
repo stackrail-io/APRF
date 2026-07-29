@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stackrail.io/aprf/auditor-comparison/0.2",
+  "title": "APRF Auditor Comparison",
+  "type": "object",
+  "required": ["schemaVersion", "baseline", "candidate", "summary", "deltas"],
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "0.2.0" },
+    "baseline": {
+      "type": "object",
+      "required": ["label", "assessmentPath"],
+      "properties": {
+        "label": { "type": "string" },
+        "assessmentPath": { "type": "string" },
+        "gitRef": { "type": "string" },
+        "assessedAt": { "type": "string" }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "required": ["label", "assessmentPath"],
+      "properties": {
+        "label": { "type": "string" },
+        "assessmentPath": { "type": "string" },
+        "gitRef": { "type": "string" },
+        "assessedAt": { "type": "string" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "newlyPassed",
+        "regressions",
+        "newBlockers",
+        "resolvedBlockers",
+        "unchanged"
+      ],
+      "properties": {
+        "newlyPassed": { "type": "integer" },
+        "regressions": { "type": "integer" },
+        "newBlockers": { "type": "integer" },
+        "resolvedBlockers": { "type": "integer" },
+        "unchanged": { "type": "integer" },
+        "gateBaseline": { "type": "boolean" },
+        "gateCandidate": { "type": "boolean" }
+      }
+    },
+    "deltas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["checkId", "fromStatus", "toStatus", "kind"],
+        "properties": {
+          "checkId": { "type": "string" },
+          "fromStatus": { "type": "string" },
+          "toStatus": { "type": "string" },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "newly-passed",
+              "regression",
+              "new-blocker",
+              "resolved-blocker",
+              "status-change",
+              "unchanged"
+            ]
+          },
+          "note": { "type": "string" }
+        }
+      }
+    }
+  }
+}

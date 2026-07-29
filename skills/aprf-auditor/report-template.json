@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "0.1.0",
+  "aprfVersion": "0.10.1",
+  "skillVersion": "0.1.0",
+  "assessedAt": "2026-07-29T00:00:00.000Z",
+  "subject": {
+    "path": "/absolute/or/relative/project",
+    "name": "example-service",
+    "gitCommit": "optional-sha"
+  },
+  "scope": {
+    "profileId": "aprf-profile-core",
+    "criticality": 2,
+    "lensIds": [],
+    "checkIds": ["SEC2-M1", "PRM-M1"]
+  },
+  "executiveSummary": {
+    "overallGatePassed": false,
+    "overallGrade": "F",
+    "riskLevel": "high",
+    "assessmentConfidence": "low",
+    "recommendedScore": 42,
+    "blockerCount": 2,
+    "criticalBlockerCount": 1,
+    "narrative": "Local agent assessment against APRF Core. Critical secrets control not demonstrated; gate cannot pass."
+  },
+  "domainScores": [
+    {
+      "domain": "Security",
+      "score": 25,
+      "mandatoryGatePassed": false,
+      "applicable": 4,
+      "satisfied": 1,
+      "notDemonstrated": 2
+    }
+  ],
+  "controls": [
+    {
+      "checkId": "SEC2-M1",
+      "title": "Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks",
+      "category": "secrets",
+      "gate": "mandatory",
+      "severity": "critical",
+      "status": "NOT_DEMONSTRATED",
+      "passed": false,
+      "confidence": "low",
+      "evidenceFound": [],
+      "requiredEvidenceMissing": [
+        "Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths"
+      ],
+      "reasoning": "No secrets-manager references or secret-scan workflow observed in the assessed tree.",
+      "recommendedAction": "Add a CI secret scan covering prompts/fixtures and wire runtime secrets to a manager.",
+      "priority": "P1"
+    }
+  ],
+  "findings": {
+    "critical": [],
+    "high": [
+      {
+        "checkId": "SEC2-M1",
+        "title": "Secrets manager / scan evidence missing",
+        "status": "NOT_DEMONSTRATED",
+        "summary": "Cannot demonstrate SEC2-M1; treat as gate blocker until evidence exists.",
+        "priority": "P1"
+      }
+    ],
+    "medium": [],
+    "low": [],
+    "quickWins": [
+      {
+        "checkId": "SEC2-M1",
+        "title": "Enable gitleaks in CI",
+        "status": "NOT_DEMONSTRATED",
+        "summary": "Add .github/workflows secret scan — low effort, high signal."
+      }
+    ],
+    "productionBlockers": [
+      {
+        "checkId": "SEC2-M1",
+        "title": "Secrets control not demonstrated",
+        "status": "NOT_DEMONSTRATED",
+        "summary": "Mandatory critical control lacks evidence.",
+        "priority": "P1"
+      }
+    ]
+  },
+  "roadmaps": {
+    "days30": [
+      "Add secret scan CI and remove any plaintext credentials from the tree.",
+      "Document secrets manager wiring for production runtime."
+    ],
+    "days90": [
+      "Extend scans to prompt registries and eval fixtures.",
+      "Automate detector IDs declared on SEC2-* Checks where possible."
+    ],
+    "longTerm": [
+      "Adopt Regulated profile if tier-3 / regulated workloads are in scope."
+    ]
+  },
+  "discovery": {
+    "found": [".github/workflows", "Dockerfile", "src/"],
+    "absent": ["prompts/", "eval/", "otel config"]
+  },
+  "disclaimer": "Local APRF Auditor skill assessment — evidence-based self-attestation aid only. Not third-party certification. Not proof of NIST, ISO, or SOC 2 compliance."
+}

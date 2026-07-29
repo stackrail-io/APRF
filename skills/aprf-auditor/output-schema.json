@@ -1,0 +1,423 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stackrail.io/aprf/auditor-assessment/0.2",
+  "title": "APRF Auditor Assessment",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "aprfVersion",
+    "skillVersion",
+    "assessedAt",
+    "subject",
+    "scope",
+    "executiveSummary",
+    "domainScores",
+    "controls",
+    "findings",
+    "roadmaps",
+    "disclaimer"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "0.2.0" },
+    "aprfVersion": { "type": "string" },
+    "skillVersion": { "type": "string" },
+    "assessedAt": { "type": "string", "format": "date-time" },
+    "subject": {
+      "type": "object",
+      "required": ["path", "name"],
+      "additionalProperties": true,
+      "properties": {
+        "path": { "type": "string" },
+        "name": { "type": "string" },
+        "gitCommit": { "type": "string" },
+        "buildId": { "type": "string" },
+        "organization": { "type": "string" }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "required": ["profileId", "criticality", "lensIds"],
+      "additionalProperties": true,
+      "properties": {
+        "profileId": { "type": "string" },
+        "criticality": { "type": "integer", "minimum": 1, "maximum": 3 },
+        "lensIds": { "type": "array", "items": { "type": "string" } },
+        "checkIds": { "type": "array", "items": { "type": "string" } },
+        "mode": {
+          "type": "string",
+          "enum": ["assess", "compare", "history-append"]
+        },
+        "systemType": {
+          "type": "string",
+          "enum": ["ai-application", "non-ai-platform", "unknown"]
+        },
+        "assessmentKind": {
+          "type": "string",
+          "enum": [
+            "aprf-core",
+            "aprf-regulated",
+            "full-catalog",
+            "non-ai-platform-subset"
+          ]
+        },
+        "scopeId": { "type": "string" },
+        "excludedCheckIds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "reason"],
+            "properties": {
+              "id": { "type": "string" },
+              "reason": { "type": "string" }
+            }
+          }
+        },
+        "reportBanner": { "type": "string" }
+      }
+    },
+    "evidenceGraphPath": { "type": "string" },
+    "executiveSummary": {
+      "type": "object",
+      "required": [
+        "overallGatePassed",
+        "criticalityTier",
+        "criticalityName",
+        "requiredCapabilityLevel",
+        "requiredCapabilityName",
+        "assessmentConfidence",
+        "recommendedScore",
+        "blockerCount",
+        "criticalBlockerCount",
+        "narrative"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "overallGatePassed": { "type": "boolean" },
+        "criticalityTier": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "APRF criticality tier 0–3"
+        },
+        "criticalityName": {
+          "type": "string",
+          "enum": ["Sandbox", "Internal", "Production", "Mission Critical"]
+        },
+        "requiredCapabilityLevel": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "requiredCapabilityName": {
+          "type": "string",
+          "enum": [
+            "Initial",
+            "Managed",
+            "Defined",
+            "Quantitatively Managed",
+            "Optimizing"
+          ]
+        },
+        "assessedCapabilityLevel": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Optional inferred floor from passed Check maturity requirements"
+        },
+        "assessedCapabilityName": { "type": "string" },
+        "maturityUrl": {
+          "type": "string",
+          "const": "https://stackrail.io/aprf/how/#maturity"
+        },
+        "overallGrade": {
+          "type": "string",
+          "enum": ["A", "B", "C", "D", "F"],
+          "description": "Secondary communication label only"
+        },
+        "riskLevel": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low", "informational"],
+          "description": "Secondary communication label only"
+        },
+        "assessmentConfidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        },
+        "recommendedScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "blockerCount": { "type": "integer", "minimum": 0 },
+        "criticalBlockerCount": { "type": "integer", "minimum": 0 },
+        "narrative": { "type": "string" }
+      }
+    },
+    "domainScores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["domain", "score", "mandatoryGatePassed"],
+        "additionalProperties": true,
+        "properties": {
+          "domain": { "type": "string" },
+          "score": { "type": "number", "minimum": 0, "maximum": 100 },
+          "mandatoryGatePassed": { "type": "boolean" },
+          "applicable": { "type": "integer" },
+          "satisfied": { "type": "integer" },
+          "notDemonstrated": { "type": "integer" }
+        }
+      }
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "checkId",
+          "title",
+          "category",
+          "gate",
+          "severity",
+          "status",
+          "confidence",
+          "evidenceFound",
+          "reasoning",
+          "recommendedAction",
+          "priority"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "checkId": { "type": "string" },
+          "title": { "type": "string" },
+          "category": { "type": "string" },
+          "gate": { "type": "string", "enum": ["mandatory", "recommended"] },
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low"]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PASS",
+              "FAIL",
+              "PARTIAL",
+              "NOT_DEMONSTRATED",
+              "NOT_APPLICABLE"
+            ]
+          },
+          "passed": { "type": "boolean" },
+          "notApplicable": { "type": "boolean" },
+          "naReason": { "type": "string" },
+          "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+          "confidenceScore": { "type": "number", "minimum": 0, "maximum": 1 },
+          "primaryEvidenceClass": {
+            "type": "string",
+            "enum": [
+              "runtime",
+              "ci",
+              "iac",
+              "runtime-config",
+              "policy",
+              "code",
+              "docs",
+              "user"
+            ]
+          },
+          "evidenceFound": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/evidenceItem" }
+          },
+          "requiredEvidenceMissing": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "reasoning": { "type": "string" },
+          "recommendedAction": { "type": "string" },
+          "priority": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] },
+          "userAttestation": { "$ref": "#/$defs/userAttestation" },
+          "remediation": { "$ref": "#/$defs/remediation" }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": { "notApplicable": { "const": true } },
+              "required": ["notApplicable"]
+            },
+            "then": {
+              "properties": { "passed": { "const": false } }
+            }
+          }
+        ]
+      }
+    },
+    "findings": {
+      "type": "object",
+      "required": [
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "quickWins",
+        "productionBlockers"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "critical": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+        "high": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+        "medium": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+        "low": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+        "quickWins": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+        "productionBlockers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        }
+      }
+    },
+    "roadmaps": {
+      "type": "object",
+      "required": ["days30", "days90", "longTerm"],
+      "additionalProperties": false,
+      "properties": {
+        "days30": { "type": "array", "items": { "type": "string" } },
+        "days90": { "type": "array", "items": { "type": "string" } },
+        "longTerm": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "discovery": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "found": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Artifacts observed in the project"
+        },
+        "notObserved": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Common tech paths not present — NOT a defect by itself (e.g. k8s/helm)"
+        },
+        "requiredEvidenceMissing": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Evidence still needed for in-scope Checks (gate-relevant)"
+        },
+        "absent": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Deprecated alias — prefer notObserved; do not treat as required"
+        },
+        "pluginsRan": { "type": "array", "items": { "type": "string" } },
+        "pluginsNeedsUser": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "historySummary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["assessedAt", "overallGatePassed"],
+        "additionalProperties": true,
+        "properties": {
+          "assessedAt": { "type": "string" },
+          "overallGatePassed": { "type": "boolean" },
+          "overallGrade": { "type": "string" },
+          "reason": { "type": "string" },
+          "gitCommit": { "type": "string" }
+        }
+      }
+    },
+    "disclaimer": { "type": "string" }
+  },
+  "$defs": {
+    "evidenceItem": {
+      "type": "object",
+      "required": ["ref"],
+      "additionalProperties": true,
+      "properties": {
+        "ref": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "file",
+            "config",
+            "ci",
+            "iac",
+            "runtime",
+            "policy",
+            "code",
+            "docs",
+            "user-answer",
+            "attest",
+            "other"
+          ]
+        },
+        "class": {
+          "type": "string",
+          "enum": [
+            "runtime",
+            "ci",
+            "iac",
+            "runtime-config",
+            "policy",
+            "code",
+            "docs",
+            "user"
+          ]
+        },
+        "lastModified": { "type": "string" },
+        "gitCommit": { "type": "string" },
+        "buildId": { "type": "string" },
+        "evidenceAgeDays": { "type": ["number", "null"] },
+        "role": { "type": "string", "enum": ["primary", "supporting"] }
+      }
+    },
+    "userAttestation": {
+      "type": "object",
+      "required": ["answer"],
+      "additionalProperties": false,
+      "properties": {
+        "answer": {
+          "type": "string",
+          "enum": ["yes", "no", "unknown"],
+          "description": "Customer reply for a Check that lacked repo evidence: yes=have it, no=don't have it, unknown=don't know"
+        },
+        "detail": {
+          "type": "string",
+          "description": "Optional free text, path, or pointer to imports/custom/"
+        },
+        "askedAt": {
+          "type": "string",
+          "description": "ISO-8601 timestamp when the question was asked"
+        }
+      }
+    },
+    "remediation": {
+      "type": "object",
+      "required": ["fix", "priority"],
+      "additionalProperties": true,
+      "properties": {
+        "fix": { "type": "string" },
+        "example": { "type": "string" },
+        "reference": { "type": "string" },
+        "owner": { "type": "string" },
+        "priority": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] },
+        "estimatedEffort": {
+          "type": "string",
+          "enum": ["S", "M", "L", "XL"]
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "required": ["checkId", "title", "status", "summary"],
+      "additionalProperties": true,
+      "properties": {
+        "checkId": { "type": "string" },
+        "title": { "type": "string" },
+        "status": { "type": "string" },
+        "summary": { "type": "string" },
+        "priority": { "type": "string" },
+        "remediation": { "$ref": "#/$defs/remediation" }
+      }
+    }
+  }
+}

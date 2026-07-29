@@ -1,0 +1,74 @@
+# Deterministic evidence precedence for APRF Auditor
+# When multiple artifacts speak to the same Check claim, higher rank wins as PRIMARY.
+# Lower ranks may be SUPPORTING only. Never invent evidence to fill a gap.
+
+version: "0.2.0"
+aprfVersion: "0.10.1"
+
+# Higher rank number = higher precedence (wins conflicts)
+precedence:
+  - rank: 100
+    class: runtime
+    examples: [OpenTelemetry export, LangSmith trace, live metrics snapshot, CloudWatch alarm config export]
+  - rank: 90
+    class: ci
+    examples: [GitHub Actions workflow + recent run log, eval gate job, secret-scan SARIF]
+  - rank: 85
+    class: iac
+    examples: [Terraform, Pulumi, Helm, K8s Deployment, CDK]
+  - rank: 80
+    class: runtime-config
+    examples: [app config YAML/JSON, feature flags, model pin files, MCP manifests]
+  - rank: 70
+    class: policy
+    examples: [OPA/Rego, Cedar, allowlists, org AI policy enforced in CI]
+  - rank: 60
+    class: code
+    examples: [middleware, tool wrappers, guardrail modules]
+  - rank: 40
+    class: docs
+    examples: [README, docs/security.md, ADRs, wiki export, SOC2 PDF]
+  - rank: 20
+    class: user
+    examples: [pasted answer, path provided in chat, signed attestation]
+
+conflictRules:
+  - id: primary-wins
+    rule: "Select the highest-rank node that actually supports the Check passCondition."
+  - id: docs-cannot-override-fail
+    rule: >
+      Documentation alone cannot overturn FAIL from higher-rank evidence
+      (e.g. plaintext key in code + README claiming secrets manager).
+  - id: user-cannot-override-fail
+    rule: "User attestation cannot override FAIL from runtime/ci/iac/code evidence."
+  - id: equal-rank
+    rule: "If same rank, prefer more recent lastModified; then lexicographically smaller ref path."
+
+freshness:
+  assessmentTimestamp: "Always record assessedAt (ISO-8601)."
+  perNodeFields:
+    - lastModified   # file mtime or artifact timestamp if known
+    - gitCommit      # when from VCS
+    - buildId        # CI build / run id when known
+    - evidenceAgeDays  # computed: (assessedAt - lastModified) in days; null if unknown
+  decay:
+    # Multiplies base confidenceScore (see confidence.yaml). Clamp to [0, 1].
+    # Missing lastModified → treat as unknownAgeMultiplier (do not invent dates).
+    unknownAgeMultiplier: 0.85
+    bands:
+      - maxAgeDays: 30
+        multiplier: 1.0
+      - maxAgeDays: 90
+        multiplier: 0.9
+      - maxAgeDays: 365
+        multiplier: 0.7
+      - maxAgeDays: null   # older than 365 or ancient PDFs
+        multiplier: 0.5
+  notes:
+    - "A 2023 SOC2 PDF (docs) does not equal today's Terraform (iac)."
+    - "Stale runtime exports (>90d) should be PARTIAL or low confidence unless user refreshes."
+
+askUserWhen:
+  - "No node at class ≥ policy (rank 70) supports a mandatory Check"
+  - "Only docs/user nodes found for a critical mandatory Check"
+  - "Runtime evidence is required by Check.evidenceRequired but no runtime plugin/export present"

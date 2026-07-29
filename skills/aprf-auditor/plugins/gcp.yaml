@@ -1,0 +1,14 @@
+id: gcp
+title: GCP Vertex / Secret Manager / Cloud Monitoring
+version: "0.2.0"
+evidenceClass: iac
+alsoEmits: [runtime]
+inputs: ["TF/DM", "optional Monitoring export"]
+collect:
+  - "Parse Secret Manager, Vertex AI, monitoring alert policies in IaC"
+emits:
+  nodeClass: iac
+  refPattern: "**/*gcp*|**/vertex*"
+  signals: [secret-manager, monitoring, vertex]
+mapsToChecks: [SEC2-M1, OBS-M1, MOD-M1]
+whenUnavailable: "Ask for exports"

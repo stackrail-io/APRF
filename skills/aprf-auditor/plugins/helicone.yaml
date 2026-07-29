@@ -1,0 +1,14 @@
+id: helicone
+title: Helicone gateway / logging export
+version: "0.2.0"
+evidenceClass: runtime
+inputs: ["aprf-assessment/imports/helicone/", "proxy config in-repo"]
+collect:
+  - "Detect Helicone base URL / headers in config"
+  - "Prefer user export for request logs"
+emits:
+  nodeClass: runtime
+  refPattern: "imports/helicone/*"
+  signals: [request-log, cost, cache]
+mapsToChecks: [OBS-M1, COST-M1, COST-M2]
+whenUnavailable: "Ask user for export"

@@ -1,0 +1,417 @@
+# Evidence map for APRF Auditor
+# Agents MUST also load each Check YAML (evidenceRequired, passCondition, detection).
+# This file provides portable search strategies — not a replacement for the catalog.
+
+version: "0.2.0"
+aprfVersion: "0.10.1"
+
+# Report domain ← APRF category.domain (+ special pillar groupings)
+reportDomains:
+  Security:
+    aprfDomains: [security]
+    categories: [ai-security, authentication, authorization, secrets, tool-safety, supply-chain, infrastructure]
+  AI Safety:
+    aprfDomains: [safety]
+    categories: [safety-responsible-ai, explainability]
+  Memory:
+    aprfDomains: [data]
+    categories: [memory-management]
+  Data:
+    aprfDomains: [data]
+    categories: [data-privacy, data-governance]
+  Model Lifecycle:
+    aprfDomains: [model-lifecycle]
+    categories: [model-governance, prompt-engineering, context-engineering, evaluation]
+  Agent Safety:
+    aprfDomains: [agents]
+    categories: [agent-governance, human-approval]
+  Observability:
+    aprfDomains: [reliability]
+    categories: [observability]
+  Reliability:
+    aprfDomains: [reliability]
+    categories: [reliability-continuity, performance-slo]
+  Operations:
+    aprfDomains: [reliability]
+    categories: [change-management, incident-readiness]
+  Cost:
+    aprfDomains: [cost]
+    categories: [cost-optimization]
+  Governance:
+    aprfDomains: [governance]
+    categories: [organizational-governance, compliance]
+  Platform:
+    aprfDomains: [cross-cutting]
+    categories: [platform-engineering]
+
+# Default search strategies by category (globs are hints; always read matching files)
+categoryDefaults:
+  ai-security:
+    search:
+      - "**/prompt*"
+      - "**/*guardrail*"
+      - "**/*moderation*"
+      - "**/*injection*"
+      - "**/policy/**"
+      - "**/openai*/**"
+      - "**/anthropic*/**"
+    signals: [input validation, allowlist, tool mediation, content filter]
+  authentication:
+    search:
+      - "**/*auth*"
+      - "**/middleware/**"
+      - "**/*oauth*"
+      - "**/*oidc*"
+      - "**/*jwt*"
+      - "**/api/**/route.*"
+    signals: [auth middleware, identity provider, service account, mTLS]
+  authorization:
+    search:
+      - "**/*rbac*"
+      - "**/*authz*"
+      - "**/policy/**"
+      - "**/*.rego"
+      - "**/cedar/**"
+    signals: [RBAC, ABAC, scope checks, least privilege]
+  secrets:
+    search:
+      - "**/.env*"
+      - "**/*secret*"
+      - "**/.github/workflows/**"
+      - "**/Dockerfile*"
+      - "**/gitleaks*"
+      - "**/trufflehog*"
+      - "**/sops*"
+      - "**/vault/**"
+    signals: [secrets manager, secret scan CI, no hardcoded keys]
+    failFastPatterns:
+      - 'AKIA[0-9A-Z]{16}'
+      - 'sk-[a-zA-Z0-9]{20,}'
+      - '-----BEGIN (RSA |OPENSSH )?PRIVATE KEY-----'
+  tool-safety:
+    search:
+      - "**/mcp*"
+      - "**/*tool*"
+      - "**/tools/**"
+      - "**/*allowlist*"
+      - "**/openai*functions*"
+    signals: [tool allowlist, sandbox, confirmation, side-effect flags]
+  supply-chain:
+    search:
+      - "**/sbom*"
+      - "**/*provenance*"
+      - "**/.github/workflows/**"
+      - "**/Dockerfile*"
+      - "**/package-lock.json"
+      - "**/pnpm-lock.yaml"
+      - "**/go.sum"
+    signals: [pin digests, signed images, dependency lockfile, SLSA]
+  infrastructure:
+    search:
+      - "**/Dockerfile*"
+      - "**/k8s/**"
+      - "**/helm/**"
+      - "**/*.tf"
+      - "**/network*"
+      - "**/security-group*"
+    signals: [non-root, network policy, isolation, runtime hardening]
+  safety-responsible-ai:
+    search:
+      - "**/*safety*"
+      - "**/*fairness*"
+      - "**/*bias*"
+      - "**/*moderation*"
+      - "**/eval/**"
+    signals: [safety policy, harm taxonomy, red team]
+  explainability:
+    search:
+      - "**/*trace*"
+      - "**/*explain*"
+      - "**/otel*"
+      - "**/*audit*log*"
+    signals: [decision log, citation, reconstructable path]
+  data-privacy:
+    search:
+      - "**/*pii*"
+      - "**/*privacy*"
+      - "**/*redact*"
+      - "**/dpia*"
+      - "**/*retention*"
+    signals: [minimization, classification, DLP]
+  data-governance:
+    search:
+      - "**/corpus*"
+      - "**/dataset*"
+      - "**/rag/**"
+      - "**/index*"
+      - "**/*lineage*"
+    signals: [corpus ownership, labeling, refresh]
+  memory-management:
+    search:
+      - "**/*memory*"
+      - "**/vector*"
+      - "**/redis*"
+      - "**/*session*"
+      - "**/*conversation*"
+    signals: [TTL, tenant isolation, memory scope]
+  model-governance:
+    search:
+      - "**/*model*"
+      - "**/providers/**"
+      - "**/*llm*"
+      - "**/config/**"
+    signals: [pinned model ID, deprecation, capability bound]
+  prompt-engineering:
+    search:
+      - "**/prompts/**"
+      - "**/*prompt*"
+      - "**/*.prompt.md"
+    signals: [versioned prompts, review, registry]
+  context-engineering:
+    search:
+      - "**/rag/**"
+      - "**/*context*"
+      - "**/*chunk*"
+      - "**/retriev*"
+    signals: [context budget, labeling, isolation]
+  evaluation:
+    search:
+      - "**/eval/**"
+      - "**/evals/**"
+      - "**/*golden*"
+      - "**/.github/workflows/**"
+    signals: [eval CI gate, golden set, regression]
+  agent-governance:
+    search:
+      - "**/*agent*"
+      - "**/a2a*"
+      - "**/*orchestr*"
+      - "**/*autonom*"
+    signals: [charter, loop limits, budget, escalation]
+  human-approval:
+    search:
+      - "**/*approval*"
+      - "**/*human*"
+      - "**/*hitl*"
+      - "**/*review*"
+    signals: [approval workflow, dual control]
+  observability:
+    search:
+      - "**/otel*"
+      - "**/*telemetry*"
+      - "**/*tracing*"
+      - "**/logging*"
+      - "**/datadog*"
+      - "**/grafana*"
+    signals: [traces, prompt/tool spans, metrics]
+  performance-slo:
+    search:
+      - "**/*slo*"
+      - "**/*latency*"
+      - "**/grafana*"
+      - "**/*budget*"
+    signals: [SLO, error budget, load test]
+  reliability-continuity:
+    search:
+      - "**/*fallback*"
+      - "**/*circuit*"
+      - "**/*retry*"
+      - "**/*degrad*"
+      - "**/*chaos*"
+    signals: [timeout, fallback, multi-provider]
+  change-management:
+    search:
+      - "**/.github/workflows/**"
+      - "**/deploy*"
+      - "**/*rollback*"
+      - "**/release*"
+      - "**/changelog*"
+    signals: [promotion pipeline, rollback tested]
+  incident-readiness:
+    search:
+      - "**/runbook*"
+      - "**/*incident*"
+      - "**/oncall*"
+      - "**/pager*"
+    signals: [runbook, severity, postmortem]
+  cost-optimization:
+    search:
+      - "**/*budget*"
+      - "**/*quota*"
+      - "**/*cache*"
+      - "**/*routing*"
+      - "**/*token*"
+    signals: [spend cap, cache, model routing]
+  organizational-governance:
+    search:
+      - "**/POLICY*"
+      - "**/governance*"
+      - "**/owners*"
+      - "**/CODEOWNERS"
+      - "**/RACI*"
+    signals: [AI policy, named owners]
+  compliance:
+    search:
+      - "**/compliance*"
+      - "**/audit*"
+      - "**/soc2*"
+      - "**/iso*"
+    signals: [control mapping, evidence pack]
+  platform-engineering:
+    search:
+      - "**/template*"
+      - "**/scaffold*"
+      - "**/golden*"
+      - "**/platform*"
+      - "**/devtools*"
+    signals: [golden path, safe defaults]
+
+# Optional Check-level overrides (extend over time; Core profile examples)
+checks:
+  SEC2-M1:
+    requiredEvidence:
+      - "Secrets manager / sealed-secrets / cloud secret refs in runtime config"
+      - "CI secret-scan workflow covering prompts and fixtures"
+    searchExtra:
+      - "**/.github/workflows/*secret*"
+      - "**/gitleaks.toml"
+    evaluation: |
+      FAIL if hardcoded cloud/API keys found in tracked source.
+      PASS if secret scan CI present AND runtime resolves secrets from manager/refs.
+      PARTIAL if only one of scan or manager is present.
+      NOT_DEMONSTRATED if neither found.
+  PRM-M1:
+    requiredEvidence:
+      - "Versioned prompt files or registry references"
+    searchExtra:
+      - "**/prompts/**"
+    evaluation: |
+      PASS if prompts are version-controlled with clear ownership.
+      NOT_DEMONSTRATED if no prompt artifacts found (do not invent).
+  OBS-M1:
+    requiredEvidence:
+      - "Tracing/logging that can reconstruct model+tool path"
+    searchExtra:
+      - "**/otel*"
+      - "**/*instrument*"
+    evaluation: |
+      PASS if OTel or equivalent traces spans for LLM/tool calls.
+      PARTIAL if only generic HTTP logs.
+  EVL-M1:
+    requiredEvidence:
+      - "Eval suite + CI gate or scheduled run evidence"
+    searchExtra:
+      - "**/eval/**"
+      - "**/.github/workflows/*eval*"
+    evaluation: |
+      PASS if eval runs in CI and can block merge/release.
+      PARTIAL if evals exist but are manual-only.
+  AGN-M2:
+    requiredEvidence:
+      - "Agent loop/budget/timeout controls in code or config"
+    naWhen: "No agent / multi-step autonomy in system"
+  HUM-M1:
+    requiredEvidence:
+      - "Human approval path for high-impact actions"
+    naWhen: "No high-impact autonomous actions"
+  DEP-M1:
+    requiredEvidence:
+      - "Documented/tested rollback for model/prompt/tool promotion"
+    searchExtra:
+      - "**/*rollback*"
+      - "**/deploy*"
+
+# Global fail-closed patterns (support FAIL with high confidence when matched in scope)
+globalFailSignals:
+  - id: plaintext-cloud-key
+    category: secrets
+    pattern: 'AKIA[0-9A-Z]{16}'
+    relatedChecks: [SEC2-M1, SEC2-M2]
+  - id: openai-sk-prefix
+    category: secrets
+    pattern: 'sk-[a-zA-Z0-9]{20,}'
+    relatedChecks: [SEC2-M1]
+  - id: private-key-pem
+    category: secrets
+    pattern: '-----BEGIN (RSA |OPENSSH )?PRIVATE KEY-----'
+    relatedChecks: [SEC2-M1]
+
+# Dedicated AI-system evidence strategies (map to APRF Checks; use precedence + plugins)
+aiSpecificStrategies:
+  promptInjectionDefenses:
+    relatedChecks: [SEC-M1, SEC-M2, SEC-M3]
+    search:
+      - "**/*guardrail*"
+      - "**/*injection*"
+      - "**/moderation*"
+      - "**/promptfoo*"
+      - "**/redteam/**"
+    plugins: [promptfoo, langsmith, phoenix]
+    signals: [input-filter, allowlist, redteam-pass]
+  toolPermissionBoundaries:
+    relatedChecks: [TOL-M1, TOL-M2, TOL-M3, AUTHZ-M1]
+    search:
+      - "**/mcp*.json"
+      - "**/tools/**"
+      - "**/*allowlist*"
+      - "**/*permission*"
+    signals: [tool-allowlist, least-privilege, side-effect-gate]
+  modelVersionPinning:
+    relatedChecks: [MOD-M1, MOD-M2]
+    search:
+      - "**/*model*"
+      - "**/providers/**"
+      - "**/.env.example"
+    signals: [model-id-pin, provider-pin, deprecation-policy]
+  evaluationDrift:
+    relatedChecks: [EVL-M1, EVL-M2]
+    search:
+      - "**/eval/**"
+      - "**/evals/**"
+      - "**/*baseline*"
+    plugins: [promptfoo, phoenix, wandb]
+    signals: [eval-gate, baseline-compare, drift-alert]
+  memoryPoisoning:
+    relatedChecks: [MEM-M1, MEM-M2, MEM-M3]
+    search:
+      - "**/memory/**"
+      - "**/vector*"
+      - "**/*store*"
+    signals: [ttl, tenant-isolation, write-policy]
+  contextLeakage:
+    relatedChecks: [CTX-M1, CTX-M2, SEC-M4]
+    search:
+      - "**/context*"
+      - "**/*rag*"
+      - "**/retriev*"
+    signals: [context-budget, pii-filter, citation]
+  promptVersionControl:
+    relatedChecks: [PRM-M1, PRM-M2, PRM-M3]
+    search:
+      - "**/prompts/**"
+      - "**/*.prompt*"
+    signals: [prompt-semver, owners, changelog]
+  modelRolloutFeatureFlags:
+    relatedChecks: [CHG-M1, CHG-M2, MOD-M3]
+    search:
+      - "**/*feature*flag*"
+      - "**/launchdarkly*"
+      - "**/unleash*"
+      - "**/flags/**"
+    signals: [flag-gated-model, percentage-rollout]
+  canaryDeployments:
+    relatedChecks: [CHG-M2, CHG-M3, DEP-M1, REL-M1]
+    search:
+      - "**/*canary*"
+      - "**/*blue*green*"
+      - "**/traffic*"
+      - "**/argo*rollout*"
+    signals: [canary, rollback]
+  costAnomalyDetection:
+    relatedChecks: [COST-M1, COST-M2, COST-M3]
+    search:
+      - "**/*budget*"
+      - "**/*cost*"
+      - "**/*token*limit*"
+    plugins: [helicone, otel, cloudwatch, prometheus]
+    signals: [budget-alarm, anomaly-rule, per-tenant-cap]

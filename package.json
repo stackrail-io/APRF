@@ -14,9 +14,13 @@
     "aprf:validate": "npm run validate -w @stackrail-io/aprf-engine",
     "aprf:catalog": "npm run build-catalog -w @stackrail-io/aprf-engine",
     "aprf:integrity": "npx tsx scripts/check-integrity.ts",
+    "aprf:collect": "npx tsx skills/aprf-auditor/collectors/runner.ts",
+    "aprf:report-html": "npx tsx skills/aprf-auditor/scripts/render-html-report.ts",
+    "aprf:verify-html": "npx tsx skills/aprf-auditor/scripts/verify-html-report.ts",
     "test:unit": "npm run test:unit -w @stackrail-io/aprf-engine && npm run test:unit -w @stackrail-io/aprf-framework-definition",
+    "test:auditor-skill": "npx tsx skills/aprf-auditor/tests/validate-fixture.ts && npx tsx skills/aprf-auditor/tests/collectors-smoke.ts && npx tsx skills/aprf-auditor/tests/render-html-smoke.ts",
     "build": "npm run build -w @stackrail-io/aprf-engine && npm run build -w @stackrail-io/aprf-framework-definition",
-    "validate": "npm run aprf:validate && npm run aprf:catalog && npm run aprf:integrity && npm run test:unit",
+    "validate": "npm run aprf:validate && npm run aprf:catalog && npm run aprf:integrity && npm run test:unit && npm run test:auditor-skill",
     "publish:packages": "npm run build && npm publish -w @stackrail-io/aprf-framework-definition --access public && npm publish -w @stackrail-io/aprf-engine --access public"
   },
   "devDependencies": {

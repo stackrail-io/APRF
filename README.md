@@ -44,6 +44,7 @@ This is the **normative public home** for APRF releases (Layers 1–3 + governan
 | [`schemas/`](schemas/) | JSON Schemas for the spec document and self-attestation exports |
 | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | CI: rule validation, catalog drift, unit tests, spec structure |
 | [`rfcs/`](rfcs/) | RFC template and open/historical RFCs |
+| [`skills/aprf-auditor/`](skills/aprf-auditor/) | Portable **APRF Auditor** skill — any local LLM/agent can assess a repo against Checks (no StackRail backend) |
 | [`CHANGELOG.md`](CHANGELOG.md) | SemVer history |
 
 **Author Checks here** under `packages/aprf-engine/rules/`. Product repos consume these packages from the [@stackrail-io](https://www.npmjs.com/org/stackrail-io) npm org (or a local `file:` / workspace link) — they must not redefine Check IDs.
@@ -156,6 +157,10 @@ git add packages/aprf-engine/src/generated/catalog.ts
 | **Regulated** (`aprf-profile-regulated`) | 61 (Core + 21 Tier-3-only) | Tier 3 / capability level 5 |
 
 Lenses (RAG, Agents, Voice, Coding) add additional mandatory Check IDs. Gating is binary: all in-scope mandatories must **pass** or be formally **N/A** with rationale.
+
+### Local agent assessment (APRF Auditor skill)
+
+Load [`skills/aprf-auditor/`](skills/aprf-auditor/) in Cursor, Claude Code, Codex, Copilot Agent, or any MCP-compatible host. Phrases like **“Run an APRF assessment”**, **“APRF assessment”**, or **“AI production readiness”** activate it — the agent discovers the project, maps evidence to Checks, and writes `REPORT.md` / `assessment.json` / SARIF / issues. If evidence is missing, it **asks you** for a path or to add/paste it; only then may it mark **`NOT_DEMONSTRATED`** (never invent `FAIL`). See the skill [README](skills/aprf-auditor/README.md).
 
 The StackRail site hosts human-readable pillar pages, How APRF works, and the reference [Core / Regulated assessment](https://stackrail.io/aprf/assess/).
 

@@ -1,0 +1,14 @@
+id: wandb
+title: Weights & Biases experiment / eval export
+version: "0.2.0"
+evidenceClass: runtime
+inputs: ["aprf-assessment/imports/wandb/"]
+collect:
+  - "Detect wandb init in code"
+  - "Ingest user-exported run summaries for model/eval evidence"
+emits:
+  nodeClass: runtime
+  refPattern: "imports/wandb/*"
+  signals: [experiment, eval, model-version]
+mapsToChecks: [MOD-M1, MOD-M2, EVL-M1]
+whenUnavailable: "Ask for export"

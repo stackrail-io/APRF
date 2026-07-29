@@ -1,0 +1,115 @@
+# Auditor scope — NOT an official APRF profile.
+# Use when the target is a platform / console / tooling / non–GenAI app.
+# Gate results here are subset hygiene only — never claim "APRF Core PASS/FAIL".
+
+id: aprf-auditor-scope-non-ai-platform
+name: Non-AI platform / tooling subset
+version: "0.2.0"
+aprfVersion: "0.10.1"
+assessmentKind: non-ai-platform-subset
+
+summary: >
+  Narrow Check subset for repositories that are not customer-facing AI systems
+  (no production model/agent/RAG product surface). Drawn from Core Check IDs that
+  still apply to identity, secrets, supply chain, infra, privacy, change, and ops.
+  Excludes AI-specific mandatories (injection, tools, prompts, models, evals, agents, AI cost).
+
+claimLanguage:
+  allowed:
+    - "Non-AI platform subset gate (auditor scope)"
+    - "Platform hygiene against selected APRF Check IDs"
+  forbidden:
+    - "APRF Core production readiness"
+    - "APRF Regulated gate"
+    - "AI Production Readiness PASS"
+  reportBanner: >
+    NON-AI / PLATFORM SUBSET — This is not an APRF Core or Regulated production-readiness
+    assessment. The target was classified as a non–GenAI system (platform, console, or tooling).
+    Re-run with systemType=ai-application and aprf-profile-core against the AI product repo
+    to claim AI production readiness.
+
+# Signals that suggest this scope (agent should confirm with user if ambiguous)
+detectWhen:
+  anyOf:
+    - "Repo is an assessment console / control plane / framework catalog (not an AI app)"
+    - "No production LLM/agent/RAG feature surface in README or architecture"
+    - "Primary purpose is CI, admin UI, billing, or packaging other systems"
+  aiSignalsAbsent:
+    - "**/prompts/**"
+    - "model provider SDKs used for product inference"
+    - "agent runtime / tool-calling product path"
+    - "RAG / vector retrieval product path"
+    - "eval harness gating model quality"
+
+# In-scope mandatory IDs (subset of Core — do not invent IDs)
+mandatoryCheckIds:
+  - AUTHN-M1
+  - AUTHN-M2
+  - AUTHZ-M1
+  - AUTHZ-M2
+  - SEC2-M1
+  - SEC2-M2
+  - SCI-M2
+  - INF-M1
+  - PRI-M1
+  - PRI-M3
+  - REL-M1
+  - REL-M2
+  - DEP-M1
+  - CHG-M1
+  - CHG-M3
+  - INC-M1
+  - INC-M2
+  - ORG-M2
+
+# Core mandatories intentionally out of scope for this subset
+excludedFromCore:
+  - id: SEC-M1
+    reason: "AI adversarial / prompt-injection control — not applicable to non-AI platform"
+  - id: SEC-M3
+    reason: "AI security eval gate — not applicable"
+  - id: TOL-M1
+    reason: "Tool/MCP mediation — no product tool host"
+  - id: TOL-M2
+    reason: "Tool/MCP mediation — no product tool host"
+  - id: TOL-M3
+    reason: "Tool/MCP mediation — no product tool host"
+  - id: SAF-M1
+    reason: "Responsible AI safety policy for model outputs — not applicable"
+  - id: SAF-M2
+    reason: "AI safety eval — not applicable"
+  - id: SAF-M3
+    reason: "AI safety control — not applicable"
+  - id: MEM-M1
+    reason: "AI memory isolation — not applicable"
+  - id: PRM-M1
+    reason: "Prompt versioning — no product prompts"
+  - id: PRM-M2
+    reason: "Prompt controls — no product prompts"
+  - id: MOD-M1
+    reason: "Model governance — no production model product"
+  - id: EVL-M1
+    reason: "Model/eval quality gate — not applicable"
+  - id: EVL-M2
+    reason: "Eval regression gate — not applicable"
+  - id: AGN-M2
+    reason: "Agent autonomy — no production agent host"
+  - id: HUM-M1
+    reason: "Human approval for agent actions — not applicable"
+  - id: HUM-M3
+    reason: "Human approval — not applicable"
+  - id: OBS-M1
+    reason: "LLM/tool path observability — use general SRE outside this subset"
+  - id: OBS-M2
+    reason: "AI cost/trace attribution — not applicable"
+  - id: PERF-M1
+    reason: "AI feature SLO — not applicable"
+  - id: COST-M1
+    reason: "AI spend ceiling — not applicable"
+  - id: COST-M3
+    reason: "AI cost controls — not applicable"
+
+gate:
+  passWhen: "Every mandatoryCheckIds entry is PASS or NOT_APPLICABLE"
+  label: "non-ai-platform-subset-gate"
+  note: "Passing this gate must never be marketed as APRF Core PASS."

@@ -1,0 +1,22 @@
+id: github-actions
+title: GitHub Actions CI collector
+version: "0.2.0"
+executor: collectors/github-actions.ts
+live:
+  env: [GITHUB_TOKEN]
+  flag: APRF_AUDITOR_LIVE=1
+evidenceClass: ci
+inputs:
+  - ".github/workflows/**"
+  - optional: latest workflow run logs / SARIF uploaded by user
+collect:
+  - "Parse workflow YAML for secret-scan, eval, deploy, OIDC, permissions"
+  - "If user provides run logs or SARIF under aprf-assessment/imports/github-actions/, attach as ci nodes with buildId"
+  - "If --live + GITHUB_TOKEN, fetch recent workflow runs from GitHub API"
+emits:
+  nodeClass: ci
+  refPattern: ".github/workflows/<file>"
+  signals: [workflow-job, secret-scan, eval-gate, deploy]
+mapsToChecks: [SEC2-M1, SEC2-M2, EVL-M1, CHG-M1, CHG-M2, DEP-M1, SUP-M1]
+whenUnavailable: "No workflows → skip plugin; do not invent CI"
+builtin: true
