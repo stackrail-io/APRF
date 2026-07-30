@@ -72,7 +72,11 @@ categoryDefaults:
       - "**/policy/**"
       - "**/*.rego"
       - "**/cedar/**"
-    signals: [RBAC, ABAC, scope checks, least privilege]
+      - "**/access_control/**"
+      - "**/tests/**/*auth*"
+    signals: [RBAC, ABAC, scope checks, least privilege, authz denial tests]
+    relatedChecks: [AUTHZ-M1, AUTHZ-M2]
+    plugins: [authz-entry-tests, cross-tenant-tests]
   secrets:
     search:
       - "**/.env*"
@@ -268,6 +272,42 @@ categoryDefaults:
 
 # Optional Check-level overrides (extend over time; Core profile examples)
 checks:
+  AUTHN-M1:
+    requiredEvidence:
+      - "Automated auth probe report covering all production AI HTTP/RPC routes"
+    plugins: [http-auth-probe]
+    searchExtra:
+      - "**/openapi.json"
+      - "**/swagger.json"
+      - "**/*auth*"
+    evaluation: |
+      Prefer runtime: run collectors/http-auth-probe with --base-url against a running app
+      (or ingest imports/http-auth-probe/auth-probe-report.json).
+      Discover HTTP methods from FastAPI @router.get/post/… (not GET-only guessing).
+      PASS if report.summary.authnM1Satisfied === true (declared AI methods → 401/403).
+      GET returning 405 on paths without a declared GET is advisory only — note that GET
+      should also return 401/403; it does not alone fail AUTHN-M1 when declared methods pass.
+      FAIL if any scored declared method (or advisory GET) returns 2xx without credentials.
+      PARTIAL if auth middleware exists in code but no probe report.
+      NOT_DEMONSTRATED if no base URL, unreachable target, and no prior report — ask user to start the app or provide URL.
+      Do not PASS from code review alone.
+  AUTHN-M2:
+    requiredEvidence:
+      - "MCP/S2S connection inventory + auth config export"
+    plugins: [mcp-s2s-inventory]
+    searchExtra:
+      - "**/mcp*"
+      - "**/*tool_server*"
+      - "**/mcp.json"
+    evaluation: |
+      Prefer runtime inventory: imports/mcp-s2s-inventory/*.json or live GET
+      /api/v1/configs/tool_servers with --base-url + --admin-token, or email/password sign-in.
+      PASS if report.summary.authnM2Satisfied === true (every connection has named machine
+      identity; no auth_type=none; no shared static bearer keys).
+      Empty inventory (no connections) is a vacuous PASS with a note to confirm production.
+      FAIL if any connection is anonymous, session-as-S2S, or static shared key.
+      PARTIAL if code allows auth_type=none but no production inventory yet.
+      NOT_DEMONSTRATED without inventory/export — ask user; do not PASS from OAuth support in code alone.
   SEC2-M1:
     requiredEvidence:
       - "Secrets manager / sealed-secrets / cloud secret refs in runtime config"
@@ -275,6 +315,7 @@ checks:
     searchExtra:
       - "**/.github/workflows/*secret*"
       - "**/gitleaks.toml"
+    plugins: [secrets-hygiene]
     evaluation: |
       FAIL if hardcoded cloud/API keys found in tracked source.
       PASS if secret scan CI present AND runtime resolves secrets from manager/refs.
@@ -327,6 +368,7 @@ globalFailSignals:
     category: secrets
     pattern: 'AKIA[0-9A-Z]{16}'
     relatedChecks: [SEC2-M1, SEC2-M2]
+    plugins: [secrets-hygiene, secret-redaction]
   - id: openai-sk-prefix
     category: secrets
     pattern: 'sk-[a-zA-Z0-9]{20,}'
@@ -346,7 +388,7 @@ aiSpecificStrategies:
       - "**/moderation*"
       - "**/promptfoo*"
       - "**/redteam/**"
-    plugins: [promptfoo, langsmith, phoenix]
+    plugins: [promptfoo, langsmith, phoenix, injection-policy-gate]
     signals: [input-filter, allowlist, redteam-pass]
   toolPermissionBoundaries:
     relatedChecks: [TOL-M1, TOL-M2, TOL-M3, AUTHZ-M1]

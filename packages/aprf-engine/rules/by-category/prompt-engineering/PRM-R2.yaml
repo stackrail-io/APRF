@@ -3,14 +3,18 @@ category: "prompt-engineering"
 title: "PRM-R2: Prompt linting for length, forbidden patterns, and injection-prone constructs"
 description: "Prompt linting for length, forbidden patterns, and injection-prone constructs"
 whyItMatters: "PRM-R2 (Prompt Engineering, recommended): Prompt linting for length, forbidden
-  patterns, and injection-prone constructs Failing this leaves a production gap against: Lint runs
-  on every prompt change PR; blocking rules exist for secrets patterns and unbounded user
-  concatenation; last failing lint example retained"
+  patterns, and injection-prone constructs Failing this leaves a production gap against: Lint
+  runs on every prompt change PR; blocking rules exist for length limits, secrets patterns,
+  injection-prone constructs, and unbounded user concatenation; last failing lint example
+  retained"
+
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Lint runs on every prompt change PR; blocking rules exist for secrets patterns and
-  unbounded user concatenation; last failing lint example retained"
+passCondition: "Lint runs on every prompt change PR; blocking rules exist for length limits, secrets
+  patterns, injection-prone constructs, and unbounded user concatenation; last failing lint
+  example retained"
+
 evidenceRequired:
   - "Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint
     report"
@@ -24,8 +28,10 @@ detection:
 manualVerification: "For PRM-R2 (PRM-R2: Prompt linting for length, forbidden patterns, and
   injection-prone constructs): inspect current evidence for [Prompt-lint CI config (length,
   forbidden patterns, injection-prone constructs) + latest lint report] and confirm the pass
-  condition holds — Lint runs on every prompt change PR; blocking rules exist for secrets patterns
-  and unbounded user concatenation; last failing lint example retained"
+  condition holds — Lint runs on every prompt change PR; blocking rules exist for length
+  limits, secrets patterns, injection-prone constructs, and unbounded user concatenation;
+  last failing lint example retained"
+
 falsePositiveGuidance: "PRM-R2 (Prompt Engineering): re-verify against a current artifact for this
   specific Check (PRM-R2), not a sibling control. Document named exceptions with owner and expiry."
 recommendedFixes:

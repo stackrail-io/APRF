@@ -14,15 +14,12 @@ passCondition: "Automated tests show tool calls without a valid authz decision a
 evidenceRequired:
   - "Tool gateway authz tests + deny logs"
 detection:
-  capability: "automated"
+  capability: "manual"
   detectors:
-    - id: "mcp-tool-allowlist"
-      params: {}
-    - id: "mcp-filesystem-scope"
-      params: {}
     - id: "manual-attest"
       params:
         hint: "Tool gateway authz tests + deny logs"
+
 manualVerification: "For TOL-M1 (Every tool invocation must be authorized server-side independent of
   model output): inspect current evidence for [Tool gateway authz tests + deny logs] and confirm the
   pass condition holds — Automated tests show tool calls without a valid authz decision are denied
@@ -34,7 +31,7 @@ recommendedFixes:
     of model output (TOL-M1)"
   - "Retain evidence artifacts required by this Check, starting with: Tool gateway authz tests +
     deny logs"
-  - "Wire or verify detectors declared on TOL-M1 so automation matches the pass condition"
+  - "Schedule recurring manual verification for TOL-M1 with a named owner and retained report"
   - "Block release (or open a time-boxed waiver with owner and expiry) until TOL-M1 passes"
 references:
   - title: "Model Context Protocol security considerations"
@@ -50,7 +47,7 @@ relatedRules:
 tags:
   - "tool-safety"
   - "mandatory"
-  - "automated"
+  - "manual"
 applicability:
   technologies:
     - "mcp"

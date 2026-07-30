@@ -3,14 +3,16 @@ category: "memory-management"
 title: "Critical memory records must have cryptographic or signed integrity protection"
 description: "Critical memory records shall have cryptographic or signed integrity protection"
 whyItMatters: "MEM-M4 (Memory Management, mandatory): Critical memory records shall have
-  cryptographic or signed integrity protection Failing this leaves a production gap against: PASS if
-  critical memory classes are inventoried and integrity verification succeeds in the latest check
-  (≤90 days)"
+  cryptographic or signed integrity protection Failing this leaves a production gap against:
+  Critical memory classes are inventoried; cryptographic verification or signature check
+  succeeds for those classes in the latest check (≤90 days)"
+
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "PASS if critical memory classes are inventoried and integrity verification succeeds
-  in the latest check (≤90 days)"
+passCondition: "Critical memory classes are inventoried; cryptographic verification or signature check
+  succeeds for those classes in the latest check (≤90 days)"
+
 evidenceRequired:
   - "Integrity/signing design + verification sample for critical memory stores"
 detection:
@@ -21,8 +23,10 @@ detection:
         hint: "Integrity/signing design + verification sample for critical memory stores"
 manualVerification: "For MEM-M4 (Critical memory records must have cryptographic or signed integrity
   protection): inspect current evidence for [Integrity/signing design + verification sample for
-  critical memory stores] and confirm the pass condition holds — PASS if critical memory classes are
-  inventoried and integrity verification succeeds in the latest check (≤90 days)"
+  critical memory stores] and confirm the pass condition holds — Critical memory classes are
+  inventoried; cryptographic verification or signature check succeeds for those classes in the
+  latest check (≤90 days)"
+
 falsePositiveGuidance: "MEM-M4 (Memory Management): re-verify against a current artifact for this
   specific Check (MEM-M4), not a sibling control. Document named exceptions with owner and expiry."
 recommendedFixes:

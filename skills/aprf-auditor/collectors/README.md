@@ -49,10 +49,106 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | repo-filesystem | `repo-filesystem.ts` | yes | — | — |
 | github-actions | `github-actions.ts` | workflow YAML | — | Actions runs API |
 | otel | `otel.ts` | config scan | `imports/otel/` | — |
+| **http-auth-probe** | `http-auth-probe.ts` | route catalog | `imports/http-auth-probe/` | **`--base-url` probe** |
 | promptfoo | `promptfoo.ts` | eval configs | `imports/promptfoo/` | — |
 | aws / azure / gcp | `iac-cloud.ts` | Terraform/Bicep signals | `imports/<cloud>/` | — |
 | langsmith, phoenix, … | `import-ingest.ts` | — | `imports/<id>/` | — |
 | **custom** | `import-ingest.ts` | — | **`imports/custom/`** | — |
+
+### AUTHN-M1 — live auth probe
+
+The Check requires an **automated auth probe report**, not code review alone.
+
+```bash
+# Start the target app yourself, then:
+npm run aprf:collect -- \
+  --plugins http-auth-probe \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment \
+  --base-url http://127.0.0.1:8080
+```
+
+Writes `imports/http-auth-probe/auth-probe-report.json`. Every discovered AI route must return **401/403** without credentials for AUTHN-M1 to be satisfiable. If the app is not running, the collector returns `needs-user` and still emits a route catalog.
+
+### AUTHN-M2 — MCP / S2S inventory
+
+```bash
+# Option A: live fetch with bearer token (do not commit)
+export APRF_ADMIN_TOKEN='...'
+npm run aprf:mcp-s2s -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment \
+  --base-url http://127.0.0.1:8080 \
+  --admin-token "$APRF_ADMIN_TOKEN"
+
+# Option A2: live fetch via email/password sign-in (Open WebUI)
+# Uses POST /api/v1/auths/signin → JWT; password is never written to reports.
+export APRF_ADMIN_EMAIL='admin@example.com'
+export APRF_ADMIN_PASSWORD='...'
+npm run aprf:mcp-s2s -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment \
+  --base-url http://127.0.0.1:8080 \
+  --admin-email "$APRF_ADMIN_EMAIL" \
+  --admin-password "$APRF_ADMIN_PASSWORD"
+
+# Option B: drop a redacted export
+mkdir -p ./aprf-assessment/imports/mcp-s2s-inventory
+cp tool_servers.json ./aprf-assessment/imports/mcp-s2s-inventory/
+npm run aprf:mcp-s2s -- --target /path/to/app --out ./aprf-assessment
+```
+
+Scores each connection: `auth_type=none` / static bearer keys fail; named OAuth/OIDC/mTLS pass. Writes `imports/mcp-s2s-inventory/mcp-s2s-inventory-report.json`.
+
+### AUTHZ-M1 — Authz entry-point denial tests
+
+```bash
+npm run aprf:authz-tests -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Inventories AI routes, detects server-side guards, and scores whether tests assert 401/403 for those paths. Writes `imports/authz-entry-tests/authz-entry-report.json`. Code guards alone ≠ PASS.
+
+### AUTHZ-M2 — Cross-tenant attack tests
+
+```bash
+npm run aprf:cross-tenant -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Looks for tenant isolation in code and scores cross-tenant attack tests (≥10 cases, 0 unauthorized successes). Writes `imports/cross-tenant-tests/cross-tenant-report.json`.
+
+### SEC2-M1 — Secrets manager + secret scan
+
+```bash
+npm run aprf:secrets -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects secrets-manager refs, CI secret-scan config, and high-confidence embedded secrets (values never stored). Writes `imports/secrets-hygiene/secrets-hygiene-report.json`.
+
+### SEC2-M2 — Log/trace secret redaction
+
+```bash
+npm run aprf:secret-redaction -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects redaction config and canary tests; PASS needs measured 100% detection. Writes `imports/secret-redaction/secret-redaction-report.json`.
+
+### SEC-M1 — Injection / privilege-escalation policy gate
+
+```bash
+npm run aprf:injection-gate -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects server-side tool policy, injection corpora, and CI gates; PASS needs ≥95% deny rate. Writes `imports/injection-policy-gate/injection-policy-gate-report.json`.
 
 Plugin YAML under `../plugins/` remains the contract; `executor` points here.
 

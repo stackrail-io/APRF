@@ -14,15 +14,12 @@ passCondition: "100% of production agents have finite max-steps, wall-clock time
 evidenceRequired:
   - "Runtime config for max steps, wall-clock timeout, and spawn depth + enforcement tests"
 detection:
-  capability: "automated"
+  capability: "manual"
   detectors:
-    - id: "mcp-filesystem-scope"
-      params: {}
-    - id: "mcp-tool-allowlist"
-      params: {}
     - id: "manual-attest"
       params:
         hint: "Runtime config for max steps, wall-clock timeout, and spawn depth + enforcement tests"
+
 manualVerification: "For AGN-M2 (Hard limits must exist on steps, wall-clock time, and recursive
   agent spawning): inspect current evidence for [Runtime config for max steps, wall-clock timeout,
   and spawn depth + enforcement tests] and confirm the pass condition holds — 100% of production
@@ -36,7 +33,7 @@ recommendedFixes:
     agent spawning (AGN-M2)"
   - "Retain evidence artifacts required by this Check, starting with: Runtime config for max steps,
     wall-clock timeout, and spawn depth + enforcement tests"
-  - "Wire or verify detectors declared on AGN-M2 so automation matches the pass condition"
+  - "Schedule recurring manual verification for AGN-M2 with a named owner and retained report"
   - "Block release (or open a time-boxed waiver with owner and expiry) until AGN-M2 passes"
 references:
   - title: "OWASP LLM — Excessive Agency"
@@ -52,7 +49,7 @@ relatedRules:
 tags:
   - "agent-governance"
   - "mandatory"
-  - "automated"
+  - "manual"
 applicability:
   technologies:
     - "a2a"

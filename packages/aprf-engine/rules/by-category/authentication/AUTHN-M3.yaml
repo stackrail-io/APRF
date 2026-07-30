@@ -12,16 +12,16 @@ gate: "mandatory"
 passCondition: "100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented
   maximum and have monitoring enabled"
 evidenceRequired:
-  - "IdP policy export for AI admin roles + break-glass account inventory"
+  - "IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring"
 detection:
   capability: "manual"
   detectors:
     - id: "manual-attest"
       params:
-        hint: "IdP policy export for AI admin roles + break-glass account inventory"
+        hint: "IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring"
 manualVerification: "For AUTHN-M3 (Administrative access to AI control planes must require strong
-  authentication including MFA): inspect current evidence for [IdP policy export for AI admin roles
-  + break-glass account inventory] and confirm the pass condition holds — 100% of AI control-plane
+  authentication including MFA): inspect current evidence for [IdP MFA policy export for AI admin
+  roles + break-glass account inventory with monitoring] and confirm the pass condition holds — 100% of AI control-plane
   admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled"
 falsePositiveGuidance: "AUTHN-M3 (Authentication): re-verify against a current artifact for this
   specific Check (AUTHN-M3), not a sibling control. Document named exceptions with owner and
@@ -29,8 +29,7 @@ falsePositiveGuidance: "AUTHN-M3 (Authentication): re-verify against a current a
 recommendedFixes:
   - "Implement and operationalize: Administrative access to AI control planes must require strong
     authentication including MFA (AUTHN-M3)"
-  - "Retain evidence artifacts required by this Check, starting with: IdP policy export for AI admin
-    roles + break-glass account inventory"
+  - "Retain evidence artifacts required by this Check, starting with: IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring"
   - "Schedule recurring manual verification for AUTHN-M3 with a named owner and retained report"
   - "Block release (or open a time-boxed waiver with owner and expiry) until AUTHN-M3 passes"
 references:

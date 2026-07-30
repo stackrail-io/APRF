@@ -3,6 +3,13 @@ import { repoFilesystemCollector } from "./repo-filesystem.ts";
 import { githubActionsCollector } from "./github-actions.ts";
 import { otelCollector } from "./otel.ts";
 import { promptfooCollector } from "./promptfoo.ts";
+import { httpAuthProbeCollector } from "./http-auth-probe.ts";
+import { mcpS2sInventoryCollector } from "./mcp-s2s-inventory.ts";
+import { authzEntryTestsCollector } from "./authz-entry-tests.ts";
+import { crossTenantTestsCollector } from "./cross-tenant-tests.ts";
+import { secretsHygieneCollector } from "./secrets-hygiene.ts";
+import { secretRedactionCollector } from "./secret-redaction.ts";
+import { injectionPolicyGateCollector } from "./injection-policy-gate.ts";
 import {
   awsCollector,
   azureCollector,
@@ -16,6 +23,13 @@ export const COLLECTORS: Collector[] = [
   githubActionsCollector,
   otelCollector,
   promptfooCollector,
+  httpAuthProbeCollector,
+  mcpS2sInventoryCollector,
+  authzEntryTestsCollector,
+  crossTenantTestsCollector,
+  secretsHygieneCollector,
+  secretRedactionCollector,
+  injectionPolicyGateCollector,
   awsCollector,
   azureCollector,
   gcpCollector,

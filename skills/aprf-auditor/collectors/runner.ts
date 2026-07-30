@@ -27,17 +27,30 @@ function parseArgs(argv: string[]) {
     live: boolean;
     plugins?: string[];
     maxFiles: number;
+    baseUrl?: string;
+    adminToken?: string;
+    adminEmail?: string;
+    adminPassword?: string;
   } = {
     target: process.cwd(),
     outDir: resolve(process.cwd(), "aprf-assessment"),
     live: process.env.APRF_AUDITOR_LIVE === "1",
     maxFiles: 4000,
+    baseUrl: process.env.APRF_AUTH_PROBE_BASE_URL,
+    adminToken: process.env.APRF_ADMIN_TOKEN,
+    adminEmail: process.env.APRF_ADMIN_EMAIL || process.env.APRF_ADMIN_USER,
+    adminPassword: process.env.APRF_ADMIN_PASSWORD,
   };
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--target") out.target = resolve(argv[++i] ?? ".");
     else if (a === "--out") out.outDir = resolve(argv[++i] ?? out.outDir);
     else if (a === "--live") out.live = true;
+    else if (a === "--base-url") out.baseUrl = argv[++i];
+    else if (a === "--admin-token") out.adminToken = argv[++i];
+    else if (a === "--admin-email" || a === "--admin-user")
+      out.adminEmail = argv[++i];
+    else if (a === "--admin-password") out.adminPassword = argv[++i];
     else if (a === "--plugins") {
       out.plugins = (argv[++i] ?? "").split(",").filter(Boolean);
     } else if (a === "--max-files") {
@@ -50,7 +63,27 @@ Options:
   --out <path>        Output dir (default: ./aprf-assessment)
   --plugins a,b,c     Subset of collector ids (default: all)
   --live              Allow credentialed API calls (also APRF_AUDITOR_LIVE=1)
+  --base-url <url>    Running app URL (AUTHN-M1 probe / AUTHN-M2 live fetch)
+                      (also APRF_AUTH_PROBE_BASE_URL)
+  --admin-token <tok> Admin bearer token for MCP/S2S inventory live fetch
+                      (also APRF_ADMIN_TOKEN) — never commit this value
+  --admin-email <e>   Admin email for password sign-in (also APRF_ADMIN_EMAIL /
+                      APRF_ADMIN_USER). Open WebUI uses email, not username.
+  --admin-password <p> Admin password (also APRF_ADMIN_PASSWORD) — never commit
   --max-files <n>     Cap filesystem walk (default: 4000)
+
+AUTHN-M1 live probe:
+  npm run aprf:auth-probe -- --target <app> --out <app>/aprf-assessment \\
+    --base-url http://127.0.0.1:8080
+
+AUTHN-M2 MCP/S2S inventory:
+  npm run aprf:mcp-s2s -- --target <app> --out <app>/aprf-assessment \\
+    --base-url http://127.0.0.1:8080 --admin-token "$APRF_ADMIN_TOKEN"
+  # or sign in with email/password (obtains JWT, does not store password):
+  npm run aprf:mcp-s2s -- --target <app> --out <app>/aprf-assessment \\
+    --base-url http://127.0.0.1:8080 \\
+    --admin-email "$APRF_ADMIN_EMAIL" --admin-password "$APRF_ADMIN_PASSWORD"
+  # or drop redacted JSON under imports/mcp-s2s-inventory/
 
 Import runtime evidence without live APIs:
   mkdir -p <out>/imports/langsmith && cp traces.json <out>/imports/langsmith/
@@ -75,6 +108,10 @@ async function main() {
     gitCommit,
     live: args.live,
     maxFiles: args.maxFiles,
+    baseUrl: args.baseUrl,
+    adminToken: args.adminToken,
+    adminEmail: args.adminEmail,
+    adminPassword: args.adminPassword,
   };
 
   const selected = args.plugins

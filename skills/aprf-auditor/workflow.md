@@ -27,6 +27,15 @@ Read first: `capabilities.yaml`, `evidence-precedence.yaml`, `confidence.yaml`.
    - **Profile / scope:** Core | Regulated | full-catalog | **non-ai-platform subset**
    - **Lenses:** none unless `ai-application` (RAG | Agents | Voice | Coding)
    - **Target path** (+ optional **baseline** git ref for compare mode)
+   - **Live base URL (required for `ai-application` before collect finishes):** ask up front —
+     *“Is there a running instance I can probe (local/staging URL)?”*
+     - If **yes** → record as `APRF_AUTH_PROBE_BASE_URL` / `--base-url` and run `http-auth-probe` during Phase 2
+     - If **not yet** → ask them to start the app (or paste URL when ready); do **not** PASS AUTHN-M1 from code alone; you may continue repo discovery but keep AUTHN-M1 open until probe or explicit Phase 2b
+     - If **no runnable instance** (library-only / docs-only) → document that; AUTHN-M1 stays NOT_DEMONSTRATED or N/A with justified `naReason` (no customer-facing HTTP API)
+   - **MCP/S2S inventory (AUTHN-M2, when the app has tools/MCP):** ask with the live URL —
+     *“Can you export tool-server/MCP connection config (redact secrets), or provide an admin token for inventory fetch?”*
+     - Prefer `imports/mcp-s2s-inventory/*.json`, or `--base-url` with `--admin-token` / `APRF_ADMIN_TOKEN`, or `--admin-email` + `--admin-password` (sign-in → JWT)
+     - Never commit tokens; never store raw API keys in reports
 5. Load in-scope Check IDs:
    - `ai-application` → profile ∪ lenses
    - `non-ai-platform` → **only** `scopes/non-ai-platform.yaml` → `mandatoryCheckIds` (do **not** evaluate excluded AI Checks as blockers; list them under `scope.excludedCheckIds` with reasons)
@@ -84,6 +93,77 @@ Also note which plugins ran vs need user input.
 6. **Precedence:** when multiple nodes support one Check, pick PRIMARY per `evidence-precedence.yaml` (runtime → ci → iac → runtime-config → policy → code → docs → user). Docs/user cannot override FAIL from higher ranks.
 
 **Runtime evidence without live cloud:** place exports under `aprf-assessment/imports/<pluginId>/` then re-run collectors.
+
+**AUTHN-M1 (http-auth-probe):** code review of auth middleware is **not** sufficient to PASS. Prefer a live probe:
+
+```bash
+# User starts the app, then:
+npm run aprf:auth-probe -- \
+  --target <project> --out <project>/aprf-assessment \
+  --base-url http://127.0.0.1:8080
+```
+
+Writes `imports/http-auth-probe/auth-probe-report.json`. PASS only when every probed AI route returns 401/403 without credentials. If the app cannot be started, ask for a base URL or an exported probe report — do not invent PASS.
+
+**AUTHN-M2 (mcp-s2s-inventory):** OAuth support in code is **not** sufficient to PASS. Prefer an inventory:
+
+```bash
+npm run aprf:mcp-s2s -- \
+  --target <project> --out <project>/aprf-assessment \
+  --base-url http://127.0.0.1:8080 --admin-token "$APRF_ADMIN_TOKEN"
+  # or: --admin-email "$APRF_ADMIN_EMAIL" --admin-password "$APRF_ADMIN_PASSWORD"
+# or: imports/mcp-s2s-inventory/tool_servers.json (redact secrets)
+```
+
+**AUTHZ-M1 (authz-entry-tests):** server-side `has_permission` / `Depends(get_verified_user)` is **supporting** evidence only. Prefer:
+
+```bash
+npm run aprf:authz-tests -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop coveredPaths JSON under imports/authz-entry-tests/
+```
+
+PASS only when automated tests cover 100% of AI feature/tool/retrieval entry points with unauthenticated/unauthorized denial.
+
+**AUTHZ-M2 (cross-tenant-tests):** `user_id` / `access_grants` filters are **supporting** only. Prefer:
+
+```bash
+npm run aprf:cross-tenant -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop suite JSON under imports/cross-tenant-tests/
+```
+
+PASS only with ≥10 automated cross-tenant attack cases and 0 successful unauthorized reads/writes on AI data/memory paths.
+
+**SEC2-M1 (secrets-hygiene):** CI `${{ secrets.* }}` is **not** a production secrets manager. Prefer:
+
+```bash
+npm run aprf:secrets -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop gitleaks/trufflehog SARIF under imports/secrets-hygiene/
+```
+
+PASS only with secrets-manager runtime wiring AND a clean secret-scan (0 privileged secrets in repos/prompts/fixtures).
+
+**SEC2-M2 (secret-redaction):** log scrubbers in code are **supporting** only. Prefer:
+
+```bash
+npm run aprf:secret-redaction -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop canary harness JSON under imports/secret-redaction/
+```
+
+PASS only with redaction config + canary results showing 100% detection of synthetic API/bearer/AWS-key patterns in persisted logs/traces.
+
+**SEC-M1 (injection-policy-gate):** content-filter warnings are **supporting** only. Prefer:
+
+```bash
+npm run aprf:injection-gate -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop corpus/CI results under imports/injection-policy-gate/
+```
+
+PASS only with server-side policy + versioned injection/privilege-escalation corpus + CI gate showing ≥95% deny and 0 model-text privilege grants.
 
 **Out-of-plugin evidence:** place any customer artifact under `aprf-assessment/imports/custom/` → ingested as `user` nodes (catch-all; not a FAIL if empty).
 

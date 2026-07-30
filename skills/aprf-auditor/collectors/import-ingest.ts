@@ -30,6 +30,13 @@ const RUNTIME_PLUGINS = new Set([
   "grafana",
   "wandb",
   "cloudwatch",
+  "http-auth-probe",
+  "mcp-s2s-inventory",
+  "authz-entry-tests",
+  "cross-tenant-tests",
+  "secrets-hygiene",
+  "secret-redaction",
+  "injection-policy-gate",
 ]);
 
 function evidenceClass(pluginId: string): EvidenceClass {

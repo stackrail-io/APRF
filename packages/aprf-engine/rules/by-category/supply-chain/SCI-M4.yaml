@@ -13,15 +13,12 @@ passCondition: "PASS if admission is enforced in production deploy paths and the
 evidenceRequired:
   - "Admission policy config + deny logs for unsigned/unapproved artifacts"
 detection:
-  capability: "automated"
+  capability: "manual"
   detectors:
-    - id: "cicd-no-pull-request-target"
-      params: {}
-    - id: "cicd-no-self-hosted-runner"
-      params: {}
     - id: "manual-attest"
       params:
         hint: "Admission policy config + deny logs for unsigned/unapproved artifacts"
+
 manualVerification: "For SCI-M4 (Admission controls must block unsigned or unapproved AI artifacts):
   inspect current evidence for [Admission policy config + deny logs for unsigned/unapproved
   artifacts] and confirm the pass condition holds — PASS if admission is enforced in production
@@ -34,7 +31,7 @@ recommendedFixes:
     (SCI-M4)"
   - "Retain evidence artifacts required by this Check, starting with: Admission policy config + deny
     logs for unsigned/unapproved artifacts"
-  - "Wire or verify detectors declared on SCI-M4 so automation matches the pass condition"
+  - "Schedule recurring manual verification for SCI-M4 with a named owner and retained report"
   - "Block release (or open a time-boxed waiver with owner and expiry) until SCI-M4 passes"
 references:
   - title: "SLSA — Supply-chain Levels for Software Artifacts"
@@ -52,7 +49,7 @@ relatedRules:
 tags:
   - "supply-chain"
   - "mandatory"
-  - "automated"
+  - "manual"
 applicability:
   technologies:
     - "github"

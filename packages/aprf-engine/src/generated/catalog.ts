@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:c90eb58a749e869ac304814980125eeef74964ea74648e0d861fc37b0f499b76",
+  "generatedAt": "sha256:c4f94145237056893cb0e89b5d6594e23940db8a6657c595f5df608a36b05970",
   "ruleCount": 177,
   "categories": [
     {
@@ -279,16 +279,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Runtime config for max steps, wall-clock timeout, and spawn depth + enforcement tests"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "manual",
         "detectors": [
-          {
-            "id": "mcp-filesystem-scope",
-            "params": {}
-          },
-          {
-            "id": "mcp-tool-allowlist",
-            "params": {}
-          },
           {
             "id": "manual-attest",
             "params": {
@@ -302,7 +294,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "recommendedFixes": [
         "Implement and operationalize: Hard limits must exist on steps, wall-clock time, and recursive agent spawning (AGN-M2)",
         "Retain evidence artifacts required by this Check, starting with: Runtime config for max steps, wall-clock timeout, and spawn depth + enforcement tests",
-        "Wire or verify detectors declared on AGN-M2 so automation matches the pass condition",
+        "Schedule recurring manual verification for AGN-M2 with a named owner and retained report",
         "Block release (or open a time-boxed waiver with owner and expiry) until AGN-M2 passes"
       ],
       "references": [
@@ -325,7 +317,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "agent-governance",
         "mandatory",
-        "automated"
+        "manual"
       ],
       "applicability": {
         "technologies": [
@@ -737,12 +729,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "MCP/S2S connection inventory + auth config export"
       ],
       "detection": {
-        "capability": "hybrid",
+        "capability": "manual",
         "detectors": [
-          {
-            "id": "cicd-oidc-present",
-            "params": {}
-          },
           {
             "id": "manual-attest",
             "params": {
@@ -752,11 +740,11 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         ]
       },
       "manualVerification": "For AUTHN-M2 (Service-to-service and MCP connections must use strong machine identity): inspect current evidence for [MCP/S2S connection inventory + auth config export] and confirm the pass condition holds — 0 production MCP or AI S2S connections accept anonymous access or shared long-lived static keys; each connection has a named machine identity",
-      "falsePositiveGuidance": "AUTHN-M2 (Authentication): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "falsePositiveGuidance": "AUTHN-M2 (Authentication): re-verify against a current MCP/S2S inventory artifact for this Check (AUTHN-M2), not CI OIDC alone. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
         "Implement and operationalize: Service-to-service and MCP connections must use strong machine identity (AUTHN-M2)",
         "Retain evidence artifacts required by this Check, starting with: MCP/S2S connection inventory + auth config export",
-        "Wire or verify detectors declared on AUTHN-M2 so automation matches the pass condition",
+        "Schedule recurring manual verification for AUTHN-M2 with a named owner and retained report",
         "Block release (or open a time-boxed waiver with owner and expiry) until AUTHN-M2 passes"
       ],
       "references": [
@@ -779,7 +767,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "authentication",
         "mandatory",
-        "hybrid"
+        "manual"
       ],
       "applicability": {
         "technologies": [
@@ -805,7 +793,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "gate": "mandatory",
       "passCondition": "100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled",
       "evidenceRequired": [
-        "IdP policy export for AI admin roles + break-glass account inventory"
+        "IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring"
       ],
       "detection": {
         "capability": "manual",
@@ -813,16 +801,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "IdP policy export for AI admin roles + break-glass account inventory"
+              "hint": "IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring"
             }
           }
         ]
       },
-      "manualVerification": "For AUTHN-M3 (Administrative access to AI control planes must require strong authentication including MFA): inspect current evidence for [IdP policy export for AI admin roles + break-glass account inventory] and confirm the pass condition holds — 100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled",
+      "manualVerification": "For AUTHN-M3 (Administrative access to AI control planes must require strong authentication including MFA): inspect current evidence for [IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring] and confirm the pass condition holds — 100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled",
       "falsePositiveGuidance": "AUTHN-M3 (Authentication): re-verify against a current artifact for this specific Check (AUTHN-M3), not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
         "Implement and operationalize: Administrative access to AI control planes must require strong authentication including MFA (AUTHN-M3)",
-        "Retain evidence artifacts required by this Check, starting with: IdP policy export for AI admin roles + break-glass account inventory",
+        "Retain evidence artifacts required by this Check, starting with: IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring",
         "Schedule recurring manual verification for AUTHN-M3 with a named owner and retained report",
         "Block release (or open a time-boxed waiver with owner and expiry) until AUTHN-M3 passes"
       ],
@@ -1075,43 +1063,32 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "authorization",
       "title": "Authorization must be enforced server-side for AI features, tools, and retrieval",
       "description": "Authorization shall be enforced server-side for AI features, tools, and retrieval",
-      "whyItMatters": "AUTHZ-M1 (Authorization, mandatory): Authorization shall be enforced server-side for AI features, tools, and retrieval Failing this leaves a production gap against: Automated tests cover 100% of production AI feature, tool, and retrieval entry points; unauthenticated or unauthorized callers are denied at 100% in the suite",
+      "whyItMatters": "AUTHZ-M1 (Authorization, mandatory): Authorization shall be enforced server-side for AI features, tools, and retrieval Failing this leaves a production gap against: 100% of privileged AI feature, tool, and retrieval entry points enforce authorization server-side; 0 successful requests from authenticated callers lacking required permission or scope in the authz suite",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Automated tests cover 100% of production AI feature, tool, and retrieval entry points; unauthenticated or unauthorized callers are denied at 100% in the suite",
+      "passCondition": "100% of privileged AI feature, tool, and retrieval entry points enforce authorization server-side; 0 successful requests from authenticated callers lacking required permission or scope in the authz suite",
       "evidenceRequired": [
-        "Authz middleware/policy tests for AI feature, tool, and retrieval entry points"
+        "Server-side authz middleware/policy for AI feature, tool, and retrieval entry points",
+        "Authz suite results showing authenticated-but-unauthorized callers denied on those entry points"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "manual",
         "detectors": [
-          {
-            "id": "iam-least-privilege",
-            "params": {
-              "hint": "APEP apep.iam.policy_document — flag wildcard Action"
-            }
-          },
-          {
-            "id": "iam-no-wildcard-resource",
-            "params": {
-              "hint": "APEP apep.iam.policy_document — flag wildcard Resource"
-            }
-          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Authz middleware/policy tests for AI feature, tool, and retrieval entry points"
+              "hint": "Server-side authz middleware/policy + unauthorized-caller suite for AI feature/tool/retrieval entry points"
             }
           }
         ]
       },
-      "manualVerification": "For AUTHZ-M1 (Authorization must be enforced server-side for AI features, tools, and retrieval): inspect current evidence for [Authz middleware/policy tests for AI feature, tool, and retrieval entry points] and confirm the pass condition holds — Automated tests cover 100% of production AI feature, tool, and retrieval entry points; unauthenticated or unauthorized callers are denied at 100% in the suite",
-      "falsePositiveGuidance": "AUTHZ-M1 (Authorization): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For AUTHZ-M1 (Authorization must be enforced server-side for AI features, tools, and retrieval): inspect current evidence for [Server-side authz middleware/policy for AI feature, tool, and retrieval entry points; Authz suite results showing authenticated-but-unauthorized callers denied on those entry points] and confirm the pass condition holds — 100% of privileged AI feature, tool, and retrieval entry points enforce authorization server-side; 0 successful requests from authenticated callers lacking required permission or scope in the authz suite",
+      "falsePositiveGuidance": "AUTHZ-M1 (Authorization): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days. Do not score AUTHN-M1 (unauthenticated rejection) as satisfying this Check — require authenticated but unauthorized callers.",
       "recommendedFixes": [
         "Implement and operationalize: Authorization must be enforced server-side for AI features, tools, and retrieval (AUTHZ-M1)",
-        "Retain evidence artifacts required by this Check, starting with: Authz middleware/policy tests for AI feature, tool, and retrieval entry points",
-        "Wire or verify detectors declared on AUTHZ-M1 so automation matches the pass condition",
+        "Retain evidence artifacts required by this Check, starting with: Server-side authz middleware/policy for AI feature, tool, and retrieval entry points",
+        "Add or extend an authz suite that denies authenticated callers lacking required permission or scope on AI feature, tool, and retrieval entry points",
         "Block release (or open a time-boxed waiver with owner and expiry) until AUTHZ-M1 passes"
       ],
       "references": [
@@ -1129,12 +1106,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AUTHZ-M3",
         "AUTHZ-M4",
         "AUTHZ-R1",
-        "AUTHZ-R2"
+        "AUTHZ-R2",
+        "AUTHN-M1"
       ],
       "tags": [
         "authorization",
         "mandatory",
-        "automated"
+        "manual"
       ],
       "applicability": {
         "technologies": [
@@ -1285,19 +1263,26 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "authorization",
       "title": "Attribute-based controls must govern access to sensitive document classes",
       "description": "Attribute-based controls shall govern access to sensitive document classes",
-      "whyItMatters": "AUTHZ-M4 (Authorization, mandatory): Attribute-based controls shall govern access to sensitive document classes Failing this leaves a production gap against: PASS if sensitive document classes are enumerated and policy denies unauthorized class access in tests; inventory matches production classes",
+      "whyItMatters": "AUTHZ-M4 (Authorization, mandatory): Attribute-based controls shall govern access to sensitive document classes Failing this leaves a production gap against: Sensitive document classes are enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class access in tests; inventory matches production classes",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "PASS if sensitive document classes are enumerated and policy denies unauthorized class access in tests; inventory matches production classes",
+      "passCondition": "Sensitive document classes are enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class access in tests; inventory matches production classes",
       "evidenceRequired": [
         "ABAC/policy config + sample allow/deny decisions for sensitive classes"
       ],
       "detection": {
         "capability": "manual",
-        "detectors": []
+        "detectors": [
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "ABAC/policy config + sample allow/deny decisions for sensitive classes"
+            }
+          }
+        ]
       },
-      "manualVerification": "For AUTHZ-M4 (Attribute-based controls must govern access to sensitive document classes): inspect current evidence for [ABAC/policy config + sample allow/deny decisions for sensitive classes] and confirm the pass condition holds — PASS if sensitive document classes are enumerated and policy denies unauthorized class access in tests; inventory matches production classes",
+      "manualVerification": "For AUTHZ-M4 (Attribute-based controls must govern access to sensitive document classes): inspect current evidence for [ABAC/policy config + sample allow/deny decisions for sensitive classes] and confirm the pass condition holds — Sensitive document classes are enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class access in tests; inventory matches production classes",
       "falsePositiveGuidance": "AUTHZ-M4 (Authorization): re-verify against a current artifact for this specific Check (AUTHZ-M4), not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
         "Implement and operationalize: Attribute-based controls must govern access to sensitive document classes (AUTHZ-M4)",
@@ -5836,16 +5821,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "CSPM/network scan of AI data stores and control planes + edge auth config"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "manual",
         "detectors": [
-          {
-            "id": "docker-nonroot-user",
-            "params": {}
-          },
-          {
-            "id": "docker-no-curl-pipe-shell",
-            "params": {}
-          },
           {
             "id": "manual-attest",
             "params": {
@@ -5859,7 +5836,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "recommendedFixes": [
         "Implement and operationalize: AI data stores and control planes must not be publicly exposed without authenticated edge controls (INF-M1)",
         "Retain evidence artifacts required by this Check, starting with: CSPM/network scan of AI data stores and control planes + edge auth config",
-        "Wire or verify detectors declared on INF-M1 so automation matches the pass condition",
+        "Schedule recurring manual verification for INF-M1 with a named owner and retained report",
         "Block release (or open a time-boxed waiver with owner and expiry) until INF-M1 passes"
       ],
       "references": [
@@ -5886,7 +5863,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "infrastructure",
         "mandatory",
-        "automated"
+        "manual"
       ],
       "applicability": {
         "technologies": [
@@ -6283,7 +6260,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "gate": "mandatory",
       "passCondition": "0 successful cross-tenant (and cross-user where required) memory reads/writes across ≥10 automated attack cases",
       "evidenceRequired": [
-        "Isolation tests for memory store APIs"
+        "Cross-tenant (and cross-user where required) isolation tests for memory store APIs"
       ],
       "detection": {
         "capability": "manual",
@@ -6472,11 +6449,11 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "memory-management",
       "title": "Critical memory records must have cryptographic or signed integrity protection",
       "description": "Critical memory records shall have cryptographic or signed integrity protection",
-      "whyItMatters": "MEM-M4 (Memory Management, mandatory): Critical memory records shall have cryptographic or signed integrity protection Failing this leaves a production gap against: PASS if critical memory classes are inventoried and integrity verification succeeds in the latest check (≤90 days)",
+      "whyItMatters": "MEM-M4 (Memory Management, mandatory): Critical memory records shall have cryptographic or signed integrity protection Failing this leaves a production gap against: Critical memory classes are inventoried; cryptographic verification or signature check succeeds for those classes in the latest check (≤90 days)",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "PASS if critical memory classes are inventoried and integrity verification succeeds in the latest check (≤90 days)",
+      "passCondition": "Critical memory classes are inventoried; cryptographic verification or signature check succeeds for those classes in the latest check (≤90 days)",
       "evidenceRequired": [
         "Integrity/signing design + verification sample for critical memory stores"
       ],
@@ -6491,7 +6468,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For MEM-M4 (Critical memory records must have cryptographic or signed integrity protection): inspect current evidence for [Integrity/signing design + verification sample for critical memory stores] and confirm the pass condition holds — PASS if critical memory classes are inventoried and integrity verification succeeds in the latest check (≤90 days)",
+      "manualVerification": "For MEM-M4 (Critical memory records must have cryptographic or signed integrity protection): inspect current evidence for [Integrity/signing design + verification sample for critical memory stores] and confirm the pass condition holds — Critical memory classes are inventoried; cryptographic verification or signature check succeeds for those classes in the latest check (≤90 days)",
       "falsePositiveGuidance": "MEM-M4 (Memory Management): re-verify against a current artifact for this specific Check (MEM-M4), not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
         "Implement and operationalize: Critical memory records must have cryptographic or signed integrity protection (MEM-M4)",
@@ -8885,11 +8862,11 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "prompt-engineering",
       "title": "PRM-R2: Prompt linting for length, forbidden patterns, and injection-prone constructs",
       "description": "Prompt linting for length, forbidden patterns, and injection-prone constructs",
-      "whyItMatters": "PRM-R2 (Prompt Engineering, recommended): Prompt linting for length, forbidden patterns, and injection-prone constructs Failing this leaves a production gap against: Lint runs on every prompt change PR; blocking rules exist for secrets patterns and unbounded user concatenation; last failing lint example retained",
+      "whyItMatters": "PRM-R2 (Prompt Engineering, recommended): Prompt linting for length, forbidden patterns, and injection-prone constructs Failing this leaves a production gap against: Lint runs on every prompt change PR; blocking rules exist for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example retained",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Lint runs on every prompt change PR; blocking rules exist for secrets patterns and unbounded user concatenation; last failing lint example retained",
+      "passCondition": "Lint runs on every prompt change PR; blocking rules exist for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example retained",
       "evidenceRequired": [
         "Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint report"
       ],
@@ -8904,7 +8881,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PRM-R2 (PRM-R2: Prompt linting for length, forbidden patterns, and injection-prone constructs): inspect current evidence for [Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint report] and confirm the pass condition holds — Lint runs on every prompt change PR; blocking rules exist for secrets patterns and unbounded user concatenation; last failing lint example retained",
+      "manualVerification": "For PRM-R2 (PRM-R2: Prompt linting for length, forbidden patterns, and injection-prone constructs): inspect current evidence for [Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint report] and confirm the pass condition holds — Lint runs on every prompt change PR; blocking rules exist for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example retained",
       "falsePositiveGuidance": "PRM-R2 (Prompt Engineering): re-verify against a current artifact for this specific Check (PRM-R2), not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
         "Implement and operationalize: PRM-R2: Prompt linting for length, forbidden patterns, and injection-prone constructs (PRM-R2)",
@@ -9022,24 +8999,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Client config / static analysis report for timeouts and max retries"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "manual",
         "detectors": [
-          {
-            "id": "cicd-timeout-present",
-            "params": {}
-          },
-          {
-            "id": "cicd-concurrency-present",
-            "params": {}
-          },
-          {
-            "id": "docker-healthcheck-present",
-            "params": {}
-          },
-          {
-            "id": "docker-workdir-present",
-            "params": {}
-          },
           {
             "id": "manual-attest",
             "params": {
@@ -9053,7 +9014,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "recommendedFixes": [
         "Implement and operationalize: All model and tool calls must have timeouts and bounded retries (REL-M1)",
         "Retain evidence artifacts required by this Check, starting with: Client config / static analysis report for timeouts and max retries",
-        "Wire or verify detectors declared on REL-M1 so automation matches the pass condition",
+        "Schedule recurring manual verification for REL-M1 with a named owner and retained report",
         "Block release (or open a time-boxed waiver with owner and expiry) until REL-M1 passes"
       ],
       "references": [
@@ -9080,7 +9041,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "reliability-continuity",
         "mandatory",
-        "automated"
+        "manual"
       ],
       "applicability": {
         "technologies": [
@@ -10131,11 +10092,11 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "safety-responsible-ai",
       "title": "SAF-R2: Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)",
       "description": "Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)",
-      "whyItMatters": "SAF-R2 (Safety & Responsible AI, recommended): Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team) Failing this leaves a production gap against: Suite covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
+      "whyItMatters": "SAF-R2 (Safety & Responsible AI, recommended): Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team) Failing this leaves a production gap against: A jailbreak-to-harm red-team suite (distinct from the security injection suite) covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Suite covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
+      "passCondition": "A jailbreak-to-harm red-team suite (distinct from the security injection suite) covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
       "evidenceRequired": [
         "Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run report"
       ],
@@ -10150,7 +10111,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SAF-R2 (SAF: Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)): inspect current evidence for [Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run report] and confirm the pass condition holds — Suite covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
+      "manualVerification": "For SAF-R2 (SAF: Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)): inspect current evidence for [Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run report] and confirm the pass condition holds — A jailbreak-to-harm red-team suite (distinct from the security injection suite) covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
       "falsePositiveGuidance": "SAF-R2 (Safety & Responsible AI): re-verify against a current artifact for this specific Check (SAF-R2), not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
         "Implement and operationalize: SAF-R2: Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team) (SAF-R2)",
@@ -10494,16 +10455,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Admission policy config + deny logs for unsigned/unapproved artifacts"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "manual",
         "detectors": [
-          {
-            "id": "cicd-no-pull-request-target",
-            "params": {}
-          },
-          {
-            "id": "cicd-no-self-hosted-runner",
-            "params": {}
-          },
           {
             "id": "manual-attest",
             "params": {
@@ -10517,7 +10470,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "recommendedFixes": [
         "Implement and operationalize: Admission controls must block unsigned or unapproved AI artifacts (SCI-M4)",
         "Retain evidence artifacts required by this Check, starting with: Admission policy config + deny logs for unsigned/unapproved artifacts",
-        "Wire or verify detectors declared on SCI-M4 so automation matches the pass condition",
+        "Schedule recurring manual verification for SCI-M4 with a named owner and retained report",
         "Block release (or open a time-boxed waiver with owner and expiry) until SCI-M4 passes"
       ],
       "references": [
@@ -10544,7 +10497,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "supply-chain",
         "mandatory",
-        "automated"
+        "manual"
       ],
       "applicability": {
         "technologies": [
@@ -10850,13 +10803,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "ai-security",
       "title": "Abuse, jailbreak, and injection testing must gate customer-facing releases",
       "description": "Abuse, jailbreak, and injection testing shall gate customer-facing releases",
-      "whyItMatters": "SEC-M3 (Adversarial Security, mandatory): Abuse, jailbreak, and injection testing shall gate customer-facing releases Failing this leaves a production gap against: 100% of production releases in the last 30 days show security-suite gate = pass, or a time-boxed waiver with owner and expiry ≤ 30 days",
+      "whyItMatters": "SEC-M3 (Adversarial Security, mandatory): Abuse, jailbreak, and injection testing shall gate customer-facing releases Failing this leaves a production gap against: 100% of production releases in the last 30 days show an abuse/jailbreak/injection suite gate = pass (suite must include those case classes), or a time-boxed waiver with owner and expiry ≤ 30 days",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production releases in the last 30 days show security-suite gate = pass, or a time-boxed waiver with owner and expiry ≤ 30 days",
+      "passCondition": "100% of production releases in the last 30 days show an abuse/jailbreak/injection suite gate = pass (suite must include those case classes), or a time-boxed waiver with owner and expiry ≤ 30 days",
       "evidenceRequired": [
-        "CI gate configuration + last 30 days of release reports"
+        "CI gate configuration for abuse/jailbreak/injection suite + last 30 days of release reports showing that suite passed (or waiver)"
       ],
       "detection": {
         "capability": "manual",
@@ -10864,16 +10817,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "CI gate configuration + last 30 days of release reports"
+              "hint": "CI gate configuration for abuse/jailbreak/injection suite + last 30 days of release reports"
             }
           }
         ]
       },
-      "manualVerification": "For SEC-M3 (Abuse, jailbreak, and injection testing must gate customer-facing releases): inspect current evidence for [CI gate configuration + last 30 days of release reports] and confirm the pass condition holds — 100% of production releases in the last 30 days show security-suite gate = pass, or a time-boxed waiver with owner and expiry ≤ 30 days",
+      "manualVerification": "For SEC-M3 (Abuse, jailbreak, and injection testing must gate customer-facing releases): inspect current evidence for [CI gate configuration for abuse/jailbreak/injection suite + last 30 days of release reports showing that suite passed (or waiver)] and confirm the pass condition holds — 100% of production releases in the last 30 days show an abuse/jailbreak/injection suite gate = pass (suite must include those case classes), or a time-boxed waiver with owner and expiry ≤ 30 days",
       "falsePositiveGuidance": "SEC-M3 (Adversarial Security): re-verify against a current artifact for this specific Check (SEC-M3), not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
         "Implement and operationalize: Abuse, jailbreak, and injection testing must gate customer-facing releases (SEC-M3)",
-        "Retain evidence artifacts required by this Check, starting with: CI gate configuration + last 30 days of release reports",
+        "Retain evidence artifacts required by this Check, starting with: CI gate configuration for abuse/jailbreak/injection suite + last 30 days of release reports",
         "Schedule recurring manual verification for SEC-M3 with a named owner and retained report",
         "Block release (or open a time-boxed waiver with owner and expiry) until SEC-M3 passes"
       ],
@@ -11344,13 +11297,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "secrets",
       "title": "Provider and cloud keys must be rotatable and scoped; client apps must not hold privileged keys",
       "description": "Provider and cloud keys shall be rotatable and scoped; client apps shall not hold privileged keys",
-      "whyItMatters": "SEC2-M3 (Secrets, mandatory): Provider and cloud keys shall be rotatable and scoped; client apps shall not hold privileged keys Failing this leaves a production gap against: 0 privileged provider/cloud keys embedded in client apps; every production key has a rotation date within policy (≤90 days or provider-managed short-lived cred…",
+      "whyItMatters": "SEC2-M3 (Secrets, mandatory): Provider and cloud keys shall be rotatable and scoped; client apps shall not hold privileged keys Failing this leaves a production gap against: 0 privileged provider/cloud keys embedded in client apps; every production key has a documented least-privilege scope and a rotation date within policy (≤90 days or provider-managed short-lived credentials)",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "0 privileged provider/cloud keys embedded in client apps; every production key has a rotation date within policy (≤90 days or provider-managed short-lived credentials)",
+      "passCondition": "0 privileged provider/cloud keys embedded in client apps; every production key has a documented least-privilege scope and a rotation date within policy (≤90 days or provider-managed short-lived credentials)",
       "evidenceRequired": [
-        "Key inventory with rotation dates + client bundle/scan report"
+        "Key inventory with least-privilege scope + rotation dates + client bundle/scan report"
       ],
       "detection": {
         "capability": "manual",
@@ -11358,16 +11311,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Key inventory with rotation dates + client bundle/scan report"
+              "hint": "Key inventory with least-privilege scope + rotation dates + client bundle/scan report"
             }
           }
         ]
       },
-      "manualVerification": "For SEC2-M3 (Provider and cloud keys must be rotatable and scoped; client apps must not hold privileged keys): inspect current evidence for [Key inventory with rotation dates + client bundle/scan report] and confirm the pass condition holds — 0 privileged provider/cloud keys embedded in client apps; every production key has a rotation date within policy (≤90 days or provider-managed short-lived credentials)",
+      "manualVerification": "For SEC2-M3 (Provider and cloud keys must be rotatable and scoped; client apps must not hold privileged keys): inspect current evidence for [Key inventory with least-privilege scope + rotation dates + client bundle/scan report] and confirm the pass condition holds — 0 privileged provider/cloud keys embedded in client apps; every production key has a documented least-privilege scope and a rotation date within policy (≤90 days or provider-managed short-lived credentials)",
       "falsePositiveGuidance": "SEC2-M3 (Secrets): re-verify against a current artifact for this specific Check (SEC2-M3), not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
         "Implement and operationalize: Provider and cloud keys must be rotatable and scoped; client apps must not hold privileged keys (SEC2-M3)",
-        "Retain evidence artifacts required by this Check, starting with: Key inventory with rotation dates + client bundle/scan report",
+        "Retain evidence artifacts required by this Check, starting with: Key inventory with least-privilege scope + rotation dates + client bundle/scan report",
         "Schedule recurring manual verification for SEC2-M3 with a named owner and retained report",
         "Block release (or open a time-boxed waiver with owner and expiry) until SEC2-M3 passes"
       ],
@@ -11625,16 +11578,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Tool gateway authz tests + deny logs"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "manual",
         "detectors": [
-          {
-            "id": "mcp-tool-allowlist",
-            "params": {}
-          },
-          {
-            "id": "mcp-filesystem-scope",
-            "params": {}
-          },
           {
             "id": "manual-attest",
             "params": {
@@ -11648,7 +11593,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "recommendedFixes": [
         "Implement and operationalize: Every tool invocation must be authorized server-side independent of model output (TOL-M1)",
         "Retain evidence artifacts required by this Check, starting with: Tool gateway authz tests + deny logs",
-        "Wire or verify detectors declared on TOL-M1 so automation matches the pass condition",
+        "Schedule recurring manual verification for TOL-M1 with a named owner and retained report",
         "Block release (or open a time-boxed waiver with owner and expiry) until TOL-M1 passes"
       ],
       "references": [
@@ -11671,7 +11616,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "tool-safety",
         "mandatory",
-        "automated"
+        "manual"
       ],
       "applicability": {
         "technologies": [

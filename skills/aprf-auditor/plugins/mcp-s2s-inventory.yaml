@@ -1,0 +1,31 @@
+executor: collectors/mcp-s2s-inventory.ts
+id: mcp-s2s-inventory
+title: MCP / S2S connection inventory (AUTHN-M2)
+version: "0.2.0"
+evidenceClass: runtime
+inputs:
+  - "Optional: connection inventory JSON under aprf-assessment/imports/mcp-s2s-inventory/"
+  - "Optional live fetch: --base-url + --admin-token (APRF_ADMIN_TOKEN), or --admin-email + --admin-password (sign-in → JWT) → GET /api/v1/configs/tool_servers"
+  - "Repo scan for auth_type allow-lists (code policy signals)"
+collect:
+  - "Discover whether the app supports MCP/tool-server connections and which auth_type values exist in code"
+  - "Ingest inventory export or fetch live admin tool_servers / terminal_servers configs"
+  - "Score each connection: anonymous/none and shared static bearer keys fail; named OAuth/OIDC/workload identity pass"
+  - "Write mcp-s2s-inventory-report.json under imports/mcp-s2s-inventory/"
+emits:
+  nodeClass: runtime
+  refPattern: "aprf-assessment/imports/mcp-s2s-inventory/*"
+  signals:
+    - mcp-s2s-inventory
+    - authn-m2
+    - machine-identity
+    - auth-type-none
+mapsToChecks: [AUTHN-M2]
+whenUnavailable: >
+  Ask for a redacted MCP/tool-server connection inventory export, or a live base URL plus admin
+  token to fetch /api/v1/configs/tool_servers. Code supporting OAuth alone is not a PASS.
+live:
+  required: false
+  note: >
+    Live fetch uses user-provided admin token against --base-url (same host as http-auth-probe).
+    Never log or persist raw secrets — redact keys in the report.

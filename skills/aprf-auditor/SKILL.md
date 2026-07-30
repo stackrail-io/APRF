@@ -34,11 +34,13 @@ npm run aprf:report-html -- \
 
    Valid `REPORT.html` must include `stackrail.io` links and a **Visual overview** section (donut / bars / gauge). If missing, re-run the command above.
 
-Collectors: local by default; `aprf-assessment/imports/<plugin>/` for runtime exports; `imports/custom/` for out-of-plugin evidence; live APIs only with `APRF_AUDITOR_LIVE=1`.
+Collectors: local by default; `aprf-assessment/imports/<plugin>/` for runtime exports; `imports/custom/` for out-of-plugin evidence; live APIs only with `APRF_AUDITOR_LIVE=1`. For **AUTHN-M1**, run `http-auth-probe` with `--base-url` (or ingest `imports/http-auth-probe/auth-probe-report.json`) — do not PASS from auth middleware code alone. For **AUTHN-M2**, run `mcp-s2s-inventory` with an inventory export or `--base-url` + `--admin-token` (or `--admin-email` + `--admin-password` to sign in) — do not PASS from OAuth support in code alone. For **AUTHZ-M1**, run `authz-entry-tests` — do not PASS from `has_permission` code alone; need automated denial tests for AI entry points. For **AUTHZ-M2**, run `cross-tenant-tests` — do not PASS from `user_id` filters alone; need ≥10 cross-tenant attack cases with 0 unauthorized successes. For **SEC2-M1**, run `secrets-hygiene` — do not PASS from `${{ secrets.* }}` CI vars alone; need secrets-manager wiring + clean secret-scan covering prompts/fixtures. For **SEC2-M2**, run `secret-redaction` — do not PASS from redact helpers alone; need a canary harness with 100% detection in persisted logs/traces. For **SEC-M1**, run `injection-policy-gate` — do not PASS from prompt-injection warnings alone; need a versioned corpus + CI gate with ≥95% deny and 0 model-text privilege grants.
 
 ## Hard rules
 
 - **Classify `systemType` first.** Consoles / catalogs / tooling → `non-ai-platform` + `scopes/non-ai-platform.yaml` (subset gate). Only `ai-application` uses Core/Regulated as an AI production-readiness claim.
+- **Ask for a live base URL early (Phase 0)** on `ai-application` assessments: running local/staging URL for `http-auth-probe` (AUTHN-M1). Do not wait until Phase 2b to discover you needed runtime. If none, say so and do not invent PASS.
+- **Ask for MCP/S2S inventory (AUTHN-M2)** when tools/MCP exist: redacted export under `imports/mcp-s2s-inventory/` or admin token for live fetch — never commit tokens.
 - **Never market subset PASS/FAIL as APRF Core.**
 - **Precedence:** runtime → ci → iac → runtime-config → policy → code → docs → user.
 - **Never invent or assume evidence.** For each Check that would be `NOT_DEMONSTRATED`, ask **YES / NO / DON'T KNOW** (Phase 2b) before finalizing. Phase 2b lines must use the Check YAML **`title` verbatim** (never shorten or add “(beyond …)”).

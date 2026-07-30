@@ -12,7 +12,7 @@ gate: "mandatory"
 passCondition: "0 successful cross-tenant (and cross-user where required) memory reads/writes across
   ≥10 automated attack cases"
 evidenceRequired:
-  - "Isolation tests for memory store APIs"
+  - "Cross-tenant (and cross-user where required) isolation tests for memory store APIs"
 detection:
   capability: "manual"
   detectors:

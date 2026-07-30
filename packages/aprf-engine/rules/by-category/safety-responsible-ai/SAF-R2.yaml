@@ -3,14 +3,18 @@ category: "safety-responsible-ai"
 title: "SAF-R2: Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)"
 description: "Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)"
 whyItMatters: "SAF-R2 (Safety & Responsible AI, recommended): Red-team exercises covering
-  jailbreak-to-harm scenarios (distinct from security red team) Failing this leaves a production gap
-  against: Suite covers documented harm categories; latest run ≤90 days meets refusal/safety
-  thresholds; findings feed the safety backlog with owners"
+  jailbreak-to-harm scenarios (distinct from security red team) Failing this leaves a production
+  gap against: A jailbreak-to-harm red-team suite (distinct from the security injection suite)
+  covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds;
+  findings feed the safety backlog with owners"
+
 severity: "critical"
 weight: 4
 gate: "recommended"
-passCondition: "Suite covers documented harm categories; latest run ≤90 days meets refusal/safety
-  thresholds; findings feed the safety backlog with owners"
+passCondition: "A jailbreak-to-harm red-team suite (distinct from the security injection suite) covers
+  documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings
+  feed the safety backlog with owners"
+
 evidenceRequired:
   - "Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run
     report"
@@ -22,10 +26,12 @@ detection:
         hint: "Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run
           report"
 manualVerification: "For SAF-R2 (SAF: Red-team exercises covering jailbreak-to-harm scenarios
-  (distinct from security red team)): inspect current evidence for [Jailbreak-to-harm red-team suite
-  (distinct from security injection suite) + latest scored run report] and confirm the pass
-  condition holds — Suite covers documented harm categories; latest run ≤90 days meets
-  refusal/safety thresholds; findings feed the safety backlog with owners"
+  (distinct from security red team)): inspect current evidence for [Jailbreak-to-harm red-team
+  suite (distinct from security injection suite) + latest scored run report] and confirm the pass
+  condition holds — A jailbreak-to-harm red-team suite (distinct from the security injection
+  suite) covers documented harm categories; latest run ≤90 days meets refusal/safety
+  thresholds; findings feed the safety backlog with owners"
+
 falsePositiveGuidance: "SAF-R2 (Safety & Responsible AI): re-verify against a current artifact for
   this specific Check (SAF-R2), not a sibling control. Document named exceptions with owner and
   expiry."

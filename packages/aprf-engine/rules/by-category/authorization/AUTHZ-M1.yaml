@@ -3,41 +3,44 @@ category: "authorization"
 title: "Authorization must be enforced server-side for AI features, tools, and retrieval"
 description: "Authorization shall be enforced server-side for AI features, tools, and retrieval"
 whyItMatters: "AUTHZ-M1 (Authorization, mandatory): Authorization shall be enforced server-side for
-  AI features, tools, and retrieval Failing this leaves a production gap against: Automated tests
-  cover 100% of production AI feature, tool, and retrieval entry points; unauthenticated or
-  unauthorized callers are denied at 100% in the suite"
+  AI features, tools, and retrieval Failing this leaves a production gap against: 100% of privileged
+  AI feature, tool, and retrieval entry points enforce authorization server-side; 0 successful
+  requests from authenticated callers lacking required permission or scope in the authz suite"
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "Automated tests cover 100% of production AI feature, tool, and retrieval entry
-  points; unauthenticated or unauthorized callers are denied at 100% in the suite"
+passCondition: "100% of privileged AI feature, tool, and retrieval entry points enforce
+  authorization server-side; 0 successful requests from authenticated callers lacking required
+  permission or scope in the authz suite"
 evidenceRequired:
-  - "Authz middleware/policy tests for AI feature, tool, and retrieval entry points"
+  - "Server-side authz middleware/policy for AI feature, tool, and retrieval entry points"
+  - "Authz suite results showing authenticated-but-unauthorized callers denied on those entry
+    points"
 detection:
-  capability: "automated"
+  capability: "manual"
   detectors:
-    - id: "iam-least-privilege"
-      params:
-        hint: "APEP apep.iam.policy_document — flag wildcard Action"
-    - id: "iam-no-wildcard-resource"
-      params:
-        hint: "APEP apep.iam.policy_document — flag wildcard Resource"
     - id: "manual-attest"
       params:
-        hint: "Authz middleware/policy tests for AI feature, tool, and retrieval entry points"
+        hint: "Server-side authz middleware/policy + unauthorized-caller suite for AI
+          feature/tool/retrieval entry points"
 manualVerification: "For AUTHZ-M1 (Authorization must be enforced server-side for AI features,
-  tools, and retrieval): inspect current evidence for [Authz middleware/policy tests for AI feature,
-  tool, and retrieval entry points] and confirm the pass condition holds — Automated tests cover
-  100% of production AI feature, tool, and retrieval entry points; unauthenticated or unauthorized
-  callers are denied at 100% in the suite"
+  tools, and retrieval): inspect current evidence for [Server-side authz middleware/policy for AI
+  feature, tool, and retrieval entry points; Authz suite results showing
+  authenticated-but-unauthorized callers denied on those entry points] and confirm the pass
+  condition holds — 100% of privileged AI feature, tool, and retrieval entry points enforce
+  authorization server-side; 0 successful requests from authenticated callers lacking required
+  permission or scope in the authz suite"
 falsePositiveGuidance: "AUTHZ-M1 (Authorization): confirm the detector target matches the production
-  path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days."
+  path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days. Do not
+  score AUTHN-M1 (unauthenticated rejection) as satisfying this Check — require authenticated but
+  unauthorized callers."
 recommendedFixes:
   - "Implement and operationalize: Authorization must be enforced server-side for AI features,
     tools, and retrieval (AUTHZ-M1)"
-  - "Retain evidence artifacts required by this Check, starting with: Authz middleware/policy tests
-    for AI feature, tool, and retrieval entry points"
-  - "Wire or verify detectors declared on AUTHZ-M1 so automation matches the pass condition"
+  - "Retain evidence artifacts required by this Check, starting with: Server-side authz
+    middleware/policy for AI feature, tool, and retrieval entry points"
+  - "Add or extend an authz suite that denies authenticated callers lacking required permission or
+    scope on AI feature, tool, and retrieval entry points"
   - "Block release (or open a time-boxed waiver with owner and expiry) until AUTHZ-M1 passes"
 references:
   - title: "OWASP Access Control Cheat Sheet"
@@ -50,10 +53,11 @@ relatedRules:
   - "AUTHZ-M4"
   - "AUTHZ-R1"
   - "AUTHZ-R2"
+  - "AUTHN-M1"
 tags:
   - "authorization"
   - "mandatory"
-  - "automated"
+  - "manual"
 applicability:
   technologies:
     - "openapi"

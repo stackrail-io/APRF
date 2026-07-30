@@ -3,24 +3,31 @@ category: "authorization"
 title: "Attribute-based controls must govern access to sensitive document classes"
 description: "Attribute-based controls shall govern access to sensitive document classes"
 whyItMatters: "AUTHZ-M4 (Authorization, mandatory): Attribute-based controls shall govern access to
-  sensitive document classes Failing this leaves a production gap against: PASS if sensitive
-  document classes are enumerated and policy denies unauthorized class access in tests; inventory
-  matches production classes"
+  sensitive document classes Failing this leaves a production gap against: Sensitive document
+  classes are enumerated; attribute-based policy (subject/resource attributes) denies
+  unauthorized class access in tests; inventory matches production classes"
+
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "PASS if sensitive document classes are enumerated and policy denies unauthorized
-  class access in tests; inventory matches production classes"
+passCondition: "Sensitive document classes are enumerated; attribute-based policy (subject/resource
+  attributes) denies unauthorized class access in tests; inventory matches production
+  classes"
+
 evidenceRequired:
   - "ABAC/policy config + sample allow/deny decisions for sensitive classes"
 detection:
   capability: "manual"
-  detectors: []
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "ABAC/policy config + sample allow/deny decisions for sensitive classes"
 manualVerification: "For AUTHZ-M4 (Attribute-based controls must govern access to sensitive document
   classes): inspect current evidence for [ABAC/policy config + sample allow/deny decisions for
-  sensitive classes] and confirm the pass condition holds — PASS if sensitive document classes are
-  enumerated and policy denies unauthorized class access in tests; inventory matches production
-  classes"
+  sensitive classes] and confirm the pass condition holds — Sensitive document classes are
+  enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class
+  access in tests; inventory matches production classes"
+
 falsePositiveGuidance: "AUTHZ-M4 (Authorization): re-verify against a current artifact for this
   specific Check (AUTHZ-M4), not a sibling control. Document named exceptions with owner and
   expiry."

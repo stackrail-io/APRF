@@ -45,6 +45,20 @@ export interface CollectorContext {
   live: boolean;
   /** Limit filesystem walk depth / file count for determinism + speed */
   maxFiles?: number;
+  /**
+   * Optional base URL for live HTTP probes (http-auth-probe / AUTHN-M1).
+   * Also accepted via APRF_AUTH_PROBE_BASE_URL.
+   */
+  baseUrl?: string;
+  /**
+   * Optional admin bearer token for live config fetch (mcp-s2s-inventory / AUTHN-M2).
+   * Also accepted via APRF_ADMIN_TOKEN.
+   */
+  adminToken?: string;
+  /** Optional admin email for password login (obtains token). APRF_ADMIN_EMAIL. */
+  adminEmail?: string;
+  /** Optional admin password for password login. APRF_ADMIN_PASSWORD — never log/persist. */
+  adminPassword?: string;
 }
 
 export interface Collector {

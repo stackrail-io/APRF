@@ -16,15 +16,12 @@ passCondition: "0 AI data stores or control-plane endpoints publicly reachable w
 evidenceRequired:
   - "CSPM/network scan of AI data stores and control planes + edge auth config"
 detection:
-  capability: "automated"
+  capability: "manual"
   detectors:
-    - id: "docker-nonroot-user"
-      params: {}
-    - id: "docker-no-curl-pipe-shell"
-      params: {}
     - id: "manual-attest"
       params:
         hint: "CSPM/network scan of AI data stores and control planes + edge auth config"
+
 manualVerification: "For INF-M1 (AI data stores and control planes must not be publicly exposed
   without authenticated edge controls): inspect current evidence for [CSPM/network scan of AI data
   stores and control planes + edge auth config] and confirm the pass condition holds — 0 AI data
@@ -37,7 +34,7 @@ recommendedFixes:
     without authenticated edge controls (INF-M1)"
   - "Retain evidence artifacts required by this Check, starting with: CSPM/network scan of AI data
     stores and control planes + edge auth config"
-  - "Wire or verify detectors declared on INF-M1 so automation matches the pass condition"
+  - "Schedule recurring manual verification for INF-M1 with a named owner and retained report"
   - "Block release (or open a time-boxed waiver with owner and expiry) until INF-M1 passes"
 references:
   - title: "CIS Benchmarks"
@@ -55,7 +52,7 @@ relatedRules:
 tags:
   - "infrastructure"
   - "mandatory"
-  - "automated"
+  - "manual"
 applicability:
   technologies:
     - "aws"

@@ -1,0 +1,30 @@
+executor: collectors/cross-tenant-tests.ts
+id: cross-tenant-tests
+title: Cross-tenant attack tests for AI data and memory (AUTHZ-M2)
+version: "0.2.0"
+evidenceClass: code
+inputs:
+  - "Target repo with multi-tenant AI data/memory paths"
+  - "Optional suite export: aprf-assessment/imports/cross-tenant-tests/*.json"
+  - "Optional prior report: aprf-assessment/imports/cross-tenant-tests/cross-tenant-report.json"
+collect:
+  - "Detect tenant-isolation helpers in code (user_id filters, access_grants, has_access, …)"
+  - "Inventory AI data/memory path hints (chats, memories, knowledge, files, vectors, …)"
+  - "Scan automated tests for cross-tenant attack cases; count cases and unauthorized successes"
+  - "Write cross-tenant-report.json; AUTHZ-M2 needs ≥10 attack cases with 0 successful unauthorized access"
+emits:
+  nodeClass: code
+  refPattern: "aprf-assessment/imports/cross-tenant-tests/*"
+  signals:
+    - cross-tenant-tests
+    - authz-m2
+    - tenant-isolation
+    - cross-tenant-gap
+mapsToChecks: [AUTHZ-M2]
+whenUnavailable: >
+  Tenant filters / access_grants in code are supporting evidence only. AUTHZ-M2 PASS requires
+  a cross-tenant attack test suite (≥10 cases, 0 successful unauthorized reads/writes) — drop
+  results under imports/cross-tenant-tests/ if the suite lives in CI elsewhere.
+live:
+  required: false
+  note: Offline collector; optional imports for CI suite results.

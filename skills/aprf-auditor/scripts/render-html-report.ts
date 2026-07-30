@@ -471,12 +471,69 @@ function titleCaseDomain(domain: string): string {
     .join(" ");
 }
 
+/** Resolve APRF domain id (security, data, …) — never leave a category slug as the domain. */
+function domainIdForControl(c: Control): string {
+  const raw = (c.domain && c.domain.trim()) || "";
+  // If assessment wrongly stored category as domain, map it.
+  if (raw && DOMAIN_BY_CATEGORY[raw]) return DOMAIN_BY_CATEGORY[raw];
+  if (raw && Object.values(DOMAIN_BY_CATEGORY).includes(raw)) return raw;
+  if (DOMAIN_BY_CATEGORY[c.category]) return DOMAIN_BY_CATEGORY[c.category];
+  return raw || c.category || "other";
+}
+
 function controlDomain(c: Control): string {
-  const raw =
-    (c.domain && c.domain.trim()) ||
-    DOMAIN_BY_CATEGORY[c.category] ||
-    c.category;
-  return titleCaseDomain(raw);
+  return titleCaseDomain(domainIdForControl(c));
+}
+
+/** Roll up domain scores from controls (corrects category-as-domain mistakes in assessment.json). */
+function domainScoresFromControls(
+  controls: Control[],
+): Assessment["domainScores"] {
+  const order = [
+    "security",
+    "safety",
+    "data",
+    "model-lifecycle",
+    "agents",
+    "reliability",
+    "cost",
+    "governance",
+    "platform",
+  ];
+  const byDomain = new Map<string, Control[]>();
+  for (const c of controls) {
+    const id = domainIdForControl(c);
+    const list = byDomain.get(id) ?? [];
+    list.push(c);
+    byDomain.set(id, list);
+  }
+  const ids = [
+    ...order.filter((d) => byDomain.has(d)),
+    ...[...byDomain.keys()].filter((d) => !order.includes(d)),
+  ];
+  return ids.map((domain) => {
+    const list = byDomain.get(domain) ?? [];
+    const applicable = list.filter((c) => c.status !== "NOT_APPLICABLE");
+    const satisfied = applicable.filter((c) => c.status === "PASS");
+    const notDemonstrated = applicable.filter(
+      (c) => c.status === "NOT_DEMONSTRATED",
+    ).length;
+    const blockers = applicable.filter((c) =>
+      ["FAIL", "PARTIAL", "NOT_DEMONSTRATED"].includes(c.status),
+    );
+    const score =
+      applicable.length === 0
+        ? 100
+        : Math.round((satisfied.length / applicable.length) * 100);
+    return {
+      domain: titleCaseDomain(domain),
+      score,
+      mandatoryGatePassed: blockers.length === 0,
+      applicable: applicable.length,
+      satisfied: satisfied.length,
+      notDemonstrated,
+    };
+  });
 }
 
 /** Human category from Check YAML `category` (pillar), not the rolled-up domain. */
@@ -721,7 +778,9 @@ function render(a: Assessment): string {
   const statusCounts = countByStatus(a.controls);
   const severityCounts = countBySeverity(a.controls);
 
-  const domainsTable = a.domainScores
+  // Prefer rollup from controls so category slugs never appear as "domains"
+  const domainScores = domainScoresFromControls(a.controls);
+  const domainsTable = domainScores
     .map(
       (d) =>
         `<tr><td>${esc(d.domain)}</td><td>${esc(d.score)}</td><td class="${d.mandatoryGatePassed ? "ok" : "bad"}">${d.mandatoryGatePassed ? "pass" : "fail"}</td></tr>`,

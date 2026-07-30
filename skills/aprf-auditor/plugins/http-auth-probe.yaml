@@ -1,0 +1,32 @@
+executor: collectors/http-auth-probe.ts
+id: http-auth-probe
+title: Unauthenticated HTTP auth probe (AUTHN-M1)
+version: "0.2.0"
+evidenceClass: runtime
+inputs:
+  - "Base URL of a running app (local/staging/prod) via --base-url or APRF_AUTH_PROBE_BASE_URL"
+  - "Optional route inventory override: aprf-assessment/imports/http-auth-probe/routes.json"
+  - "Optional prior report: aprf-assessment/imports/http-auth-probe/auth-probe-report.json"
+collect:
+  - "Discover AI HTTP routes from FastAPI include_router prefixes, OpenAPI/Swagger files, or routes.json"
+  - "If no base URL: emit route-catalog node (code) and needs-user — do not invent PASS"
+  - "If base URL set: probe each AI route without Authorization/Cookie; expect 401/403"
+  - "Write auth-probe-report.json under imports/http-auth-probe/ and emit runtime nodes"
+emits:
+  nodeClass: runtime
+  refPattern: "aprf-assessment/imports/http-auth-probe/*"
+  signals:
+    - auth-probe
+    - http-401
+    - http-403
+    - route-catalog
+    - authn-m1
+mapsToChecks: [AUTHN-M1]
+whenUnavailable: >
+  Ask for a reachable base URL (or start the app locally), or drop an auth-probe-report.json
+  under imports/http-auth-probe/. Code-only auth middleware is supporting evidence, not a PASS.
+live:
+  required: false
+  note: >
+    Probing a base URL is local HTTP to a user-provided target (not a third-party cloud API).
+    Still opt-in via --base-url / APRF_AUTH_PROBE_BASE_URL so default collect stays offline.

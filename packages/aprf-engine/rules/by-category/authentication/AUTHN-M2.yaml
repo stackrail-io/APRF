@@ -14,26 +14,25 @@ passCondition: "0 production MCP or AI S2S connections accept anonymous access o
 evidenceRequired:
   - "MCP/S2S connection inventory + auth config export"
 detection:
-  capability: "hybrid"
+  capability: "manual"
   detectors:
-    - id: "cicd-oidc-present"
-      params: {}
     - id: "manual-attest"
       params:
         hint: "MCP/S2S connection inventory + auth config export"
+
 manualVerification: "For AUTHN-M2 (Service-to-service and MCP connections must use strong machine
   identity): inspect current evidence for [MCP/S2S connection inventory + auth config export] and
   confirm the pass condition holds — 0 production MCP or AI S2S connections accept anonymous access
   or shared long-lived static keys; each connection has a named machine identity"
-falsePositiveGuidance: "AUTHN-M2 (Authentication): when automation and attestation disagree, prefer
-  the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the
-  gap."
+falsePositiveGuidance: "AUTHN-M2 (Authentication): re-verify against a current MCP/S2S inventory
+  artifact for this Check (AUTHN-M2), not CI OIDC alone. Named exceptions need an owner and
+  expiry ≤90 days."
 recommendedFixes:
   - "Implement and operationalize: Service-to-service and MCP connections must use strong machine
     identity (AUTHN-M2)"
   - "Retain evidence artifacts required by this Check, starting with: MCP/S2S connection inventory +
     auth config export"
-  - "Wire or verify detectors declared on AUTHN-M2 so automation matches the pass condition"
+  - "Schedule recurring manual verification for AUTHN-M2 with a named owner and retained report"
   - "Block release (or open a time-boxed waiver with owner and expiry) until AUTHN-M2 passes"
 references:
   - title: "OWASP Authentication Cheat Sheet"
@@ -49,7 +48,7 @@ relatedRules:
 tags:
   - "authentication"
   - "mandatory"
-  - "hybrid"
+  - "manual"
 applicability:
   technologies:
     - "openapi"
