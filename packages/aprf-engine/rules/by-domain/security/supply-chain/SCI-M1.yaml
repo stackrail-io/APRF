@@ -1,0 +1,62 @@
+id: "SCI-M1"
+category: "supply-chain"
+title: "Production model and container artifacts must have verified provenance/integrity"
+description: "Production model and container artifacts shall have verified provenance/integrity"
+whyItMatters: "Production model and container artifacts shall have verified provenance/integrity
+  Failing this leaves a production gap against: 100% of production model/container pulls in the
+  sample window verify against expected digest or signature; unverified pulls are blocked"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "100% of production model/container pulls in the sample window verify against
+  expected digest or signature; unverified pulls are blocked"
+evidenceRequired:
+  - "Digest/signature verification logs for last production deploy"
+detection:
+  capability: "automated"
+  detectors:
+    - id: "docker-image-digest-pinned"
+      params: {}
+    - id: "manual-attest"
+      params:
+        hint: "Digest/signature verification logs for last production deploy"
+manualVerification: "For this Check (Production model and container artifacts must have verified
+  provenance/integrity): inspect current evidence for [Digest/signature verification logs for last
+  production deploy] and confirm the pass condition holds — 100% of production model/container pulls
+  in the sample window verify against expected digest or signature; unverified pulls are blocked"
+falsePositiveGuidance: "(Supply Chain Integrity): confirm the detector target matches the production
+  path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days."
+recommendedFixes:
+  - "Implement and operationalize: Production model and container artifacts must have verified
+    provenance/integrity"
+  - "Retain evidence artifacts required by this Check, starting with: Digest/signature verification
+    logs for last production deploy"
+  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "SLSA — Supply-chain Levels for Software Artifacts"
+    url: "https://slsa.dev/"
+  - title: "CNCF Software Supply Chain Best Practices"
+    url: "https://www.cncf.io/"
+  - title: "OWASP LLM — Supply Chain Vulnerabilities"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "SCI-M2"
+  - "SCI-M3"
+  - "SCI-M4"
+  - "SCI-R1"
+  - "SCI-R2"
+tags:
+  - "supply-chain"
+  - "mandatory"
+  - "automated"
+applicability:
+  technologies:
+    - "github"
+    - "github-actions"
+    - "cicd"
+    - "docker"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

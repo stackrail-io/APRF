@@ -1,0 +1,76 @@
+id: "AGN-M1"
+category: "agent-governance"
+title: "Every production agent must have a documented charter"
+description: "Each production agent (any autonomous or semi-autonomous runtime that plans, loops, or
+  invokes tools on behalf of a product capability—including in-process agents, MCP clients/servers
+  acting as agents, and A2A participants) shall have a versioned charter covering purpose, allowed
+  tools, data scope, autonomy limits, and a named owner."
+whyItMatters: "Without a charter, agents become unbounded co-processors: they can pursue undefined
+  goals, touch undeclared tools and corpora, and escalate autonomy without an accountable owner.
+  Governance failures usually look like “the agent went rogue” but stem from missing product
+  controls—not model quirks. Charters make allowed agency reviewable before incidents, not
+  reconstructable after."
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "100% of production agents appear in an inventory with a charter that includes
+  purpose, tool allowlist reference, data scope, autonomy limits, and named owner; inventory query
+  returns 0 agents missing any required field."
+evidenceRequired:
+  - "Versioned agent inventory listing every production agent with owner and charter URI/id"
+  - "Per-agent charter documents (or equivalent structured records) covering purpose, tool allowlist
+    reference, data scope, and autonomy limits"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Confirm production-agent inventory completeness, then spot-check that each charter has
+          purpose, tool allowlist reference, data scope, autonomy limits, and owner."
+manualVerification: "1) Define “production agent” for this system (any agent runtime reachable from
+  production traffic or scheduled jobs—not only MCP/A2A). Build or export an inventory of those
+  agents with owners. 2) For each inventory row, open the linked charter and verify it states:
+  purpose/goals; tool allowlist reference (config id, policy id, or doc URI); data/corpora scope;
+  autonomy limits (e.g. max steps, wall-clock, spawn depth, or escalation rules—consistent with
+  AGN-M2 where applicable); named owner. 3) PASS only if the inventory query (or equivalent review)
+  shows 0 production agents missing any required field. Agents in non-production environments may be
+  excluded if the inventory documents the exclusion rule."
+falsePositiveGuidance: "Do not pass on architecture or design docs that name agent types without a
+  current inventory (registry/CMDB/manifest export ≤90 days) of deployed production agents. Do not
+  treat a type-level row as covering every deployed instance. Chatbots without tool/autonomy loops
+  are out of scope unless your documented production-agent definition includes them. A tool
+  allowlist in code does not satisfy this Check unless each charter references it. Stub charters
+  (empty purpose, unset owner, missing autonomy limits) fail. Passing step-limit or kill-switch Checks
+  does not substitute for charters. Named exceptions need owner and expiry ≤90 days."
+recommendedFixes:
+  - "Create a single agent inventory (registry, CMDB table, or repo manifest) that lists every
+    production agent with owner and charter link"
+  - "Author a charter template with required fields: purpose, tool allowlist reference, data scope,
+    autonomy limits, owner; migrate existing agents onto it"
+  - "Gate new agent promotion to production on inventory + charter completeness (fail closed when
+    fields are missing)"
+  - "Schedule a recurring inventory audit (≤90 days) with a named owner and retain the report"
+references:
+  - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI Risk Management Framework — Govern"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "AGN-M2"
+  - "AGN-M3"
+  - "AGN-M4"
+  - "AGN-R1"
+  - "AGN-R2"
+  - "HUM-M1"
+tags:
+  - "agent-governance"
+  - "mandatory"
+  - "manual"
+  - "charter"
+  - "inventory"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

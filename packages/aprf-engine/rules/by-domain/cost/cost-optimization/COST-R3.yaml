@@ -1,0 +1,59 @@
+id: "COST-R3"
+category: "cost-optimization"
+title: "Production systems should have finOps reviews of AI unit economics per product"
+description: "FinOps reviews of AI unit economics per product"
+whyItMatters: "FinOps reviews of AI unit economics per product Failing this leaves a production gap
+  against: Each customer-facing AI product has unit-cost metrics for the last quarter; review
+  occurred ≤90 days with owners for outliers above documented thresholds"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "Each customer-facing AI product has unit-cost metrics for the last quarter; review
+  occurred ≤90 days with owners for outliers above documented thresholds"
+evidenceRequired:
+  - "Per-product AI unit-economics report (cost per successful task / journey) + FinOps review
+    minutes"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Per-product AI unit-economics report (cost per successful task / journey) + FinOps review
+          minutes"
+manualVerification: "For this Check (FinOps reviews of AI unit economics per product): inspect
+  current evidence for [Per-product AI unit-economics report (cost per successful task / journey) +
+  FinOps review minutes] and confirm the pass condition holds — Each customer-facing AI product has
+  unit-cost metrics for the last quarter; review occurred ≤90 days with owners for outliers above
+  documented thresholds"
+falsePositiveGuidance: "(Cost Optimization): re-verify against a current artifact for this specific
+  Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: FinOps reviews of AI unit economics per product"
+  - "Retain evidence artifacts required by this Check, starting with: Per-product AI unit-economics
+    report (cost per successful task / journey) + FinOps review minutes"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "AWS Well-Architected — Cost Optimization"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "FinOps Foundation practices"
+    url: "https://www.finops.org/"
+relatedRules:
+  - "COST-M1"
+  - "COST-M2"
+  - "COST-M3"
+  - "COST-R1"
+  - "COST-R2"
+tags:
+  - "cost-optimization"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

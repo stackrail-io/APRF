@@ -1,0 +1,59 @@
+id: "AUTHZ-M4"
+category: "authorization"
+title: "Attribute-based controls must govern access to sensitive document classes"
+description: "Attribute-based controls shall govern access to sensitive document classes"
+whyItMatters: "Attribute-based controls shall govern access to sensitive document classes Failing
+  this leaves a production gap against: Sensitive document classes are enumerated; attribute-based
+  policy (subject/resource attributes) denies unauthorized class access in tests; inventory matches
+  production classes"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "Sensitive document classes are enumerated; attribute-based policy (subject/resource
+  attributes) denies unauthorized class access in tests; inventory matches production classes"
+evidenceRequired:
+  - "ABAC/policy config + sample allow/deny decisions for sensitive classes"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "ABAC/policy config + sample allow/deny decisions for sensitive classes"
+manualVerification: "For this Check (Attribute-based controls must govern access to sensitive
+  document classes): inspect current evidence for [ABAC/policy config + sample allow/deny decisions
+  for sensitive classes] and confirm the pass condition holds — Sensitive document classes are
+  enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class access
+  in tests; inventory matches production classes"
+falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
+  control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Attribute-based controls must govern access to sensitive document
+    classes"
+  - "Retain evidence artifacts required by this Check, starting with: ABAC/policy config + sample
+    allow/deny decisions for sensitive classes"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "OWASP Access Control Cheat Sheet"
+    url: "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "AUTHZ-M1"
+  - "AUTHZ-M2"
+  - "AUTHZ-M3"
+  - "AUTHZ-R1"
+  - "AUTHZ-R2"
+tags:
+  - "authorization"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "openapi"
+    - "mcp"
+    - "a2a"
+  minCriticality: 3
+  requiredFromLevel: 5
+status: "active"
+introducedIn: "0.10.0"

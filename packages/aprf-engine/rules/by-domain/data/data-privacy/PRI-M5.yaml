@@ -1,0 +1,58 @@
+id: "PRI-M5"
+category: "data-privacy"
+title: "DPIA/PIA equivalents must exist for major AI features before production"
+description: "DPIA/PIA equivalents shall exist for major AI features before production"
+whyItMatters: "DPIA/PIA equivalents shall exist for major AI features before production Failing this
+  leaves a production gap against: PASS if 100% of major in-scope AI features have a completed
+  assessment with owner sign-off before production traffic"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "PASS if 100% of major in-scope AI features have a completed assessment with owner
+  sign-off before production traffic"
+evidenceRequired:
+  - "Completed DPIA/PIA (or equivalent) with sign-off for each major in-scope AI feature"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Completed DPIA/PIA (or equivalent) with sign-off for each major in-scope AI feature"
+manualVerification: "For this Check (DPIA/PIA equivalents must exist for major AI features before
+  production): inspect current evidence for [Completed DPIA/PIA (or equivalent) with sign-off for
+  each major in-scope AI feature] and confirm the pass condition holds — PASS if 100% of major
+  in-scope AI features have a completed assessment with owner sign-off before production traffic"
+falsePositiveGuidance: "(Data Privacy): re-verify against a current artifact for this specific Check
+  , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: DPIA/PIA equivalents must exist for major AI features before
+    production"
+  - "Retain evidence artifacts required by this Check, starting with: Completed DPIA/PIA (or
+    equivalent) with sign-off for each major in-scope AI feature"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF — privacy considerations"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Sensitive Information Disclosure"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "PRI-M1"
+  - "PRI-M2"
+  - "PRI-M3"
+  - "PRI-M4"
+  - "PRI-R1"
+tags:
+  - "data-privacy"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "vector-databases"
+  minCriticality: 3
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

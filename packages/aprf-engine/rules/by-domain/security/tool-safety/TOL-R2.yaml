@@ -1,0 +1,57 @@
+id: "TOL-R2"
+category: "tool-safety"
+title: "Production systems should have per-tool rate limits and blast-radius budgets"
+description: "Per-tool rate limits and blast-radius budgets"
+whyItMatters: "Per-tool rate limits and blast-radius budgets Failing this leaves a production gap
+  against: Each high-impact tool has a documented QPS/daily cap and max-affected-entities budget; ≥1
+  limit hit or synthetic test proves enforcement in the last 30 days"
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: "Each high-impact tool has a documented QPS/daily cap and max-affected-entities
+  budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days"
+evidenceRequired:
+  - "Per-tool rate-limit and blast-radius policy config + sample enforcement metrics (7 days)"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Per-tool rate-limit and blast-radius policy config + sample enforcement metrics (7 days)"
+manualVerification: "For this Check (Per-tool rate limits and blast-radius budgets): inspect current
+  evidence for [Per-tool rate-limit and blast-radius policy config + sample enforcement metrics (7
+  days)] and confirm the pass condition holds — Each high-impact tool has a documented QPS/daily cap
+  and max-affected-entities budget; ≥1 limit hit or synthetic test proves enforcement in the last 30
+  days"
+falsePositiveGuidance: "(Tool Safety): re-verify against a current artifact for this specific Check
+  , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: Per-tool rate limits and blast-radius budgets"
+  - "Retain evidence artifacts required by this Check, starting with: Per-tool rate-limit and
+    blast-radius policy config + sample enforcement metrics (7 days)"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "Model Context Protocol security considerations"
+    url: "https://modelcontextprotocol.io/"
+  - title: "OWASP LLM — Excessive Agency"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "TOL-M1"
+  - "TOL-M2"
+  - "TOL-M3"
+  - "TOL-M4"
+  - "TOL-M5"
+tags:
+  - "tool-safety"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "mcp"
+    - "a2a"
+    - "openapi"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

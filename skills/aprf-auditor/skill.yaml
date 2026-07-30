@@ -29,7 +29,9 @@ triggers:
 
 sourceOfTruth:
   repository: https://github.com/stackrail-io/APRF
-  checks: packages/aprf-engine/rules/by-category/**/*.yaml
+  checks: packages/aprf-engine/rules/by-domain/**/*.yaml
+  domains: packages/aprf-engine/rules/_index/domains.yaml
+  pillars: packages/aprf-engine/rules/_index/pillars.yaml
   categories: packages/aprf-engine/rules/_index/categories.yaml
   profiles: packages/framework-definition/src/profiles.ts
   lenses: packages/framework-definition/src/lenses.ts

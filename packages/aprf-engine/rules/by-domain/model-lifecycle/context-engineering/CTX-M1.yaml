@@ -1,0 +1,60 @@
+id: "CTX-M1"
+category: "context-engineering"
+title: "Context assembly must enforce maximum sizes and prioritization rules"
+description: "Context assembly shall enforce maximum sizes and prioritization rules"
+whyItMatters: "Context assembly shall enforce maximum sizes and prioritization rules Failing this
+  leaves a production gap against: 100% of production context builders enforce a max token/byte
+  budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent
+  overflows"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "100% of production context builders enforce a max token/byte budget; tests show
+  oversized inputs are truncated/rejected per priority rules with 0 silent overflows"
+evidenceRequired:
+  - "Context-budget config + unit/integration tests for overflow behavior"
+detection:
+  capability: "automated"
+  detectors:
+    - id: "prompt-budget-hint"
+      params: {}
+    - id: "manual-attest"
+      params:
+        hint: "Context-budget config + unit/integration tests for overflow behavior"
+manualVerification: "For this Check (Context assembly must enforce maximum sizes and prioritization
+  rules): inspect current evidence for [Context-budget config + unit/integration tests for overflow
+  behavior] and confirm the pass condition holds — 100% of production context builders enforce a max
+  token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0
+  silent overflows"
+falsePositiveGuidance: "(Context Engineering): confirm the detector target matches the production
+  path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days."
+recommendedFixes:
+  - "Implement and operationalize: Context assembly must enforce maximum sizes and prioritization
+    rules"
+  - "Retain evidence artifacts required by this Check, starting with: Context-budget config +
+    unit/integration tests for overflow behavior"
+  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF — Map and Measure functions"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Sensitive Information Disclosure"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "CTX-M2"
+  - "CTX-M3"
+  - "CTX-R1"
+  - "CTX-R2"
+  - "CTX-R3"
+tags:
+  - "context-engineering"
+  - "mandatory"
+  - "automated"
+applicability:
+  technologies:
+    - "rag-pipelines"
+    - "prompt-templates"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

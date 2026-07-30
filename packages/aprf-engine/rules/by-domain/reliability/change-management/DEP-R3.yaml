@@ -1,0 +1,64 @@
+id: "DEP-R3"
+category: "change-management"
+title: "Production systems should have automated migration for embedding/index version upgrades"
+description: "Automated migration for embedding/index version upgrades"
+whyItMatters: "Automated migration for embedding/index version upgrades Failing this leaves a
+  production gap against: Index/embedding version upgrades run via automated migration with
+  validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without
+  dual-write gaps"
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: "Index/embedding version upgrades run via automated migration with validation gates;
+  last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps"
+evidenceRequired:
+  - "Embedding/index migration runbook + last automated migration job log and validation"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Embedding/index migration runbook + last automated migration job log and validation"
+manualVerification: "For this Check (Automated migration for embedding/index version upgrades):
+  inspect current evidence for [Embedding/index migration runbook + last automated migration job log
+  and validation] and confirm the pass condition holds — Index/embedding version upgrades run via
+  automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no
+  upgrade) succeeded without dual-write gaps"
+falsePositiveGuidance: "(Change Management & Release): re-verify against a current artifact for this
+  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: Automated migration for embedding/index version
+    upgrades"
+  - "Retain evidence artifacts required by this Check, starting with: Embedding/index migration
+    runbook + last automated migration job log and validation"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "Google SRE Workbook — Configuration Management"
+    url: "https://sre.google/workbook/"
+  - title: "AWS Well-Architected — Operational Excellence"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "Google SRE — Emergency Response"
+    url: "https://sre.google/sre-book/emergency-response/"
+  - title: "AWS Well-Architected — Reliability"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+relatedRules:
+  - "DEP-M1"
+  - "DEP-M2"
+  - "DEP-M3"
+  - "CHG-M1"
+  - "CHG-M2"
+tags:
+  - "change-management"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "github"
+    - "github-actions"
+    - "azure-devops"
+    - "cicd"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

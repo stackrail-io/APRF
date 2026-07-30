@@ -1,0 +1,51 @@
+id: "CMP-M2"
+category: "compliance"
+title: "Control-to-evidence mapping must exist for in-scope requirements"
+description: "Control-to-evidence mapping shall exist for in-scope requirements"
+whyItMatters: "Control-to-evidence mapping shall exist for in-scope requirements Failing this leaves
+  a production gap against: 100% of in-scope obligations map to ≥1 evidence artifact ID; matrix
+  review date ≤ 12 months; 0 orphan obligations without evidence pointer"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "100% of in-scope obligations map to ≥1 evidence artifact ID; matrix review date ≤ 12
+  months; 0 orphan obligations without evidence pointer"
+evidenceRequired:
+  - "Control→evidence matrix linking obligations to APRF checks or internal control IDs"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For this Check (Control-to-evidence mapping must exist for in-scope
+  requirements): inspect current evidence for [Control→evidence matrix linking obligations to APRF
+  checks or internal control IDs] and confirm the pass condition holds — 100% of in-scope
+  obligations map to ≥1 evidence artifact ID; matrix review date ≤ 12 months; 0 orphan obligations
+  without evidence pointer"
+falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
+  control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Control-to-evidence mapping must exist for in-scope requirements"
+  - "Retain evidence artifacts required by this Check, starting with: Control→evidence matrix
+    linking obligations to APRF checks or internal control IDs"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "ISO/IEC 42001 (AI management systems) — conceptual alignment"
+    url: "https://www.iso.org/standard/81230.html"
+relatedRules:
+  - "CMP-M1"
+  - "CMP-M3"
+  - "CMP-R1"
+  - "CMP-R2"
+  - "CMP-R3"
+tags:
+  - "compliance"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies: []
+  minCriticality: 3
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

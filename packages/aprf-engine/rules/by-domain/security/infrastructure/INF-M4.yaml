@@ -1,0 +1,63 @@
+id: "INF-M4"
+category: "infrastructure"
+title: "GPU/accelerator isolation and noisy-neighbor controls must protect multi-tenant inference"
+description: "GPU/accelerator isolation and noisy-neighbor controls shall protect multi-tenant inference"
+whyItMatters: "GPU/accelerator isolation and noisy-neighbor controls shall protect multi-tenant
+  inference Failing this leaves a production gap against: PASS if isolation controls are documented
+  and the latest isolation/capacity test (≤90 days) meets stated limits"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "PASS if isolation controls are documented and the latest isolation/capacity test
+  (≤90 days) meets stated limits"
+evidenceRequired:
+  - "Isolation design + capacity/isolation test report for shared accelerators"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Isolation design + capacity/isolation test report for shared accelerators"
+manualVerification: "For this Check (GPU/accelerator isolation and noisy-neighbor controls must
+  protect multi-tenant inference): inspect current evidence for [Isolation design +
+  capacity/isolation test report for shared accelerators] and confirm the pass condition holds —
+  PASS if isolation controls are documented and the latest isolation/capacity test (≤90 days) meets
+  stated limits"
+falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
+  control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: GPU/accelerator isolation and noisy-neighbor controls must
+    protect multi-tenant inference"
+  - "Retain evidence artifacts required by this Check, starting with: Isolation design +
+    capacity/isolation test report for shared accelerators"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "CIS Benchmarks"
+    url: "https://www.cisecurity.org/cis-benchmarks"
+  - title: "CNCF security technical advisory guidance"
+    url: "https://www.cncf.io/"
+  - title: "AWS Well-Architected — Security"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+relatedRules:
+  - "INF-M1"
+  - "INF-M2"
+  - "INF-M3"
+  - "INF-R1"
+  - "INF-R3"
+tags:
+  - "infrastructure"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "kubernetes"
+    - "terraform"
+    - "docker"
+  minCriticality: 3
+  requiredFromLevel: 5
+status: "active"
+introducedIn: "0.10.0"

@@ -7,7 +7,7 @@
  *     --out ./aprf-assessment/REPORT.html
  *
  * Catalog fields (title, description, whyItMatters, …) are merged from
- * packages/aprf-engine/rules/by-category Check YAML so incomplete agent
+ * packages/aprf-engine/rules/by-domain Check YAML so incomplete agent
  * assessment.json still shows full Check text.
  */
 import {
@@ -32,7 +32,7 @@ const STACKRAIL = {
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const SKILL_ROOT = resolve(SCRIPT_DIR, "..");
 const REPO_ROOT = resolve(SKILL_ROOT, "../..");
-const RULES_ROOT = resolve(REPO_ROOT, "packages/aprf-engine/rules/by-category");
+const RULES_ROOT = resolve(REPO_ROOT, "packages/aprf-engine/rules/by-domain");
 
 type CatalogRule = {
   id: string;
@@ -461,7 +461,7 @@ const DOMAIN_BY_CATEGORY: Record<string, string> = {
   "cost-optimization": "cost",
   "organizational-governance": "governance",
   compliance: "governance",
-  "platform-engineering": "platform",
+  "platform-engineering": "cross-cutting",
 };
 
 function titleCaseDomain(domain: string): string {
@@ -476,6 +476,7 @@ function domainIdForControl(c: Control): string {
   const raw = (c.domain && c.domain.trim()) || "";
   // If assessment wrongly stored category as domain, map it.
   if (raw && DOMAIN_BY_CATEGORY[raw]) return DOMAIN_BY_CATEGORY[raw];
+  if (raw === "platform") return "cross-cutting";
   if (raw && Object.values(DOMAIN_BY_CATEGORY).includes(raw)) return raw;
   if (DOMAIN_BY_CATEGORY[c.category]) return DOMAIN_BY_CATEGORY[c.category];
   return raw || c.category || "other";
@@ -498,7 +499,7 @@ function domainScoresFromControls(
     "reliability",
     "cost",
     "governance",
-    "platform",
+    "cross-cutting",
   ];
   const byDomain = new Map<string, Control[]>();
   for (const c of controls) {

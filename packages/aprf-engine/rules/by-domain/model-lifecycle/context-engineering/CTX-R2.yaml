@@ -1,0 +1,58 @@
+id: "CTX-R2"
+category: "context-engineering"
+title: "Production systems should have summarization or compaction strategies are tested for
+  information loss on critical facts"
+description: "Summarization or compaction strategies are tested for information loss on critical facts"
+whyItMatters: "Summarization or compaction strategies are tested for information loss on critical
+  facts Failing this leaves a production gap against: Critical-fact retention ≥ documented threshold
+  after compaction on the eval set; last run ≤90 days; regressions block context-pipeline releases"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "Critical-fact retention ≥ documented threshold after compaction on the eval set;
+  last run ≤90 days; regressions block context-pipeline releases"
+evidenceRequired:
+  - "Compaction/summarization eval set of critical facts + latest information-loss report"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Compaction/summarization eval set of critical facts + latest information-loss report"
+manualVerification: "For this Check (Summarization or compaction strategies are tested for
+  information loss on critical facts): inspect current evidence for [Compaction/summarization eval
+  set of critical facts + latest information-loss report] and confirm the pass condition holds —
+  Critical-fact retention ≥ documented threshold after compaction on the eval set; last run ≤90
+  days; regressions block context-pipeline releases"
+falsePositiveGuidance: "(Context Engineering): re-verify against a current artifact for this
+  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: Summarization or compaction strategies are tested for
+    information loss on critical facts"
+  - "Retain evidence artifacts required by this Check, starting with: Compaction/summarization eval
+    set of critical facts + latest information-loss report"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF — Map and Measure functions"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Sensitive Information Disclosure"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "CTX-M1"
+  - "CTX-M2"
+  - "CTX-M3"
+  - "CTX-R1"
+  - "CTX-R3"
+tags:
+  - "context-engineering"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "rag-pipelines"
+    - "prompt-templates"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

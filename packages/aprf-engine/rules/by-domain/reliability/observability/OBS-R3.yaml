@@ -1,0 +1,58 @@
+id: "OBS-R3"
+category: "observability"
+title: "Production systems should have sLO dashboards for AI latency, error, and quality burn rates"
+description: "SLO dashboards for AI latency, error, and quality burn rates"
+whyItMatters: "SLO dashboards for AI latency, error, and quality burn rates Failing this leaves a
+  production gap against: Named SLOs with numeric targets exist for each critical AI journey; alert
+  fires when burn exceeds documented threshold"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "Named SLOs with numeric targets exist for each critical AI journey; alert fires when
+  burn exceeds documented threshold"
+evidenceRequired:
+  - "SLO/alert configuration export + dashboard screenshot or URL with retention note"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "SLO/alert configuration export + dashboard screenshot or URL with retention note"
+manualVerification: "For this Check (SLO dashboards for AI latency, error, and quality burn rates):
+  inspect current evidence for [SLO/alert configuration export + dashboard screenshot or URL with
+  retention note] and confirm the pass condition holds — Named SLOs with numeric targets exist for
+  each critical AI journey; alert fires when burn exceeds documented threshold"
+falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
+  control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: SLO dashboards for AI latency, error, and quality
+    burn rates"
+  - "Retain evidence artifacts required by this Check, starting with: SLO/alert configuration export
+    + dashboard screenshot or URL with retention note"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "Google SRE Workbook — Observability"
+    url: "https://sre.google/workbook/observability/"
+  - title: "OpenTelemetry"
+    url: "https://opentelemetry.io/"
+relatedRules:
+  - "OBS-M1"
+  - "OBS-M2"
+  - "OBS-M3"
+  - "OBS-R1"
+  - "OBS-R2"
+tags:
+  - "observability"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "kubernetes"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

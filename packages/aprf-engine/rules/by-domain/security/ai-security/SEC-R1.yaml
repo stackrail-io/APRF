@@ -1,0 +1,63 @@
+id: "SEC-R1"
+category: "ai-security"
+title: "Production systems should have red-team exercises cover multi-turn and indirect injection
+  via RAG/MCP"
+description: "Red-team exercises cover multi-turn and indirect injection via RAG/MCP"
+whyItMatters: "Red-team exercises cover multi-turn and indirect injection via RAG/MCP Failing this
+  leaves a production gap against: Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection
+  cases; latest run ≤90 days meets documented pass thresholds; report retained ≥90 days"
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: "Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases; latest run
+  ≤90 days meets documented pass thresholds; report retained ≥90 days"
+evidenceRequired:
+  - "Versioned red-team suite covering multi-turn and indirect injection via RAG/MCP + latest scored
+    run report"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Versioned red-team suite covering multi-turn and indirect injection via RAG/MCP + latest
+          scored run report"
+manualVerification: "For this Check (Red-team exercises cover multi-turn and indirect injection via
+  RAG/MCP): inspect current evidence for [Versioned red-team suite covering multi-turn and indirect
+  injection via RAG/MCP + latest scored run report] and confirm the pass condition holds — Suite
+  includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases; latest run ≤90 days meets
+  documented pass thresholds; report retained ≥90 days"
+falsePositiveGuidance: "(Adversarial Security): re-verify against a current artifact for this
+  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: Red-team exercises cover multi-turn and indirect
+    injection via RAG/MCP"
+  - "Retain evidence artifacts required by this Check, starting with: Versioned red-team suite
+    covering multi-turn and indirect injection via RAG/MCP + latest scored run report"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "OWASP Top 10 for Large Language Model Applications"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI Risk Management Framework"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "CIS Controls (select mappings for AI workloads)"
+    url: "https://www.cisecurity.org/controls"
+relatedRules:
+  - "SEC-M1"
+  - "SEC-M2"
+  - "SEC-M3"
+  - "SEC-M4"
+  - "SEC-M5"
+tags:
+  - "ai-security"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "openapi"
+    - "prompt-templates"
+    - "cicd"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

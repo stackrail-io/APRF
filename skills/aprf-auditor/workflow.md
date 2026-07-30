@@ -308,7 +308,7 @@ Never invent FAIL from “best practice.” **NO** from the customer is an expli
 | `manualVerification` | `manualVerification` |
 | `falsePositiveGuidance` | `falsePositiveGuidance` |
 | `category` | Check YAML `category` (pillar id, e.g. `data-privacy`) — **not** the same as domain |
-| `domain` | From `categories.yaml` mapping (`data-privacy` → `data`). Report shows **Category** (Data Privacy) and domain as grouping. |
+| `domain` | From `domains.yaml` / pillar mapping (`data-privacy` → `data`). Report shows **Category** (pillar name) and domain as grouping. |
 | `gate` / `severity` | same fields |
 
 **Map catalog → report wording** (do not invent shorter substitutes):

@@ -1,0 +1,76 @@
+# APRF domains — mirrors spec/aprf-spec.json taxonomy.domains (+ crossCutting).
+# Source of truth for domain id, name, summary, and ordered pillarSlugs.
+domains:
+  - id: security
+    name: Security
+    summary: Adversarial resistance, identity, authorization, secrets, tool mediation, supply chain, and hardened runtime for AI systems.
+    crossCutting: false
+    pillarSlugs:
+      - ai-security
+      - authentication
+      - authorization
+      - secrets
+      - tool-safety
+      - supply-chain
+      - infrastructure
+  - id: safety
+    name: "Safety & Responsible AI"
+    summary: Harm prevention, content safety, fairness, and transparency—NIST trustworthiness characteristics distinct from adversarial security.
+    crossCutting: false
+    pillarSlugs:
+      - safety-responsible-ai
+      - explainability
+  - id: data
+    name: Data
+    summary: Privacy, corpus and index governance, data quality, and memory integrity across AI pipelines.
+    crossCutting: false
+    pillarSlugs:
+      - data-privacy
+      - data-governance
+      - memory-management
+  - id: model-lifecycle
+    name: "Model & Prompt Lifecycle"
+    summary: Model selection and versioning, prompt and context as production artifacts, and continuous evaluation gates.
+    crossCutting: false
+    pillarSlugs:
+      - model-governance
+      - prompt-engineering
+      - context-engineering
+      - evaluation
+  - id: agents
+    name: "Agents & Autonomy"
+    summary: Agent charters, autonomy limits, A2A trust, and human oversight for high-impact actions.
+    crossCutting: false
+    pillarSlugs:
+      - agent-governance
+      - human-approval
+  - id: reliability
+    name: "Reliability & Operations"
+    summary: Observability, performance SLOs, graceful degradation and continuity, change management with rollback, and incident readiness.
+    crossCutting: false
+    pillarSlugs:
+      - observability
+      - performance-slo
+      - reliability-continuity
+      - change-management
+      - incident-readiness
+  - id: cost
+    name: Cost
+    summary: Spend bounds, attribution, caching, routing, and denial-of-wallet controls for AI workloads.
+    crossCutting: false
+    pillarSlugs:
+      - cost-optimization
+  - id: governance
+    name: "Governance & Compliance"
+    summary: Organizational AI policy, ownership, risk acceptance, and auditable evidence of controls—without equating compliance with readiness.
+    crossCutting: false
+    pillarSlugs:
+      - organizational-governance
+      - compliance
+crossCutting:
+  id: cross-cutting
+  name: Cross-cutting concerns
+  summary: Concerns that apply across every domain. They are not peer domains; they enable safe delivery of all other pillars.
+  crossCutting: true
+  pillarSlugs:
+    - platform-engineering

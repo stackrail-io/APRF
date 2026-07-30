@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate YAML rules (schema + referential integrity)
+      - name: Validate YAML rules (schema, lint, spec mapping)
         run: npm run aprf:validate
 
       - name: Rebuild generated catalog

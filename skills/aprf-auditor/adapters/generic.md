@@ -10,7 +10,8 @@ Load and obey the APRF Auditor skill at <APRF>/skills/aprf-auditor/:
 - scoring.yaml (gate + scores)
 - output-schema.json (emit contract)
 
-Normative Checks: <APRF>/packages/aprf-engine/rules/by-category/**/*.yaml
+Normative Checks: <APRF>/packages/aprf-engine/rules/by-domain/**/*.yaml
+Domains / pillars: <APRF>/packages/aprf-engine/rules/_index/{domains,pillars}.yaml
 Profiles: <APRF>/packages/framework-definition/src/profiles.ts
 
 Assess project at <TARGET>.

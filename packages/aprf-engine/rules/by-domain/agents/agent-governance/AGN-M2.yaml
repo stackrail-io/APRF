@@ -1,0 +1,86 @@
+id: "AGN-M2"
+category: "agent-governance"
+title: "Production agents must have hard limits on steps, time, and spawn depth"
+description: >
+  Every production agent runtime shall enforce finite hard limits on plan/tool
+  steps, wall-clock execution time, and recursive agent spawning (child/sub-agent
+  depth). Limits must be enforced by the platform or runtime—not by prompt
+  wording alone—and exceeding a limit must abort or fail closed the run.
+whyItMatters: >
+  Unbounded agent loops are a reliable abuse and failure mode: attackers and
+  buggy planners can recurse into spawn trees, burn tokens and tool quota, and
+  amplify side effects far beyond the original request. Soft or prompt-only
+  “budgets” are bypassable; without runtime max-steps, wall-clock timeout, and
+  spawn-depth caps, a single session becomes a self-propagating load and
+  privilege amplifier. Hard limits convert runaway agency into a contained,
+  observable abort.
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: >
+  100% of production agents have finite max-steps, wall-clock timeout, and
+  spawn-depth ≤ configured bound; enforcement tests show the run aborts (or
+  otherwise fails closed) when any limit is exceeded; 0 production agents rely
+  solely on prompt text for these limits.
+evidenceRequired:
+  - "Runtime/platform configuration declaring max steps, wall-clock timeout, and spawn depth for each production agent (or shared policy bound)"
+  - "Enforcement test results showing abort/fail-closed when each limit is exceeded (steps, time, spawn depth)"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: >
+          Verify runtime config values are finite and non-zero (or explicitly
+          bounded), then review tests that force exceedance of steps, wall-clock,
+          and spawn depth and confirm abort/fail-closed—not prompt-only refusals.
+manualVerification: >
+  1) Inventory production agent runtimes (same scope as the charter inventory).
+  2) For each, locate the runtime or platform setting for max steps (or equivalent
+  tool-call/plan iterations), wall-clock timeout, and maximum spawn/delegation
+  depth. Confirm each value is finite and documented; treat missing, null,
+  zero-as-unlimited, or “disabled” as fail.
+  3) Review or run enforcement tests: force step overrun, timeout overrun, and
+  spawn-depth overrun; require abort/fail-closed with an observable signal
+  (error, kill, or quarantine). Prompt-only refusals without runtime stop do
+  not pass.
+  4) PASS only if every production agent meets config + enforcement evidence.
+falsePositiveGuidance: >
+  Do not pass on charter text or system-prompt budgets without runtime
+  enforcement. Do not pass because a framework “supports” limits if production
+  configs leave them unset or infinite. Client-side or SDK defaults that operators
+  can override to unlimited fail unless production policy prevents that override.
+  A test that only asserts config keys exist (without exceeding limits) is
+  insufficient. Token or cost budgets alone do not satisfy step, wall-clock, and
+  spawn-depth requirements unless mapped 1:1 to those three controls with
+  abort-on-exceed. Kill-switch or pause capability does not substitute for
+  proactive hard limits. Named exceptions need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Set finite platform defaults for max-steps, wall-clock timeout, and spawn depth; fail closed if unset at deploy time"
+  - "Add contract/integration tests that exceed each limit and assert abort (include recursive spawn fixtures)"
+  - "Block production promotion when agent configs omit any of the three limits or set unlimited sentinels"
+  - "Alert on limit-hit rates so operators can tune bounds without disabling enforcement"
+references:
+  - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI Risk Management Framework — Govern / Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "AGN-M1"
+  - "AGN-M3"
+  - "AGN-M4"
+  - "AGN-R1"
+  - "COST-M3"
+  - "TOL-M1"
+tags:
+  - "agent-governance"
+  - "mandatory"
+  - "manual"
+  - "loop-limits"
+  - "spawn-depth"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

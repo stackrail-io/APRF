@@ -1,0 +1,93 @@
+id: "AGN-M4"
+category: "agent-governance"
+title: "Multi-agent and A2A handoffs must have authenticated peers and scoped capabilities"
+description: >
+  Every production agent-to-agent (A2A) or multi-agent handoff path shall
+  authenticate the peer identity and authorize a scoped capability set (tools,
+  data, actions) independent of network presence. Unauthenticated, spoofed, or
+  over-scoped handoffs shall be denied by the platform—not by prompt
+  instructions alone.
+whyItMatters: >
+  Multi-agent meshes turn one compromised or confused agent into a lateral
+  movement path: peers that trust “who can reach me on the network” inherit
+  tools and corpora they were never granted. Over-scoped capability tokens and
+  unsigned handoffs enable privilege amplification across agents (confused
+  deputy / excessive agency). Authenticating peers and binding handoffs to
+  least-privilege capabilities keeps the mesh from becoming a universal proxy
+  between agents.
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: >
+  100% of production A2A/multi-agent handoff paths require authenticated peers
+  and scoped capabilities; negative tests show unauthenticated, forged-peer,
+  and over-scoped handoffs denied at 100%; 0 production handoff paths that
+  accept anonymous or network-presence-only trust.
+evidenceRequired:
+  - "Inventory of production A2A/multi-agent handoff paths with authn/authz mechanism per path"
+  - "Capability token/schema (or equivalent) examples showing scoped grants for handoffs"
+  - "Negative test results: unauthenticated, forged identity, and over-scoped capability cases denied at 100%"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-a2a-config"
+      params: {}
+    - id: "manual-attest"
+      params:
+        hint: >
+          Config presence is not enough—confirm negative tests deny
+          unauthenticated, forged-peer, and over-scoped handoffs on every
+          production multi-agent path (or document N/A if none exist).
+manualVerification: >
+  1) Determine whether the system has production A2A or multi-agent handoffs
+  (including in-process supervisor/worker agents that exchange goals/tools). If
+  none, score NOT_APPLICABLE with inventory evidence. If present, list every
+  production handoff path.
+  2) For each path, identify how peer identity is authenticated (mTLS, signed
+  tokens, workload identity, etc.) and how capabilities are scoped (token
+  claims, allowlists, policy). Network ACLs alone without peer auth fail.
+  3) Review negative tests: unauthenticated caller, wrong/forged peer identity,
+  and capability exceeding grant—all must be denied. Prompt-only “don’t trust
+  other agents” does not pass.
+  4) PASS only if every production handoff path has authn + scoped capabilities
+  and deny tests cover the three abuse cases at 100%.
+falsePositiveGuidance: >
+  Do not pass on open mesh / shared API keys / “agents on the same VPC.” Do not
+  pass because A2A config files exist without deny tests. Do not treat user→agent
+  authentication (login) as peer authentication between agents. MCP tool auth to
+  a single server does not cover agent-to-agent handoffs unless those handoffs
+  are in scope and tested. Capability tokens that encode “admin” or unbounded
+  tool sets fail scoped-capability intent. Sibling Checks (charters, loop
+  limits, kill switch) do not prove mesh authn/authz. Named exceptions need
+  owner and expiry ≤90 days.
+recommendedFixes:
+  - "Require mutual authentication on every A2A/multi-agent handoff; reject anonymous and network-presence-only peers"
+  - "Issue least-privilege capability tokens (or equivalent) per handoff; deny over-scoped grants in policy tests"
+  - "Add CI/contract negative tests for unauthenticated, forged-peer, and over-scoped handoffs; gate releases on pass"
+  - "Inventory handoff paths alongside the agent charter inventory and close any unauthenticated mesh edges"
+references:
+  - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI Risk Management Framework — Govern / Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "AGN-M1"
+  - "AGN-M2"
+  - "AGN-M3"
+  - "AUTHN-M2"
+  - "AUTHZ-M1"
+  - "TOL-M1"
+tags:
+  - "agent-governance"
+  - "mandatory"
+  - "hybrid"
+  - "a2a"
+  - "multi-agent"
+applicability:
+  technologies:
+    - "a2a"
+    - "mcp"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

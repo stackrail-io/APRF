@@ -1,0 +1,58 @@
+id: "MOD-R1"
+category: "model-governance"
+title: "Production systems should have deprecation and sunset policy for models and embeddings"
+description: "Deprecation and sunset policy for models and embeddings"
+whyItMatters: "Deprecation and sunset policy for models and embeddings Failing this leaves a
+  production gap against: Policy defines notice period and forced-sunset rules; ≥1 superseded
+  production model/embedding has a sunset date in the registry; no undocumented pins past sunset
+  without exception"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "Policy defines notice period and forced-sunset rules; ≥1 superseded production
+  model/embedding has a sunset date in the registry; no undocumented pins past sunset without
+  exception"
+evidenceRequired:
+  - "Model/embedding deprecation and sunset policy + registry entries showing sunset dates for
+    superseded pins"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For this Check (Deprecation and sunset policy for models and embeddings):
+  inspect current evidence for [Model/embedding deprecation and sunset policy + registry entries
+  showing sunset dates for superseded pins] and confirm the pass condition holds — Policy defines
+  notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date
+  in the registry; no undocumented pins past sunset without exception"
+falsePositiveGuidance: "(Model Governance): re-verify against a current artifact for this specific
+  Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: Deprecation and sunset policy for models and
+    embeddings"
+  - "Retain evidence artifacts required by this Check, starting with: Model/embedding deprecation
+    and sunset policy + registry entries showing sunset dates for superseded pins"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF — Map"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "AWS Well-Architected — Operational Excellence (change management parallels)"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+relatedRules:
+  - "MOD-M1"
+  - "MOD-M2"
+  - "MOD-M3"
+  - "MOD-R2"
+  - "MOD-R3"
+tags:
+  - "model-governance"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

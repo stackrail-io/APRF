@@ -12,8 +12,10 @@ When asked to run an APRF assessment (or equivalent: **APRF assessment**, **AI p
 
 | Asset | Path in APRF repo |
 | --- | --- |
-| Check YAML | `packages/aprf-engine/rules/by-category/**/*.yaml` |
-| Categories / domains | `packages/aprf-engine/rules/_index/categories.yaml` |
+| Check YAML | `packages/aprf-engine/rules/by-domain/<domain>/<pillar-slug>/**/*.yaml` |
+| Domains | `packages/aprf-engine/rules/_index/domains.yaml` |
+| Pillars (APRF-NN) | `packages/aprf-engine/rules/_index/pillars.yaml` |
+| Categories (compat = pillar slug) | `packages/aprf-engine/rules/_index/categories.yaml` |
 | Core / Regulated profiles | `packages/framework-definition/src/profiles.ts` |
 | Lenses | `packages/framework-definition/src/lenses.ts` |
 | Rule schema | `packages/aprf-engine/rules/_schema/rule.schema.json` |

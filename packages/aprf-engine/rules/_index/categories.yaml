@@ -1,138 +1,164 @@
+# Compatibility index: category id == pillar slug (rule.category field).
+# Prefer pillars.yaml (APRF-NN) + domains.yaml for taxonomy. Kept for loaders/docs.
 categories:
   - id: ai-security
+    pillarId: APRF-01
     pillarSlug: ai-security
     domain: security
     name: Adversarial Security
-    summary: Prevent prompt injection, jailbreaks, exfiltration, and model/tool abuse from becoming a
-      production incident.
+    summary: Prevent prompt injection, jailbreaks, exfiltration, and model/tool abuse from becoming a production incident.
   - id: authentication
+    pillarId: APRF-10
     pillarSlug: authentication
     domain: security
     name: Authentication
     summary: Strong identity for users, services, agents, and MCP callers.
   - id: authorization
+    pillarId: APRF-11
     pillarSlug: authorization
     domain: security
     name: Authorization
     summary: Enforce who/what may invoke which models, tools, data, and actions.
   - id: secrets
+    pillarId: APRF-12
     pillarSlug: secrets
     domain: security
     name: Secrets
     summary: Eliminate secret leakage into prompts, logs, tools, and client surfaces.
   - id: tool-safety
+    pillarId: APRF-05
     pillarSlug: tool-safety
     domain: security
     name: Tool Safety
     summary: Make tool/MCP invocation fail closed with least privilege and side-effect control.
   - id: supply-chain
+    pillarId: APRF-24
     pillarSlug: supply-chain
     domain: security
     name: Supply Chain Integrity
     summary: Prove provenance and integrity of models, containers, MCP servers, and AI dependencies.
   - id: infrastructure
+    pillarId: APRF-20
     pillarSlug: infrastructure
     domain: security
     name: Infrastructure
     summary: Harden runtime, network, isolation, and supply chain for AI workloads.
   - id: safety-responsible-ai
+    pillarId: APRF-25
     pillarSlug: safety-responsible-ai
     domain: safety
-    name: Safety & Responsible AI
+    name: "Safety & Responsible AI"
     summary: Prevent harmful content and unfair outcomes—NIST trustworthiness beyond adversarial security.
   - id: explainability
+    pillarId: APRF-26
     pillarSlug: explainability
     domain: safety
-    name: Explainability & Transparency
+    name: "Explainability & Transparency"
     summary: Make AI decisions reconstructable for operators, users, and auditors—not only for debugging.
   - id: data-privacy
+    pillarId: APRF-18
     pillarSlug: data-privacy
     domain: data
     name: Data Privacy
     summary: Minimize, classify, and protect data flowing through AI pipelines.
   - id: data-governance
+    pillarId: APRF-27
     pillarSlug: data-governance
     domain: data
-    name: Data Governance & Quality
+    name: "Data Governance & Quality"
     summary: Govern corpora, indexes, labels, and feedback loops—distinct from privacy controls.
   - id: memory-management
+    pillarId: APRF-04
     pillarSlug: memory-management
     domain: data
     name: Memory Management
     summary: Control retention, isolation, and poisoning of short- and long-term memory.
   - id: model-governance
+    pillarId: APRF-07
     pillarSlug: model-governance
     domain: model-lifecycle
     name: Model Governance
     summary: Own model selection, versioning, deprecation, and capability boundaries.
   - id: prompt-engineering
+    pillarId: APRF-02
     pillarSlug: prompt-engineering
     domain: model-lifecycle
     name: Prompt Engineering
     summary: Treat prompts as versioned production artifacts with regression control.
   - id: context-engineering
+    pillarId: APRF-03
     pillarSlug: context-engineering
     domain: model-lifecycle
     name: Context Engineering
     summary: Bound and structure what the model is allowed to see and use.
   - id: evaluation
+    pillarId: APRF-08
     pillarSlug: evaluation
     domain: model-lifecycle
     name: Evaluation
     summary: Continuously prove quality, safety, and task success before and after release.
   - id: agent-governance
+    pillarId: APRF-06
     pillarSlug: agent-governance
     domain: agents
     name: Agent Governance
     summary: Constrain goals, autonomy, loops, and escalation for agents and A2A.
   - id: human-approval
+    pillarId: APRF-17
     pillarSlug: human-approval
     domain: agents
     name: Human Approval
     summary: Require human gates for high-impact or irreversible actions.
   - id: observability
+    pillarId: APRF-09
     pillarSlug: observability
     domain: reliability
     name: Observability
     summary: "Make every decision path reconstructable: traces, prompts, tools, costs, outcomes."
   - id: performance-slo
+    pillarId: APRF-28
     pillarSlug: performance-slo
     domain: reliability
-    name: Performance & SLO Engineering
+    name: "Performance & SLO Engineering"
     summary: Latency, throughput, and error budgets for AI features—SRE discipline applied to GenAI.
   - id: reliability-continuity
+    pillarId: APRF-14
     pillarSlug: reliability-continuity
     domain: reliability
-    name: Reliability & Continuity
-    summary: Survive provider outages and partial failures, and preserve critical AI capabilities under
-      sustained disruption.
+    name: "Reliability & Continuity"
+    summary: Survive provider outages and partial failures, and preserve critical AI capabilities under sustained disruption.
   - id: change-management
+    pillarId: APRF-15
     pillarSlug: change-management
     domain: reliability
-    name: Change Management & Release
+    name: "Change Management & Release"
     summary: Repeatable promotion of models, prompts, tools, and agents—with tested, fast rollback.
   - id: incident-readiness
+    pillarId: APRF-21
     pillarSlug: incident-readiness
     domain: reliability
     name: Incident Readiness
     summary: Detect, contain, and learn from AI-specific production incidents.
   - id: cost-optimization
+    pillarId: APRF-13
     pillarSlug: cost-optimization
     domain: cost
     name: Cost Optimization
     summary: Bound spend with budgets, caching, routing, and abuse controls.
   - id: organizational-governance
+    pillarId: APRF-29
     pillarSlug: organizational-governance
     domain: governance
     name: Organizational Governance
-    summary: AI policy, ownership, risk acceptance, and continual improvement—ISO 42001-style management
-      system.
+    summary: AI policy, ownership, risk acceptance, and continual improvement—ISO 42001-style management system.
   - id: compliance
+    pillarId: APRF-19
     pillarSlug: compliance
     domain: governance
     name: Compliance
     summary: Produce auditable evidence of controls without equating compliance with readiness.
   - id: platform-engineering
+    pillarId: APRF-23
     pillarSlug: platform-engineering
     domain: null
     name: Platform Engineering

@@ -1,0 +1,54 @@
+id: "EVL-R2"
+category: "evaluation"
+title: "Production systems should have human preference or expert review sampling on a defined cadence"
+description: "Human preference or expert review sampling on a defined cadence"
+whyItMatters: "Human preference or expert review sampling on a defined cadence Failing this leaves a
+  production gap against: Cadence and sample size are defined; last sample ≤90 days covers
+  production-like prompts; disagreements have adjudication recorded"
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: "Cadence and sample size are defined; last sample ≤90 days covers production-like
+  prompts; disagreements have adjudication recorded"
+evidenceRequired:
+  - "Human preference / expert-review sampling protocol + last scored sample set with inter-rater
+    notes"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For this Check (Human preference or expert review sampling on a defined
+  cadence): inspect current evidence for [Human preference / expert-review sampling protocol + last
+  scored sample set with inter-rater notes] and confirm the pass condition holds — Cadence and
+  sample size are defined; last sample ≤90 days covers production-like prompts; disagreements have
+  adjudication recorded"
+falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
+  control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: Human preference or expert review sampling on a
+    defined cadence"
+  - "Retain evidence artifacts required by this Check, starting with: Human preference /
+    expert-review sampling protocol + last scored sample set with inter-rater notes"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF — Measure"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "Google SRE — Monitoring Distributed Systems (measurement culture)"
+    url: "https://sre.google/sre-book/monitoring-distributed-systems/"
+relatedRules:
+  - "EVL-M1"
+  - "EVL-M2"
+  - "EVL-M3"
+  - "EVL-M4"
+  - "EVL-R1"
+tags:
+  - "evaluation"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "cicd"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

@@ -9,7 +9,13 @@ import { fileURLToPath } from "url";
 import { parse as parseYaml } from "yaml";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
-import type { AprfRule, CategoryDef, RuleIndex } from "./types.js";
+import type {
+  AprfRule,
+  CategoryDef,
+  DomainDef,
+  PillarDef,
+  RuleIndex,
+} from "./types.js";
 import { TECHNOLOGIES } from "./types.js";
 import { buildRuleIndex } from "./index-builder.js";
 import { listCatalogDetectorIds } from "./detectors/catalog-ids.js";
@@ -44,6 +50,33 @@ function walkYamlFiles(dir: string, out: string[] = []): string[] {
   return out;
 }
 
+export function loadDomains(rulesRoot: string): DomainDef[] {
+  const path = join(rulesRoot, "_index", "domains.yaml");
+  if (!existsSync(path)) return [];
+  const doc = parseYaml(readFileSync(path, "utf8")) as {
+    domains?: DomainDef[];
+    crossCutting?: DomainDef;
+  };
+  const list = [...(doc.domains ?? [])];
+  if (doc.crossCutting) {
+    list.push({
+      ...doc.crossCutting,
+      crossCutting: true,
+    });
+  }
+  return list;
+}
+
+export function loadPillars(rulesRoot: string): PillarDef[] {
+  const path = join(rulesRoot, "_index", "pillars.yaml");
+  if (!existsSync(path)) return [];
+  const doc = parseYaml(readFileSync(path, "utf8")) as {
+    pillars?: PillarDef[];
+  };
+  return doc.pillars ?? [];
+}
+
+/** Compatibility: category id == pillar slug (Check YAML `category`). */
 export function loadCategories(rulesRoot: string): CategoryDef[] {
   const path = join(rulesRoot, "_index", "categories.yaml");
   if (!existsSync(path)) return [];
@@ -55,26 +88,70 @@ export function loadCategories(rulesRoot: string): CategoryDef[] {
 
 export function loadRulesFromDisk(rulesRoot?: string): {
   rules: AprfRule[];
+  domains: DomainDef[];
+  pillars: PillarDef[];
   categories: CategoryDef[];
   index: RuleIndex;
   errors: string[];
 } {
   const root = rulesRoot ?? rulesRootDir();
+  const domains = loadDomains(root);
+  const pillars = loadPillars(root);
   const categories = loadCategories(root);
   const schema = loadSchema(root);
   const ajv = new Ajv2020({ allErrors: true, strict: false });
   addFormats(ajv);
   const validate = ajv.compile(schema);
 
-  const files = walkYamlFiles(join(root, "by-category")).sort((a, b) =>
-    a.localeCompare(b),
-  );
+  const byDomainRoot = join(root, "by-domain");
+  const legacyRoot = join(root, "by-category");
+  const walkRoot = existsSync(byDomainRoot) ? byDomainRoot : legacyRoot;
+  const files = walkYamlFiles(walkRoot).sort((a, b) => a.localeCompare(b));
   const rules: AprfRule[] = [];
   const errors: string[] = [];
   const seenIds = new Set<string>();
   const categoryIds = new Set(categories.map((c) => c.id));
+  const pillarSlugs = new Set(pillars.map((p) => p.slug));
   const knownDetectors = new Set(listCatalogDetectorIds());
   const knownTechs = new Set<string>(TECHNOLOGIES);
+
+  if (domains.length === 0) {
+    errors.push(`${root}/_index/domains.yaml: missing or empty domains`);
+  }
+  if (pillars.length === 0) {
+    errors.push(`${root}/_index/pillars.yaml: missing or empty pillars`);
+  }
+
+  // Taxonomy integrity: every pillar slug appears in exactly one domain.pillarSlugs
+  const slugToDomain = new Map<string, string>();
+  for (const d of domains) {
+    for (const slug of d.pillarSlugs ?? []) {
+      if (slugToDomain.has(slug)) {
+        errors.push(
+          `domains.yaml: pillar slug "${slug}" listed under both ${slugToDomain.get(slug)} and ${d.id}`,
+        );
+      }
+      slugToDomain.set(slug, d.id);
+    }
+  }
+  for (const p of pillars) {
+    const expected = slugToDomain.get(p.slug);
+    if (!expected) {
+      errors.push(
+        `pillars.yaml: ${p.id} slug "${p.slug}" not listed in any domain.pillarSlugs`,
+      );
+    } else if (p.crossCutting) {
+      if (expected !== "cross-cutting" && expected !== p.domain) {
+        errors.push(
+          `pillars.yaml: ${p.id} crossCutting domain mismatch (expected cross-cutting folder id)`,
+        );
+      }
+    } else if (p.domain !== expected) {
+      errors.push(
+        `pillars.yaml: ${p.id} domain "${p.domain}" != domains.yaml listing "${expected}"`,
+      );
+    }
+  }
 
   for (const file of files) {
     let raw: unknown;
@@ -103,6 +180,8 @@ export function loadRulesFromDisk(rulesRoot?: string): {
 
     if (categoryIds.size > 0 && !categoryIds.has(rule.category)) {
       errors.push(`${file}: unknown category "${rule.category}"`);
+    } else if (pillarSlugs.size > 0 && !pillarSlugs.has(rule.category)) {
+      errors.push(`${file}: unknown pillar slug/category "${rule.category}"`);
     }
 
     for (const tech of rule.applicability.technologies ?? []) {
@@ -164,7 +243,6 @@ export function loadRulesFromDisk(rulesRoot?: string): {
   }
 
   rules.sort((a, b) => a.id.localeCompare(b.id));
-  const index = buildRuleIndex(rules, categories);
-  return { rules, categories, index, errors };
+  const index = buildRuleIndex(rules, categories, domains, pillars);
+  return { rules, domains, pillars, categories, index, errors };
 }
-

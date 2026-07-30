@@ -1,0 +1,165 @@
+# APRF pillars — mirrors spec/aprf-spec.json pillars[].
+# id is stable APRF-NN; slug matches site URL path and Check YAML category field.
+pillars:
+  - id: APRF-01
+    slug: ai-security
+    name: Adversarial Security
+    summary: Prevent prompt injection, jailbreaks, exfiltration, and model/tool abuse from becoming a production incident.
+    domain: security
+    crossCutting: false
+  - id: APRF-10
+    slug: authentication
+    name: Authentication
+    summary: Strong identity for users, services, agents, and MCP callers.
+    domain: security
+    crossCutting: false
+  - id: APRF-11
+    slug: authorization
+    name: Authorization
+    summary: Enforce who/what may invoke which models, tools, data, and actions.
+    domain: security
+    crossCutting: false
+  - id: APRF-12
+    slug: secrets
+    name: Secrets
+    summary: Eliminate secret leakage into prompts, logs, tools, and client surfaces.
+    domain: security
+    crossCutting: false
+  - id: APRF-05
+    slug: tool-safety
+    name: Tool Safety
+    summary: Make tool/MCP invocation fail closed with least privilege and side-effect control.
+    domain: security
+    crossCutting: false
+  - id: APRF-24
+    slug: supply-chain
+    name: Supply Chain Integrity
+    summary: Prove provenance and integrity of models, containers, MCP servers, and AI dependencies.
+    domain: security
+    crossCutting: false
+  - id: APRF-20
+    slug: infrastructure
+    name: Infrastructure
+    summary: Harden runtime, network, isolation, and supply chain for AI workloads.
+    domain: security
+    crossCutting: false
+  - id: APRF-25
+    slug: safety-responsible-ai
+    name: "Safety & Responsible AI"
+    summary: Prevent harmful content and unfair outcomes—NIST trustworthiness beyond adversarial security.
+    domain: safety
+    crossCutting: false
+  - id: APRF-26
+    slug: explainability
+    name: "Explainability & Transparency"
+    summary: Make AI decisions reconstructable for operators, users, and auditors—not only for debugging.
+    domain: safety
+    crossCutting: false
+  - id: APRF-18
+    slug: data-privacy
+    name: Data Privacy
+    summary: Minimize, classify, and protect data flowing through AI pipelines.
+    domain: data
+    crossCutting: false
+  - id: APRF-27
+    slug: data-governance
+    name: "Data Governance & Quality"
+    summary: Govern corpora, indexes, labels, and feedback loops—distinct from privacy controls.
+    domain: data
+    crossCutting: false
+  - id: APRF-04
+    slug: memory-management
+    name: Memory Management
+    summary: Control retention, isolation, and poisoning of short- and long-term memory.
+    domain: data
+    crossCutting: false
+  - id: APRF-07
+    slug: model-governance
+    name: Model Governance
+    summary: Own model selection, versioning, deprecation, and capability boundaries.
+    domain: model-lifecycle
+    crossCutting: false
+  - id: APRF-02
+    slug: prompt-engineering
+    name: Prompt Engineering
+    summary: Treat prompts as versioned production artifacts with regression control.
+    domain: model-lifecycle
+    crossCutting: false
+  - id: APRF-03
+    slug: context-engineering
+    name: Context Engineering
+    summary: Bound and structure what the model is allowed to see and use.
+    domain: model-lifecycle
+    crossCutting: false
+  - id: APRF-08
+    slug: evaluation
+    name: Evaluation
+    summary: Continuously prove quality, safety, and task success before and after release.
+    domain: model-lifecycle
+    crossCutting: false
+  - id: APRF-06
+    slug: agent-governance
+    name: Agent Governance
+    summary: Constrain goals, autonomy, loops, and escalation for agents and A2A.
+    domain: agents
+    crossCutting: false
+  - id: APRF-17
+    slug: human-approval
+    name: Human Approval
+    summary: Require human gates for high-impact or irreversible actions.
+    domain: agents
+    crossCutting: false
+  - id: APRF-09
+    slug: observability
+    name: Observability
+    summary: "Make every decision path reconstructable: traces, prompts, tools, costs, outcomes."
+    domain: reliability
+    crossCutting: false
+  - id: APRF-28
+    slug: performance-slo
+    name: "Performance & SLO Engineering"
+    summary: Latency, throughput, and error budgets for AI features—SRE discipline applied to GenAI.
+    domain: reliability
+    crossCutting: false
+  - id: APRF-14
+    slug: reliability-continuity
+    name: "Reliability & Continuity"
+    summary: Survive provider outages and partial failures, and preserve critical AI capabilities under sustained disruption.
+    domain: reliability
+    crossCutting: false
+  - id: APRF-15
+    slug: change-management
+    name: "Change Management & Release"
+    summary: Repeatable promotion of models, prompts, tools, and agents—with tested, fast rollback.
+    domain: reliability
+    crossCutting: false
+  - id: APRF-21
+    slug: incident-readiness
+    name: Incident Readiness
+    summary: Detect, contain, and learn from AI-specific production incidents.
+    domain: reliability
+    crossCutting: false
+  - id: APRF-13
+    slug: cost-optimization
+    name: Cost Optimization
+    summary: Bound spend with budgets, caching, routing, and abuse controls.
+    domain: cost
+    crossCutting: false
+  - id: APRF-29
+    slug: organizational-governance
+    name: Organizational Governance
+    summary: AI policy, ownership, risk acceptance, and continual improvement—ISO 42001-style management system.
+    domain: governance
+    crossCutting: false
+  - id: APRF-19
+    slug: compliance
+    name: Compliance
+    summary: Produce auditable evidence of controls without equating compliance with readiness.
+    domain: governance
+    crossCutting: false
+  - id: APRF-23
+    slug: platform-engineering
+    name: Platform Engineering
+    summary: Make the safe path the easy path—paved roads that apply across every APRF domain.
+    domain: null
+    crossCutting: true

@@ -1,0 +1,55 @@
+id: "DX-M1"
+category: "platform-engineering"
+title: "Builders must have a documented golden path for deploying AI features to production"
+description: "Builders shall have a documented golden path for deploying AI features to production"
+whyItMatters: "Builders shall have a documented golden path for deploying AI features to production
+  Failing this leaves a production gap against: Doc exists with version/owner; covers auth, secrets,
+  evals, and promote steps; reviewed ≤ 12 months"
+severity: "medium"
+weight: 2
+gate: "mandatory"
+passCondition: "Doc exists with version/owner; covers auth, secrets, evals, and promote steps;
+  reviewed ≤ 12 months"
+evidenceRequired:
+  - "Golden-path documentation with steps from scaffold to production"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For this Check (Builders must have a documented golden path for deploying AI
+  features to production): inspect current evidence for [Golden-path documentation with steps from
+  scaffold to production] and confirm the pass condition holds — Doc exists with version/owner;
+  covers auth, secrets, evals, and promote steps; reviewed ≤ 12 months"
+falsePositiveGuidance: "(Platform Engineering): re-verify against a current artifact for this
+  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Builders must have a documented golden path for deploying AI
+    features to production"
+  - "Retain evidence artifacts required by this Check, starting with: Golden-path documentation with
+    steps from scaffold to production"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "Google SRE Workbook — Soft skills / platform thinking parallels"
+    url: "https://sre.google/workbook/"
+  - title: "CNCF platforms white papers — paved roads concept"
+    url: "https://www.cncf.io/"
+relatedRules:
+  - "DX-M2"
+  - "DX-M3"
+  - "DX-R1"
+  - "DX-R2"
+  - "DX-R3"
+tags:
+  - "platform-engineering"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "github"
+    - "github-actions"
+    - "cicd"
+    - "kubernetes"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

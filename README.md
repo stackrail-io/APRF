@@ -92,12 +92,12 @@ npm run build                  # emit publishable dist/ for both packages
 
 ## Check (rule) model
 
-Each Check lives as one YAML file under `packages/aprf-engine/rules/by-category/<category>/<ID>.yaml` and must include:
+Taxonomy matches [APRF domains & pillars](https://stackrail.io/aprf/): **domain** → **pillar** (APRF-NN) → **Check**. Indexes live under `packages/aprf-engine/rules/_index/` (`domains.yaml`, `pillars.yaml`). Each Check is one YAML file under `packages/aprf-engine/rules/by-domain/<domain>/<pillar-slug>/<ID>.yaml` and must include:
 
 | Field | Purpose |
 | --- | --- |
 | `id` | Stable Check ID (`SEC-M1`, `AUTHN-M1`, …) — never reuse |
-| `category` | Pillar / category slug |
+| `category` | Pillar slug (e.g. `ai-security`, `authentication`) — same as site URL path |
 | `title`, `description`, `whyItMatters` | Human-facing normative prose |
 | `severity` | `critical` \| `high` \| `medium` \| `low` (remediation ordering) |
 | `weight` | Used for recommended scoring only — never the gate |
@@ -124,7 +124,7 @@ Platform-specific **detections** (scanners, collectors) stay in product/plugin r
 
 ### Add a Check without code changes
 
-1. Create `packages/aprf-engine/rules/by-category/<category>/<NEW-ID>.yaml` matching an existing Check for shape.
+1. Create `packages/aprf-engine/rules/by-domain/<domain>/<pillar-slug>/<NEW-ID>.yaml` matching an existing Check for shape.
 2. Ensure `id` is unique and follows the published namespace (`PREFIX-M#` / `PREFIX-R#`).
 3. Point `relatedRules` only at existing IDs; set `applicability` and `detection.capability` honestly.
 4. Run `npm run validate` locally.

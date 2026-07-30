@@ -1,0 +1,60 @@
+id: "REL-M2"
+category: "reliability-continuity"
+title: "Critical user journeys must define a degraded mode when AI is unavailable"
+description: "Critical user journeys shall define a degraded mode when AI is unavailable"
+whyItMatters: "Critical user journeys shall define a degraded mode when AI is unavailable Failing
+  this leaves a production gap against: 100% of critical journeys document degraded behavior;
+  failover test shows non-AI or safe fallback activates when AI dependency fails"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "100% of critical journeys document degraded behavior; failover test shows non-AI or
+  safe fallback activates when AI dependency fails"
+evidenceRequired:
+  - "Degraded-mode spec per critical journey + feature-flag or fallback test"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Degraded-mode spec per critical journey + feature-flag or fallback test"
+manualVerification: "For this Check (Critical user journeys must define a degraded mode when AI is
+  unavailable): inspect current evidence for [Degraded-mode spec per critical journey + feature-flag
+  or fallback test] and confirm the pass condition holds — 100% of critical journeys document
+  degraded behavior; failover test shows non-AI or safe fallback activates when AI dependency fails"
+falsePositiveGuidance: "(Reliability & Continuity): re-verify against a current artifact for this
+  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Critical user journeys must define a degraded mode when AI is
+    unavailable"
+  - "Retain evidence artifacts required by this Check, starting with: Degraded-mode spec per
+    critical journey + feature-flag or fallback test"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "Google SRE Book — Addressing Cascading Failures"
+    url: "https://sre.google/sre-book/addressing-cascading-failures/"
+  - title: "AWS Well-Architected — Reliability"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "Google SRE — Disaster Recovery"
+    url: "https://sre.google/sre-book/disaster-recovery/"
+relatedRules:
+  - "REL-M1"
+  - "REL-M3"
+  - "REL-M4"
+  - "REL-M5"
+  - "REL-M6"
+tags:
+  - "reliability-continuity"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "kubernetes"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

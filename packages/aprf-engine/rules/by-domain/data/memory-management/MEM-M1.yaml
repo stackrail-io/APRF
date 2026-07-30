@@ -1,0 +1,56 @@
+id: "MEM-M1"
+category: "memory-management"
+title: "Memory must be isolated by tenant (and user where required) with tested boundaries"
+description: "Memory shall be isolated by tenant (and user where required) with tested boundaries"
+whyItMatters: "Memory shall be isolated by tenant (and user where required) with tested boundaries
+  Failing this leaves a production gap against: 0 successful cross-tenant (and cross-user where
+  required) memory reads/writes across ≥10 automated attack cases"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "0 successful cross-tenant (and cross-user where required) memory reads/writes across
+  ≥10 automated attack cases"
+evidenceRequired:
+  - "Cross-tenant (and cross-user where required) isolation tests for memory store APIs"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Isolation tests for memory store APIs"
+manualVerification: "For this Check (Be isolated by tenant (and user where required) with tested
+  boundaries): inspect current evidence for [Isolation tests for memory store APIs] and confirm the
+  pass condition holds — 0 successful cross-tenant (and cross-user where required) memory
+  reads/writes across ≥10 automated attack cases"
+falsePositiveGuidance: "(Memory Management): re-verify against a current artifact for this specific
+  Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Memory must be isolated by tenant (and user where required) with
+    tested boundaries"
+  - "Retain evidence artifacts required by this Check, starting with: Isolation tests for memory
+    store APIs"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF — Govern and Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "MEM-M2"
+  - "MEM-M3"
+  - "MEM-M4"
+  - "MEM-R1"
+  - "MEM-R3"
+tags:
+  - "memory-management"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "vector-databases"
+    - "mcp"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

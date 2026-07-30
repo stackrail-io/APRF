@@ -1,0 +1,61 @@
+id: "DX-R3"
+category: "platform-engineering"
+title: "Production systems should have dX metrics: time-to-safe-production and bypass rate"
+description: "DX metrics: time-to-safe-production and bypass rate"
+whyItMatters: "DX metrics: time-to-safe-production and bypass rate Failing this leaves a production
+  gap against: Both metrics are defined with formulas; published for ≥30 consecutive days; bypass
+  rate has an alert or review threshold with a named owner"
+severity: "medium"
+weight: 2
+gate: "recommended"
+passCondition: "Both metrics are defined with formulas; published for ≥30 consecutive days; bypass
+  rate has an alert or review threshold with a named owner"
+evidenceRequired:
+  - "Platform DX dashboard (or weekly report) with time-to-safe-production and policy-bypass rate
+    definitions + last 30 days series"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Platform DX dashboard (or weekly report) with time-to-safe-production and policy-bypass rate
+          definitions + last 30 days series"
+manualVerification: "For this Check (DX metrics: time-to-safe-production and bypass rate): inspect
+  current evidence for [Platform DX dashboard (or weekly report) with time-to-safe-production and
+  policy-bypass rate definitions + last 30 days series] and confirm the pass condition holds — Both
+  metrics are defined with formulas; published for ≥30 consecutive days; bypass rate has an alert or
+  review threshold with a named owner"
+falsePositiveGuidance: "(Platform Engineering): re-verify against a current artifact for this
+  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: DX metrics: time-to-safe-production and bypass rate"
+  - "Retain evidence artifacts required by this Check, starting with: Platform DX dashboard (or
+    weekly report) with time-to-safe-production and policy-bypass rate definitions + last 30 days
+    series"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "Google SRE Workbook — Soft skills / platform thinking parallels"
+    url: "https://sre.google/workbook/"
+  - title: "CNCF platforms white papers — paved roads concept"
+    url: "https://www.cncf.io/"
+relatedRules:
+  - "DX-M1"
+  - "DX-M2"
+  - "DX-M3"
+  - "DX-R1"
+  - "DX-R2"
+tags:
+  - "platform-engineering"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "github"
+    - "github-actions"
+    - "cicd"
+    - "kubernetes"
+  minCriticality: 3
+  requiredFromLevel: 5
+status: "active"
+introducedIn: "0.10.0"

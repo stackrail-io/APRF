@@ -2,6 +2,8 @@ import type {
   AprfCheckProjection,
   AprfRule,
   CategoryDef,
+  DomainDef,
+  PillarDef,
   RuleGate,
   RuleIndex,
   Severity,
@@ -11,6 +13,8 @@ import type {
 export function buildRuleIndex(
   rules: AprfRule[],
   categories: CategoryDef[],
+  domains: DomainDef[] = [],
+  pillars: PillarDef[] = [],
 ): RuleIndex {
   const byId = new Map<string, AprfRule>();
   const byCategory = new Map<string, AprfRule[]>();
@@ -19,6 +23,9 @@ export function buildRuleIndex(
   const bySeverity = new Map<Severity, AprfRule[]>();
   const byGate = new Map<RuleGate, AprfRule[]>();
   const categoryById = new Map(categories.map((c) => [c.id, c]));
+  const domainById = new Map(domains.map((d) => [d.id, d]));
+  const pillarById = new Map(pillars.map((p) => [p.id, p]));
+  const pillarBySlug = new Map(pillars.map((p) => [p.slug, p]));
 
   for (const rule of rules) {
     byId.set(rule.id, rule);
@@ -58,6 +65,11 @@ export function buildRuleIndex(
     byGate,
     categories,
     categoryById,
+    domains,
+    domainById,
+    pillars,
+    pillarById,
+    pillarBySlug,
   };
 }
 

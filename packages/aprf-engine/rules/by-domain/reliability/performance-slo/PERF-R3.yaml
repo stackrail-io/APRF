@@ -1,0 +1,58 @@
+id: "PERF-R3"
+category: "performance-slo"
+title: "Production systems should have streaming-specific SLIs (TTFT, inter-token latency) for
+  streaming UIs"
+description: "Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs"
+whyItMatters: "Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs Failing this
+  leaves a production gap against: TTFT and inter-token latency SLIs exist for each streaming AI
+  surface; alerts fire on documented thresholds; series retained ≥30 days"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire
+  on documented thresholds; series retained ≥30 days"
+evidenceRequired:
+  - "Streaming SLI dashboard for TTFT and inter-token latency + alert config for streaming UIs"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Streaming SLI dashboard for TTFT and inter-token latency + alert config for streaming UIs"
+manualVerification: "For this Check (PERF: Streaming-specific SLIs (TTFT, inter-token latency) for
+  streaming UIs): inspect current evidence for [Streaming SLI dashboard for TTFT and inter-token
+  latency + alert config for streaming UIs] and confirm the pass condition holds — TTFT and
+  inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented
+  thresholds; series retained ≥30 days"
+falsePositiveGuidance: "(Performance & SLO Engineering): re-verify against a current artifact for
+  this specific Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: Streaming-specific SLIs (TTFT, inter-token latency)
+    for streaming UIs"
+  - "Retain evidence artifacts required by this Check, starting with: Streaming SLI dashboard for
+    TTFT and inter-token latency + alert config for streaming UIs"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "Google SRE — Service Level Objectives"
+    url: "https://sre.google/sre-book/service-level-objectives/"
+  - title: "AWS Well-Architected — Performance Efficiency"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+relatedRules:
+  - "PERF-M1"
+  - "PERF-M2"
+  - "PERF-M3"
+  - "PERF-R1"
+  - "PERF-R2"
+tags:
+  - "performance-slo"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "cicd"
+    - "kubernetes"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

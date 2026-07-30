@@ -1,0 +1,58 @@
+id: "AUTHN-M2"
+category: "authentication"
+title: "Service-to-service and MCP connections must use strong machine identity"
+description: "Service-to-service and MCP connections shall use strong machine identity"
+whyItMatters: "Service-to-service and MCP connections shall use strong machine identity Failing this
+  leaves a production gap against: 0 production MCP or AI S2S connections accept anonymous access or
+  shared long-lived static keys; each connection has a named machine identity"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "0 production MCP or AI S2S connections accept anonymous access or shared long-lived
+  static keys; each connection has a named machine identity"
+evidenceRequired:
+  - "MCP/S2S connection inventory + auth config export"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "MCP/S2S connection inventory + auth config export"
+manualVerification: "For this Check (Service-to-service and MCP connections must use strong machine
+  identity): inspect current evidence for [MCP/S2S connection inventory + auth config export] and
+  confirm the pass condition holds — 0 production MCP or AI S2S connections accept anonymous access
+  or shared long-lived static keys; each connection has a named machine identity"
+falsePositiveGuidance: "re-verify against a current MCP/S2S inventory artifact for this Check , not
+  CI OIDC alone. Named exceptions need an owner and expiry ≤90 days."
+recommendedFixes:
+  - "Implement and operationalize: Service-to-service and MCP connections must use strong machine
+    identity"
+  - "Retain evidence artifacts required by this Check, starting with: MCP/S2S connection inventory +
+    auth config export"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "OWASP Authentication Cheat Sheet"
+    url: "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+  - title: "CIS Benchmarks — Identity controls"
+    url: "https://www.cisecurity.org/cis-benchmarks"
+relatedRules:
+  - "AUTHN-M1"
+  - "AUTHN-M3"
+  - "AUTHN-M4"
+  - "AUTHN-R1"
+  - "AUTHN-R2"
+tags:
+  - "authentication"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "openapi"
+    - "mcp"
+    - "a2a"
+    - "cicd"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

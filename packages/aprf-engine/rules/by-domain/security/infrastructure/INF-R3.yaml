@@ -1,0 +1,62 @@
+id: "INF-R3"
+category: "infrastructure"
+title: "Production systems should have infrastructure-as-code with policy checks (CIS-aligned)"
+description: "Infrastructure-as-code with policy checks (CIS-aligned)"
+whyItMatters: "Infrastructure-as-code with policy checks (CIS-aligned) Failing this leaves a
+  production gap against: Production AI infra is declared in IaC; CIS (or equivalent) policy checks
+  run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions ≤90
+  days"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "Production AI infra is declared in IaC; CIS (or equivalent) policy checks run on
+  every apply/PR; critical findings for production stacks are 0 or have dated exceptions ≤90 days"
+evidenceRequired:
+  - "IaC modules for AI infra + CIS-aligned policy scan config + latest scan report for production
+    stacks"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For this Check (INF: Infrastructure-as-code with policy checks (CIS-aligned)):
+  inspect current evidence for [IaC modules for AI infra + CIS-aligned policy scan config + latest
+  scan report for production stacks] and confirm the pass condition holds — Production AI infra is
+  declared in IaC; CIS (or equivalent) policy checks run on every apply/PR; critical findings for
+  production stacks are 0 or have dated exceptions ≤90 days"
+falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
+  control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: Infrastructure-as-code with policy checks
+    (CIS-aligned)"
+  - "Retain evidence artifacts required by this Check, starting with: IaC modules for AI infra +
+    CIS-aligned policy scan config + latest scan report for production stacks"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "CIS Benchmarks"
+    url: "https://www.cisecurity.org/cis-benchmarks"
+  - title: "CNCF security technical advisory guidance"
+    url: "https://www.cncf.io/"
+  - title: "AWS Well-Architected — Security"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+relatedRules:
+  - "INF-M1"
+  - "INF-M2"
+  - "INF-M3"
+  - "INF-M4"
+  - "INF-R1"
+tags:
+  - "infrastructure"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "kubernetes"
+    - "terraform"
+    - "docker"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

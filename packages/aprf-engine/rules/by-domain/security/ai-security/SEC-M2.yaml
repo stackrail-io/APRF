@@ -1,0 +1,61 @@
+id: "SEC-M2"
+category: "ai-security"
+title: "High-risk outputs must be schema-validated or policy-filtered before side effects"
+description: "High-risk outputs shall be schema-validated or policy-filtered before side effects"
+whyItMatters: "High-risk outputs shall be schema-validated or policy-filtered before side effects
+  Failing this leaves a production gap against: 100% of high-risk side-effect paths (impact tier
+  write/irreversible/financial) reject non-conforming model output in contract tests; coverage
+  inventory lists every such path"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "100% of high-risk side-effect paths (impact tier write/irreversible/financial)
+  reject non-conforming model output in contract tests; coverage inventory lists every such path"
+evidenceRequired:
+  - "Schema/policy definitions for high-risk paths + contract test results"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Schema/policy definitions for high-risk paths + contract test results"
+manualVerification: "For this Check (High-risk outputs must be schema-validated or policy-filtered
+  before side effects): inspect current evidence for [Schema/policy definitions for high-risk paths
+  + contract test results] and confirm the pass condition holds — 100% of high-risk side-effect
+  paths (impact tier write/irreversible/financial) reject non-conforming model output in contract
+  tests; coverage inventory lists every such path"
+falsePositiveGuidance: "(Adversarial Security): re-verify against a current artifact for this
+  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: High-risk outputs must be schema-validated or policy-filtered
+    before side effects"
+  - "Retain evidence artifacts required by this Check, starting with: Schema/policy definitions for
+    high-risk paths + contract test results"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "OWASP Top 10 for Large Language Model Applications"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI Risk Management Framework"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "CIS Controls (select mappings for AI workloads)"
+    url: "https://www.cisecurity.org/controls"
+relatedRules:
+  - "SEC-M1"
+  - "SEC-M3"
+  - "SEC-M4"
+  - "SEC-M5"
+  - "SEC-R1"
+tags:
+  - "ai-security"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "openapi"
+    - "prompt-templates"
+    - "cicd"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"
