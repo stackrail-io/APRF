@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:54fa6f6f1a013a096cc0b05f7e89cb3d9b82d61e3bc2fc4f3d7e948b0f0314a7",
+  "generatedAt": "sha256:1a7901995f8a86f97cc254026526c189f4f17417c84fcfc2786b4692aa436e9a",
   "ruleCount": 177,
   "domains": [
     {
@@ -561,12 +561,25 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Per-agent charter documents (or equivalent structured records) covering purpose, tool allowlist reference, data scope, and autonomy limits"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "automated",
         "detectors": [
+          {
+            "id": "repo-agent-charter-inventory",
+            "params": {
+              "requireFields": [
+                "purpose",
+                "tool-allowlist",
+                "data-scope",
+                "autonomy-limits",
+                "owner"
+              ],
+              "requireInventoryCompleteness": true
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Confirm production-agent inventory completeness, then spot-check that each charter has purpose, tool allowlist reference, data scope, autonomy limits, and owner."
+              "hint": "If automation cannot prove inventory completeness, attest a versioned production-agent inventory with charter fields (purpose, tool allowlist, data scope, autonomy limits, owner) and 0 missing rows.\n"
             }
           }
         ]
@@ -600,7 +613,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "agent-governance",
         "mandatory",
-        "manual",
+        "automated",
         "charter",
         "inventory"
       ],
@@ -627,12 +640,24 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Enforcement test results showing abort/fail-closed when each limit is exceeded (steps, time, spawn depth)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "automated",
         "detectors": [
+          {
+            "id": "repo-agent-loop-limits",
+            "params": {
+              "require": [
+                "max-steps",
+                "wall-clock-timeout",
+                "spawn-depth"
+              ],
+              "requireEnforcementTests": true,
+              "failClosedOnExceed": true
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Verify runtime config values are finite and non-zero (or explicitly bounded), then review tests that force exceedance of steps, wall-clock, and spawn depth and confirm abort/fail-closed—not prompt-only refusals.\n"
+              "hint": "If automation cannot see runtime enforcement, attest finite max-steps/wall-clock/spawn-depth config plus abort-on-exceed tests for every production agent.\n"
             }
           }
         ]
@@ -666,7 +691,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "agent-governance",
         "mandatory",
-        "manual",
+        "automated",
         "loop-limits",
         "spawn-depth"
       ],
@@ -690,26 +715,57 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "passCondition": "Documented pause/terminate control exists for production agents; control is restricted to authorized operators (not end-user-only and not model-invoked); ≥1 successful pause or terminate action in drill or production in the last 90 days shows recorded time-to-effect ≤ documented numeric SLO; evidence shows further tool/MCP/A2A side effects for that run (and its spawned children, if any) were stopped or drained without requiring the model to refuse.\n",
       "evidenceRequired": [
         "Kill-switch/pause runbook: who may invoke, scope (run / agent type / fleet), expected effect, and numeric time-to-effect SLO",
-        "Successful drill or production use record (≤90 days) with timestamps for invoke → effect, covering at least one production agent path"
+        "Successful drill or production use record (≤90 days) with timestamps for invoke → effect, covering at least one production agent path",
+        "Cancellation suite or import proving queued work, running tasks, and child agents stop without new dispatch"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "kill-api-exists",
+            "params": {
+              "hint": "Discover operator pause/terminate API or console control and evidence it is authz-gated (not end-user-only, not model-invoked).\n"
+            }
+          },
+          {
+            "id": "queue-cancellation-test",
+            "params": {
+              "hint": "Launch a representative agent, enqueue work, invoke kill, and verify queued tasks transition to Cancelled without new task dispatch.\n"
+            }
+          },
+          {
+            "id": "running-task-cancellation-test",
+            "params": {
+              "hint": "Invoke kill while tool/MCP work is in flight; verify running tasks abort or drain without completing unauthorized side effects.\n"
+            }
+          },
+          {
+            "id": "child-agent-termination-test",
+            "params": {
+              "hint": "With spawn/delegation active, invoke kill and verify child/sub-agents terminate or are cancelled (no respawn storm).\n"
+            }
+          },
+          {
+            "id": "drill-log-review",
+            "params": {
+              "hint": "Parse ≤90-day drill/prod record: invoke→effect timestamps ≤ documented numeric SLO; retain report.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Confirm an authorized operator control exists, SLO is numeric, and a ≤90-day drill/prod record shows time-to-effect ≤ SLO with side effects stopped—not a docs-only or UI-cancel-without-tool-halt path.\n"
+              "hint": "Architecture review: agent cannot disable its own kill path; control is operator/break-glass scoped; UI cancel-without-tool-halt does not count.\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Identify the pause/terminate control (API, console, break-glass runbook) and who is authorized (on-call / operator role). Confirm the agent cannot disable or ignore the control via tool calls. 2) Verify documented scope and a numeric time-to-effect SLO (e.g. p95 ≤ N seconds). Missing or non-numeric SLO fails. 3) Review a drill or production use ≤90 days: timestamps from invoke to observed stop; confirm in-flight/queued tools and child/spawned agents were halted or cancelled—not merely “chat stopped while tools continued.” 4) Spot-check that coverage maps to production agent inventory (same scope as charters): at least the drilled path is a production agent; note any agent types lacking a kill path as gaps. 5) PASS only if documentation + measured successful action meet the pass condition.\n",
+      "manualVerification": "1) Identify the pause/terminate control (API, console, break-glass runbook) and who is authorized (on-call / operator role). Confirm the agent cannot disable or ignore the control via tool calls. 2) Verify documented scope and a numeric time-to-effect SLO (e.g. p95 ≤ N seconds). Missing or non-numeric SLO fails. 3) Review cancellation suite or imports: queued cancel, running-task cancel, child-agent terminate — all must stop further side effects. 4) Review a drill or production use ≤90 days: timestamps from invoke to observed stop ≤ SLO. 5) PASS only if kill-api + measured cancellation/drill evidence meet the pass condition.\n",
       "falsePositiveGuidance": "Do not pass on runbooks without a reachable control, or on “cancel chat” / client disconnect that leaves tool/MCP calls running. Do not pass because step/time limits exist—those are proactive bounds, not a reactive kill switch. Do not pass a drill that only stops new sessions while current runs continue, or that lacks timestamps / SLO comparison. End-user mute/cancel without an operator control-plane path is insufficient for production incident response. A single undocumented ad-hoc kill (SSH, redeploy) without a retained drill record and SLO does not satisfy this Check. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Expose an authenticated operator pause/terminate API or console action scoped to run, agent type, and optionally fleet/tenant",
         "Define a numeric time-to-effect SLO; implement cancellation that stops planners, drains/cancels tool queues, and prevents child respawn",
-        "Run a recurring ≤90-day kill-switch drill on a production-representative agent path; retain invoke/effect timestamps and outcome",
-        "Map kill-switch coverage to the production agent inventory and close gaps before release"
+        "Add automated cancellation tests for queued, running, and child-agent paths; gate releases on pass",
+        "Run a recurring ≤90-day kill-switch drill; retain invoke/effect timestamps and outcome under imports/agent-kill-switch/"
       ],
       "references": [
         {
@@ -732,7 +788,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "agent-governance",
         "mandatory",
-        "manual",
+        "hybrid",
         "kill-switch",
         "incident-containment"
       ],

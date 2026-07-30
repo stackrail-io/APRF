@@ -1,0 +1,33 @@
+id: a2a-peer-auth
+title: A2A / multi-agent peer auth and scoped capabilities (AGN-M4)
+version: "0.2.0"
+executor: collectors/a2a-peer-auth.ts
+evidenceClass: policy
+alsoEmits: [code, ci]
+detectorIds: [repo-a2a-config]
+inputs:
+  - "Target repo (A2A, multi-agent, handoff, capability token configs/tests)"
+  - "Optional deny suite: aprf-assessment/imports/a2a-peer-auth/*.{json}"
+collect:
+  - "Inventory A2A / multi-agent handoff path signals"
+  - "Detect peer authentication (mTLS, workload identity, capability tokens, …)"
+  - "Detect scoped capability grants on handoffs"
+  - "Detect negative tests (unauth / forged / over-scoped)"
+  - "Ingest imported deny suites; write a2a-peer-auth-report.json"
+emits:
+  nodeClass: policy
+  refPattern: "aprf-assessment/imports/a2a-peer-auth/*"
+  signals:
+    - a2a-peer-auth
+    - agn-m4
+    - repo-a2a-config
+    - peer-auth
+    - scoped-capability
+mapsToChecks: [AGN-M4]
+whenUnavailable: >
+  Config files alone are PARTIAL. AGN-M4 PASS needs imported deny results for
+  unauthenticated, forged-peer, and over-scoped handoffs (100%) plus measuredAt
+  ≤90 days. No multi-agent handoffs → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline repo heuristics + optional imported negative-test JSON.

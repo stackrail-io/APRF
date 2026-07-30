@@ -21,12 +21,23 @@ evidenceRequired:
   - "Per-agent charter documents (or equivalent structured records) covering purpose, tool allowlist
     reference, data scope, and autonomy limits"
 detection:
-  capability: "manual"
+  capability: "automated"
   detectors:
+    - id: "repo-agent-charter-inventory"
+      params:
+        requireFields:
+          - "purpose"
+          - "tool-allowlist"
+          - "data-scope"
+          - "autonomy-limits"
+          - "owner"
+        requireInventoryCompleteness: true
     - id: "manual-attest"
       params:
-        hint: "Confirm production-agent inventory completeness, then spot-check that each charter has
-          purpose, tool allowlist reference, data scope, autonomy limits, and owner."
+        hint: >
+          If automation cannot prove inventory completeness, attest a versioned
+          production-agent inventory with charter fields (purpose, tool
+          allowlist, data scope, autonomy limits, owner) and 0 missing rows.
 manualVerification: "1) Define “production agent” for this system (any agent runtime reachable from
   production traffic or scheduled jobs—not only MCP/A2A). Build or export an inventory of those
   agents with owners. 2) For each inventory row, open the linked charter and verify it states:
@@ -65,7 +76,7 @@ relatedRules:
 tags:
   - "agent-governance"
   - "mandatory"
-  - "manual"
+  - "automated"
   - "charter"
   - "inventory"
 applicability:

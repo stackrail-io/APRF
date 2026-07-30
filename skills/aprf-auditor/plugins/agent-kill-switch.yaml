@@ -1,0 +1,36 @@
+id: agent-kill-switch
+title: Agent kill switch — pause/terminate with cancellation + drill (AGN-M3)
+version: "0.2.0"
+executor: collectors/agent-kill-switch.ts
+evidenceClass: runtime
+alsoEmits: [docs, code, ci]
+detectorIds:
+  - kill-api-exists
+  - queue-cancellation-test
+  - running-task-cancellation-test
+  - child-agent-termination-test
+  - drill-log-review
+inputs:
+  - "Target repo (kill/pause APIs, runbooks, cancellation tests)"
+  - "Optional suite: aprf-assessment/imports/agent-kill-switch/*.{json}"
+collect:
+  - "Detect operator kill/pause/terminate control and authz hints"
+  - "Detect runbook + numeric time-to-effect SLO signals"
+  - "Detect repo tests for queue / running / child cancellation"
+  - "Ingest imported cancellation + drill results; write agent-kill-switch-report.json"
+emits:
+  nodeClass: runtime
+  refPattern: "aprf-assessment/imports/agent-kill-switch/*"
+  signals:
+    - agent-kill-switch
+    - agn-m3
+    - kill-api-exists
+    - drill-log-review
+mapsToChecks: [AGN-M3]
+whenUnavailable: >
+  Kill API/docs alone are PARTIAL. AGN-M3 PASS needs operator authz signals,
+  numeric SLO, imported queue+running+child cancel, ≤90-day drill within SLO,
+  architectureReviewOk=true, and measuredAt ≤90 days. No agent signals → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline discovery + optional imported cancellation/drill JSON (live harness optional later).

@@ -85,6 +85,22 @@ AUTHN-M2 MCP/S2S inventory:
     --admin-email "$APRF_ADMIN_EMAIL" --admin-password "$APRF_ADMIN_PASSWORD"
   # or drop redacted JSON under imports/mcp-s2s-inventory/
 
+AGN-M1 agent charters:
+  npm run aprf:agent-charters -- --target <app> --out <app>/aprf-assessment
+  # PASS needs complete inventory under imports/agent-charter-inventory/
+
+AGN-M2 agent loop limits:
+  npm run aprf:agent-limits -- --target <app> --out <app>/aprf-assessment
+  # PASS needs measured abort suite under imports/agent-loop-limits/
+
+AGN-M3 agent kill switch:
+  npm run aprf:agent-kill -- --target <app> --out <app>/aprf-assessment
+  # PASS needs cancel suite + drill under imports/agent-kill-switch/
+
+AGN-M4 A2A peer auth:
+  npm run aprf:a2a-auth -- --target <app> --out <app>/aprf-assessment
+  # PASS needs deny suite under imports/a2a-peer-auth/
+
 Import runtime evidence without live APIs:
   mkdir -p <out>/imports/langsmith && cp traces.json <out>/imports/langsmith/
 `);

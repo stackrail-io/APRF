@@ -26,14 +26,22 @@ evidenceRequired:
   - "Runtime/platform configuration declaring max steps, wall-clock timeout, and spawn depth for each production agent (or shared policy bound)"
   - "Enforcement test results showing abort/fail-closed when each limit is exceeded (steps, time, spawn depth)"
 detection:
-  capability: "manual"
+  capability: "automated"
   detectors:
+    - id: "repo-agent-loop-limits"
+      params:
+        require:
+          - "max-steps"
+          - "wall-clock-timeout"
+          - "spawn-depth"
+        requireEnforcementTests: true
+        failClosedOnExceed: true
     - id: "manual-attest"
       params:
         hint: >
-          Verify runtime config values are finite and non-zero (or explicitly
-          bounded), then review tests that force exceedance of steps, wall-clock,
-          and spawn depth and confirm abort/fail-closed—not prompt-only refusals.
+          If automation cannot see runtime enforcement, attest finite
+          max-steps/wall-clock/spawn-depth config plus abort-on-exceed tests
+          for every production agent.
 manualVerification: >
   1) Inventory production agent runtimes (same scope as the charter inventory).
   2) For each, locate the runtime or platform setting for max steps (or equivalent
@@ -75,7 +83,7 @@ relatedRules:
 tags:
   - "agent-governance"
   - "mandatory"
-  - "manual"
+  - "automated"
   - "loop-limits"
   - "spawn-depth"
 applicability:

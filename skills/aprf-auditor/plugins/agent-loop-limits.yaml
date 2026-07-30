@@ -1,0 +1,34 @@
+id: agent-loop-limits
+title: Agent loop limits — max steps, wall-clock, spawn depth (AGN-M2)
+version: "0.2.0"
+executor: collectors/agent-loop-limits.ts
+evidenceClass: runtime-config
+alsoEmits: [code, ci]
+detectorIds: [repo-agent-loop-limits]
+inputs:
+  - "Target repo (agent runtimes, orchestrators, configs, tests)"
+  - "Optional measured suite: aprf-assessment/imports/agent-loop-limits/*.{json}"
+collect:
+  - "Detect max-steps / iteration limits in agent-related config or code"
+  - "Detect wall-clock / run timeout settings"
+  - "Detect spawn-depth / child-agent limits"
+  - "Detect enforcement tests that abort on exceedance"
+  - "Ingest imported abort-on-exceed results; write agent-loop-limits-report.json"
+emits:
+  nodeClass: runtime-config
+  refPattern: "aprf-assessment/imports/agent-loop-limits/*"
+  signals:
+    - agent-loop-limits
+    - agn-m2
+    - repo-agent-loop-limits
+    - max-steps
+    - wall-clock
+    - spawn-depth
+mapsToChecks: [AGN-M2]
+whenUnavailable: >
+  Config discovery alone is PARTIAL. AGN-M2 PASS needs imported measured results
+  showing abort/fail-closed when steps, wall-clock, or spawn depth are exceeded
+  (0 prompt-only limits) plus measuredAt ≤90 days. No agent signals → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline repo heuristics + optional imported enforcement suite JSON.

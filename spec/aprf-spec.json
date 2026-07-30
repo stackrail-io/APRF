@@ -3799,37 +3799,37 @@
       "mandatoryChecks": [
         {
           "id": "AGN-M1",
-          "requirement": "Each production agent shall have a documented charter: purpose, allowed tools, data scope, and autonomy limits",
-          "artifact": "Agent inventory with charter fields per production agent",
-          "passCondition": "100% of production agents have a charter with purpose, tool allowlist reference, data scope, and autonomy limits; inventory query returns 0 agents missing any required field",
-          "method": "manual",
+          "requirement": "Each production agent shall have a documented charter: purpose, allowed tools, data scope, autonomy limits, and a named owner",
+          "artifact": "Versioned agent inventory listing every production agent with owner and charter URI/id; per-agent charter records covering purpose, tool allowlist reference, data scope, and autonomy limits",
+          "passCondition": "100% of production agents appear in an inventory with a charter that includes purpose, tool allowlist reference, data scope, autonomy limits, and named owner; inventory query returns 0 agents missing any required field",
+          "method": "automated",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "AGN-M2",
-          "requirement": "Hard limits shall exist on steps, wall-clock time, and recursive agent spawning",
-          "artifact": "Runtime config for max steps, wall-clock timeout, and spawn depth + enforcement tests",
-          "passCondition": "100% of production agents have finite max-steps, wall-clock timeout, and spawn-depth \u2264 configured bound; tests show limits are enforced (run aborts) when exceeded",
+          "requirement": "Hard limits shall exist on steps, wall-clock time, and recursive agent spawning, enforced by the platform or runtime (not prompt wording alone)",
+          "artifact": "Runtime/platform configuration declaring max steps, wall-clock timeout, and spawn depth for each production agent (or shared policy bound) + enforcement test results showing abort/fail-closed when each limit is exceeded",
+          "passCondition": "100% of production agents have finite max-steps, wall-clock timeout, and spawn-depth \u2264 configured bound; enforcement tests show the run aborts (or otherwise fails closed) when any limit is exceeded; 0 production agents rely solely on prompt text for these limits",
           "method": "automated",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "AGN-M3",
-          "requirement": "Operators shall be able to pause or terminate agent runs in production",
-          "artifact": "Kill-switch/pause control documentation + successful drill or production use record",
-          "passCondition": "Documented pause/terminate control exists for production agents; \u22651 successful pause or terminate action in drill or production in last 90 days with recorded time-to-effect \u2264 documented SLO",
-          "method": "manual",
+          "requirement": "Operators shall be able to pause or terminate production agent runs through a control-plane action that stops further planning and in-flight or queued tool/MCP/A2A side effects within a documented time-to-effect SLO; the control must not depend on the model cooperating and must not be disableable by the agent runtime itself",
+          "artifact": "Kill-switch/pause runbook (authorized operators, scope, numeric time-to-effect SLO) + cancellation suite proving queued work, running tasks, and child agents stop + \u226490-day drill or production use record with invoke\u2192effect timestamps; architecture attest that the agent cannot disable the kill path",
+          "passCondition": "Documented pause/terminate control exists for production agents; control is restricted to authorized operators (not end-user-only and not model-invoked); \u22651 successful pause or terminate action in drill or production in the last 90 days shows recorded time-to-effect \u2264 documented numeric SLO; evidence shows further tool/MCP/A2A side effects for that run (and its spawned children, if any) were stopped or drained without requiring the model to refuse",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "AGN-M4",
-          "requirement": "A2A and multi-agent handoffs shall authenticate peers and carry scoped capabilities",
-          "artifact": "A2A auth config + capability-token/schema examples + negative auth tests",
-          "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers; tests show unauthenticated or over-scoped handoffs denied at 100%",
-          "method": "automated",
+          "requirement": "A2A and multi-agent handoffs shall authenticate peers and authorize a scoped capability set (tools, data, actions) independent of network presence",
+          "artifact": "Inventory of production A2A/multi-agent handoff paths with authn/authz mechanism per path + capability token/schema examples + negative test results for unauthenticated, forged identity, and over-scoped capability cases",
+          "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers and scoped capabilities; negative tests show unauthenticated, forged-peer, and over-scoped handoffs denied at 100%; 0 production handoff paths that accept anonymous or network-presence-only trust",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }

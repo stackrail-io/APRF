@@ -29,28 +29,52 @@ passCondition: >
 evidenceRequired:
   - "Kill-switch/pause runbook: who may invoke, scope (run / agent type / fleet), expected effect, and numeric time-to-effect SLO"
   - "Successful drill or production use record (≤90 days) with timestamps for invoke → effect, covering at least one production agent path"
+  - "Cancellation suite or import proving queued work, running tasks, and child agents stop without new dispatch"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "kill-api-exists"
+      params:
+        hint: >
+          Discover operator pause/terminate API or console control and evidence
+          it is authz-gated (not end-user-only, not model-invoked).
+    - id: "queue-cancellation-test"
+      params:
+        hint: >
+          Launch a representative agent, enqueue work, invoke kill, and verify
+          queued tasks transition to Cancelled without new task dispatch.
+    - id: "running-task-cancellation-test"
+      params:
+        hint: >
+          Invoke kill while tool/MCP work is in flight; verify running tasks
+          abort or drain without completing unauthorized side effects.
+    - id: "child-agent-termination-test"
+      params:
+        hint: >
+          With spawn/delegation active, invoke kill and verify child/sub-agents
+          terminate or are cancelled (no respawn storm).
+    - id: "drill-log-review"
+      params:
+        hint: >
+          Parse ≤90-day drill/prod record: invoke→effect timestamps ≤ documented
+          numeric SLO; retain report.
     - id: "manual-attest"
       params:
         hint: >
-          Confirm an authorized operator control exists, SLO is numeric, and a
-          ≤90-day drill/prod record shows time-to-effect ≤ SLO with side effects
-          stopped—not a docs-only or UI-cancel-without-tool-halt path.
+          Architecture review: agent cannot disable its own kill path; control
+          is operator/break-glass scoped; UI cancel-without-tool-halt does not
+          count.
 manualVerification: >
   1) Identify the pause/terminate control (API, console, break-glass runbook)
   and who is authorized (on-call / operator role). Confirm the agent cannot
   disable or ignore the control via tool calls.
   2) Verify documented scope and a numeric time-to-effect SLO (e.g. p95 ≤ N
   seconds). Missing or non-numeric SLO fails.
-  3) Review a drill or production use ≤90 days: timestamps from invoke to
-  observed stop; confirm in-flight/queued tools and child/spawned agents were
-  halted or cancelled—not merely “chat stopped while tools continued.”
-  4) Spot-check that coverage maps to production agent inventory (same scope
-  as charters): at least the drilled path is a production agent; note any
-  agent types lacking a kill path as gaps.
-  5) PASS only if documentation + measured successful action meet the pass
+  3) Review cancellation suite or imports: queued cancel, running-task cancel,
+  child-agent terminate — all must stop further side effects.
+  4) Review a drill or production use ≤90 days: timestamps from invoke to
+  observed stop ≤ SLO.
+  5) PASS only if kill-api + measured cancellation/drill evidence meet the pass
   condition.
 falsePositiveGuidance: >
   Do not pass on runbooks without a reachable control, or on “cancel chat” /
@@ -65,8 +89,8 @@ falsePositiveGuidance: >
 recommendedFixes:
   - "Expose an authenticated operator pause/terminate API or console action scoped to run, agent type, and optionally fleet/tenant"
   - "Define a numeric time-to-effect SLO; implement cancellation that stops planners, drains/cancels tool queues, and prevents child respawn"
-  - "Run a recurring ≤90-day kill-switch drill on a production-representative agent path; retain invoke/effect timestamps and outcome"
-  - "Map kill-switch coverage to the production agent inventory and close gaps before release"
+  - "Add automated cancellation tests for queued, running, and child-agent paths; gate releases on pass"
+  - "Run a recurring ≤90-day kill-switch drill; retain invoke/effect timestamps and outcome under imports/agent-kill-switch/"
 references:
   - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
@@ -82,7 +106,7 @@ relatedRules:
 tags:
   - "agent-governance"
   - "mandatory"
-  - "manual"
+  - "hybrid"
   - "kill-switch"
   - "incident-containment"
 applicability:

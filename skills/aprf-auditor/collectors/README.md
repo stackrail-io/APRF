@@ -54,6 +54,42 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | aws / azure / gcp | `iac-cloud.ts` | Terraform/Bicep signals | `imports/<cloud>/` | — |
 | langsmith, phoenix, … | `import-ingest.ts` | — | `imports/<id>/` | — |
 | **custom** | `import-ingest.ts` | — | **`imports/custom/`** | — |
+| **agent-charter-inventory** | `agent-charter-inventory.ts` | inventory/charters | `imports/agent-charter-inventory/` | — |
+| **agent-loop-limits** | `agent-loop-limits.ts` | agent limit config/tests | `imports/agent-loop-limits/` | — |
+| **agent-kill-switch** | `agent-kill-switch.ts` | kill API / cancel tests | `imports/agent-kill-switch/` | — |
+| **a2a-peer-auth** | `a2a-peer-auth.ts` | A2A handoff auth/scope | `imports/a2a-peer-auth/` | — |
+
+### AGN-M1 — agent charters
+
+```bash
+npm run aprf:agent-charters -- --target /path/to/app --out /path/to/app/aprf-assessment
+# PASS unlock — complete inventory export (0 missing fields):
+# imports/agent-charter-inventory/inventory.json
+```
+
+### AGN-M2 — agent loop limits
+
+```bash
+npm run aprf:agent-limits -- --target /path/to/app --out /path/to/app/aprf-assessment
+# Optional PASS unlock — measured abort-on-exceed suite:
+# imports/agent-loop-limits/suite.json
+```
+
+### AGN-M3 — agent kill switch
+
+```bash
+npm run aprf:agent-kill -- --target /path/to/app --out /path/to/app/aprf-assessment
+# Optional PASS unlock — cancellation suite + ≤90-day drill:
+# imports/agent-kill-switch/suite.json
+```
+
+### AGN-M4 — A2A peer auth
+
+```bash
+npm run aprf:a2a-auth -- --target /path/to/app --out /path/to/app/aprf-assessment
+# Optional PASS unlock — 100% deny suite (unauth / forged / over-scoped):
+# imports/a2a-peer-auth/suite.json
+```
 
 ### AUTHN-M1 — live auth probe
 

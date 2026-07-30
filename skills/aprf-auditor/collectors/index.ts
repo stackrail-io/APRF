@@ -10,6 +10,10 @@ import { crossTenantTestsCollector } from "./cross-tenant-tests.ts";
 import { secretsHygieneCollector } from "./secrets-hygiene.ts";
 import { secretRedactionCollector } from "./secret-redaction.ts";
 import { injectionPolicyGateCollector } from "./injection-policy-gate.ts";
+import { agentLoopLimitsCollector } from "./agent-loop-limits.ts";
+import { a2aPeerAuthCollector } from "./a2a-peer-auth.ts";
+import { agentCharterInventoryCollector } from "./agent-charter-inventory.ts";
+import { agentKillSwitchCollector } from "./agent-kill-switch.ts";
 import {
   awsCollector,
   azureCollector,
@@ -30,6 +34,10 @@ export const COLLECTORS: Collector[] = [
   secretsHygieneCollector,
   secretRedactionCollector,
   injectionPolicyGateCollector,
+  agentCharterInventoryCollector,
+  agentLoopLimitsCollector,
+  agentKillSwitchCollector,
+  a2aPeerAuthCollector,
   awsCollector,
   azureCollector,
   gcpCollector,
