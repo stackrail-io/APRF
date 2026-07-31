@@ -1,0 +1,14 @@
+id: cloudwatch
+title: AWS CloudWatch alarms / log groups (export or IaC)
+version: "0.2.0"
+evidenceClass: runtime
+alsoEmits: [iac]
+inputs: ["TF CloudWatch resources", "aprf-assessment/imports/cloudwatch/"]
+collect:
+  - "Parse alarm/log definitions; attach user exports when present"
+emits:
+  nodeClass: runtime
+  refPattern: "imports/cloudwatch/*|**/*cloudwatch*"
+  signals: [alarm, log-group]
+mapsToChecks: [OBS-M1, INC-M1, COST-M2]
+whenUnavailable: "Ask for export"

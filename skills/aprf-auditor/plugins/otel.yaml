@@ -1,0 +1,17 @@
+executor: collectors/otel.ts
+id: otel
+title: OpenTelemetry collector / config
+version: "0.2.0"
+evidenceClass: runtime
+inputs:
+  - "OTel collector config, SDK init, or exported traces"
+  - "aprf-assessment/imports/otel/"
+collect:
+  - "Search otel*/opentelemetry* configs and instrumentation"
+  - "Ask for recent trace export if config exists but no sample spans"
+emits:
+  nodeClass: runtime
+  refPattern: "**/*otel*"
+  signals: [trace, span-llm, span-tool]
+mapsToChecks: [OBS-M1, OBS-M2, COST-M1]
+whenUnavailable: "Ask user; do not assume production tracing is enabled"

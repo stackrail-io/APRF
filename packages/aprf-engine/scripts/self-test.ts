@@ -23,6 +23,18 @@ assert(
   catalog.generatedAt.startsWith("sha256:"),
   "generatedAt should be content hash",
 );
+assert(
+  (catalog.domains?.length ?? 0) >= 9,
+  `expected domains+crossCutting (>=9), got ${catalog.domains?.length}`,
+);
+assert(
+  (catalog.pillars?.length ?? 0) === 27,
+  `expected 27 pillars, got ${catalog.pillars?.length}`,
+);
+assert(
+  catalog.pillars?.some((p) => p.id === "APRF-01" && p.slug === "ai-security"),
+  "APRF-01 ai-security pillar present",
+);
 
 const ids = catalog.rules.map((r) => r.id);
 assert(new Set(ids).size === ids.length, "duplicate rule ids in catalog");

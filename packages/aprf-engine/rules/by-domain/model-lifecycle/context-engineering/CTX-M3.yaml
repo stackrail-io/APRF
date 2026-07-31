@@ -1,0 +1,58 @@
+id: "CTX-M3"
+category: "context-engineering"
+title: "Sensitive context classes (secrets, regulated data) must have explicit inclusion policies"
+description: "Sensitive context classes (secrets, regulated data) shall have explicit inclusion policies"
+whyItMatters: "Sensitive context classes (secrets, regulated data) shall have explicit inclusion
+  policies Failing this leaves a production gap against: Policy enumerates sensitive classes and
+  allow/deny rules; tests show disallowed classes are stripped or blocked at ≥95% on the
+  sensitive-class fixture suite"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "Policy enumerates sensitive classes and allow/deny rules; tests show disallowed
+  classes are stripped or blocked at ≥95% on the sensitive-class fixture suite"
+evidenceRequired:
+  - "Data-class inclusion policy + enforcement tests or DLP hooks on context assembly"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Data-class inclusion policy + enforcement tests or DLP hooks on context assembly"
+manualVerification: "For this Check (Sensitive context classes (secrets, regulated data) must have
+  explicit inclusion policies): inspect current evidence for [Data-class inclusion policy +
+  enforcement tests or DLP hooks on context assembly] and confirm the pass condition holds — Policy
+  enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or
+  blocked at ≥95% on the sensitive-class fixture suite"
+falsePositiveGuidance: "(Context Engineering): re-verify against a current artifact for this
+  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Sensitive context classes (secrets, regulated data) must have
+    explicit inclusion policies"
+  - "Retain evidence artifacts required by this Check, starting with: Data-class inclusion policy +
+    enforcement tests or DLP hooks on context assembly"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF — Map and Measure functions"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Sensitive Information Disclosure"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "CTX-M1"
+  - "CTX-M2"
+  - "CTX-R1"
+  - "CTX-R2"
+  - "CTX-R3"
+tags:
+  - "context-engineering"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "rag-pipelines"
+    - "prompt-templates"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

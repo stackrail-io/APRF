@@ -1,0 +1,59 @@
+id: "COST-R2"
+category: "cost-optimization"
+title: "Production systems should have model routing: cheaper models for low-risk tasks with eval
+  coverage"
+description: "Model routing: cheaper models for low-risk tasks with eval coverage"
+whyItMatters: "Model routing: cheaper models for low-risk tasks with eval coverage Failing this
+  leaves a production gap against: Low-risk task classes route to cheaper models by default; eval
+  shows quality within tolerance vs premium baseline; misroute rate monitored ≤30 days"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "Low-risk task classes route to cheaper models by default; eval shows quality within
+  tolerance vs premium baseline; misroute rate monitored ≤30 days"
+evidenceRequired:
+  - "Model-routing policy (cheap vs premium) + eval coverage report for low-risk routed tasks"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Model-routing policy (cheap vs premium) + eval coverage report for low-risk routed tasks"
+manualVerification: "For this Check (Model routing: cheaper models for low-risk tasks with eval
+  coverage): inspect current evidence for [Model-routing policy (cheap vs premium) + eval coverage
+  report for low-risk routed tasks] and confirm the pass condition holds — Low-risk task classes
+  route to cheaper models by default; eval shows quality within tolerance vs premium baseline;
+  misroute rate monitored ≤30 days"
+falsePositiveGuidance: "(Cost Optimization): re-verify against a current artifact for this specific
+  Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: Model routing: cheaper models for low-risk tasks with
+    eval coverage"
+  - "Retain evidence artifacts required by this Check, starting with: Model-routing policy (cheap vs
+    premium) + eval coverage report for low-risk routed tasks"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "AWS Well-Architected — Cost Optimization"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "FinOps Foundation practices"
+    url: "https://www.finops.org/"
+relatedRules:
+  - "COST-M1"
+  - "COST-M2"
+  - "COST-M3"
+  - "COST-R1"
+  - "COST-R3"
+tags:
+  - "cost-optimization"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

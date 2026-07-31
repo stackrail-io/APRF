@@ -1,0 +1,87 @@
+id: "AGN-R1"
+category: "agent-governance"
+title: "Production systems should have goal conflict detection and policy checks before plan execution"
+description: >
+  Production agent planners should run policy checks for goal conflicts and
+  disallowed goals before invoking side-effecting tools. Checks must be
+  enforced by the platform or planner runtime—not by prompt wording alone—
+  and denied plans must leave an observable deny/allow trace.
+whyItMatters: >
+  Agents optimize for stated goals; when a user, tool result, or peer injects a
+  conflicting or disallowed objective, an unchecked planner will pursue it with
+  the same tools and budgets as a legitimate task. Prompt-only “stay on mission”
+  instructions are bypassable. Pre-tool policy gates convert goal conflicts into
+  measurable denies with an accountable rule owner, instead of discovering
+  overreach only after side effects land.
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: >
+  Agent planner runs policy checks for goal conflicts / disallowed goals before
+  side-effecting tools; ≥1 synthetic conflict is denied in test or production
+  logs within the last 90 days with retained deny/allow traces; the policy rule
+  set has a named owner.
+evidenceRequired:
+  - "Versioned pre-execution policy rules (goal-conflict / disallowed-goal) with named owner"
+  - "Sample deny/allow traces showing the planner gated side-effecting tools"
+  - "≥1 synthetic conflict deny record (test or prod) ≤90 days"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-agent-goal-policy"
+      params:
+        hint: >
+          Discover goal-conflict / disallowed-goal / plan-policy gates that run
+          before side-effecting tools, plus named owner and deny-test signals.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove a ≤90-day synthetic deny, attest policy
+          rules with named owner plus a retained deny/allow trace for a
+          synthetic conflict within 90 days.
+manualVerification: >
+  1) Confirm production agents plan or invoke side-effecting tools. If none,
+  score NOT_APPLICABLE. 2) Locate pre-execution policy (code, config, or policy
+  engine) that evaluates goal conflicts / disallowed goals before tool calls.
+  Prompt-only instructions without a gate fail. 3) Verify the rule set has a
+  named owner. 4) Review ≥1 synthetic conflict deny in test or prod logs ≤90
+  days with deny/allow traces. 5) PASS only if gate + owner + fresh deny
+  evidence all hold.
+falsePositiveGuidance: >
+  Do not pass on charter purpose text or system-prompt “refuse conflicting
+  goals” without a pre-tool gate. Do not pass because tool allowlists exist
+  (TOL)—those constrain tools, not goals. Do not pass a unit test that only
+  asserts a config key without denying a conflicting goal. Sibling Checks
+  (loop limits, kill switch, human approval) do not prove goal-conflict
+  policy. Named exceptions need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Add a pre-tool plan policy that denies conflicting or disallowed goals before side-effecting tools run"
+  - "Assign a named owner to the goal-conflict / disallowed-goal rule set; version it in-repo or in the policy store"
+  - "Add a synthetic conflict fixture that must be denied; retain deny/allow traces and gate releases on pass"
+  - "Schedule a ≤90-day review of deny rates and rule coverage with the policy owner"
+references:
+  - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI Risk Management Framework — Govern / Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "AGN-M1"
+  - "AGN-M2"
+  - "AGN-M3"
+  - "AGN-M4"
+  - "AGN-R2"
+  - "TOL-M1"
+  - "HUM-M1"
+  - "SAF-M1"
+tags:
+  - "agent-governance"
+  - "recommended"
+  - "hybrid"
+  - "goal-conflict"
+  - "plan-policy"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

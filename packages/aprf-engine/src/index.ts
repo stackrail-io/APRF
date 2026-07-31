@@ -12,6 +12,8 @@ export type {
   RuleApplicability,
   AprfRule,
   CategoryDef,
+  DomainDef,
+  PillarDef,
   RuleIndex,
   AprfCheckProjection,
 } from "./types.js";

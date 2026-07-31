@@ -14,5 +14,10 @@ export function getGeneratedCatalog(): GeneratedCatalog {
 
 export function getGeneratedRuleIndex(): RuleIndex {
   const catalog = getGeneratedCatalog();
-  return buildRuleIndex(catalog.rules, catalog.categories);
+  return buildRuleIndex(
+    catalog.rules,
+    catalog.categories,
+    catalog.domains ?? [],
+    catalog.pillars ?? [],
+  );
 }

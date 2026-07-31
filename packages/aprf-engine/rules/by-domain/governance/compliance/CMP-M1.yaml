@@ -1,0 +1,52 @@
+id: "CMP-M1"
+category: "compliance"
+title: "Applicable obligations for the AI system must be identified and owned"
+description: "Applicable obligations for the AI system shall be identified and owned"
+whyItMatters: "Applicable obligations for the AI system shall be identified and owned Failing this
+  leaves a production gap against: Every production AI system ID has ≥1 mapped obligation entry or
+  an explicit “none in scope” attestation with owner and review date ≤ 12 months"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "Every production AI system ID has ≥1 mapped obligation entry or an explicit “none in
+  scope” attestation with owner and review date ≤ 12 months"
+evidenceRequired:
+  - "Obligations register with owner per obligation for each production AI system"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For this Check (Applicable obligations for the AI system must be identified and
+  owned): inspect current evidence for [Obligations register with owner per obligation for each
+  production AI system] and confirm the pass condition holds — Every production AI system ID has ≥1
+  mapped obligation entry or an explicit “none in scope” attestation with owner and review date ≤ 12
+  months"
+falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
+  control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Applicable obligations for the AI system must be identified and
+    owned"
+  - "Retain evidence artifacts required by this Check, starting with: Obligations register with
+    owner per obligation for each production AI system"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "ISO/IEC 42001 (AI management systems) — conceptual alignment"
+    url: "https://www.iso.org/standard/81230.html"
+relatedRules:
+  - "CMP-M2"
+  - "CMP-M3"
+  - "CMP-R1"
+  - "CMP-R2"
+  - "CMP-R3"
+tags:
+  - "compliance"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

@@ -1,0 +1,52 @@
+id: "EXP-M4"
+category: "explainability"
+title: "Counterfactual or change summaries must be available for material model/prompt version diffs"
+description: "Counterfactual or change summaries shall be available for material model/prompt version diffs"
+whyItMatters: "Counterfactual or change summaries shall be available for material model/prompt
+  version diffs Failing this leaves a production gap against: PASS if the last material model/prompt
+  promotion includes a retained change/counterfactual summary"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "PASS if the last material model/prompt promotion includes a retained
+  change/counterfactual summary"
+evidenceRequired:
+  - "Change-summary tooling/config + sample summaries for recent promotions"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Change-summary tooling/config + sample summaries for recent promotions"
+manualVerification: "For this Check (Counterfactual or change summaries must be available for
+  material model/prompt version diffs): inspect current evidence for [Change-summary tooling/config
+  + sample summaries for recent promotions] and confirm the pass condition holds — PASS if the last
+  material model/prompt promotion includes a retained change/counterfactual summary"
+falsePositiveGuidance: "(Explainability & Transparency): re-verify against a current artifact for
+  this specific Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Counterfactual or change summaries must be available for material
+    model/prompt version diffs"
+  - "Retain evidence artifacts required by this Check, starting with: Change-summary tooling/config
+    + sample summaries for recent promotions"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF — Explainability and Interpretability"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "EXP-M1"
+  - "EXP-M2"
+  - "EXP-M3"
+  - "EXP-R1"
+  - "EXP-R3"
+tags:
+  - "explainability"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies: []
+  minCriticality: 3
+  requiredFromLevel: 5
+status: "active"
+introducedIn: "0.10.0"

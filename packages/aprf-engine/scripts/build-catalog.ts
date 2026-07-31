@@ -14,16 +14,21 @@ import { loadRulesFromDisk, rulesRootDir } from "../src/loader";
 const here = dirname(fileURLToPath(import.meta.url));
 const outPath = join(here, "..", "src", "generated", "catalog.ts");
 
-function contentStamp(categories: unknown, rules: unknown): string {
+function contentStamp(
+  domains: unknown,
+  pillars: unknown,
+  categories: unknown,
+  rules: unknown,
+): string {
   const digest = createHash("sha256")
-    .update(JSON.stringify({ categories, rules }))
+    .update(JSON.stringify({ domains, pillars, categories, rules }))
     .digest("hex");
   return `sha256:${digest}`;
 }
 
 function main() {
   const root = rulesRootDir();
-  const { rules, categories, errors } = loadRulesFromDisk(root);
+  const { rules, domains, pillars, categories, errors } = loadRulesFromDisk(root);
 
   if (errors.length > 0) {
     console.error("aprf-engine build-catalog refused — validation errors:");
@@ -32,8 +37,10 @@ function main() {
   }
 
   const catalog = {
-    generatedAt: contentStamp(categories, rules),
+    generatedAt: contentStamp(domains, pillars, categories, rules),
     ruleCount: rules.length,
+    domains,
+    pillars,
     categories,
     rules,
   };

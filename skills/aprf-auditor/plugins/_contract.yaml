@@ -1,0 +1,13 @@
+# Plugin contract — implement or follow as agent playbook
+id: _contract
+version: "0.2.0"
+kind: contract
+requiredFields: [id, title, evidenceClass, inputs, collect, emits, whenUnavailable]
+evidenceClassEnum: [runtime, ci, iac, runtime-config, policy, code, docs, user]
+emitsMustInclude: [nodeClass, refPattern, signals]
+security:
+  - Never exfiltrate secrets to third parties.
+  - Prefer user-provided exports under aprf-assessment/imports/<pluginId>/ when live APIs are unavailable.
+  - Live API calls require APRF_AUDITOR_LIVE=1 and explicit credentials; never enable by default.
+  - Redact secrets in excerpts.
+  - TypeScript executors live in collectors/; YAML remains the portable contract.

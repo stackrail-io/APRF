@@ -1,0 +1,18 @@
+id: aws
+title: AWS AI / secrets / observability exports
+version: "0.2.0"
+executor: collectors/iac-cloud.ts
+evidenceClass: iac
+alsoEmits: [runtime, runtime-config]
+inputs:
+  - "Terraform/CDK under repo"
+  - "Optional: user-exported AWS Config / CloudWatch / Secrets Manager refs under imports/aws/"
+collect:
+  - "Parse IaC for Bedrock, Secrets Manager, IAM, CloudWatch alarms"
+  - "Never call AWS APIs unless host has explicit user-approved tooling"
+emits:
+  nodeClass: iac
+  refPattern: "**/*.tf|**/cdk/**"
+  signals: [secrets-manager, iam, cloudwatch, bedrock]
+mapsToChecks: [SEC2-M1, INF-M1, OBS-M1, COST-M1]
+whenUnavailable: "Use IaC only; ask for runtime exports if needed"

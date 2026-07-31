@@ -1,0 +1,63 @@
+id: "OBS-M1"
+category: "observability"
+title: "Distributed traces must link user request → model calls → tools → outcome"
+description: "Distributed traces shall link user request → model calls → tools → outcome"
+whyItMatters: "Distributed traces shall link user request → model calls → tools → outcome Failing
+  this leaves a production gap against: Canary or sampled traces show parent request ID linking
+  model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "Canary or sampled traces show parent request ID linking model spans, tool spans, and
+  outcome in ≥95% of canary requests over 24 hours"
+evidenceRequired:
+  - "Sample production traces (redacted) + tracing config"
+detection:
+  capability: "automated"
+  detectors:
+    - id: "otel-services-present"
+      params:
+        hint: "APEP apep.otel.service_inventory — require listed services"
+    - id: "repo-otel-config"
+      params: {}
+    - id: "manual-attest"
+      params:
+        hint: "Sample production traces (redacted) + tracing config"
+manualVerification: "For this Check (Distributed traces must link user request → model calls → tools
+  → outcome): inspect current evidence for [Sample production traces (redacted) + tracing config]
+  and confirm the pass condition holds — Canary or sampled traces show parent request ID linking
+  model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours"
+falsePositiveGuidance: "confirm the detector target matches the production path for this Check
+  before waiving. Named exceptions need an owner and expiry ≤90 days."
+recommendedFixes:
+  - "Implement and operationalize: Distributed traces must link user request → model calls → tools →
+    outcome"
+  - "Retain evidence artifacts required by this Check, starting with: Sample production traces
+    (redacted) + tracing config"
+  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "Google SRE Workbook — Observability"
+    url: "https://sre.google/workbook/observability/"
+  - title: "OpenTelemetry"
+    url: "https://opentelemetry.io/"
+relatedRules:
+  - "OBS-M2"
+  - "OBS-M3"
+  - "OBS-R1"
+  - "OBS-R2"
+  - "OBS-R3"
+tags:
+  - "observability"
+  - "mandatory"
+  - "automated"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "kubernetes"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

@@ -1,0 +1,52 @@
+id: "EXP-M1"
+category: "explainability"
+title: "High-stakes or factual RAG outputs must include provenance (citations or source IDs)"
+description: "High-stakes or factual RAG outputs shall include provenance (citations or source IDs)"
+whyItMatters: "High-stakes or factual RAG outputs shall include provenance (citations or source IDs)
+  Failing this leaves a production gap against: On the factual/high-stakes RAG eval set, ≥90% of
+  answers include ≥1 valid source ID/citation that resolves to an authorized corpus document"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "On the factual/high-stakes RAG eval set, ≥90% of answers include ≥1 valid source
+  ID/citation that resolves to an authorized corpus document"
+evidenceRequired:
+  - "RAG eval suite measuring citation presence/accuracy + sample production traces"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "RAG eval suite measuring citation presence/accuracy + sample production traces"
+manualVerification: "For this Check (Include provenance (citations or source IDs)): inspect current
+  evidence for [RAG eval suite measuring citation presence/accuracy + sample production traces] and
+  confirm the pass condition holds — On the factual/high-stakes RAG eval set, ≥90% of answers
+  include ≥1 valid source ID/citation that resolves to an authorized corpus document"
+falsePositiveGuidance: "(Explainability & Transparency): re-verify against a current artifact for
+  this specific Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: High-stakes or factual RAG outputs must include provenance
+    (citations or source IDs)"
+  - "Retain evidence artifacts required by this Check, starting with: RAG eval suite measuring
+    citation presence/accuracy + sample production traces"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF — Explainability and Interpretability"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "EXP-M2"
+  - "EXP-M3"
+  - "EXP-M4"
+  - "EXP-R1"
+  - "EXP-R3"
+tags:
+  - "explainability"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

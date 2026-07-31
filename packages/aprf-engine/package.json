@@ -39,7 +39,8 @@
   "scripts": {
     "validate": "npx tsx scripts/validate.ts",
     "build-catalog": "npx tsx scripts/build-catalog.ts",
-    "test:unit": "npx tsx scripts/self-test.ts",
+    "test:unit": "npx tsx scripts/self-test.ts && npx tsx scripts/test-yaml-validation.ts",
+    "test:yaml": "npx tsx scripts/test-yaml-validation.ts",
     "build": "rm -rf dist && npm run build-catalog && tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run build"
   },

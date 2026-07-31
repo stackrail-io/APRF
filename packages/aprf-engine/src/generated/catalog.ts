@@ -6,11 +6,331 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:c90eb58a749e869ac304814980125eeef74964ea74648e0d861fc37b0f499b76",
+  "generatedAt": "sha256:c370edd446caa69004c4e2edc7b36b278531288ec977ea8235d16c23623a884b",
   "ruleCount": 177,
+  "domains": [
+    {
+      "id": "security",
+      "name": "Security",
+      "summary": "Adversarial resistance, identity, authorization, secrets, tool mediation, supply chain, and hardened runtime for AI systems.",
+      "crossCutting": false,
+      "pillarSlugs": [
+        "ai-security",
+        "authentication",
+        "authorization",
+        "secrets",
+        "tool-safety",
+        "supply-chain",
+        "infrastructure"
+      ]
+    },
+    {
+      "id": "safety",
+      "name": "Safety & Responsible AI",
+      "summary": "Harm prevention, content safety, fairness, and transparency—NIST trustworthiness characteristics distinct from adversarial security.",
+      "crossCutting": false,
+      "pillarSlugs": [
+        "safety-responsible-ai",
+        "explainability"
+      ]
+    },
+    {
+      "id": "data",
+      "name": "Data",
+      "summary": "Privacy, corpus and index governance, data quality, and memory integrity across AI pipelines.",
+      "crossCutting": false,
+      "pillarSlugs": [
+        "data-privacy",
+        "data-governance",
+        "memory-management"
+      ]
+    },
+    {
+      "id": "model-lifecycle",
+      "name": "Model & Prompt Lifecycle",
+      "summary": "Model selection and versioning, prompt and context as production artifacts, and continuous evaluation gates.",
+      "crossCutting": false,
+      "pillarSlugs": [
+        "model-governance",
+        "prompt-engineering",
+        "context-engineering",
+        "evaluation"
+      ]
+    },
+    {
+      "id": "agents",
+      "name": "Agents & Autonomy",
+      "summary": "Agent charters, autonomy limits, A2A trust, and human oversight for high-impact actions.",
+      "crossCutting": false,
+      "pillarSlugs": [
+        "agent-governance",
+        "human-approval"
+      ]
+    },
+    {
+      "id": "reliability",
+      "name": "Reliability & Operations",
+      "summary": "Observability, performance SLOs, graceful degradation and continuity, change management with rollback, and incident readiness.",
+      "crossCutting": false,
+      "pillarSlugs": [
+        "observability",
+        "performance-slo",
+        "reliability-continuity",
+        "change-management",
+        "incident-readiness"
+      ]
+    },
+    {
+      "id": "cost",
+      "name": "Cost",
+      "summary": "Spend bounds, attribution, caching, routing, and denial-of-wallet controls for AI workloads.",
+      "crossCutting": false,
+      "pillarSlugs": [
+        "cost-optimization"
+      ]
+    },
+    {
+      "id": "governance",
+      "name": "Governance & Compliance",
+      "summary": "Organizational AI policy, ownership, risk acceptance, and auditable evidence of controls—without equating compliance with readiness.",
+      "crossCutting": false,
+      "pillarSlugs": [
+        "organizational-governance",
+        "compliance"
+      ]
+    },
+    {
+      "id": "cross-cutting",
+      "name": "Cross-cutting concerns",
+      "summary": "Concerns that apply across every domain. They are not peer domains; they enable safe delivery of all other pillars.",
+      "crossCutting": true,
+      "pillarSlugs": [
+        "platform-engineering"
+      ]
+    }
+  ],
+  "pillars": [
+    {
+      "id": "APRF-01",
+      "slug": "ai-security",
+      "name": "Adversarial Security",
+      "summary": "Prevent prompt injection, jailbreaks, exfiltration, and model/tool abuse from becoming a production incident.",
+      "domain": "security",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-10",
+      "slug": "authentication",
+      "name": "Authentication",
+      "summary": "Strong identity for users, services, agents, and MCP callers.",
+      "domain": "security",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-11",
+      "slug": "authorization",
+      "name": "Authorization",
+      "summary": "Enforce who/what may invoke which models, tools, data, and actions.",
+      "domain": "security",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-12",
+      "slug": "secrets",
+      "name": "Secrets",
+      "summary": "Eliminate secret leakage into prompts, logs, tools, and client surfaces.",
+      "domain": "security",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-05",
+      "slug": "tool-safety",
+      "name": "Tool Safety",
+      "summary": "Make tool/MCP invocation fail closed with least privilege and side-effect control.",
+      "domain": "security",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-24",
+      "slug": "supply-chain",
+      "name": "Supply Chain Integrity",
+      "summary": "Prove provenance and integrity of models, containers, MCP servers, and AI dependencies.",
+      "domain": "security",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-20",
+      "slug": "infrastructure",
+      "name": "Infrastructure",
+      "summary": "Harden runtime, network, isolation, and supply chain for AI workloads.",
+      "domain": "security",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-25",
+      "slug": "safety-responsible-ai",
+      "name": "Safety & Responsible AI",
+      "summary": "Prevent harmful content and unfair outcomes—NIST trustworthiness beyond adversarial security.",
+      "domain": "safety",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-26",
+      "slug": "explainability",
+      "name": "Explainability & Transparency",
+      "summary": "Make AI decisions reconstructable for operators, users, and auditors—not only for debugging.",
+      "domain": "safety",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-18",
+      "slug": "data-privacy",
+      "name": "Data Privacy",
+      "summary": "Minimize, classify, and protect data flowing through AI pipelines.",
+      "domain": "data",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-27",
+      "slug": "data-governance",
+      "name": "Data Governance & Quality",
+      "summary": "Govern corpora, indexes, labels, and feedback loops—distinct from privacy controls.",
+      "domain": "data",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-04",
+      "slug": "memory-management",
+      "name": "Memory Management",
+      "summary": "Control retention, isolation, and poisoning of short- and long-term memory.",
+      "domain": "data",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-07",
+      "slug": "model-governance",
+      "name": "Model Governance",
+      "summary": "Own model selection, versioning, deprecation, and capability boundaries.",
+      "domain": "model-lifecycle",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-02",
+      "slug": "prompt-engineering",
+      "name": "Prompt Engineering",
+      "summary": "Treat prompts as versioned production artifacts with regression control.",
+      "domain": "model-lifecycle",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-03",
+      "slug": "context-engineering",
+      "name": "Context Engineering",
+      "summary": "Bound and structure what the model is allowed to see and use.",
+      "domain": "model-lifecycle",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-08",
+      "slug": "evaluation",
+      "name": "Evaluation",
+      "summary": "Continuously prove quality, safety, and task success before and after release.",
+      "domain": "model-lifecycle",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-06",
+      "slug": "agent-governance",
+      "name": "Agent Governance",
+      "summary": "Constrain goals, autonomy, loops, and escalation for agents and A2A.",
+      "domain": "agents",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-17",
+      "slug": "human-approval",
+      "name": "Human Approval",
+      "summary": "Require human gates for high-impact or irreversible actions.",
+      "domain": "agents",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-09",
+      "slug": "observability",
+      "name": "Observability",
+      "summary": "Make every decision path reconstructable: traces, prompts, tools, costs, outcomes.",
+      "domain": "reliability",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-28",
+      "slug": "performance-slo",
+      "name": "Performance & SLO Engineering",
+      "summary": "Latency, throughput, and error budgets for AI features—SRE discipline applied to GenAI.",
+      "domain": "reliability",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-14",
+      "slug": "reliability-continuity",
+      "name": "Reliability & Continuity",
+      "summary": "Survive provider outages and partial failures, and preserve critical AI capabilities under sustained disruption.",
+      "domain": "reliability",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-15",
+      "slug": "change-management",
+      "name": "Change Management & Release",
+      "summary": "Repeatable promotion of models, prompts, tools, and agents—with tested, fast rollback.",
+      "domain": "reliability",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-21",
+      "slug": "incident-readiness",
+      "name": "Incident Readiness",
+      "summary": "Detect, contain, and learn from AI-specific production incidents.",
+      "domain": "reliability",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-13",
+      "slug": "cost-optimization",
+      "name": "Cost Optimization",
+      "summary": "Bound spend with budgets, caching, routing, and abuse controls.",
+      "domain": "cost",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-29",
+      "slug": "organizational-governance",
+      "name": "Organizational Governance",
+      "summary": "AI policy, ownership, risk acceptance, and continual improvement—ISO 42001-style management system.",
+      "domain": "governance",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-19",
+      "slug": "compliance",
+      "name": "Compliance",
+      "summary": "Produce auditable evidence of controls without equating compliance with readiness.",
+      "domain": "governance",
+      "crossCutting": false
+    },
+    {
+      "id": "APRF-23",
+      "slug": "platform-engineering",
+      "name": "Platform Engineering",
+      "summary": "Make the safe path the easy path—paved roads that apply across every APRF domain.",
+      "domain": null,
+      "crossCutting": true
+    }
+  ],
   "categories": [
     {
       "id": "ai-security",
+      "pillarId": "APRF-01",
       "pillarSlug": "ai-security",
       "domain": "security",
       "name": "Adversarial Security",
@@ -18,6 +338,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "authentication",
+      "pillarId": "APRF-10",
       "pillarSlug": "authentication",
       "domain": "security",
       "name": "Authentication",
@@ -25,6 +346,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "authorization",
+      "pillarId": "APRF-11",
       "pillarSlug": "authorization",
       "domain": "security",
       "name": "Authorization",
@@ -32,6 +354,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "secrets",
+      "pillarId": "APRF-12",
       "pillarSlug": "secrets",
       "domain": "security",
       "name": "Secrets",
@@ -39,6 +362,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "tool-safety",
+      "pillarId": "APRF-05",
       "pillarSlug": "tool-safety",
       "domain": "security",
       "name": "Tool Safety",
@@ -46,6 +370,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "supply-chain",
+      "pillarId": "APRF-24",
       "pillarSlug": "supply-chain",
       "domain": "security",
       "name": "Supply Chain Integrity",
@@ -53,6 +378,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "infrastructure",
+      "pillarId": "APRF-20",
       "pillarSlug": "infrastructure",
       "domain": "security",
       "name": "Infrastructure",
@@ -60,6 +386,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "safety-responsible-ai",
+      "pillarId": "APRF-25",
       "pillarSlug": "safety-responsible-ai",
       "domain": "safety",
       "name": "Safety & Responsible AI",
@@ -67,6 +394,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "explainability",
+      "pillarId": "APRF-26",
       "pillarSlug": "explainability",
       "domain": "safety",
       "name": "Explainability & Transparency",
@@ -74,6 +402,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "data-privacy",
+      "pillarId": "APRF-18",
       "pillarSlug": "data-privacy",
       "domain": "data",
       "name": "Data Privacy",
@@ -81,6 +410,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "data-governance",
+      "pillarId": "APRF-27",
       "pillarSlug": "data-governance",
       "domain": "data",
       "name": "Data Governance & Quality",
@@ -88,6 +418,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "memory-management",
+      "pillarId": "APRF-04",
       "pillarSlug": "memory-management",
       "domain": "data",
       "name": "Memory Management",
@@ -95,6 +426,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "model-governance",
+      "pillarId": "APRF-07",
       "pillarSlug": "model-governance",
       "domain": "model-lifecycle",
       "name": "Model Governance",
@@ -102,6 +434,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "prompt-engineering",
+      "pillarId": "APRF-02",
       "pillarSlug": "prompt-engineering",
       "domain": "model-lifecycle",
       "name": "Prompt Engineering",
@@ -109,6 +442,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "context-engineering",
+      "pillarId": "APRF-03",
       "pillarSlug": "context-engineering",
       "domain": "model-lifecycle",
       "name": "Context Engineering",
@@ -116,6 +450,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "evaluation",
+      "pillarId": "APRF-08",
       "pillarSlug": "evaluation",
       "domain": "model-lifecycle",
       "name": "Evaluation",
@@ -123,6 +458,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "agent-governance",
+      "pillarId": "APRF-06",
       "pillarSlug": "agent-governance",
       "domain": "agents",
       "name": "Agent Governance",
@@ -130,6 +466,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "human-approval",
+      "pillarId": "APRF-17",
       "pillarSlug": "human-approval",
       "domain": "agents",
       "name": "Human Approval",
@@ -137,6 +474,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "observability",
+      "pillarId": "APRF-09",
       "pillarSlug": "observability",
       "domain": "reliability",
       "name": "Observability",
@@ -144,6 +482,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "performance-slo",
+      "pillarId": "APRF-28",
       "pillarSlug": "performance-slo",
       "domain": "reliability",
       "name": "Performance & SLO Engineering",
@@ -151,6 +490,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "reliability-continuity",
+      "pillarId": "APRF-14",
       "pillarSlug": "reliability-continuity",
       "domain": "reliability",
       "name": "Reliability & Continuity",
@@ -158,6 +498,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "change-management",
+      "pillarId": "APRF-15",
       "pillarSlug": "change-management",
       "domain": "reliability",
       "name": "Change Management & Release",
@@ -165,6 +506,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "incident-readiness",
+      "pillarId": "APRF-21",
       "pillarSlug": "incident-readiness",
       "domain": "reliability",
       "name": "Incident Readiness",
@@ -172,6 +514,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "cost-optimization",
+      "pillarId": "APRF-13",
       "pillarSlug": "cost-optimization",
       "domain": "cost",
       "name": "Cost Optimization",
@@ -179,6 +522,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "organizational-governance",
+      "pillarId": "APRF-29",
       "pillarSlug": "organizational-governance",
       "domain": "governance",
       "name": "Organizational Governance",
@@ -186,6 +530,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "compliance",
+      "pillarId": "APRF-19",
       "pillarSlug": "compliance",
       "domain": "governance",
       "name": "Compliance",
@@ -193,6 +538,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     },
     {
       "id": "platform-engineering",
+      "pillarId": "APRF-23",
       "pillarSlug": "platform-engineering",
       "domain": null,
       "name": "Platform Engineering",
@@ -203,42 +549,56 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "AGN-M1",
       "category": "agent-governance",
-      "title": "Each production agent must have a documented charter: purpose, allowed tools, data scope, and autonomy limits",
-      "description": "Each production agent shall have a documented charter: purpose, allowed tools, data scope, and autonomy limits",
-      "whyItMatters": "AGN-M1 (Agent Governance, mandatory): Each production agent shall have a documented charter: purpose, allowed tools, data scope, and autonomy limits Failing this leaves a production gap against: 100% of production agents have a charter with purpose, tool allowlist reference, data scope, and autonomy limits; inventory query returns 0 agents missing any…",
+      "title": "Every production agent must have a documented charter",
+      "description": "Each production agent (any autonomous or semi-autonomous runtime that plans, loops, or invokes tools on behalf of a product capability—including in-process agents, MCP clients/servers acting as agents, and A2A participants) shall have a versioned charter covering purpose, allowed tools, data scope, autonomy limits, and a named owner.",
+      "whyItMatters": "Without a charter, agents become unbounded co-processors: they can pursue undefined goals, touch undeclared tools and corpora, and escalate autonomy without an accountable owner. Governance failures usually look like “the agent went rogue” but stem from missing product controls—not model quirks. Charters make allowed agency reviewable before incidents, not reconstructable after.",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production agents have a charter with purpose, tool allowlist reference, data scope, and autonomy limits; inventory query returns 0 agents missing any required field",
+      "passCondition": "100% of production agents appear in an inventory with a charter that includes purpose, tool allowlist reference, data scope, autonomy limits, and named owner; inventory query returns 0 agents missing any required field.",
       "evidenceRequired": [
-        "Agent inventory with charter fields per production agent"
+        "Versioned agent inventory listing every production agent with owner and charter URI/id",
+        "Per-agent charter documents (or equivalent structured records) covering purpose, tool allowlist reference, data scope, and autonomy limits"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "automated",
         "detectors": [
+          {
+            "id": "repo-agent-charter-inventory",
+            "params": {
+              "requireFields": [
+                "purpose",
+                "tool-allowlist",
+                "data-scope",
+                "autonomy-limits",
+                "owner"
+              ],
+              "requireInventoryCompleteness": true
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Agent inventory with charter fields per production agent"
+              "hint": "If automation cannot prove inventory completeness, attest a versioned production-agent inventory with charter fields (purpose, tool allowlist, data scope, autonomy limits, owner) and 0 missing rows.\n"
             }
           }
         ]
       },
-      "manualVerification": "For AGN-M1 (Each production agent must have a documented charter: purpose, allowed tools, data scope, and autonomy limits): inspect current evidence for [Agent inventory with charter fields per production agent] and confirm the pass condition holds — 100% of production agents have a charter with purpose, tool allowlist reference, data scope, and autonomy limits; inventory query returns 0 agents missing any required field",
-      "falsePositiveGuidance": "AGN-M1 (Agent Governance): re-verify against a current artifact for this specific Check (AGN-M1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Define “production agent” for this system (any agent runtime reachable from production traffic or scheduled jobs—not only MCP/A2A). Build or export an inventory of those agents with owners. 2) For each inventory row, open the linked charter and verify it states: purpose/goals; tool allowlist reference (config id, policy id, or doc URI); data/corpora scope; autonomy limits (e.g. max steps, wall-clock, spawn depth, or escalation rules—consistent with AGN-M2 where applicable); named owner. 3) PASS only if the inventory query (or equivalent review) shows 0 production agents missing any required field. Agents in non-production environments may be excluded if the inventory documents the exclusion rule.",
+      "falsePositiveGuidance": "Do not pass on architecture or design docs that name agent types without a current inventory (registry/CMDB/manifest export ≤90 days) of deployed production agents. Do not treat a type-level row as covering every deployed instance. Chatbots without tool/autonomy loops are out of scope unless your documented production-agent definition includes them. A tool allowlist in code does not satisfy this Check unless each charter references it. Stub charters (empty purpose, unset owner, missing autonomy limits) fail. Passing step-limit or kill-switch Checks does not substitute for charters. Named exceptions need owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Each production agent must have a documented charter: purpose, allowed tools, data scope, and autonomy limits (AGN-M1)",
-        "Retain evidence artifacts required by this Check, starting with: Agent inventory with charter fields per production agent",
-        "Schedule recurring manual verification for AGN-M1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AGN-M1 passes"
+        "Create a single agent inventory (registry, CMDB table, or repo manifest) that lists every production agent with owner and charter link",
+        "Author a charter template with required fields: purpose, tool allowlist reference, data scope, autonomy limits, owner; migrate existing agents onto it",
+        "Gate new agent promotion to production on inventory + charter completeness (fail closed when fields are missing)",
+        "Schedule a recurring inventory audit (≤90 days) with a named owner and retain the report"
       ],
       "references": [
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
-          "title": "NIST AI RMF — Govern",
+          "title": "NIST AI Risk Management Framework — Govern",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
@@ -247,18 +607,18 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AGN-M3",
         "AGN-M4",
         "AGN-R1",
-        "AGN-R2"
+        "AGN-R2",
+        "HUM-M1"
       ],
       "tags": [
         "agent-governance",
         "mandatory",
-        "manual"
+        "automated",
+        "charter",
+        "inventory"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -268,50 +628,55 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "AGN-M2",
       "category": "agent-governance",
-      "title": "Hard limits must exist on steps, wall-clock time, and recursive agent spawning",
-      "description": "Hard limits shall exist on steps, wall-clock time, and recursive agent spawning",
-      "whyItMatters": "AGN-M2 (Agent Governance, mandatory): Hard limits shall exist on steps, wall-clock time, and recursive agent spawning Failing this leaves a production gap against: 100% of production agents have finite max-steps, wall-clock timeout, and spawn-depth ≤ configured bound; tests show limits are enforced (run aborts) when excee…",
+      "title": "Production agents must have hard limits on steps, time, and spawn depth",
+      "description": "Every production agent runtime shall enforce finite hard limits on plan/tool steps, wall-clock execution time, and recursive agent spawning (child/sub-agent depth). Limits must be enforced by the platform or runtime—not by prompt wording alone—and exceeding a limit must abort or fail closed the run.\n",
+      "whyItMatters": "Unbounded agent loops are a reliable abuse and failure mode: attackers and buggy planners can recurse into spawn trees, burn tokens and tool quota, and amplify side effects far beyond the original request. Soft or prompt-only “budgets” are bypassable; without runtime max-steps, wall-clock timeout, and spawn-depth caps, a single session becomes a self-propagating load and privilege amplifier. Hard limits convert runaway agency into a contained, observable abort.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production agents have finite max-steps, wall-clock timeout, and spawn-depth ≤ configured bound; tests show limits are enforced (run aborts) when exceeded",
+      "passCondition": "100% of production agents have finite max-steps, wall-clock timeout, and spawn-depth ≤ configured bound; enforcement tests show the run aborts (or otherwise fails closed) when any limit is exceeded; 0 production agents rely solely on prompt text for these limits.\n",
       "evidenceRequired": [
-        "Runtime config for max steps, wall-clock timeout, and spawn depth + enforcement tests"
+        "Runtime/platform configuration declaring max steps, wall-clock timeout, and spawn depth for each production agent (or shared policy bound)",
+        "Enforcement test results showing abort/fail-closed when each limit is exceeded (steps, time, spawn depth)"
       ],
       "detection": {
         "capability": "automated",
         "detectors": [
           {
-            "id": "mcp-filesystem-scope",
-            "params": {}
-          },
-          {
-            "id": "mcp-tool-allowlist",
-            "params": {}
+            "id": "repo-agent-loop-limits",
+            "params": {
+              "require": [
+                "max-steps",
+                "wall-clock-timeout",
+                "spawn-depth"
+              ],
+              "requireEnforcementTests": true,
+              "failClosedOnExceed": true
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Runtime config for max steps, wall-clock timeout, and spawn depth + enforcement tests"
+              "hint": "If automation cannot see runtime enforcement, attest finite max-steps/wall-clock/spawn-depth config plus abort-on-exceed tests for every production agent.\n"
             }
           }
         ]
       },
-      "manualVerification": "For AGN-M2 (Hard limits must exist on steps, wall-clock time, and recursive agent spawning): inspect current evidence for [Runtime config for max steps, wall-clock timeout, and spawn depth + enforcement tests] and confirm the pass condition holds — 100% of production agents have finite max-steps, wall-clock timeout, and spawn-depth ≤ configured bound; tests show limits are enforced (run aborts) when exceeded",
-      "falsePositiveGuidance": "AGN-M2 (Agent Governance): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Inventory production agent runtimes (same scope as the charter inventory). 2) For each, locate the runtime or platform setting for max steps (or equivalent tool-call/plan iterations), wall-clock timeout, and maximum spawn/delegation depth. Confirm each value is finite and documented; treat missing, null, zero-as-unlimited, or “disabled” as fail. 3) Review or run enforcement tests: force step overrun, timeout overrun, and spawn-depth overrun; require abort/fail-closed with an observable signal (error, kill, or quarantine). Prompt-only refusals without runtime stop do not pass. 4) PASS only if every production agent meets config + enforcement evidence.\n",
+      "falsePositiveGuidance": "Do not pass on charter text or system-prompt budgets without runtime enforcement. Do not pass because a framework “supports” limits if production configs leave them unset or infinite. Client-side or SDK defaults that operators can override to unlimited fail unless production policy prevents that override. A test that only asserts config keys exist (without exceeding limits) is insufficient. Token or cost budgets alone do not satisfy step, wall-clock, and spawn-depth requirements unless mapped 1:1 to those three controls with abort-on-exceed. Kill-switch or pause capability does not substitute for proactive hard limits. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Hard limits must exist on steps, wall-clock time, and recursive agent spawning (AGN-M2)",
-        "Retain evidence artifacts required by this Check, starting with: Runtime config for max steps, wall-clock timeout, and spawn depth + enforcement tests",
-        "Wire or verify detectors declared on AGN-M2 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AGN-M2 passes"
+        "Set finite platform defaults for max-steps, wall-clock timeout, and spawn depth; fail closed if unset at deploy time",
+        "Add contract/integration tests that exceed each limit and assert abort (include recursive spawn fixtures)",
+        "Block production promotion when agent configs omit any of the three limits or set unlimited sentinels",
+        "Alert on limit-hit rates so operators can tune bounds without disabling enforcement"
       ],
       "references": [
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
-          "title": "NIST AI RMF — Govern",
+          "title": "NIST AI Risk Management Framework — Govern / Manage",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
@@ -320,18 +685,18 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AGN-M3",
         "AGN-M4",
         "AGN-R1",
-        "AGN-R2"
+        "COST-M3",
+        "TOL-M1"
       ],
       "tags": [
         "agent-governance",
         "mandatory",
-        "automated"
+        "automated",
+        "loop-limits",
+        "spawn-depth"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -341,42 +706,74 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "AGN-M3",
       "category": "agent-governance",
-      "title": "Operators must be able to pause or terminate agent runs in production",
-      "description": "Operators shall be able to pause or terminate agent runs in production",
-      "whyItMatters": "AGN-M3 (Agent Governance, mandatory): Operators shall be able to pause or terminate agent runs in production Failing this leaves a production gap against: Documented pause/terminate control exists for production agents; ≥1 successful pause or terminate action in drill or production in last 90 days with recorded t…",
+      "title": "Operators must have a production kill switch to pause or terminate agent runs",
+      "description": "Authorized operators shall be able to pause or terminate production agent runs through a control-plane action that stops further planning and in-flight or queued tool/MCP/A2A side effects within a documented time-to-effect SLO. The control must not depend on the model cooperating and must not be disableable by the agent runtime itself.\n",
+      "whyItMatters": "Hard step/time limits contain normal loops; they do not stop an already-bad run, a stuck multi-agent mesh, or a session that is burning tools and budget under the configured ceiling. Without an operable pause/terminate path, on-call cannot interrupt runaway agency during an incident—only wait for natural timeout or redeploy. Kill switches are containment controls: they convert “the agent went rogue” into a bounded, reversible stop with a measurable time-to-effect.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Documented pause/terminate control exists for production agents; ≥1 successful pause or terminate action in drill or production in last 90 days with recorded time-to-effect ≤ documented SLO",
+      "passCondition": "Documented pause/terminate control exists for production agents; control is restricted to authorized operators (not end-user-only and not model-invoked); ≥1 successful pause or terminate action in drill or production in the last 90 days shows recorded time-to-effect ≤ documented numeric SLO; evidence shows further tool/MCP/A2A side effects for that run (and its spawned children, if any) were stopped or drained without requiring the model to refuse.\n",
       "evidenceRequired": [
-        "Kill-switch/pause control documentation + successful drill or production use record"
+        "Kill-switch/pause runbook: who may invoke, scope (run / agent type / fleet), expected effect, and numeric time-to-effect SLO",
+        "Successful drill or production use record (≤90 days) with timestamps for invoke → effect, covering at least one production agent path",
+        "Cancellation suite or import proving queued work, running tasks, and child agents stop without new dispatch"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "kill-api-exists",
+            "params": {
+              "hint": "Discover operator pause/terminate API or console control and evidence it is authz-gated (not end-user-only, not model-invoked).\n"
+            }
+          },
+          {
+            "id": "queue-cancellation-test",
+            "params": {
+              "hint": "Launch a representative agent, enqueue work, invoke kill, and verify queued tasks transition to Cancelled without new task dispatch.\n"
+            }
+          },
+          {
+            "id": "running-task-cancellation-test",
+            "params": {
+              "hint": "Invoke kill while tool/MCP work is in flight; verify running tasks abort or drain without completing unauthorized side effects.\n"
+            }
+          },
+          {
+            "id": "child-agent-termination-test",
+            "params": {
+              "hint": "With spawn/delegation active, invoke kill and verify child/sub-agents terminate or are cancelled (no respawn storm).\n"
+            }
+          },
+          {
+            "id": "drill-log-review",
+            "params": {
+              "hint": "Parse ≤90-day drill/prod record: invoke→effect timestamps ≤ documented numeric SLO; retain report.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Kill-switch/pause control documentation + successful drill or production use record"
+              "hint": "Architecture review: agent cannot disable its own kill path; control is operator/break-glass scoped; UI cancel-without-tool-halt does not count.\n"
             }
           }
         ]
       },
-      "manualVerification": "For AGN-M3 (Operators must be able to pause or terminate agent runs in production): inspect current evidence for [Kill-switch/pause control documentation + successful drill or production use record] and confirm the pass condition holds — Documented pause/terminate control exists for production agents; ≥1 successful pause or terminate action in drill or production in last 90 days with recorded time-to-effect ≤ docu…",
-      "falsePositiveGuidance": "AGN-M3 (Agent Governance): re-verify against a current artifact for this specific Check (AGN-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Identify the pause/terminate control (API, console, break-glass runbook) and who is authorized (on-call / operator role). Confirm the agent cannot disable or ignore the control via tool calls. 2) Verify documented scope and a numeric time-to-effect SLO (e.g. p95 ≤ N seconds). Missing or non-numeric SLO fails. 3) Review cancellation suite or imports: queued cancel, running-task cancel, child-agent terminate — all must stop further side effects. 4) Review a drill or production use ≤90 days: timestamps from invoke to observed stop ≤ SLO. 5) PASS only if kill-api + measured cancellation/drill evidence meet the pass condition.\n",
+      "falsePositiveGuidance": "Do not pass on runbooks without a reachable control, or on “cancel chat” / client disconnect that leaves tool/MCP calls running. Do not pass because step/time limits exist—those are proactive bounds, not a reactive kill switch. Do not pass a drill that only stops new sessions while current runs continue, or that lacks timestamps / SLO comparison. End-user mute/cancel without an operator control-plane path is insufficient for production incident response. A single undocumented ad-hoc kill (SSH, redeploy) without a retained drill record and SLO does not satisfy this Check. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Operators must be able to pause or terminate agent runs in production (AGN-M3)",
-        "Retain evidence artifacts required by this Check, starting with: Kill-switch/pause control documentation + successful drill or production use record",
-        "Schedule recurring manual verification for AGN-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AGN-M3 passes"
+        "Expose an authenticated operator pause/terminate API or console action scoped to run, agent type, and optionally fleet/tenant",
+        "Define a numeric time-to-effect SLO; implement cancellation that stops planners, drains/cancels tool queues, and prevents child respawn",
+        "Add automated cancellation tests for queued, running, and child-agent paths; gate releases on pass",
+        "Run a recurring ≤90-day kill-switch drill; retain invoke/effect timestamps and outcome under imports/agent-kill-switch/"
       ],
       "references": [
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
-          "title": "NIST AI RMF — Govern",
+          "title": "NIST AI Risk Management Framework — Govern / Manage",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
@@ -384,19 +781,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AGN-M1",
         "AGN-M2",
         "AGN-M4",
-        "AGN-R1",
-        "AGN-R2"
+        "HUM-M1",
+        "INC-M1",
+        "TOL-M1"
       ],
       "tags": [
         "agent-governance",
         "mandatory",
-        "manual"
+        "hybrid",
+        "kill-switch",
+        "incident-containment"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -406,18 +803,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "AGN-M4",
       "category": "agent-governance",
-      "title": "A2A and multi-agent handoffs must authenticate peers and carry scoped capabilities",
-      "description": "A2A and multi-agent handoffs shall authenticate peers and carry scoped capabilities",
-      "whyItMatters": "AGN-M4 (Agent Governance, mandatory): A2A and multi-agent handoffs shall authenticate peers and carry scoped capabilities Failing this leaves a production gap against: 100% of production A2A/multi-agent handoff paths require authenticated peers; tests show unauthenticated or over-scoped handoffs denied at 100%",
+      "title": "Multi-agent and A2A handoffs must have authenticated peers and scoped capabilities",
+      "description": "Every production agent-to-agent (A2A) or multi-agent handoff path shall authenticate the peer identity and authorize a scoped capability set (tools, data, actions) independent of network presence. Unauthenticated, spoofed, or over-scoped handoffs shall be denied by the platform—not by prompt instructions alone.\n",
+      "whyItMatters": "Multi-agent meshes turn one compromised or confused agent into a lateral movement path: peers that trust “who can reach me on the network” inherit tools and corpora they were never granted. Over-scoped capability tokens and unsigned handoffs enable privilege amplification across agents (confused deputy / excessive agency). Authenticating peers and binding handoffs to least-privilege capabilities keeps the mesh from becoming a universal proxy between agents.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers; tests show unauthenticated or over-scoped handoffs denied at 100%",
+      "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers and scoped capabilities; negative tests show unauthenticated, forged-peer, and over-scoped handoffs denied at 100%; 0 production handoff paths that accept anonymous or network-presence-only trust.\n",
       "evidenceRequired": [
-        "A2A auth config + capability-token/schema examples + negative auth tests"
+        "Inventory of production A2A/multi-agent handoff paths with authn/authz mechanism per path",
+        "Capability token/schema (or equivalent) examples showing scoped grants for handoffs",
+        "Negative test results: unauthenticated, forged identity, and over-scoped capability cases denied at 100%"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
             "id": "repo-a2a-config",
@@ -426,26 +825,26 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "A2A auth config + capability-token/schema examples + negative auth tests"
+              "hint": "Config presence is not enough—confirm negative tests deny unauthenticated, forged-peer, and over-scoped handoffs on every production multi-agent path (or document N/A if none exist).\n"
             }
           }
         ]
       },
-      "manualVerification": "For AGN-M4 (A2A and multi-agent handoffs must authenticate peers and carry scoped capabilities): inspect current evidence for [A2A auth config + capability-token/schema examples + negative auth tests] and confirm the pass condition holds — 100% of production A2A/multi-agent handoff paths require authenticated peers; tests show unauthenticated or over-scoped handoffs denied at 100%",
-      "falsePositiveGuidance": "AGN-M4 (Agent Governance): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Determine whether the system has production A2A or multi-agent handoffs (including in-process supervisor/worker agents that exchange goals/tools). If none, score NOT_APPLICABLE with inventory evidence. If present, list every production handoff path. 2) For each path, identify how peer identity is authenticated (mTLS, signed tokens, workload identity, etc.) and how capabilities are scoped (token claims, allowlists, policy). Network ACLs alone without peer auth fail. 3) Review negative tests: unauthenticated caller, wrong/forged peer identity, and capability exceeding grant—all must be denied. Prompt-only “don’t trust other agents” does not pass. 4) PASS only if every production handoff path has authn + scoped capabilities and deny tests cover the three abuse cases at 100%.\n",
+      "falsePositiveGuidance": "Do not pass on open mesh / shared API keys / “agents on the same VPC.” Do not pass because A2A config files exist without deny tests. Do not treat user→agent authentication (login) as peer authentication between agents. MCP tool auth to a single server does not cover agent-to-agent handoffs unless those handoffs are in scope and tested. Capability tokens that encode “admin” or unbounded tool sets fail scoped-capability intent. Sibling Checks (charters, loop limits, kill switch) do not prove mesh authn/authz. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: A2A and multi-agent handoffs must authenticate peers and carry scoped capabilities (AGN-M4)",
-        "Retain evidence artifacts required by this Check, starting with: A2A auth config + capability-token/schema examples + negative auth tests",
-        "Wire or verify detectors declared on AGN-M4 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AGN-M4 passes"
+        "Require mutual authentication on every A2A/multi-agent handoff; reject anonymous and network-presence-only peers",
+        "Issue least-privilege capability tokens (or equivalent) per handoff; deny over-scoped grants in policy tests",
+        "Add CI/contract negative tests for unauthenticated, forged-peer, and over-scoped handoffs; gate releases on pass",
+        "Inventory handoff paths alongside the agent charter inventory and close any unauthenticated mesh edges"
       ],
       "references": [
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
-          "title": "NIST AI RMF — Govern",
+          "title": "NIST AI Risk Management Framework — Govern / Manage",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
@@ -453,13 +852,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AGN-M1",
         "AGN-M2",
         "AGN-M3",
-        "AGN-R1",
-        "AGN-R2"
+        "AUTHN-M2",
+        "AUTHZ-M1",
+        "TOL-M1"
       ],
       "tags": [
         "agent-governance",
         "mandatory",
-        "automated"
+        "hybrid",
+        "a2a",
+        "multi-agent"
       ],
       "applicability": {
         "technologies": [
@@ -475,35 +877,50 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "AGN-R1",
       "category": "agent-governance",
-      "title": "AGN-R1: Goal conflict detection and policy checks before plan execution",
-      "description": "Goal conflict detection and policy checks before plan execution",
-      "whyItMatters": "AGN-R1 (Agent Governance, recommended): Goal conflict detection and policy checks before plan execution Failing this leaves a production gap against: Agent planner runs policy checks before side-effecting tools; ≥1 synthetic conflict is denied in test or prod logs within 90 days; rules have a named owner",
+      "title": "Production systems should have goal conflict detection and policy checks before plan execution",
+      "description": "Production agent planners should run policy checks for goal conflicts and disallowed goals before invoking side-effecting tools. Checks must be enforced by the platform or planner runtime—not by prompt wording alone— and denied plans must leave an observable deny/allow trace.\n",
+      "whyItMatters": "Agents optimize for stated goals; when a user, tool result, or peer injects a conflicting or disallowed objective, an unchecked planner will pursue it with the same tools and budgets as a legitimate task. Prompt-only “stay on mission” instructions are bypassable. Pre-tool policy gates convert goal conflicts into measurable denies with an accountable rule owner, instead of discovering overreach only after side effects land.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Agent planner runs policy checks before side-effecting tools; ≥1 synthetic conflict is denied in test or prod logs within 90 days; rules have a named owner",
+      "passCondition": "Agent planner runs policy checks for goal conflicts / disallowed goals before side-effecting tools; ≥1 synthetic conflict is denied in test or production logs within the last 90 days with retained deny/allow traces; the policy rule set has a named owner.\n",
       "evidenceRequired": [
-        "Pre-execution policy checks for agent plans (goal-conflict / disallowed-goal rules) + sample deny/allow traces"
+        "Versioned pre-execution policy rules (goal-conflict / disallowed-goal) with named owner",
+        "Sample deny/allow traces showing the planner gated side-effecting tools",
+        "≥1 synthetic conflict deny record (test or prod) ≤90 days"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-agent-goal-policy",
+            "params": {
+              "hint": "Discover goal-conflict / disallowed-goal / plan-policy gates that run before side-effecting tools, plus named owner and deny-test signals.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove a ≤90-day synthetic deny, attest policy rules with named owner plus a retained deny/allow trace for a synthetic conflict within 90 days.\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For AGN-R1 (AGN-R1: Goal conflict detection and policy checks before plan execution): inspect current evidence for [Pre-execution policy checks for agent plans (goal-conflict / disallowed-goal rules) + sample deny/allow traces] and confirm the pass condition holds — Agent planner runs policy checks before side-effecting tools; ≥1 synthetic conflict is denied in test or prod logs within 90 days; rules have a named owner",
-      "falsePositiveGuidance": "AGN-R1 (Agent Governance): re-verify against a current artifact for this specific Check (AGN-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production agents plan or invoke side-effecting tools. If none, score NOT_APPLICABLE. 2) Locate pre-execution policy (code, config, or policy engine) that evaluates goal conflicts / disallowed goals before tool calls. Prompt-only instructions without a gate fail. 3) Verify the rule set has a named owner. 4) Review ≥1 synthetic conflict deny in test or prod logs ≤90 days with deny/allow traces. 5) PASS only if gate + owner + fresh deny evidence all hold.\n",
+      "falsePositiveGuidance": "Do not pass on charter purpose text or system-prompt “refuse conflicting goals” without a pre-tool gate. Do not pass because tool allowlists exist (TOL)—those constrain tools, not goals. Do not pass a unit test that only asserts a config key without denying a conflicting goal. Sibling Checks (loop limits, kill switch, human approval) do not prove goal-conflict policy. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: AGN-R1: Goal conflict detection and policy checks before plan execution (AGN-R1)",
-        "Retain evidence artifacts required by this Check, starting with: Pre-execution policy checks for agent plans (goal-conflict / disallowed-goal rules) + sample deny/a…",
-        "Schedule recurring manual verification for AGN-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AGN-R1 passes"
+        "Add a pre-tool plan policy that denies conflicting or disallowed goals before side-effecting tools run",
+        "Assign a named owner to the goal-conflict / disallowed-goal rule set; version it in-repo or in the policy store",
+        "Add a synthetic conflict fixture that must be denied; retain deny/allow traces and gate releases on pass",
+        "Schedule a ≤90-day review of deny rates and rule coverage with the policy owner"
       ],
       "references": [
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
-          "title": "NIST AI RMF — Govern",
+          "title": "NIST AI Risk Management Framework — Govern / Manage",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
@@ -512,18 +929,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AGN-M2",
         "AGN-M3",
         "AGN-M4",
-        "AGN-R2"
+        "AGN-R2",
+        "TOL-M1",
+        "HUM-M1",
+        "SAF-M1"
       ],
       "tags": [
         "agent-governance",
         "recommended",
-        "manual"
+        "hybrid",
+        "goal-conflict",
+        "plan-policy"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -533,62 +952,71 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "AGN-R2",
       "category": "agent-governance",
-      "title": "AGN-R2: Simulation/sandbox runs for new agent behaviors before production",
-      "description": "Simulation/sandbox runs for new agent behaviors before production",
-      "whyItMatters": "AGN-R2 (Agent Governance, recommended): Simulation/sandbox runs for new agent behaviors before production Failing this leaves a production gap against: Last new agent behavior promoted to production has a linked sandbox run ≤30 days before release with pass/fail criteria recorded",
+      "title": "Production systems should have simulation/sandbox runs for new agent behaviors before production",
+      "description": "New or materially changed production agent behaviors should be exercised in a sandbox or simulation environment before promotion, with recorded pass/fail criteria. The last such promotion should link to a sandbox run completed within 30 days before release.\n",
+      "whyItMatters": "Agent behaviors that only meet unit tests or prompt reviews still fail in production under tool side effects, multi-step plans, and peer handoffs. Promoting unsimulated changes turns every release into a live experiment on customers and connected systems. A linked pre-prod sandbox run with explicit pass/fail criteria makes behavior risk reviewable before blast radius grows.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Last new agent behavior promoted to production has a linked sandbox run ≤30 days before release with pass/fail criteria recorded",
+      "passCondition": "Last new agent behavior promoted to production has a linked sandbox or simulation run completed ≤30 days before release with pass/fail criteria recorded; the sandbox/simulation environment used for agent behaviors is documented or configured.\n",
       "evidenceRequired": [
-        "Sandbox/simulation environment config for agents + last pre-prod simulation report for a behavior change"
+        "Sandbox/simulation environment config (or equivalent) for agent behaviors",
+        "Last pre-prod simulation/sandbox report for a behavior change, linked to the production promotion",
+        "Recorded pass/fail criteria and outcome for that run (≤30 days before release)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-agent-sandbox-sim",
+            "params": {
+              "hint": "Discover agent sandbox/simulation environment config and pre-prod sim/report or CI gate signals for behavior changes.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Sandbox/simulation environment config for agents + last pre-prod simulation report for a behavior change"
+              "hint": "If automation cannot prove linkage, attest the last production agent-behavior promotion with a sandbox/sim report ≤30 days before release and recorded pass/fail criteria.\n"
             }
           }
         ]
       },
-      "manualVerification": "For AGN-R2 (AGN-R2: Simulation/sandbox runs for new agent behaviors before production): inspect current evidence for [Sandbox/simulation environment config for agents + last pre-prod simulation report for a behavior change] and confirm the pass condition holds — Last new agent behavior promoted to production has a linked sandbox run ≤30 days before release with pass/fail criteria recorded",
-      "falsePositiveGuidance": "AGN-R2 (Agent Governance): re-verify against a current artifact for this specific Check (AGN-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the system promotes new or changed agent behaviors to production. If agents never change behavior after initial deploy, score NOT_APPLICABLE with evidence of the freeze. 2) Locate the sandbox/simulation environment (config, staging stack, or documented sim harness) used for agent runs. 3) For the last promoted behavior change, open the linked sandbox/sim report and verify pass/fail criteria and outcome; confirm the run date is ≤30 days before the production release. 4) PASS only if environment + linked fresh report with criteria all hold. Prompt-only “we tested it” without a report fails.\n",
+      "falsePositiveGuidance": "Do not pass on generic staging deploys that never exercise agent tools/plans. Do not pass unit or eval suites that are not a sandbox/sim of the promoted behavior. Do not pass a sandbox report older than 30 days relative to the release, or one with no pass/fail criteria. Sibling Checks (charters, loop limits, goal-conflict policy) do not prove pre-prod simulation. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: AGN-R2: Simulation/sandbox runs for new agent behaviors before production (AGN-R2)",
-        "Retain evidence artifacts required by this Check, starting with: Sandbox/simulation environment config for agents + last pre-prod simulation report for a behavior c…",
-        "Schedule recurring manual verification for AGN-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AGN-R2 passes"
+        "Stand up or document an agent sandbox/simulation environment that can run representative plans and tools safely",
+        "Require a linked sandbox/sim report with pass/fail criteria on every agent-behavior promotion PR/release",
+        "Gate production promotion when the linked run is missing, failed, or older than 30 days before release",
+        "Retain the last promotion’s sandbox report under imports/agent-sandbox-sim/ for assessment"
       ],
       "references": [
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
-          "title": "NIST AI RMF — Govern",
+          "title": "NIST AI Risk Management Framework — Govern / Manage",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
         "AGN-M1",
         "AGN-M2",
-        "AGN-M3",
-        "AGN-M4",
-        "AGN-R1"
+        "AGN-R1",
+        "AGN-R3",
+        "EVL-M1",
+        "CHG-M1",
+        "CHG-M3"
       ],
       "tags": [
         "agent-governance",
         "recommended",
-        "manual"
+        "hybrid",
+        "sandbox",
+        "simulation"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -598,55 +1026,70 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "AGN-R3",
       "category": "agent-governance",
-      "title": "AGN-R3: Formal RACI for agent ownership across teams",
-      "description": "Formal RACI for agent ownership across teams",
-      "whyItMatters": "AGN-R3 (Agent Governance, recommended): Formal RACI for agent ownership across teams Failing this leaves a production gap against: Every production AI system ID has non-empty owner fields for required domains; inventory query returns 0 orphans",
+      "title": "Production systems should have formal RACI for agent ownership across teams",
+      "description": "Every production AI system and production agent should appear in a versioned RACI or ownership register that names Responsible and Accountable parties (and Consulted/Informed where used) across the teams that operate the agent fleet. Inventory queries should return 0 orphan system or agent IDs missing required ownership fields.\n",
+      "whyItMatters": "Agents cut across product, platform, security, and on-call teams. A single charter owner (AGN-M1) does not resolve who is Responsible vs Accountable when tools fail, spend spikes, or a peer agent misbehaves. Without a formal RACI, incidents stall on “whose agent is this?” and changes ship without a clear accountable steward. Cross-team ownership converts agent fleet risk into assignable duty.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Every production AI system ID has non-empty owner fields for required domains; inventory query returns 0 orphans",
+      "passCondition": "Every production AI system ID (and production agent ID in scope) has non-empty Responsible and Accountable owner fields for the organization’s required domains/roles; inventory query returns 0 orphans.\n",
       "evidenceRequired": [
-        "RACI or ownership register entry for the system"
+        "Versioned RACI or ownership register covering production AI systems / agents",
+        "Required ownership fields defined (at minimum Responsible + Accountable)",
+        "Inventory export or query result showing 0 orphans for those fields"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-agent-raci",
+            "params": {
+              "hint": "Discover RACI / ownership-register artifacts for agents or AI systems with Responsible/Accountable (and optional C/I) role signals.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove zero orphans, attest a versioned RACI register export with Responsible+Accountable filled for every production AI system/agent ID in scope.\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For AGN-R3 (AGN-R3: Formal RACI for agent ownership across teams): inspect current evidence for [RACI or ownership register entry for the system] and confirm the pass condition holds — Every production AI system ID has non-empty owner fields for required domains; inventory query returns 0 orphans",
-      "falsePositiveGuidance": "AGN-R3 (Agent Governance): re-verify against a current artifact for this specific Check (AGN-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Define the production AI system and agent ID scope (align with AGN-M1 inventory where present). If no production agents/systems, score NOT_APPLICABLE. 2) Open the RACI or ownership register; confirm required fields include at least Responsible and Accountable (document any additional required domains). 3) Query for orphans (empty/missing R or A). 4) PASS only if the query returns 0 orphans. A CODEOWNERS file alone or a single charter owner without RACI roles does not satisfy this Check unless it encodes R and A for every in-scope ID.\n",
+      "falsePositiveGuidance": "Do not pass on AGN-M1 charters that list one owner without Responsible vs Accountable across teams. Do not pass ORG-M2 system-domain owners as a substitute unless the same register explicitly covers agent IDs with RACI roles. Do not pass a stale register (>90 days) or a template with blank rows. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: AGN-R3: Formal RACI for agent ownership across teams (AGN-R3)",
-        "Retain evidence artifacts required by this Check, starting with: RACI or ownership register entry for the system",
-        "Schedule recurring manual verification for AGN-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AGN-R3 passes"
+        "Create a versioned agent/AI-system RACI register with Responsible and Accountable columns (add C/I as needed)",
+        "Backfill every production system and agent ID; fail closed on empty R or A",
+        "Export the register under imports/agent-raci-ownership/ with orphanCount=0 for assessments",
+        "Review RACI on agent promotion and at least every 90 days with a named steward"
       ],
       "references": [
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
-          "title": "NIST AI RMF — Govern",
+          "title": "NIST AI Risk Management Framework — Govern",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
         "AGN-M1",
-        "AGN-M2",
-        "AGN-M3",
-        "AGN-M4",
-        "AGN-R1"
+        "AGN-R1",
+        "AGN-R2",
+        "ORG-M2",
+        "ORG-M1",
+        "HUM-M1"
       ],
       "tags": [
         "agent-governance",
         "recommended",
-        "manual"
+        "hybrid",
+        "raci",
+        "ownership"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -658,7 +1101,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "authentication",
       "title": "Customer-facing AI APIs must reject unauthenticated callers",
       "description": "Customer-facing AI APIs shall reject unauthenticated callers",
-      "whyItMatters": "AUTHN-M1 (Authentication, mandatory): Customer-facing AI APIs shall reject unauthenticated callers Failing this leaves a production gap against: 100% of probed production AI endpoints return 401/403 without valid credentials; probe inventory matches production route catalog",
+      "whyItMatters": "Customer-facing AI APIs shall reject unauthenticated callers Failing this leaves a production gap against: 100% of probed production AI endpoints return 401/403 without valid credentials; probe inventory matches production route catalog",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -680,13 +1123,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For AUTHN-M1 (Customer-facing AI APIs must reject unauthenticated callers): inspect current evidence for [Automated auth probe report covering all production AI HTTP/RPC routes] and confirm the pass condition holds — 100% of probed production AI endpoints return 401/403 without valid credentials; probe inventory matches production route catalog",
-      "falsePositiveGuidance": "AUTHN-M1 (Authentication): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Customer-facing AI APIs must reject unauthenticated callers): inspect current evidence for [Automated auth probe report covering all production AI HTTP/RPC routes] and confirm the pass condition holds — 100% of probed production AI endpoints return 401/403 without valid credentials; probe inventory matches production route catalog",
+      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Customer-facing AI APIs must reject unauthenticated callers (AUTHN-M1)",
+        "Implement and operationalize: Customer-facing AI APIs must reject unauthenticated callers",
         "Retain evidence artifacts required by this Check, starting with: Automated auth probe report covering all production AI HTTP/RPC routes",
-        "Wire or verify detectors declared on AUTHN-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AUTHN-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -728,7 +1171,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "authentication",
       "title": "Service-to-service and MCP connections must use strong machine identity",
       "description": "Service-to-service and MCP connections shall use strong machine identity",
-      "whyItMatters": "AUTHN-M2 (Authentication, mandatory): Service-to-service and MCP connections shall use strong machine identity Failing this leaves a production gap against: 0 production MCP or AI S2S connections accept anonymous access or shared long-lived static keys; each connection has a named machine identity",
+      "whyItMatters": "Service-to-service and MCP connections shall use strong machine identity Failing this leaves a production gap against: 0 production MCP or AI S2S connections accept anonymous access or shared long-lived static keys; each connection has a named machine identity",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -737,12 +1180,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "MCP/S2S connection inventory + auth config export"
       ],
       "detection": {
-        "capability": "hybrid",
+        "capability": "manual",
         "detectors": [
-          {
-            "id": "cicd-oidc-present",
-            "params": {}
-          },
           {
             "id": "manual-attest",
             "params": {
@@ -751,13 +1190,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For AUTHN-M2 (Service-to-service and MCP connections must use strong machine identity): inspect current evidence for [MCP/S2S connection inventory + auth config export] and confirm the pass condition holds — 0 production MCP or AI S2S connections accept anonymous access or shared long-lived static keys; each connection has a named machine identity",
-      "falsePositiveGuidance": "AUTHN-M2 (Authentication): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (Service-to-service and MCP connections must use strong machine identity): inspect current evidence for [MCP/S2S connection inventory + auth config export] and confirm the pass condition holds — 0 production MCP or AI S2S connections accept anonymous access or shared long-lived static keys; each connection has a named machine identity",
+      "falsePositiveGuidance": "re-verify against a current MCP/S2S inventory artifact for this Check , not CI OIDC alone. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Service-to-service and MCP connections must use strong machine identity (AUTHN-M2)",
+        "Implement and operationalize: Service-to-service and MCP connections must use strong machine identity",
         "Retain evidence artifacts required by this Check, starting with: MCP/S2S connection inventory + auth config export",
-        "Wire or verify detectors declared on AUTHN-M2 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AUTHN-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -779,7 +1218,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "authentication",
         "mandatory",
-        "hybrid"
+        "manual"
       ],
       "applicability": {
         "technologies": [
@@ -799,13 +1238,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "authentication",
       "title": "Administrative access to AI control planes must require strong authentication including MFA",
       "description": "Administrative access to AI control planes shall require strong authentication including MFA",
-      "whyItMatters": "AUTHN-M3 (Authentication, mandatory): Administrative access to AI control planes shall require strong authentication including MFA Failing this leaves a production gap against: 100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled",
+      "whyItMatters": "Administrative access to AI control planes shall require strong authentication including MFA Failing this leaves a production gap against: 100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
       "passCondition": "100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled",
       "evidenceRequired": [
-        "IdP policy export for AI admin roles + break-glass account inventory"
+        "IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring"
       ],
       "detection": {
         "capability": "manual",
@@ -813,18 +1252,18 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "IdP policy export for AI admin roles + break-glass account inventory"
+              "hint": "IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring"
             }
           }
         ]
       },
-      "manualVerification": "For AUTHN-M3 (Administrative access to AI control planes must require strong authentication including MFA): inspect current evidence for [IdP policy export for AI admin roles + break-glass account inventory] and confirm the pass condition holds — 100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled",
-      "falsePositiveGuidance": "AUTHN-M3 (Authentication): re-verify against a current artifact for this specific Check (AUTHN-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Administrative access to AI control planes must require strong authentication including MFA): inspect current evidence for [IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring] and confirm the pass condition holds — 100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Administrative access to AI control planes must require strong authentication including MFA (AUTHN-M3)",
-        "Retain evidence artifacts required by this Check, starting with: IdP policy export for AI admin roles + break-glass account inventory",
-        "Schedule recurring manual verification for AUTHN-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AUTHN-M3 passes"
+        "Implement and operationalize: Administrative access to AI control planes must require strong authentication including MFA",
+        "Retain evidence artifacts required by this Check, starting with: IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -866,7 +1305,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "authentication",
       "title": "End-user identity must remain bound through agent and tool chains",
       "description": "End-user identity shall remain bound through agent and tool chains",
-      "whyItMatters": "AUTHN-M4 (Authentication, mandatory): End-user identity shall remain bound through agent and tool chains Failing this leaves a production gap against: PASS if 100% of sampled privileged tool calls in the latest review carry an end-user (or documented service) subject; 0 anonymous privileged hops",
+      "whyItMatters": "End-user identity shall remain bound through agent and tool chains Failing this leaves a production gap against: PASS if 100% of sampled privileged tool calls in the latest review carry an end-user (or documented service) subject; 0 anonymous privileged hops",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -885,13 +1324,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For AUTHN-M4 (End-user identity must remain bound through agent and tool chains): inspect current evidence for [Identity-propagation design + sample traces showing end-user subject on tool calls] and confirm the pass condition holds — PASS if 100% of sampled privileged tool calls in the latest review carry an end-user (or documented service) subject; 0 anonymous privileged hops",
-      "falsePositiveGuidance": "AUTHN-M4 (Authentication): re-verify against a current artifact for this specific Check (AUTHN-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (End-user identity must remain bound through agent and tool chains): inspect current evidence for [Identity-propagation design + sample traces showing end-user subject on tool calls] and confirm the pass condition holds — PASS if 100% of sampled privileged tool calls in the latest review carry an end-user (or documented service) subject; 0 anonymous privileged hops",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: End-user identity must remain bound through agent and tool chains (AUTHN-M4)",
+        "Implement and operationalize: End-user identity must remain bound through agent and tool chains",
         "Retain evidence artifacts required by this Check, starting with: Identity-propagation design + sample traces showing end-user subject on tool calls",
-        "Schedule recurring manual verification for AUTHN-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AUTHN-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -931,9 +1370,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "AUTHN-R1",
       "category": "authentication",
-      "title": "AUTHN-R1: Short-lived tokens for agents and tools; no long-lived static keys in prompts",
+      "title": "Production systems should have short-lived tokens for agents and tools; no long-lived static keys in prompts",
       "description": "Short-lived tokens for agents and tools; no long-lived static keys in prompts",
-      "whyItMatters": "AUTHN-R1 (Authentication, recommended): Short-lived tokens for agents and tools; no long-lived static keys in prompts Failing this leaves a production gap against: 100% of inventoried agent/tool credentials have TTL ≤1h (or a named exception ≤30 days); secret scan of prompts/config finds 0 long-lived static API keys",
+      "whyItMatters": "Short-lived tokens for agents and tools; no long-lived static keys in prompts Failing this leaves a production gap against: 100% of inventoried agent/tool credentials have TTL ≤1h (or a named exception ≤30 days); secret scan of prompts/config finds 0 long-lived static API keys",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -960,13 +1399,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For AUTHN-R1 (AUTHN-R1: Short-lived tokens for agents and tools; no long-lived static keys in prompts): inspect current evidence for [IdP/token TTL policy export + inventory of agent/tool credentials used in production prompts/config] and confirm the pass condition holds — 100% of inventoried agent/tool credentials have TTL ≤1h (or a named exception ≤30 days); secret scan of prompts/config finds 0 long-lived static API keys",
-      "falsePositiveGuidance": "AUTHN-R1 (Authentication): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (Short-lived tokens for agents and tools; no long-lived static keys in prompts): inspect current evidence for [IdP/token TTL policy export + inventory of agent/tool credentials used in production prompts/config] and confirm the pass condition holds — 100% of inventoried agent/tool credentials have TTL ≤1h (or a named exception ≤30 days); secret scan of prompts/config finds 0 long-lived static API keys",
+      "falsePositiveGuidance": "when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: AUTHN-R1: Short-lived tokens for agents and tools; no long-lived static keys in prompts (AUTHN-R1)",
+        "Implement and operationalize: this Check: Short-lived tokens for agents and tools; no long-lived static keys in prompts",
         "Retain evidence artifacts required by this Check, starting with: IdP/token TTL policy export + inventory of agent/tool credentials used in production prompts/config",
-        "Wire or verify detectors declared on AUTHN-R1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AUTHN-R1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1006,9 +1445,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "AUTHN-R2",
       "category": "authentication",
-      "title": "AUTHN-R2: Workload identity for self-hosted model runtimes",
+      "title": "Production systems should have workload identity for self-hosted model runtimes",
       "description": "Workload identity for self-hosted model runtimes",
-      "whyItMatters": "AUTHN-R2 (Authentication, recommended): Workload identity for self-hosted model runtimes Failing this leaves a production gap against: Every self-hosted model runtime in production authenticates via workload identity (SPIFFE/IAM role/equivalent); 0 static shared keys in the runtime inventory",
+      "whyItMatters": "Workload identity for self-hosted model runtimes Failing this leaves a production gap against: Every self-hosted model runtime in production authenticates via workload identity (SPIFFE/IAM role/equivalent); 0 static shared keys in the runtime inventory",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -1027,13 +1466,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For AUTHN-R2 (AUTHN-R2: Workload identity for self-hosted model runtimes): inspect current evidence for [Workload-identity binding config for self-hosted model runtimes + sample authenticated call traces] and confirm the pass condition holds — Every self-hosted model runtime in production authenticates via workload identity (SPIFFE/IAM role/equivalent); 0 static shared keys in the runtime inventory",
-      "falsePositiveGuidance": "AUTHN-R2 (Authentication): re-verify against a current artifact for this specific Check (AUTHN-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Workload identity for self-hosted model runtimes): inspect current evidence for [Workload-identity binding config for self-hosted model runtimes + sample authenticated call traces] and confirm the pass condition holds — Every self-hosted model runtime in production authenticates via workload identity (SPIFFE/IAM role/equivalent); 0 static shared keys in the runtime inventory",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: AUTHN-R2: Workload identity for self-hosted model runtimes (AUTHN-R2)",
+        "Implement and operationalize: this Check: Workload identity for self-hosted model runtimes",
         "Retain evidence artifacts required by this Check, starting with: Workload-identity binding config for self-hosted model runtimes + sample authenticated call traces",
-        "Schedule recurring manual verification for AUTHN-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AUTHN-R2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1075,44 +1514,33 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "authorization",
       "title": "Authorization must be enforced server-side for AI features, tools, and retrieval",
       "description": "Authorization shall be enforced server-side for AI features, tools, and retrieval",
-      "whyItMatters": "AUTHZ-M1 (Authorization, mandatory): Authorization shall be enforced server-side for AI features, tools, and retrieval Failing this leaves a production gap against: Automated tests cover 100% of production AI feature, tool, and retrieval entry points; unauthenticated or unauthorized callers are denied at 100% in the suite",
+      "whyItMatters": "Authorization shall be enforced server-side for AI features, tools, and retrieval Failing this leaves a production gap against: 100% of privileged AI feature, tool, and retrieval entry points enforce authorization server-side; 0 successful requests from authenticated callers lacking required permission or scope in the authz suite",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Automated tests cover 100% of production AI feature, tool, and retrieval entry points; unauthenticated or unauthorized callers are denied at 100% in the suite",
+      "passCondition": "100% of privileged AI feature, tool, and retrieval entry points enforce authorization server-side; 0 successful requests from authenticated callers lacking required permission or scope in the authz suite",
       "evidenceRequired": [
-        "Authz middleware/policy tests for AI feature, tool, and retrieval entry points"
+        "Server-side authz middleware/policy for AI feature, tool, and retrieval entry points",
+        "Authz suite results showing authenticated-but-unauthorized callers denied on those entry points"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "manual",
         "detectors": [
-          {
-            "id": "iam-least-privilege",
-            "params": {
-              "hint": "APEP apep.iam.policy_document — flag wildcard Action"
-            }
-          },
-          {
-            "id": "iam-no-wildcard-resource",
-            "params": {
-              "hint": "APEP apep.iam.policy_document — flag wildcard Resource"
-            }
-          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Authz middleware/policy tests for AI feature, tool, and retrieval entry points"
+              "hint": "Server-side authz middleware/policy + unauthorized-caller suite for AI feature/tool/retrieval entry points"
             }
           }
         ]
       },
-      "manualVerification": "For AUTHZ-M1 (Authorization must be enforced server-side for AI features, tools, and retrieval): inspect current evidence for [Authz middleware/policy tests for AI feature, tool, and retrieval entry points] and confirm the pass condition holds — Automated tests cover 100% of production AI feature, tool, and retrieval entry points; unauthenticated or unauthorized callers are denied at 100% in the suite",
-      "falsePositiveGuidance": "AUTHZ-M1 (Authorization): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Authorization must be enforced server-side for AI features, tools, and retrieval): inspect current evidence for [Server-side authz middleware/policy for AI feature, tool, and retrieval entry points; Authz suite results showing authenticated-but-unauthorized callers denied on those entry points] and confirm the pass condition holds — 100% of privileged AI feature, tool, and retrieval entry points enforce authorization server-side; 0 successful requests from authenticated callers lacking required permission or scope in the authz suite",
+      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days. Do not score AUTHN-M1 (unauthenticated rejection) as satisfying this Check — require authenticated but unauthorized callers.",
       "recommendedFixes": [
-        "Implement and operationalize: Authorization must be enforced server-side for AI features, tools, and retrieval (AUTHZ-M1)",
-        "Retain evidence artifacts required by this Check, starting with: Authz middleware/policy tests for AI feature, tool, and retrieval entry points",
-        "Wire or verify detectors declared on AUTHZ-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AUTHZ-M1 passes"
+        "Implement and operationalize: Authorization must be enforced server-side for AI features, tools, and retrieval",
+        "Retain evidence artifacts required by this Check, starting with: Server-side authz middleware/policy for AI feature, tool, and retrieval entry points",
+        "Add or extend an authz suite that denies authenticated callers lacking required permission or scope on AI feature, tool, and retrieval entry points",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1129,12 +1557,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AUTHZ-M3",
         "AUTHZ-M4",
         "AUTHZ-R1",
-        "AUTHZ-R2"
+        "AUTHZ-R2",
+        "AUTHN-M1"
       ],
       "tags": [
         "authorization",
         "mandatory",
-        "automated"
+        "manual"
       ],
       "applicability": {
         "technologies": [
@@ -1153,7 +1582,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "authorization",
       "title": "Multi-tenant isolation must be tested for AI data and memory paths",
       "description": "Multi-tenant isolation shall be tested for AI data and memory paths",
-      "whyItMatters": "AUTHZ-M2 (Authorization, mandatory): Multi-tenant isolation shall be tested for AI data and memory paths Failing this leaves a production gap against: 0 successful unauthorized cross-tenant reads/writes across ≥10 automated attack cases on AI data and memory paths",
+      "whyItMatters": "Multi-tenant isolation shall be tested for AI data and memory paths Failing this leaves a production gap against: 0 successful unauthorized cross-tenant reads/writes across ≥10 automated attack cases on AI data and memory paths",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -1172,13 +1601,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For AUTHZ-M2 (Multi-tenant isolation must be tested for AI data and memory paths): inspect current evidence for [Cross-tenant attack test suite results for AI data stores and memory APIs] and confirm the pass condition holds — 0 successful unauthorized cross-tenant reads/writes across ≥10 automated attack cases on AI data and memory paths",
-      "falsePositiveGuidance": "AUTHZ-M2 (Authorization): re-verify against a current artifact for this specific Check (AUTHZ-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Multi-tenant isolation must be tested for AI data and memory paths): inspect current evidence for [Cross-tenant attack test suite results for AI data stores and memory APIs] and confirm the pass condition holds — 0 successful unauthorized cross-tenant reads/writes across ≥10 automated attack cases on AI data and memory paths",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Multi-tenant isolation must be tested for AI data and memory paths (AUTHZ-M2)",
+        "Implement and operationalize: Multi-tenant isolation must be tested for AI data and memory paths",
         "Retain evidence artifacts required by this Check, starting with: Cross-tenant attack test suite results for AI data stores and memory APIs",
-        "Schedule recurring manual verification for AUTHZ-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AUTHZ-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1219,7 +1648,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "authorization",
       "title": "Least-privilege roles must be defined for agents and automation identities",
       "description": "Least-privilege roles shall be defined for agents and automation identities",
-      "whyItMatters": "AUTHZ-M3 (Authorization, mandatory): Least-privilege roles shall be defined for agents and automation identities Failing this leaves a production gap against: 100% of production agent/automation identities appear in the role matrix with non-admin default roles; quarterly (or ≤90-day) access review recorded with 0 une…",
+      "whyItMatters": "Least-privilege roles shall be defined for agents and automation identities Failing this leaves a production gap against: 100% of production agent/automation identities appear in the role matrix with non-admin default roles; quarterly (or ≤90-day) access review recorded with 0 unexplained privilege escalations",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -1238,13 +1667,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For AUTHZ-M3 (Least-privilege roles must be defined for agents and automation identities): inspect current evidence for [Role matrix for every production agent/automation identity + IAM/policy export] and confirm the pass condition holds — 100% of production agent/automation identities appear in the role matrix with non-admin default roles; quarterly (or ≤90-day) access review recorded with 0 unexplained privilege e…",
-      "falsePositiveGuidance": "AUTHZ-M3 (Authorization): re-verify against a current artifact for this specific Check (AUTHZ-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Least-privilege roles must be defined for agents and automation identities): inspect current evidence for [Role matrix for every production agent/automation identity + IAM/policy export] and confirm the pass condition holds — 100% of production agent/automation identities appear in the role matrix with non-admin default roles; quarterly (or ≤90-day) access review recorded with 0 unexplained privilege escalations",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Least-privilege roles must be defined for agents and automation identities (AUTHZ-M3)",
+        "Implement and operationalize: Least-privilege roles must be defined for agents and automation identities",
         "Retain evidence artifacts required by this Check, starting with: Role matrix for every production agent/automation identity + IAM/policy export",
-        "Schedule recurring manual verification for AUTHZ-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AUTHZ-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1285,25 +1714,32 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "authorization",
       "title": "Attribute-based controls must govern access to sensitive document classes",
       "description": "Attribute-based controls shall govern access to sensitive document classes",
-      "whyItMatters": "AUTHZ-M4 (Authorization, mandatory): Attribute-based controls shall govern access to sensitive document classes Failing this leaves a production gap against: PASS if sensitive document classes are enumerated and policy denies unauthorized class access in tests; inventory matches production classes",
+      "whyItMatters": "Attribute-based controls shall govern access to sensitive document classes Failing this leaves a production gap against: Sensitive document classes are enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class access in tests; inventory matches production classes",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "PASS if sensitive document classes are enumerated and policy denies unauthorized class access in tests; inventory matches production classes",
+      "passCondition": "Sensitive document classes are enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class access in tests; inventory matches production classes",
       "evidenceRequired": [
         "ABAC/policy config + sample allow/deny decisions for sensitive classes"
       ],
       "detection": {
         "capability": "manual",
-        "detectors": []
+        "detectors": [
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "ABAC/policy config + sample allow/deny decisions for sensitive classes"
+            }
+          }
+        ]
       },
-      "manualVerification": "For AUTHZ-M4 (Attribute-based controls must govern access to sensitive document classes): inspect current evidence for [ABAC/policy config + sample allow/deny decisions for sensitive classes] and confirm the pass condition holds — PASS if sensitive document classes are enumerated and policy denies unauthorized class access in tests; inventory matches production classes",
-      "falsePositiveGuidance": "AUTHZ-M4 (Authorization): re-verify against a current artifact for this specific Check (AUTHZ-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Attribute-based controls must govern access to sensitive document classes): inspect current evidence for [ABAC/policy config + sample allow/deny decisions for sensitive classes] and confirm the pass condition holds — Sensitive document classes are enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class access in tests; inventory matches production classes",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Attribute-based controls must govern access to sensitive document classes (AUTHZ-M4)",
+        "Implement and operationalize: Attribute-based controls must govern access to sensitive document classes",
         "Retain evidence artifacts required by this Check, starting with: ABAC/policy config + sample allow/deny decisions for sensitive classes",
-        "Schedule recurring manual verification for AUTHZ-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AUTHZ-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1342,9 +1778,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "AUTHZ-R1",
       "category": "authorization",
-      "title": "AUTHZ-R1: Policy-as-code for tool and model access",
+      "title": "Production systems should have policy-as-code for tool and model access",
       "description": "Policy-as-code for tool and model access",
-      "whyItMatters": "AUTHZ-R1 (Authorization, recommended): Policy-as-code for tool and model access Failing this leaves a production gap against: Tool and model access rules are expressed as code and enforced in CI or admission; last failing-to-passing policy change ≤90 days shows a deny for unauthorized…",
+      "whyItMatters": "Policy-as-code for tool and model access Failing this leaves a production gap against: Tool and model access rules are expressed as code and enforced in CI or admission; last failing-to-passing policy change ≤90 days shows a deny for unauthorized tool/model",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -1367,13 +1803,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For AUTHZ-R1 (AUTHZ-R1: Policy-as-code for tool and model access): inspect current evidence for [Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent) + latest CI policy-check report] and confirm the pass condition holds — Tool and model access rules are expressed as code and enforced in CI or admission; last failing-to-passing policy change ≤90 days shows a deny for unauthorized tool/model",
-      "falsePositiveGuidance": "AUTHZ-R1 (Authorization): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (Policy-as-code for tool and model access): inspect current evidence for [Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent) + latest CI policy-check report] and confirm the pass condition holds — Tool and model access rules are expressed as code and enforced in CI or admission; last failing-to-passing policy change ≤90 days shows a deny for unauthorized tool/model",
+      "falsePositiveGuidance": "when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: AUTHZ-R1: Policy-as-code for tool and model access (AUTHZ-R1)",
-        "Retain evidence artifacts required by this Check, starting with: Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent) + latest…",
-        "Wire or verify detectors declared on AUTHZ-R1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AUTHZ-R1 passes"
+        "Implement and operationalize: this Check: Policy-as-code for tool and model access",
+        "Retain evidence artifacts required by this Check, starting with: Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent) + latest CI policy-check report",
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1412,9 +1848,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "AUTHZ-R2",
       "category": "authorization",
-      "title": "AUTHZ-R2: Continuous access reviews for high-privilege agents",
+      "title": "Production systems should have continuous access reviews for high-privilege agents",
       "description": "Continuous access reviews for high-privilege agents",
-      "whyItMatters": "AUTHZ-R2 (Authorization, recommended): Continuous access reviews for high-privilege agents Failing this leaves a production gap against: Every high-privilege agent identity was reviewed ≤90 days ago; ≥1 revoke or scope-reduction appears in the last two cycles (or attestation that none were warra…",
+      "whyItMatters": "Continuous access reviews for high-privilege agents Failing this leaves a production gap against: Every high-privilege agent identity was reviewed ≤90 days ago; ≥1 revoke or scope-reduction appears in the last two cycles (or attestation that none were warranted with reviewer sign-off)",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -1433,13 +1869,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For AUTHZ-R2 (AUTHZ-R2: Continuous access reviews for high-privilege agents): inspect current evidence for [High-privilege agent inventory + last access-review spreadsheet/report with decisions (keep/revoke/modify)] and confirm the pass condition holds — Every high-privilege agent identity was reviewed ≤90 days ago; ≥1 revoke or scope-reduction appears in the last two cycles (or attestation that none were warranted with reviewer s…",
-      "falsePositiveGuidance": "AUTHZ-R2 (Authorization): re-verify against a current artifact for this specific Check (AUTHZ-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Continuous access reviews for high-privilege agents): inspect current evidence for [High-privilege agent inventory + last access-review spreadsheet/report with decisions (keep/revoke/modify)] and confirm the pass condition holds — Every high-privilege agent identity was reviewed ≤90 days ago; ≥1 revoke or scope-reduction appears in the last two cycles (or attestation that none were warranted with reviewer sign-off)",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: AUTHZ-R2: Continuous access reviews for high-privilege agents (AUTHZ-R2)",
-        "Retain evidence artifacts required by this Check, starting with: High-privilege agent inventory + last access-review spreadsheet/report with decisions (keep/revoke/…",
-        "Schedule recurring manual verification for AUTHZ-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until AUTHZ-R2 passes"
+        "Implement and operationalize: this Check: Continuous access reviews for high-privilege agents",
+        "Retain evidence artifacts required by this Check, starting with: High-privilege agent inventory + last access-review spreadsheet/report with decisions (keep/revoke/modify)",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1480,7 +1916,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "change-management",
       "title": "Prior production versions of prompts and model pins must be retained and restorable",
       "description": "Prior production versions of prompts and model pins shall be retained and restorable",
-      "whyItMatters": "CHG-M1 (Change Management & Release, mandatory): Prior production versions of prompts and model pins shall be retained and restorable Failing this leaves a production gap against: ≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env",
+      "whyItMatters": "Prior production versions of prompts and model pins shall be retained and restorable Failing this leaves a production gap against: ≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -1499,13 +1935,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CHG-M1 (Prior production versions of prompts and model pins must be retained and restorable): inspect current evidence for [Version retention policy + registry listing of prior production versions] and confirm the pass condition holds — ≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env",
-      "falsePositiveGuidance": "CHG-M1 (Change Management & Release): re-verify against a current artifact for this specific Check (CHG-M1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Prior production versions of prompts and model pins must be retained and restorable): inspect current evidence for [Version retention policy + registry listing of prior production versions] and confirm the pass condition holds — ≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env",
+      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Prior production versions of prompts and model pins must be retained and restorable (CHG-M1)",
+        "Implement and operationalize: Prior production versions of prompts and model pins must be retained and restorable",
         "Retain evidence artifacts required by this Check, starting with: Version retention policy + registry listing of prior production versions",
-        "Schedule recurring manual verification for CHG-M1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CHG-M1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1555,7 +1991,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "change-management",
       "title": "Rollback procedure must be documented and operable by on-call",
       "description": "Rollback procedure shall be documented and operable by on-call",
-      "whyItMatters": "CHG-M2 (Change Management & Release, mandatory): Rollback procedure shall be documented and operable by on-call Failing this leaves a production gap against: Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute",
+      "whyItMatters": "Rollback procedure shall be documented and operable by on-call Failing this leaves a production gap against: Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -1578,13 +2014,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CHG-M2 (Rollback procedure must be documented and operable by on-call): inspect current evidence for [Rollback runbook + on-call acknowledgment or drill checklist] and confirm the pass condition holds — Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute",
-      "falsePositiveGuidance": "CHG-M2 (Change Management & Release): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (Rollback procedure must be documented and operable by on-call): inspect current evidence for [Rollback runbook + on-call acknowledgment or drill checklist] and confirm the pass condition holds — Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute",
+      "falsePositiveGuidance": "(Change Management & Release): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: Rollback procedure must be documented and operable by on-call (CHG-M2)",
+        "Implement and operationalize: Rollback procedure must be documented and operable by on-call",
         "Retain evidence artifacts required by this Check, starting with: Rollback runbook + on-call acknowledgment or drill checklist",
-        "Wire or verify detectors declared on CHG-M2 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CHG-M2 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1634,7 +2070,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "change-management",
       "title": "Rollback must be tested in a drill or real event on a defined cadence",
       "description": "Rollback shall be tested in a drill or real event on a defined cadence",
-      "whyItMatters": "CHG-M3 (Change Management & Release, mandatory): Rollback shall be tested in a drill or real event on a defined cadence Failing this leaves a production gap against: ≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO",
+      "whyItMatters": "Rollback shall be tested in a drill or real event on a defined cadence Failing this leaves a production gap against: ≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -1653,13 +2089,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CHG-M3 (Rollback must be tested in a drill or real event on a defined cadence): inspect current evidence for [Drill or incident record with timestamps and outcome] and confirm the pass condition holds — ≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO",
-      "falsePositiveGuidance": "CHG-M3 (Change Management & Release): re-verify against a current artifact for this specific Check (CHG-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Rollback must be tested in a drill or real event on a defined cadence): inspect current evidence for [Drill or incident record with timestamps and outcome] and confirm the pass condition holds — ≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO",
+      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Rollback must be tested in a drill or real event on a defined cadence (CHG-M3)",
+        "Implement and operationalize: Rollback must be tested in a drill or real event on a defined cadence",
         "Retain evidence artifacts required by this Check, starting with: Drill or incident record with timestamps and outcome",
-        "Schedule recurring manual verification for CHG-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CHG-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1709,7 +2145,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "change-management",
       "title": "Automated rollback must trigger on quality SLO burn for AI releases",
       "description": "Automated rollback shall trigger on quality SLO burn for AI releases",
-      "whyItMatters": "CHG-M4 (Change Management & Release, mandatory): Automated rollback shall trigger on quality SLO burn for AI releases Failing this leaves a production gap against: PASS if quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred ≤90 days",
+      "whyItMatters": "Automated rollback shall trigger on quality SLO burn for AI releases Failing this leaves a production gap against: PASS if quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred ≤90 days",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -1728,13 +2164,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CHG-M4 (Automated rollback must trigger on quality SLO burn for AI releases): inspect current evidence for [Rollback automation config + sample trigger/test evidence tied to quality SLOs] and confirm the pass condition holds — PASS if quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred ≤90 days",
-      "falsePositiveGuidance": "CHG-M4 (Change Management & Release): re-verify against a current artifact for this specific Check (CHG-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Automated rollback must trigger on quality SLO burn for AI releases): inspect current evidence for [Rollback automation config + sample trigger/test evidence tied to quality SLOs] and confirm the pass condition holds — PASS if quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred ≤90 days",
+      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Automated rollback must trigger on quality SLO burn for AI releases (CHG-M4)",
+        "Implement and operationalize: Automated rollback must trigger on quality SLO burn for AI releases",
         "Retain evidence artifacts required by this Check, starting with: Rollback automation config + sample trigger/test evidence tied to quality SLOs",
-        "Schedule recurring manual verification for CHG-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CHG-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1782,9 +2218,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CHG-R1",
       "category": "change-management",
-      "title": "CHG-R1: One-click or single-command rollback for AI release units",
+      "title": "Production systems should have one-click or single-command rollback for AI release units",
       "description": "One-click or single-command rollback for AI release units",
-      "whyItMatters": "CHG-R1 (Change Management & Release, recommended): One-click or single-command rollback for AI release units Failing this leaves a production gap against: AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO",
+      "whyItMatters": "One-click or single-command rollback for AI release units Failing this leaves a production gap against: AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -1803,13 +2239,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CHG-R1 (CHG-R1: One-click or single-command rollback for AI release units): inspect current evidence for [Rollback runbook or one-command script for AI release units + last rollback exercise log] and confirm the pass condition holds — AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO",
-      "falsePositiveGuidance": "CHG-R1 (Change Management & Release): re-verify against a current artifact for this specific Check (CHG-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (One-click or single-command rollback for AI release units): inspect current evidence for [Rollback runbook or one-command script for AI release units + last rollback exercise log] and confirm the pass condition holds — AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO",
+      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: CHG-R1: One-click or single-command rollback for AI release units (CHG-R1)",
+        "Implement and operationalize: this Check: One-click or single-command rollback for AI release units",
         "Retain evidence artifacts required by this Check, starting with: Rollback runbook or one-command script for AI release units + last rollback exercise log",
-        "Schedule recurring manual verification for CHG-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CHG-R1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1857,9 +2293,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CHG-R2",
       "category": "change-management",
-      "title": "CHG-R2: Feature flags for new agent behaviors",
+      "title": "Production systems should have feature flags for new agent behaviors",
       "description": "Feature flags for new agent behaviors",
-      "whyItMatters": "CHG-R2 (Change Management & Release, recommended): Feature flags for new agent behaviors Failing this leaves a production gap against: New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago",
+      "whyItMatters": "Feature flags for new agent behaviors Failing this leaves a production gap against: New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -1878,13 +2314,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CHG-R2 (CHG-R2: Feature flags for new agent behaviors): inspect current evidence for [Feature-flag config covering new agent behaviors + sample flag change audit trail] and confirm the pass condition holds — New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago",
-      "falsePositiveGuidance": "CHG-R2 (Change Management & Release): re-verify against a current artifact for this specific Check (CHG-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Feature flags for new agent behaviors): inspect current evidence for [Feature-flag config covering new agent behaviors + sample flag change audit trail] and confirm the pass condition holds — New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago",
+      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: CHG-R2: Feature flags for new agent behaviors (CHG-R2)",
+        "Implement and operationalize: this Check: Feature flags for new agent behaviors",
         "Retain evidence artifacts required by this Check, starting with: Feature-flag config covering new agent behaviors + sample flag change audit trail",
-        "Schedule recurring manual verification for CHG-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CHG-R2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1934,7 +2370,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "compliance",
       "title": "Applicable obligations for the AI system must be identified and owned",
       "description": "Applicable obligations for the AI system shall be identified and owned",
-      "whyItMatters": "CMP-M1 (Compliance, mandatory): Applicable obligations for the AI system shall be identified and owned Failing this leaves a production gap against: Every production AI system ID has ≥1 mapped obligation entry or an explicit “none in scope” attestation with owner and review date ≤ 12 months",
+      "whyItMatters": "Applicable obligations for the AI system shall be identified and owned Failing this leaves a production gap against: Every production AI system ID has ≥1 mapped obligation entry or an explicit “none in scope” attestation with owner and review date ≤ 12 months",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -1946,13 +2382,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For CMP-M1 (Applicable obligations for the AI system must be identified and owned): inspect current evidence for [Obligations register with owner per obligation for each production AI system] and confirm the pass condition holds — Every production AI system ID has ≥1 mapped obligation entry or an explicit “none in scope” attestation with owner and review date ≤ 12 months",
-      "falsePositiveGuidance": "CMP-M1 (Compliance): re-verify against a current artifact for this specific Check (CMP-M1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Applicable obligations for the AI system must be identified and owned): inspect current evidence for [Obligations register with owner per obligation for each production AI system] and confirm the pass condition holds — Every production AI system ID has ≥1 mapped obligation entry or an explicit “none in scope” attestation with owner and review date ≤ 12 months",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Applicable obligations for the AI system must be identified and owned (CMP-M1)",
+        "Implement and operationalize: Applicable obligations for the AI system must be identified and owned",
         "Retain evidence artifacts required by this Check, starting with: Obligations register with owner per obligation for each production AI system",
-        "Schedule recurring manual verification for CMP-M1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CMP-M1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -1989,7 +2425,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "compliance",
       "title": "Control-to-evidence mapping must exist for in-scope requirements",
       "description": "Control-to-evidence mapping shall exist for in-scope requirements",
-      "whyItMatters": "CMP-M2 (Compliance, mandatory): Control-to-evidence mapping shall exist for in-scope requirements Failing this leaves a production gap against: 100% of in-scope obligations map to ≥1 evidence artifact ID; matrix review date ≤ 12 months; 0 orphan obligations without evidence pointer",
+      "whyItMatters": "Control-to-evidence mapping shall exist for in-scope requirements Failing this leaves a production gap against: 100% of in-scope obligations map to ≥1 evidence artifact ID; matrix review date ≤ 12 months; 0 orphan obligations without evidence pointer",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -2001,13 +2437,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For CMP-M2 (Control-to-evidence mapping must exist for in-scope requirements): inspect current evidence for [Control→evidence matrix linking obligations to APRF checks or internal control IDs] and confirm the pass condition holds — 100% of in-scope obligations map to ≥1 evidence artifact ID; matrix review date ≤ 12 months; 0 orphan obligations without evidence pointer",
-      "falsePositiveGuidance": "CMP-M2 (Compliance): re-verify against a current artifact for this specific Check (CMP-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Control-to-evidence mapping must exist for in-scope requirements): inspect current evidence for [Control→evidence matrix linking obligations to APRF checks or internal control IDs] and confirm the pass condition holds — 100% of in-scope obligations map to ≥1 evidence artifact ID; matrix review date ≤ 12 months; 0 orphan obligations without evidence pointer",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Control-to-evidence mapping must exist for in-scope requirements (CMP-M2)",
+        "Implement and operationalize: Control-to-evidence mapping must exist for in-scope requirements",
         "Retain evidence artifacts required by this Check, starting with: Control→evidence matrix linking obligations to APRF checks or internal control IDs",
-        "Schedule recurring manual verification for CMP-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CMP-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2044,7 +2480,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "compliance",
       "title": "Audit logs for critical AI control-plane changes must be retained per policy",
       "description": "Audit logs for critical AI control-plane changes shall be retained per policy",
-      "whyItMatters": "CMP-M3 (Compliance, mandatory): Audit logs for critical AI control-plane changes shall be retained per policy Failing this leaves a production gap against: Retention configured ≥ policy minimum (e.g. ≥ 365 days); synthetic control-plane change appears in audit log within ≤ 5 minutes and remains queryable after ret…",
+      "whyItMatters": "Audit logs for critical AI control-plane changes shall be retained per policy Failing this leaves a production gap against: Retention configured ≥ policy minimum (e.g. ≥ 365 days); synthetic control-plane change appears in audit log within ≤ 5 minutes and remains queryable after retention smoke check",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -2063,13 +2499,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CMP-M3 (Audit logs for critical AI control-plane changes must be retained per policy): inspect current evidence for [Audit log retention config + sample of control-plane change events] and confirm the pass condition holds — Retention configured ≥ policy minimum (e.g. ≥ 365 days); synthetic control-plane change appears in audit log within ≤ 5 minutes and remains queryable after retention smoke check",
-      "falsePositiveGuidance": "CMP-M3 (Compliance): re-verify against a current artifact for this specific Check (CMP-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Audit logs for critical AI control-plane changes must be retained per policy): inspect current evidence for [Audit log retention config + sample of control-plane change events] and confirm the pass condition holds — Retention configured ≥ policy minimum (e.g. ≥ 365 days); synthetic control-plane change appears in audit log within ≤ 5 minutes and remains queryable after retention smoke check",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Audit logs for critical AI control-plane changes must be retained per policy (CMP-M3)",
+        "Implement and operationalize: Audit logs for critical AI control-plane changes must be retained per policy",
         "Retain evidence artifacts required by this Check, starting with: Audit log retention config + sample of control-plane change events",
-        "Schedule recurring manual verification for CMP-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CMP-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2104,9 +2540,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CMP-R1",
       "category": "compliance",
-      "title": "CMP-R1: Regular control testing with documented exceptions",
+      "title": "Production systems should have regular control testing with documented exceptions",
       "description": "Regular control testing with documented exceptions",
-      "whyItMatters": "CMP-R1 (Compliance, recommended): Regular control testing with documented exceptions Failing this leaves a production gap against: Documented controls were tested on schedule in the last cycle (≤90 days default); open exceptions have owner, expiry, and compensating control",
+      "whyItMatters": "Regular control testing with documented exceptions Failing this leaves a production gap against: Documented controls were tested on schedule in the last cycle (≤90 days default); open exceptions have owner, expiry, and compensating control",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -2125,13 +2561,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CMP-R1 (CMP-R1: Regular control testing with documented exceptions): inspect current evidence for [Control-testing schedule + latest test results pack with exceptions register] and confirm the pass condition holds — Documented controls were tested on schedule in the last cycle (≤90 days default); open exceptions have owner, expiry, and compensating control",
-      "falsePositiveGuidance": "CMP-R1 (Compliance): re-verify against a current artifact for this specific Check (CMP-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Regular control testing with documented exceptions): inspect current evidence for [Control-testing schedule + latest test results pack with exceptions register] and confirm the pass condition holds — Documented controls were tested on schedule in the last cycle (≤90 days default); open exceptions have owner, expiry, and compensating control",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: CMP-R1: Regular control testing with documented exceptions (CMP-R1)",
+        "Implement and operationalize: this Check: Regular control testing with documented exceptions",
         "Retain evidence artifacts required by this Check, starting with: Control-testing schedule + latest test results pack with exceptions register",
-        "Schedule recurring manual verification for CMP-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CMP-R1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2166,9 +2602,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CMP-R2",
       "category": "compliance",
-      "title": "CMP-R2: Customer-facing trust documentation aligned to APRF pillars",
+      "title": "Production systems should have customer-facing trust documentation aligned to APRF pillars",
       "description": "Customer-facing trust documentation aligned to APRF pillars",
-      "whyItMatters": "CMP-R2 (Compliance, recommended): Customer-facing trust documentation aligned to APRF pillars Failing this leaves a production gap against: Public trust doc covers identity, safety/eval, data handling, and incident contact at minimum; last-updated ≤12 months; pillar/Core mapping table is explicit",
+      "whyItMatters": "Customer-facing trust documentation aligned to APRF pillars Failing this leaves a production gap against: Public trust doc covers identity, safety/eval, data handling, and incident contact at minimum; last-updated ≤12 months; pillar/Core mapping table is explicit",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -2187,13 +2623,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CMP-R2 (CMP-R2: Customer-facing trust documentation aligned to APRF pillars): inspect current evidence for [Customer-facing trust/security doc mapped to APRF pillars (or Core Profile) + published URL and last-updated date] and confirm the pass condition holds — Public trust doc covers identity, safety/eval, data handling, and incident contact at minimum; last-updated ≤12 months; pillar/Core mapping table is explicit",
-      "falsePositiveGuidance": "CMP-R2 (Compliance): re-verify against a current artifact for this specific Check (CMP-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Customer-facing trust documentation aligned to APRF pillars): inspect current evidence for [Customer-facing trust/security doc mapped to APRF pillars (or Core Profile) + published URL and last-updated date] and confirm the pass condition holds — Public trust doc covers identity, safety/eval, data handling, and incident contact at minimum; last-updated ≤12 months; pillar/Core mapping table is explicit",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: CMP-R2: Customer-facing trust documentation aligned to APRF pillars (CMP-R2)",
-        "Retain evidence artifacts required by this Check, starting with: Customer-facing trust/security doc mapped to APRF pillars (or Core Profile) + published URL and las…",
-        "Schedule recurring manual verification for CMP-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CMP-R2 passes"
+        "Implement and operationalize: this Check: Customer-facing trust documentation aligned to APRF pillars",
+        "Retain evidence artifacts required by this Check, starting with: Customer-facing trust/security doc mapped to APRF pillars (or Core Profile) + published URL and last-updated date",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2228,9 +2664,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CMP-R3",
       "category": "compliance",
-      "title": "CMP-R3: Independent assessment for Level 5 systems",
+      "title": "Production systems should have independent assessment for Level 5 systems",
       "description": "Independent assessment for Level 5 systems",
-      "whyItMatters": "CMP-R3 (Compliance, recommended): Independent assessment for Level 5 systems Failing this leaves a production gap against: Last assessment ≤12 months old lists sampled check IDs, findings, and remediation owners; covers every system rated Level 5",
+      "whyItMatters": "Independent assessment for Level 5 systems Failing this leaves a production gap against: Last assessment ≤12 months old lists sampled check IDs, findings, and remediation owners; covers every system rated Level 5",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -2242,13 +2678,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For CMP-R3 (CMP-R3: Independent assessment for Level 5 systems): inspect current evidence for [Independent assessment or internal-audit report sampling Level-5 AI systems against APRF gates] and confirm the pass condition holds — Last assessment ≤12 months old lists sampled check IDs, findings, and remediation owners; covers every system rated Level 5",
-      "falsePositiveGuidance": "CMP-R3 (Compliance): re-verify against a current artifact for this specific Check (CMP-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Independent assessment for Level 5 systems): inspect current evidence for [Independent assessment or internal-audit report sampling Level-5 AI systems against APRF gates] and confirm the pass condition holds — Last assessment ≤12 months old lists sampled check IDs, findings, and remediation owners; covers every system rated Level 5",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: CMP-R3: Independent assessment for Level 5 systems (CMP-R3)",
+        "Implement and operationalize: this Check: Independent assessment for Level 5 systems",
         "Retain evidence artifacts required by this Check, starting with: Independent assessment or internal-audit report sampling Level-5 AI systems against APRF gates",
-        "Schedule recurring manual verification for CMP-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CMP-R3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2285,7 +2721,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "cost-optimization",
       "title": "Production AI workloads must have hard spend or rate limits",
       "description": "Production AI workloads shall have hard spend or rate limits",
-      "whyItMatters": "COST-M1 (Cost Optimization, mandatory): Production AI workloads shall have hard spend or rate limits Failing this leaves a production gap against: Enforced limit demonstrably denies or throttles when exceeded (automated test or production event log within last 90 days)",
+      "whyItMatters": "Production AI workloads shall have hard spend or rate limits Failing this leaves a production gap against: Enforced limit demonstrably denies or throttles when exceeded (automated test or production event log within last 90 days)",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -2312,13 +2748,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For COST-M1 (Production AI workloads must have hard spend or rate limits): inspect current evidence for [Gateway/provider quota config] and confirm the pass condition holds — Enforced limit demonstrably denies or throttles when exceeded (automated test or production event log within last 90 days)",
-      "falsePositiveGuidance": "COST-M1 (Cost Optimization): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Production AI workloads must have hard spend or rate limits): inspect current evidence for [Gateway/provider quota config] and confirm the pass condition holds — Enforced limit demonstrably denies or throttles when exceeded (automated test or production event log within last 90 days)",
+      "falsePositiveGuidance": "(Cost Optimization): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Production AI workloads must have hard spend or rate limits (COST-M1)",
+        "Implement and operationalize: Production AI workloads must have hard spend or rate limits",
         "Retain evidence artifacts required by this Check, starting with: Gateway/provider quota config",
-        "Wire or verify detectors declared on COST-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until COST-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2359,7 +2795,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "cost-optimization",
       "title": "Cost must be monitored with alerts on anomaly and budget burn",
       "description": "Cost shall be monitored with alerts on anomaly and budget burn",
-      "whyItMatters": "COST-M2 (Cost Optimization, mandatory): Cost shall be monitored with alerts on anomaly and budget burn Failing this leaves a production gap against: Alerts exist for budget burn and spend anomaly; synthetic or historical burn event would page/notify per runbook (alert test or documented fire in last 90 days)",
+      "whyItMatters": "Cost shall be monitored with alerts on anomaly and budget burn Failing this leaves a production gap against: Alerts exist for budget burn and spend anomaly; synthetic or historical burn event would page/notify per runbook (alert test or documented fire in last 90 days)",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -2378,13 +2814,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For COST-M2 (Cost must be monitored with alerts on anomaly and budget burn): inspect current evidence for [Cost dashboard + alert policies for anomaly and budget burn] and confirm the pass condition holds — Alerts exist for budget burn and spend anomaly; synthetic or historical burn event would page/notify per runbook (alert test or documented fire in last 90 days)",
-      "falsePositiveGuidance": "COST-M2 (Cost Optimization): re-verify against a current artifact for this specific Check (COST-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Cost must be monitored with alerts on anomaly and budget burn): inspect current evidence for [Cost dashboard + alert policies for anomaly and budget burn] and confirm the pass condition holds — Alerts exist for budget burn and spend anomaly; synthetic or historical burn event would page/notify per runbook (alert test or documented fire in last 90 days)",
+      "falsePositiveGuidance": "(Cost Optimization): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Cost must be monitored with alerts on anomaly and budget burn (COST-M2)",
+        "Implement and operationalize: Cost must be monitored with alerts on anomaly and budget burn",
         "Retain evidence artifacts required by this Check, starting with: Cost dashboard + alert policies for anomaly and budget burn",
-        "Schedule recurring manual verification for COST-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until COST-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2425,7 +2861,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "cost-optimization",
       "title": "Retry and loop policies must prevent unbounded cost amplification",
       "description": "Retry and loop policies shall prevent unbounded cost amplification",
-      "whyItMatters": "COST-M3 (Cost Optimization, mandatory): Retry and loop policies shall prevent unbounded cost amplification Failing this leaves a production gap against: Max retries and max agent loops are finite for 100% of production AI clients; tests show cost cannot grow without bound under forced failure/retry (bounded tok…",
+      "whyItMatters": "Retry and loop policies shall prevent unbounded cost amplification Failing this leaves a production gap against: Max retries and max agent loops are finite for 100% of production AI clients; tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling hit)",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -2444,13 +2880,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For COST-M3 (Retry and loop policies must prevent unbounded cost amplification): inspect current evidence for [Retry/backoff and agent-loop budget config + amplification tests] and confirm the pass condition holds — Max retries and max agent loops are finite for 100% of production AI clients; tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling hit)",
-      "falsePositiveGuidance": "COST-M3 (Cost Optimization): re-verify against a current artifact for this specific Check (COST-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Retry and loop policies must prevent unbounded cost amplification): inspect current evidence for [Retry/backoff and agent-loop budget config + amplification tests] and confirm the pass condition holds — Max retries and max agent loops are finite for 100% of production AI clients; tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling hit)",
+      "falsePositiveGuidance": "(Cost Optimization): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Retry and loop policies must prevent unbounded cost amplification (COST-M3)",
+        "Implement and operationalize: Retry and loop policies must prevent unbounded cost amplification",
         "Retain evidence artifacts required by this Check, starting with: Retry/backoff and agent-loop budget config + amplification tests",
-        "Schedule recurring manual verification for COST-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until COST-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2489,9 +2925,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "COST-R1",
       "category": "cost-optimization",
-      "title": "COST-R1: Caching for idempotent or repeated prompts where safe",
+      "title": "Production systems should have caching for idempotent or repeated prompts where safe",
       "description": "Caching for idempotent or repeated prompts where safe",
-      "whyItMatters": "COST-R1 (Cost Optimization, recommended): Caching for idempotent or repeated prompts where safe Failing this leaves a production gap against: Cache enabled for documented idempotent paths; sensitive/personalized prompts are excluded; hit-rate and savings reported for ≥30 days",
+      "whyItMatters": "Caching for idempotent or repeated prompts where safe Failing this leaves a production gap against: Cache enabled for documented idempotent paths; sensitive/personalized prompts are excluded; hit-rate and savings reported for ≥30 days",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -2510,13 +2946,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For COST-R1 (COST-R1: Caching for idempotent or repeated prompts where safe): inspect current evidence for [Prompt/response cache config with safety exclusions + hit-rate report for 30 days] and confirm the pass condition holds — Cache enabled for documented idempotent paths; sensitive/personalized prompts are excluded; hit-rate and savings reported for ≥30 days",
-      "falsePositiveGuidance": "COST-R1 (Cost Optimization): re-verify against a current artifact for this specific Check (COST-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Caching for idempotent or repeated prompts where safe): inspect current evidence for [Prompt/response cache config with safety exclusions + hit-rate report for 30 days] and confirm the pass condition holds — Cache enabled for documented idempotent paths; sensitive/personalized prompts are excluded; hit-rate and savings reported for ≥30 days",
+      "falsePositiveGuidance": "(Cost Optimization): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: COST-R1: Caching for idempotent or repeated prompts where safe (COST-R1)",
+        "Implement and operationalize: this Check: Caching for idempotent or repeated prompts where safe",
         "Retain evidence artifacts required by this Check, starting with: Prompt/response cache config with safety exclusions + hit-rate report for 30 days",
-        "Schedule recurring manual verification for COST-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until COST-R1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2555,9 +2991,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "COST-R2",
       "category": "cost-optimization",
-      "title": "COST-R2: Model routing: cheaper models for low-risk tasks with eval coverage",
+      "title": "Production systems should have model routing: cheaper models for low-risk tasks with eval coverage",
       "description": "Model routing: cheaper models for low-risk tasks with eval coverage",
-      "whyItMatters": "COST-R2 (Cost Optimization, recommended): Model routing: cheaper models for low-risk tasks with eval coverage Failing this leaves a production gap against: Low-risk task classes route to cheaper models by default; eval shows quality within tolerance vs premium baseline; misroute rate monitored ≤30 days",
+      "whyItMatters": "Model routing: cheaper models for low-risk tasks with eval coverage Failing this leaves a production gap against: Low-risk task classes route to cheaper models by default; eval shows quality within tolerance vs premium baseline; misroute rate monitored ≤30 days",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -2576,13 +3012,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For COST-R2 (COST-R2: Model routing: cheaper models for low-risk tasks with eval coverage): inspect current evidence for [Model-routing policy (cheap vs premium) + eval coverage report for low-risk routed tasks] and confirm the pass condition holds — Low-risk task classes route to cheaper models by default; eval shows quality within tolerance vs premium baseline; misroute rate monitored ≤30 days",
-      "falsePositiveGuidance": "COST-R2 (Cost Optimization): re-verify against a current artifact for this specific Check (COST-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Model routing: cheaper models for low-risk tasks with eval coverage): inspect current evidence for [Model-routing policy (cheap vs premium) + eval coverage report for low-risk routed tasks] and confirm the pass condition holds — Low-risk task classes route to cheaper models by default; eval shows quality within tolerance vs premium baseline; misroute rate monitored ≤30 days",
+      "falsePositiveGuidance": "(Cost Optimization): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: COST-R2: Model routing: cheaper models for low-risk tasks with eval coverage (COST-R2)",
+        "Implement and operationalize: this Check: Model routing: cheaper models for low-risk tasks with eval coverage",
         "Retain evidence artifacts required by this Check, starting with: Model-routing policy (cheap vs premium) + eval coverage report for low-risk routed tasks",
-        "Schedule recurring manual verification for COST-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until COST-R2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2621,9 +3057,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "COST-R3",
       "category": "cost-optimization",
-      "title": "COST-R3: FinOps reviews of AI unit economics per product",
+      "title": "Production systems should have finOps reviews of AI unit economics per product",
       "description": "FinOps reviews of AI unit economics per product",
-      "whyItMatters": "COST-R3 (Cost Optimization, recommended): FinOps reviews of AI unit economics per product Failing this leaves a production gap against: Each customer-facing AI product has unit-cost metrics for the last quarter; review occurred ≤90 days with owners for outliers above documented thresholds",
+      "whyItMatters": "FinOps reviews of AI unit economics per product Failing this leaves a production gap against: Each customer-facing AI product has unit-cost metrics for the last quarter; review occurred ≤90 days with owners for outliers above documented thresholds",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -2642,13 +3078,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For COST-R3 (COST-R3: FinOps reviews of AI unit economics per product): inspect current evidence for [Per-product AI unit-economics report (cost per successful task / journey) + FinOps review minutes] and confirm the pass condition holds — Each customer-facing AI product has unit-cost metrics for the last quarter; review occurred ≤90 days with owners for outliers above documented thresholds",
-      "falsePositiveGuidance": "COST-R3 (Cost Optimization): re-verify against a current artifact for this specific Check (COST-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (FinOps reviews of AI unit economics per product): inspect current evidence for [Per-product AI unit-economics report (cost per successful task / journey) + FinOps review minutes] and confirm the pass condition holds — Each customer-facing AI product has unit-cost metrics for the last quarter; review occurred ≤90 days with owners for outliers above documented thresholds",
+      "falsePositiveGuidance": "(Cost Optimization): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: COST-R3: FinOps reviews of AI unit economics per product (COST-R3)",
+        "Implement and operationalize: this Check: FinOps reviews of AI unit economics per product",
         "Retain evidence artifacts required by this Check, starting with: Per-product AI unit-economics report (cost per successful task / journey) + FinOps review minutes",
-        "Schedule recurring manual verification for COST-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until COST-R3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2689,7 +3125,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "context-engineering",
       "title": "Context assembly must enforce maximum sizes and prioritization rules",
       "description": "Context assembly shall enforce maximum sizes and prioritization rules",
-      "whyItMatters": "CTX-M1 (Context Engineering, mandatory): Context assembly shall enforce maximum sizes and prioritization rules Failing this leaves a production gap against: 100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overfl…",
+      "whyItMatters": "Context assembly shall enforce maximum sizes and prioritization rules Failing this leaves a production gap against: 100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -2712,13 +3148,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CTX-M1 (Context assembly must enforce maximum sizes and prioritization rules): inspect current evidence for [Context-budget config + unit/integration tests for overflow behavior] and confirm the pass condition holds — 100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows",
-      "falsePositiveGuidance": "CTX-M1 (Context Engineering): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Context assembly must enforce maximum sizes and prioritization rules): inspect current evidence for [Context-budget config + unit/integration tests for overflow behavior] and confirm the pass condition holds — 100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows",
+      "falsePositiveGuidance": "(Context Engineering): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Context assembly must enforce maximum sizes and prioritization rules (CTX-M1)",
+        "Implement and operationalize: Context assembly must enforce maximum sizes and prioritization rules",
         "Retain evidence artifacts required by this Check, starting with: Context-budget config + unit/integration tests for overflow behavior",
-        "Wire or verify detectors declared on CTX-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CTX-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2758,7 +3194,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "context-engineering",
       "title": "Retrieved and tool-sourced content must be labeled and access-checked before inclusion",
       "description": "Retrieved and tool-sourced content shall be labeled and access-checked before inclusion",
-      "whyItMatters": "CTX-M2 (Context Engineering, mandatory): Retrieved and tool-sourced content shall be labeled and access-checked before inclusion Failing this leaves a production gap against: Automated tests: unauthorized retrieval chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts",
+      "whyItMatters": "Retrieved and tool-sourced content shall be labeled and access-checked before inclusion Failing this leaves a production gap against: Automated tests: unauthorized retrieval chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -2777,13 +3213,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CTX-M2 (Retrieved and tool-sourced content must be labeled and access-checked before inclusion): inspect current evidence for [Context assembly code/tests showing source labels + ACL checks on retrieval/tool results] and confirm the pass condition holds — Automated tests: unauthorized retrieval chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts",
-      "falsePositiveGuidance": "CTX-M2 (Context Engineering): re-verify against a current artifact for this specific Check (CTX-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Retrieved and tool-sourced content must be labeled and access-checked before inclusion): inspect current evidence for [Context assembly code/tests showing source labels + ACL checks on retrieval/tool results] and confirm the pass condition holds — Automated tests: unauthorized retrieval chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts",
+      "falsePositiveGuidance": "(Context Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Retrieved and tool-sourced content must be labeled and access-checked before inclusion (CTX-M2)",
+        "Implement and operationalize: Retrieved and tool-sourced content must be labeled and access-checked before inclusion",
         "Retain evidence artifacts required by this Check, starting with: Context assembly code/tests showing source labels + ACL checks on retrieval/tool results",
-        "Schedule recurring manual verification for CTX-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CTX-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2823,7 +3259,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "context-engineering",
       "title": "Sensitive context classes (secrets, regulated data) must have explicit inclusion policies",
       "description": "Sensitive context classes (secrets, regulated data) shall have explicit inclusion policies",
-      "whyItMatters": "CTX-M3 (Context Engineering, mandatory): Sensitive context classes (secrets, regulated data) shall have explicit inclusion policies Failing this leaves a production gap against: Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at ≥95% on the sensitive-class fixture suite",
+      "whyItMatters": "Sensitive context classes (secrets, regulated data) shall have explicit inclusion policies Failing this leaves a production gap against: Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at ≥95% on the sensitive-class fixture suite",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -2842,13 +3278,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CTX-M3 (Sensitive context classes (secrets, regulated data) must have explicit inclusion policies): inspect current evidence for [Data-class inclusion policy + enforcement tests or DLP hooks on context assembly] and confirm the pass condition holds — Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at ≥95% on the sensitive-class fixture suite",
-      "falsePositiveGuidance": "CTX-M3 (Context Engineering): re-verify against a current artifact for this specific Check (CTX-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Sensitive context classes (secrets, regulated data) must have explicit inclusion policies): inspect current evidence for [Data-class inclusion policy + enforcement tests or DLP hooks on context assembly] and confirm the pass condition holds — Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at ≥95% on the sensitive-class fixture suite",
+      "falsePositiveGuidance": "(Context Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Sensitive context classes (secrets, regulated data) must have explicit inclusion policies (CTX-M3)",
+        "Implement and operationalize: Sensitive context classes (secrets, regulated data) must have explicit inclusion policies",
         "Retain evidence artifacts required by this Check, starting with: Data-class inclusion policy + enforcement tests or DLP hooks on context assembly",
-        "Schedule recurring manual verification for CTX-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CTX-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2886,9 +3322,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CTX-R1",
       "category": "context-engineering",
-      "title": "CTX-R1: Context budgets are monitored per request with alerts on saturation",
+      "title": "Production systems should have context budgets are monitored per request with alerts on saturation",
       "description": "Context budgets are monitored per request with alerts on saturation",
-      "whyItMatters": "CTX-R1 (Context Engineering, recommended): Context budgets are monitored per request with alerts on saturation Failing this leaves a production gap against: ≥99% of production requests in a 24h sample emit context-budget usage; alert fires when usage exceeds the documented % of max context (or hard truncate rate ex…",
+      "whyItMatters": "Context budgets are monitored per request with alerts on saturation Failing this leaves a production gap against: ≥99% of production requests in a 24h sample emit context-budget usage; alert fires when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold)",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -2907,13 +3343,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CTX-R1 (CTX-R1: Context budgets are monitored per request with alerts on saturation): inspect current evidence for [Per-request context token/budget metrics dashboard + alert rule export for saturation thresholds] and confirm the pass condition holds — ≥99% of production requests in a 24h sample emit context-budget usage; alert fires when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold)",
-      "falsePositiveGuidance": "CTX-R1 (Context Engineering): re-verify against a current artifact for this specific Check (CTX-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Context budgets are monitored per request with alerts on saturation): inspect current evidence for [Per-request context token/budget metrics dashboard + alert rule export for saturation thresholds] and confirm the pass condition holds — ≥99% of production requests in a 24h sample emit context-budget usage; alert fires when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold)",
+      "falsePositiveGuidance": "(Context Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: CTX-R1: Context budgets are monitored per request with alerts on saturation (CTX-R1)",
+        "Implement and operationalize: this Check: Context budgets are monitored per request with alerts on saturation",
         "Retain evidence artifacts required by this Check, starting with: Per-request context token/budget metrics dashboard + alert rule export for saturation thresholds",
-        "Schedule recurring manual verification for CTX-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CTX-R1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -2951,9 +3387,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CTX-R2",
       "category": "context-engineering",
-      "title": "CTX-R2: Summarization or compaction strategies are tested for information loss on critical facts",
+      "title": "Production systems should have summarization or compaction strategies are tested for information loss on critical facts",
       "description": "Summarization or compaction strategies are tested for information loss on critical facts",
-      "whyItMatters": "CTX-R2 (Context Engineering, recommended): Summarization or compaction strategies are tested for information loss on critical facts Failing this leaves a production gap against: Critical-fact retention ≥ documented threshold after compaction on the eval set; last run ≤90 days; regressions block context-pipeline releases",
+      "whyItMatters": "Summarization or compaction strategies are tested for information loss on critical facts Failing this leaves a production gap against: Critical-fact retention ≥ documented threshold after compaction on the eval set; last run ≤90 days; regressions block context-pipeline releases",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -2972,13 +3408,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CTX-R2 (CTX-R2: Summarization or compaction strategies are tested for information loss on critical facts): inspect current evidence for [Compaction/summarization eval set of critical facts + latest information-loss report] and confirm the pass condition holds — Critical-fact retention ≥ documented threshold after compaction on the eval set; last run ≤90 days; regressions block context-pipeline releases",
-      "falsePositiveGuidance": "CTX-R2 (Context Engineering): re-verify against a current artifact for this specific Check (CTX-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Summarization or compaction strategies are tested for information loss on critical facts): inspect current evidence for [Compaction/summarization eval set of critical facts + latest information-loss report] and confirm the pass condition holds — Critical-fact retention ≥ documented threshold after compaction on the eval set; last run ≤90 days; regressions block context-pipeline releases",
+      "falsePositiveGuidance": "(Context Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: CTX-R2: Summarization or compaction strategies are tested for information loss on critical facts (CTX-R2)",
+        "Implement and operationalize: this Check: Summarization or compaction strategies are tested for information loss on critical facts",
         "Retain evidence artifacts required by this Check, starting with: Compaction/summarization eval set of critical facts + latest information-loss report",
-        "Schedule recurring manual verification for CTX-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CTX-R2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3016,9 +3452,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CTX-R3",
       "category": "context-engineering",
-      "title": "CTX-R3: Structured context blocks (JSON/XML sections) separate instructions from data",
+      "title": "Production systems should have structured context blocks (JSON/XML sections) separate instructions from data",
       "description": "Structured context blocks (JSON/XML sections) separate instructions from data",
-      "whyItMatters": "CTX-R3 (Context Engineering, recommended): Structured context blocks (JSON/XML sections) separate instructions from data Failing this leaves a production gap against: Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test",
+      "whyItMatters": "Structured context blocks (JSON/XML sections) separate instructions from data Failing this leaves a production gap against: Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -3037,13 +3473,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For CTX-R3 (CTX: Structured context blocks (JSON/XML sections) separate instructions from data): inspect current evidence for [Context assembly schema/spec separating instruction vs data blocks + sample rendered request] and confirm the pass condition holds — Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test",
-      "falsePositiveGuidance": "CTX-R3 (Context Engineering): re-verify against a current artifact for this specific Check (CTX-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (CTX: Structured context blocks (JSON/XML sections) separate instructions from data): inspect current evidence for [Context assembly schema/spec separating instruction vs data blocks + sample rendered request] and confirm the pass condition holds — Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test",
+      "falsePositiveGuidance": "(Context Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: CTX-R3: Structured context blocks (JSON/XML sections) separate instructions from data (CTX-R3)",
+        "Implement and operationalize: this Check: Structured context blocks (JSON/XML sections) separate instructions from data",
         "Retain evidence artifacts required by this Check, starting with: Context assembly schema/spec separating instruction vs data blocks + sample rendered request",
-        "Schedule recurring manual verification for CTX-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until CTX-R3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3083,7 +3519,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "change-management",
       "title": "A promotion path must exist from non-prod to prod for prompts, models, and tools",
       "description": "A promotion path shall exist from non-prod to prod for prompts, models, and tools",
-      "whyItMatters": "DEP-M1 (Change Management & Release, mandatory): A promotion path shall exist from non-prod to prod for prompts, models, and tools Failing this leaves a production gap against: 100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change…",
+      "whyItMatters": "A promotion path shall exist from non-prod to prod for prompts, models, and tools Failing this leaves a production gap against: 100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -3102,13 +3538,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DEP-M1 (A promotion path must exist from non-prod to prod for prompts, models, and tools): inspect current evidence for [Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools] and confirm the pass condition holds — 100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record",
-      "falsePositiveGuidance": "DEP-M1 (Change Management & Release): re-verify against a current artifact for this specific Check (DEP-M1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (A promotion path must exist from non-prod to prod for prompts, models, and tools): inspect current evidence for [Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools] and confirm the pass condition holds — 100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record",
+      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: A promotion path must exist from non-prod to prod for prompts, models, and tools (DEP-M1)",
+        "Implement and operationalize: A promotion path must exist from non-prod to prod for prompts, models, and tools",
         "Retain evidence artifacts required by this Check, starting with: Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools",
-        "Schedule recurring manual verification for DEP-M1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DEP-M1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3158,7 +3594,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "change-management",
       "title": "Production changes must be recorded (who/what/when) and linked to reviews",
       "description": "Production changes shall be recorded (who/what/when) and linked to reviews",
-      "whyItMatters": "DEP-M2 (Change Management & Release, mandatory): Production changes shall be recorded (who/what/when) and linked to reviews Failing this leaves a production gap against: 100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID)",
+      "whyItMatters": "Production changes shall be recorded (who/what/when) and linked to reviews Failing this leaves a production gap against: 100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID)",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -3177,13 +3613,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DEP-M2 (Be recorded (who/what/when) and linked to reviews): inspect current evidence for [Change log or ticket export for AI artifact releases] and confirm the pass condition holds — 100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID)",
-      "falsePositiveGuidance": "DEP-M2 (Change Management & Release): re-verify against a current artifact for this specific Check (DEP-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Be recorded (who/what/when) and linked to reviews): inspect current evidence for [Change log or ticket export for AI artifact releases] and confirm the pass condition holds — 100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID)",
+      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Production changes must be recorded (who/what/when) and linked to reviews (DEP-M2)",
+        "Implement and operationalize: Production changes must be recorded (who/what/when) and linked to reviews",
         "Retain evidence artifacts required by this Check, starting with: Change log or ticket export for AI artifact releases",
-        "Schedule recurring manual verification for DEP-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DEP-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3233,7 +3669,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "change-management",
       "title": "Infrastructure and AI config must be defined as code or equivalent declarative config",
       "description": "Infrastructure and AI config shall be defined as code or equivalent declarative config",
-      "whyItMatters": "DEP-M3 (Change Management & Release, mandatory): Infrastructure and AI config shall be defined as code or equivalent declarative config Failing this leaves a production gap against: Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100%",
+      "whyItMatters": "Infrastructure and AI config shall be defined as code or equivalent declarative config Failing this leaves a production gap against: Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100%",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -3256,13 +3692,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DEP-M3 (Infrastructure and AI config must be defined as code or equivalent declarative config): inspect current evidence for [IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts] and confirm the pass condition holds — Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100%",
-      "falsePositiveGuidance": "DEP-M3 (Change Management & Release): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Infrastructure and AI config must be defined as code or equivalent declarative config): inspect current evidence for [IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts] and confirm the pass condition holds — Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100%",
+      "falsePositiveGuidance": "(Change Management & Release): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Infrastructure and AI config must be defined as code or equivalent declarative config (DEP-M3)",
+        "Implement and operationalize: Infrastructure and AI config must be defined as code or equivalent declarative config",
         "Retain evidence artifacts required by this Check, starting with: IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts",
-        "Wire or verify detectors declared on DEP-M3 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DEP-M3 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3310,9 +3746,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DEP-R1",
       "category": "change-management",
-      "title": "DEP-R1: Canary or progressive delivery for high-traffic AI changes",
+      "title": "Production systems should have canary or progressive delivery for high-traffic AI changes",
       "description": "Canary or progressive delivery for high-traffic AI changes",
-      "whyItMatters": "DEP-R1 (Change Management & Release, recommended): Canary or progressive delivery for high-traffic AI changes Failing this leaves a production gap against: High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release ≤90 days includes canary metrics link",
+      "whyItMatters": "Canary or progressive delivery for high-traffic AI changes Failing this leaves a production gap against: High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release ≤90 days includes canary metrics link",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -3331,13 +3767,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DEP-R1 (DEP-R1: Canary or progressive delivery for high-traffic AI changes): inspect current evidence for [Progressive delivery/canary config for high-traffic AI changes + last canary promotion log] and confirm the pass condition holds — High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release ≤90 days includes canary metrics link",
-      "falsePositiveGuidance": "DEP-R1 (Change Management & Release): re-verify against a current artifact for this specific Check (DEP-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Canary or progressive delivery for high-traffic AI changes): inspect current evidence for [Progressive delivery/canary config for high-traffic AI changes + last canary promotion log] and confirm the pass condition holds — High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release ≤90 days includes canary metrics link",
+      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: DEP-R1: Canary or progressive delivery for high-traffic AI changes (DEP-R1)",
+        "Implement and operationalize: this Check: Canary or progressive delivery for high-traffic AI changes",
         "Retain evidence artifacts required by this Check, starting with: Progressive delivery/canary config for high-traffic AI changes + last canary promotion log",
-        "Schedule recurring manual verification for DEP-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DEP-R1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3385,9 +3821,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DEP-R2",
       "category": "change-management",
-      "title": "DEP-R2: Environment parity checks for model pins and tool catalogs",
+      "title": "Production systems should have environment parity checks for model pins and tool catalogs",
       "description": "Environment parity checks for model pins and tool catalogs",
-      "whyItMatters": "DEP-R2 (Change Management & Release, recommended): Environment parity checks for model pins and tool catalogs Failing this leaves a production gap against: Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan ≤30 days with 0 unexplained drifts",
+      "whyItMatters": "Environment parity checks for model pins and tool catalogs Failing this leaves a production gap against: Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan ≤30 days with 0 unexplained drifts",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -3406,13 +3842,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DEP-R2 (DEP-R2: Environment parity checks for model pins and tool catalogs): inspect current evidence for [Environment parity checklist for model pins and tool catalogs + last parity scan across envs] and confirm the pass condition holds — Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan ≤30 days with 0 unexplained drifts",
-      "falsePositiveGuidance": "DEP-R2 (Change Management & Release): re-verify against a current artifact for this specific Check (DEP-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Environment parity checks for model pins and tool catalogs): inspect current evidence for [Environment parity checklist for model pins and tool catalogs + last parity scan across envs] and confirm the pass condition holds — Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan ≤30 days with 0 unexplained drifts",
+      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: DEP-R2: Environment parity checks for model pins and tool catalogs (DEP-R2)",
+        "Implement and operationalize: this Check: Environment parity checks for model pins and tool catalogs",
         "Retain evidence artifacts required by this Check, starting with: Environment parity checklist for model pins and tool catalogs + last parity scan across envs",
-        "Schedule recurring manual verification for DEP-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DEP-R2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3460,9 +3896,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DEP-R3",
       "category": "change-management",
-      "title": "DEP-R3: Automated migration for embedding/index version upgrades",
+      "title": "Production systems should have automated migration for embedding/index version upgrades",
       "description": "Automated migration for embedding/index version upgrades",
-      "whyItMatters": "DEP-R3 (Change Management & Release, recommended): Automated migration for embedding/index version upgrades Failing this leaves a production gap against: Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded withou…",
+      "whyItMatters": "Automated migration for embedding/index version upgrades Failing this leaves a production gap against: Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -3481,13 +3917,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DEP-R3 (DEP-R3: Automated migration for embedding/index version upgrades): inspect current evidence for [Embedding/index migration runbook + last automated migration job log and validation] and confirm the pass condition holds — Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps",
-      "falsePositiveGuidance": "DEP-R3 (Change Management & Release): re-verify against a current artifact for this specific Check (DEP-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Automated migration for embedding/index version upgrades): inspect current evidence for [Embedding/index migration runbook + last automated migration job log and validation] and confirm the pass condition holds — Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps",
+      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: DEP-R3: Automated migration for embedding/index version upgrades (DEP-R3)",
+        "Implement and operationalize: this Check: Automated migration for embedding/index version upgrades",
         "Retain evidence artifacts required by this Check, starting with: Embedding/index migration runbook + last automated migration job log and validation",
-        "Schedule recurring manual verification for DEP-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DEP-R3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3537,7 +3973,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "data-governance",
       "title": "Production retrieval corpora and indexes must have owners, versioning, and refresh cadence",
       "description": "Production retrieval corpora and indexes shall have owners, versioning, and refresh cadence",
-      "whyItMatters": "DG-M1 (Data Governance & Quality, mandatory): Production retrieval corpora and indexes shall have owners, versioning, and refresh cadence Failing this leaves a production gap against: 100% of production indexes have owner + version ID + refresh cadence; 0 indexes missing any field; stale beyond cadence flagged or rebuilt",
+      "whyItMatters": "Production retrieval corpora and indexes shall have owners, versioning, and refresh cadence Failing this leaves a production gap against: 100% of production indexes have owner + version ID + refresh cadence; 0 indexes missing any field; stale beyond cadence flagged or rebuilt",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -3560,13 +3996,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DG-M1 (Production retrieval corpora and indexes must have owners, versioning, and refresh cadence): inspect current evidence for [Corpus/index inventory with owner, version ID, and refresh schedule] and confirm the pass condition holds — 100% of production indexes have owner + version ID + refresh cadence; 0 indexes missing any field; stale beyond cadence flagged or rebuilt",
-      "falsePositiveGuidance": "DG-M1 (Data Governance & Quality): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (Production retrieval corpora and indexes must have owners, versioning, and refresh cadence): inspect current evidence for [Corpus/index inventory with owner, version ID, and refresh schedule] and confirm the pass condition holds — 100% of production indexes have owner + version ID + refresh cadence; 0 indexes missing any field; stale beyond cadence flagged or rebuilt",
+      "falsePositiveGuidance": "(Data Governance & Quality): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: Production retrieval corpora and indexes must have owners, versioning, and refresh cadence (DG-M1)",
+        "Implement and operationalize: Production retrieval corpora and indexes must have owners, versioning, and refresh cadence",
         "Retain evidence artifacts required by this Check, starting with: Corpus/index inventory with owner, version ID, and refresh schedule",
-        "Wire or verify detectors declared on DG-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DG-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3606,7 +4042,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "data-governance",
       "title": "Data used for evals or fine-tuning must have documented provenance and quality criteria",
       "description": "Data used for evals or fine-tuning shall have documented provenance and quality criteria",
-      "whyItMatters": "DG-M2 (Data Governance & Quality, mandatory): Data used for evals or fine-tuning shall have documented provenance and quality criteria Failing this leaves a production gap against: 100% of datasets used in production gates or fine-tunes have provenance + quality criteria documented; promotion blocked if missing (CI or review checklist evi…",
+      "whyItMatters": "Data used for evals or fine-tuning shall have documented provenance and quality criteria Failing this leaves a production gap against: 100% of datasets used in production gates or fine-tunes have provenance + quality criteria documented; promotion blocked if missing (CI or review checklist evidence)",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -3625,13 +4061,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DG-M2 (Data used for evals or fine-tuning must have documented provenance and quality criteria): inspect current evidence for [Dataset cards or registry entries for eval/fine-tune sets] and confirm the pass condition holds — 100% of datasets used in production gates or fine-tunes have provenance + quality criteria documented; promotion blocked if missing (CI or review checklist evidence)",
-      "falsePositiveGuidance": "DG-M2 (Data Governance & Quality): re-verify against a current artifact for this specific Check (DG-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Data used for evals or fine-tuning must have documented provenance and quality criteria): inspect current evidence for [Dataset cards or registry entries for eval/fine-tune sets] and confirm the pass condition holds — 100% of datasets used in production gates or fine-tunes have provenance + quality criteria documented; promotion blocked if missing (CI or review checklist evidence)",
+      "falsePositiveGuidance": "(Data Governance & Quality): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Data used for evals or fine-tuning must have documented provenance and quality criteria (DG-M2)",
+        "Implement and operationalize: Data used for evals or fine-tuning must have documented provenance and quality criteria",
         "Retain evidence artifacts required by this Check, starting with: Dataset cards or registry entries for eval/fine-tune sets",
-        "Schedule recurring manual verification for DG-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DG-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3671,7 +4107,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "data-governance",
       "title": "Feedback or memory promotion paths that affect future answers must be governed",
       "description": "Feedback or memory promotion paths that affect future answers shall be governed",
-      "whyItMatters": "DG-M3 (Data Governance & Quality, mandatory): Feedback or memory promotion paths that affect future answers shall be governed Failing this leaves a production gap against: 100% of promotion paths require policy check or human approval; tests show ungated promotion to durable memory/training is denied",
+      "whyItMatters": "Feedback or memory promotion paths that affect future answers shall be governed Failing this leaves a production gap against: 100% of promotion paths require policy check or human approval; tests show ungated promotion to durable memory/training is denied",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -3690,13 +4126,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DG-M3 (Feedback or memory promotion paths that affect future answers must be governed): inspect current evidence for [Promotion policy + write-path controls for feedback→memory/training] and confirm the pass condition holds — 100% of promotion paths require policy check or human approval; tests show ungated promotion to durable memory/training is denied",
-      "falsePositiveGuidance": "DG-M3 (Data Governance & Quality): re-verify against a current artifact for this specific Check (DG-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Feedback or memory promotion paths that affect future answers must be governed): inspect current evidence for [Promotion policy + write-path controls for feedback→memory/training] and confirm the pass condition holds — 100% of promotion paths require policy check or human approval; tests show ungated promotion to durable memory/training is denied",
+      "falsePositiveGuidance": "(Data Governance & Quality): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Feedback or memory promotion paths that affect future answers must be governed (DG-M3)",
+        "Implement and operationalize: Feedback or memory promotion paths that affect future answers must be governed",
         "Retain evidence artifacts required by this Check, starting with: Promotion policy + write-path controls for feedback→memory/training",
-        "Schedule recurring manual verification for DG-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DG-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3734,9 +4170,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DG-R1",
       "category": "data-governance",
-      "title": "DG-R1: Automated freshness and coverage metrics for critical corpora",
+      "title": "Production systems should have automated freshness and coverage metrics for critical corpora",
       "description": "Automated freshness and coverage metrics for critical corpora",
-      "whyItMatters": "DG-R1 (Data Governance & Quality, recommended): Automated freshness and coverage metrics for critical corpora Failing this leaves a production gap against: Each critical corpus has a documented freshness SLO (e.g. max age hours); ≥95% of sampled docs meet the SLO in the last 7 days; alert fires on freshness breach",
+      "whyItMatters": "Automated freshness and coverage metrics for critical corpora Failing this leaves a production gap against: Each critical corpus has a documented freshness SLO (e.g. max age hours); ≥95% of sampled docs meet the SLO in the last 7 days; alert fires on freshness breach",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -3755,13 +4191,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DG-R1 (DG-R1: Automated freshness and coverage metrics for critical corpora): inspect current evidence for [Corpus freshness dashboard (or job report) + alert config export covering each critical corpus ID] and confirm the pass condition holds — Each critical corpus has a documented freshness SLO (e.g. max age hours); ≥95% of sampled docs meet the SLO in the last 7 days; alert fires on freshness breach",
-      "falsePositiveGuidance": "DG-R1 (Data Governance & Quality): re-verify against a current artifact for this specific Check (DG-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Automated freshness and coverage metrics for critical corpora): inspect current evidence for [Corpus freshness dashboard (or job report) + alert config export covering each critical corpus ID] and confirm the pass condition holds — Each critical corpus has a documented freshness SLO (e.g. max age hours); ≥95% of sampled docs meet the SLO in the last 7 days; alert fires on freshness breach",
+      "falsePositiveGuidance": "(Data Governance & Quality): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: DG-R1: Automated freshness and coverage metrics for critical corpora (DG-R1)",
+        "Implement and operationalize: this Check: Automated freshness and coverage metrics for critical corpora",
         "Retain evidence artifacts required by this Check, starting with: Corpus freshness dashboard (or job report) + alert config export covering each critical corpus ID",
-        "Schedule recurring manual verification for DG-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DG-R1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3799,9 +4235,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DG-R2",
       "category": "data-governance",
-      "title": "DG-R2: Train/serve skew monitoring for features or embeddings",
+      "title": "Production systems should have train/serve skew monitoring for features or embeddings",
       "description": "Train/serve skew monitoring for features or embeddings",
-      "whyItMatters": "DG-R2 (Data Governance & Quality, recommended): Train/serve skew monitoring for features or embeddings Failing this leaves a production gap against: Skew job ran within the last 7 days for every production embedding/feature pipeline; at least one documented threshold exists; breach creates a tracked ticket…",
+      "whyItMatters": "Train/serve skew monitoring for features or embeddings Failing this leaves a production gap against: Skew job ran within the last 7 days for every production embedding/feature pipeline; at least one documented threshold exists; breach creates a tracked ticket or page",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -3820,13 +4256,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DG-R2 (DG-R2: Train/serve skew monitoring for features or embeddings): inspect current evidence for [Skew monitor config + last weekly skew report comparing train vs serve feature/embedding distributions] and confirm the pass condition holds — Skew job ran within the last 7 days for every production embedding/feature pipeline; at least one documented threshold exists; breach creates a tracked ticket or page",
-      "falsePositiveGuidance": "DG-R2 (Data Governance & Quality): re-verify against a current artifact for this specific Check (DG-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Train/serve skew monitoring for features or embeddings): inspect current evidence for [Skew monitor config + last weekly skew report comparing train vs serve feature/embedding distributions] and confirm the pass condition holds — Skew job ran within the last 7 days for every production embedding/feature pipeline; at least one documented threshold exists; breach creates a tracked ticket or page",
+      "falsePositiveGuidance": "(Data Governance & Quality): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: DG-R2: Train/serve skew monitoring for features or embeddings (DG-R2)",
-        "Retain evidence artifacts required by this Check, starting with: Skew monitor config + last weekly skew report comparing train vs serve feature/embedding distributi…",
-        "Schedule recurring manual verification for DG-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DG-R2 passes"
+        "Implement and operationalize: this Check: Train/serve skew monitoring for features or embeddings",
+        "Retain evidence artifacts required by this Check, starting with: Skew monitor config + last weekly skew report comparing train vs serve feature/embedding distributions",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3864,9 +4300,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DG-R3",
       "category": "data-governance",
-      "title": "DG-R3: Dataset cards for major eval and fine-tune sets",
+      "title": "Production systems should have dataset cards for major eval and fine-tune sets",
       "description": "Dataset cards for major eval and fine-tune sets",
-      "whyItMatters": "DG-R3 (Data Governance & Quality, recommended): Dataset cards for major eval and fine-tune sets Failing this leaves a production gap against: 100% of major eval/fine-tune sets used in production promotion have a dataset card with purpose, source, PII handling, and last-updated date ≤12 months",
+      "whyItMatters": "Dataset cards for major eval and fine-tune sets Failing this leaves a production gap against: 100% of major eval/fine-tune sets used in production promotion have a dataset card with purpose, source, PII handling, and last-updated date ≤12 months",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -3885,13 +4321,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DG-R3 (DG-R3: Dataset cards for major eval and fine-tune sets): inspect current evidence for [Dataset cards (or equivalent metadata) for each major eval and fine-tune corpus in the registry] and confirm the pass condition holds — 100% of major eval/fine-tune sets used in production promotion have a dataset card with purpose, source, PII handling, and last-updated date ≤12 months",
-      "falsePositiveGuidance": "DG-R3 (Data Governance & Quality): re-verify against a current artifact for this specific Check (DG-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Dataset cards for major eval and fine-tune sets): inspect current evidence for [Dataset cards (or equivalent metadata) for each major eval and fine-tune corpus in the registry] and confirm the pass condition holds — 100% of major eval/fine-tune sets used in production promotion have a dataset card with purpose, source, PII handling, and last-updated date ≤12 months",
+      "falsePositiveGuidance": "(Data Governance & Quality): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: DG-R3: Dataset cards for major eval and fine-tune sets (DG-R3)",
+        "Implement and operationalize: this Check: Dataset cards for major eval and fine-tune sets",
         "Retain evidence artifacts required by this Check, starting with: Dataset cards (or equivalent metadata) for each major eval and fine-tune corpus in the registry",
-        "Schedule recurring manual verification for DG-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DG-R3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3931,7 +4367,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "platform-engineering",
       "title": "Builders must have a documented golden path for deploying AI features to production",
       "description": "Builders shall have a documented golden path for deploying AI features to production",
-      "whyItMatters": "DX-M1 (Platform Engineering, mandatory): Builders shall have a documented golden path for deploying AI features to production Failing this leaves a production gap against: Doc exists with version/owner; covers auth, secrets, evals, and promote steps; reviewed ≤ 12 months",
+      "whyItMatters": "Builders shall have a documented golden path for deploying AI features to production Failing this leaves a production gap against: Doc exists with version/owner; covers auth, secrets, evals, and promote steps; reviewed ≤ 12 months",
       "severity": "medium",
       "weight": 2,
       "gate": "mandatory",
@@ -3943,13 +4379,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For DX-M1 (Builders must have a documented golden path for deploying AI features to production): inspect current evidence for [Golden-path documentation with steps from scaffold to production] and confirm the pass condition holds — Doc exists with version/owner; covers auth, secrets, evals, and promote steps; reviewed ≤ 12 months",
-      "falsePositiveGuidance": "DX-M1 (Platform Engineering): re-verify against a current artifact for this specific Check (DX-M1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Builders must have a documented golden path for deploying AI features to production): inspect current evidence for [Golden-path documentation with steps from scaffold to production] and confirm the pass condition holds — Doc exists with version/owner; covers auth, secrets, evals, and promote steps; reviewed ≤ 12 months",
+      "falsePositiveGuidance": "(Platform Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Builders must have a documented golden path for deploying AI features to production (DX-M1)",
+        "Implement and operationalize: Builders must have a documented golden path for deploying AI features to production",
         "Retain evidence artifacts required by this Check, starting with: Golden-path documentation with steps from scaffold to production",
-        "Schedule recurring manual verification for DX-M1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DX-M1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -3991,7 +4427,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "platform-engineering",
       "title": "Local or CI self-serve checks must cover critical mandatory controls (auth, secrets, basic evals)",
       "description": "Local or CI self-serve checks shall cover critical mandatory controls (auth, secrets, basic evals)",
-      "whyItMatters": "DX-M2 (Platform Engineering, mandatory): Local or CI self-serve checks shall cover critical mandatory controls (auth, secrets, basic evals) Failing this leaves a production gap against: Default AI pipeline runs auth, secret-scan, and basic eval checks; failing any blocks merge/promote in the golden-path template",
+      "whyItMatters": "Local or CI self-serve checks shall cover critical mandatory controls (auth, secrets, basic evals) Failing this leaves a production gap against: Default AI pipeline runs auth, secret-scan, and basic eval checks; failing any blocks merge/promote in the golden-path template",
       "severity": "medium",
       "weight": 2,
       "gate": "mandatory",
@@ -4010,13 +4446,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DX-M2 (Cover critical mandatory controls (auth, secrets, basic evals)): inspect current evidence for [CI/local check config covering auth, secrets, and basic evals] and confirm the pass condition holds — Default AI pipeline runs auth, secret-scan, and basic eval checks; failing any blocks merge/promote in the golden-path template",
-      "falsePositiveGuidance": "DX-M2 (Platform Engineering): re-verify against a current artifact for this specific Check (DX-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Cover critical mandatory controls (auth, secrets, basic evals)): inspect current evidence for [CI/local check config covering auth, secrets, and basic evals] and confirm the pass condition holds — Default AI pipeline runs auth, secret-scan, and basic eval checks; failing any blocks merge/promote in the golden-path template",
+      "falsePositiveGuidance": "(Platform Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Local or CI self-serve checks must cover critical mandatory controls (auth, secrets, basic evals) (DX-M2)",
+        "Implement and operationalize: Local or CI self-serve checks must cover critical mandatory controls (auth, secrets, basic evals)",
         "Retain evidence artifacts required by this Check, starting with: CI/local check config covering auth, secrets, and basic evals",
-        "Schedule recurring manual verification for DX-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DX-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4058,7 +4494,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "platform-engineering",
       "title": "Ownership and support channel must exist for the AI platform/paved road",
       "description": "Ownership and support channel shall exist for the AI platform/paved road",
-      "whyItMatters": "DX-M3 (Platform Engineering, mandatory): Ownership and support channel shall exist for the AI platform/paved road Failing this leaves a production gap against: Named owner team and support channel documented; channel responds to a test ping within published SLA or has on-call rotation listed",
+      "whyItMatters": "Ownership and support channel shall exist for the AI platform/paved road Failing this leaves a production gap against: Named owner team and support channel documented; channel responds to a test ping within published SLA or has on-call rotation listed",
       "severity": "medium",
       "weight": 2,
       "gate": "mandatory",
@@ -4070,13 +4506,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For DX-M3 (Ownership and support channel must exist for the AI platform/paved road): inspect current evidence for [Platform ownership record + support channel (on-call, Slack, ticket queue)] and confirm the pass condition holds — Named owner team and support channel documented; channel responds to a test ping within published SLA or has on-call rotation listed",
-      "falsePositiveGuidance": "DX-M3 (Platform Engineering): re-verify against a current artifact for this specific Check (DX-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Ownership and support channel must exist for the AI platform/paved road): inspect current evidence for [Platform ownership record + support channel (on-call, Slack, ticket queue)] and confirm the pass condition holds — Named owner team and support channel documented; channel responds to a test ping within published SLA or has on-call rotation listed",
+      "falsePositiveGuidance": "(Platform Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Ownership and support channel must exist for the AI platform/paved road (DX-M3)",
+        "Implement and operationalize: Ownership and support channel must exist for the AI platform/paved road",
         "Retain evidence artifacts required by this Check, starting with: Platform ownership record + support channel (on-call, Slack, ticket queue)",
-        "Schedule recurring manual verification for DX-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DX-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4116,9 +4552,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DX-R1",
       "category": "platform-engineering",
-      "title": "DX-R1: Scaffolding templates for agents, RAG, and MCP with safe defaults",
+      "title": "Production systems should have scaffolding templates for agents, RAG, and MCP with safe defaults",
       "description": "Scaffolding templates for agents, RAG, and MCP with safe defaults",
-      "whyItMatters": "DX-R1 (Platform Engineering, recommended): Scaffolding templates for agents, RAG, and MCP with safe defaults Failing this leaves a production gap against: Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults on; ≥1 new service used a template in the last 90 days or adoption target is…",
+      "whyItMatters": "Scaffolding templates for agents, RAG, and MCP with safe defaults Failing this leaves a production gap against: Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults on; ≥1 new service used a template in the last 90 days or adoption target is documented",
       "severity": "medium",
       "weight": 2,
       "gate": "recommended",
@@ -4141,13 +4577,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DX-R1 (DX-R1: Scaffolding templates for agents, RAG, and MCP with safe defaults): inspect current evidence for [Scaffolding template repo/catalog for agents, RAG, and MCP with default security settings + adoption metrics] and confirm the pass condition holds — Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults on; ≥1 new service used a template in the last 90 days or adoption target is documented",
-      "falsePositiveGuidance": "DX-R1 (Platform Engineering): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (Scaffolding templates for agents, RAG, and MCP with safe defaults): inspect current evidence for [Scaffolding template repo/catalog for agents, RAG, and MCP with default security settings + adoption metrics] and confirm the pass condition holds — Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults on; ≥1 new service used a template in the last 90 days or adoption target is documented",
+      "falsePositiveGuidance": "(Platform Engineering): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: DX-R1: Scaffolding templates for agents, RAG, and MCP with safe defaults (DX-R1)",
-        "Retain evidence artifacts required by this Check, starting with: Scaffolding template repo/catalog for agents, RAG, and MCP with default security settings + adoptio…",
-        "Wire or verify detectors declared on DX-R1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DX-R1 passes"
+        "Implement and operationalize: this Check: Scaffolding templates for agents, RAG, and MCP with safe defaults",
+        "Retain evidence artifacts required by this Check, starting with: Scaffolding template repo/catalog for agents, RAG, and MCP with default security settings + adoption metrics",
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4187,9 +4623,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DX-R2",
       "category": "platform-engineering",
-      "title": "DX-R2: Inner-loop eval runners developers can run before PR",
+      "title": "Production systems should have inner-loop eval runners developers can run before PR",
       "description": "Inner-loop eval runners developers can run before PR",
-      "whyItMatters": "DX-R2 (Platform Engineering, recommended): Inner-loop eval runners developers can run before PR Failing this leaves a production gap against: Developers can run the core eval subset locally or in a one-command inner loop; last sampled AI PR (≤30 days) shows pre-PR eval evidence or documented waiver",
+      "whyItMatters": "Inner-loop eval runners developers can run before PR Failing this leaves a production gap against: Developers can run the core eval subset locally or in a one-command inner loop; last sampled AI PR (≤30 days) shows pre-PR eval evidence or documented waiver",
       "severity": "medium",
       "weight": 2,
       "gate": "recommended",
@@ -4208,13 +4644,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DX-R2 (DX-R2: Inner-loop eval runners developers can run before PR): inspect current evidence for [Local/inner-loop eval runner docs + package + sample developer run log before a recent PR] and confirm the pass condition holds — Developers can run the core eval subset locally or in a one-command inner loop; last sampled AI PR (≤30 days) shows pre-PR eval evidence or documented waiver",
-      "falsePositiveGuidance": "DX-R2 (Platform Engineering): re-verify against a current artifact for this specific Check (DX-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Inner-loop eval runners developers can run before PR): inspect current evidence for [Local/inner-loop eval runner docs + package + sample developer run log before a recent PR] and confirm the pass condition holds — Developers can run the core eval subset locally or in a one-command inner loop; last sampled AI PR (≤30 days) shows pre-PR eval evidence or documented waiver",
+      "falsePositiveGuidance": "(Platform Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: DX-R2: Inner-loop eval runners developers can run before PR (DX-R2)",
+        "Implement and operationalize: this Check: Inner-loop eval runners developers can run before PR",
         "Retain evidence artifacts required by this Check, starting with: Local/inner-loop eval runner docs + package + sample developer run log before a recent PR",
-        "Schedule recurring manual verification for DX-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DX-R2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4254,9 +4690,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DX-R3",
       "category": "platform-engineering",
-      "title": "DX-R3: DX metrics: time-to-safe-production and bypass rate",
+      "title": "Production systems should have dX metrics: time-to-safe-production and bypass rate",
       "description": "DX metrics: time-to-safe-production and bypass rate",
-      "whyItMatters": "DX-R3 (Platform Engineering, recommended): DX metrics: time-to-safe-production and bypass rate Failing this leaves a production gap against: Both metrics are defined with formulas; published for ≥30 consecutive days; bypass rate has an alert or review threshold with a named owner",
+      "whyItMatters": "DX metrics: time-to-safe-production and bypass rate Failing this leaves a production gap against: Both metrics are defined with formulas; published for ≥30 consecutive days; bypass rate has an alert or review threshold with a named owner",
       "severity": "medium",
       "weight": 2,
       "gate": "recommended",
@@ -4275,13 +4711,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For DX-R3 (DX-R3: DX metrics: time-to-safe-production and bypass rate): inspect current evidence for [Platform DX dashboard (or weekly report) with time-to-safe-production and policy-bypass rate definitions + last 30 days series] and confirm the pass condition holds — Both metrics are defined with formulas; published for ≥30 consecutive days; bypass rate has an alert or review threshold with a named owner",
-      "falsePositiveGuidance": "DX-R3 (Platform Engineering): re-verify against a current artifact for this specific Check (DX-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (DX metrics: time-to-safe-production and bypass rate): inspect current evidence for [Platform DX dashboard (or weekly report) with time-to-safe-production and policy-bypass rate definitions + last 30 days series] and confirm the pass condition holds — Both metrics are defined with formulas; published for ≥30 consecutive days; bypass rate has an alert or review threshold with a named owner",
+      "falsePositiveGuidance": "(Platform Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: DX-R3: DX metrics: time-to-safe-production and bypass rate (DX-R3)",
-        "Retain evidence artifacts required by this Check, starting with: Platform DX dashboard (or weekly report) with time-to-safe-production and policy-bypass rate defini…",
-        "Schedule recurring manual verification for DX-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until DX-R3 passes"
+        "Implement and operationalize: this Check: DX metrics: time-to-safe-production and bypass rate",
+        "Retain evidence artifacts required by this Check, starting with: Platform DX dashboard (or weekly report) with time-to-safe-production and policy-bypass rate definitions + last 30 days series",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4323,7 +4759,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "evaluation",
       "title": "Critical customer journeys must have automated offline eval suites on every relevant change",
       "description": "Critical customer journeys shall have automated offline eval suites on every relevant change",
-      "whyItMatters": "EVL-M1 (Evaluation, mandatory): Critical customer journeys shall have automated offline eval suites on every relevant change Failing this leaves a production gap against: 100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in last 30 days triggered the suite (or documented waiver…",
+      "whyItMatters": "Critical customer journeys shall have automated offline eval suites on every relevant change Failing this leaves a production gap against: 100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in last 30 days triggered the suite (or documented waiver ≤ 14 days)",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -4346,13 +4782,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For EVL-M1 (Critical customer journeys must have automated offline eval suites on every relevant change): inspect current evidence for [Eval suite registry mapped to journeys + CI runs on prompt/model/tool changes] and confirm the pass condition holds — 100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in last 30 days triggered the suite (or documented waiver ≤ 14 days)",
-      "falsePositiveGuidance": "EVL-M1 (Evaluation): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Critical customer journeys must have automated offline eval suites on every relevant change): inspect current evidence for [Eval suite registry mapped to journeys + CI runs on prompt/model/tool changes] and confirm the pass condition holds — 100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in last 30 days triggered the suite (or documented waiver ≤ 14 days)",
+      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Critical customer journeys must have automated offline eval suites on every relevant change (EVL-M1)",
+        "Implement and operationalize: Critical customer journeys must have automated offline eval suites on every relevant change",
         "Retain evidence artifacts required by this Check, starting with: Eval suite registry mapped to journeys + CI runs on prompt/model/tool changes",
-        "Wire or verify detectors declared on EVL-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until EVL-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4391,7 +4827,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "evaluation",
       "title": "Release gates must enforce numeric minimum thresholds for quality and safety metrics",
       "description": "Release gates shall enforce numeric minimum thresholds for quality and safety metrics",
-      "whyItMatters": "EVL-M2 (Evaluation, mandatory): Release gates shall enforce numeric minimum thresholds for quality and safety metrics Failing this leaves a production gap against: Each critical journey has ≥1 quality and ≥1 safety metric with numeric threshold; failing gate blocks deploy in CI",
+      "whyItMatters": "Release gates shall enforce numeric minimum thresholds for quality and safety metrics Failing this leaves a production gap against: Each critical journey has ≥1 quality and ≥1 safety metric with numeric threshold; failing gate blocks deploy in CI",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -4410,13 +4846,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For EVL-M2 (Release gates must enforce numeric minimum thresholds for quality and safety metrics): inspect current evidence for [Gate config with metric names and thresholds + CI reports] and confirm the pass condition holds — Each critical journey has ≥1 quality and ≥1 safety metric with numeric threshold; failing gate blocks deploy in CI",
-      "falsePositiveGuidance": "EVL-M2 (Evaluation): re-verify against a current artifact for this specific Check (EVL-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Release gates must enforce numeric minimum thresholds for quality and safety metrics): inspect current evidence for [Gate config with metric names and thresholds + CI reports] and confirm the pass condition holds — Each critical journey has ≥1 quality and ≥1 safety metric with numeric threshold; failing gate blocks deploy in CI",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Release gates must enforce numeric minimum thresholds for quality and safety metrics (EVL-M2)",
+        "Implement and operationalize: Release gates must enforce numeric minimum thresholds for quality and safety metrics",
         "Retain evidence artifacts required by this Check, starting with: Gate config with metric names and thresholds + CI reports",
-        "Schedule recurring manual verification for EVL-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until EVL-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4455,7 +4891,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "evaluation",
       "title": "Production must have online signals for task success/failure and safety refusals",
       "description": "Production shall have online signals for task success/failure and safety refusals",
-      "whyItMatters": "EVL-M3 (Evaluation, mandatory): Production shall have online signals for task success/failure and safety refusals Failing this leaves a production gap against: Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness ≤ 24 hours on the dashboard",
+      "whyItMatters": "Production shall have online signals for task success/failure and safety refusals Failing this leaves a production gap against: Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness ≤ 24 hours on the dashboard",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -4474,13 +4910,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For EVL-M3 (Production must have online signals for task success/failure and safety refusals): inspect current evidence for [Dashboard/metrics for task success and safety refusal rates] and confirm the pass condition holds — Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness ≤ 24 hours on the dashboard",
-      "falsePositiveGuidance": "EVL-M3 (Evaluation): re-verify against a current artifact for this specific Check (EVL-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Production must have online signals for task success/failure and safety refusals): inspect current evidence for [Dashboard/metrics for task success and safety refusal rates] and confirm the pass condition holds — Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness ≤ 24 hours on the dashboard",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Production must have online signals for task success/failure and safety refusals (EVL-M3)",
+        "Implement and operationalize: Production must have online signals for task success/failure and safety refusals",
         "Retain evidence artifacts required by this Check, starting with: Dashboard/metrics for task success and safety refusal rates",
-        "Schedule recurring manual verification for EVL-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until EVL-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4519,7 +4955,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "evaluation",
       "title": "Shadow deployment with eval comparison must precede full cutover for high-risk AI changes",
       "description": "Shadow deployment with eval comparison shall precede full cutover for high-risk AI changes",
-      "whyItMatters": "EVL-M4 (Evaluation, mandatory): Shadow deployment with eval comparison shall precede full cutover for high-risk AI changes Failing this leaves a production gap against: PASS if the last high-risk AI cutover retained a shadow/canary comparison that met promotion criteria before 100% traffic",
+      "whyItMatters": "Shadow deployment with eval comparison shall precede full cutover for high-risk AI changes Failing this leaves a production gap against: PASS if the last high-risk AI cutover retained a shadow/canary comparison that met promotion criteria before 100% traffic",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -4538,13 +4974,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For EVL-M4 (Shadow deployment with eval comparison must precede full cutover for high-risk AI changes): inspect current evidence for [Shadow/canary eval config + comparison report for the last high-risk cutover] and confirm the pass condition holds — PASS if the last high-risk AI cutover retained a shadow/canary comparison that met promotion criteria before 100% traffic",
-      "falsePositiveGuidance": "EVL-M4 (Evaluation): re-verify against a current artifact for this specific Check (EVL-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Shadow deployment with eval comparison must precede full cutover for high-risk AI changes): inspect current evidence for [Shadow/canary eval config + comparison report for the last high-risk cutover] and confirm the pass condition holds — PASS if the last high-risk AI cutover retained a shadow/canary comparison that met promotion criteria before 100% traffic",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Shadow deployment with eval comparison must precede full cutover for high-risk AI changes (EVL-M4)",
+        "Implement and operationalize: Shadow deployment with eval comparison must precede full cutover for high-risk AI changes",
         "Retain evidence artifacts required by this Check, starting with: Shadow/canary eval config + comparison report for the last high-risk cutover",
-        "Schedule recurring manual verification for EVL-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until EVL-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4581,9 +5017,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "EVL-R1",
       "category": "evaluation",
-      "title": "EVL-R1: Separate eval tracks for regression, adversarial, and distribution-shift cases",
+      "title": "Production systems should have separate eval tracks for regression, adversarial, and distribution-shift cases",
       "description": "Separate eval tracks for regression, adversarial, and distribution-shift cases",
-      "whyItMatters": "EVL-R1 (Evaluation, recommended): Separate eval tracks for regression, adversarial, and distribution-shift cases Failing this leaves a production gap against: All three tracks exist with distinct corpora and owners; each track ran successfully on the last production model/prompt promotion (≤90 days)",
+      "whyItMatters": "Separate eval tracks for regression, adversarial, and distribution-shift cases Failing this leaves a production gap against: All three tracks exist with distinct corpora and owners; each track ran successfully on the last production model/prompt promotion (≤90 days)",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -4602,13 +5038,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For EVL-R1 (EVL-R1: Separate eval tracks for regression, adversarial, and distribution-shift cases): inspect current evidence for [Eval catalog showing separate tracks for regression, adversarial, and distribution-shift + latest CI matrix] and confirm the pass condition holds — All three tracks exist with distinct corpora and owners; each track ran successfully on the last production model/prompt promotion (≤90 days)",
-      "falsePositiveGuidance": "EVL-R1 (Evaluation): re-verify against a current artifact for this specific Check (EVL-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Separate eval tracks for regression, adversarial, and distribution-shift cases): inspect current evidence for [Eval catalog showing separate tracks for regression, adversarial, and distribution-shift + latest CI matrix] and confirm the pass condition holds — All three tracks exist with distinct corpora and owners; each track ran successfully on the last production model/prompt promotion (≤90 days)",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: EVL-R1: Separate eval tracks for regression, adversarial, and distribution-shift cases (EVL-R1)",
-        "Retain evidence artifacts required by this Check, starting with: Eval catalog showing separate tracks for regression, adversarial, and distribution-shift + latest C…",
-        "Schedule recurring manual verification for EVL-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until EVL-R1 passes"
+        "Implement and operationalize: this Check: Separate eval tracks for regression, adversarial, and distribution-shift cases",
+        "Retain evidence artifacts required by this Check, starting with: Eval catalog showing separate tracks for regression, adversarial, and distribution-shift + latest CI matrix",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4645,9 +5081,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "EVL-R2",
       "category": "evaluation",
-      "title": "EVL-R2: Human preference or expert review sampling on a defined cadence",
+      "title": "Production systems should have human preference or expert review sampling on a defined cadence",
       "description": "Human preference or expert review sampling on a defined cadence",
-      "whyItMatters": "EVL-R2 (Evaluation, recommended): Human preference or expert review sampling on a defined cadence Failing this leaves a production gap against: Cadence and sample size are defined; last sample ≤90 days covers production-like prompts; disagreements have adjudication recorded",
+      "whyItMatters": "Human preference or expert review sampling on a defined cadence Failing this leaves a production gap against: Cadence and sample size are defined; last sample ≤90 days covers production-like prompts; disagreements have adjudication recorded",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -4659,13 +5095,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For EVL-R2 (EVL-R2: Human preference or expert review sampling on a defined cadence): inspect current evidence for [Human preference / expert-review sampling protocol + last scored sample set with inter-rater notes] and confirm the pass condition holds — Cadence and sample size are defined; last sample ≤90 days covers production-like prompts; disagreements have adjudication recorded",
-      "falsePositiveGuidance": "EVL-R2 (Evaluation): re-verify against a current artifact for this specific Check (EVL-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Human preference or expert review sampling on a defined cadence): inspect current evidence for [Human preference / expert-review sampling protocol + last scored sample set with inter-rater notes] and confirm the pass condition holds — Cadence and sample size are defined; last sample ≤90 days covers production-like prompts; disagreements have adjudication recorded",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: EVL-R2: Human preference or expert review sampling on a defined cadence (EVL-R2)",
+        "Implement and operationalize: this Check: Human preference or expert review sampling on a defined cadence",
         "Retain evidence artifacts required by this Check, starting with: Human preference / expert-review sampling protocol + last scored sample set with inter-rater notes",
-        "Schedule recurring manual verification for EVL-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until EVL-R2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4704,7 +5140,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "explainability",
       "title": "High-stakes or factual RAG outputs must include provenance (citations or source IDs)",
       "description": "High-stakes or factual RAG outputs shall include provenance (citations or source IDs)",
-      "whyItMatters": "EXP-M1 (Explainability & Transparency, mandatory): High-stakes or factual RAG outputs shall include provenance (citations or source IDs) Failing this leaves a production gap against: On the factual/high-stakes RAG eval set, ≥90% of answers include ≥1 valid source ID/citation that resolves to an authorized corpus document",
+      "whyItMatters": "High-stakes or factual RAG outputs shall include provenance (citations or source IDs) Failing this leaves a production gap against: On the factual/high-stakes RAG eval set, ≥90% of answers include ≥1 valid source ID/citation that resolves to an authorized corpus document",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -4723,13 +5159,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For EXP-M1 (Include provenance (citations or source IDs)): inspect current evidence for [RAG eval suite measuring citation presence/accuracy + sample production traces] and confirm the pass condition holds — On the factual/high-stakes RAG eval set, ≥90% of answers include ≥1 valid source ID/citation that resolves to an authorized corpus document",
-      "falsePositiveGuidance": "EXP-M1 (Explainability & Transparency): re-verify against a current artifact for this specific Check (EXP-M1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Include provenance (citations or source IDs)): inspect current evidence for [RAG eval suite measuring citation presence/accuracy + sample production traces] and confirm the pass condition holds — On the factual/high-stakes RAG eval set, ≥90% of answers include ≥1 valid source ID/citation that resolves to an authorized corpus document",
+      "falsePositiveGuidance": "(Explainability & Transparency): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: High-stakes or factual RAG outputs must include provenance (citations or source IDs) (EXP-M1)",
+        "Implement and operationalize: High-stakes or factual RAG outputs must include provenance (citations or source IDs)",
         "Retain evidence artifacts required by this Check, starting with: RAG eval suite measuring citation presence/accuracy + sample production traces",
-        "Schedule recurring manual verification for EXP-M1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until EXP-M1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4762,7 +5198,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "explainability",
       "title": "Operators must reconstruct the decision path for a sampled production outcome",
       "description": "Operators shall reconstruct the decision path for a sampled production outcome",
-      "whyItMatters": "EXP-M2 (Explainability & Transparency, mandatory): Operators shall reconstruct the decision path for a sampled production outcome Failing this leaves a production gap against: On-call or operator successfully reconstructs model→retrieval/tools→outcome for 3/3 sampled production traces within documented time budget (e.g. ≤15 minutes e…",
+      "whyItMatters": "Operators shall reconstruct the decision path for a sampled production outcome Failing this leaves a production gap against: On-call or operator successfully reconstructs model→retrieval/tools→outcome for 3/3 sampled production traces within documented time budget (e.g. ≤15 minutes each)",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -4781,13 +5217,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For EXP-M2 (Operators must reconstruct the decision path for a sampled production outcome): inspect current evidence for [Operator reconstruction procedure + timed drill record on ≥3 sampled traces] and confirm the pass condition holds — On-call or operator successfully reconstructs model→retrieval/tools→outcome for 3/3 sampled production traces within documented time budget (e.g. ≤15 minutes each)",
-      "falsePositiveGuidance": "EXP-M2 (Explainability & Transparency): re-verify against a current artifact for this specific Check (EXP-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Operators must reconstruct the decision path for a sampled production outcome): inspect current evidence for [Operator reconstruction procedure + timed drill record on ≥3 sampled traces] and confirm the pass condition holds — On-call or operator successfully reconstructs model→retrieval/tools→outcome for 3/3 sampled production traces within documented time budget (e.g. ≤15 minutes each)",
+      "falsePositiveGuidance": "(Explainability & Transparency): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Operators must reconstruct the decision path for a sampled production outcome (EXP-M2)",
+        "Implement and operationalize: Operators must reconstruct the decision path for a sampled production outcome",
         "Retain evidence artifacts required by this Check, starting with: Operator reconstruction procedure + timed drill record on ≥3 sampled traces",
-        "Schedule recurring manual verification for EXP-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until EXP-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4820,7 +5256,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "explainability",
       "title": "Explanation content must not disclose secrets or unauthorized data",
       "description": "Explanation content shall not disclose secrets or unauthorized data",
-      "whyItMatters": "EXP-M3 (Explainability & Transparency, mandatory): Explanation content shall not disclose secrets or unauthorized data Failing this leaves a production gap against: Synthetic secret/PII fixtures in explanation paths are redacted or blocked at 100% in tests; latest production explanation sample scan shows 0 privileged secre…",
+      "whyItMatters": "Explanation content shall not disclose secrets or unauthorized data Failing this leaves a production gap against: Synthetic secret/PII fixtures in explanation paths are redacted or blocked at 100% in tests; latest production explanation sample scan shows 0 privileged secret pattern hits",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -4839,13 +5275,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For EXP-M3 (Explanation content must not disclose secrets or unauthorized data): inspect current evidence for [Explanation redaction policy + automated secret/PII scan on explanation payloads] and confirm the pass condition holds — Synthetic secret/PII fixtures in explanation paths are redacted or blocked at 100% in tests; latest production explanation sample scan shows 0 privileged secret pattern hits",
-      "falsePositiveGuidance": "EXP-M3 (Explainability & Transparency): re-verify against a current artifact for this specific Check (EXP-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Explanation content must not disclose secrets or unauthorized data): inspect current evidence for [Explanation redaction policy + automated secret/PII scan on explanation payloads] and confirm the pass condition holds — Synthetic secret/PII fixtures in explanation paths are redacted or blocked at 100% in tests; latest production explanation sample scan shows 0 privileged secret pattern hits",
+      "falsePositiveGuidance": "(Explainability & Transparency): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Explanation content must not disclose secrets or unauthorized data (EXP-M3)",
+        "Implement and operationalize: Explanation content must not disclose secrets or unauthorized data",
         "Retain evidence artifacts required by this Check, starting with: Explanation redaction policy + automated secret/PII scan on explanation payloads",
-        "Schedule recurring manual verification for EXP-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until EXP-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4878,7 +5314,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "explainability",
       "title": "Counterfactual or change summaries must be available for material model/prompt version diffs",
       "description": "Counterfactual or change summaries shall be available for material model/prompt version diffs",
-      "whyItMatters": "EXP-M4 (Explainability & Transparency, mandatory): Counterfactual or change summaries shall be available for material model/prompt version diffs Failing this leaves a production gap against: PASS if the last material model/prompt promotion includes a retained change/counterfactual summary",
+      "whyItMatters": "Counterfactual or change summaries shall be available for material model/prompt version diffs Failing this leaves a production gap against: PASS if the last material model/prompt promotion includes a retained change/counterfactual summary",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -4897,13 +5333,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For EXP-M4 (Counterfactual or change summaries must be available for material model/prompt version diffs): inspect current evidence for [Change-summary tooling/config + sample summaries for recent promotions] and confirm the pass condition holds — PASS if the last material model/prompt promotion includes a retained change/counterfactual summary",
-      "falsePositiveGuidance": "EXP-M4 (Explainability & Transparency): re-verify against a current artifact for this specific Check (EXP-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Counterfactual or change summaries must be available for material model/prompt version diffs): inspect current evidence for [Change-summary tooling/config + sample summaries for recent promotions] and confirm the pass condition holds — PASS if the last material model/prompt promotion includes a retained change/counterfactual summary",
+      "falsePositiveGuidance": "(Explainability & Transparency): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Counterfactual or change summaries must be available for material model/prompt version diffs (EXP-M4)",
+        "Implement and operationalize: Counterfactual or change summaries must be available for material model/prompt version diffs",
         "Retain evidence artifacts required by this Check, starting with: Change-summary tooling/config + sample summaries for recent promotions",
-        "Schedule recurring manual verification for EXP-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until EXP-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4934,9 +5370,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "EXP-R1",
       "category": "explainability",
-      "title": "EXP-R1: User-facing rationale for material automated decisions",
+      "title": "Production systems should have user-facing rationale for material automated decisions",
       "description": "User-facing rationale for material automated decisions",
-      "whyItMatters": "EXP-R1 (Explainability & Transparency, recommended): User-facing rationale for material automated decisions Failing this leaves a production gap against: 100% of decision types marked material in the catalog return a rationale field or UI explanation in a 20-case sample; gaps tracked with owners",
+      "whyItMatters": "User-facing rationale for material automated decisions Failing this leaves a production gap against: 100% of decision types marked material in the catalog return a rationale field or UI explanation in a 20-case sample; gaps tracked with owners",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -4955,13 +5391,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For EXP-R1 (EXP-R1: User-facing rationale for material automated decisions): inspect current evidence for [Product UI/API screenshots or traces showing user-facing rationale for material automated decisions + decision catalog] and confirm the pass condition holds — 100% of decision types marked material in the catalog return a rationale field or UI explanation in a 20-case sample; gaps tracked with owners",
-      "falsePositiveGuidance": "EXP-R1 (Explainability & Transparency): re-verify against a current artifact for this specific Check (EXP-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (User-facing rationale for material automated decisions): inspect current evidence for [Product UI/API screenshots or traces showing user-facing rationale for material automated decisions + decision catalog] and confirm the pass condition holds — 100% of decision types marked material in the catalog return a rationale field or UI explanation in a 20-case sample; gaps tracked with owners",
+      "falsePositiveGuidance": "(Explainability & Transparency): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: EXP-R1: User-facing rationale for material automated decisions (EXP-R1)",
-        "Retain evidence artifacts required by this Check, starting with: Product UI/API screenshots or traces showing user-facing rationale for material automated decisions…",
-        "Schedule recurring manual verification for EXP-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until EXP-R1 passes"
+        "Implement and operationalize: this Check: User-facing rationale for material automated decisions",
+        "Retain evidence artifacts required by this Check, starting with: Product UI/API screenshots or traces showing user-facing rationale for material automated decisions + decision catalog",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -4992,9 +5428,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "EXP-R3",
       "category": "explainability",
-      "title": "EXP-R3: Formal explainability requirements mapped for regulated features",
+      "title": "Production systems should have formal explainability requirements mapped for regulated features",
       "description": "Formal explainability requirements mapped for regulated features",
-      "whyItMatters": "EXP-R3 (Explainability & Transparency, recommended): Formal explainability requirements mapped for regulated features Failing this leaves a production gap against: Every regulated AI feature lists required explanation type and evidence; matrix reviewed ≤12 months ago with named owner",
+      "whyItMatters": "Formal explainability requirements mapped for regulated features Failing this leaves a production gap against: Every regulated AI feature lists required explanation type and evidence; matrix reviewed ≤12 months ago with named owner",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -5013,13 +5449,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For EXP-R3 (EXP-R3: Formal explainability requirements mapped for regulated features): inspect current evidence for [Explainability requirements matrix (feature × regulation/obligation) + last compliance review record] and confirm the pass condition holds — Every regulated AI feature lists required explanation type and evidence; matrix reviewed ≤12 months ago with named owner",
-      "falsePositiveGuidance": "EXP-R3 (Explainability & Transparency): re-verify against a current artifact for this specific Check (EXP-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Formal explainability requirements mapped for regulated features): inspect current evidence for [Explainability requirements matrix (feature × regulation/obligation) + last compliance review record] and confirm the pass condition holds — Every regulated AI feature lists required explanation type and evidence; matrix reviewed ≤12 months ago with named owner",
+      "falsePositiveGuidance": "(Explainability & Transparency): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: EXP-R3: Formal explainability requirements mapped for regulated features (EXP-R3)",
+        "Implement and operationalize: this Check: Formal explainability requirements mapped for regulated features",
         "Retain evidence artifacts required by this Check, starting with: Explainability requirements matrix (feature × regulation/obligation) + last compliance review record",
-        "Schedule recurring manual verification for EXP-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until EXP-R3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5052,7 +5488,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "human-approval",
       "title": "High-impact action classes must be inventoried and gated by human approval in production",
       "description": "High-impact action classes shall be inventoried and gated by human approval in production",
-      "whyItMatters": "HUM-M1 (Human Approval, mandatory): High-impact action classes shall be inventoried and gated by human approval in production Failing this leaves a production gap against: 100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests fail at 100%",
+      "whyItMatters": "High-impact action classes shall be inventoried and gated by human approval in production Failing this leaves a production gap against: 100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests fail at 100%",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -5075,13 +5511,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For HUM-M1 (High-impact action classes must be inventoried and gated by human approval in production): inspect current evidence for [High-impact action inventory + gate wiring evidence] and confirm the pass condition holds — 100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests fail at 100%",
-      "falsePositiveGuidance": "HUM-M1 (Human Approval): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (High-impact action classes must be inventoried and gated by human approval in production): inspect current evidence for [High-impact action inventory + gate wiring evidence] and confirm the pass condition holds — 100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests fail at 100%",
+      "falsePositiveGuidance": "(Human Approval): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: High-impact action classes must be inventoried and gated by human approval in production (HUM-M1)",
+        "Implement and operationalize: High-impact action classes must be inventoried and gated by human approval in production",
         "Retain evidence artifacts required by this Check, starting with: High-impact action inventory + gate wiring evidence",
-        "Wire or verify detectors declared on HUM-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until HUM-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5121,7 +5557,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "human-approval",
       "title": "Approval decisions must be logged with actor, context, and outcome",
       "description": "Approval decisions shall be logged with actor, context, and outcome",
-      "whyItMatters": "HUM-M2 (Human Approval, mandatory): Approval decisions shall be logged with actor, context, and outcome Failing this leaves a production gap against: 100% of sampled approvals in last 30 days include actor ID, action context, and approve/deny outcome; schema validation test passes",
+      "whyItMatters": "Approval decisions shall be logged with actor, context, and outcome Failing this leaves a production gap against: 100% of sampled approvals in last 30 days include actor ID, action context, and approve/deny outcome; schema validation test passes",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -5140,13 +5576,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For HUM-M2 (Approval decisions must be logged with actor, context, and outcome): inspect current evidence for [Approval audit log schema + sample records] and confirm the pass condition holds — 100% of sampled approvals in last 30 days include actor ID, action context, and approve/deny outcome; schema validation test passes",
-      "falsePositiveGuidance": "HUM-M2 (Human Approval): re-verify against a current artifact for this specific Check (HUM-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Approval decisions must be logged with actor, context, and outcome): inspect current evidence for [Approval audit log schema + sample records] and confirm the pass condition holds — 100% of sampled approvals in last 30 days include actor ID, action context, and approve/deny outcome; schema validation test passes",
+      "falsePositiveGuidance": "(Human Approval): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Approval decisions must be logged with actor, context, and outcome (HUM-M2)",
+        "Implement and operationalize: Approval decisions must be logged with actor, context, and outcome",
         "Retain evidence artifacts required by this Check, starting with: Approval audit log schema + sample records",
-        "Schedule recurring manual verification for HUM-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until HUM-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5186,7 +5622,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "human-approval",
       "title": "Approval must not be bypassable via alternate agent or API paths",
       "description": "Approval shall not be bypassable via alternate agent or API paths",
-      "whyItMatters": "HUM-M3 (Human Approval, mandatory): Approval shall not be bypassable via alternate agent or API paths Failing this leaves a production gap against: Automated or reviewed tests attempt bypass via alternate paths; 0 successful ungated high-impact executions",
+      "whyItMatters": "Approval shall not be bypassable via alternate agent or API paths Failing this leaves a production gap against: Automated or reviewed tests attempt bypass via alternate paths; 0 successful ungated high-impact executions",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -5205,13 +5641,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For HUM-M3 (Approval must not be bypassable via alternate agent or API paths): inspect current evidence for [Bypass-path threat tests across UI, API, and agent entry points] and confirm the pass condition holds — Automated or reviewed tests attempt bypass via alternate paths; 0 successful ungated high-impact executions",
-      "falsePositiveGuidance": "HUM-M3 (Human Approval): re-verify against a current artifact for this specific Check (HUM-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Approval must not be bypassable via alternate agent or API paths): inspect current evidence for [Bypass-path threat tests across UI, API, and agent entry points] and confirm the pass condition holds — Automated or reviewed tests attempt bypass via alternate paths; 0 successful ungated high-impact executions",
+      "falsePositiveGuidance": "(Human Approval): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Approval must not be bypassable via alternate agent or API paths (HUM-M3)",
+        "Implement and operationalize: Approval must not be bypassable via alternate agent or API paths",
         "Retain evidence artifacts required by this Check, starting with: Bypass-path threat tests across UI, API, and agent entry points",
-        "Schedule recurring manual verification for HUM-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until HUM-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5251,7 +5687,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "human-approval",
       "title": "Dual control must be required for Level 5 irreversible actions",
       "description": "Dual control shall be required for Level 5 irreversible actions",
-      "whyItMatters": "HUM-M4 (Human Approval, mandatory): Dual control shall be required for Level 5 irreversible actions Failing this leaves a production gap against: PASS if Level 5 irreversible actions are inventoried and 100% of sampled executions show dual approval; 0 single-approver completes in the sample",
+      "whyItMatters": "Dual control shall be required for Level 5 irreversible actions Failing this leaves a production gap against: PASS if Level 5 irreversible actions are inventoried and 100% of sampled executions show dual approval; 0 single-approver completes in the sample",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -5270,13 +5706,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For HUM-M4 (Dual control must be required for Level 5 irreversible actions): inspect current evidence for [Dual-control workflow config + sample approval records for irreversible actions] and confirm the pass condition holds — PASS if Level 5 irreversible actions are inventoried and 100% of sampled executions show dual approval; 0 single-approver completes in the sample",
-      "falsePositiveGuidance": "HUM-M4 (Human Approval): re-verify against a current artifact for this specific Check (HUM-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Dual control must be required for Level 5 irreversible actions): inspect current evidence for [Dual-control workflow config + sample approval records for irreversible actions] and confirm the pass condition holds — PASS if Level 5 irreversible actions are inventoried and 100% of sampled executions show dual approval; 0 single-approver completes in the sample",
+      "falsePositiveGuidance": "(Human Approval): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Dual control must be required for Level 5 irreversible actions (HUM-M4)",
+        "Implement and operationalize: Dual control must be required for Level 5 irreversible actions",
         "Retain evidence artifacts required by this Check, starting with: Dual-control workflow config + sample approval records for irreversible actions",
-        "Schedule recurring manual verification for HUM-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until HUM-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5314,9 +5750,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "HUM-R1",
       "category": "human-approval",
-      "title": "HUM-R1: Risk-based UI showing tool args, diffs, and confidence before approve",
+      "title": "Production systems should have risk-based UI showing tool args, diffs, and confidence before approve",
       "description": "Risk-based UI showing tool args, diffs, and confidence before approve",
-      "whyItMatters": "HUM-R1 (Human Approval, recommended): Risk-based UI showing tool args, diffs, and confidence before approve Failing this leaves a production gap against: High-impact approvals display tool args, change diff (or equivalent), and confidence/risk; ≥10 sampled approvals in 90 days show those fields populated",
+      "whyItMatters": "Risk-based UI showing tool args, diffs, and confidence before approve Failing this leaves a production gap against: High-impact approvals display tool args, change diff (or equivalent), and confidence/risk; ≥10 sampled approvals in 90 days show those fields populated",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -5335,13 +5771,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For HUM-R1 (HUM-R1: Risk-based UI showing tool args, diffs, and confidence before approve): inspect current evidence for [Approval UI screenshots/spec showing tool args, diffs, and confidence + sample approval records] and confirm the pass condition holds — High-impact approvals display tool args, change diff (or equivalent), and confidence/risk; ≥10 sampled approvals in 90 days show those fields populated",
-      "falsePositiveGuidance": "HUM-R1 (Human Approval): re-verify against a current artifact for this specific Check (HUM-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Risk-based UI showing tool args, diffs, and confidence before approve): inspect current evidence for [Approval UI screenshots/spec showing tool args, diffs, and confidence + sample approval records] and confirm the pass condition holds — High-impact approvals display tool args, change diff (or equivalent), and confidence/risk; ≥10 sampled approvals in 90 days show those fields populated",
+      "falsePositiveGuidance": "(Human Approval): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: HUM-R1: Risk-based UI showing tool args, diffs, and confidence before approve (HUM-R1)",
+        "Implement and operationalize: this Check: Risk-based UI showing tool args, diffs, and confidence before approve",
         "Retain evidence artifacts required by this Check, starting with: Approval UI screenshots/spec showing tool args, diffs, and confidence + sample approval records",
-        "Schedule recurring manual verification for HUM-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until HUM-R1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5379,9 +5815,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "HUM-R3",
       "category": "human-approval",
-      "title": "HUM-R3: SLA for approval queues to avoid unsafe workarounds",
+      "title": "Production systems should have sLA for approval queues to avoid unsafe workarounds",
       "description": "SLA for approval queues to avoid unsafe workarounds",
-      "whyItMatters": "HUM-R3 (Human Approval, recommended): SLA for approval queues to avoid unsafe workarounds Failing this leaves a production gap against: Documented SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is within SLA or open exceptions have owners and expiry",
+      "whyItMatters": "SLA for approval queues to avoid unsafe workarounds Failing this leaves a production gap against: Documented SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is within SLA or open exceptions have owners and expiry",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -5400,13 +5836,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For HUM-R3 (HUM-R3: SLA for approval queues to avoid unsafe workarounds): inspect current evidence for [Approval-queue SLA definition + queue age/metrics dashboard for the last 30 days] and confirm the pass condition holds — Documented SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is within SLA or open exceptions have owners and expiry",
-      "falsePositiveGuidance": "HUM-R3 (Human Approval): re-verify against a current artifact for this specific Check (HUM-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (SLA for approval queues to avoid unsafe workarounds): inspect current evidence for [Approval-queue SLA definition + queue age/metrics dashboard for the last 30 days] and confirm the pass condition holds — Documented SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is within SLA or open exceptions have owners and expiry",
+      "falsePositiveGuidance": "(Human Approval): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: HUM-R3: SLA for approval queues to avoid unsafe workarounds (HUM-R3)",
+        "Implement and operationalize: this Check: SLA for approval queues to avoid unsafe workarounds",
         "Retain evidence artifacts required by this Check, starting with: Approval-queue SLA definition + queue age/metrics dashboard for the last 30 days",
-        "Schedule recurring manual verification for HUM-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until HUM-R3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5446,7 +5882,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "incident-readiness",
       "title": "AI-specific incident playbooks must exist for abuse, leakage, bad actions, and provider outage",
       "description": "AI-specific incident playbooks shall exist for abuse, leakage, bad actions, and provider outage",
-      "whyItMatters": "INC-M1 (Incident Readiness, mandatory): AI-specific incident playbooks shall exist for abuse, leakage, bad actions, and provider outage Failing this leaves a production gap against: Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date ≤ 12 months",
+      "whyItMatters": "AI-specific incident playbooks shall exist for abuse, leakage, bad actions, and provider outage Failing this leaves a production gap against: Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date ≤ 12 months",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -5469,13 +5905,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For INC-M1 (AI-specific incident playbooks must exist for abuse, leakage, bad actions, and provider outage): inspect current evidence for [Playbook set covering the four scenarios with owners] and confirm the pass condition holds — Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date ≤ 12 months",
-      "falsePositiveGuidance": "INC-M1 (Incident Readiness): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (AI-specific incident playbooks must exist for abuse, leakage, bad actions, and provider outage): inspect current evidence for [Playbook set covering the four scenarios with owners] and confirm the pass condition holds — Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date ≤ 12 months",
+      "falsePositiveGuidance": "(Incident Readiness): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: AI-specific incident playbooks must exist for abuse, leakage, bad actions, and provider outage (INC-M1)",
+        "Implement and operationalize: AI-specific incident playbooks must exist for abuse, leakage, bad actions, and provider outage",
         "Retain evidence artifacts required by this Check, starting with: Playbook set covering the four scenarios with owners",
-        "Wire or verify detectors declared on INC-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until INC-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5514,7 +5950,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "incident-readiness",
       "title": "On-call must be able to execute containment: pause agents, disable tools, roll back prompts/models",
       "description": "On-call shall be able to execute containment: pause agents, disable tools, roll back prompts/models",
-      "whyItMatters": "INC-M2 (Incident Readiness, mandatory): On-call shall be able to execute containment: pause agents, disable tools, roll back prompts/models Failing this leaves a production gap against: Drill in last 90 days successfully demonstrated pause agents, disable tools, and roll back prompt/model within documented time budgets",
+      "whyItMatters": "On-call shall be able to execute containment: pause agents, disable tools, roll back prompts/models Failing this leaves a production gap against: Drill in last 90 days successfully demonstrated pause agents, disable tools, and roll back prompt/model within documented time budgets",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -5533,13 +5969,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For INC-M2 (On-call must be able to execute containment: pause agents, disable tools, roll back prompts/models): inspect current evidence for [Containment runbook + drill record exercising pause, disable, and rollback] and confirm the pass condition holds — Drill in last 90 days successfully demonstrated pause agents, disable tools, and roll back prompt/model within documented time budgets",
-      "falsePositiveGuidance": "INC-M2 (Incident Readiness): re-verify against a current artifact for this specific Check (INC-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (On-call must be able to execute containment: pause agents, disable tools, roll back prompts/models): inspect current evidence for [Containment runbook + drill record exercising pause, disable, and rollback] and confirm the pass condition holds — Drill in last 90 days successfully demonstrated pause agents, disable tools, and roll back prompt/model within documented time budgets",
+      "falsePositiveGuidance": "(Incident Readiness): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: On-call must be able to execute containment: pause agents, disable tools, roll back prompts/models (INC-M2)",
+        "Implement and operationalize: On-call must be able to execute containment: pause agents, disable tools, roll back prompts/models",
         "Retain evidence artifacts required by this Check, starting with: Containment runbook + drill record exercising pause, disable, and rollback",
-        "Schedule recurring manual verification for INC-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until INC-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5578,7 +6014,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "incident-readiness",
       "title": "Post-incident reviews must produce tracked actions against APRF pillars",
       "description": "Post-incident reviews shall produce tracked actions against APRF pillars",
-      "whyItMatters": "INC-M3 (Incident Readiness, mandatory): Post-incident reviews shall produce tracked actions against APRF pillars Failing this leaves a production gap against: 100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale",
+      "whyItMatters": "Post-incident reviews shall produce tracked actions against APRF pillars Failing this leaves a production gap against: 100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -5590,13 +6026,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For INC-M3 (Post-incident reviews must produce tracked actions against APRF pillars): inspect current evidence for [Post-incident review template + sample reviews with linked actions] and confirm the pass condition holds — 100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale",
-      "falsePositiveGuidance": "INC-M3 (Incident Readiness): re-verify against a current artifact for this specific Check (INC-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Post-incident reviews must produce tracked actions against APRF pillars): inspect current evidence for [Post-incident review template + sample reviews with linked actions] and confirm the pass condition holds — 100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale",
+      "falsePositiveGuidance": "(Incident Readiness): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Post-incident reviews must produce tracked actions against APRF pillars (INC-M3)",
+        "Implement and operationalize: Post-incident reviews must produce tracked actions against APRF pillars",
         "Retain evidence artifacts required by this Check, starting with: Post-incident review template + sample reviews with linked actions",
-        "Schedule recurring manual verification for INC-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until INC-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5635,7 +6071,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "incident-readiness",
       "title": "Regular tabletop exercises must cover AI-specific incidents",
       "description": "Regular tabletop exercises shall cover AI-specific incidents",
-      "whyItMatters": "INC-M4 (Incident Readiness, mandatory): Regular tabletop exercises shall cover AI-specific incidents Failing this leaves a production gap against: PASS if an AI-focused tabletop completed ≤180 days with retained actions and owners",
+      "whyItMatters": "Regular tabletop exercises shall cover AI-specific incidents Failing this leaves a production gap against: PASS if an AI-focused tabletop completed ≤180 days with retained actions and owners",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -5654,13 +6090,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For INC-M4 (Regular tabletop exercises must cover AI-specific incidents): inspect current evidence for [Tabletop plan + dated after-action report for an AI incident scenario] and confirm the pass condition holds — PASS if an AI-focused tabletop completed ≤180 days with retained actions and owners",
-      "falsePositiveGuidance": "INC-M4 (Incident Readiness): re-verify against a current artifact for this specific Check (INC-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Regular tabletop exercises must cover AI-specific incidents): inspect current evidence for [Tabletop plan + dated after-action report for an AI incident scenario] and confirm the pass condition holds — PASS if an AI-focused tabletop completed ≤180 days with retained actions and owners",
+      "falsePositiveGuidance": "(Incident Readiness): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Regular tabletop exercises must cover AI-specific incidents (INC-M4)",
+        "Implement and operationalize: Regular tabletop exercises must cover AI-specific incidents",
         "Retain evidence artifacts required by this Check, starting with: Tabletop plan + dated after-action report for an AI incident scenario",
-        "Schedule recurring manual verification for INC-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until INC-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5697,9 +6133,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "INC-R1",
       "category": "incident-readiness",
-      "title": "INC-R1: Page-worthy alerts for safety and quality signals, not only infra",
+      "title": "Production systems should have page-worthy alerts for safety and quality signals, not only infra",
       "description": "Page-worthy alerts for safety and quality signals, not only infra",
-      "whyItMatters": "INC-R1 (Incident Readiness, recommended): Page-worthy alerts for safety and quality signals, not only infra Failing this leaves a production gap against: At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and own…",
+      "whyItMatters": "Page-worthy alerts for safety and quality signals, not only infra Failing this leaves a production gap against: At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and owner; policy reviewed ≤90 days ago",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -5718,13 +6154,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For INC-R1 (INC-R1: Page-worthy alerts for safety and quality signals, not only infra): inspect current evidence for [On-call alert policy export listing safety/quality pages + last 90 days of triggered incidents (or drill tickets)] and confirm the pass condition holds — At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and owner; policy reviewed…",
-      "falsePositiveGuidance": "INC-R1 (Incident Readiness): re-verify against a current artifact for this specific Check (INC-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Page-worthy alerts for safety and quality signals, not only infra): inspect current evidence for [On-call alert policy export listing safety/quality pages + last 90 days of triggered incidents (or drill tickets)] and confirm the pass condition holds — At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and owner; policy reviewed ≤90 days ago",
+      "falsePositiveGuidance": "(Incident Readiness): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: INC-R1: Page-worthy alerts for safety and quality signals, not only infra (INC-R1)",
-        "Retain evidence artifacts required by this Check, starting with: On-call alert policy export listing safety/quality pages + last 90 days of triggered incidents (or…",
-        "Schedule recurring manual verification for INC-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until INC-R1 passes"
+        "Implement and operationalize: this Check: Page-worthy alerts for safety and quality signals, not only infra",
+        "Retain evidence artifacts required by this Check, starting with: On-call alert policy export listing safety/quality pages + last 90 days of triggered incidents (or drill tickets)",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5761,9 +6197,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "INC-R3",
       "category": "incident-readiness",
-      "title": "INC-R3: Customer notification criteria for AI-related events",
+      "title": "Production systems should have customer notification criteria for AI-related events",
       "description": "Customer notification criteria for AI-related events",
-      "whyItMatters": "INC-R3 (Incident Readiness, recommended): Customer notification criteria for AI-related events Failing this leaves a production gap against: Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident ≤12 months followed the criter…",
+      "whyItMatters": "Customer notification criteria for AI-related events Failing this leaves a production gap against: Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -5782,13 +6218,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For INC-R3 (INC-R3: Customer notification criteria for AI-related events): inspect current evidence for [Customer notification criteria for AI-related events + last drill or real notification sample] and confirm the pass condition holds — Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps",
-      "falsePositiveGuidance": "INC-R3 (Incident Readiness): re-verify against a current artifact for this specific Check (INC-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Customer notification criteria for AI-related events): inspect current evidence for [Customer notification criteria for AI-related events + last drill or real notification sample] and confirm the pass condition holds — Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps",
+      "falsePositiveGuidance": "(Incident Readiness): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: INC-R3: Customer notification criteria for AI-related events (INC-R3)",
+        "Implement and operationalize: this Check: Customer notification criteria for AI-related events",
         "Retain evidence artifacts required by this Check, starting with: Customer notification criteria for AI-related events + last drill or real notification sample",
-        "Schedule recurring manual verification for INC-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until INC-R3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5827,7 +6263,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "infrastructure",
       "title": "AI data stores and control planes must not be publicly exposed without authenticated edge controls",
       "description": "AI data stores and control planes shall not be publicly exposed without authenticated edge controls",
-      "whyItMatters": "INF-M1 (Infrastructure, mandatory): AI data stores and control planes shall not be publicly exposed without authenticated edge controls Failing this leaves a production gap against: 0 AI data stores or control-plane endpoints publicly reachable without authentication in the latest scan; findings severity ≥ high closed or waived with expiry",
+      "whyItMatters": "AI data stores and control planes shall not be publicly exposed without authenticated edge controls Failing this leaves a production gap against: 0 AI data stores or control-plane endpoints publicly reachable without authentication in the latest scan; findings severity ≥ high closed or waived with expiry",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -5836,16 +6272,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "CSPM/network scan of AI data stores and control planes + edge auth config"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "manual",
         "detectors": [
-          {
-            "id": "docker-nonroot-user",
-            "params": {}
-          },
-          {
-            "id": "docker-no-curl-pipe-shell",
-            "params": {}
-          },
           {
             "id": "manual-attest",
             "params": {
@@ -5854,13 +6282,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For INF-M1 (AI data stores and control planes must not be publicly exposed without authenticated edge controls): inspect current evidence for [CSPM/network scan of AI data stores and control planes + edge auth config] and confirm the pass condition holds — 0 AI data stores or control-plane endpoints publicly reachable without authentication in the latest scan; findings severity ≥ high closed or waived with expiry",
-      "falsePositiveGuidance": "INF-M1 (Infrastructure): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (AI data stores and control planes must not be publicly exposed without authenticated edge controls): inspect current evidence for [CSPM/network scan of AI data stores and control planes + edge auth config] and confirm the pass condition holds — 0 AI data stores or control-plane endpoints publicly reachable without authentication in the latest scan; findings severity ≥ high closed or waived with expiry",
+      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: AI data stores and control planes must not be publicly exposed without authenticated edge controls (INF-M1)",
+        "Implement and operationalize: AI data stores and control planes must not be publicly exposed without authenticated edge controls",
         "Retain evidence artifacts required by this Check, starting with: CSPM/network scan of AI data stores and control planes + edge auth config",
-        "Wire or verify detectors declared on INF-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until INF-M1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5886,7 +6314,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "infrastructure",
         "mandatory",
-        "automated"
+        "manual"
       ],
       "applicability": {
         "technologies": [
@@ -5908,7 +6336,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "infrastructure",
       "title": "Base images and runtimes must follow documented patching SLAs",
       "description": "Base images and runtimes shall follow documented patching SLAs",
-      "whyItMatters": "INF-M2 (Infrastructure, mandatory): Base images and runtimes shall follow documented patching SLAs Failing this leaves a production gap against: 100% of production AI runtime images are within patching SLA (e.g. critical fixes ≤ 14 days); report shows 0 SLA breaches or open waivers with expiry",
+      "whyItMatters": "Base images and runtimes shall follow documented patching SLAs Failing this leaves a production gap against: 100% of production AI runtime images are within patching SLA (e.g. critical fixes ≤ 14 days); report shows 0 SLA breaches or open waivers with expiry",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -5931,13 +6359,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For INF-M2 (Base images and runtimes must follow documented patching SLAs): inspect current evidence for [Patching SLA policy + image age/CVE backlog report for AI runtimes] and confirm the pass condition holds — 100% of production AI runtime images are within patching SLA (e.g. critical fixes ≤ 14 days); report shows 0 SLA breaches or open waivers with expiry",
-      "falsePositiveGuidance": "INF-M2 (Infrastructure): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (Base images and runtimes must follow documented patching SLAs): inspect current evidence for [Patching SLA policy + image age/CVE backlog report for AI runtimes] and confirm the pass condition holds — 100% of production AI runtime images are within patching SLA (e.g. critical fixes ≤ 14 days); report shows 0 SLA breaches or open waivers with expiry",
+      "falsePositiveGuidance": "when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: Base images and runtimes must follow documented patching SLAs (INF-M2)",
+        "Implement and operationalize: Base images and runtimes must follow documented patching SLAs",
         "Retain evidence artifacts required by this Check, starting with: Patching SLA policy + image age/CVE backlog report for AI runtimes",
-        "Wire or verify detectors declared on INF-M2 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until INF-M2 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5985,7 +6413,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "infrastructure",
       "title": "Network segmentation must limit agent/tool reachability to required dependencies",
       "description": "Network segmentation shall limit agent/tool reachability to required dependencies",
-      "whyItMatters": "INF-M3 (Infrastructure, mandatory): Network segmentation shall limit agent/tool reachability to required dependencies Failing this leaves a production gap against: Egress/east-west allowlists for agent/tool identities match the documented dependency inventory; probe from agent identity to a non-allowlisted internal servic…",
+      "whyItMatters": "Network segmentation shall limit agent/tool reachability to required dependencies Failing this leaves a production gap against: Egress/east-west allowlists for agent/tool identities match the documented dependency inventory; probe from agent identity to a non-allowlisted internal service fails at 100%",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -6008,13 +6436,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For INF-M3 (Network segmentation must limit agent/tool reachability to required dependencies): inspect current evidence for [Network policy / security-group export for agent and tool runtimes + dependency allowlist] and confirm the pass condition holds — Egress/east-west allowlists for agent/tool identities match the documented dependency inventory; probe from agent identity to a non-allowlisted internal service fails at 100%",
-      "falsePositiveGuidance": "INF-M3 (Infrastructure): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (Network segmentation must limit agent/tool reachability to required dependencies): inspect current evidence for [Network policy / security-group export for agent and tool runtimes + dependency allowlist] and confirm the pass condition holds — Egress/east-west allowlists for agent/tool identities match the documented dependency inventory; probe from agent identity to a non-allowlisted internal service fails at 100%",
+      "falsePositiveGuidance": "when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: Network segmentation must limit agent/tool reachability to required dependencies (INF-M3)",
+        "Implement and operationalize: Network segmentation must limit agent/tool reachability to required dependencies",
         "Retain evidence artifacts required by this Check, starting with: Network policy / security-group export for agent and tool runtimes + dependency allowlist",
-        "Wire or verify detectors declared on INF-M3 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until INF-M3 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6062,7 +6490,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "infrastructure",
       "title": "GPU/accelerator isolation and noisy-neighbor controls must protect multi-tenant inference",
       "description": "GPU/accelerator isolation and noisy-neighbor controls shall protect multi-tenant inference",
-      "whyItMatters": "INF-M4 (Infrastructure, mandatory): GPU/accelerator isolation and noisy-neighbor controls shall protect multi-tenant inference Failing this leaves a production gap against: PASS if isolation controls are documented and the latest isolation/capacity test (≤90 days) meets stated limits",
+      "whyItMatters": "GPU/accelerator isolation and noisy-neighbor controls shall protect multi-tenant inference Failing this leaves a production gap against: PASS if isolation controls are documented and the latest isolation/capacity test (≤90 days) meets stated limits",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -6081,13 +6509,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For INF-M4 (GPU/accelerator isolation and noisy-neighbor controls must protect multi-tenant inference): inspect current evidence for [Isolation design + capacity/isolation test report for shared accelerators] and confirm the pass condition holds — PASS if isolation controls are documented and the latest isolation/capacity test (≤90 days) meets stated limits",
-      "falsePositiveGuidance": "INF-M4 (Infrastructure): re-verify against a current artifact for this specific Check (INF-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (GPU/accelerator isolation and noisy-neighbor controls must protect multi-tenant inference): inspect current evidence for [Isolation design + capacity/isolation test report for shared accelerators] and confirm the pass condition holds — PASS if isolation controls are documented and the latest isolation/capacity test (≤90 days) meets stated limits",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: GPU/accelerator isolation and noisy-neighbor controls must protect multi-tenant inference (INF-M4)",
+        "Implement and operationalize: GPU/accelerator isolation and noisy-neighbor controls must protect multi-tenant inference",
         "Retain evidence artifacts required by this Check, starting with: Isolation design + capacity/isolation test report for shared accelerators",
-        "Schedule recurring manual verification for INF-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until INF-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6133,9 +6561,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "INF-R1",
       "category": "infrastructure",
-      "title": "INF-R1: Signed model and container artifacts with verify-on-deploy",
+      "title": "Production systems should have signed model and container artifacts with verify-on-deploy",
       "description": "Signed model and container artifacts with verify-on-deploy",
-      "whyItMatters": "INF-R1 (Infrastructure, recommended): Signed model and container artifacts with verify-on-deploy Failing this leaves a production gap against: Unsigned model/container images cannot schedule in production namespaces; policy verified by a failed admission test within 90 days",
+      "whyItMatters": "Signed model and container artifacts with verify-on-deploy Failing this leaves a production gap against: Unsigned model/container images cannot schedule in production namespaces; policy verified by a failed admission test within 90 days",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -6154,13 +6582,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For INF-R1 (INF-R1: Signed model and container artifacts with verify-on-deploy): inspect current evidence for [Cluster/admission controller config requiring signed images + last failed-unsigned admission event or drill] and confirm the pass condition holds — Unsigned model/container images cannot schedule in production namespaces; policy verified by a failed admission test within 90 days",
-      "falsePositiveGuidance": "INF-R1 (Infrastructure): re-verify against a current artifact for this specific Check (INF-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Signed model and container artifacts with verify-on-deploy): inspect current evidence for [Cluster/admission controller config requiring signed images + last failed-unsigned admission event or drill] and confirm the pass condition holds — Unsigned model/container images cannot schedule in production namespaces; policy verified by a failed admission test within 90 days",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: INF-R1: Signed model and container artifacts with verify-on-deploy (INF-R1)",
-        "Retain evidence artifacts required by this Check, starting with: Cluster/admission controller config requiring signed images + last failed-unsigned admission event…",
-        "Schedule recurring manual verification for INF-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until INF-R1 passes"
+        "Implement and operationalize: this Check: Signed model and container artifacts with verify-on-deploy",
+        "Retain evidence artifacts required by this Check, starting with: Cluster/admission controller config requiring signed images + last failed-unsigned admission event or drill",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6209,9 +6637,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "INF-R3",
       "category": "infrastructure",
-      "title": "INF-R3: Infrastructure-as-code with policy checks (CIS-aligned)",
+      "title": "Production systems should have infrastructure-as-code with policy checks (CIS-aligned)",
       "description": "Infrastructure-as-code with policy checks (CIS-aligned)",
-      "whyItMatters": "INF-R3 (Infrastructure, recommended): Infrastructure-as-code with policy checks (CIS-aligned) Failing this leaves a production gap against: Production AI infra is declared in IaC; CIS (or equivalent) policy checks run on every apply/PR; critical findings for production stacks are 0 or have dated ex…",
+      "whyItMatters": "Infrastructure-as-code with policy checks (CIS-aligned) Failing this leaves a production gap against: Production AI infra is declared in IaC; CIS (or equivalent) policy checks run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions ≤90 days",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -6223,13 +6651,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For INF-R3 (INF: Infrastructure-as-code with policy checks (CIS-aligned)): inspect current evidence for [IaC modules for AI infra + CIS-aligned policy scan config + latest scan report for production stacks] and confirm the pass condition holds — Production AI infra is declared in IaC; CIS (or equivalent) policy checks run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions ≤90 days",
-      "falsePositiveGuidance": "INF-R3 (Infrastructure): re-verify against a current artifact for this specific Check (INF-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (INF: Infrastructure-as-code with policy checks (CIS-aligned)): inspect current evidence for [IaC modules for AI infra + CIS-aligned policy scan config + latest scan report for production stacks] and confirm the pass condition holds — Production AI infra is declared in IaC; CIS (or equivalent) policy checks run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions ≤90 days",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: INF-R3: Infrastructure-as-code with policy checks (CIS-aligned) (INF-R3)",
+        "Implement and operationalize: this Check: Infrastructure-as-code with policy checks (CIS-aligned)",
         "Retain evidence artifacts required by this Check, starting with: IaC modules for AI infra + CIS-aligned policy scan config + latest scan report for production stacks",
-        "Schedule recurring manual verification for INF-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until INF-R3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6277,13 +6705,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "memory-management",
       "title": "Memory must be isolated by tenant (and user where required) with tested boundaries",
       "description": "Memory shall be isolated by tenant (and user where required) with tested boundaries",
-      "whyItMatters": "MEM-M1 (Memory Management, mandatory): Memory shall be isolated by tenant (and user where required) with tested boundaries Failing this leaves a production gap against: 0 successful cross-tenant (and cross-user where required) memory reads/writes across ≥10 automated attack cases",
+      "whyItMatters": "Memory shall be isolated by tenant (and user where required) with tested boundaries Failing this leaves a production gap against: 0 successful cross-tenant (and cross-user where required) memory reads/writes across ≥10 automated attack cases",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
       "passCondition": "0 successful cross-tenant (and cross-user where required) memory reads/writes across ≥10 automated attack cases",
       "evidenceRequired": [
-        "Isolation tests for memory store APIs"
+        "Cross-tenant (and cross-user where required) isolation tests for memory store APIs"
       ],
       "detection": {
         "capability": "manual",
@@ -6296,13 +6724,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For MEM-M1 (Be isolated by tenant (and user where required) with tested boundaries): inspect current evidence for [Isolation tests for memory store APIs] and confirm the pass condition holds — 0 successful cross-tenant (and cross-user where required) memory reads/writes across ≥10 automated attack cases",
-      "falsePositiveGuidance": "MEM-M1 (Memory Management): re-verify against a current artifact for this specific Check (MEM-M1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Be isolated by tenant (and user where required) with tested boundaries): inspect current evidence for [Isolation tests for memory store APIs] and confirm the pass condition holds — 0 successful cross-tenant (and cross-user where required) memory reads/writes across ≥10 automated attack cases",
+      "falsePositiveGuidance": "(Memory Management): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Memory must be isolated by tenant (and user where required) with tested boundaries (MEM-M1)",
+        "Implement and operationalize: Memory must be isolated by tenant (and user where required) with tested boundaries",
         "Retain evidence artifacts required by this Check, starting with: Isolation tests for memory store APIs",
-        "Schedule recurring manual verification for MEM-M1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until MEM-M1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6342,7 +6770,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "memory-management",
       "title": "Retention and deletion policies must exist and be executable",
       "description": "Retention and deletion policies shall exist and be executable",
-      "whyItMatters": "MEM-M2 (Memory Management, mandatory): Retention and deletion policies shall exist and be executable Failing this leaves a production gap against: TTL/deletion job succeeds in test; sample records older than retention are absent after job run; policy documents retention periods per memory class",
+      "whyItMatters": "Retention and deletion policies shall exist and be executable Failing this leaves a production gap against: TTL/deletion job succeeds in test; sample records older than retention are absent after job run; policy documents retention periods per memory class",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -6361,13 +6789,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For MEM-M2 (Retention and deletion policies must exist and be executable): inspect current evidence for [Retention policy + TTL job config + deletion test record] and confirm the pass condition holds — TTL/deletion job succeeds in test; sample records older than retention are absent after job run; policy documents retention periods per memory class",
-      "falsePositiveGuidance": "MEM-M2 (Memory Management): re-verify against a current artifact for this specific Check (MEM-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Retention and deletion policies must exist and be executable): inspect current evidence for [Retention policy + TTL job config + deletion test record] and confirm the pass condition holds — TTL/deletion job succeeds in test; sample records older than retention are absent after job run; policy documents retention periods per memory class",
+      "falsePositiveGuidance": "(Memory Management): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Retention and deletion policies must exist and be executable (MEM-M2)",
+        "Implement and operationalize: Retention and deletion policies must exist and be executable",
         "Retain evidence artifacts required by this Check, starting with: Retention policy + TTL job config + deletion test record",
-        "Schedule recurring manual verification for MEM-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until MEM-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6407,7 +6835,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "memory-management",
       "title": "Writes to long-term memory must be validated against policy (who/what may write)",
       "description": "Writes to long-term memory shall be validated against policy (who/what may write)",
-      "whyItMatters": "MEM-M3 (Memory Management, mandatory): Writes to long-term memory shall be validated against policy (who/what may write) Failing this leaves a production gap against: Unauthorized writers denied at 100% in tests; policy enumerates allowed writers and content classes for durable memory",
+      "whyItMatters": "Writes to long-term memory shall be validated against policy (who/what may write) Failing this leaves a production gap against: Unauthorized writers denied at 100% in tests; policy enumerates allowed writers and content classes for durable memory",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -6426,13 +6854,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For MEM-M3 (Be validated against policy (who/what may write)): inspect current evidence for [Write-policy middleware config + deny tests] and confirm the pass condition holds — Unauthorized writers denied at 100% in tests; policy enumerates allowed writers and content classes for durable memory",
-      "falsePositiveGuidance": "MEM-M3 (Memory Management): re-verify against a current artifact for this specific Check (MEM-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Be validated against policy (who/what may write)): inspect current evidence for [Write-policy middleware config + deny tests] and confirm the pass condition holds — Unauthorized writers denied at 100% in tests; policy enumerates allowed writers and content classes for durable memory",
+      "falsePositiveGuidance": "(Memory Management): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Writes to long-term memory must be validated against policy (who/what may write) (MEM-M3)",
+        "Implement and operationalize: Writes to long-term memory must be validated against policy (who/what may write)",
         "Retain evidence artifacts required by this Check, starting with: Write-policy middleware config + deny tests",
-        "Schedule recurring manual verification for MEM-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until MEM-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6472,11 +6900,11 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "memory-management",
       "title": "Critical memory records must have cryptographic or signed integrity protection",
       "description": "Critical memory records shall have cryptographic or signed integrity protection",
-      "whyItMatters": "MEM-M4 (Memory Management, mandatory): Critical memory records shall have cryptographic or signed integrity protection Failing this leaves a production gap against: PASS if critical memory classes are inventoried and integrity verification succeeds in the latest check (≤90 days)",
+      "whyItMatters": "Critical memory records shall have cryptographic or signed integrity protection Failing this leaves a production gap against: Critical memory classes are inventoried; cryptographic verification or signature check succeeds for those classes in the latest check (≤90 days)",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "PASS if critical memory classes are inventoried and integrity verification succeeds in the latest check (≤90 days)",
+      "passCondition": "Critical memory classes are inventoried; cryptographic verification or signature check succeeds for those classes in the latest check (≤90 days)",
       "evidenceRequired": [
         "Integrity/signing design + verification sample for critical memory stores"
       ],
@@ -6491,13 +6919,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For MEM-M4 (Critical memory records must have cryptographic or signed integrity protection): inspect current evidence for [Integrity/signing design + verification sample for critical memory stores] and confirm the pass condition holds — PASS if critical memory classes are inventoried and integrity verification succeeds in the latest check (≤90 days)",
-      "falsePositiveGuidance": "MEM-M4 (Memory Management): re-verify against a current artifact for this specific Check (MEM-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Critical memory records must have cryptographic or signed integrity protection): inspect current evidence for [Integrity/signing design + verification sample for critical memory stores] and confirm the pass condition holds — Critical memory classes are inventoried; cryptographic verification or signature check succeeds for those classes in the latest check (≤90 days)",
+      "falsePositiveGuidance": "(Memory Management): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Critical memory records must have cryptographic or signed integrity protection (MEM-M4)",
+        "Implement and operationalize: Critical memory records must have cryptographic or signed integrity protection",
         "Retain evidence artifacts required by this Check, starting with: Integrity/signing design + verification sample for critical memory stores",
-        "Schedule recurring manual verification for MEM-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until MEM-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6535,9 +6963,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "MEM-R1",
       "category": "memory-management",
-      "title": "MEM-R1: Memory poisoning tests in the eval suite",
+      "title": "Production systems should have memory poisoning tests in the eval suite",
       "description": "Memory poisoning tests in the eval suite",
-      "whyItMatters": "MEM-R1 (Memory Management, recommended): Memory poisoning tests in the eval suite Failing this leaves a production gap against: ≥5 poisoning scenarios (cross-tenant write, prompt-in-memory, stale trusted fact) are executed ≤90 days; critical fails block or require risk acceptance",
+      "whyItMatters": "Memory poisoning tests in the eval suite Failing this leaves a production gap against: ≥5 poisoning scenarios (cross-tenant write, prompt-in-memory, stale trusted fact) are executed ≤90 days; critical fails block or require risk acceptance",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -6556,13 +6984,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For MEM-R1 (MEM-R1: Memory poisoning tests in the eval suite): inspect current evidence for [Memory-poisoning cases in the adversarial eval suite + latest run report with pass/fail per case] and confirm the pass condition holds — ≥5 poisoning scenarios (cross-tenant write, prompt-in-memory, stale trusted fact) are executed ≤90 days; critical fails block or require risk acceptance",
-      "falsePositiveGuidance": "MEM-R1 (Memory Management): re-verify against a current artifact for this specific Check (MEM-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Memory poisoning tests in the eval suite): inspect current evidence for [Memory-poisoning cases in the adversarial eval suite + latest run report with pass/fail per case] and confirm the pass condition holds — ≥5 poisoning scenarios (cross-tenant write, prompt-in-memory, stale trusted fact) are executed ≤90 days; critical fails block or require risk acceptance",
+      "falsePositiveGuidance": "(Memory Management): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: MEM-R1: Memory poisoning tests in the eval suite (MEM-R1)",
+        "Implement and operationalize: this Check: Memory poisoning tests in the eval suite",
         "Retain evidence artifacts required by this Check, starting with: Memory-poisoning cases in the adversarial eval suite + latest run report with pass/fail per case",
-        "Schedule recurring manual verification for MEM-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until MEM-R1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6600,9 +7028,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "MEM-R3",
       "category": "memory-management",
-      "title": "MEM-R3: Separate working memory from durable memory with promotion rules",
+      "title": "Production systems should have separate working memory from durable memory with promotion rules",
       "description": "Separate working memory from durable memory with promotion rules",
-      "whyItMatters": "MEM-R3 (Memory Management, recommended): Separate working memory from durable memory with promotion rules Failing this leaves a production gap against: Working memory cannot silently become durable without a promotion rule; last 10 promotions show rule ID and actor; TTL differs by memory class",
+      "whyItMatters": "Separate working memory from durable memory with promotion rules Failing this leaves a production gap against: Working memory cannot silently become durable without a promotion rule; last 10 promotions show rule ID and actor; TTL differs by memory class",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -6621,13 +7049,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For MEM-R3 (MEM-R3: Separate working memory from durable memory with promotion rules): inspect current evidence for [Memory architecture doc + config showing working vs durable stores and promotion rules + sample promotion audit] and confirm the pass condition holds — Working memory cannot silently become durable without a promotion rule; last 10 promotions show rule ID and actor; TTL differs by memory class",
-      "falsePositiveGuidance": "MEM-R3 (Memory Management): re-verify against a current artifact for this specific Check (MEM-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Separate working memory from durable memory with promotion rules): inspect current evidence for [Memory architecture doc + config showing working vs durable stores and promotion rules + sample promotion audit] and confirm the pass condition holds — Working memory cannot silently become durable without a promotion rule; last 10 promotions show rule ID and actor; TTL differs by memory class",
+      "falsePositiveGuidance": "(Memory Management): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: MEM-R3: Separate working memory from durable memory with promotion rules (MEM-R3)",
-        "Retain evidence artifacts required by this Check, starting with: Memory architecture doc + config showing working vs durable stores and promotion rules + sample pro…",
-        "Schedule recurring manual verification for MEM-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until MEM-R3 passes"
+        "Implement and operationalize: this Check: Separate working memory from durable memory with promotion rules",
+        "Retain evidence artifacts required by this Check, starting with: Memory architecture doc + config showing working vs durable stores and promotion rules + sample promotion audit",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6667,7 +7095,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "model-governance",
       "title": "Production must use pinned model identifiers; aliases like “latest” are forbidden on critical paths",
       "description": "Production shall use pinned model identifiers; aliases like “latest” are forbidden on critical paths",
-      "whyItMatters": "MOD-M1 (Model Governance, mandatory): Production shall use pinned model identifiers; aliases like “latest” are forbidden on critical paths Failing this leaves a production gap against: 0 “latest”/floating aliases on critical production paths in config lint; 100% of critical paths reference immutable model IDs",
+      "whyItMatters": "Production shall use pinned model identifiers; aliases like “latest” are forbidden on critical paths Failing this leaves a production gap against: 0 “latest”/floating aliases on critical production paths in config lint; 100% of critical paths reference immutable model IDs",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -6690,13 +7118,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For MOD-M1 (Production must use pinned model identifiers; aliases like “latest” are forbidden on critical paths): inspect current evidence for [Production model pin config + lint/CI rule rejecting “latest” aliases] and confirm the pass condition holds — 0 “latest”/floating aliases on critical production paths in config lint; 100% of critical paths reference immutable model IDs",
-      "falsePositiveGuidance": "MOD-M1 (Model Governance): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Production must use pinned model identifiers; aliases like “latest” are forbidden on critical paths): inspect current evidence for [Production model pin config + lint/CI rule rejecting “latest” aliases] and confirm the pass condition holds — 0 “latest”/floating aliases on critical production paths in config lint; 100% of critical paths reference immutable model IDs",
+      "falsePositiveGuidance": "(Model Governance): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Production must use pinned model identifiers; aliases like “latest” are forbidden on critical paths (MOD-M1)",
+        "Implement and operationalize: Production must use pinned model identifiers; aliases like “latest” are forbidden on critical paths",
         "Retain evidence artifacts required by this Check, starting with: Production model pin config + lint/CI rule rejecting “latest” aliases",
-        "Wire or verify detectors declared on MOD-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until MOD-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6737,7 +7165,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "model-governance",
       "title": "Model inventory must exist with owners, data residency, and intended use",
       "description": "Model inventory shall exist with owners, data residency, and intended use",
-      "whyItMatters": "MOD-M2 (Model Governance, mandatory): Model inventory shall exist with owners, data residency, and intended use Failing this leaves a production gap against: 100% of production models have owner, residency, and intended-use fields; query returns 0 incomplete rows",
+      "whyItMatters": "Model inventory shall exist with owners, data residency, and intended use Failing this leaves a production gap against: 100% of production models have owner, residency, and intended-use fields; query returns 0 incomplete rows",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -6756,13 +7184,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For MOD-M2 (Model inventory must exist with owners, data residency, and intended use): inspect current evidence for [Model inventory registry export] and confirm the pass condition holds — 100% of production models have owner, residency, and intended-use fields; query returns 0 incomplete rows",
-      "falsePositiveGuidance": "MOD-M2 (Model Governance): re-verify against a current artifact for this specific Check (MOD-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Model inventory must exist with owners, data residency, and intended use): inspect current evidence for [Model inventory registry export] and confirm the pass condition holds — 100% of production models have owner, residency, and intended-use fields; query returns 0 incomplete rows",
+      "falsePositiveGuidance": "(Model Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Model inventory must exist with owners, data residency, and intended use (MOD-M2)",
+        "Implement and operationalize: Model inventory must exist with owners, data residency, and intended use",
         "Retain evidence artifacts required by this Check, starting with: Model inventory registry export",
-        "Schedule recurring manual verification for MOD-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until MOD-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6803,7 +7231,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "model-governance",
       "title": "Model changes must require evaluation evidence before promotion",
       "description": "Model changes shall require evaluation evidence before promotion",
-      "whyItMatters": "MOD-M3 (Model Governance, mandatory): Model changes shall require evaluation evidence before promotion Failing this leaves a production gap against: 100% of production model promotions in last 30 days have linked eval pass artifacts; promote without eval is blocked by gate",
+      "whyItMatters": "Model changes shall require evaluation evidence before promotion Failing this leaves a production gap against: 100% of production model promotions in last 30 days have linked eval pass artifacts; promote without eval is blocked by gate",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -6822,13 +7250,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For MOD-M3 (Model changes must require evaluation evidence before promotion): inspect current evidence for [Promotion policy + CI/registry requiring eval artifact on model version bumps] and confirm the pass condition holds — 100% of production model promotions in last 30 days have linked eval pass artifacts; promote without eval is blocked by gate",
-      "falsePositiveGuidance": "MOD-M3 (Model Governance): re-verify against a current artifact for this specific Check (MOD-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Model changes must require evaluation evidence before promotion): inspect current evidence for [Promotion policy + CI/registry requiring eval artifact on model version bumps] and confirm the pass condition holds — 100% of production model promotions in last 30 days have linked eval pass artifacts; promote without eval is blocked by gate",
+      "falsePositiveGuidance": "(Model Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Model changes must require evaluation evidence before promotion (MOD-M3)",
+        "Implement and operationalize: Model changes must require evaluation evidence before promotion",
         "Retain evidence artifacts required by this Check, starting with: Promotion policy + CI/registry requiring eval artifact on model version bumps",
-        "Schedule recurring manual verification for MOD-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until MOD-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6867,9 +7295,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "MOD-R1",
       "category": "model-governance",
-      "title": "MOD-R1: Deprecation and sunset policy for models and embeddings",
+      "title": "Production systems should have deprecation and sunset policy for models and embeddings",
       "description": "Deprecation and sunset policy for models and embeddings",
-      "whyItMatters": "MOD-R1 (Model Governance, recommended): Deprecation and sunset policy for models and embeddings Failing this leaves a production gap against: Policy defines notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date in the registry; no undocumented pins past sun…",
+      "whyItMatters": "Deprecation and sunset policy for models and embeddings Failing this leaves a production gap against: Policy defines notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date in the registry; no undocumented pins past sunset without exception",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -6881,13 +7309,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For MOD-R1 (MOD-R1: Deprecation and sunset policy for models and embeddings): inspect current evidence for [Model/embedding deprecation and sunset policy + registry entries showing sunset dates for superseded pins] and confirm the pass condition holds — Policy defines notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date in the registry; no undocumented pins past sunset without exception",
-      "falsePositiveGuidance": "MOD-R1 (Model Governance): re-verify against a current artifact for this specific Check (MOD-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Deprecation and sunset policy for models and embeddings): inspect current evidence for [Model/embedding deprecation and sunset policy + registry entries showing sunset dates for superseded pins] and confirm the pass condition holds — Policy defines notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date in the registry; no undocumented pins past sunset without exception",
+      "falsePositiveGuidance": "(Model Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: MOD-R1: Deprecation and sunset policy for models and embeddings (MOD-R1)",
-        "Retain evidence artifacts required by this Check, starting with: Model/embedding deprecation and sunset policy + registry entries showing sunset dates for supersede…",
-        "Schedule recurring manual verification for MOD-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until MOD-R1 passes"
+        "Implement and operationalize: this Check: Deprecation and sunset policy for models and embeddings",
+        "Retain evidence artifacts required by this Check, starting with: Model/embedding deprecation and sunset policy + registry entries showing sunset dates for superseded pins",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6926,9 +7354,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "MOD-R2",
       "category": "model-governance",
-      "title": "MOD-R2: Capability allowlists (e.g., code execution, vision) per workload",
+      "title": "Production systems should have capability allowlists (e.g., code execution, vision) per workload",
       "description": "Capability allowlists (e.g., code execution, vision) per workload",
-      "whyItMatters": "MOD-R2 (Model Governance, recommended): Capability allowlists (e.g., code execution, vision) per workload Failing this leaves a production gap against: Each production workload has an explicit capability allowlist; a denied capability attempt is recorded in test or prod within 90 days",
+      "whyItMatters": "Capability allowlists (e.g., code execution, vision) per workload Failing this leaves a production gap against: Each production workload has an explicit capability allowlist; a denied capability attempt is recorded in test or prod within 90 days",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -6947,13 +7375,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For MOD-R2 (MOD: Capability allowlists (e.g., code execution, vision) per workload): inspect current evidence for [Per-workload capability allowlist config (code execution, vision, browsing, etc.) + deny logs] and confirm the pass condition holds — Each production workload has an explicit capability allowlist; a denied capability attempt is recorded in test or prod within 90 days",
-      "falsePositiveGuidance": "MOD-R2 (Model Governance): re-verify against a current artifact for this specific Check (MOD-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (MOD: Capability allowlists (e.g., code execution, vision) per workload): inspect current evidence for [Per-workload capability allowlist config (code execution, vision, browsing, etc.) + deny logs] and confirm the pass condition holds — Each production workload has an explicit capability allowlist; a denied capability attempt is recorded in test or prod within 90 days",
+      "falsePositiveGuidance": "(Model Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: MOD-R2: Capability allowlists (e.g., code execution, vision) per workload (MOD-R2)",
+        "Implement and operationalize: this Check: Capability allowlists (e.g., code execution, vision) per workload",
         "Retain evidence artifacts required by this Check, starting with: Per-workload capability allowlist config (code execution, vision, browsing, etc.) + deny logs",
-        "Schedule recurring manual verification for MOD-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until MOD-R2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -6992,9 +7420,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "MOD-R3",
       "category": "model-governance",
-      "title": "MOD-R3: License and provenance review for open-weight and fine-tuned models",
+      "title": "Production systems should have license and provenance review for open-weight and fine-tuned models",
       "description": "License and provenance review for open-weight and fine-tuned models",
-      "whyItMatters": "MOD-R3 (Model Governance, recommended): License and provenance review for open-weight and fine-tuned models Failing this leaves a production gap against: 100% of open-weight/fine-tuned production models have a license+provenance review ≤12 months old; blocked licenses have documented exceptions with expiry",
+      "whyItMatters": "License and provenance review for open-weight and fine-tuned models Failing this leaves a production gap against: 100% of open-weight/fine-tuned production models have a license+provenance review ≤12 months old; blocked licenses have documented exceptions with expiry",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -7006,13 +7434,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For MOD-R3 (MOD-R3: License and provenance review for open-weight and fine-tuned models): inspect current evidence for [License/provenance review checklist + completed reviews for each open-weight or fine-tuned production model] and confirm the pass condition holds — 100% of open-weight/fine-tuned production models have a license+provenance review ≤12 months old; blocked licenses have documented exceptions with expiry",
-      "falsePositiveGuidance": "MOD-R3 (Model Governance): re-verify against a current artifact for this specific Check (MOD-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (License and provenance review for open-weight and fine-tuned models): inspect current evidence for [License/provenance review checklist + completed reviews for each open-weight or fine-tuned production model] and confirm the pass condition holds — 100% of open-weight/fine-tuned production models have a license+provenance review ≤12 months old; blocked licenses have documented exceptions with expiry",
+      "falsePositiveGuidance": "(Model Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: MOD-R3: License and provenance review for open-weight and fine-tuned models (MOD-R3)",
-        "Retain evidence artifacts required by this Check, starting with: License/provenance review checklist + completed reviews for each open-weight or fine-tuned producti…",
-        "Schedule recurring manual verification for MOD-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until MOD-R3 passes"
+        "Implement and operationalize: this Check: License and provenance review for open-weight and fine-tuned models",
+        "Retain evidence artifacts required by this Check, starting with: License/provenance review checklist + completed reviews for each open-weight or fine-tuned production model",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7053,7 +7481,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "observability",
       "title": "Distributed traces must link user request → model calls → tools → outcome",
       "description": "Distributed traces shall link user request → model calls → tools → outcome",
-      "whyItMatters": "OBS-M1 (Observability, mandatory): Distributed traces shall link user request → model calls → tools → outcome Failing this leaves a production gap against: Canary or sampled traces show parent request ID linking model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours",
+      "whyItMatters": "Distributed traces shall link user request → model calls → tools → outcome Failing this leaves a production gap against: Canary or sampled traces show parent request ID linking model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -7082,13 +7510,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For OBS-M1 (Distributed traces must link user request → model calls → tools → outcome): inspect current evidence for [Sample production traces (redacted) + tracing config] and confirm the pass condition holds — Canary or sampled traces show parent request ID linking model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours",
-      "falsePositiveGuidance": "OBS-M1 (Observability): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Distributed traces must link user request → model calls → tools → outcome): inspect current evidence for [Sample production traces (redacted) + tracing config] and confirm the pass condition holds — Canary or sampled traces show parent request ID linking model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours",
+      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Distributed traces must link user request → model calls → tools → outcome (OBS-M1)",
+        "Implement and operationalize: Distributed traces must link user request → model calls → tools → outcome",
         "Retain evidence artifacts required by this Check, starting with: Sample production traces (redacted) + tracing config",
-        "Wire or verify detectors declared on OBS-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until OBS-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7130,7 +7558,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "observability",
       "title": "Token usage and cost must be attributable per request/feature/tenant",
       "description": "Token usage and cost shall be attributable per request/feature/tenant",
-      "whyItMatters": "OBS-M2 (Observability, mandatory): Token usage and cost shall be attributable per request/feature/tenant Failing this leaves a production gap against: ≥95% of billed model calls in a 24h sample carry request ID + feature + tenant (or equivalent) attribution labels",
+      "whyItMatters": "Token usage and cost shall be attributable per request/feature/tenant Failing this leaves a production gap against: ≥95% of billed model calls in a 24h sample carry request ID + feature + tenant (or equivalent) attribution labels",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -7149,13 +7577,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For OBS-M2 (Token usage and cost must be attributable per request/feature/tenant): inspect current evidence for [Cost/token metrics with request, feature, and tenant labels] and confirm the pass condition holds — ≥95% of billed model calls in a 24h sample carry request ID + feature + tenant (or equivalent) attribution labels",
-      "falsePositiveGuidance": "OBS-M2 (Observability): re-verify against a current artifact for this specific Check (OBS-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Token usage and cost must be attributable per request/feature/tenant): inspect current evidence for [Cost/token metrics with request, feature, and tenant labels] and confirm the pass condition holds — ≥95% of billed model calls in a 24h sample carry request ID + feature + tenant (or equivalent) attribution labels",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Token usage and cost must be attributable per request/feature/tenant (OBS-M2)",
+        "Implement and operationalize: Token usage and cost must be attributable per request/feature/tenant",
         "Retain evidence artifacts required by this Check, starting with: Cost/token metrics with request, feature, and tenant labels",
-        "Schedule recurring manual verification for OBS-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until OBS-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7197,7 +7625,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "observability",
       "title": "Sensitive fields in traces must be redacted or access-controlled",
       "description": "Sensitive fields in traces shall be redacted or access-controlled",
-      "whyItMatters": "OBS-M3 (Observability, mandatory): Sensitive fields in traces shall be redacted or access-controlled Failing this leaves a production gap against: Synthetic secrets/PII in traced fields are redacted or inaccessible to unauthorized roles at 100% in tests",
+      "whyItMatters": "Sensitive fields in traces shall be redacted or access-controlled Failing this leaves a production gap against: Synthetic secrets/PII in traced fields are redacted or inaccessible to unauthorized roles at 100% in tests",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -7216,13 +7644,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For OBS-M3 (Sensitive fields in traces must be redacted or access-controlled): inspect current evidence for [Trace redaction/ACL config + synthetic sensitive-field test] and confirm the pass condition holds — Synthetic secrets/PII in traced fields are redacted or inaccessible to unauthorized roles at 100% in tests",
-      "falsePositiveGuidance": "OBS-M3 (Observability): re-verify against a current artifact for this specific Check (OBS-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Sensitive fields in traces must be redacted or access-controlled): inspect current evidence for [Trace redaction/ACL config + synthetic sensitive-field test] and confirm the pass condition holds — Synthetic secrets/PII in traced fields are redacted or inaccessible to unauthorized roles at 100% in tests",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Sensitive fields in traces must be redacted or access-controlled (OBS-M3)",
+        "Implement and operationalize: Sensitive fields in traces must be redacted or access-controlled",
         "Retain evidence artifacts required by this Check, starting with: Trace redaction/ACL config + synthetic sensitive-field test",
-        "Schedule recurring manual verification for OBS-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until OBS-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7262,9 +7690,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "OBS-R1",
       "category": "observability",
-      "title": "OBS-R1: Replay tooling for failed traces in a secure environment",
+      "title": "Production systems should have replay tooling for failed traces in a secure environment",
       "description": "Replay tooling for failed traces in a secure environment",
-      "whyItMatters": "OBS-R1 (Observability, recommended): Replay tooling for failed traces in a secure environment Failing this leaves a production gap against: On-call can replay a failed AI trace in a restricted environment within the documented RTO; last drill or real replay ≤90 days old",
+      "whyItMatters": "Replay tooling for failed traces in a secure environment Failing this leaves a production gap against: On-call can replay a failed AI trace in a restricted environment within the documented RTO; last drill or real replay ≤90 days old",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -7283,13 +7711,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For OBS-R1 (OBS-R1: Replay tooling for failed traces in a secure environment): inspect current evidence for [Secure replay tooling config + sample replay session for a failed production trace (redacted)] and confirm the pass condition holds — On-call can replay a failed AI trace in a restricted environment within the documented RTO; last drill or real replay ≤90 days old",
-      "falsePositiveGuidance": "OBS-R1 (Observability): re-verify against a current artifact for this specific Check (OBS-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Replay tooling for failed traces in a secure environment): inspect current evidence for [Secure replay tooling config + sample replay session for a failed production trace (redacted)] and confirm the pass condition holds — On-call can replay a failed AI trace in a restricted environment within the documented RTO; last drill or real replay ≤90 days old",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: OBS-R1: Replay tooling for failed traces in a secure environment (OBS-R1)",
+        "Implement and operationalize: this Check: Replay tooling for failed traces in a secure environment",
         "Retain evidence artifacts required by this Check, starting with: Secure replay tooling config + sample replay session for a failed production trace (redacted)",
-        "Schedule recurring manual verification for OBS-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until OBS-R1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7329,9 +7757,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "OBS-R2",
       "category": "observability",
-      "title": "OBS-R2: Quality annotations attachable to traces for closed-loop eval",
+      "title": "Production systems should have quality annotations attachable to traces for closed-loop eval",
       "description": "Quality annotations attachable to traces for closed-loop eval",
-      "whyItMatters": "OBS-R2 (Observability, recommended): Quality annotations attachable to traces for closed-loop eval Failing this leaves a production gap against: Annotators can attach quality labels to production traces in a secure tool; ≥50 annotations in the last 90 days feed an eval or review loop",
+      "whyItMatters": "Quality annotations attachable to traces for closed-loop eval Failing this leaves a production gap against: Annotators can attach quality labels to production traces in a secure tool; ≥50 annotations in the last 90 days feed an eval or review loop",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -7350,13 +7778,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For OBS-R2 (OBS-R2: Quality annotations attachable to traces for closed-loop eval): inspect current evidence for [Trace annotation schema + tooling config allowing quality labels on spans + sample annotated traces] and confirm the pass condition holds — Annotators can attach quality labels to production traces in a secure tool; ≥50 annotations in the last 90 days feed an eval or review loop",
-      "falsePositiveGuidance": "OBS-R2 (Observability): re-verify against a current artifact for this specific Check (OBS-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Quality annotations attachable to traces for closed-loop eval): inspect current evidence for [Trace annotation schema + tooling config allowing quality labels on spans + sample annotated traces] and confirm the pass condition holds — Annotators can attach quality labels to production traces in a secure tool; ≥50 annotations in the last 90 days feed an eval or review loop",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: OBS-R2: Quality annotations attachable to traces for closed-loop eval (OBS-R2)",
+        "Implement and operationalize: this Check: Quality annotations attachable to traces for closed-loop eval",
         "Retain evidence artifacts required by this Check, starting with: Trace annotation schema + tooling config allowing quality labels on spans + sample annotated traces",
-        "Schedule recurring manual verification for OBS-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until OBS-R2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7396,9 +7824,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "OBS-R3",
       "category": "observability",
-      "title": "OBS-R3: SLO dashboards for AI latency, error, and quality burn rates",
+      "title": "Production systems should have sLO dashboards for AI latency, error, and quality burn rates",
       "description": "SLO dashboards for AI latency, error, and quality burn rates",
-      "whyItMatters": "OBS-R3 (Observability, recommended): SLO dashboards for AI latency, error, and quality burn rates Failing this leaves a production gap against: Named SLOs with numeric targets exist for each critical AI journey; alert fires when burn exceeds documented threshold",
+      "whyItMatters": "SLO dashboards for AI latency, error, and quality burn rates Failing this leaves a production gap against: Named SLOs with numeric targets exist for each critical AI journey; alert fires when burn exceeds documented threshold",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -7417,13 +7845,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For OBS-R3 (OBS-R3: SLO dashboards for AI latency, error, and quality burn rates): inspect current evidence for [SLO/alert configuration export + dashboard screenshot or URL with retention note] and confirm the pass condition holds — Named SLOs with numeric targets exist for each critical AI journey; alert fires when burn exceeds documented threshold",
-      "falsePositiveGuidance": "OBS-R3 (Observability): re-verify against a current artifact for this specific Check (OBS-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (SLO dashboards for AI latency, error, and quality burn rates): inspect current evidence for [SLO/alert configuration export + dashboard screenshot or URL with retention note] and confirm the pass condition holds — Named SLOs with numeric targets exist for each critical AI journey; alert fires when burn exceeds documented threshold",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: OBS-R3: SLO dashboards for AI latency, error, and quality burn rates (OBS-R3)",
+        "Implement and operationalize: this Check: SLO dashboards for AI latency, error, and quality burn rates",
         "Retain evidence artifacts required by this Check, starting with: SLO/alert configuration export + dashboard screenshot or URL with retention note",
-        "Schedule recurring manual verification for OBS-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until OBS-R3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7465,7 +7893,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "organizational-governance",
       "title": "Documented AI policy covering acceptable use and prohibited applications must exist",
       "description": "Documented AI policy covering acceptable use and prohibited applications shall exist",
-      "whyItMatters": "ORG-M1 (Organizational Governance, mandatory): Documented AI policy covering acceptable use and prohibited applications shall exist Failing this leaves a production gap against: Policy has version, owner, and review date ≤ 12 months; includes both acceptable-use and prohibited-application sections",
+      "whyItMatters": "Documented AI policy covering acceptable use and prohibited applications shall exist Failing this leaves a production gap against: Policy has version, owner, and review date ≤ 12 months; includes both acceptable-use and prohibited-application sections",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -7488,13 +7916,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For ORG-M1 (Documented AI policy covering acceptable use and prohibited applications must exist): inspect current evidence for [Approved AI acceptable-use / prohibited-applications policy] and confirm the pass condition holds — Policy has version, owner, and review date ≤ 12 months; includes both acceptable-use and prohibited-application sections",
-      "falsePositiveGuidance": "ORG-M1 (Organizational Governance): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (Documented AI policy covering acceptable use and prohibited applications must exist): inspect current evidence for [Approved AI acceptable-use / prohibited-applications policy] and confirm the pass condition holds — Policy has version, owner, and review date ≤ 12 months; includes both acceptable-use and prohibited-application sections",
+      "falsePositiveGuidance": "(Organizational Governance): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: Documented AI policy covering acceptable use and prohibited applications must exist (ORG-M1)",
+        "Implement and operationalize: Documented AI policy covering acceptable use and prohibited applications must exist",
         "Retain evidence artifacts required by this Check, starting with: Approved AI acceptable-use / prohibited-applications policy",
-        "Wire or verify detectors declared on ORG-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until ORG-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7531,7 +7959,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "organizational-governance",
       "title": "Each production AI system must have named owners for critical APRF domains",
       "description": "Each production AI system shall have named owners for critical APRF domains",
-      "whyItMatters": "ORG-M2 (Organizational Governance, mandatory): Each production AI system shall have named owners for critical APRF domains Failing this leaves a production gap against: 0 production systems missing required domain owners in inventory query",
+      "whyItMatters": "Each production AI system shall have named owners for critical APRF domains Failing this leaves a production gap against: 0 production systems missing required domain owners in inventory query",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -7554,13 +7982,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For ORG-M2 (Each production AI system must have named owners for critical APRF domains): inspect current evidence for [System inventory with owner fields for critical domains] and confirm the pass condition holds — 0 production systems missing required domain owners in inventory query",
-      "falsePositiveGuidance": "ORG-M2 (Organizational Governance): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (Each production AI system must have named owners for critical APRF domains): inspect current evidence for [System inventory with owner fields for critical domains] and confirm the pass condition holds — 0 production systems missing required domain owners in inventory query",
+      "falsePositiveGuidance": "(Organizational Governance): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: Each production AI system must have named owners for critical APRF domains (ORG-M2)",
+        "Implement and operationalize: Each production AI system must have named owners for critical APRF domains",
         "Retain evidence artifacts required by this Check, starting with: System inventory with owner fields for critical domains",
-        "Wire or verify detectors declared on ORG-M2 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until ORG-M2 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7597,7 +8025,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "organizational-governance",
       "title": "Risk acceptance for known control gaps must be recorded with owner and expiry",
       "description": "Risk acceptance for known control gaps shall be recorded with owner and expiry",
-      "whyItMatters": "ORG-M3 (Organizational Governance, mandatory): Risk acceptance for known control gaps shall be recorded with owner and expiry Failing this leaves a production gap against: 100% of open control-gap waivers have owner + expiry date; 0 expired waivers without escalation record",
+      "whyItMatters": "Risk acceptance for known control gaps shall be recorded with owner and expiry Failing this leaves a production gap against: 100% of open control-gap waivers have owner + expiry date; 0 expired waivers without escalation record",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -7616,13 +8044,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For ORG-M3 (Risk acceptance for known control gaps must be recorded with owner and expiry): inspect current evidence for [Risk-acceptance register samples] and confirm the pass condition holds — 100% of open control-gap waivers have owner + expiry date; 0 expired waivers without escalation record",
-      "falsePositiveGuidance": "ORG-M3 (Organizational Governance): re-verify against a current artifact for this specific Check (ORG-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Risk acceptance for known control gaps must be recorded with owner and expiry): inspect current evidence for [Risk-acceptance register samples] and confirm the pass condition holds — 100% of open control-gap waivers have owner + expiry date; 0 expired waivers without escalation record",
+      "falsePositiveGuidance": "(Organizational Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Risk acceptance for known control gaps must be recorded with owner and expiry (ORG-M3)",
+        "Implement and operationalize: Risk acceptance for known control gaps must be recorded with owner and expiry",
         "Retain evidence artifacts required by this Check, starting with: Risk-acceptance register samples",
-        "Schedule recurring manual verification for ORG-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until ORG-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7659,7 +8087,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "organizational-governance",
       "title": "Internal audit or independent assessment must sample APRF evidence on a defined cadence",
       "description": "Internal audit or independent assessment shall sample APRF evidence on a defined cadence",
-      "whyItMatters": "ORG-M4 (Organizational Governance, mandatory): Internal audit or independent assessment shall sample APRF evidence on a defined cadence Failing this leaves a production gap against: PASS if the last sampling report is ≤12 months old and lists sampled check IDs and findings",
+      "whyItMatters": "Internal audit or independent assessment shall sample APRF evidence on a defined cadence Failing this leaves a production gap against: PASS if the last sampling report is ≤12 months old and lists sampled check IDs and findings",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -7671,13 +8099,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For ORG-M4 (Internal audit or independent assessment must sample APRF evidence on a defined cadence): inspect current evidence for [Independent assessment or internal-audit sampling report against APRF evidence] and confirm the pass condition holds — PASS if the last sampling report is ≤12 months old and lists sampled check IDs and findings",
-      "falsePositiveGuidance": "ORG-M4 (Organizational Governance): re-verify against a current artifact for this specific Check (ORG-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Internal audit or independent assessment must sample APRF evidence on a defined cadence): inspect current evidence for [Independent assessment or internal-audit sampling report against APRF evidence] and confirm the pass condition holds — PASS if the last sampling report is ≤12 months old and lists sampled check IDs and findings",
+      "falsePositiveGuidance": "(Organizational Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Internal audit or independent assessment must sample APRF evidence on a defined cadence (ORG-M4)",
+        "Implement and operationalize: Internal audit or independent assessment must sample APRF evidence on a defined cadence",
         "Retain evidence artifacts required by this Check, starting with: Independent assessment or internal-audit sampling report against APRF evidence",
-        "Schedule recurring manual verification for ORG-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until ORG-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7712,9 +8140,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "ORG-R1",
       "category": "organizational-governance",
-      "title": "ORG-R1: Periodic leadership review of AI risk posture and APRF maturity",
+      "title": "Production systems should have periodic leadership review of AI risk posture and APRF maturity",
       "description": "Periodic leadership review of AI risk posture and APRF maturity",
-      "whyItMatters": "ORG-R1 (Organizational Governance, recommended): Periodic leadership review of AI risk posture and APRF maturity Failing this leaves a production gap against: Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago; open actions have owners and due dates",
+      "whyItMatters": "Periodic leadership review of AI risk posture and APRF maturity Failing this leaves a production gap against: Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago; open actions have owners and due dates",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -7726,13 +8154,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For ORG-R1 (ORG-R1: Periodic leadership review of AI risk posture and APRF maturity): inspect current evidence for [Leadership AI risk / APRF maturity review minutes (or board pack excerpt) + action log] and confirm the pass condition holds — Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago; open actions have owners and due dates",
-      "falsePositiveGuidance": "ORG-R1 (Organizational Governance): re-verify against a current artifact for this specific Check (ORG-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Periodic leadership review of AI risk posture and APRF maturity): inspect current evidence for [Leadership AI risk / APRF maturity review minutes (or board pack excerpt) + action log] and confirm the pass condition holds — Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago; open actions have owners and due dates",
+      "falsePositiveGuidance": "(Organizational Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: ORG-R1: Periodic leadership review of AI risk posture and APRF maturity (ORG-R1)",
+        "Implement and operationalize: this Check: Periodic leadership review of AI risk posture and APRF maturity",
         "Retain evidence artifacts required by this Check, starting with: Leadership AI risk / APRF maturity review minutes (or board pack excerpt) + action log",
-        "Schedule recurring manual verification for ORG-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until ORG-R1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7767,9 +8195,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "ORG-R3",
       "category": "organizational-governance",
-      "title": "ORG-R3: Continual improvement backlog fed by incidents and eval failures",
+      "title": "Production systems should have continual improvement backlog fed by incidents and eval failures",
       "description": "Continual improvement backlog fed by incidents and eval failures",
-      "whyItMatters": "ORG-R3 (Organizational Governance, recommended): Continual improvement backlog fed by incidents and eval failures Failing this leaves a production gap against: ≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; ≥50% of those items closed or have a dated plan",
+      "whyItMatters": "Continual improvement backlog fed by incidents and eval failures Failing this leaves a production gap against: ≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; ≥50% of those items closed or have a dated plan",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -7788,13 +8216,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For ORG-R3 (ORG-R3: Continual improvement backlog fed by incidents and eval failures): inspect current evidence for [Improvement backlog (tickets) linked from incidents and eval failures + sample of closed items last quarter] and confirm the pass condition holds — ≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; ≥50% of those items closed or have a dated plan",
-      "falsePositiveGuidance": "ORG-R3 (Organizational Governance): re-verify against a current artifact for this specific Check (ORG-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Continual improvement backlog fed by incidents and eval failures): inspect current evidence for [Improvement backlog (tickets) linked from incidents and eval failures + sample of closed items last quarter] and confirm the pass condition holds — ≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; ≥50% of those items closed or have a dated plan",
+      "falsePositiveGuidance": "(Organizational Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: ORG-R3: Continual improvement backlog fed by incidents and eval failures (ORG-R3)",
-        "Retain evidence artifacts required by this Check, starting with: Improvement backlog (tickets) linked from incidents and eval failures + sample of closed items last…",
-        "Schedule recurring manual verification for ORG-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until ORG-R3 passes"
+        "Implement and operationalize: this Check: Continual improvement backlog fed by incidents and eval failures",
+        "Retain evidence artifacts required by this Check, starting with: Improvement backlog (tickets) linked from incidents and eval failures + sample of closed items last quarter",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7831,7 +8259,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "performance-slo",
       "title": "Critical AI user journeys must have documented latency and availability SLOs",
       "description": "Critical AI user journeys shall have documented latency and availability SLOs",
-      "whyItMatters": "PERF-M1 (Performance & SLO Engineering, mandatory): Critical AI user journeys shall have documented latency and availability SLOs Failing this leaves a production gap against: 100% of journeys marked critical have availability % and latency percentile targets recorded",
+      "whyItMatters": "Critical AI user journeys shall have documented latency and availability SLOs Failing this leaves a production gap against: 100% of journeys marked critical have availability % and latency percentile targets recorded",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -7843,13 +8271,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For PERF-M1 (Critical AI user journeys must have documented latency and availability SLOs): inspect current evidence for [SLO catalog with numeric targets per journey] and confirm the pass condition holds — 100% of journeys marked critical have availability % and latency percentile targets recorded",
-      "falsePositiveGuidance": "PERF-M1 (Performance & SLO Engineering): re-verify against a current artifact for this specific Check (PERF-M1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Critical AI user journeys must have documented latency and availability SLOs): inspect current evidence for [SLO catalog with numeric targets per journey] and confirm the pass condition holds — 100% of journeys marked critical have availability % and latency percentile targets recorded",
+      "falsePositiveGuidance": "(Performance & SLO Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Critical AI user journeys must have documented latency and availability SLOs (PERF-M1)",
+        "Implement and operationalize: Critical AI user journeys must have documented latency and availability SLOs",
         "Retain evidence artifacts required by this Check, starting with: SLO catalog with numeric targets per journey",
-        "Schedule recurring manual verification for PERF-M1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PERF-M1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7889,7 +8317,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "performance-slo",
       "title": "Online dashboards must track AI latency, error, and at least one quality or task-success signal",
       "description": "Online dashboards shall track AI latency, error, and at least one quality or task-success signal",
-      "whyItMatters": "PERF-M2 (Performance & SLO Engineering, mandatory): Online dashboards shall track AI latency, error, and at least one quality or task-success signal Failing this leaves a production gap against: Dashboard panels for latency, error rate, and ≥1 quality/task-success signal are live with freshness ≤ 15 minutes",
+      "whyItMatters": "Online dashboards shall track AI latency, error, and at least one quality or task-success signal Failing this leaves a production gap against: Dashboard panels for latency, error rate, and ≥1 quality/task-success signal are live with freshness ≤ 15 minutes",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -7908,13 +8336,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PERF-M2 (Online dashboards must track AI latency, error, and at least one quality or task-success signal): inspect current evidence for [Dashboard URLs/config showing latency, error, and quality/task-success panels] and confirm the pass condition holds — Dashboard panels for latency, error rate, and ≥1 quality/task-success signal are live with freshness ≤ 15 minutes",
-      "falsePositiveGuidance": "PERF-M2 (Performance & SLO Engineering): re-verify against a current artifact for this specific Check (PERF-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Online dashboards must track AI latency, error, and at least one quality or task-success signal): inspect current evidence for [Dashboard URLs/config showing latency, error, and quality/task-success panels] and confirm the pass condition holds — Dashboard panels for latency, error rate, and ≥1 quality/task-success signal are live with freshness ≤ 15 minutes",
+      "falsePositiveGuidance": "(Performance & SLO Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Online dashboards must track AI latency, error, and at least one quality or task-success signal (PERF-M2)",
+        "Implement and operationalize: Online dashboards must track AI latency, error, and at least one quality or task-success signal",
         "Retain evidence artifacts required by this Check, starting with: Dashboard URLs/config showing latency, error, and quality/task-success panels",
-        "Schedule recurring manual verification for PERF-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PERF-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -7954,7 +8382,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "performance-slo",
       "title": "Alerting must exist when SLOs burn beyond defined thresholds",
       "description": "Alerting shall exist when SLOs burn beyond defined thresholds",
-      "whyItMatters": "PERF-M3 (Performance & SLO Engineering, mandatory): Alerting shall exist when SLOs burn beyond defined thresholds Failing this leaves a production gap against: Alert policies exist for each critical journey SLO; alert test or documented fire demonstrates notification path works",
+      "whyItMatters": "Alerting shall exist when SLOs burn beyond defined thresholds Failing this leaves a production gap against: Alert policies exist for each critical journey SLO; alert test or documented fire demonstrates notification path works",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -7973,13 +8401,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PERF-M3 (Alerting must exist when SLOs burn beyond defined thresholds): inspect current evidence for [Burn-rate or SLO alert policies] and confirm the pass condition holds — Alert policies exist for each critical journey SLO; alert test or documented fire demonstrates notification path works",
-      "falsePositiveGuidance": "PERF-M3 (Performance & SLO Engineering): re-verify against a current artifact for this specific Check (PERF-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Alerting must exist when SLOs burn beyond defined thresholds): inspect current evidence for [Burn-rate or SLO alert policies] and confirm the pass condition holds — Alert policies exist for each critical journey SLO; alert test or documented fire demonstrates notification path works",
+      "falsePositiveGuidance": "(Performance & SLO Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Alerting must exist when SLOs burn beyond defined thresholds (PERF-M3)",
+        "Implement and operationalize: Alerting must exist when SLOs burn beyond defined thresholds",
         "Retain evidence artifacts required by this Check, starting with: Burn-rate or SLO alert policies",
-        "Schedule recurring manual verification for PERF-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PERF-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8017,9 +8445,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PERF-R1",
       "category": "performance-slo",
-      "title": "PERF-R1: Error budgets formally gate release velocity for AI features",
+      "title": "Production systems should have error budgets formally gate release velocity for AI features",
       "description": "Error budgets formally gate release velocity for AI features",
-      "whyItMatters": "PERF-R1 (Performance & SLO Engineering, recommended): Error budgets formally gate release velocity for AI features Failing this leaves a production gap against: When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days",
+      "whyItMatters": "Error budgets formally gate release velocity for AI features Failing this leaves a production gap against: When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -8038,13 +8466,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PERF-R1 (PERF-R1: Error budgets formally gate release velocity for AI features): inspect current evidence for [Error-budget policy linking AI SLOs to release freezes + last budget burn report that gated a release] and confirm the pass condition holds — When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days",
-      "falsePositiveGuidance": "PERF-R1 (Performance & SLO Engineering): re-verify against a current artifact for this specific Check (PERF-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Error budgets formally gate release velocity for AI features): inspect current evidence for [Error-budget policy linking AI SLOs to release freezes + last budget burn report that gated a release] and confirm the pass condition holds — When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days",
+      "falsePositiveGuidance": "(Performance & SLO Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: PERF-R1: Error budgets formally gate release velocity for AI features (PERF-R1)",
-        "Retain evidence artifacts required by this Check, starting with: Error-budget policy linking AI SLOs to release freezes + last budget burn report that gated a relea…",
-        "Schedule recurring manual verification for PERF-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PERF-R1 passes"
+        "Implement and operationalize: this Check: Error budgets formally gate release velocity for AI features",
+        "Retain evidence artifacts required by this Check, starting with: Error-budget policy linking AI SLOs to release freezes + last budget burn report that gated a release",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8082,9 +8510,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PERF-R2",
       "category": "performance-slo",
-      "title": "PERF-R2: Capacity and load tests include adversarial long-prompt and agent-loop scenarios",
+      "title": "Production systems should have capacity and load tests include adversarial long-prompt and agent-loop scenarios",
       "description": "Capacity and load tests include adversarial long-prompt and agent-loop scenarios",
-      "whyItMatters": "PERF-R2 (Performance & SLO Engineering, recommended): Capacity and load tests include adversarial long-prompt and agent-loop scenarios Failing this leaves a production gap against: Last capacity test ≤90 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurren…",
+      "whyItMatters": "Capacity and load tests include adversarial long-prompt and agent-loop scenarios Failing this leaves a production gap against: Last capacity test ≤90 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurrency",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -8103,13 +8531,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PERF-R2 (PERF-R2: Capacity and load tests include adversarial long-prompt and agent-loop scenarios): inspect current evidence for [Load-test plan including long-prompt and agent-loop scenarios + latest capacity test report] and confirm the pass condition holds — Last capacity test ≤90 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurrency",
-      "falsePositiveGuidance": "PERF-R2 (Performance & SLO Engineering): re-verify against a current artifact for this specific Check (PERF-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Capacity and load tests include adversarial long-prompt and agent-loop scenarios): inspect current evidence for [Load-test plan including long-prompt and agent-loop scenarios + latest capacity test report] and confirm the pass condition holds — Last capacity test ≤90 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurrency",
+      "falsePositiveGuidance": "(Performance & SLO Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: PERF-R2: Capacity and load tests include adversarial long-prompt and agent-loop scenarios (PERF-R2)",
+        "Implement and operationalize: this Check: Capacity and load tests include adversarial long-prompt and agent-loop scenarios",
         "Retain evidence artifacts required by this Check, starting with: Load-test plan including long-prompt and agent-loop scenarios + latest capacity test report",
-        "Schedule recurring manual verification for PERF-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PERF-R2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8147,9 +8575,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PERF-R3",
       "category": "performance-slo",
-      "title": "PERF-R3: Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs",
+      "title": "Production systems should have streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs",
       "description": "Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs",
-      "whyItMatters": "PERF-R3 (Performance & SLO Engineering, recommended): Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs Failing this leaves a production gap against: TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained ≥30 days",
+      "whyItMatters": "Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs Failing this leaves a production gap against: TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained ≥30 days",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -8168,13 +8596,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PERF-R3 (PERF: Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs): inspect current evidence for [Streaming SLI dashboard for TTFT and inter-token latency + alert config for streaming UIs] and confirm the pass condition holds — TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained ≥30 days",
-      "falsePositiveGuidance": "PERF-R3 (Performance & SLO Engineering): re-verify against a current artifact for this specific Check (PERF-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (PERF: Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs): inspect current evidence for [Streaming SLI dashboard for TTFT and inter-token latency + alert config for streaming UIs] and confirm the pass condition holds — TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained ≥30 days",
+      "falsePositiveGuidance": "(Performance & SLO Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: PERF-R3: Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs (PERF-R3)",
+        "Implement and operationalize: this Check: Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs",
         "Retain evidence artifacts required by this Check, starting with: Streaming SLI dashboard for TTFT and inter-token latency + alert config for streaming UIs",
-        "Schedule recurring manual verification for PERF-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PERF-R3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8214,7 +8642,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "data-privacy",
       "title": "Data flowing to models must be classified; sensitive classes must have documented handling rules",
       "description": "Data flowing to models shall be classified; sensitive classes shall have documented handling rules",
-      "whyItMatters": "PRI-M1 (Data Privacy, mandatory): Data flowing to models shall be classified; sensitive classes shall have documented handling rules Failing this leaves a production gap against: Classification scheme covers AI payload classes; ≥1 automated or sampled audit shows 100% of sampled production model requests tagged with a class, and sensiti…",
+      "whyItMatters": "Data flowing to models shall be classified; sensitive classes shall have documented handling rules Failing this leaves a production gap against: Classification scheme covers AI payload classes; ≥1 automated or sampled audit shows 100% of sampled production model requests tagged with a class, and sensitive-class handling matches policy",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -8237,13 +8665,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PRI-M1 (Data flowing to models must be classified; sensitive classes must have documented handling rules): inspect current evidence for [Data classification scheme + handling rules for model-bound payloads] and confirm the pass condition holds — Classification scheme covers AI payload classes; ≥1 automated or sampled audit shows 100% of sampled production model requests tagged with a class, and sensitive-class handling ma…",
-      "falsePositiveGuidance": "PRI-M1 (Data Privacy): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (Data flowing to models must be classified; sensitive classes must have documented handling rules): inspect current evidence for [Data classification scheme + handling rules for model-bound payloads] and confirm the pass condition holds — Classification scheme covers AI payload classes; ≥1 automated or sampled audit shows 100% of sampled production model requests tagged with a class, and sensitive-class handling matches policy",
+      "falsePositiveGuidance": "(Data Privacy): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: Data flowing to models must be classified; sensitive classes must have documented handling rules (PRI-M1)",
+        "Implement and operationalize: Data flowing to models must be classified; sensitive classes must have documented handling rules",
         "Retain evidence artifacts required by this Check, starting with: Data classification scheme + handling rules for model-bound payloads",
-        "Wire or verify detectors declared on PRI-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PRI-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8285,7 +8713,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "data-privacy",
       "title": "Third-party model processing terms must be reviewed for training use and retention",
       "description": "Third-party model processing terms shall be reviewed for training use and retention",
-      "whyItMatters": "PRI-M2 (Data Privacy, mandatory): Third-party model processing terms shall be reviewed for training use and retention Failing this leaves a production gap against: 100% of production model providers have a review record ≤ 12 months covering training use and retention; 0 unreviewed providers in the inventory",
+      "whyItMatters": "Third-party model processing terms shall be reviewed for training use and retention Failing this leaves a production gap against: 100% of production model providers have a review record ≤ 12 months covering training use and retention; 0 unreviewed providers in the inventory",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -8297,13 +8725,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For PRI-M2 (Third-party model processing terms must be reviewed for training use and retention): inspect current evidence for [Vendor terms review record (DPA/training/retention) with date and owner] and confirm the pass condition holds — 100% of production model providers have a review record ≤ 12 months covering training use and retention; 0 unreviewed providers in the inventory",
-      "falsePositiveGuidance": "PRI-M2 (Data Privacy): re-verify against a current artifact for this specific Check (PRI-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Third-party model processing terms must be reviewed for training use and retention): inspect current evidence for [Vendor terms review record (DPA/training/retention) with date and owner] and confirm the pass condition holds — 100% of production model providers have a review record ≤ 12 months covering training use and retention; 0 unreviewed providers in the inventory",
+      "falsePositiveGuidance": "(Data Privacy): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Third-party model processing terms must be reviewed for training use and retention (PRI-M2)",
+        "Implement and operationalize: Third-party model processing terms must be reviewed for training use and retention",
         "Retain evidence artifacts required by this Check, starting with: Vendor terms review record (DPA/training/retention) with date and owner",
-        "Schedule recurring manual verification for PRI-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PRI-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8345,7 +8773,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "data-privacy",
       "title": "Users or tenants must have deletion/export paths covering AI memory and logs where required",
       "description": "Users or tenants shall have deletion/export paths covering AI memory and logs where required",
-      "whyItMatters": "PRI-M3 (Data Privacy, mandatory): Users or tenants shall have deletion/export paths covering AI memory and logs where required Failing this leaves a production gap against: Documented API/runbook covers AI memory and in-scope logs; test shows deletion/export completes within SLA for a sample tenant/user (measured duration recorded)",
+      "whyItMatters": "Users or tenants shall have deletion/export paths covering AI memory and logs where required Failing this leaves a production gap against: Documented API/runbook covers AI memory and in-scope logs; test shows deletion/export completes within SLA for a sample tenant/user (measured duration recorded)",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -8364,13 +8792,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PRI-M3 (Users or tenants must have deletion/export paths covering AI memory and logs where required): inspect current evidence for [Deletion/export procedure + successful test execution record] and confirm the pass condition holds — Documented API/runbook covers AI memory and in-scope logs; test shows deletion/export completes within SLA for a sample tenant/user (measured duration recorded)",
-      "falsePositiveGuidance": "PRI-M3 (Data Privacy): re-verify against a current artifact for this specific Check (PRI-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Users or tenants must have deletion/export paths covering AI memory and logs where required): inspect current evidence for [Deletion/export procedure + successful test execution record] and confirm the pass condition holds — Documented API/runbook covers AI memory and in-scope logs; test shows deletion/export completes within SLA for a sample tenant/user (measured duration recorded)",
+      "falsePositiveGuidance": "(Data Privacy): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Users or tenants must have deletion/export paths covering AI memory and logs where required (PRI-M3)",
+        "Implement and operationalize: Users or tenants must have deletion/export paths covering AI memory and logs where required",
         "Retain evidence artifacts required by this Check, starting with: Deletion/export procedure + successful test execution record",
-        "Schedule recurring manual verification for PRI-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PRI-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8412,7 +8840,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "data-privacy",
       "title": "Residency-constrained routing must be enforced for regulated workloads",
       "description": "Residency-constrained routing shall be enforced for regulated workloads",
-      "whyItMatters": "PRI-M4 (Data Privacy, mandatory): Residency-constrained routing shall be enforced for regulated workloads Failing this leaves a production gap against: PASS if regulated workloads are labeled and 100% of sampled regulated requests stay in approved regions",
+      "whyItMatters": "Residency-constrained routing shall be enforced for regulated workloads Failing this leaves a production gap against: PASS if regulated workloads are labeled and 100% of sampled regulated requests stay in approved regions",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -8431,13 +8859,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PRI-M4 (Residency-constrained routing must be enforced for regulated workloads): inspect current evidence for [Routing policy config + sample routing decisions for regulated tenants/regions] and confirm the pass condition holds — PASS if regulated workloads are labeled and 100% of sampled regulated requests stay in approved regions",
-      "falsePositiveGuidance": "PRI-M4 (Data Privacy): re-verify against a current artifact for this specific Check (PRI-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Residency-constrained routing must be enforced for regulated workloads): inspect current evidence for [Routing policy config + sample routing decisions for regulated tenants/regions] and confirm the pass condition holds — PASS if regulated workloads are labeled and 100% of sampled regulated requests stay in approved regions",
+      "falsePositiveGuidance": "(Data Privacy): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Residency-constrained routing must be enforced for regulated workloads (PRI-M4)",
+        "Implement and operationalize: Residency-constrained routing must be enforced for regulated workloads",
         "Retain evidence artifacts required by this Check, starting with: Routing policy config + sample routing decisions for regulated tenants/regions",
-        "Schedule recurring manual verification for PRI-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PRI-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8479,7 +8907,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "data-privacy",
       "title": "DPIA/PIA equivalents must exist for major AI features before production",
       "description": "DPIA/PIA equivalents shall exist for major AI features before production",
-      "whyItMatters": "PRI-M5 (Data Privacy, mandatory): DPIA/PIA equivalents shall exist for major AI features before production Failing this leaves a production gap against: PASS if 100% of major in-scope AI features have a completed assessment with owner sign-off before production traffic",
+      "whyItMatters": "DPIA/PIA equivalents shall exist for major AI features before production Failing this leaves a production gap against: PASS if 100% of major in-scope AI features have a completed assessment with owner sign-off before production traffic",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -8498,13 +8926,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PRI-M5 (DPIA/PIA equivalents must exist for major AI features before production): inspect current evidence for [Completed DPIA/PIA (or equivalent) with sign-off for each major in-scope AI feature] and confirm the pass condition holds — PASS if 100% of major in-scope AI features have a completed assessment with owner sign-off before production traffic",
-      "falsePositiveGuidance": "PRI-M5 (Data Privacy): re-verify against a current artifact for this specific Check (PRI-M5), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (DPIA/PIA equivalents must exist for major AI features before production): inspect current evidence for [Completed DPIA/PIA (or equivalent) with sign-off for each major in-scope AI feature] and confirm the pass condition holds — PASS if 100% of major in-scope AI features have a completed assessment with owner sign-off before production traffic",
+      "falsePositiveGuidance": "(Data Privacy): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: DPIA/PIA equivalents must exist for major AI features before production (PRI-M5)",
+        "Implement and operationalize: DPIA/PIA equivalents must exist for major AI features before production",
         "Retain evidence artifacts required by this Check, starting with: Completed DPIA/PIA (or equivalent) with sign-off for each major in-scope AI feature",
-        "Schedule recurring manual verification for PRI-M5 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PRI-M5 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8544,9 +8972,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PRI-R1",
       "category": "data-privacy",
-      "title": "PRI-R1: Tokenization or redaction before model calls for high-sensitivity fields",
+      "title": "Production systems should have tokenization or redaction before model calls for high-sensitivity fields",
       "description": "Tokenization or redaction before model calls for high-sensitivity fields",
-      "whyItMatters": "PRI-R1 (Data Privacy, recommended): Tokenization or redaction before model calls for high-sensitivity fields Failing this leaves a production gap against: Documented high-sensitivity fields never appear in cleartext in model request samples (≥50 sampled calls); pipeline fails closed when redaction errors",
+      "whyItMatters": "Tokenization or redaction before model calls for high-sensitivity fields Failing this leaves a production gap against: Documented high-sensitivity fields never appear in cleartext in model request samples (≥50 sampled calls); pipeline fails closed when redaction errors",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -8569,13 +8997,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PRI-R1 (PRI-R1: Tokenization or redaction before model calls for high-sensitivity fields): inspect current evidence for [Pre-model tokenization/redaction pipeline config + sample of redacted payloads for high-sensitivity fields] and confirm the pass condition holds — Documented high-sensitivity fields never appear in cleartext in model request samples (≥50 sampled calls); pipeline fails closed when redaction errors",
-      "falsePositiveGuidance": "PRI-R1 (Data Privacy): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (Tokenization or redaction before model calls for high-sensitivity fields): inspect current evidence for [Pre-model tokenization/redaction pipeline config + sample of redacted payloads for high-sensitivity fields] and confirm the pass condition holds — Documented high-sensitivity fields never appear in cleartext in model request samples (≥50 sampled calls); pipeline fails closed when redaction errors",
+      "falsePositiveGuidance": "(Data Privacy): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: PRI-R1: Tokenization or redaction before model calls for high-sensitivity fields (PRI-R1)",
-        "Retain evidence artifacts required by this Check, starting with: Pre-model tokenization/redaction pipeline config + sample of redacted payloads for high-sensitivity…",
-        "Wire or verify detectors declared on PRI-R1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PRI-R1 passes"
+        "Implement and operationalize: this Check: Tokenization or redaction before model calls for high-sensitivity fields",
+        "Retain evidence artifacts required by this Check, starting with: Pre-model tokenization/redaction pipeline config + sample of redacted payloads for high-sensitivity fields",
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8617,7 +9045,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "prompt-engineering",
       "title": "Every production prompt must have an immutable version identifier and owner",
       "description": "Every production prompt shall have an immutable version identifier and owner",
-      "whyItMatters": "PRM-M1 (Prompt Engineering, mandatory): Every production prompt shall have an immutable version identifier and owner Failing this leaves a production gap against: 100% of production prompts have immutable version ID + owner; 0 unversioned production prompts",
+      "whyItMatters": "Every production prompt shall have an immutable version identifier and owner Failing this leaves a production gap against: 100% of production prompts have immutable version ID + owner; 0 unversioned production prompts",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -8644,13 +9072,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PRM-M1 (Every production prompt must have an immutable version identifier and owner): inspect current evidence for [Prompt registry export] and confirm the pass condition holds — 100% of production prompts have immutable version ID + owner; 0 unversioned production prompts",
-      "falsePositiveGuidance": "PRM-M1 (Prompt Engineering): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Every production prompt must have an immutable version identifier and owner): inspect current evidence for [Prompt registry export] and confirm the pass condition holds — 100% of production prompts have immutable version ID + owner; 0 unversioned production prompts",
+      "falsePositiveGuidance": "(Prompt Engineering): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Every production prompt must have an immutable version identifier and owner (PRM-M1)",
+        "Implement and operationalize: Every production prompt must have an immutable version identifier and owner",
         "Retain evidence artifacts required by this Check, starting with: Prompt registry export",
-        "Wire or verify detectors declared on PRM-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PRM-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8689,7 +9117,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "prompt-engineering",
       "title": "Prompt changes must go through review and be tied to evaluation results before release",
       "description": "Prompt changes shall go through review and be tied to evaluation results before release",
-      "whyItMatters": "PRM-M2 (Prompt Engineering, mandatory): Prompt changes shall go through review and be tied to evaluation results before release Failing this leaves a production gap against: 100% of production prompt releases in last 30 days have review ID and eval pass artifact; promote without both is blocked",
+      "whyItMatters": "Prompt changes shall go through review and be tied to evaluation results before release Failing this leaves a production gap against: 100% of production prompt releases in last 30 days have review ID and eval pass artifact; promote without both is blocked",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -8708,13 +9136,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PRM-M2 (Prompt changes must go through review and be tied to evaluation results before release): inspect current evidence for [Change records linking prompt versions to review + eval artifacts] and confirm the pass condition holds — 100% of production prompt releases in last 30 days have review ID and eval pass artifact; promote without both is blocked",
-      "falsePositiveGuidance": "PRM-M2 (Prompt Engineering): re-verify against a current artifact for this specific Check (PRM-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Prompt changes must go through review and be tied to evaluation results before release): inspect current evidence for [Change records linking prompt versions to review + eval artifacts] and confirm the pass condition holds — 100% of production prompt releases in last 30 days have review ID and eval pass artifact; promote without both is blocked",
+      "falsePositiveGuidance": "(Prompt Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Prompt changes must go through review and be tied to evaluation results before release (PRM-M2)",
+        "Implement and operationalize: Prompt changes must go through review and be tied to evaluation results before release",
         "Retain evidence artifacts required by this Check, starting with: Change records linking prompt versions to review + eval artifacts",
-        "Schedule recurring manual verification for PRM-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PRM-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8753,7 +9181,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "prompt-engineering",
       "title": "Rollback to a prior prompt version must be possible without redeploying unrelated services",
       "description": "Rollback to a prior prompt version shall be possible without redeploying unrelated services",
-      "whyItMatters": "PRM-M3 (Prompt Engineering, mandatory): Rollback to a prior prompt version shall be possible without redeploying unrelated services Failing this leaves a production gap against: Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in last 90 days",
+      "whyItMatters": "Rollback to a prior prompt version shall be possible without redeploying unrelated services Failing this leaves a production gap against: Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in last 90 days",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -8776,13 +9204,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PRM-M3 (Rollback to a prior prompt version must be possible without redeploying unrelated services): inspect current evidence for [Prompt rollback procedure + timed restore test] and confirm the pass condition holds — Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in last 90 days",
-      "falsePositiveGuidance": "PRM-M3 (Prompt Engineering): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (Rollback to a prior prompt version must be possible without redeploying unrelated services): inspect current evidence for [Prompt rollback procedure + timed restore test] and confirm the pass condition holds — Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in last 90 days",
+      "falsePositiveGuidance": "(Prompt Engineering): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: Rollback to a prior prompt version must be possible without redeploying unrelated services (PRM-M3)",
+        "Implement and operationalize: Rollback to a prior prompt version must be possible without redeploying unrelated services",
         "Retain evidence artifacts required by this Check, starting with: Prompt rollback procedure + timed restore test",
-        "Wire or verify detectors declared on PRM-M3 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PRM-M3 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8819,9 +9247,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PRM-R1",
       "category": "prompt-engineering",
-      "title": "PRM-R1: Prompt templates are parameterized; secrets and PII never hardcoded",
+      "title": "Production systems should have prompt templates are parameterized; secrets and PII never hardcoded",
       "description": "Prompt templates are parameterized; secrets and PII never hardcoded",
-      "whyItMatters": "PRM-R1 (Prompt Engineering, recommended): Prompt templates are parameterized; secrets and PII never hardcoded Failing this leaves a production gap against: 100% of production prompt templates are parameterized for variable inputs; scan of templates finds 0 secrets and 0 hardcoded customer PII fields",
+      "whyItMatters": "Prompt templates are parameterized; secrets and PII never hardcoded Failing this leaves a production gap against: 100% of production prompt templates are parameterized for variable inputs; scan of templates finds 0 secrets and 0 hardcoded customer PII fields",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -8840,13 +9268,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PRM-R1 (PRM-R1: Prompt templates are parameterized; secrets and PII never hardcoded): inspect current evidence for [Prompt template inventory showing parameters + static analysis or review finding zero hardcoded secrets/PII] and confirm the pass condition holds — 100% of production prompt templates are parameterized for variable inputs; scan of templates finds 0 secrets and 0 hardcoded customer PII fields",
-      "falsePositiveGuidance": "PRM-R1 (Prompt Engineering): re-verify against a current artifact for this specific Check (PRM-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Prompt templates are parameterized; secrets and PII never hardcoded): inspect current evidence for [Prompt template inventory showing parameters + static analysis or review finding zero hardcoded secrets/PII] and confirm the pass condition holds — 100% of production prompt templates are parameterized for variable inputs; scan of templates finds 0 secrets and 0 hardcoded customer PII fields",
+      "falsePositiveGuidance": "(Prompt Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: PRM-R1: Prompt templates are parameterized; secrets and PII never hardcoded (PRM-R1)",
-        "Retain evidence artifacts required by this Check, starting with: Prompt template inventory showing parameters + static analysis or review finding zero hardcoded sec…",
-        "Schedule recurring manual verification for PRM-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PRM-R1 passes"
+        "Implement and operationalize: this Check: Prompt templates are parameterized; secrets and PII never hardcoded",
+        "Retain evidence artifacts required by this Check, starting with: Prompt template inventory showing parameters + static analysis or review finding zero hardcoded secrets/PII",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8883,13 +9311,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PRM-R2",
       "category": "prompt-engineering",
-      "title": "PRM-R2: Prompt linting for length, forbidden patterns, and injection-prone constructs",
+      "title": "Production systems should have prompt linting for length, forbidden patterns, and injection-prone constructs",
       "description": "Prompt linting for length, forbidden patterns, and injection-prone constructs",
-      "whyItMatters": "PRM-R2 (Prompt Engineering, recommended): Prompt linting for length, forbidden patterns, and injection-prone constructs Failing this leaves a production gap against: Lint runs on every prompt change PR; blocking rules exist for secrets patterns and unbounded user concatenation; last failing lint example retained",
+      "whyItMatters": "Prompt linting for length, forbidden patterns, and injection-prone constructs Failing this leaves a production gap against: Lint runs on every prompt change PR; blocking rules exist for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example retained",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Lint runs on every prompt change PR; blocking rules exist for secrets patterns and unbounded user concatenation; last failing lint example retained",
+      "passCondition": "Lint runs on every prompt change PR; blocking rules exist for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example retained",
       "evidenceRequired": [
         "Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint report"
       ],
@@ -8904,13 +9332,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PRM-R2 (PRM-R2: Prompt linting for length, forbidden patterns, and injection-prone constructs): inspect current evidence for [Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint report] and confirm the pass condition holds — Lint runs on every prompt change PR; blocking rules exist for secrets patterns and unbounded user concatenation; last failing lint example retained",
-      "falsePositiveGuidance": "PRM-R2 (Prompt Engineering): re-verify against a current artifact for this specific Check (PRM-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Prompt linting for length, forbidden patterns, and injection-prone constructs): inspect current evidence for [Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint report] and confirm the pass condition holds — Lint runs on every prompt change PR; blocking rules exist for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example retained",
+      "falsePositiveGuidance": "(Prompt Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: PRM-R2: Prompt linting for length, forbidden patterns, and injection-prone constructs (PRM-R2)",
+        "Implement and operationalize: this Check: Prompt linting for length, forbidden patterns, and injection-prone constructs",
         "Retain evidence artifacts required by this Check, starting with: Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint report",
-        "Schedule recurring manual verification for PRM-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PRM-R2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -8947,9 +9375,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PRM-R3",
       "category": "prompt-engineering",
-      "title": "PRM-R3: A/B or shadow evaluation for high-traffic prompt changes",
+      "title": "Production systems should have a/B or shadow evaluation for high-traffic prompt changes",
       "description": "A/B or shadow evaluation for high-traffic prompt changes",
-      "whyItMatters": "PRM-R3 (Prompt Engineering, recommended): A/B or shadow evaluation for high-traffic prompt changes Failing this leaves a production gap against: Last high-traffic prompt change used A/B or shadow eval with pre-registered metrics; promotion required non-inferiority (or better) on safety and primary quali…",
+      "whyItMatters": "A/B or shadow evaluation for high-traffic prompt changes Failing this leaves a production gap against: Last high-traffic prompt change used A/B or shadow eval with pre-registered metrics; promotion required non-inferiority (or better) on safety and primary quality SLI",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -8968,13 +9396,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For PRM-R3 (PRM-R3: A/B or shadow evaluation for high-traffic prompt changes): inspect current evidence for [A/B or shadow-eval config for high-traffic prompt changes + last experiment report with quality/safety deltas] and confirm the pass condition holds — Last high-traffic prompt change used A/B or shadow eval with pre-registered metrics; promotion required non-inferiority (or better) on safety and primary quality SLI",
-      "falsePositiveGuidance": "PRM-R3 (Prompt Engineering): re-verify against a current artifact for this specific Check (PRM-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (A/B or shadow evaluation for high-traffic prompt changes): inspect current evidence for [A/B or shadow-eval config for high-traffic prompt changes + last experiment report with quality/safety deltas] and confirm the pass condition holds — Last high-traffic prompt change used A/B or shadow eval with pre-registered metrics; promotion required non-inferiority (or better) on safety and primary quality SLI",
+      "falsePositiveGuidance": "(Prompt Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: PRM-R3: A/B or shadow evaluation for high-traffic prompt changes (PRM-R3)",
-        "Retain evidence artifacts required by this Check, starting with: A/B or shadow-eval config for high-traffic prompt changes + last experiment report with quality/saf…",
-        "Schedule recurring manual verification for PRM-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until PRM-R3 passes"
+        "Implement and operationalize: this Check: A/B or shadow evaluation for high-traffic prompt changes",
+        "Retain evidence artifacts required by this Check, starting with: A/B or shadow-eval config for high-traffic prompt changes + last experiment report with quality/safety deltas",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -9013,7 +9441,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "reliability-continuity",
       "title": "All model and tool calls must have timeouts and bounded retries",
       "description": "All model and tool calls shall have timeouts and bounded retries",
-      "whyItMatters": "REL-M1 (Reliability & Continuity, mandatory): All model and tool calls shall have timeouts and bounded retries Failing this leaves a production gap against: 100% of model/tool client call sites have finite timeout and max-retry ≤ bound; verified by static check or integration test",
+      "whyItMatters": "All model and tool calls shall have timeouts and bounded retries Failing this leaves a production gap against: 100% of model/tool client call sites have finite timeout and max-retry ≤ bound; verified by static check or integration test",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -9022,24 +9450,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Client config / static analysis report for timeouts and max retries"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "manual",
         "detectors": [
-          {
-            "id": "cicd-timeout-present",
-            "params": {}
-          },
-          {
-            "id": "cicd-concurrency-present",
-            "params": {}
-          },
-          {
-            "id": "docker-healthcheck-present",
-            "params": {}
-          },
-          {
-            "id": "docker-workdir-present",
-            "params": {}
-          },
           {
             "id": "manual-attest",
             "params": {
@@ -9048,13 +9460,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For REL-M1 (All model and tool calls must have timeouts and bounded retries): inspect current evidence for [Client config / static analysis report for timeouts and max retries] and confirm the pass condition holds — 100% of model/tool client call sites have finite timeout and max-retry ≤ bound; verified by static check or integration test",
-      "falsePositiveGuidance": "REL-M1 (Reliability & Continuity): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (All model and tool calls must have timeouts and bounded retries): inspect current evidence for [Client config / static analysis report for timeouts and max retries] and confirm the pass condition holds — 100% of model/tool client call sites have finite timeout and max-retry ≤ bound; verified by static check or integration test",
+      "falsePositiveGuidance": "(Reliability & Continuity): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: All model and tool calls must have timeouts and bounded retries (REL-M1)",
+        "Implement and operationalize: All model and tool calls must have timeouts and bounded retries",
         "Retain evidence artifacts required by this Check, starting with: Client config / static analysis report for timeouts and max retries",
-        "Wire or verify detectors declared on REL-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until REL-M1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -9080,7 +9492,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "reliability-continuity",
         "mandatory",
-        "automated"
+        "manual"
       ],
       "applicability": {
         "technologies": [
@@ -9100,7 +9512,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "reliability-continuity",
       "title": "Critical user journeys must define a degraded mode when AI is unavailable",
       "description": "Critical user journeys shall define a degraded mode when AI is unavailable",
-      "whyItMatters": "REL-M2 (Reliability & Continuity, mandatory): Critical user journeys shall define a degraded mode when AI is unavailable Failing this leaves a production gap against: 100% of critical journeys document degraded behavior; failover test shows non-AI or safe fallback activates when AI dependency fails",
+      "whyItMatters": "Critical user journeys shall define a degraded mode when AI is unavailable Failing this leaves a production gap against: 100% of critical journeys document degraded behavior; failover test shows non-AI or safe fallback activates when AI dependency fails",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -9119,13 +9531,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For REL-M2 (Critical user journeys must define a degraded mode when AI is unavailable): inspect current evidence for [Degraded-mode spec per critical journey + feature-flag or fallback test] and confirm the pass condition holds — 100% of critical journeys document degraded behavior; failover test shows non-AI or safe fallback activates when AI dependency fails",
-      "falsePositiveGuidance": "REL-M2 (Reliability & Continuity): re-verify against a current artifact for this specific Check (REL-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Critical user journeys must define a degraded mode when AI is unavailable): inspect current evidence for [Degraded-mode spec per critical journey + feature-flag or fallback test] and confirm the pass condition holds — 100% of critical journeys document degraded behavior; failover test shows non-AI or safe fallback activates when AI dependency fails",
+      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Critical user journeys must define a degraded mode when AI is unavailable (REL-M2)",
+        "Implement and operationalize: Critical user journeys must define a degraded mode when AI is unavailable",
         "Retain evidence artifacts required by this Check, starting with: Degraded-mode spec per critical journey + feature-flag or fallback test",
-        "Schedule recurring manual verification for REL-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until REL-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -9171,7 +9583,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "reliability-continuity",
       "title": "Partial tool failures must be detected and must prevent false-success continuation",
       "description": "Partial tool failures shall be detected and shall prevent false-success continuation",
-      "whyItMatters": "REL-M3 (Reliability & Continuity, mandatory): Partial tool failures shall be detected and shall prevent false-success continuation Failing this leaves a production gap against: Tests inject tool failure after partial success; agent does not report overall success in 100% of cases without explicit compensation/approval",
+      "whyItMatters": "Partial tool failures shall be detected and shall prevent false-success continuation Failing this leaves a production gap against: Tests inject tool failure after partial success; agent does not report overall success in 100% of cases without explicit compensation/approval",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -9190,13 +9602,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For REL-M3 (Partial tool failures must be detected and must prevent false-success continuation): inspect current evidence for [Agent/tool error-handling tests for partial failure] and confirm the pass condition holds — Tests inject tool failure after partial success; agent does not report overall success in 100% of cases without explicit compensation/approval",
-      "falsePositiveGuidance": "REL-M3 (Reliability & Continuity): re-verify against a current artifact for this specific Check (REL-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Partial tool failures must be detected and must prevent false-success continuation): inspect current evidence for [Agent/tool error-handling tests for partial failure] and confirm the pass condition holds — Tests inject tool failure after partial success; agent does not report overall success in 100% of cases without explicit compensation/approval",
+      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Partial tool failures must be detected and must prevent false-success continuation (REL-M3)",
+        "Implement and operationalize: Partial tool failures must be detected and must prevent false-success continuation",
         "Retain evidence artifacts required by this Check, starting with: Agent/tool error-handling tests for partial failure",
-        "Schedule recurring manual verification for REL-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until REL-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -9242,7 +9654,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "reliability-continuity",
       "title": "Critical AI-dependent processes must have documented continuity options",
       "description": "Critical AI-dependent processes shall have documented continuity options",
-      "whyItMatters": "REL-M4 (Reliability & Continuity, mandatory): Critical AI-dependent processes shall have documented continuity options Failing this leaves a production gap against: 100% of processes marked critical-AI-dependent have ≥1 documented continuity option with owner",
+      "whyItMatters": "Critical AI-dependent processes shall have documented continuity options Failing this leaves a production gap against: 100% of processes marked critical-AI-dependent have ≥1 documented continuity option with owner",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -9254,13 +9666,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For REL-M4 (Critical AI-dependent processes must have documented continuity options): inspect current evidence for [Continuity options doc per critical process (failover, manual, alternate provider)] and confirm the pass condition holds — 100% of processes marked critical-AI-dependent have ≥1 documented continuity option with owner",
-      "falsePositiveGuidance": "REL-M4 (Reliability & Continuity): re-verify against a current artifact for this specific Check (REL-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Critical AI-dependent processes must have documented continuity options): inspect current evidence for [Continuity options doc per critical process (failover, manual, alternate provider)] and confirm the pass condition holds — 100% of processes marked critical-AI-dependent have ≥1 documented continuity option with owner",
+      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Critical AI-dependent processes must have documented continuity options (REL-M4)",
+        "Implement and operationalize: Critical AI-dependent processes must have documented continuity options",
         "Retain evidence artifacts required by this Check, starting with: Continuity options doc per critical process (failover, manual, alternate provider)",
-        "Schedule recurring manual verification for REL-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until REL-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -9306,7 +9718,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "reliability-continuity",
       "title": "Backups must include AI control-plane artifacts needed to restore service",
       "description": "Backups shall include AI control-plane artifacts needed to restore service",
-      "whyItMatters": "REL-M5 (Reliability & Continuity, mandatory): Backups shall include AI control-plane artifacts needed to restore service Failing this leaves a production gap against: Backup inventory includes required AI control-plane artifacts; restore test in last 90 days succeeds for a sample artifact set",
+      "whyItMatters": "Backups shall include AI control-plane artifacts needed to restore service Failing this leaves a production gap against: Backup inventory includes required AI control-plane artifacts; restore test in last 90 days succeeds for a sample artifact set",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -9325,13 +9737,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For REL-M5 (Backups must include AI control-plane artifacts needed to restore service): inspect current evidence for [Backup job config covering prompt registry, policies, indexes as required + restore test] and confirm the pass condition holds — Backup inventory includes required AI control-plane artifacts; restore test in last 90 days succeeds for a sample artifact set",
-      "falsePositiveGuidance": "REL-M5 (Reliability & Continuity): re-verify against a current artifact for this specific Check (REL-M5), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Backups must include AI control-plane artifacts needed to restore service): inspect current evidence for [Backup job config covering prompt registry, policies, indexes as required + restore test] and confirm the pass condition holds — Backup inventory includes required AI control-plane artifacts; restore test in last 90 days succeeds for a sample artifact set",
+      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Backups must include AI control-plane artifacts needed to restore service (REL-M5)",
+        "Implement and operationalize: Backups must include AI control-plane artifacts needed to restore service",
         "Retain evidence artifacts required by this Check, starting with: Backup job config covering prompt registry, policies, indexes as required + restore test",
-        "Schedule recurring manual verification for REL-M5 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until REL-M5 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -9377,7 +9789,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "reliability-continuity",
       "title": "RTO/RPO objectives must exist for critical AI features",
       "description": "RTO/RPO objectives shall exist for critical AI features",
-      "whyItMatters": "REL-M6 (Reliability & Continuity, mandatory): RTO/RPO objectives shall exist for critical AI features Failing this leaves a production gap against: 100% of critical AI features have numeric RTO and RPO documented and linked to a tested restore/failover procedure",
+      "whyItMatters": "RTO/RPO objectives shall exist for critical AI features Failing this leaves a production gap against: 100% of critical AI features have numeric RTO and RPO documented and linked to a tested restore/failover procedure",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -9389,13 +9801,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For REL-M6 (RTO/RPO objectives must exist for critical AI features): inspect current evidence for [RTO/RPO catalog for critical AI features] and confirm the pass condition holds — 100% of critical AI features have numeric RTO and RPO documented and linked to a tested restore/failover procedure",
-      "falsePositiveGuidance": "REL-M6 (Reliability & Continuity): re-verify against a current artifact for this specific Check (REL-M6), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (RTO/RPO objectives must exist for critical AI features): inspect current evidence for [RTO/RPO catalog for critical AI features] and confirm the pass condition holds — 100% of critical AI features have numeric RTO and RPO documented and linked to a tested restore/failover procedure",
+      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: RTO/RPO objectives must exist for critical AI features (REL-M6)",
+        "Implement and operationalize: RTO/RPO objectives must exist for critical AI features",
         "Retain evidence artifacts required by this Check, starting with: RTO/RPO catalog for critical AI features",
-        "Schedule recurring manual verification for REL-M6 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until REL-M6 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -9441,7 +9853,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "reliability-continuity",
       "title": "Chaos experiments must cover AI dependency failure modes",
       "description": "Chaos experiments shall cover AI dependency failure modes",
-      "whyItMatters": "REL-M7 (Reliability & Continuity, mandatory): Chaos experiments shall cover AI dependency failure modes Failing this leaves a production gap against: PASS if at least one AI-dependency chaos exercise completed in the last 180 days with retained actions",
+      "whyItMatters": "Chaos experiments shall cover AI dependency failure modes Failing this leaves a production gap against: PASS if at least one AI-dependency chaos exercise completed in the last 180 days with retained actions",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -9464,13 +9876,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For REL-M7 (Chaos experiments must cover AI dependency failure modes): inspect current evidence for [Chaos experiment plan + dated after-action report including AI provider/tool failures] and confirm the pass condition holds — PASS if at least one AI-dependency chaos exercise completed in the last 180 days with retained actions",
-      "falsePositiveGuidance": "REL-M7 (Reliability & Continuity): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (Chaos experiments must cover AI dependency failure modes): inspect current evidence for [Chaos experiment plan + dated after-action report including AI provider/tool failures] and confirm the pass condition holds — PASS if at least one AI-dependency chaos exercise completed in the last 180 days with retained actions",
+      "falsePositiveGuidance": "(Reliability & Continuity): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: Chaos experiments must cover AI dependency failure modes (REL-M7)",
+        "Implement and operationalize: Chaos experiments must cover AI dependency failure modes",
         "Retain evidence artifacts required by this Check, starting with: Chaos experiment plan + dated after-action report including AI provider/tool failures",
-        "Wire or verify detectors declared on REL-M7 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until REL-M7 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -9516,7 +9928,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "reliability-continuity",
       "title": "Contractual and technical multi-provider options must exist for Level 5 continuity",
       "description": "Contractual and technical multi-provider options shall exist for Level 5 continuity",
-      "whyItMatters": "REL-M8 (Reliability & Continuity, mandatory): Contractual and technical multi-provider options shall exist for Level 5 continuity Failing this leaves a production gap against: PASS if Level 5 workloads have a documented alternate provider/path and a successful failover test ≤180 days",
+      "whyItMatters": "Contractual and technical multi-provider options shall exist for Level 5 continuity Failing this leaves a production gap against: PASS if Level 5 workloads have a documented alternate provider/path and a successful failover test ≤180 days",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
@@ -9535,13 +9947,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For REL-M8 (Contractual and technical multi-provider options must exist for Level 5 continuity): inspect current evidence for [Provider contract summary + technical failover design and test evidence] and confirm the pass condition holds — PASS if Level 5 workloads have a documented alternate provider/path and a successful failover test ≤180 days",
-      "falsePositiveGuidance": "REL-M8 (Reliability & Continuity): re-verify against a current artifact for this specific Check (REL-M8), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Contractual and technical multi-provider options must exist for Level 5 continuity): inspect current evidence for [Provider contract summary + technical failover design and test evidence] and confirm the pass condition holds — PASS if Level 5 workloads have a documented alternate provider/path and a successful failover test ≤180 days",
+      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Contractual and technical multi-provider options must exist for Level 5 continuity (REL-M8)",
+        "Implement and operationalize: Contractual and technical multi-provider options must exist for Level 5 continuity",
         "Retain evidence artifacts required by this Check, starting with: Provider contract summary + technical failover design and test evidence",
-        "Schedule recurring manual verification for REL-M8 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until REL-M8 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -9585,9 +9997,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "REL-R1",
       "category": "reliability-continuity",
-      "title": "REL-R1: Circuit breakers and bulkheads around provider clients",
+      "title": "Production systems should have circuit breakers and bulkheads around provider clients",
       "description": "Circuit breakers and bulkheads around provider clients",
-      "whyItMatters": "REL-R1 (Reliability & Continuity, recommended): Circuit breakers and bulkheads around provider clients Failing this leaves a production gap against: Breaker opens under induced failure in test or observed prod trip within 90 days; bulkhead limits concurrent calls per provider dependency",
+      "whyItMatters": "Circuit breakers and bulkheads around provider clients Failing this leaves a production gap against: Breaker opens under induced failure in test or observed prod trip within 90 days; bulkhead limits concurrent calls per provider dependency",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -9606,13 +10018,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For REL-R1 (REL-R1: Circuit breakers and bulkheads around provider clients): inspect current evidence for [Client library/config showing circuit breakers and bulkheads around model/provider calls + last trip log] and confirm the pass condition holds — Breaker opens under induced failure in test or observed prod trip within 90 days; bulkhead limits concurrent calls per provider dependency",
-      "falsePositiveGuidance": "REL-R1 (Reliability & Continuity): re-verify against a current artifact for this specific Check (REL-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Circuit breakers and bulkheads around provider clients): inspect current evidence for [Client library/config showing circuit breakers and bulkheads around model/provider calls + last trip log] and confirm the pass condition holds — Breaker opens under induced failure in test or observed prod trip within 90 days; bulkhead limits concurrent calls per provider dependency",
+      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: REL-R1: Circuit breakers and bulkheads around provider clients (REL-R1)",
-        "Retain evidence artifacts required by this Check, starting with: Client library/config showing circuit breakers and bulkheads around model/provider calls + last tri…",
-        "Schedule recurring manual verification for REL-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until REL-R1 passes"
+        "Implement and operationalize: this Check: Circuit breakers and bulkheads around provider clients",
+        "Retain evidence artifacts required by this Check, starting with: Client library/config showing circuit breakers and bulkheads around model/provider calls + last trip log",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -9656,9 +10068,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "REL-R2",
       "category": "reliability-continuity",
-      "title": "REL-R2: Multi-provider or multi-region fallback with eval coverage",
+      "title": "Production systems should have multi-provider or multi-region fallback with eval coverage",
       "description": "Multi-provider or multi-region fallback with eval coverage",
-      "whyItMatters": "REL-R2 (Reliability & Continuity, recommended): Multi-provider or multi-region fallback with eval coverage Failing this leaves a production gap against: Fallback path is configured and was exercised ≤90 days; fallback eval meets minimum quality/safety bars (not only connectivity)",
+      "whyItMatters": "Multi-provider or multi-region fallback with eval coverage Failing this leaves a production gap against: Fallback path is configured and was exercised ≤90 days; fallback eval meets minimum quality/safety bars (not only connectivity)",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -9677,13 +10089,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For REL-R2 (REL-R2: Multi-provider or multi-region fallback with eval coverage): inspect current evidence for [Multi-provider or multi-region fallback config + eval report comparing primary vs fallback quality/safety] and confirm the pass condition holds — Fallback path is configured and was exercised ≤90 days; fallback eval meets minimum quality/safety bars (not only connectivity)",
-      "falsePositiveGuidance": "REL-R2 (Reliability & Continuity): re-verify against a current artifact for this specific Check (REL-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Multi-provider or multi-region fallback with eval coverage): inspect current evidence for [Multi-provider or multi-region fallback config + eval report comparing primary vs fallback quality/safety] and confirm the pass condition holds — Fallback path is configured and was exercised ≤90 days; fallback eval meets minimum quality/safety bars (not only connectivity)",
+      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: REL-R2: Multi-provider or multi-region fallback with eval coverage (REL-R2)",
-        "Retain evidence artifacts required by this Check, starting with: Multi-provider or multi-region fallback config + eval report comparing primary vs fallback quality/…",
-        "Schedule recurring manual verification for REL-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until REL-R2 passes"
+        "Implement and operationalize: this Check: Multi-provider or multi-region fallback with eval coverage",
+        "Retain evidence artifacts required by this Check, starting with: Multi-provider or multi-region fallback config + eval report comparing primary vs fallback quality/safety",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -9727,9 +10139,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "REL-R4",
       "category": "reliability-continuity",
-      "title": "REL-R4: Periodic continuity drills including provider loss",
+      "title": "Production systems should have periodic continuity drills including provider loss",
       "description": "Periodic continuity drills including provider loss",
-      "whyItMatters": "REL-R4 (Reliability & Continuity, recommended): Periodic continuity drills including provider loss Failing this leaves a production gap against: Provider-loss (or equivalent) continuity drill completed ≤90 days; RTO/RPO met or exceptions have named owners and expiry",
+      "whyItMatters": "Periodic continuity drills including provider loss Failing this leaves a production gap against: Provider-loss (or equivalent) continuity drill completed ≤90 days; RTO/RPO met or exceptions have named owners and expiry",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -9748,13 +10160,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For REL-R4 (REL-R4: Periodic continuity drills including provider loss): inspect current evidence for [Continuity drill calendar + last provider-loss drill report with RTO/RPO results] and confirm the pass condition holds — Provider-loss (or equivalent) continuity drill completed ≤90 days; RTO/RPO met or exceptions have named owners and expiry",
-      "falsePositiveGuidance": "REL-R4 (Reliability & Continuity): re-verify against a current artifact for this specific Check (REL-R4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Periodic continuity drills including provider loss): inspect current evidence for [Continuity drill calendar + last provider-loss drill report with RTO/RPO results] and confirm the pass condition holds — Provider-loss (or equivalent) continuity drill completed ≤90 days; RTO/RPO met or exceptions have named owners and expiry",
+      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: REL-R4: Periodic continuity drills including provider loss (REL-R4)",
+        "Implement and operationalize: this Check: Periodic continuity drills including provider loss",
         "Retain evidence artifacts required by this Check, starting with: Continuity drill calendar + last provider-loss drill report with RTO/RPO results",
-        "Schedule recurring manual verification for REL-R4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until REL-R4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -9798,9 +10210,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "REL-R6",
       "category": "reliability-continuity",
-      "title": "REL-R6: Warm standby for self-hosted inference where required",
+      "title": "Production systems should have warm standby for self-hosted inference where required",
       "description": "Warm standby for self-hosted inference where required",
-      "whyItMatters": "REL-R6 (Reliability & Continuity, recommended): Warm standby for self-hosted inference where required Failing this leaves a production gap against: Failover to warm standby completes within documented RTO in the last test (≤90 days); standby capacity covers declared peak for critical workloads",
+      "whyItMatters": "Warm standby for self-hosted inference where required Failing this leaves a production gap against: Failover to warm standby completes within documented RTO in the last test (≤90 days); standby capacity covers declared peak for critical workloads",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -9819,13 +10231,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For REL-R6 (REL-R6: Warm standby for self-hosted inference where required): inspect current evidence for [Warm-standby inference architecture + last failover test report with RTO result] and confirm the pass condition holds — Failover to warm standby completes within documented RTO in the last test (≤90 days); standby capacity covers declared peak for critical workloads",
-      "falsePositiveGuidance": "REL-R6 (Reliability & Continuity): re-verify against a current artifact for this specific Check (REL-R6), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Warm standby for self-hosted inference where required): inspect current evidence for [Warm-standby inference architecture + last failover test report with RTO result] and confirm the pass condition holds — Failover to warm standby completes within documented RTO in the last test (≤90 days); standby capacity covers declared peak for critical workloads",
+      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: REL-R6: Warm standby for self-hosted inference where required (REL-R6)",
+        "Implement and operationalize: this Check: Warm standby for self-hosted inference where required",
         "Retain evidence artifacts required by this Check, starting with: Warm-standby inference architecture + last failover test report with RTO result",
-        "Schedule recurring manual verification for REL-R6 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until REL-R6 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -9871,7 +10283,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "safety-responsible-ai",
       "title": "A documented harm taxonomy and refusal/escalation policy must exist for the product domain",
       "description": "A documented harm taxonomy and refusal/escalation policy shall exist for the product domain",
-      "whyItMatters": "SAF-M1 (Safety & Responsible AI, mandatory): A documented harm taxonomy and refusal/escalation policy shall exist for the product domain Failing this leaves a production gap against: Policy document has version, owner, and review date ≤ 12 months; maps ≥ domain-minimum harm categories with explicit refuse vs escalate actions for each",
+      "whyItMatters": "A documented harm taxonomy and refusal/escalation policy shall exist for the product domain Failing this leaves a production gap against: Policy document has version, owner, and review date ≤ 12 months; maps ≥ domain-minimum harm categories with explicit refuse vs escalate actions for each",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -9894,13 +10306,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SAF-M1 (A documented harm taxonomy and refusal/escalation policy must exist for the product domain): inspect current evidence for [Approved harm taxonomy + refusal/escalation policy (versioned, owned)] and confirm the pass condition holds — Policy document has version, owner, and review date ≤ 12 months; maps ≥ domain-minimum harm categories with explicit refuse vs escalate actions for each",
-      "falsePositiveGuidance": "SAF-M1 (Safety & Responsible AI): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (A documented harm taxonomy and refusal/escalation policy must exist for the product domain): inspect current evidence for [Approved harm taxonomy + refusal/escalation policy (versioned, owned)] and confirm the pass condition holds — Policy document has version, owner, and review date ≤ 12 months; maps ≥ domain-minimum harm categories with explicit refuse vs escalate actions for each",
+      "falsePositiveGuidance": "(Safety & Responsible AI): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: A documented harm taxonomy and refusal/escalation policy must exist for the product domain (SAF-M1)",
+        "Implement and operationalize: A documented harm taxonomy and refusal/escalation policy must exist for the product domain",
         "Retain evidence artifacts required by this Check, starting with: Approved harm taxonomy + refusal/escalation policy (versioned, owned)",
-        "Wire or verify detectors declared on SAF-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SAF-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -9939,7 +10351,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "safety-responsible-ai",
       "title": "Automated safety evaluation gates must run on relevant releases",
       "description": "Automated safety evaluation gates shall run on relevant releases",
-      "whyItMatters": "SAF-M2 (Safety & Responsible AI, mandatory): Automated safety evaluation gates shall run on relevant releases Failing this leaves a production gap against: Safety gate executed on 100% of in-scope releases in last 30 days; fail blocks promote unless time-boxed waiver (expiry ≤ 14 days) with owner",
+      "whyItMatters": "Automated safety evaluation gates shall run on relevant releases Failing this leaves a production gap against: Safety gate executed on 100% of in-scope releases in last 30 days; fail blocks promote unless time-boxed waiver (expiry ≤ 14 days) with owner",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -9958,13 +10370,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SAF-M2 (Automated safety evaluation gates must run on relevant releases): inspect current evidence for [Safety suite definition with numeric thresholds + CI gate reports] and confirm the pass condition holds — Safety gate executed on 100% of in-scope releases in last 30 days; fail blocks promote unless time-boxed waiver (expiry ≤ 14 days) with owner",
-      "falsePositiveGuidance": "SAF-M2 (Safety & Responsible AI): re-verify against a current artifact for this specific Check (SAF-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Automated safety evaluation gates must run on relevant releases): inspect current evidence for [Safety suite definition with numeric thresholds + CI gate reports] and confirm the pass condition holds — Safety gate executed on 100% of in-scope releases in last 30 days; fail blocks promote unless time-boxed waiver (expiry ≤ 14 days) with owner",
+      "falsePositiveGuidance": "(Safety & Responsible AI): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Automated safety evaluation gates must run on relevant releases (SAF-M2)",
+        "Implement and operationalize: Automated safety evaluation gates must run on relevant releases",
         "Retain evidence artifacts required by this Check, starting with: Safety suite definition with numeric thresholds + CI gate reports",
-        "Schedule recurring manual verification for SAF-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SAF-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10003,7 +10415,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "safety-responsible-ai",
       "title": "Users must be disclosed when interacting with AI where required by policy or law",
       "description": "Users shall be disclosed when interacting with AI where required by policy or law",
-      "whyItMatters": "SAF-M3 (Safety & Responsible AI, mandatory): Users shall be disclosed when interacting with AI where required by policy or law Failing this leaves a production gap against: AI-interaction disclosure present on 100% of in-scope user surfaces per policy checklist; 0 critical surfaces missing disclosure in the latest audit",
+      "whyItMatters": "Users shall be disclosed when interacting with AI where required by policy or law Failing this leaves a production gap against: AI-interaction disclosure present on 100% of in-scope user surfaces per policy checklist; 0 critical surfaces missing disclosure in the latest audit",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -10022,13 +10434,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SAF-M3 (Users must be disclosed when interacting with AI where required by policy or law): inspect current evidence for [Disclosure UX inventory + screenshot/checklist audit of in-scope surfaces] and confirm the pass condition holds — AI-interaction disclosure present on 100% of in-scope user surfaces per policy checklist; 0 critical surfaces missing disclosure in the latest audit",
-      "falsePositiveGuidance": "SAF-M3 (Safety & Responsible AI): re-verify against a current artifact for this specific Check (SAF-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Users must be disclosed when interacting with AI where required by policy or law): inspect current evidence for [Disclosure UX inventory + screenshot/checklist audit of in-scope surfaces] and confirm the pass condition holds — AI-interaction disclosure present on 100% of in-scope user surfaces per policy checklist; 0 critical surfaces missing disclosure in the latest audit",
+      "falsePositiveGuidance": "(Safety & Responsible AI): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Users must be disclosed when interacting with AI where required by policy or law (SAF-M3)",
+        "Implement and operationalize: Users must be disclosed when interacting with AI where required by policy or law",
         "Retain evidence artifacts required by this Check, starting with: Disclosure UX inventory + screenshot/checklist audit of in-scope surfaces",
-        "Schedule recurring manual verification for SAF-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SAF-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10067,7 +10479,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "safety-responsible-ai",
       "title": "Fairness/disparity evaluation must cover high-stakes decision paths",
       "description": "Fairness/disparity evaluation shall cover high-stakes decision paths",
-      "whyItMatters": "SAF-M4 (Safety & Responsible AI, mandatory): Fairness/disparity evaluation shall cover high-stakes decision paths Failing this leaves a production gap against: PASS if in-scope high-stakes paths are inventoried and the latest eval (≤90 days) is retained with thresholds and owners",
+      "whyItMatters": "Fairness/disparity evaluation shall cover high-stakes decision paths Failing this leaves a production gap against: PASS if in-scope high-stakes paths are inventoried and the latest eval (≤90 days) is retained with thresholds and owners",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -10086,13 +10498,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SAF-M4 (Fairness/disparity evaluation must cover high-stakes decision paths): inspect current evidence for [Fairness/disparity eval methodology + latest run report for in-scope high-stakes paths] and confirm the pass condition holds — PASS if in-scope high-stakes paths are inventoried and the latest eval (≤90 days) is retained with thresholds and owners",
-      "falsePositiveGuidance": "SAF-M4 (Safety & Responsible AI): re-verify against a current artifact for this specific Check (SAF-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Fairness/disparity evaluation must cover high-stakes decision paths): inspect current evidence for [Fairness/disparity eval methodology + latest run report for in-scope high-stakes paths] and confirm the pass condition holds — PASS if in-scope high-stakes paths are inventoried and the latest eval (≤90 days) is retained with thresholds and owners",
+      "falsePositiveGuidance": "(Safety & Responsible AI): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Fairness/disparity evaluation must cover high-stakes decision paths (SAF-M4)",
+        "Implement and operationalize: Fairness/disparity evaluation must cover high-stakes decision paths",
         "Retain evidence artifacts required by this Check, starting with: Fairness/disparity eval methodology + latest run report for in-scope high-stakes paths",
-        "Schedule recurring manual verification for SAF-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SAF-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10129,13 +10541,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SAF-R2",
       "category": "safety-responsible-ai",
-      "title": "SAF-R2: Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)",
+      "title": "Production systems should have red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)",
       "description": "Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)",
-      "whyItMatters": "SAF-R2 (Safety & Responsible AI, recommended): Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team) Failing this leaves a production gap against: Suite covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
+      "whyItMatters": "Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team) Failing this leaves a production gap against: A jailbreak-to-harm red-team suite (distinct from the security injection suite) covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Suite covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
+      "passCondition": "A jailbreak-to-harm red-team suite (distinct from the security injection suite) covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
       "evidenceRequired": [
         "Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run report"
       ],
@@ -10150,13 +10562,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SAF-R2 (SAF: Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)): inspect current evidence for [Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run report] and confirm the pass condition holds — Suite covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
-      "falsePositiveGuidance": "SAF-R2 (Safety & Responsible AI): re-verify against a current artifact for this specific Check (SAF-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (SAF: Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)): inspect current evidence for [Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run report] and confirm the pass condition holds — A jailbreak-to-harm red-team suite (distinct from the security injection suite) covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
+      "falsePositiveGuidance": "(Safety & Responsible AI): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: SAF-R2: Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team) (SAF-R2)",
+        "Implement and operationalize: this Check: Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)",
         "Retain evidence artifacts required by this Check, starting with: Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run report",
-        "Schedule recurring manual verification for SAF-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SAF-R2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10193,9 +10605,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SAF-R3",
       "category": "safety-responsible-ai",
-      "title": "SAF-R3: Human review sampling of safety edge cases on a defined cadence",
+      "title": "Production systems should have human review sampling of safety edge cases on a defined cadence",
       "description": "Human review sampling of safety edge cases on a defined cadence",
-      "whyItMatters": "SAF-R3 (Safety & Responsible AI, recommended): Human review sampling of safety edge cases on a defined cadence Failing this leaves a production gap against: Defined sample size and cadence (≥ monthly or per release); last packet ≤90 days includes disposition for each fail/edge case and links to backlog items when n…",
+      "whyItMatters": "Human review sampling of safety edge cases on a defined cadence Failing this leaves a production gap against: Defined sample size and cadence (≥ monthly or per release); last packet ≤90 days includes disposition for each fail/edge case and links to backlog items when needed",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -10207,13 +10619,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For SAF-R3 (SAF-R3: Human review sampling of safety edge cases on a defined cadence): inspect current evidence for [Safety edge-case sampling plan + last review packet (sample size, labels, actions) with reviewer names] and confirm the pass condition holds — Defined sample size and cadence (≥ monthly or per release); last packet ≤90 days includes disposition for each fail/edge case and links to backlog items when needed",
-      "falsePositiveGuidance": "SAF-R3 (Safety & Responsible AI): re-verify against a current artifact for this specific Check (SAF-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Human review sampling of safety edge cases on a defined cadence): inspect current evidence for [Safety edge-case sampling plan + last review packet (sample size, labels, actions) with reviewer names] and confirm the pass condition holds — Defined sample size and cadence (≥ monthly or per release); last packet ≤90 days includes disposition for each fail/edge case and links to backlog items when needed",
+      "falsePositiveGuidance": "(Safety & Responsible AI): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: SAF-R3: Human review sampling of safety edge cases on a defined cadence (SAF-R3)",
-        "Retain evidence artifacts required by this Check, starting with: Safety edge-case sampling plan + last review packet (sample size, labels, actions) with reviewer na…",
-        "Schedule recurring manual verification for SAF-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SAF-R3 passes"
+        "Implement and operationalize: this Check: Human review sampling of safety edge cases on a defined cadence",
+        "Retain evidence artifacts required by this Check, starting with: Safety edge-case sampling plan + last review packet (sample size, labels, actions) with reviewer names",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10252,7 +10664,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "supply-chain",
       "title": "Production model and container artifacts must have verified provenance/integrity",
       "description": "Production model and container artifacts shall have verified provenance/integrity",
-      "whyItMatters": "SCI-M1 (Supply Chain Integrity, mandatory): Production model and container artifacts shall have verified provenance/integrity Failing this leaves a production gap against: 100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked",
+      "whyItMatters": "Production model and container artifacts shall have verified provenance/integrity Failing this leaves a production gap against: 100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -10275,13 +10687,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SCI-M1 (Production model and container artifacts must have verified provenance/integrity): inspect current evidence for [Digest/signature verification logs for last production deploy] and confirm the pass condition holds — 100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked",
-      "falsePositiveGuidance": "SCI-M1 (Supply Chain Integrity): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Production model and container artifacts must have verified provenance/integrity): inspect current evidence for [Digest/signature verification logs for last production deploy] and confirm the pass condition holds — 100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked",
+      "falsePositiveGuidance": "(Supply Chain Integrity): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Production model and container artifacts must have verified provenance/integrity (SCI-M1)",
+        "Implement and operationalize: Production model and container artifacts must have verified provenance/integrity",
         "Retain evidence artifacts required by this Check, starting with: Digest/signature verification logs for last production deploy",
-        "Wire or verify detectors declared on SCI-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SCI-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10327,7 +10739,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "supply-chain",
       "title": "MCP servers and high-impact tools must be inventoried, version-pinned, and reviewed before production use",
       "description": "MCP servers and high-impact tools shall be inventoried, version-pinned, and reviewed before production use",
-      "whyItMatters": "SCI-M2 (Supply Chain Integrity, mandatory): MCP servers and high-impact tools shall be inventoried, version-pinned, and reviewed before production use Failing this leaves a production gap against: 100% of production MCP servers and high-impact tools have pin + owner + review date ≤ 180 days; 0 unpinned “latest” entries in production",
+      "whyItMatters": "MCP servers and high-impact tools shall be inventoried, version-pinned, and reviewed before production use Failing this leaves a production gap against: 100% of production MCP servers and high-impact tools have pin + owner + review date ≤ 180 days; 0 unpinned “latest” entries in production",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -10354,13 +10766,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SCI-M2 (MCP servers and high-impact tools must be inventoried, version-pinned, and reviewed before production use): inspect current evidence for [MCP/tool inventory with version pins, owners, and review dates] and confirm the pass condition holds — 100% of production MCP servers and high-impact tools have pin + owner + review date ≤ 180 days; 0 unpinned “latest” entries in production",
-      "falsePositiveGuidance": "SCI-M2 (Supply Chain Integrity): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (MCP servers and high-impact tools must be inventoried, version-pinned, and reviewed before production use): inspect current evidence for [MCP/tool inventory with version pins, owners, and review dates] and confirm the pass condition holds — 100% of production MCP servers and high-impact tools have pin + owner + review date ≤ 180 days; 0 unpinned “latest” entries in production",
+      "falsePositiveGuidance": "(Supply Chain Integrity): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: MCP servers and high-impact tools must be inventoried, version-pinned, and reviewed before production use (SCI-M2)",
+        "Implement and operationalize: MCP servers and high-impact tools must be inventoried, version-pinned, and reviewed before production use",
         "Retain evidence artifacts required by this Check, starting with: MCP/tool inventory with version pins, owners, and review dates",
-        "Wire or verify detectors declared on SCI-M2 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SCI-M2 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10406,7 +10818,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "supply-chain",
       "title": "Dependency and image vulnerability scanning gates must apply to AI runtimes",
       "description": "Dependency and image vulnerability scanning gates shall apply to AI runtimes",
-      "whyItMatters": "SCI-M3 (Supply Chain Integrity, mandatory): Dependency and image vulnerability scanning gates shall apply to AI runtimes Failing this leaves a production gap against: 100% of AI runtime image builds in the last 30 days ran vulnerability scan; critical CVEs (CVSS ≥ 9.0 or org policy equivalent) block promote unless waived wit…",
+      "whyItMatters": "Dependency and image vulnerability scanning gates shall apply to AI runtimes Failing this leaves a production gap against: 100% of AI runtime image builds in the last 30 days ran vulnerability scan; critical CVEs (CVSS ≥ 9.0 or org policy equivalent) block promote unless waived with expiry ≤ 14 days",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -10433,13 +10845,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SCI-M3 (Dependency and image vulnerability scanning gates must apply to AI runtimes): inspect current evidence for [Scanner config + CI gate reports for AI runtime images/deps] and confirm the pass condition holds — 100% of AI runtime image builds in the last 30 days ran vulnerability scan; critical CVEs (CVSS ≥ 9.0 or org policy equivalent) block promote unless waived with expiry ≤ 14 days",
-      "falsePositiveGuidance": "SCI-M3 (Supply Chain Integrity): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Dependency and image vulnerability scanning gates must apply to AI runtimes): inspect current evidence for [Scanner config + CI gate reports for AI runtime images/deps] and confirm the pass condition holds — 100% of AI runtime image builds in the last 30 days ran vulnerability scan; critical CVEs (CVSS ≥ 9.0 or org policy equivalent) block promote unless waived with expiry ≤ 14 days",
+      "falsePositiveGuidance": "(Supply Chain Integrity): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Dependency and image vulnerability scanning gates must apply to AI runtimes (SCI-M3)",
+        "Implement and operationalize: Dependency and image vulnerability scanning gates must apply to AI runtimes",
         "Retain evidence artifacts required by this Check, starting with: Scanner config + CI gate reports for AI runtime images/deps",
-        "Wire or verify detectors declared on SCI-M3 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SCI-M3 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10485,7 +10897,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "supply-chain",
       "title": "Admission controls must block unsigned or unapproved AI artifacts",
       "description": "Admission controls shall block unsigned or unapproved AI artifacts",
-      "whyItMatters": "SCI-M4 (Supply Chain Integrity, mandatory): Admission controls shall block unsigned or unapproved AI artifacts Failing this leaves a production gap against: PASS if admission is enforced in production deploy paths and the latest probe shows unsigned artifacts are blocked",
+      "whyItMatters": "Admission controls shall block unsigned or unapproved AI artifacts Failing this leaves a production gap against: PASS if admission is enforced in production deploy paths and the latest probe shows unsigned artifacts are blocked",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -10494,16 +10906,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Admission policy config + deny logs for unsigned/unapproved artifacts"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "manual",
         "detectors": [
-          {
-            "id": "cicd-no-pull-request-target",
-            "params": {}
-          },
-          {
-            "id": "cicd-no-self-hosted-runner",
-            "params": {}
-          },
           {
             "id": "manual-attest",
             "params": {
@@ -10512,13 +10916,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SCI-M4 (Admission controls must block unsigned or unapproved AI artifacts): inspect current evidence for [Admission policy config + deny logs for unsigned/unapproved artifacts] and confirm the pass condition holds — PASS if admission is enforced in production deploy paths and the latest probe shows unsigned artifacts are blocked",
-      "falsePositiveGuidance": "SCI-M4 (Supply Chain Integrity): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Admission controls must block unsigned or unapproved AI artifacts): inspect current evidence for [Admission policy config + deny logs for unsigned/unapproved artifacts] and confirm the pass condition holds — PASS if admission is enforced in production deploy paths and the latest probe shows unsigned artifacts are blocked",
+      "falsePositiveGuidance": "(Supply Chain Integrity): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Admission controls must block unsigned or unapproved AI artifacts (SCI-M4)",
+        "Implement and operationalize: Admission controls must block unsigned or unapproved AI artifacts",
         "Retain evidence artifacts required by this Check, starting with: Admission policy config + deny logs for unsigned/unapproved artifacts",
-        "Wire or verify detectors declared on SCI-M4 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SCI-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10544,7 +10948,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "supply-chain",
         "mandatory",
-        "automated"
+        "manual"
       ],
       "applicability": {
         "technologies": [
@@ -10562,9 +10966,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SCI-R1",
       "category": "supply-chain",
-      "title": "SCI-R1: Signed model/container artifacts with verify-on-deploy (SLSA-aligned)",
+      "title": "Production systems should have signed model/container artifacts with verify-on-deploy (SLSA-aligned)",
       "description": "Signed model/container artifacts with verify-on-deploy (SLSA-aligned)",
-      "whyItMatters": "SCI-R1 (Supply Chain Integrity, recommended): Signed model/container artifacts with verify-on-deploy (SLSA-aligned) Failing this leaves a production gap against: Last production model/container deploy shows signature verification success; unsigned artifact is rejected in a recorded test or canary within 90 days",
+      "whyItMatters": "Signed model/container artifacts with verify-on-deploy (SLSA-aligned) Failing this leaves a production gap against: Last production model/container deploy shows signature verification success; unsigned artifact is rejected in a recorded test or canary within 90 days",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -10583,13 +10987,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SCI-R1 (SCI: Signed model/container artifacts with verify-on-deploy (SLSA-aligned)): inspect current evidence for [Admission/verify-on-deploy policy for signed model and container artifacts + last deploy verification log] and confirm the pass condition holds — Last production model/container deploy shows signature verification success; unsigned artifact is rejected in a recorded test or canary within 90 days",
-      "falsePositiveGuidance": "SCI-R1 (Supply Chain Integrity): re-verify against a current artifact for this specific Check (SCI-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (SCI: Signed model/container artifacts with verify-on-deploy (SLSA-aligned)): inspect current evidence for [Admission/verify-on-deploy policy for signed model and container artifacts + last deploy verification log] and confirm the pass condition holds — Last production model/container deploy shows signature verification success; unsigned artifact is rejected in a recorded test or canary within 90 days",
+      "falsePositiveGuidance": "(Supply Chain Integrity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: SCI-R1: Signed model/container artifacts with verify-on-deploy (SLSA-aligned) (SCI-R1)",
-        "Retain evidence artifacts required by this Check, starting with: Admission/verify-on-deploy policy for signed model and container artifacts + last deploy verificati…",
-        "Schedule recurring manual verification for SCI-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SCI-R1 passes"
+        "Implement and operationalize: this Check: Signed model/container artifacts with verify-on-deploy (SLSA-aligned)",
+        "Retain evidence artifacts required by this Check, starting with: Admission/verify-on-deploy policy for signed model and container artifacts + last deploy verification log",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10633,9 +11037,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SCI-R2",
       "category": "supply-chain",
-      "title": "SCI-R2: Machine-readable model bill of materials (MBOM) for production models",
+      "title": "Production systems should have machine-readable model bill of materials (MBOM) for production models",
       "description": "Machine-readable model bill of materials (MBOM) for production models",
-      "whyItMatters": "SCI-R2 (Supply Chain Integrity, recommended): Machine-readable model bill of materials (MBOM) for production models Failing this leaves a production gap against: 100% of production model pins have an MBOM/SBOM artifact retained ≥90 days and linked from the model registry entry",
+      "whyItMatters": "Machine-readable model bill of materials (MBOM) for production models Failing this leaves a production gap against: 100% of production model pins have an MBOM/SBOM artifact retained ≥90 days and linked from the model registry entry",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -10658,13 +11062,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SCI-R2 (SCI: Machine-readable model bill of materials (MBOM) for production models): inspect current evidence for [Machine-readable MBOM (or SBOM+model metadata) for each production model pin + retention location] and confirm the pass condition holds — 100% of production model pins have an MBOM/SBOM artifact retained ≥90 days and linked from the model registry entry",
-      "falsePositiveGuidance": "SCI-R2 (Supply Chain Integrity): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "For this Check (SCI: Machine-readable model bill of materials (MBOM) for production models): inspect current evidence for [Machine-readable MBOM (or SBOM+model metadata) for each production model pin + retention location] and confirm the pass condition holds — 100% of production model pins have an MBOM/SBOM artifact retained ≥90 days and linked from the model registry entry",
+      "falsePositiveGuidance": "(Supply Chain Integrity): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
       "recommendedFixes": [
-        "Implement and operationalize: SCI-R2: Machine-readable model bill of materials (MBOM) for production models (SCI-R2)",
+        "Implement and operationalize: this Check: Machine-readable model bill of materials (MBOM) for production models",
         "Retain evidence artifacts required by this Check, starting with: Machine-readable MBOM (or SBOM+model metadata) for each production model pin + retention location",
-        "Wire or verify detectors declared on SCI-R2 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SCI-R2 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10710,7 +11114,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "ai-security",
       "title": "Untrusted input must never authorize privileged actions without server-side policy",
       "description": "Untrusted input shall never authorize privileged actions without server-side policy",
-      "whyItMatters": "SEC-M1 (Adversarial Security, mandatory): Untrusted input shall never authorize privileged actions without server-side policy Failing this leaves a production gap against: ≥95% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the sui…",
+      "whyItMatters": "Untrusted input shall never authorize privileged actions without server-side policy Failing this leaves a production gap against: ≥95% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the suite",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -10729,13 +11133,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SEC-M1 (Untrusted input must never authorize privileged actions without server-side policy): inspect current evidence for [Injection/privilege-escalation corpus (versioned) + CI gate report + policy-engine deny sample logs] and confirm the pass condition holds — ≥95% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the suite",
-      "falsePositiveGuidance": "SEC-M1 (Adversarial Security): re-verify against a current artifact for this specific Check (SEC-M1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Untrusted input must never authorize privileged actions without server-side policy): inspect current evidence for [Injection/privilege-escalation corpus (versioned) + CI gate report + policy-engine deny sample logs] and confirm the pass condition holds — ≥95% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the suite",
+      "falsePositiveGuidance": "(Adversarial Security): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Untrusted input must never authorize privileged actions without server-side policy (SEC-M1)",
+        "Implement and operationalize: Untrusted input must never authorize privileged actions without server-side policy",
         "Retain evidence artifacts required by this Check, starting with: Injection/privilege-escalation corpus (versioned) + CI gate report + policy-engine deny sample logs",
-        "Schedule recurring manual verification for SEC-M1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SEC-M1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10780,7 +11184,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "ai-security",
       "title": "High-risk outputs must be schema-validated or policy-filtered before side effects",
       "description": "High-risk outputs shall be schema-validated or policy-filtered before side effects",
-      "whyItMatters": "SEC-M2 (Adversarial Security, mandatory): High-risk outputs shall be schema-validated or policy-filtered before side effects Failing this leaves a production gap against: 100% of high-risk side-effect paths (impact tier write/irreversible/financial) reject non-conforming model output in contract tests; coverage inventory lists e…",
+      "whyItMatters": "High-risk outputs shall be schema-validated or policy-filtered before side effects Failing this leaves a production gap against: 100% of high-risk side-effect paths (impact tier write/irreversible/financial) reject non-conforming model output in contract tests; coverage inventory lists every such path",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -10799,13 +11203,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SEC-M2 (High-risk outputs must be schema-validated or policy-filtered before side effects): inspect current evidence for [Schema/policy definitions for high-risk paths + contract test results] and confirm the pass condition holds — 100% of high-risk side-effect paths (impact tier write/irreversible/financial) reject non-conforming model output in contract tests; coverage inventory lists every such path",
-      "falsePositiveGuidance": "SEC-M2 (Adversarial Security): re-verify against a current artifact for this specific Check (SEC-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (High-risk outputs must be schema-validated or policy-filtered before side effects): inspect current evidence for [Schema/policy definitions for high-risk paths + contract test results] and confirm the pass condition holds — 100% of high-risk side-effect paths (impact tier write/irreversible/financial) reject non-conforming model output in contract tests; coverage inventory lists every such path",
+      "falsePositiveGuidance": "(Adversarial Security): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: High-risk outputs must be schema-validated or policy-filtered before side effects (SEC-M2)",
+        "Implement and operationalize: High-risk outputs must be schema-validated or policy-filtered before side effects",
         "Retain evidence artifacts required by this Check, starting with: Schema/policy definitions for high-risk paths + contract test results",
-        "Schedule recurring manual verification for SEC-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SEC-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10850,13 +11254,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "ai-security",
       "title": "Abuse, jailbreak, and injection testing must gate customer-facing releases",
       "description": "Abuse, jailbreak, and injection testing shall gate customer-facing releases",
-      "whyItMatters": "SEC-M3 (Adversarial Security, mandatory): Abuse, jailbreak, and injection testing shall gate customer-facing releases Failing this leaves a production gap against: 100% of production releases in the last 30 days show security-suite gate = pass, or a time-boxed waiver with owner and expiry ≤ 30 days",
+      "whyItMatters": "Abuse, jailbreak, and injection testing shall gate customer-facing releases Failing this leaves a production gap against: 100% of production releases in the last 30 days show an abuse/jailbreak/injection suite gate = pass (suite must include those case classes), or a time-boxed waiver with owner and expiry ≤ 30 days",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production releases in the last 30 days show security-suite gate = pass, or a time-boxed waiver with owner and expiry ≤ 30 days",
+      "passCondition": "100% of production releases in the last 30 days show an abuse/jailbreak/injection suite gate = pass (suite must include those case classes), or a time-boxed waiver with owner and expiry ≤ 30 days",
       "evidenceRequired": [
-        "CI gate configuration + last 30 days of release reports"
+        "CI gate configuration for abuse/jailbreak/injection suite + last 30 days of release reports showing that suite passed (or waiver)"
       ],
       "detection": {
         "capability": "manual",
@@ -10864,18 +11268,18 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "CI gate configuration + last 30 days of release reports"
+              "hint": "CI gate configuration for abuse/jailbreak/injection suite + last 30 days of release reports"
             }
           }
         ]
       },
-      "manualVerification": "For SEC-M3 (Abuse, jailbreak, and injection testing must gate customer-facing releases): inspect current evidence for [CI gate configuration + last 30 days of release reports] and confirm the pass condition holds — 100% of production releases in the last 30 days show security-suite gate = pass, or a time-boxed waiver with owner and expiry ≤ 30 days",
-      "falsePositiveGuidance": "SEC-M3 (Adversarial Security): re-verify against a current artifact for this specific Check (SEC-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Abuse, jailbreak, and injection testing must gate customer-facing releases): inspect current evidence for [CI gate configuration for abuse/jailbreak/injection suite + last 30 days of release reports showing that suite passed (or waiver)] and confirm the pass condition holds — 100% of production releases in the last 30 days show an abuse/jailbreak/injection suite gate = pass (suite must include those case classes), or a time-boxed waiver with owner and expiry ≤ 30 days",
+      "falsePositiveGuidance": "(Adversarial Security): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Abuse, jailbreak, and injection testing must gate customer-facing releases (SEC-M3)",
-        "Retain evidence artifacts required by this Check, starting with: CI gate configuration + last 30 days of release reports",
-        "Schedule recurring manual verification for SEC-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SEC-M3 passes"
+        "Implement and operationalize: Abuse, jailbreak, and injection testing must gate customer-facing releases",
+        "Retain evidence artifacts required by this Check, starting with: CI gate configuration for abuse/jailbreak/injection suite + last 30 days of release reports",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10918,9 +11322,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SEC-M4",
       "category": "ai-security",
-      "title": "Network and identity boundaries must prevent the model path from becoming a universal proxy to internal sys…",
+      "title": "Network and identity boundaries must prevent the model path from becoming a universal proxy to internal systems",
       "description": "Network and identity boundaries shall prevent the model path from becoming a universal proxy to internal systems",
-      "whyItMatters": "SEC-M4 (Adversarial Security, mandatory): Network and identity boundaries shall prevent the model path from becoming a universal proxy to internal systems Failing this leaves a production gap against: Automated or reviewed probe shows the model/tool runtime can reach only allowlisted destinations; 0 unrestricted routes to internal admin APIs or data stores f…",
+      "whyItMatters": "Network and identity boundaries shall prevent the model path from becoming a universal proxy to internal systems Failing this leaves a production gap against: Automated or reviewed probe shows the model/tool runtime can reach only allowlisted destinations; 0 unrestricted routes to internal admin APIs or data stores from the model identity",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -10939,13 +11343,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SEC-M4 (Network and identity boundaries must prevent the model path from becoming a universal proxy to internal sys…): inspect current evidence for [Architecture diagram of model/tool trust boundaries + network policy or egress allowlist export] and confirm the pass condition holds — Automated or reviewed probe shows the model/tool runtime can reach only allowlisted destinations; 0 unrestricted routes to internal admin APIs or data stores from the model identi…",
-      "falsePositiveGuidance": "SEC-M4 (Adversarial Security): re-verify against a current artifact for this specific Check (SEC-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Network and identity boundaries must prevent the model path from becoming a universal proxy to internal systems): inspect current evidence for [Architecture diagram of model/tool trust boundaries + network policy or egress allowlist export] and confirm the pass condition holds — Automated or reviewed probe shows the model/tool runtime can reach only allowlisted destinations; 0 unrestricted routes to internal admin APIs or data stores from the model identity",
+      "falsePositiveGuidance": "(Adversarial Security): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Network and identity boundaries must prevent the model path from becoming a universal proxy to internal sys… (SEC-M4)",
+        "Implement and operationalize: Network and identity boundaries must prevent the model path from becoming a universal proxy to internal systems",
         "Retain evidence artifacts required by this Check, starting with: Architecture diagram of model/tool trust boundaries + network policy or egress allowlist export",
-        "Schedule recurring manual verification for SEC-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SEC-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -10990,7 +11394,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "ai-security",
       "title": "Canary tokens or tripwires must detect exfiltration attempts in sensitive AI contexts",
       "description": "Canary tokens or tripwires shall detect exfiltration attempts in sensitive AI contexts",
-      "whyItMatters": "SEC-M5 (Adversarial Security, mandatory): Canary tokens or tripwires shall detect exfiltration attempts in sensitive AI contexts Failing this leaves a production gap against: PASS if canaries/tripwires are deployed in production-sensitive paths and the latest detection test (≤90 days) shows expected alerts with 0 silent misses in th…",
+      "whyItMatters": "Canary tokens or tripwires shall detect exfiltration attempts in sensitive AI contexts Failing this leaves a production gap against: PASS if canaries/tripwires are deployed in production-sensitive paths and the latest detection test (≤90 days) shows expected alerts with 0 silent misses in the suite",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -11009,13 +11413,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SEC-M5 (Canary tokens or tripwires must detect exfiltration attempts in sensitive AI contexts): inspect current evidence for [Canary/tripwire design + detection test report with sample alerts for sensitive contexts] and confirm the pass condition holds — PASS if canaries/tripwires are deployed in production-sensitive paths and the latest detection test (≤90 days) shows expected alerts with 0 silent misses in the suite",
-      "falsePositiveGuidance": "SEC-M5 (Adversarial Security): re-verify against a current artifact for this specific Check (SEC-M5), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Canary tokens or tripwires must detect exfiltration attempts in sensitive AI contexts): inspect current evidence for [Canary/tripwire design + detection test report with sample alerts for sensitive contexts] and confirm the pass condition holds — PASS if canaries/tripwires are deployed in production-sensitive paths and the latest detection test (≤90 days) shows expected alerts with 0 silent misses in the suite",
+      "falsePositiveGuidance": "(Adversarial Security): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Canary tokens or tripwires must detect exfiltration attempts in sensitive AI contexts (SEC-M5)",
+        "Implement and operationalize: Canary tokens or tripwires must detect exfiltration attempts in sensitive AI contexts",
         "Retain evidence artifacts required by this Check, starting with: Canary/tripwire design + detection test report with sample alerts for sensitive contexts",
-        "Schedule recurring manual verification for SEC-M5 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SEC-M5 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -11058,9 +11462,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SEC-R1",
       "category": "ai-security",
-      "title": "SEC-R1: Red-team exercises cover multi-turn and indirect injection via RAG/MCP",
+      "title": "Production systems should have red-team exercises cover multi-turn and indirect injection via RAG/MCP",
       "description": "Red-team exercises cover multi-turn and indirect injection via RAG/MCP",
-      "whyItMatters": "SEC-R1 (Adversarial Security, recommended): Red-team exercises cover multi-turn and indirect injection via RAG/MCP Failing this leaves a production gap against: Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases; latest run ≤90 days meets documented pass thresholds; report retained ≥90 days",
+      "whyItMatters": "Red-team exercises cover multi-turn and indirect injection via RAG/MCP Failing this leaves a production gap against: Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases; latest run ≤90 days meets documented pass thresholds; report retained ≥90 days",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -11079,13 +11483,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SEC-R1 (SEC-R1: Red-team exercises cover multi-turn and indirect injection via RAG/MCP): inspect current evidence for [Versioned red-team suite covering multi-turn and indirect injection via RAG/MCP + latest scored run report] and confirm the pass condition holds — Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases; latest run ≤90 days meets documented pass thresholds; report retained ≥90 days",
-      "falsePositiveGuidance": "SEC-R1 (Adversarial Security): re-verify against a current artifact for this specific Check (SEC-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Red-team exercises cover multi-turn and indirect injection via RAG/MCP): inspect current evidence for [Versioned red-team suite covering multi-turn and indirect injection via RAG/MCP + latest scored run report] and confirm the pass condition holds — Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases; latest run ≤90 days meets documented pass thresholds; report retained ≥90 days",
+      "falsePositiveGuidance": "(Adversarial Security): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: SEC-R1: Red-team exercises cover multi-turn and indirect injection via RAG/MCP (SEC-R1)",
-        "Retain evidence artifacts required by this Check, starting with: Versioned red-team suite covering multi-turn and indirect injection via RAG/MCP + latest scored run…",
-        "Schedule recurring manual verification for SEC-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SEC-R1 passes"
+        "Implement and operationalize: this Check: Red-team exercises cover multi-turn and indirect injection via RAG/MCP",
+        "Retain evidence artifacts required by this Check, starting with: Versioned red-team suite covering multi-turn and indirect injection via RAG/MCP + latest scored run report",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -11128,9 +11532,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SEC-R2",
       "category": "ai-security",
-      "title": "SEC-R2: Content safety and malware scanning on multimodal inputs where applicable",
+      "title": "Production systems should have content safety and malware scanning on multimodal inputs where applicable",
       "description": "Content safety and malware scanning on multimodal inputs where applicable",
-      "whyItMatters": "SEC-R2 (Adversarial Security, recommended): Content safety and malware scanning on multimodal inputs where applicable Failing this leaves a production gap against: Where multimodal inputs are accepted, scanner runs before model ingest; last report ≤90 days shows coverage of image/file types in use and 0 unscanned producti…",
+      "whyItMatters": "Content safety and malware scanning on multimodal inputs where applicable Failing this leaves a production gap against: Where multimodal inputs are accepted, scanner runs before model ingest; last report ≤90 days shows coverage of image/file types in use and 0 unscanned production paths",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -11149,13 +11553,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SEC-R2 (SEC-R2: Content safety and malware scanning on multimodal inputs where applicable): inspect current evidence for [Multimodal input safety/malware scanner config + latest CI or batch scan report for production-bound media] and confirm the pass condition holds — Where multimodal inputs are accepted, scanner runs before model ingest; last report ≤90 days shows coverage of image/file types in use and 0 unscanned production paths",
-      "falsePositiveGuidance": "SEC-R2 (Adversarial Security): re-verify against a current artifact for this specific Check (SEC-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Content safety and malware scanning on multimodal inputs where applicable): inspect current evidence for [Multimodal input safety/malware scanner config + latest CI or batch scan report for production-bound media] and confirm the pass condition holds — Where multimodal inputs are accepted, scanner runs before model ingest; last report ≤90 days shows coverage of image/file types in use and 0 unscanned production paths",
+      "falsePositiveGuidance": "(Adversarial Security): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: SEC-R2: Content safety and malware scanning on multimodal inputs where applicable (SEC-R2)",
-        "Retain evidence artifacts required by this Check, starting with: Multimodal input safety/malware scanner config + latest CI or batch scan report for production-boun…",
-        "Schedule recurring manual verification for SEC-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SEC-R2 passes"
+        "Implement and operationalize: this Check: Content safety and malware scanning on multimodal inputs where applicable",
+        "Retain evidence artifacts required by this Check, starting with: Multimodal input safety/malware scanner config + latest CI or batch scan report for production-bound media",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -11200,7 +11604,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "secrets",
       "title": "Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks",
       "description": "Production secrets shall live in a secrets manager and not in prompts, repos, or prod notebooks",
-      "whyItMatters": "SEC2-M1 (Secrets, mandatory): Production secrets shall live in a secrets manager and not in prompts, repos, or prod notebooks Failing this leaves a production gap against: 0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the se…",
+      "whyItMatters": "Production secrets shall live in a secrets manager and not in prompts, repos, or prod notebooks Failing this leaves a production gap against: 0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the secrets manager",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -11231,13 +11635,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SEC2-M1 (Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks): inspect current evidence for [Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths] and confirm the pass condition holds — 0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the secrets manager",
-      "falsePositiveGuidance": "SEC2-M1 (Secrets): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks): inspect current evidence for [Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths] and confirm the pass condition holds — 0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the secrets manager",
+      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks (SEC2-M1)",
+        "Implement and operationalize: Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks",
         "Retain evidence artifacts required by this Check, starting with: Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths",
-        "Wire or verify detectors declared on SEC2-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SEC2-M1 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -11278,7 +11682,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "secrets",
       "title": "Logging and tracing pipelines must redact secret-like patterns",
       "description": "Logging and tracing pipelines shall redact secret-like patterns",
-      "whyItMatters": "SEC2-M2 (Secrets, mandatory): Logging and tracing pipelines shall redact secret-like patterns Failing this leaves a production gap against: Synthetic secrets (API key/bearer/AWS-key patterns) injected into a canary request are redacted in persisted logs/traces at 100% detection in the test harness",
+      "whyItMatters": "Logging and tracing pipelines shall redact secret-like patterns Failing this leaves a production gap against: Synthetic secrets (API key/bearer/AWS-key patterns) injected into a canary request are redacted in persisted logs/traces at 100% detection in the test harness",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -11297,13 +11701,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SEC2-M2 (Logging and tracing pipelines must redact secret-like patterns): inspect current evidence for [Redaction config + sample of redacted traces + synthetic secret-injection test results] and confirm the pass condition holds — Synthetic secrets (API key/bearer/AWS-key patterns) injected into a canary request are redacted in persisted logs/traces at 100% detection in the test harness",
-      "falsePositiveGuidance": "SEC2-M2 (Secrets): re-verify against a current artifact for this specific Check (SEC2-M2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Logging and tracing pipelines must redact secret-like patterns): inspect current evidence for [Redaction config + sample of redacted traces + synthetic secret-injection test results] and confirm the pass condition holds — Synthetic secrets (API key/bearer/AWS-key patterns) injected into a canary request are redacted in persisted logs/traces at 100% detection in the test harness",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Logging and tracing pipelines must redact secret-like patterns (SEC2-M2)",
+        "Implement and operationalize: Logging and tracing pipelines must redact secret-like patterns",
         "Retain evidence artifacts required by this Check, starting with: Redaction config + sample of redacted traces + synthetic secret-injection test results",
-        "Schedule recurring manual verification for SEC2-M2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SEC2-M2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -11344,13 +11748,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "secrets",
       "title": "Provider and cloud keys must be rotatable and scoped; client apps must not hold privileged keys",
       "description": "Provider and cloud keys shall be rotatable and scoped; client apps shall not hold privileged keys",
-      "whyItMatters": "SEC2-M3 (Secrets, mandatory): Provider and cloud keys shall be rotatable and scoped; client apps shall not hold privileged keys Failing this leaves a production gap against: 0 privileged provider/cloud keys embedded in client apps; every production key has a rotation date within policy (≤90 days or provider-managed short-lived cred…",
+      "whyItMatters": "Provider and cloud keys shall be rotatable and scoped; client apps shall not hold privileged keys Failing this leaves a production gap against: 0 privileged provider/cloud keys embedded in client apps; every production key has a documented least-privilege scope and a rotation date within policy (≤90 days or provider-managed short-lived credentials)",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "0 privileged provider/cloud keys embedded in client apps; every production key has a rotation date within policy (≤90 days or provider-managed short-lived credentials)",
+      "passCondition": "0 privileged provider/cloud keys embedded in client apps; every production key has a documented least-privilege scope and a rotation date within policy (≤90 days or provider-managed short-lived credentials)",
       "evidenceRequired": [
-        "Key inventory with rotation dates + client bundle/scan report"
+        "Key inventory with least-privilege scope + rotation dates + client bundle/scan report"
       ],
       "detection": {
         "capability": "manual",
@@ -11358,18 +11762,18 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Key inventory with rotation dates + client bundle/scan report"
+              "hint": "Key inventory with least-privilege scope + rotation dates + client bundle/scan report"
             }
           }
         ]
       },
-      "manualVerification": "For SEC2-M3 (Provider and cloud keys must be rotatable and scoped; client apps must not hold privileged keys): inspect current evidence for [Key inventory with rotation dates + client bundle/scan report] and confirm the pass condition holds — 0 privileged provider/cloud keys embedded in client apps; every production key has a rotation date within policy (≤90 days or provider-managed short-lived credentials)",
-      "falsePositiveGuidance": "SEC2-M3 (Secrets): re-verify against a current artifact for this specific Check (SEC2-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Provider and cloud keys must be rotatable and scoped; client apps must not hold privileged keys): inspect current evidence for [Key inventory with least-privilege scope + rotation dates + client bundle/scan report] and confirm the pass condition holds — 0 privileged provider/cloud keys embedded in client apps; every production key has a documented least-privilege scope and a rotation date within policy (≤90 days or provider-managed short-lived credentials)",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Provider and cloud keys must be rotatable and scoped; client apps must not hold privileged keys (SEC2-M3)",
-        "Retain evidence artifacts required by this Check, starting with: Key inventory with rotation dates + client bundle/scan report",
-        "Schedule recurring manual verification for SEC2-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SEC2-M3 passes"
+        "Implement and operationalize: Provider and cloud keys must be rotatable and scoped; client apps must not hold privileged keys",
+        "Retain evidence artifacts required by this Check, starting with: Key inventory with least-privilege scope + rotation dates + client bundle/scan report",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -11408,9 +11812,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SEC2-R1",
       "category": "secrets",
-      "title": "SEC2-R1: Pre-commit and CI secret scanning including prompt/fixture files",
+      "title": "Production systems should have pre-commit and CI secret scanning including prompt/fixture files",
       "description": "Pre-commit and CI secret scanning including prompt/fixture files",
-      "whyItMatters": "SEC2-R1 (Secrets, recommended): Pre-commit and CI secret scanning including prompt/fixture files Failing this leaves a production gap against: Secret scanning covers application code, prompts, and fixtures; blocking on high-confidence secrets; last green main-branch scan ≤7 days (or last PR merge evid…",
+      "whyItMatters": "Pre-commit and CI secret scanning including prompt/fixture files Failing this leaves a production gap against: Secret scanning covers application code, prompts, and fixtures; blocking on high-confidence secrets; last green main-branch scan ≤7 days (or last PR merge evidence)",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -11437,13 +11841,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SEC2-R1 (SEC2-R1: Pre-commit and CI secret scanning including prompt/fixture files): inspect current evidence for [Pre-commit + CI secret-scan config including prompt/fixture globs + latest scan report with findings disposition] and confirm the pass condition holds — Secret scanning covers application code, prompts, and fixtures; blocking on high-confidence secrets; last green main-branch scan ≤7 days (or last PR merge evidence)",
-      "falsePositiveGuidance": "SEC2-R1 (Secrets): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Pre-commit and CI secret scanning including prompt/fixture files): inspect current evidence for [Pre-commit + CI secret-scan config including prompt/fixture globs + latest scan report with findings disposition] and confirm the pass condition holds — Secret scanning covers application code, prompts, and fixtures; blocking on high-confidence secrets; last green main-branch scan ≤7 days (or last PR merge evidence)",
+      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: SEC2-R1: Pre-commit and CI secret scanning including prompt/fixture files (SEC2-R1)",
-        "Retain evidence artifacts required by this Check, starting with: Pre-commit + CI secret-scan config including prompt/fixture globs + latest scan report with finding…",
-        "Wire or verify detectors declared on SEC2-R1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SEC2-R1 passes"
+        "Implement and operationalize: this Check: Pre-commit and CI secret scanning including prompt/fixture files",
+        "Retain evidence artifacts required by this Check, starting with: Pre-commit + CI secret-scan config including prompt/fixture globs + latest scan report with findings disposition",
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -11482,9 +11886,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SEC2-R2",
       "category": "secrets",
-      "title": "SEC2-R2: Egress controls limiting where runtime credentials can be used",
+      "title": "Production systems should have egress controls limiting where runtime credentials can be used",
       "description": "Egress controls limiting where runtime credentials can be used",
-      "whyItMatters": "SEC2-R2 (Secrets, recommended): Egress controls limiting where runtime credentials can be used Failing this leaves a production gap against: Runtime credentials can only call documented destinations; ≥1 deny event is observed in test or production logs proving enforcement in the last 90 days",
+      "whyItMatters": "Egress controls limiting where runtime credentials can be used Failing this leaves a production gap against: Runtime credentials can only call documented destinations; ≥1 deny event is observed in test or production logs proving enforcement in the last 90 days",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -11503,13 +11907,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SEC2-R2 (SEC2-R2: Egress controls limiting where runtime credentials can be used): inspect current evidence for [Egress allowlist/policy config for runtimes that hold credentials + sample deny/allow logs (24h)] and confirm the pass condition holds — Runtime credentials can only call documented destinations; ≥1 deny event is observed in test or production logs proving enforcement in the last 90 days",
-      "falsePositiveGuidance": "SEC2-R2 (Secrets): re-verify against a current artifact for this specific Check (SEC2-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Egress controls limiting where runtime credentials can be used): inspect current evidence for [Egress allowlist/policy config for runtimes that hold credentials + sample deny/allow logs (24h)] and confirm the pass condition holds — Runtime credentials can only call documented destinations; ≥1 deny event is observed in test or production logs proving enforcement in the last 90 days",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: SEC2-R2: Egress controls limiting where runtime credentials can be used (SEC2-R2)",
+        "Implement and operationalize: this Check: Egress controls limiting where runtime credentials can be used",
         "Retain evidence artifacts required by this Check, starting with: Egress allowlist/policy config for runtimes that hold credentials + sample deny/allow logs (24h)",
-        "Schedule recurring manual verification for SEC2-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SEC2-R2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -11548,9 +11952,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SEC2-R3",
       "category": "secrets",
-      "title": "SEC2-R3: Dataset scanning before fine-tuning or eval corpus publish",
+      "title": "Production systems should have dataset scanning before fine-tuning or eval corpus publish",
       "description": "Dataset scanning before fine-tuning or eval corpus publish",
-      "whyItMatters": "SEC2-R3 (Secrets, recommended): Dataset scanning before fine-tuning or eval corpus publish Failing this leaves a production gap against: 100% of fine-tune/eval corpora published in the last 90 days have a linked scan report; publish is blocked when critical findings are open",
+      "whyItMatters": "Dataset scanning before fine-tuning or eval corpus publish Failing this leaves a production gap against: 100% of fine-tune/eval corpora published in the last 90 days have a linked scan report; publish is blocked when critical findings are open",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -11569,13 +11973,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For SEC2-R3 (SEC2-R3: Dataset scanning before fine-tuning or eval corpus publish): inspect current evidence for [Dataset secret/PII scan gate config before fine-tune or eval corpus publish + last scan report for a published corpus] and confirm the pass condition holds — 100% of fine-tune/eval corpora published in the last 90 days have a linked scan report; publish is blocked when critical findings are open",
-      "falsePositiveGuidance": "SEC2-R3 (Secrets): re-verify against a current artifact for this specific Check (SEC2-R3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Dataset scanning before fine-tuning or eval corpus publish): inspect current evidence for [Dataset secret/PII scan gate config before fine-tune or eval corpus publish + last scan report for a published corpus] and confirm the pass condition holds — 100% of fine-tune/eval corpora published in the last 90 days have a linked scan report; publish is blocked when critical findings are open",
+      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: SEC2-R3: Dataset scanning before fine-tuning or eval corpus publish (SEC2-R3)",
-        "Retain evidence artifacts required by this Check, starting with: Dataset secret/PII scan gate config before fine-tune or eval corpus publish + last scan report for…",
-        "Schedule recurring manual verification for SEC2-R3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SEC2-R3 passes"
+        "Implement and operationalize: this Check: Dataset scanning before fine-tuning or eval corpus publish",
+        "Retain evidence artifacts required by this Check, starting with: Dataset secret/PII scan gate config before fine-tune or eval corpus publish + last scan report for a published corpus",
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -11616,7 +12020,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "tool-safety",
       "title": "Every tool invocation must be authorized server-side independent of model output",
       "description": "Every tool invocation shall be authorized server-side independent of model output",
-      "whyItMatters": "TOL-M1 (Tool Safety, mandatory): Every tool invocation shall be authorized server-side independent of model output Failing this leaves a production gap against: Automated tests show tool calls without a valid authz decision are denied at 100%; model-proposed tool name/args alone never bypass the gateway",
+      "whyItMatters": "Every tool invocation shall be authorized server-side independent of model output Failing this leaves a production gap against: Automated tests show tool calls without a valid authz decision are denied at 100%; model-proposed tool name/args alone never bypass the gateway",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -11625,16 +12029,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Tool gateway authz tests + deny logs"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "manual",
         "detectors": [
-          {
-            "id": "mcp-tool-allowlist",
-            "params": {}
-          },
-          {
-            "id": "mcp-filesystem-scope",
-            "params": {}
-          },
           {
             "id": "manual-attest",
             "params": {
@@ -11643,13 +12039,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For TOL-M1 (Every tool invocation must be authorized server-side independent of model output): inspect current evidence for [Tool gateway authz tests + deny logs] and confirm the pass condition holds — Automated tests show tool calls without a valid authz decision are denied at 100%; model-proposed tool name/args alone never bypass the gateway",
-      "falsePositiveGuidance": "TOL-M1 (Tool Safety): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Every tool invocation must be authorized server-side independent of model output): inspect current evidence for [Tool gateway authz tests + deny logs] and confirm the pass condition holds — Automated tests show tool calls without a valid authz decision are denied at 100%; model-proposed tool name/args alone never bypass the gateway",
+      "falsePositiveGuidance": "(Tool Safety): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Every tool invocation must be authorized server-side independent of model output (TOL-M1)",
+        "Implement and operationalize: Every tool invocation must be authorized server-side independent of model output",
         "Retain evidence artifacts required by this Check, starting with: Tool gateway authz tests + deny logs",
-        "Wire or verify detectors declared on TOL-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until TOL-M1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -11671,7 +12067,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "tool-safety",
         "mandatory",
-        "automated"
+        "manual"
       ],
       "applicability": {
         "technologies": [
@@ -11690,7 +12086,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "tool-safety",
       "title": "Tools must be allowlisted per agent/workload; unknown tools must not be inventable at runtime",
       "description": "Tools shall be allowlisted per agent/workload; unknown tools shall not be inventable at runtime",
-      "whyItMatters": "TOL-M2 (Tool Safety, mandatory): Tools shall be allowlisted per agent/workload; unknown tools shall not be inventable at runtime Failing this leaves a production gap against: 100% of production agents have an explicit tool allowlist; requests for tools outside the allowlist are denied at 100% in automated tests",
+      "whyItMatters": "Tools shall be allowlisted per agent/workload; unknown tools shall not be inventable at runtime Failing this leaves a production gap against: 100% of production agents have an explicit tool allowlist; requests for tools outside the allowlist are denied at 100% in automated tests",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -11721,13 +12117,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For TOL-M2 (Tools must be allowlisted per agent/workload; unknown tools must not be inventable at runtime): inspect current evidence for [Per-agent tool allowlist config + negative tests for unknown tool names] and confirm the pass condition holds — 100% of production agents have an explicit tool allowlist; requests for tools outside the allowlist are denied at 100% in automated tests",
-      "falsePositiveGuidance": "TOL-M2 (Tool Safety): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "For this Check (Tools must be allowlisted per agent/workload; unknown tools must not be inventable at runtime): inspect current evidence for [Per-agent tool allowlist config + negative tests for unknown tool names] and confirm the pass condition holds — 100% of production agents have an explicit tool allowlist; requests for tools outside the allowlist are denied at 100% in automated tests",
+      "falsePositiveGuidance": "(Tool Safety): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
-        "Implement and operationalize: Tools must be allowlisted per agent/workload; unknown tools must not be inventable at runtime (TOL-M2)",
+        "Implement and operationalize: Tools must be allowlisted per agent/workload; unknown tools must not be inventable at runtime",
         "Retain evidence artifacts required by this Check, starting with: Per-agent tool allowlist config + negative tests for unknown tool names",
-        "Wire or verify detectors declared on TOL-M2 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until TOL-M2 passes"
+        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -11768,7 +12164,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "tool-safety",
       "title": "High-impact tools must require additional gates (approval, dual control, or policy engine)",
       "description": "High-impact tools shall require additional gates (approval, dual control, or policy engine)",
-      "whyItMatters": "TOL-M3 (Tool Safety, mandatory): High-impact tools shall require additional gates (approval, dual control, or policy engine) Failing this leaves a production gap against: 100% of tools rated write/irreversible/financial have a configured gate; automated tests show ungated execution is impossible for those tools",
+      "whyItMatters": "High-impact tools shall require additional gates (approval, dual control, or policy engine) Failing this leaves a production gap against: 100% of tools rated write/irreversible/financial have a configured gate; automated tests show ungated execution is impossible for those tools",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -11787,13 +12183,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For TOL-M3 (Require additional gates (approval, dual control, or policy engine)): inspect current evidence for [Impact-tiered tool inventory + gate configuration + bypass tests] and confirm the pass condition holds — 100% of tools rated write/irreversible/financial have a configured gate; automated tests show ungated execution is impossible for those tools",
-      "falsePositiveGuidance": "TOL-M3 (Tool Safety): re-verify against a current artifact for this specific Check (TOL-M3), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Require additional gates (approval, dual control, or policy engine)): inspect current evidence for [Impact-tiered tool inventory + gate configuration + bypass tests] and confirm the pass condition holds — 100% of tools rated write/irreversible/financial have a configured gate; automated tests show ungated execution is impossible for those tools",
+      "falsePositiveGuidance": "(Tool Safety): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: High-impact tools must require additional gates (approval, dual control, or policy engine) (TOL-M3)",
+        "Implement and operationalize: High-impact tools must require additional gates (approval, dual control, or policy engine)",
         "Retain evidence artifacts required by this Check, starting with: Impact-tiered tool inventory + gate configuration + bypass tests",
-        "Schedule recurring manual verification for TOL-M3 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until TOL-M3 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -11834,7 +12230,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "tool-safety",
       "title": "Tool arguments must be schema-validated and sanitized before execution",
       "description": "Tool arguments shall be schema-validated and sanitized before execution",
-      "whyItMatters": "TOL-M4 (Tool Safety, mandatory): Tool arguments shall be schema-validated and sanitized before execution Failing this leaves a production gap against: 100% of production tools have a declared argument schema; invalid/malicious argument fixtures are rejected at 100% before side effects",
+      "whyItMatters": "Tool arguments shall be schema-validated and sanitized before execution Failing this leaves a production gap against: 100% of production tools have a declared argument schema; invalid/malicious argument fixtures are rejected at 100% before side effects",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -11853,13 +12249,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For TOL-M4 (Tool arguments must be schema-validated and sanitized before execution): inspect current evidence for [JSON Schema (or equivalent) per tool + contract tests for invalid payloads] and confirm the pass condition holds — 100% of production tools have a declared argument schema; invalid/malicious argument fixtures are rejected at 100% before side effects",
-      "falsePositiveGuidance": "TOL-M4 (Tool Safety): re-verify against a current artifact for this specific Check (TOL-M4), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Tool arguments must be schema-validated and sanitized before execution): inspect current evidence for [JSON Schema (or equivalent) per tool + contract tests for invalid payloads] and confirm the pass condition holds — 100% of production tools have a declared argument schema; invalid/malicious argument fixtures are rejected at 100% before side effects",
+      "falsePositiveGuidance": "(Tool Safety): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: Tool arguments must be schema-validated and sanitized before execution (TOL-M4)",
+        "Implement and operationalize: Tool arguments must be schema-validated and sanitized before execution",
         "Retain evidence artifacts required by this Check, starting with: JSON Schema (or equivalent) per tool + contract tests for invalid payloads",
-        "Schedule recurring manual verification for TOL-M4 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until TOL-M4 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -11900,7 +12296,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "tool-safety",
       "title": "MCP tool catalogs must be signed and supply-chain reviewed before production use",
       "description": "MCP tool catalogs shall be signed and supply-chain reviewed before production use",
-      "whyItMatters": "TOL-M5 (Tool Safety, mandatory): MCP tool catalogs shall be signed and supply-chain reviewed before production use Failing this leaves a production gap against: PASS if production MCP runtimes reject unsigned/unapproved tool catalogs; last review ≤90 days or since last catalog change",
+      "whyItMatters": "MCP tool catalogs shall be signed and supply-chain reviewed before production use Failing this leaves a production gap against: PASS if production MCP runtimes reject unsigned/unapproved tool catalogs; last review ≤90 days or since last catalog change",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -11912,13 +12308,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "capability": "manual",
         "detectors": []
       },
-      "manualVerification": "For TOL-M5 (MCP tool catalogs must be signed and supply-chain reviewed before production use): inspect current evidence for [Signed tool catalog + supply-chain review record + verify-on-load config] and confirm the pass condition holds — PASS if production MCP runtimes reject unsigned/unapproved tool catalogs; last review ≤90 days or since last catalog change",
-      "falsePositiveGuidance": "TOL-M5 (Tool Safety): re-verify against a current artifact for this specific Check (TOL-M5), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (MCP tool catalogs must be signed and supply-chain reviewed before production use): inspect current evidence for [Signed tool catalog + supply-chain review record + verify-on-load config] and confirm the pass condition holds — PASS if production MCP runtimes reject unsigned/unapproved tool catalogs; last review ≤90 days or since last catalog change",
+      "falsePositiveGuidance": "(Tool Safety): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: MCP tool catalogs must be signed and supply-chain reviewed before production use (TOL-M5)",
+        "Implement and operationalize: MCP tool catalogs must be signed and supply-chain reviewed before production use",
         "Retain evidence artifacts required by this Check, starting with: Signed tool catalog + supply-chain review record + verify-on-load config",
-        "Schedule recurring manual verification for TOL-M5 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until TOL-M5 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -11957,9 +12353,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "TOL-R1",
       "category": "tool-safety",
-      "title": "TOL-R1: Dry-run or simulation mode for destructive tools in lower environments",
+      "title": "Production systems should have dry-run or simulation mode for destructive tools in lower environments",
       "description": "Dry-run or simulation mode for destructive tools in lower environments",
-      "whyItMatters": "TOL-R1 (Tool Safety, recommended): Dry-run or simulation mode for destructive tools in lower environments Failing this leaves a production gap against: 100% of tools classified destructive expose dry-run or simulation in non-prod; last promotion of a destructive tool includes a dry-run evidence link ≤90 days o…",
+      "whyItMatters": "Dry-run or simulation mode for destructive tools in lower environments Failing this leaves a production gap against: 100% of tools classified destructive expose dry-run or simulation in non-prod; last promotion of a destructive tool includes a dry-run evidence link ≤90 days old",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -11978,13 +12374,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For TOL-R1 (TOL-R1: Dry-run or simulation mode for destructive tools in lower environments): inspect current evidence for [Destructive-tool catalog marking dry-run/simulation support + sample lower-env dry-run logs] and confirm the pass condition holds — 100% of tools classified destructive expose dry-run or simulation in non-prod; last promotion of a destructive tool includes a dry-run evidence link ≤90 days old",
-      "falsePositiveGuidance": "TOL-R1 (Tool Safety): re-verify against a current artifact for this specific Check (TOL-R1), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Dry-run or simulation mode for destructive tools in lower environments): inspect current evidence for [Destructive-tool catalog marking dry-run/simulation support + sample lower-env dry-run logs] and confirm the pass condition holds — 100% of tools classified destructive expose dry-run or simulation in non-prod; last promotion of a destructive tool includes a dry-run evidence link ≤90 days old",
+      "falsePositiveGuidance": "(Tool Safety): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: TOL-R1: Dry-run or simulation mode for destructive tools in lower environments (TOL-R1)",
+        "Implement and operationalize: this Check: Dry-run or simulation mode for destructive tools in lower environments",
         "Retain evidence artifacts required by this Check, starting with: Destructive-tool catalog marking dry-run/simulation support + sample lower-env dry-run logs",
-        "Schedule recurring manual verification for TOL-R1 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until TOL-R1 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -12023,9 +12419,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "TOL-R2",
       "category": "tool-safety",
-      "title": "TOL-R2: Per-tool rate limits and blast-radius budgets",
+      "title": "Production systems should have per-tool rate limits and blast-radius budgets",
       "description": "Per-tool rate limits and blast-radius budgets",
-      "whyItMatters": "TOL-R2 (Tool Safety, recommended): Per-tool rate limits and blast-radius budgets Failing this leaves a production gap against: Each high-impact tool has a documented QPS/daily cap and max-affected-entities budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days",
+      "whyItMatters": "Per-tool rate limits and blast-radius budgets Failing this leaves a production gap against: Each high-impact tool has a documented QPS/daily cap and max-affected-entities budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
@@ -12044,13 +12440,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "For TOL-R2 (TOL-R2: Per-tool rate limits and blast-radius budgets): inspect current evidence for [Per-tool rate-limit and blast-radius policy config + sample enforcement metrics (7 days)] and confirm the pass condition holds — Each high-impact tool has a documented QPS/daily cap and max-affected-entities budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days",
-      "falsePositiveGuidance": "TOL-R2 (Tool Safety): re-verify against a current artifact for this specific Check (TOL-R2), not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "For this Check (Per-tool rate limits and blast-radius budgets): inspect current evidence for [Per-tool rate-limit and blast-radius policy config + sample enforcement metrics (7 days)] and confirm the pass condition holds — Each high-impact tool has a documented QPS/daily cap and max-affected-entities budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days",
+      "falsePositiveGuidance": "(Tool Safety): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
       "recommendedFixes": [
-        "Implement and operationalize: TOL-R2: Per-tool rate limits and blast-radius budgets (TOL-R2)",
+        "Implement and operationalize: this Check: Per-tool rate limits and blast-radius budgets",
         "Retain evidence artifacts required by this Check, starting with: Per-tool rate-limit and blast-radius policy config + sample enforcement metrics (7 days)",
-        "Schedule recurring manual verification for TOL-R2 with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until TOL-R2 passes"
+        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {

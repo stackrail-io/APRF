@@ -1,0 +1,19 @@
+id: repo-filesystem
+title: Repository filesystem collector
+version: "0.2.0"
+executor: collectors/repo-filesystem.ts
+evidenceClass: code
+alsoEmits: [docs, runtime-config, policy, iac]
+inputs:
+  - targetPath: repository root
+collect:
+  - "Inventory globs from workflow.md Phase 1 (sorted)"
+  - "Read matching files; emit one node per meaningful artifact"
+  - "Apply evidence-map.yaml categoryDefaults"
+emits:
+  nodeClass: code
+  refPattern: "path[:startLine-endLine]"
+  signals: [file-present, content-match]
+mapsToChecks: ["*"]
+whenUnavailable: "Target path unreadable → abort assessment"
+builtin: true

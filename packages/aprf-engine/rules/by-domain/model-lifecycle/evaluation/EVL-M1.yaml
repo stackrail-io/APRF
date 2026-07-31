@@ -1,0 +1,59 @@
+id: "EVL-M1"
+category: "evaluation"
+title: "Critical customer journeys must have automated offline eval suites on every relevant change"
+description: "Critical customer journeys shall have automated offline eval suites on every relevant change"
+whyItMatters: "Critical customer journeys shall have automated offline eval suites on every relevant
+  change Failing this leaves a production gap against: 100% of journeys marked critical have a
+  versioned offline suite; 100% of relevant production changes in last 30 days triggered the suite
+  (or documented waiver ≤ 14 days)"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "100% of journeys marked critical have a versioned offline suite; 100% of relevant
+  production changes in last 30 days triggered the suite (or documented waiver ≤ 14 days)"
+evidenceRequired:
+  - "Eval suite registry mapped to journeys + CI runs on prompt/model/tool changes"
+detection:
+  capability: "automated"
+  detectors:
+    - id: "repo-eval-suite-present"
+      params: {}
+    - id: "manual-attest"
+      params:
+        hint: "Eval suite registry mapped to journeys + CI runs on prompt/model/tool changes"
+manualVerification: "For this Check (Critical customer journeys must have automated offline eval
+  suites on every relevant change): inspect current evidence for [Eval suite registry mapped to
+  journeys + CI runs on prompt/model/tool changes] and confirm the pass condition holds — 100% of
+  journeys marked critical have a versioned offline suite; 100% of relevant production changes in
+  last 30 days triggered the suite (or documented waiver ≤ 14 days)"
+falsePositiveGuidance: "confirm the detector target matches the production path for this Check
+  before waiving. Named exceptions need an owner and expiry ≤90 days."
+recommendedFixes:
+  - "Implement and operationalize: Critical customer journeys must have automated offline eval
+    suites on every relevant change"
+  - "Retain evidence artifacts required by this Check, starting with: Eval suite registry mapped to
+    journeys + CI runs on prompt/model/tool changes"
+  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF — Measure"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "Google SRE — Monitoring Distributed Systems (measurement culture)"
+    url: "https://sre.google/sre-book/monitoring-distributed-systems/"
+relatedRules:
+  - "EVL-M2"
+  - "EVL-M3"
+  - "EVL-M4"
+  - "EVL-R1"
+  - "EVL-R2"
+tags:
+  - "evaluation"
+  - "mandatory"
+  - "automated"
+applicability:
+  technologies:
+    - "cicd"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

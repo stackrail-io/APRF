@@ -1,0 +1,559 @@
+# Evidence map for APRF Auditor
+# Agents MUST also load each Check YAML (evidenceRequired, passCondition, detection).
+# This file provides portable search strategies — not a replacement for the catalog.
+
+version: "0.2.0"
+aprfVersion: "0.10.1"
+
+# Report domain ← APRF category.domain (+ special pillar groupings)
+reportDomains:
+  Security:
+    aprfDomains: [security]
+    categories: [ai-security, authentication, authorization, secrets, tool-safety, supply-chain, infrastructure]
+  AI Safety:
+    aprfDomains: [safety]
+    categories: [safety-responsible-ai, explainability]
+  Memory:
+    aprfDomains: [data]
+    categories: [memory-management]
+  Data:
+    aprfDomains: [data]
+    categories: [data-privacy, data-governance]
+  Model Lifecycle:
+    aprfDomains: [model-lifecycle]
+    categories: [model-governance, prompt-engineering, context-engineering, evaluation]
+  Agent Safety:
+    aprfDomains: [agents]
+    categories: [agent-governance, human-approval]
+  Observability:
+    aprfDomains: [reliability]
+    categories: [observability]
+  Reliability:
+    aprfDomains: [reliability]
+    categories: [reliability-continuity, performance-slo]
+  Operations:
+    aprfDomains: [reliability]
+    categories: [change-management, incident-readiness]
+  Cost:
+    aprfDomains: [cost]
+    categories: [cost-optimization]
+  Governance:
+    aprfDomains: [governance]
+    categories: [organizational-governance, compliance]
+  Platform:
+    aprfDomains: [cross-cutting]
+    categories: [platform-engineering]
+
+# Default search strategies by category (globs are hints; always read matching files)
+categoryDefaults:
+  ai-security:
+    search:
+      - "**/prompt*"
+      - "**/*guardrail*"
+      - "**/*moderation*"
+      - "**/*injection*"
+      - "**/policy/**"
+      - "**/openai*/**"
+      - "**/anthropic*/**"
+    signals: [input validation, allowlist, tool mediation, content filter]
+  authentication:
+    search:
+      - "**/*auth*"
+      - "**/middleware/**"
+      - "**/*oauth*"
+      - "**/*oidc*"
+      - "**/*jwt*"
+      - "**/api/**/route.*"
+    signals: [auth middleware, identity provider, service account, mTLS]
+  authorization:
+    search:
+      - "**/*rbac*"
+      - "**/*authz*"
+      - "**/policy/**"
+      - "**/*.rego"
+      - "**/cedar/**"
+      - "**/access_control/**"
+      - "**/tests/**/*auth*"
+    signals: [RBAC, ABAC, scope checks, least privilege, authz denial tests]
+    relatedChecks: [AUTHZ-M1, AUTHZ-M2]
+    plugins: [authz-entry-tests, cross-tenant-tests]
+  secrets:
+    search:
+      - "**/.env*"
+      - "**/*secret*"
+      - "**/.github/workflows/**"
+      - "**/Dockerfile*"
+      - "**/gitleaks*"
+      - "**/trufflehog*"
+      - "**/sops*"
+      - "**/vault/**"
+    signals: [secrets manager, secret scan CI, no hardcoded keys]
+    failFastPatterns:
+      - 'AKIA[0-9A-Z]{16}'
+      - 'sk-[a-zA-Z0-9]{20,}'
+      - '-----BEGIN (RSA |OPENSSH )?PRIVATE KEY-----'
+  tool-safety:
+    search:
+      - "**/mcp*"
+      - "**/*tool*"
+      - "**/tools/**"
+      - "**/*allowlist*"
+      - "**/openai*functions*"
+    signals: [tool allowlist, sandbox, confirmation, side-effect flags]
+  supply-chain:
+    search:
+      - "**/sbom*"
+      - "**/*provenance*"
+      - "**/.github/workflows/**"
+      - "**/Dockerfile*"
+      - "**/package-lock.json"
+      - "**/pnpm-lock.yaml"
+      - "**/go.sum"
+    signals: [pin digests, signed images, dependency lockfile, SLSA]
+  infrastructure:
+    search:
+      - "**/Dockerfile*"
+      - "**/k8s/**"
+      - "**/helm/**"
+      - "**/*.tf"
+      - "**/network*"
+      - "**/security-group*"
+    signals: [non-root, network policy, isolation, runtime hardening]
+  safety-responsible-ai:
+    search:
+      - "**/*safety*"
+      - "**/*fairness*"
+      - "**/*bias*"
+      - "**/*moderation*"
+      - "**/eval/**"
+    signals: [safety policy, harm taxonomy, red team]
+  explainability:
+    search:
+      - "**/*trace*"
+      - "**/*explain*"
+      - "**/otel*"
+      - "**/*audit*log*"
+    signals: [decision log, citation, reconstructable path]
+  data-privacy:
+    search:
+      - "**/*pii*"
+      - "**/*privacy*"
+      - "**/*redact*"
+      - "**/dpia*"
+      - "**/*retention*"
+    signals: [minimization, classification, DLP]
+  data-governance:
+    search:
+      - "**/corpus*"
+      - "**/dataset*"
+      - "**/rag/**"
+      - "**/index*"
+      - "**/*lineage*"
+    signals: [corpus ownership, labeling, refresh]
+  memory-management:
+    search:
+      - "**/*memory*"
+      - "**/vector*"
+      - "**/redis*"
+      - "**/*session*"
+      - "**/*conversation*"
+    signals: [TTL, tenant isolation, memory scope]
+  model-governance:
+    search:
+      - "**/*model*"
+      - "**/providers/**"
+      - "**/*llm*"
+      - "**/config/**"
+    signals: [pinned model ID, deprecation, capability bound]
+  prompt-engineering:
+    search:
+      - "**/prompts/**"
+      - "**/*prompt*"
+      - "**/*.prompt.md"
+    signals: [versioned prompts, review, registry]
+  context-engineering:
+    search:
+      - "**/rag/**"
+      - "**/*context*"
+      - "**/*chunk*"
+      - "**/retriev*"
+    signals: [context budget, labeling, isolation]
+  evaluation:
+    search:
+      - "**/eval/**"
+      - "**/evals/**"
+      - "**/*golden*"
+      - "**/.github/workflows/**"
+    signals: [eval CI gate, golden set, regression]
+  agent-governance:
+    search:
+      - "**/*agent*"
+      - "**/a2a*"
+      - "**/*orchestr*"
+      - "**/*autonom*"
+    signals: [charter, loop limits, budget, escalation]
+  human-approval:
+    search:
+      - "**/*approval*"
+      - "**/*human*"
+      - "**/*hitl*"
+      - "**/*review*"
+    signals: [approval workflow, dual control]
+  observability:
+    search:
+      - "**/otel*"
+      - "**/*telemetry*"
+      - "**/*tracing*"
+      - "**/logging*"
+      - "**/datadog*"
+      - "**/grafana*"
+    signals: [traces, prompt/tool spans, metrics]
+  performance-slo:
+    search:
+      - "**/*slo*"
+      - "**/*latency*"
+      - "**/grafana*"
+      - "**/*budget*"
+    signals: [SLO, error budget, load test]
+  reliability-continuity:
+    search:
+      - "**/*fallback*"
+      - "**/*circuit*"
+      - "**/*retry*"
+      - "**/*degrad*"
+      - "**/*chaos*"
+    signals: [timeout, fallback, multi-provider]
+  change-management:
+    search:
+      - "**/.github/workflows/**"
+      - "**/deploy*"
+      - "**/*rollback*"
+      - "**/release*"
+      - "**/changelog*"
+    signals: [promotion pipeline, rollback tested]
+  incident-readiness:
+    search:
+      - "**/runbook*"
+      - "**/*incident*"
+      - "**/oncall*"
+      - "**/pager*"
+    signals: [runbook, severity, postmortem]
+  cost-optimization:
+    search:
+      - "**/*budget*"
+      - "**/*quota*"
+      - "**/*cache*"
+      - "**/*routing*"
+      - "**/*token*"
+    signals: [spend cap, cache, model routing]
+  organizational-governance:
+    search:
+      - "**/POLICY*"
+      - "**/governance*"
+      - "**/owners*"
+      - "**/CODEOWNERS"
+      - "**/RACI*"
+    signals: [AI policy, named owners]
+  compliance:
+    search:
+      - "**/compliance*"
+      - "**/audit*"
+      - "**/soc2*"
+      - "**/iso*"
+    signals: [control mapping, evidence pack]
+  platform-engineering:
+    search:
+      - "**/template*"
+      - "**/scaffold*"
+      - "**/golden*"
+      - "**/platform*"
+      - "**/devtools*"
+    signals: [golden path, safe defaults]
+
+# Optional Check-level overrides (extend over time; Core profile examples)
+checks:
+  AUTHN-M1:
+    requiredEvidence:
+      - "Automated auth probe report covering all production AI HTTP/RPC routes"
+    plugins: [http-auth-probe]
+    searchExtra:
+      - "**/openapi.json"
+      - "**/swagger.json"
+      - "**/*auth*"
+    evaluation: |
+      Prefer runtime: run collectors/http-auth-probe with --base-url against a running app
+      (or ingest imports/http-auth-probe/auth-probe-report.json).
+      Discover HTTP methods from FastAPI @router.get/post/… (not GET-only guessing).
+      PASS if report.summary.authnM1Satisfied === true (declared AI methods → 401/403).
+      GET returning 405 on paths without a declared GET is advisory only — note that GET
+      should also return 401/403; it does not alone fail AUTHN-M1 when declared methods pass.
+      FAIL if any scored declared method (or advisory GET) returns 2xx without credentials.
+      PARTIAL if auth middleware exists in code but no probe report.
+      NOT_DEMONSTRATED if no base URL, unreachable target, and no prior report — ask user to start the app or provide URL.
+      Do not PASS from code review alone.
+  AUTHN-M2:
+    requiredEvidence:
+      - "MCP/S2S connection inventory + auth config export"
+    plugins: [mcp-s2s-inventory]
+    searchExtra:
+      - "**/mcp*"
+      - "**/*tool_server*"
+      - "**/mcp.json"
+    evaluation: |
+      Prefer runtime inventory: imports/mcp-s2s-inventory/*.json or live GET
+      /api/v1/configs/tool_servers with --base-url + --admin-token, or email/password sign-in.
+      PASS if report.summary.authnM2Satisfied === true (every connection has named machine
+      identity; no auth_type=none; no shared static bearer keys).
+      Empty inventory (no connections) is a vacuous PASS with a note to confirm production.
+      FAIL if any connection is anonymous, session-as-S2S, or static shared key.
+      PARTIAL if code allows auth_type=none but no production inventory yet.
+      NOT_DEMONSTRATED without inventory/export — ask user; do not PASS from OAuth support in code alone.
+  SEC2-M1:
+    requiredEvidence:
+      - "Secrets manager / sealed-secrets / cloud secret refs in runtime config"
+      - "CI secret-scan workflow covering prompts and fixtures"
+    searchExtra:
+      - "**/.github/workflows/*secret*"
+      - "**/gitleaks.toml"
+    plugins: [secrets-hygiene]
+    evaluation: |
+      FAIL if hardcoded cloud/API keys found in tracked source.
+      PASS if secret scan CI present AND runtime resolves secrets from manager/refs.
+      PARTIAL if only one of scan or manager is present.
+      NOT_DEMONSTRATED if neither found.
+  PRM-M1:
+    requiredEvidence:
+      - "Versioned prompt files or registry references"
+    searchExtra:
+      - "**/prompts/**"
+    evaluation: |
+      PASS if prompts are version-controlled with clear ownership.
+      NOT_DEMONSTRATED if no prompt artifacts found (do not invent).
+  OBS-M1:
+    requiredEvidence:
+      - "Tracing/logging that can reconstruct model+tool path"
+    searchExtra:
+      - "**/otel*"
+      - "**/*instrument*"
+    evaluation: |
+      PASS if OTel or equivalent traces spans for LLM/tool calls.
+      PARTIAL if only generic HTTP logs.
+  EVL-M1:
+    requiredEvidence:
+      - "Eval suite + CI gate or scheduled run evidence"
+    searchExtra:
+      - "**/eval/**"
+      - "**/.github/workflows/*eval*"
+    evaluation: |
+      PASS if eval runs in CI and can block merge/release.
+      PARTIAL if evals exist but are manual-only.
+  AGN-M1:
+    requiredEvidence:
+      - "Versioned agent inventory with owner + charter link per production agent"
+      - "Charters covering purpose, tool allowlist, data scope, autonomy limits, owner"
+      - "Optional import: imports/agent-charter-inventory/ (complete inventory export)"
+    searchExtra:
+      - "**/*agent*"
+      - "**/*charter*"
+      - "**/agents.yaml"
+      - "**/AGENT.md"
+    plugins: [agent-charter-inventory, repo-filesystem]
+    naWhen: "No production agents / multi-step autonomy in system"
+    evaluation: |
+      PASS if agent-charter-inventory report statusHint=pass (imported inventory
+      0 missing fields, coversAllProductionAgents=true, measuredAt ≤90d).
+      PARTIAL if inventory/charter artifacts found without complete attested import.
+      NOT_APPLICABLE when no agent signals.
+  AGN-M2:
+    requiredEvidence:
+      - "Runtime/platform config for max-steps, wall-clock timeout, and spawn depth"
+      - "Enforcement tests / imported abort-on-exceed suite (imports/agent-loop-limits/)"
+    searchExtra:
+      - "**/*agent*"
+      - "**/*orchestr*"
+      - "**/*timeout*"
+      - "**/*spawn*"
+    plugins: [agent-loop-limits, repo-filesystem]
+    naWhen: "No agent / multi-step autonomy in system"
+    evaluation: |
+      PASS if agent-loop-limits report statusHint=pass (all three limits + measured abort + measuredAt ≤90d).
+      PARTIAL if configs or tests found without measured abort suite.
+      NOT_APPLICABLE when report statusHint=not_applicable (no agent signals).
+  AGN-M3:
+    requiredEvidence:
+      - "Operator kill/pause API or console control with authz (not model-invoked)"
+      - "Runbook with numeric time-to-effect SLO"
+      - "Imported cancel suite + ≤90-day drill under imports/agent-kill-switch/ (architectureReviewOk + measuredAt)"
+    searchExtra:
+      - "**/*kill*"
+      - "**/*pause*"
+      - "**/*terminate*"
+      - "**/*cancel*"
+    plugins: [agent-kill-switch, repo-filesystem]
+    naWhen: "No production agents / multi-step autonomy in system"
+    evaluation: |
+      PASS if agent-kill-switch report statusHint=pass (kill API + operator authz + numeric SLO + queue/running/child cancel + drill ≤SLO ≤90d + architectureReviewOk + measuredAt ≤90d).
+      PARTIAL if kill API/docs/tests found without complete imported suite.
+      NOT_APPLICABLE when no agent/kill signals.
+  AGN-M4:
+    requiredEvidence:
+      - "A2A/multi-agent handoff inventory with peer auth + scoped capabilities"
+      - "Negative deny suite (unauth / forged / over-scoped) under imports/a2a-peer-auth/"
+    searchExtra:
+      - "**/a2a*"
+      - "**/*handoff*"
+      - "**/*multi*agent*"
+    plugins: [a2a-peer-auth, repo-filesystem]
+    naWhen: "No A2A or multi-agent handoff paths in production"
+    evaluation: |
+      PASS if a2a-peer-auth report statusHint=pass (auth+scope + unauth/forged/over-scoped deny + measuredAt ≤90d).
+      PARTIAL if handoff/auth config found without measured deny results.
+      NOT_APPLICABLE when no multi-agent handoff signals.
+  AGN-R1:
+    requiredEvidence:
+      - "Versioned goal-conflict / disallowed-goal plan policy with named owner"
+      - "Deny/allow traces; imported synthetic conflict deny ≤90d under imports/agent-goal-policy/"
+    searchExtra:
+      - "**/*goal*conflict*"
+      - "**/*plan*polic*"
+      - "**/*disallowed*goal*"
+    plugins: [agent-goal-policy, repo-filesystem]
+    naWhen: "No planning / side-effecting agents in system"
+    evaluation: |
+      PASS if agent-goal-policy report statusHint=pass (policy + owner + syntheticConflictDenied + measuredAt ≤90d).
+      PARTIAL if policy/deny-test signals found without complete import.
+      NOT_APPLICABLE when no agent/policy signals.
+  AGN-R2:
+    requiredEvidence:
+      - "Sandbox/simulation environment config for agent behaviors"
+      - "Imported linked pre-prod sim report ≤30d before release under imports/agent-sandbox-sim/"
+    searchExtra:
+      - "**/*sandbox*"
+      - "**/*simul*"
+      - "**/*pre*prod*"
+    plugins: [agent-sandbox-sim, repo-filesystem]
+    naWhen: "No agent behavior promotions / frozen agent behaviors"
+    evaluation: |
+      PASS if agent-sandbox-sim report statusHint=pass (sandbox env + linked run daysBeforeRelease≤30 + criteria + measuredAt ≤90d).
+      PARTIAL if sandbox/sim signals found without complete import.
+      NOT_APPLICABLE when no agent/sandbox signals.
+  AGN-R3:
+    requiredEvidence:
+      - "Versioned RACI / ownership register with Responsible + Accountable"
+      - "Imported register export with orphanCount=0 under imports/agent-raci-ownership/"
+    searchExtra:
+      - "**/*raci*"
+      - "**/*ownership*"
+      - "**/*owner*matrix*"
+    plugins: [agent-raci-ownership, repo-filesystem]
+    naWhen: "No production AI systems / agents"
+    evaluation: |
+      PASS if agent-raci-ownership report statusHint=pass (RACI + R/A + orphanCount=0 + coversAllProductionIds + measuredAt ≤90d).
+      PARTIAL if RACI signals found without complete import.
+      NOT_APPLICABLE when no agent/RACI signals.
+  HUM-M1:
+    requiredEvidence:
+      - "Human approval path for high-impact actions"
+    naWhen: "No high-impact autonomous actions"
+  DEP-M1:
+    requiredEvidence:
+      - "Documented/tested rollback for model/prompt/tool promotion"
+    searchExtra:
+      - "**/*rollback*"
+      - "**/deploy*"
+
+# Global fail-closed patterns (support FAIL with high confidence when matched in scope)
+globalFailSignals:
+  - id: plaintext-cloud-key
+    category: secrets
+    pattern: 'AKIA[0-9A-Z]{16}'
+    relatedChecks: [SEC2-M1, SEC2-M2]
+    plugins: [secrets-hygiene, secret-redaction]
+  - id: openai-sk-prefix
+    category: secrets
+    pattern: 'sk-[a-zA-Z0-9]{20,}'
+    relatedChecks: [SEC2-M1]
+  - id: private-key-pem
+    category: secrets
+    pattern: '-----BEGIN (RSA |OPENSSH )?PRIVATE KEY-----'
+    relatedChecks: [SEC2-M1]
+
+# Dedicated AI-system evidence strategies (map to APRF Checks; use precedence + plugins)
+aiSpecificStrategies:
+  promptInjectionDefenses:
+    relatedChecks: [SEC-M1, SEC-M2, SEC-M3]
+    search:
+      - "**/*guardrail*"
+      - "**/*injection*"
+      - "**/moderation*"
+      - "**/promptfoo*"
+      - "**/redteam/**"
+    plugins: [promptfoo, langsmith, phoenix, injection-policy-gate]
+    signals: [input-filter, allowlist, redteam-pass]
+  toolPermissionBoundaries:
+    relatedChecks: [TOL-M1, TOL-M2, TOL-M3, AUTHZ-M1]
+    search:
+      - "**/mcp*.json"
+      - "**/tools/**"
+      - "**/*allowlist*"
+      - "**/*permission*"
+    signals: [tool-allowlist, least-privilege, side-effect-gate]
+  modelVersionPinning:
+    relatedChecks: [MOD-M1, MOD-M2]
+    search:
+      - "**/*model*"
+      - "**/providers/**"
+      - "**/.env.example"
+    signals: [model-id-pin, provider-pin, deprecation-policy]
+  evaluationDrift:
+    relatedChecks: [EVL-M1, EVL-M2]
+    search:
+      - "**/eval/**"
+      - "**/evals/**"
+      - "**/*baseline*"
+    plugins: [promptfoo, phoenix, wandb]
+    signals: [eval-gate, baseline-compare, drift-alert]
+  memoryPoisoning:
+    relatedChecks: [MEM-M1, MEM-M2, MEM-M3]
+    search:
+      - "**/memory/**"
+      - "**/vector*"
+      - "**/*store*"
+    signals: [ttl, tenant-isolation, write-policy]
+  contextLeakage:
+    relatedChecks: [CTX-M1, CTX-M2, SEC-M4]
+    search:
+      - "**/context*"
+      - "**/*rag*"
+      - "**/retriev*"
+    signals: [context-budget, pii-filter, citation]
+  promptVersionControl:
+    relatedChecks: [PRM-M1, PRM-M2, PRM-M3]
+    search:
+      - "**/prompts/**"
+      - "**/*.prompt*"
+    signals: [prompt-semver, owners, changelog]
+  modelRolloutFeatureFlags:
+    relatedChecks: [CHG-M1, CHG-M2, MOD-M3]
+    search:
+      - "**/*feature*flag*"
+      - "**/launchdarkly*"
+      - "**/unleash*"
+      - "**/flags/**"
+    signals: [flag-gated-model, percentage-rollout]
+  canaryDeployments:
+    relatedChecks: [CHG-M2, CHG-M3, DEP-M1, REL-M1]
+    search:
+      - "**/*canary*"
+      - "**/*blue*green*"
+      - "**/traffic*"
+      - "**/argo*rollout*"
+    signals: [canary, rollback]
+  costAnomalyDetection:
+    relatedChecks: [COST-M1, COST-M2, COST-M3]
+    search:
+      - "**/*budget*"
+      - "**/*cost*"
+      - "**/*token*limit*"
+    plugins: [helicone, otel, cloudwatch, prometheus]
+    signals: [budget-alarm, anomaly-rule, per-tenant-cap]

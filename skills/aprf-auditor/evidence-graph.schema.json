@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stackrail.io/aprf/auditor-evidence-graph/0.2",
+  "title": "APRF Auditor Evidence Graph",
+  "type": "object",
+  "required": ["schemaVersion", "assessedAt", "subject", "nodes"],
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "0.2.0" },
+    "assessedAt": { "type": "string", "format": "date-time" },
+    "subject": {
+      "type": "object",
+      "required": ["path"],
+      "properties": {
+        "path": { "type": "string" },
+        "gitCommit": { "type": "string" },
+        "name": { "type": "string" }
+      }
+    },
+    "collectors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["pluginId", "status"],
+        "properties": {
+          "pluginId": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["ran", "skipped", "failed", "needs-user"]
+          },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "rel"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "rel": {
+            "type": "string",
+            "enum": ["supports", "contradicts", "derived-from", "implements"]
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": ["id", "class", "ref"],
+      "properties": {
+        "id": { "type": "string" },
+        "class": {
+          "type": "string",
+          "enum": [
+            "runtime",
+            "ci",
+            "iac",
+            "runtime-config",
+            "policy",
+            "code",
+            "docs",
+            "user"
+          ]
+        },
+        "ref": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "pluginId": { "type": "string" },
+        "lastModified": { "type": "string" },
+        "gitCommit": { "type": "string" },
+        "buildId": { "type": "string" },
+        "evidenceAgeDays": { "type": ["number", "null"] },
+        "relatedCheckIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "signals": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

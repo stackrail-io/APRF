@@ -1,0 +1,61 @@
+id: "CHG-R2"
+category: "change-management"
+title: "Production systems should have feature flags for new agent behaviors"
+description: "Feature flags for new agent behaviors"
+whyItMatters: "Feature flags for new agent behaviors Failing this leaves a production gap against:
+  New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested
+  ≤90 days ago"
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: "New agent behaviors ship behind flags; flag state changes are audited; kill/disable
+  path tested ≤90 days ago"
+evidenceRequired:
+  - "Feature-flag config covering new agent behaviors + sample flag change audit trail"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Feature-flag config covering new agent behaviors + sample flag change audit trail"
+manualVerification: "For this Check (Feature flags for new agent behaviors): inspect current
+  evidence for [Feature-flag config covering new agent behaviors + sample flag change audit trail]
+  and confirm the pass condition holds — New agent behaviors ship behind flags; flag state changes
+  are audited; kill/disable path tested ≤90 days ago"
+falsePositiveGuidance: "(Change Management & Release): re-verify against a current artifact for this
+  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: Feature flags for new agent behaviors"
+  - "Retain evidence artifacts required by this Check, starting with: Feature-flag config covering
+    new agent behaviors + sample flag change audit trail"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "Google SRE Workbook — Configuration Management"
+    url: "https://sre.google/workbook/"
+  - title: "AWS Well-Architected — Operational Excellence"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "Google SRE — Emergency Response"
+    url: "https://sre.google/sre-book/emergency-response/"
+  - title: "AWS Well-Architected — Reliability"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+relatedRules:
+  - "DEP-M1"
+  - "DEP-M2"
+  - "DEP-M3"
+  - "CHG-M1"
+  - "CHG-M2"
+tags:
+  - "change-management"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "github"
+    - "github-actions"
+    - "azure-devops"
+    - "cicd"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

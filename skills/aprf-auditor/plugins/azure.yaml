@@ -1,0 +1,14 @@
+id: azure
+title: Azure AI / Key Vault / Monitor exports
+version: "0.2.0"
+evidenceClass: iac
+alsoEmits: [runtime]
+inputs: ["Bicep/ARM/TF", "optional Monitor export"]
+collect:
+  - "Parse Key Vault, Azure OpenAI, Monitor diagnostic settings in IaC"
+emits:
+  nodeClass: iac
+  refPattern: "**/*azure*|**/*.bicep"
+  signals: [key-vault, monitor, aoai]
+mapsToChecks: [SEC2-M1, OBS-M1, INF-M1]
+whenUnavailable: "Ask for exports; do not invent portal screenshots"

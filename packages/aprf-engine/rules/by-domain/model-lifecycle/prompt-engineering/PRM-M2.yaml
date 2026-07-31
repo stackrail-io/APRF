@@ -1,0 +1,55 @@
+id: "PRM-M2"
+category: "prompt-engineering"
+title: "Prompt changes must go through review and be tied to evaluation results before release"
+description: "Prompt changes shall go through review and be tied to evaluation results before release"
+whyItMatters: "Prompt changes shall go through review and be tied to evaluation results before
+  release Failing this leaves a production gap against: 100% of production prompt releases in last
+  30 days have review ID and eval pass artifact; promote without both is blocked"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "100% of production prompt releases in last 30 days have review ID and eval pass
+  artifact; promote without both is blocked"
+evidenceRequired:
+  - "Change records linking prompt versions to review + eval artifacts"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Change records linking prompt versions to review + eval artifacts"
+manualVerification: "For this Check (Prompt changes must go through review and be tied to evaluation
+  results before release): inspect current evidence for [Change records linking prompt versions to
+  review + eval artifacts] and confirm the pass condition holds — 100% of production prompt releases
+  in last 30 days have review ID and eval pass artifact; promote without both is blocked"
+falsePositiveGuidance: "(Prompt Engineering): re-verify against a current artifact for this specific
+  Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Prompt changes must go through review and be tied to evaluation
+    results before release"
+  - "Retain evidence artifacts required by this Check, starting with: Change records linking prompt
+    versions to review + eval artifacts"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "Google SRE Workbook — Managing Risk (change management parallels)"
+    url: "https://sre.google/workbook/"
+  - title: "OWASP LLM Prompt Injection guidance"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "PRM-M1"
+  - "PRM-M3"
+  - "PRM-R1"
+  - "PRM-R2"
+  - "PRM-R3"
+tags:
+  - "prompt-engineering"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "prompt-templates"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

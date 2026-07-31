@@ -1,0 +1,57 @@
+id: "EVL-M3"
+category: "evaluation"
+title: "Production must have online signals for task success/failure and safety refusals"
+description: "Production shall have online signals for task success/failure and safety refusals"
+whyItMatters: "Production shall have online signals for task success/failure and safety refusals
+  Failing this leaves a production gap against: Online metrics exist and are updating for task
+  success/failure and safety refusals; alert or review cadence defined; freshness ≤ 24 hours on the
+  dashboard"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "Online metrics exist and are updating for task success/failure and safety refusals;
+  alert or review cadence defined; freshness ≤ 24 hours on the dashboard"
+evidenceRequired:
+  - "Dashboard/metrics for task success and safety refusal rates"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Dashboard/metrics for task success and safety refusal rates"
+manualVerification: "For this Check (Production must have online signals for task success/failure
+  and safety refusals): inspect current evidence for [Dashboard/metrics for task success and safety
+  refusal rates] and confirm the pass condition holds — Online metrics exist and are updating for
+  task success/failure and safety refusals; alert or review cadence defined; freshness ≤ 24 hours on
+  the dashboard"
+falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
+  control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Production must have online signals for task success/failure and
+    safety refusals"
+  - "Retain evidence artifacts required by this Check, starting with: Dashboard/metrics for task
+    success and safety refusal rates"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF — Measure"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "Google SRE — Monitoring Distributed Systems (measurement culture)"
+    url: "https://sre.google/sre-book/monitoring-distributed-systems/"
+relatedRules:
+  - "EVL-M1"
+  - "EVL-M2"
+  - "EVL-M4"
+  - "EVL-R1"
+  - "EVL-R2"
+tags:
+  - "evaluation"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "cicd"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

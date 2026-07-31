@@ -1,0 +1,53 @@
+# Objective confidence model for APRF Auditor
+# confidence label is derived from confidenceScore after freshness decay.
+
+version: "0.2.0"
+aprfVersion: "0.10.1"
+
+# Base score from the PRIMARY evidence class (after precedence selection)
+baseScoreByClass:
+  runtime: 1.00
+  ci: 0.90
+  iac: 0.85
+  runtime-config: 0.82
+  policy: 0.80
+  code: 0.80
+  docs: 0.50
+  user: 0.30
+
+# Optional bumps (additive, then clamp to 1.0) when SUPPORTING evidence corroborates
+corroborationBump:
+  eachSupportingClassAtLeast: 0.05
+  maxTotalBump: 0.10
+
+# Map numeric score → report label
+labels:
+  high:
+    minScore: 0.85
+  medium:
+    minScore: 0.55
+  low:
+    minScore: 0.0
+
+# Assessment-level confidence (executive summary)
+assessmentConfidence:
+  high: >
+    Every critical applicable mandatory has confidence high AND none are NOT_DEMONSTRATED;
+    primary evidence class ≥ ci for those Checks (or runtime).
+  medium: >
+    No critical mandatory FAIL; some medium confidence, PARTIAL, or docs-primary PASS.
+  low: >
+    Any critical mandatory NOT_DEMONSTRATED OR any critical mandatory PASS with confidence low
+    OR primary evidence only user/docs for a critical mandatory.
+
+formula: |
+  primaryClass = class of highest-precedence supporting node
+  base = baseScoreByClass[primaryClass]
+  score = clamp01(base * freshnessMultiplier + corroborationBump)
+  confidence = label(score)
+  Emit both confidence (high|medium|low) and confidenceScore (0..1) on each control.
+
+invariants:
+  - "PASS with only user attestation → confidence low (score ≤ 0.30 before bump)."
+  - "FAIL from code/ci/runtime remains high confidence when the violating evidence is fresh."
+  - "Do not raise confidence by inventing nodes."

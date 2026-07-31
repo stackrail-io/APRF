@@ -1,0 +1,119 @@
+# APRF Auditor Skill — portable, vendor-neutral assessment package
+# Canonical home: https://github.com/stackrail-io/APRF
+# Dependency: this repository only (no StackRail backend, no cloud APIs required)
+
+id: aprf-auditor
+name: APRF Auditor
+version: 0.2.0
+aprfVersion: "0.10.1"
+license: Apache-2.0
+status: working-draft
+
+description: >
+  Local, evidence-based AI Production Readiness Framework assessment.
+  Collectors → evidence graph → Checks → remediation → report.
+  Any LLM or coding agent can load this skill without StackRail services.
+
+triggers:
+  - "Run an APRF assessment"
+  - "APRF assessment"
+  - "Do an APRF assessment"
+  - "APRF audit"
+  - "AI production readiness"
+  - "Assess AI production readiness"
+  - "Production readiness assessment"
+  - "Assess production readiness with APRF"
+  - "aprf assess"
+  - "Compare APRF assessment"
+  - "APRF assessment history"
+
+sourceOfTruth:
+  repository: https://github.com/stackrail-io/APRF
+  checks: packages/aprf-engine/rules/by-domain/**/*.yaml
+  domains: packages/aprf-engine/rules/_index/domains.yaml
+  pillars: packages/aprf-engine/rules/_index/pillars.yaml
+  categories: packages/aprf-engine/rules/_index/categories.yaml
+  profiles: packages/framework-definition/src/profiles.ts
+  lenses: packages/framework-definition/src/lenses.ts
+  ruleSchema: packages/aprf-engine/rules/_schema/rule.schema.json
+  publishedSpec: spec/aprf-spec.json
+  npm:
+    - "@stackrail-io/aprf-engine"
+    - "@stackrail-io/aprf-framework-definition"
+
+invariants:
+  - No StackRail backend, product APIs, or remote attestation services.
+  - Never invent evidence; never assume missing artifacts exist off-repo.
+  - Apply evidence-precedence.yaml; docs/user cannot override FAIL from higher ranks.
+  - When evidence is not found after a thorough search, ask YES / NO / DON'T KNOW per Check (workflow Phase 2b) using verbatim Check YAML title + evidenceRequired/passCondition — never paraphrase titles.
+  - YES without artifacts → PARTIAL (low confidence); NO → FAIL; DON'T KNOW → NOT_DEMONSTRATED.
+  - After attestations, stream progress (workflow Progress reporting checklist 1/6…6/6); never silent multi-minute generation.
+  - Emit every in-scope Check in controls[] including PASS / NOT_APPLICABLE; YES without artifacts is PARTIAL not PASS.
+  - Copy Check YAML title/passCondition/evidenceRequired/recommendedFixes/whyItMatters/references verbatim; recommendedAction and remediation.fix come from recommendedFixes; reasoning quotes passCondition (+ manualVerification when failing).
+  - Never assume implementation from filenames alone without reading content.
+  - Every finding cites a stable Check ID (e.g. SEC2-M1).
+  - Mandatory gate outcomes are binary for gate math; report statuses may be richer.
+  - Check IDs are immutable; do not renumber or invent new normative IDs.
+  - Confidence from confidence.yaml (class × freshness), not vibes.
+  - non-ai-platform subset must never be labeled as APRF Core/Regulated AI production readiness.
+  - REPORT.html must be produced only by scripts/render-html-report.ts (never hand-written); must contain stackrail.io and Visual overview.
+
+defaultProfile: aprf-profile-core
+supportedProfiles:
+  - aprf-profile-core
+  - aprf-profile-regulated
+  - full-catalog
+supportedScopes:
+  - scopes/non-ai-platform.yaml
+systemTypes:
+  - ai-application
+  - non-ai-platform
+  - unknown
+
+entrypoints:
+  system: system.md
+  workflow: workflow.md
+  architecture: architecture.md
+  capabilities: capabilities.yaml
+  evidenceMap: evidence-map.yaml
+  evidencePrecedence: evidence-precedence.yaml
+  confidence: confidence.yaml
+  scoring: scoring.yaml
+  evidenceGraphSchema: evidence-graph.schema.json
+  comparisonSchema: comparison.schema.json
+  outputSchema: output-schema.json
+  reportMarkdown: report-template.md
+  reportHtml: scripts/render-html-report.ts
+  reportJson: report-template.json
+  plugins: plugins/
+  collectors: collectors/
+  scopes: scopes/
+
+outputs:
+  - evidence-graph.json
+  - REPORT.md
+  - REPORT.html
+  - assessment.json
+  - assessment.sarif
+  - issues.json
+  - comparison.json
+  - history/
+
+adapters:
+  - adapters/cursor.md
+  - adapters/claude.md
+  - adapters/codex.md
+  - adapters/copilot.md
+  - adapters/mcp.md
+  - adapters/generic.md
+
+compatibility:
+  - Cursor Agent Skills
+  - Claude Code
+  - OpenAI Codex
+  - GitHub Copilot Agent
+  - Gemini CLI
+  - Roo Code
+  - OpenHands
+  - LangGraph / CrewAI / AutoGen (load system.md + workflow.md as agent instructions)
+  - Any MCP-compatible agent (see adapters/mcp.md)

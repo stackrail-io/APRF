@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate YAML rules (schema + referential integrity)
+      - name: Validate YAML rules (schema, lint, spec mapping)
         run: npm run aprf:validate
 
       - name: Rebuild generated catalog
@@ -46,6 +46,9 @@ jobs:
 
       - name: Unit tests (aprf-engine + framework-definition)
         run: npm run test:unit
+
+      - name: APRF Auditor skill tests
+        run: npm run test:auditor-skill
 
       - name: TypeScript build (publishable packages)
         run: npm run build

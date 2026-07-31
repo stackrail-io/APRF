@@ -1,0 +1,31 @@
+id: agent-goal-policy
+title: Agent goal-conflict / plan policy before side effects (AGN-R1)
+version: "0.2.0"
+executor: collectors/agent-goal-policy.ts
+evidenceClass: policy
+alsoEmits: [code, ci]
+detectorIds: [repo-agent-goal-policy]
+inputs:
+  - "Target repo (plan policy, goal-conflict rules, deny tests)"
+  - "Optional suite: aprf-assessment/imports/agent-goal-policy/*.{json}"
+collect:
+  - "Detect goal-conflict / disallowed-goal / pre-tool plan policy gates"
+  - "Detect named owner signals on policy artifacts"
+  - "Detect synthetic conflict deny tests"
+  - "Ingest imported deny traces; write agent-goal-policy-report.json"
+emits:
+  nodeClass: policy
+  refPattern: "aprf-assessment/imports/agent-goal-policy/*"
+  signals:
+    - agent-goal-policy
+    - agn-r1
+    - repo-agent-goal-policy
+    - goal-conflict
+mapsToChecks: [AGN-R1]
+whenUnavailable: >
+  Policy/docs alone are PARTIAL. AGN-R1 PASS needs policy + named owner +
+  imported syntheticConflictDenied=true (age ≤90d) with measuredAt ≤90 days.
+  No planning agents → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline repo heuristics + optional imported deny-trace JSON.

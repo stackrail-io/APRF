@@ -1,0 +1,58 @@
+id: "OBS-M2"
+category: "observability"
+title: "Token usage and cost must be attributable per request/feature/tenant"
+description: "Token usage and cost shall be attributable per request/feature/tenant"
+whyItMatters: "Token usage and cost shall be attributable per request/feature/tenant Failing this
+  leaves a production gap against: ≥95% of billed model calls in a 24h sample carry request ID +
+  feature + tenant (or equivalent) attribution labels"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "≥95% of billed model calls in a 24h sample carry request ID + feature + tenant (or
+  equivalent) attribution labels"
+evidenceRequired:
+  - "Cost/token metrics with request, feature, and tenant labels"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Cost/token metrics with request, feature, and tenant labels"
+manualVerification: "For this Check (Token usage and cost must be attributable per
+  request/feature/tenant): inspect current evidence for [Cost/token metrics with request, feature,
+  and tenant labels] and confirm the pass condition holds — ≥95% of billed model calls in a 24h
+  sample carry request ID + feature + tenant (or equivalent) attribution labels"
+falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
+  control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Token usage and cost must be attributable per
+    request/feature/tenant"
+  - "Retain evidence artifacts required by this Check, starting with: Cost/token metrics with
+    request, feature, and tenant labels"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "Google SRE Workbook — Observability"
+    url: "https://sre.google/workbook/observability/"
+  - title: "OpenTelemetry"
+    url: "https://opentelemetry.io/"
+relatedRules:
+  - "OBS-M1"
+  - "OBS-M3"
+  - "OBS-R1"
+  - "OBS-R2"
+  - "OBS-R3"
+tags:
+  - "observability"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "kubernetes"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

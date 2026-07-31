@@ -1,0 +1,32 @@
+executor: collectors/authz-entry-tests.ts
+id: authz-entry-tests
+title: Authz middleware / policy tests for AI entry points (AUTHZ-M1)
+version: "0.2.0"
+evidenceClass: code
+inputs:
+  - "Target repo with FastAPI (or similar) AI routes"
+  - "Optional prior/imported test inventory: aprf-assessment/imports/authz-entry-tests/*.json"
+  - "Optional prior report: aprf-assessment/imports/authz-entry-tests/authz-entry-report.json"
+collect:
+  - "Discover AI HTTP entry points (reuses http-auth-probe route discovery)"
+  - "Detect server-side authz guards near handlers (get_verified_user, get_admin_user, has_permission, …)"
+  - "Scan repo tests for authenticated-but-unauthorized denial coverage of those entry points"
+  - "Write authz-entry-report.json; AUTHZ-M1 needs server-side enforcement + unauthorized-caller suite"
+emits:
+  nodeClass: code
+  refPattern: "aprf-assessment/imports/authz-entry-tests/*"
+  signals:
+    - authz-entry-tests
+    - authz-m1
+    - authz-guard
+    - authz-test-gap
+mapsToChecks: [AUTHZ-M1]
+whenUnavailable: >
+  Code that calls has_permission / Depends(get_verified_user) is supporting evidence only.
+  AUTHZ-M1 PASS requires server-side authorization on privileged AI feature/tool/retrieval
+  entry points AND an authz suite showing authenticated-but-unauthorized callers denied —
+  do not score AUTHN-M1 (unauthenticated rejection) as satisfying this Check. Drop suite
+  results under imports/authz-entry-tests/ if tests live elsewhere.
+live:
+  required: false
+  note: Offline collector; optional imports for CI test reports.

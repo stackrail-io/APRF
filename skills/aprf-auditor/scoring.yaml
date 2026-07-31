@@ -1,0 +1,147 @@
+# APRF Auditor scoring — aligned with framework semantics
+# Gates are binary. Recommended scores are prioritization-only (not certification).
+
+version: "0.2.0"
+aprfVersion: "0.10.1"
+
+principles:
+  - "Mandatory Checks in profile ∪ lenses form the gate for ai-application assessments."
+  - "non-ai-platform-subset uses scopes/non-ai-platform.yaml only — never claim Core/Regulated AI readiness."
+  - "Recommended Checks never alone define Core/Regulated gate pass."
+  - "NOT_DEMONSTRATED on a mandatory Check is a blocker (same as DON'T KNOW / unanswered after ask)."
+  - "Customer NO attestation → FAIL (demonstrated absence). Customer YES without artifacts → PARTIAL (low confidence)."
+  - "NOT_APPLICABLE does not count as PASS; it removes the Check from the mandatory set when justified."
+  - "No single vanity readiness percentage as a conformance claim."
+
+statuses:
+  PASS:
+    gateContribution: satisfied
+    passed: true
+  FAIL:
+    gateContribution: blocker
+    passed: false
+  PARTIAL:
+    gateContribution: blocker   # incomplete mandatory ≠ gate pass
+    passed: false
+  NOT_DEMONSTRATED:
+    gateContribution: blocker
+    passed: false
+  NOT_APPLICABLE:
+    gateContribution: excluded
+    passed: false
+    notApplicable: true
+
+severityWeight:
+  critical: 4
+  high: 3
+  medium: 2
+  low: 1
+
+# Overall gate
+gate:
+  passWhen: "Every applicable mandatory Check has status PASS or NOT_APPLICABLE"
+  blockersFrom:
+    - FAIL
+    - PARTIAL
+    - NOT_DEMONSTRATED
+  criticalBlockerWhen: "blocker AND Check.severity == critical"
+
+# Executive labels
+# Primary APRF axes (show first in reports): criticality tier + capability maturity
+# https://stackrail.io/aprf/how/#maturity
+criticalityTiers:
+  0:
+    name: Sandbox
+    requiredCapabilityLevel: 1
+    requiredCapabilityName: Initial
+  1:
+    name: Internal
+    requiredCapabilityLevel: 2
+    requiredCapabilityName: Managed
+  2:
+    name: Production
+    requiredCapabilityLevel: 3
+    requiredCapabilityName: Defined
+  3:
+    name: Mission Critical
+    requiredCapabilityLevel: 4
+    requiredCapabilityName: Quantitatively Managed
+
+capabilityLevels:
+  1: Initial
+  2: Managed
+  3: Defined
+  4: Quantitatively Managed
+  5: Optimizing
+
+# Grade / risk are secondary communication labels only — not APRF certification axes
+overallGrade:
+  A:
+    requires: "gate PASS AND recommendedScore >= 85 AND no critical NOT_DEMONSTRATED outside N/A"
+  B:
+    requires: "gate PASS AND recommendedScore >= 70"
+  C:
+    requires: "gate PASS"
+  D:
+    requires: "gate FAIL with only non-critical blockers"
+  F:
+    requires: "gate FAIL with any critical blocker OR >=3 mandatory FAIL"
+
+riskLevel:
+  critical: "Any critical-severity mandatory FAIL"
+  high: "Gate FAIL OR any critical NOT_DEMONSTRATED mandatory"
+  medium: "Gate PASS with PARTIAL mandatories cleared but weak recommended / medium findings"
+  low: "Gate PASS, few recommended gaps, high assessment confidence"
+  informational: "Discovery-only / profile not production-claiming"
+
+# Non-gate score 0–100 from recommended Checks only (weighted by severity)
+recommendedScore:
+  formula: "100 * sum(weight_i for PASS recommended) / sum(weight_i for applicable recommended)"
+  excludeStatuses: [NOT_APPLICABLE]
+  note: "Label as prioritization score — not APRF conformance."
+
+# Domain scores for executive dashboard (map via evidence-map.yaml reportDomains)
+domainScore:
+  formula: |
+    For Checks in domain (mandatory + recommended applicable):
+      satisfied = PASS or NOT_APPLICABLE
+      score = 100 * |satisfied| / |applicable|
+    Also emit mandatoryGatePassed for domain subset.
+  missingEvidencePenalty: |
+    NOT_DEMONSTRATED counts as not satisfied (lowers score) but is labeled distinctly in the report.
+
+assessmentConfidence:
+  # Delegates detail to confidence.yaml — keep executive labels in sync
+  high: "See confidence.yaml assessmentConfidence.high"
+  medium: "See confidence.yaml assessmentConfidence.medium"
+  low: "See confidence.yaml assessmentConfidence.low"
+  note: "Per-control scores use confidence.yaml baseScoreByClass × freshness."
+
+priority:
+  P0: "mandatory + critical + FAIL"
+  P1: "mandatory + (FAIL or critical NOT_DEMONSTRATED)"
+  P2: "mandatory PARTIAL OR recommended high/critical FAIL"
+  P3: "other recommended gaps / docs"
+
+roadmaps:
+  days30:
+    includePriorities: [P0, P1]
+    focus: "Unblock production gate; add missing CI/secret/eval evidence"
+  days90:
+    includePriorities: [P1, P2]
+    focus: "Close PARTIAL mandatories; deepen evals and observability"
+  longTerm:
+    includePriorities: [P2, P3]
+    focus: "Lenses, platform paved roads, regulated profile, continuous evidence"
+
+sarif:
+  levelMapping:
+    FAIL:
+      critical: error
+      high: error
+      medium: warning
+      low: note
+    PARTIAL: warning
+    NOT_DEMONSTRATED: note
+    PASS: none
+    NOT_APPLICABLE: none

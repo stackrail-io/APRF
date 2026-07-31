@@ -1,0 +1,58 @@
+id: "COST-M3"
+category: "cost-optimization"
+title: "Retry and loop policies must prevent unbounded cost amplification"
+description: "Retry and loop policies shall prevent unbounded cost amplification"
+whyItMatters: "Retry and loop policies shall prevent unbounded cost amplification Failing this
+  leaves a production gap against: Max retries and max agent loops are finite for 100% of production
+  AI clients; tests show cost cannot grow without bound under forced failure/retry (bounded token or
+  $ ceiling hit)"
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: "Max retries and max agent loops are finite for 100% of production AI clients; tests
+  show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling hit)"
+evidenceRequired:
+  - "Retry/backoff and agent-loop budget config + amplification tests"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Retry/backoff and agent-loop budget config + amplification tests"
+manualVerification: "For this Check (Retry and loop policies must prevent unbounded cost
+  amplification): inspect current evidence for [Retry/backoff and agent-loop budget config +
+  amplification tests] and confirm the pass condition holds — Max retries and max agent loops are
+  finite for 100% of production AI clients; tests show cost cannot grow without bound under forced
+  failure/retry (bounded token or $ ceiling hit)"
+falsePositiveGuidance: "(Cost Optimization): re-verify against a current artifact for this specific
+  Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: Retry and loop policies must prevent unbounded cost amplification"
+  - "Retain evidence artifacts required by this Check, starting with: Retry/backoff and agent-loop
+    budget config + amplification tests"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "AWS Well-Architected — Cost Optimization"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "FinOps Foundation practices"
+    url: "https://www.finops.org/"
+relatedRules:
+  - "COST-M1"
+  - "COST-M2"
+  - "COST-R1"
+  - "COST-R2"
+  - "COST-R3"
+tags:
+  - "cost-optimization"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

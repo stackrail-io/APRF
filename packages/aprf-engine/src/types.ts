@@ -110,8 +110,36 @@ export interface AprfRule {
   introducedIn?: string;
 }
 
-export interface CategoryDef {
+export interface DomainDef {
   id: string;
+  name: string;
+  summary: string;
+  pillarSlugs: string[];
+  /** True for taxonomy.crossCutting (not a peer production domain). */
+  crossCutting?: boolean;
+}
+
+export interface PillarDef {
+  /** Stable pillar ID (APRF-NN), immutable once published. */
+  id: string;
+  /** URL / folder slug (e.g. ai-security) — also Check YAML `category`. */
+  slug: string;
+  name: string;
+  summary: string;
+  /** Domain id, or null when crossCutting. */
+  domain: string | null;
+  crossCutting?: boolean;
+}
+
+/**
+ * Category = pillar slug row used by Check YAML `category` field.
+ * Prefer {@link PillarDef} / {@link DomainDef} for taxonomy; kept for compatibility.
+ */
+export interface CategoryDef {
+  /** Same as pillar slug / rule.category. */
+  id: string;
+  /** Stable APRF-NN pillar id when known. */
+  pillarId?: string;
   /** Pillar slug used by the marketing site. */
   pillarSlug: string;
   domain: string | null;
@@ -129,6 +157,11 @@ export interface RuleIndex {
   byGate: Map<RuleGate, AprfRule[]>;
   categories: CategoryDef[];
   categoryById: Map<string, CategoryDef>;
+  domains: DomainDef[];
+  domainById: Map<string, DomainDef>;
+  pillars: PillarDef[];
+  pillarById: Map<string, PillarDef>;
+  pillarBySlug: Map<string, PillarDef>;
 }
 
 /** Projection of AprfRule onto the legacy AprfCheck shape used by marketing scoring. */

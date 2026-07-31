@@ -1,0 +1,30 @@
+id: agent-sandbox-sim
+title: Agent sandbox / simulation before production (AGN-R2)
+version: "0.2.0"
+executor: collectors/agent-sandbox-sim.ts
+evidenceClass: runtime-config
+alsoEmits: [code, ci, docs]
+detectorIds: [repo-agent-sandbox-sim]
+inputs:
+  - "Target repo (sandbox/sim env, pre-prod reports, promotion CI gates)"
+  - "Optional suite: aprf-assessment/imports/agent-sandbox-sim/*.{json}"
+collect:
+  - "Detect agent sandbox/simulation environment signals"
+  - "Detect sim/report and promotion-gate signals"
+  - "Ingest imported linked ≤30-day pre-release sim reports; write agent-sandbox-sim-report.json"
+emits:
+  nodeClass: runtime-config
+  refPattern: "aprf-assessment/imports/agent-sandbox-sim/*"
+  signals:
+    - agent-sandbox-sim
+    - agn-r2
+    - repo-agent-sandbox-sim
+    - sandbox
+mapsToChecks: [AGN-R2]
+whenUnavailable: >
+  Sandbox env alone is PARTIAL. AGN-R2 PASS needs imported linkedSandboxRun with
+  passFailCriteriaRecorded, daysBeforeRelease≤30, non-failing outcome, and
+  measuredAt ≤90 days. No agent behavior promotions → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline repo heuristics + optional imported sandbox/sim report JSON.

@@ -1,0 +1,14 @@
+id: grafana
+title: Grafana dashboard-as-code
+version: "0.2.0"
+evidenceClass: runtime
+alsoEmits: [docs]
+inputs: ["**/grafana/**", "**/*dashboard*.json"]
+collect:
+  - "Inventory dashboards covering LLM/tool/cost SLOs"
+emits:
+  nodeClass: runtime
+  refPattern: "**/grafana/**"
+  signals: [dashboard, slo]
+mapsToChecks: [OBS-M1, PERF-M1, COST-M1]
+whenUnavailable: "Dashboards alone without data source proof → low freshness/confidence"

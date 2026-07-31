@@ -1,0 +1,61 @@
+id: "OBS-R2"
+category: "observability"
+title: "Production systems should have quality annotations attachable to traces for closed-loop eval"
+description: "Quality annotations attachable to traces for closed-loop eval"
+whyItMatters: "Quality annotations attachable to traces for closed-loop eval Failing this leaves a
+  production gap against: Annotators can attach quality labels to production traces in a secure
+  tool; ≥50 annotations in the last 90 days feed an eval or review loop"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "Annotators can attach quality labels to production traces in a secure tool; ≥50
+  annotations in the last 90 days feed an eval or review loop"
+evidenceRequired:
+  - "Trace annotation schema + tooling config allowing quality labels on spans + sample annotated
+    traces"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Trace annotation schema + tooling config allowing quality labels on spans + sample annotated
+          traces"
+manualVerification: "For this Check (Quality annotations attachable to traces for closed-loop eval):
+  inspect current evidence for [Trace annotation schema + tooling config allowing quality labels on
+  spans + sample annotated traces] and confirm the pass condition holds — Annotators can attach
+  quality labels to production traces in a secure tool; ≥50 annotations in the last 90 days feed an
+  eval or review loop"
+falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
+  control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: Quality annotations attachable to traces for
+    closed-loop eval"
+  - "Retain evidence artifacts required by this Check, starting with: Trace annotation schema +
+    tooling config allowing quality labels on spans + sample annotated traces"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "Google SRE Workbook — Observability"
+    url: "https://sre.google/workbook/observability/"
+  - title: "OpenTelemetry"
+    url: "https://opentelemetry.io/"
+relatedRules:
+  - "OBS-M1"
+  - "OBS-M2"
+  - "OBS-M3"
+  - "OBS-R1"
+  - "OBS-R3"
+tags:
+  - "observability"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "kubernetes"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

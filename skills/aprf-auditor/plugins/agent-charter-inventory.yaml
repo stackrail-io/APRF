@@ -1,0 +1,31 @@
+id: agent-charter-inventory
+title: Agent charter inventory (AGN-M1)
+version: "0.2.0"
+executor: collectors/agent-charter-inventory.ts
+evidenceClass: docs
+alsoEmits: [runtime-config, code]
+detectorIds: [repo-agent-charter-inventory]
+inputs:
+  - "Target repo (agents.yaml, charters/, AGENT.md, registries)"
+  - "Optional inventory export: aprf-assessment/imports/agent-charter-inventory/*.{json}"
+collect:
+  - "Detect agent inventory manifests and charter documents"
+  - "Scan for required fields: purpose, tool allowlist, data scope, autonomy limits, owner"
+  - "Ingest imported inventory exports; write agent-charter-inventory-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/agent-charter-inventory/*"
+  signals:
+    - agent-charter-inventory
+    - agn-m1
+    - repo-agent-charter-inventory
+    - charter
+    - inventory
+mapsToChecks: [AGN-M1]
+whenUnavailable: >
+  Repo charter/inventory signals alone are PARTIAL. AGN-M1 PASS needs an imported
+  inventory with complete fields (0 missing), coversAllProductionAgents=true,
+  agentCount ≥ 1, and measuredAt ≤90 days. No agent signals → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline repo heuristics + optional imported inventory JSON.

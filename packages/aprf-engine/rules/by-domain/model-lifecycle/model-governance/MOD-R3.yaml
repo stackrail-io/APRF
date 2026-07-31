@@ -1,0 +1,57 @@
+id: "MOD-R3"
+category: "model-governance"
+title: "Production systems should have license and provenance review for open-weight and fine-tuned
+  models"
+description: "License and provenance review for open-weight and fine-tuned models"
+whyItMatters: "License and provenance review for open-weight and fine-tuned models Failing this
+  leaves a production gap against: 100% of open-weight/fine-tuned production models have a
+  license+provenance review ≤12 months old; blocked licenses have documented exceptions with expiry"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "100% of open-weight/fine-tuned production models have a license+provenance review
+  ≤12 months old; blocked licenses have documented exceptions with expiry"
+evidenceRequired:
+  - "License/provenance review checklist + completed reviews for each open-weight or fine-tuned
+    production model"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For this Check (License and provenance review for open-weight and fine-tuned
+  models): inspect current evidence for [License/provenance review checklist + completed reviews for
+  each open-weight or fine-tuned production model] and confirm the pass condition holds — 100% of
+  open-weight/fine-tuned production models have a license+provenance review ≤12 months old; blocked
+  licenses have documented exceptions with expiry"
+falsePositiveGuidance: "(Model Governance): re-verify against a current artifact for this specific
+  Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: License and provenance review for open-weight and
+    fine-tuned models"
+  - "Retain evidence artifacts required by this Check, starting with: License/provenance review
+    checklist + completed reviews for each open-weight or fine-tuned production model"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF — Map"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "AWS Well-Architected — Operational Excellence (change management parallels)"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+relatedRules:
+  - "MOD-M1"
+  - "MOD-M2"
+  - "MOD-M3"
+  - "MOD-R1"
+  - "MOD-R2"
+tags:
+  - "model-governance"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

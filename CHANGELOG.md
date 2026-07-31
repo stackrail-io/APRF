@@ -7,6 +7,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ## [Unreleased]
 
+### Changed
+- `spec/aprf-spec.json` agent-governance mandatory Checks **AGN-M1–M4** aligned to catalog SoT: methods (M1 automated, M3/M4 hybrid), owner in M1, cancel-suite + operator authz in M3, forged-peer in M4.
+- AGN auditor collectors harden PASS unlocks: `measuredAt` ≤90d (M1–M4), `coversAllProductionAgents` (M1), operator authz + numeric SLO + `architectureReviewOk` (M3), all three deny cases (M4).
+- Rewrote **agent-governance** pillar (goal-conflict plan policy) from template stub to hybrid Check + collector; synced `aprf-spec.json` method to hybrid.
+
+### Added
+- Portable **APRF Auditor** skill under [`skills/aprf-auditor/`](skills/aprf-auditor/): vendor-neutral local assessment package (`system.md`, `workflow.md`, evidence map, scoring, output schema, adapters for Cursor/Claude/Codex/Copilot/MCP). No StackRail backend required.
+- Auditor skill **v0.2.0**: evidence precedence, objective confidence + freshness, capability manifest, evidence-graph / comparison schemas, collector `plugins/`, remediation fields, compare/history modes, AI-specific evidence strategies.
+- Auditor **TypeScript collectors** (`skills/aprf-auditor/collectors/`): local CI/IaC/repo scanners, `imports/` ingest for runtime exports, optional live GitHub Actions via `APRF_AUDITOR_LIVE=1`; `npm run aprf:collect`.
+- Auditor reports: Discovery splits **notObserved** vs **requiredEvidenceMissing**; executive summary leads with Criticality tier + required Capability maturity ([how/#maturity](https://stackrail.io/aprf/how/#maturity)); Grade/Risk are secondary.
+- Auditor **Phase 2b attestation**: for Checks that would be `NOT_DEMONSTRATED`, ask the customer **YES / NO / DON'T KNOW** before finalizing; map YES (no artifact)→PARTIAL, NO→FAIL, DON'T KNOW→NOT_DEMONSTRATED; persist `userAttestation` on controls.
+
 ### Fixed
 - `@stackrail-io/aprf-engine` no longer advertises a published disk loader; `src/loader.ts` remains repo-script tooling only. Moved `ajv` / `ajv-formats` / `yaml` to `devDependencies` (patch **0.10.1**).
 - Attestation schema 0.6: N/A is not a pass (`passed` must be `false` when `notApplicable` is true); removed “gate-satisfied” wording that contradicted evaluate helpers.

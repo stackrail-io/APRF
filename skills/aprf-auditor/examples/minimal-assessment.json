@@ -1,0 +1,171 @@
+{
+  "schemaVersion": "0.2.0",
+  "aprfVersion": "0.10.1",
+  "skillVersion": "0.2.0",
+  "assessedAt": "2026-07-29T12:00:00.000Z",
+  "subject": {
+    "path": "/example/project",
+    "name": "example-project",
+    "gitCommit": "deadbeef"
+  },
+  "scope": {
+    "profileId": "aprf-profile-core",
+    "criticality": 2,
+    "lensIds": [],
+    "checkIds": ["SEC2-M1", "AGN-M1"],
+    "mode": "assess"
+  },
+  "evidenceGraphPath": "aprf-assessment/evidence-graph.json",
+  "executiveSummary": {
+    "overallGatePassed": false,
+    "criticalityTier": 2,
+    "criticalityName": "Production",
+    "requiredCapabilityLevel": 3,
+    "requiredCapabilityName": "Defined",
+    "maturityUrl": "https://stackrail.io/aprf/how/#maturity",
+    "overallGrade": "F",
+    "riskLevel": "high",
+    "assessmentConfidence": "low",
+    "recommendedScore": 0,
+    "blockerCount": 1,
+    "criticalBlockerCount": 1,
+    "narrative": "Illustrative fixture only: SEC2-M1 NOT_DEMONSTRATED after ask; AGN-M1 NOT_APPLICABLE."
+  },
+  "domainScores": [
+    {
+      "domain": "Security",
+      "score": 0,
+      "mandatoryGatePassed": false,
+      "applicable": 1,
+      "satisfied": 0,
+      "notDemonstrated": 1
+    },
+    {
+      "domain": "Agent Safety",
+      "score": 100,
+      "mandatoryGatePassed": true,
+      "applicable": 1,
+      "satisfied": 1,
+      "notDemonstrated": 0
+    }
+  ],
+  "controls": [
+    {
+      "checkId": "SEC2-M1",
+      "title": "Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks",
+      "category": "secrets",
+      "domain": "security",
+      "passCondition": "0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the secrets manager",
+      "evidenceRequired": [
+        "Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths"
+      ],
+      "recommendedFixes": [
+        "Implement and operationalize: Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks (SEC2-M1)",
+        "Retain evidence artifacts required by this Check, starting with: Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths",
+        "Wire or verify detectors declared on SEC2-M1 so automation matches the pass condition",
+        "Block release (or open a time-boxed waiver with owner and expiry) until SEC2-M1 passes"
+      ],
+      "manualVerification": "For SEC2-M1 (Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks): inspect current evidence for [Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths] and confirm the pass condition holds — 0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the secrets manager",
+      "gate": "mandatory",
+      "severity": "critical",
+      "status": "NOT_DEMONSTRATED",
+      "passed": false,
+      "confidence": "low",
+      "confidenceScore": 0,
+      "evidenceFound": [],
+      "requiredEvidenceMissing": [
+        "Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths"
+      ],
+      "reasoning": "Pass condition requires 0 privileged production secrets in repos/prompts/client bundles and 100% of production runtime secrets from a secrets manager. Manual verification: inspect secrets-manager config + CI/repo secret-scan covering prompts/fixtures. Assessment: no iac/ci/runtime-config nodes after search; user skipped evidence ask.",
+      "recommendedAction": "1) Implement and operationalize: Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks (SEC2-M1). 2) Retain evidence artifacts required by this Check, starting with: Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths. 3) Wire or verify detectors declared on SEC2-M1 so automation matches the pass condition. 4) Block release (or open a time-boxed waiver with owner and expiry) until SEC2-M1 passes.",
+      "priority": "P1",
+      "remediation": {
+        "fix": "Implement and operationalize: Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks (SEC2-M1)",
+        "example": "Add gitleaks (or equivalent) workflow + ExternalSecrets/SealedSecrets refs.",
+        "reference": "SEC2-M1",
+        "owner": "unassigned",
+        "priority": "P1",
+        "estimatedEffort": "M"
+      }
+    },
+    {
+      "checkId": "AGN-M1",
+      "title": "Each production agent must have a documented charter: purpose, allowed tools, data scope, and autonomy limits",
+      "category": "agent-governance",
+      "gate": "mandatory",
+      "severity": "critical",
+      "status": "NOT_APPLICABLE",
+      "passed": false,
+      "notApplicable": true,
+      "naReason": "System has no autonomous agents or A2A loops in scope.",
+      "confidence": "high",
+      "confidenceScore": 0.8,
+      "primaryEvidenceClass": "docs",
+      "evidenceFound": [
+        {
+          "ref": "README.md",
+          "kind": "docs",
+          "class": "docs",
+          "role": "primary",
+          "excerpt": "Single-request API; no agent runtime.",
+          "evidenceAgeDays": 10
+        }
+      ],
+      "reasoning": "Applicability excluded by system type; N/A is not a pass.",
+      "recommendedAction": "Re-open if agents are introduced.",
+      "priority": "P3"
+    }
+  ],
+  "findings": {
+    "critical": [
+      {
+        "checkId": "SEC2-M1",
+        "title": "Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks",
+        "status": "NOT_DEMONSTRATED",
+        "summary": "Missing secrets-manager and secret-scan evidence for a critical mandatory Check.",
+        "priority": "P1",
+        "remediation": {
+          "fix": "Store production secrets in a secrets manager; add CI secret scan.",
+          "priority": "P1",
+          "estimatedEffort": "M",
+          "owner": "unassigned",
+          "reference": "SEC2-M1"
+        }
+      }
+    ],
+    "high": [],
+    "medium": [],
+    "low": [],
+    "quickWins": [],
+    "productionBlockers": [
+      {
+        "checkId": "SEC2-M1",
+        "title": "Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks",
+        "status": "NOT_DEMONSTRATED",
+        "summary": "Mandatory unanswered — blocks Core gate.",
+        "priority": "P1"
+      }
+    ]
+  },
+  "roadmaps": {
+    "days30": [
+      "SEC2-M1: adopt secrets manager + CI secret scan covering prompts; re-assess"
+    ],
+    "days90": [
+      "Expand secret scanning to notebooks, client bundles, and prompt registries"
+    ],
+    "longTerm": [
+      "Adopt Agents lens when shipping autonomous workflows"
+    ]
+  },
+  "discovery": {
+    "found": ["README.md", "src/"],
+    "notObserved": ["k8s/helm", "Dockerfile"],
+    "requiredEvidenceMissing": [
+      "Secrets-manager config + CI secret-scan report (SEC2-M1)"
+    ],
+    "pluginsRan": ["repo-filesystem"],
+    "pluginsNeedsUser": ["langsmith", "otel"]
+  },
+  "disclaimer": "Self-assessment is not third-party certification. This file is a schema fixture, not a live assessment of APRF."
+}

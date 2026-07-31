@@ -1,0 +1,14 @@
+id: prometheus
+title: Prometheus rules / metrics config
+version: "0.2.0"
+evidenceClass: runtime
+alsoEmits: [runtime-config]
+inputs: ["prometheus*.yml", "**/recording*.yaml", "optional metrics snapshot"]
+collect:
+  - "Find scrape configs and alert rules relevant to LLM latency/error/cost"
+emits:
+  nodeClass: runtime
+  refPattern: "**/prometheus*"
+  signals: [metric, alert-rule]
+mapsToChecks: [OBS-M1, PERF-M1, COST-M2]
+whenUnavailable: "Ask for rules or Grafana-linked export"

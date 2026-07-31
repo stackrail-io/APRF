@@ -1,0 +1,59 @@
+id: "DG-R2"
+category: "data-governance"
+title: "Production systems should have train/serve skew monitoring for features or embeddings"
+description: "Train/serve skew monitoring for features or embeddings"
+whyItMatters: "Train/serve skew monitoring for features or embeddings Failing this leaves a
+  production gap against: Skew job ran within the last 7 days for every production embedding/feature
+  pipeline; at least one documented threshold exists; breach creates a tracked ticket or page"
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: "Skew job ran within the last 7 days for every production embedding/feature pipeline;
+  at least one documented threshold exists; breach creates a tracked ticket or page"
+evidenceRequired:
+  - "Skew monitor config + last weekly skew report comparing train vs serve feature/embedding
+    distributions"
+detection:
+  capability: "manual"
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: "Skew monitor config + last weekly skew report comparing train vs serve feature/embedding
+          distributions"
+manualVerification: "For this Check (Train/serve skew monitoring for features or embeddings):
+  inspect current evidence for [Skew monitor config + last weekly skew report comparing train vs
+  serve feature/embedding distributions] and confirm the pass condition holds — Skew job ran within
+  the last 7 days for every production embedding/feature pipeline; at least one documented threshold
+  exists; breach creates a tracked ticket or page"
+falsePositiveGuidance: "(Data Governance & Quality): re-verify against a current artifact for this
+  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: this Check: Train/serve skew monitoring for features or
+    embeddings"
+  - "Retain evidence artifacts required by this Check, starting with: Skew monitor config + last
+    weekly skew report comparing train vs serve feature/embedding distributions"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "NIST AI RMF — Map and Measure (data)"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "ML systems engineering — data quality practices"
+    url: "https://ml-ops.org/"
+relatedRules:
+  - "DG-M1"
+  - "DG-M2"
+  - "DG-M3"
+  - "DG-R1"
+  - "DG-R3"
+tags:
+  - "data-governance"
+  - "recommended"
+  - "manual"
+applicability:
+  technologies:
+    - "vector-databases"
+    - "rag-pipelines"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

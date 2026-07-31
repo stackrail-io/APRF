@@ -1,0 +1,18 @@
+id: langsmith
+title: LangSmith / Langfuse-style LLM observability export
+version: "0.2.0"
+executor: collectors/import-ingest.ts
+evidenceClass: runtime
+inputs:
+  - "User export: traces JSON/CSV under aprf-assessment/imports/langsmith/"
+  - "Or in-repo LangSmith project config"
+collect:
+  - "Detect langsmith/langfuse env refs in code/config"
+  - "If export present, emit runtime nodes for prompt+tool traces"
+  - "If only SDK present without export → PARTIAL signal; ask user for export"
+emits:
+  nodeClass: runtime
+  refPattern: "imports/langsmith/*"
+  signals: [llm-trace, tool-call, prompt-version]
+mapsToChecks: [OBS-M1, OBS-M2, PRM-M1, TOL-M1, SEC-M1]
+whenUnavailable: "Ask user for trace export; else NOT_DEMONSTRATED for runtime-only claims"

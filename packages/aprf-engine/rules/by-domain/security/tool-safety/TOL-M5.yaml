@@ -1,0 +1,55 @@
+id: "TOL-M5"
+category: "tool-safety"
+title: "MCP tool catalogs must be signed and supply-chain reviewed before production use"
+description: "MCP tool catalogs shall be signed and supply-chain reviewed before production use"
+whyItMatters: "MCP tool catalogs shall be signed and supply-chain reviewed before production use
+  Failing this leaves a production gap against: PASS if production MCP runtimes reject
+  unsigned/unapproved tool catalogs; last review ≤90 days or since last catalog change"
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: "PASS if production MCP runtimes reject unsigned/unapproved tool catalogs; last
+  review ≤90 days or since last catalog change"
+evidenceRequired:
+  - "Signed tool catalog + supply-chain review record + verify-on-load config"
+detection:
+  capability: "manual"
+  detectors: []
+manualVerification: "For this Check (MCP tool catalogs must be signed and supply-chain reviewed
+  before production use): inspect current evidence for [Signed tool catalog + supply-chain review
+  record + verify-on-load config] and confirm the pass condition holds — PASS if production MCP
+  runtimes reject unsigned/unapproved tool catalogs; last review ≤90 days or since last catalog
+  change"
+falsePositiveGuidance: "(Tool Safety): re-verify against a current artifact for this specific Check
+  , not a sibling control. Document named exceptions with owner and expiry."
+recommendedFixes:
+  - "Implement and operationalize: MCP tool catalogs must be signed and supply-chain reviewed before
+    production use"
+  - "Retain evidence artifacts required by this Check, starting with: Signed tool catalog +
+    supply-chain review record + verify-on-load config"
+  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+references:
+  - title: "Model Context Protocol security considerations"
+    url: "https://modelcontextprotocol.io/"
+  - title: "OWASP LLM — Excessive Agency"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "TOL-M1"
+  - "TOL-M2"
+  - "TOL-M3"
+  - "TOL-M4"
+  - "TOL-R1"
+tags:
+  - "tool-safety"
+  - "mandatory"
+  - "manual"
+applicability:
+  technologies:
+    - "mcp"
+    - "a2a"
+    - "openapi"
+  minCriticality: 3
+  requiredFromLevel: 5
+status: "active"
+introducedIn: "0.10.0"
