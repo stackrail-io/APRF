@@ -1,0 +1,29 @@
+id: platform-golden-path
+title: AI golden-path / paved-road deploy documentation (DX-M1)
+version: "0.2.0"
+executor: collectors/platform-golden-path.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-golden-path-docs]
+inputs:
+  - "Target repo (golden-path / paved-road / platform AI deploy docs)"
+  - "Optional suite: aprf-assessment/imports/platform-golden-path/*.{json}"
+collect:
+  - "Detect golden-path documentation for AI feature deploy"
+  - "Heuristic section coverage: auth, secrets, evals, promote"
+  - "Ingest review attestation; write platform-golden-path-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/platform-golden-path/*"
+  signals:
+    - platform-golden-path
+    - dx-m1
+    - repo-golden-path-docs
+mapsToChecks: [DX-M1]
+whenUnavailable: >
+  Doc signals alone are PARTIAL. DX-M1 PASS needs imported version/owner,
+  section coverage, and reviewedWithin12Months with measuredAt ≤365 days.
+  No AI feature builders → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline doc heuristics + optional imported review JSON.

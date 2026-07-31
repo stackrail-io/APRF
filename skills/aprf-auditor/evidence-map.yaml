@@ -271,7 +271,9 @@ categoryDefaults:
       - "**/golden*"
       - "**/platform*"
       - "**/devtools*"
-    signals: [golden path, safe defaults]
+      - "**/*paved*"
+    plugins: [platform-golden-path, platform-ai-pipeline-gates, platform-ownership-support, platform-scaffolding-templates, platform-inner-loop-evals, platform-dx-metrics, repo-filesystem, github-actions]
+    signals: [golden path, paved road, ai pipeline gates, platform ownership, support channel, scaffolding templates, inner-loop evals, dx metrics, safe defaults]
 
 # Optional Check-level overrides (extend over time; Core profile examples)
 checks:
@@ -591,6 +593,101 @@ checks:
       PASS if ai-finops-unit-economics statusHint=pass (unit metrics + product coverage + quarter + review + outlier owners + measuredAt ≤90d).
       PARTIAL if FinOps/unit-cost signals without complete import.
       NOT_APPLICABLE when no AI/FinOps signals.
+  DX-M1:
+    requiredEvidence:
+      - "Versioned golden-path doc with owner covering auth, secrets, evals, promote"
+      - "Review attestation ≤12 months under imports/platform-golden-path/"
+    searchExtra:
+      - "**/*golden*path*"
+      - "**/*paved*road*"
+      - "**/*platform*guide*"
+      - "**/*deploy*ai*"
+    plugins: [platform-golden-path, repo-filesystem]
+    naWhen: "Org does not build/deploy AI features"
+    evaluation: |
+      PASS if platform-golden-path statusHint=pass (doc + version/owner + sections + reviewedWithin12Months + measuredAt ≤365d).
+      PARTIAL if golden-path doc signals without complete import.
+      NOT_APPLICABLE when no AI/golden-path signals.
+  DX-M2:
+    requiredEvidence:
+      - "Default AI CI/local pipeline with auth, secret-scan, and basic eval gates"
+      - "Blocking proof under imports/platform-ai-pipeline-gates/"
+    searchExtra:
+      - "**/.github/workflows/**"
+      - "**/*gitleaks*"
+      - "**/*promptfoo*"
+      - "**/*auth*check*"
+    plugins: [platform-ai-pipeline-gates, github-actions, promptfoo, repo-filesystem]
+    naWhen: "No AI build/promote pipeline surface"
+    evaluation: |
+      PASS if platform-ai-pipeline-gates statusHint=pass (all three gates + blockingOnFail + measuredAt ≤90d).
+      PARTIAL if gate signals without complete import.
+      NOT_APPLICABLE when no AI/pipeline-gate signals.
+  DX-R4:
+    requiredEvidence:
+      - "Named owner team + support channel for the AI paved road"
+      - "Test-ping within SLA or on-call listed under imports/platform-ownership-support/"
+    searchExtra:
+      - "**/CODEOWNERS"
+      - "**/*OWNERS*"
+      - "**/*on*call*"
+      - "**/*support*"
+      - "**/*platform*owner*"
+    plugins: [platform-ownership-support, repo-filesystem]
+    naWhen: "Org does not operate an AI platform / paved road"
+    evaluation: |
+      PASS if platform-ownership-support statusHint=pass (ownerTeamPresent + supportChannelPresent + (pingWithinSla|onCallListed) + measuredAt ≤90d).
+      PARTIAL if ownership/support signals without complete import.
+      NOT_APPLICABLE when no AI-platform ownership/support signals.
+  DX-R1:
+    requiredEvidence:
+      - "Agent, RAG, and MCP scaffolding templates with auth/secrets/logging defaults"
+      - "Adoption (≥1 use / 90d or target) under imports/platform-scaffolding-templates/"
+    searchExtra:
+      - "**/*template*"
+      - "**/*scaffold*"
+      - "**/*cookiecutter*"
+      - "**/*backstage*"
+      - "**/*mcp*template*"
+      - "**/*rag*template*"
+    plugins: [platform-scaffolding-templates, repo-filesystem]
+    naWhen: "Org does not build agent, RAG, or MCP services"
+    evaluation: |
+      PASS if platform-scaffolding-templates statusHint=pass (all three templates + auth/secrets/logging defaults + (usedInLast90Days|adoptionTargetDocumented) + measuredAt ≤90d).
+      PARTIAL if template signals without complete import.
+      NOT_APPLICABLE when no agent/RAG/MCP scaffolding signals.
+  DX-R2:
+    requiredEvidence:
+      - "Local/one-command inner-loop eval runner for the core AI eval subset"
+      - "Pre-PR sample or waiver (≤30d) under imports/platform-inner-loop-evals/"
+    searchExtra:
+      - "**/*promptfoo*"
+      - "**/*eval*"
+      - "**/Makefile"
+      - "**/package.json"
+      - "**/*inner*loop*"
+    plugins: [platform-inner-loop-evals, promptfoo, repo-filesystem]
+    naWhen: "Org has no AI eval surface"
+    evaluation: |
+      PASS if platform-inner-loop-evals statusHint=pass (runnerPresent + oneCommandCapable + (prePrEvalEvidence|waiverDocumented) + measuredAt ≤30d).
+      PARTIAL if runner signals without complete import.
+      NOT_APPLICABLE when no AI/inner-loop eval signals.
+  DX-R3:
+    requiredEvidence:
+      - "Formulas for time-to-safe-production and policy-bypass rate"
+      - "≥30 consecutive days series + bypass alert/owner under imports/platform-dx-metrics/"
+    searchExtra:
+      - "**/*dx*metric*"
+      - "**/*bypass*"
+      - "**/*time*to*safe*"
+      - "**/*ttsp*"
+      - "**/*dashboard*"
+    plugins: [platform-dx-metrics, repo-filesystem]
+    naWhen: "Org has no AI paved-road surface to measure"
+    evaluation: |
+      PASS if platform-dx-metrics statusHint=pass (ttsp+bypass formulas + ≥30d series + bypass alert/threshold + named owner + measuredAt ≤90d).
+      PARTIAL if metric name signals without complete import.
+      NOT_APPLICABLE when no AI-platform DX metric signals.
   DEP-M1:
     requiredEvidence:
       - "Documented/tested rollback for model/prompt/tool promotion"

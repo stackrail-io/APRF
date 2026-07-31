@@ -1,33 +1,60 @@
 id: "DX-M1"
 category: "platform-engineering"
 title: "Builders must have a documented golden path for deploying AI features to production"
-description: "Builders shall have a documented golden path for deploying AI features to production"
-whyItMatters: "Builders shall have a documented golden path for deploying AI features to production
-  Failing this leaves a production gap against: Doc exists with version/owner; covers auth, secrets,
-  evals, and promote steps; reviewed ≤ 12 months"
+description: >
+  Builders shall have a versioned, owned golden-path document for deploying AI
+  features to production that covers authentication, secrets, evals, and
+  promote steps, reviewed within the last 12 months.
+whyItMatters: >
+  Without a paved road from scaffold to production, each team invents a
+  different path—often skipping auth wiring, secrets managers, eval gates, or
+  controlled promotion. Policy docs that name controls without steps leave
+  builders guessing; stale paths silently diverge from current platform
+  defaults. A living golden path makes the safe route the easy route.
 severity: "medium"
 weight: 2
 gate: "mandatory"
-passCondition: "Doc exists with version/owner; covers auth, secrets, evals, and promote steps;
-  reviewed ≤ 12 months"
+passCondition: >
+  A golden-path document exists with version and owner; it covers
+  authentication, secrets, evals, and promote steps for AI features; last
+  review is within 12 months (review measuredAt ≤365 days).
 evidenceRequired:
-  - "Golden-path documentation with steps from scaffold to production"
+  - "Golden-path documentation from scaffold to production with version and owner"
+  - "Evidence the doc covers auth, secrets, evals, and promote steps"
+  - "Review attestation or changelog showing review within 12 months"
 detection:
-  capability: "manual"
-  detectors: []
-manualVerification: "For this Check (Builders must have a documented golden path for deploying AI
-  features to production): inspect current evidence for [Golden-path documentation with steps from
-  scaffold to production] and confirm the pass condition holds — Doc exists with version/owner;
-  covers auth, secrets, evals, and promote steps; reviewed ≤ 12 months"
-falsePositiveGuidance: "(Platform Engineering): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+  capability: "hybrid"
+  detectors:
+    - id: "repo-golden-path-docs"
+      params:
+        hint: >
+          Discover golden-path / paved-road / platform AI deploy docs covering
+          auth, secrets, evals, and promote steps.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove freshness or section coverage, attest the
+          golden-path doc with version/owner, required sections, and review
+          ≤12 months.
+manualVerification: >
+  1) Confirm the org builds or deploys AI features. If none, score
+  NOT_APPLICABLE. 2) Locate the golden-path / paved-road doc (platform portal,
+  internal handbook, or repo). 3) Confirm version and named owner. 4) Verify
+  sections cover authentication, secrets handling, evals, and promote/release
+  steps. 5) Confirm last review ≤12 months. 6) PASS only if all hold. Generic
+  “how to deploy any service” without AI-specific auth/secrets/evals/promote
+  does not satisfy. DX-M2 CI checks do not substitute for the documented path.
+falsePositiveGuidance: >
+  Do not pass an outdated wiki page without version/owner or review date.
+  Do not pass security policy alone without deploy steps. Do not pass scaffold
+  README that omits auth, secrets, evals, or promote. Do not pass DX-M2 pipeline
+  config as the golden-path document. Named exceptions need owner and expiry
+  ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Builders must have a documented golden path for deploying AI
-    features to production"
-  - "Retain evidence artifacts required by this Check, starting with: Golden-path documentation with
-    steps from scaffold to production"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish a versioned golden-path doc with owner covering auth, secrets, evals, and promote"
+  - "Link the path from platform portals and AI templates; review at least annually"
+  - "Retain review attestation under imports/platform-golden-path/"
+  - "Deprecate alternate deploy runbooks that bypass the golden path"
 references:
   - title: "Google SRE Workbook — Soft skills / platform thinking parallels"
     url: "https://sre.google/workbook/"
@@ -35,20 +62,19 @@ references:
     url: "https://www.cncf.io/"
 relatedRules:
   - "DX-M2"
-  - "DX-M3"
+  - "DX-R4"
   - "DX-R1"
-  - "DX-R2"
-  - "DX-R3"
+  - "AUTHN-M1"
+  - "SEC2-M1"
+  - "EVL-M1"
+  - "CHG-M1"
 tags:
   - "platform-engineering"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "golden-path"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "cicd"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

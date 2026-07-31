@@ -141,6 +141,30 @@ COST-R3 AI FinOps unit economics:
   npm run aprf:finops-unit-economics -- --target <app> --out <app>/aprf-assessment
   # PASS needs quarterly metrics + review under imports/ai-finops-unit-economics/
 
+DX-M1 AI golden-path documentation:
+  npm run aprf:golden-path -- --target <app> --out <app>/aprf-assessment
+  # PASS needs review attestation under imports/platform-golden-path/
+
+DX-M2 AI pipeline auth/secret-scan/eval gates:
+  npm run aprf:ai-pipeline-gates -- --target <app> --out <app>/aprf-assessment
+  # PASS needs blockingOnFail under imports/platform-ai-pipeline-gates/
+
+DX-R4 AI platform ownership + support:
+  npm run aprf:platform-ownership -- --target <app> --out <app>/aprf-assessment
+  # PASS needs owner+channel+(pingWithinSla|onCallListed) under imports/platform-ownership-support/
+
+DX-R1 agent/RAG/MCP scaffolding templates:
+  npm run aprf:scaffolding-templates -- --target <app> --out <app>/aprf-assessment
+  # PASS needs three templates + defaults + adoption under imports/platform-scaffolding-templates/
+
+DX-R2 inner-loop eval runners (pre-PR):
+  npm run aprf:inner-loop-evals -- --target <app> --out <app>/aprf-assessment
+  # PASS needs runner + one-command + pre-PR sample/waiver under imports/platform-inner-loop-evals/
+
+DX-R3 DX metrics (TTSP + bypass rate):
+  npm run aprf:dx-metrics -- --target <app> --out <app>/aprf-assessment
+  # PASS needs formulas + ≥30d series + bypass alert/owner under imports/platform-dx-metrics/
+
 Import runtime evidence without live APIs:
   mkdir -p <out>/imports/langsmith && cp traces.json <out>/imports/langsmith/
 `);

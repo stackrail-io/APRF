@@ -1,0 +1,29 @@
+id: platform-ai-pipeline-gates
+title: AI pipeline auth + secret-scan + eval gates (DX-M2)
+version: "0.2.0"
+executor: collectors/platform-ai-pipeline-gates.ts
+evidenceClass: ci
+alsoEmits: [code]
+detectorIds: [repo-ai-pipeline-gates]
+inputs:
+  - "Target repo (CI/local AI golden-path pipeline configs)"
+  - "Optional suite: aprf-assessment/imports/platform-ai-pipeline-gates/*.{json}"
+collect:
+  - "Detect auth, secret-scan, and basic eval gates in default AI pipelines"
+  - "Detect blocking/required-check signals"
+  - "Ingest blocking proof; write platform-ai-pipeline-gates-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/platform-ai-pipeline-gates/*"
+  signals:
+    - platform-ai-pipeline-gates
+    - dx-m2
+    - repo-ai-pipeline-gates
+mapsToChecks: [DX-M2]
+whenUnavailable: >
+  Gate config alone is PARTIAL. DX-M2 PASS needs all three gates plus imported
+  blockingOnFail=true with measuredAt ≤90 days. No AI build/promote surface →
+  NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline CI/local heuristics + optional imported blocking-proof JSON.

@@ -1,0 +1,28 @@
+id: platform-inner-loop-evals
+title: Inner-loop eval runners before PR (DX-R2)
+version: "0.2.0"
+executor: collectors/platform-inner-loop-evals.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-inner-loop-evals]
+inputs:
+  - "Target repo (local eval scripts, promptfoo, Makefile/package.json)"
+  - "Optional suite: aprf-assessment/imports/platform-inner-loop-evals/*.{json}"
+collect:
+  - "Detect local/inner-loop eval runner and one-command entrypoints"
+  - "Ingest pre-PR sample or waiver; write platform-inner-loop-evals-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/platform-inner-loop-evals/*"
+  signals:
+    - platform-inner-loop-evals
+    - dx-r2
+    - repo-inner-loop-evals
+mapsToChecks: [DX-R2]
+whenUnavailable: >
+  Runner docs alone are PARTIAL. DX-R2 PASS needs imported runnerPresent +
+  oneCommandCapable + (prePrEvalEvidence or waiverDocumented) with measuredAt
+  ≤30 days. No AI eval surface → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline runner heuristics + optional imported pre-PR sample/waiver JSON.

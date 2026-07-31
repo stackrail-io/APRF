@@ -1,42 +1,60 @@
 id: "DX-R1"
 category: "platform-engineering"
-title: "Production systems should have scaffolding templates for agents, RAG, and MCP with safe defaults"
-description: "Scaffolding templates for agents, RAG, and MCP with safe defaults"
-whyItMatters: "Scaffolding templates for agents, RAG, and MCP with safe defaults Failing this leaves
-  a production gap against: Templates exist for agents, RAG, and MCP with auth, secrets, and logging
-  defaults on; ≥1 new service used a template in the last 90 days or adoption target is documented"
+title: "Builders should have scaffolding templates for agents, RAG, and MCP with safe defaults"
+description: >
+  Scaffolding templates shall exist for agents, RAG, and MCP with authentication,
+  secrets, and logging defaults enabled, and either ≥1 new service used a
+  template in the last 90 days or an adoption target is documented.
+whyItMatters: >
+  Without opinionated templates, each team copies unsafe starter code—skipping
+  auth wiring, embedding secrets, or omitting logging. Catalog entries that
+  exist but are unused leave builders on ad-hoc paths. Safe-by-default scaffolds
+  plus recent adoption (or a tracked target) make the paved road the first
+  choice for new AI services.
 severity: "medium"
 weight: 2
 gate: "recommended"
-passCondition: "Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults
-  on; ≥1 new service used a template in the last 90 days or adoption target is documented"
+passCondition: >
+  Templates exist for agents, RAG, and MCP with auth, secrets, and logging
+  defaults on; ≥1 new service used a template in the last 90 days or an
+  adoption target is documented (adoption proof measuredAt ≤90 days).
 evidenceRequired:
-  - "Scaffolding template repo/catalog for agents, RAG, and MCP with default security settings +
-    adoption metrics"
+  - "Scaffolding template repo/catalog covering agents, RAG, and MCP"
+  - "Evidence auth, secrets, and logging defaults are enabled in those templates"
+  - "Adoption metrics (≥1 use in 90 days) or documented adoption target"
 detection:
   capability: "hybrid"
   detectors:
     - id: "repo-scaffolding-templates"
-      params: {}
+      params:
+        hint: >
+          Discover agent, RAG, and MCP scaffolding templates (cookiecutter,
+          backstage, copier, template catalogs) with auth/secrets/logging defaults.
     - id: "manual-attest"
       params:
-        hint: "Scaffolding template repo/catalog for agents, RAG, and MCP with default security settings +
-          adoption metrics"
-manualVerification: "For this Check (Scaffolding templates for agents, RAG, and MCP with safe
-  defaults): inspect current evidence for [Scaffolding template repo/catalog for agents, RAG, and
-  MCP with default security settings + adoption metrics] and confirm the pass condition holds —
-  Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults on; ≥1 new
-  service used a template in the last 90 days or adoption target is documented"
-falsePositiveGuidance: "(Platform Engineering): when automation and attestation disagree, prefer the
-  stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the
-  gap."
+        hint: >
+          If automation cannot prove all three templates or adoption, attest
+          template catalog plus adoption use-or-target (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the org builds agent, RAG, or MCP services. If none planned and
+  no AI surface, score NOT_APPLICABLE. 2) Locate scaffolding templates or a
+  template catalog for agents, RAG, and MCP. 3) Confirm each enables auth,
+  secrets, and logging by default. 4) Confirm ≥1 new service used a template
+  in the last 90 days, or an adoption target is documented. 5) PASS only if
+  all three templates, safe defaults, and adoption (use or target) hold.
+  Generic microservice templates without AI/agent/RAG/MCP variants do not
+  satisfy. DX-M1 docs alone do not substitute for usable scaffolds.
+falsePositiveGuidance: >
+  Do not pass empty Backstage catalog stubs without agent/RAG/MCP templates.
+  Do not pass templates that leave auth/secrets/logging as optional unfinished stubs.
+  Do not pass a single RAG notebook as covering agents and MCP. Do not pass
+  adoption claims older than 90 days without a documented target. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Scaffolding templates for agents, RAG, and MCP with
-    safe defaults"
-  - "Retain evidence artifacts required by this Check, starting with: Scaffolding template
-    repo/catalog for agents, RAG, and MCP with default security settings + adoption metrics"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish agent, RAG, and MCP scaffolds with auth, secrets, and logging defaults on"
+  - "List them in the platform catalog and link from the golden path (DX-M1)"
+  - "Track adoption (≥1 use / 90d or target) under imports/platform-scaffolding-templates/"
+  - "Deprecate starter repos that ship without those defaults"
 references:
   - title: "Google SRE Workbook — Soft skills / platform thinking parallels"
     url: "https://sre.google/workbook/"
@@ -45,19 +63,20 @@ references:
 relatedRules:
   - "DX-M1"
   - "DX-M2"
-  - "DX-M3"
+  - "DX-R4"
   - "DX-R2"
   - "DX-R3"
+  - "AGN-M1"
+  - "AUTHN-M1"
+  - "SEC2-M1"
+  - "OBS-M1"
 tags:
   - "platform-engineering"
   - "recommended"
   - "hybrid"
+  - "scaffolding"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "cicd"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

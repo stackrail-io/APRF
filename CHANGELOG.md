@@ -13,6 +13,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 - Rewrote **agent-governance** pillar (goal-conflict plan policy) from template stub to hybrid Check + collector; synced `aprf-spec.json` method to hybrid.
 - Rewrote **human-approval** Checks **HUM-M1–M4, HUM-R1, HUM-R3** from template stubs to hybrid catalog quality; added `human-approval*` collectors; synced `aprf-spec.json` human-approval pillar.
 - Rewrote **cost-optimization** from template stub to hybrid Check + collectors; synced `aprf-spec.json` method to hybrid.
+- Rewrote **DX-M1** (AI golden-path documentation) from template stub to hybrid Check + `platform-golden-path` collector; synced `aprf-spec.json` method to hybrid.
+- Rewrote **DX-M2** (AI pipeline auth/secret-scan/eval gates) from template stub to hybrid Check + `platform-ai-pipeline-gates` collector; synced `aprf-spec.json` method to hybrid.
+- Demoted former **DX-M3** → **DX-R4** (AI platform ownership + support channel): recommended gate, `requiredFromLevel` 4; collector remains `platform-ownership-support`; removed from gate blockers.
+- Rewrote **DX-R2** (inner-loop eval runners before PR) from template stub to hybrid Check + `platform-inner-loop-evals` collector; synced `aprf-spec.json` method to hybrid.
+- Rewrote **DX-R3** (TTSP + bypass DX metrics) from template stub to hybrid Check + `platform-dx-metrics` collector; synced `aprf-spec.json` method to hybrid.
+- Rewrote **DX-R1** (agent/RAG/MCP scaffolding templates) from template stub to hybrid Check + `platform-scaffolding-templates` collector; synced `aprf-spec.json` requirement/passCondition.
 
 ### Added
 - Portable **APRF Auditor** skill under [`skills/aprf-auditor/`](skills/aprf-auditor/): vendor-neutral local assessment package (`system.md`, `workflow.md`, evidence map, scoring, output schema, adapters for Cursor/Claude/Codex/Copilot/MCP). No StackRail backend required.
