@@ -1,0 +1,30 @@
+id: rag-corpus-governance
+title: Production RAG corpus/index ownership + cadence (DG-M1)
+version: "0.2.0"
+executor: collectors/rag-corpus-governance.ts
+evidenceClass: runtime-config
+alsoEmits: [code]
+detectorIds: [repo-rag-corpus-config]
+inputs:
+  - "Target repo (RAG/corpus/vector index configs)"
+  - "Optional suite: aprf-assessment/imports/rag-corpus-governance/*.{json}"
+collect:
+  - "Detect corpus/index configs with owner, version, and refresh cadence"
+  - "Detect stale/rebuild handling signals"
+  - "Ingest inventory; write rag-corpus-governance-report.json"
+emits:
+  nodeClass: runtime-config
+  refPattern: "aprf-assessment/imports/rag-corpus-governance/*"
+  signals:
+    - rag-corpus-governance
+    - dg-m1
+    - repo-rag-corpus-config
+mapsToChecks: [DG-M1]
+whenUnavailable: >
+  Config signals alone are PARTIAL. DG-M1 PASS needs imported inventory with
+  coversAllProductionIndexes, missing owner/version/cadence counts = 0, and
+  staleUnhandledCount=0 with measuredAt ≤90 days. No production retrieval
+  surface → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline corpus-config heuristics + optional imported inventory JSON.

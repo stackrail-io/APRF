@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:6de592d119937f054e22942717faf453b6173d79a7b537dde5377eca6c4cb8ce",
+  "generatedAt": "sha256:036046517c2c427f5471541b26b009b36e996740f1ed2bc6c3f1996105aa26d5",
   "ruleCount": 177,
   "domains": [
     {
@@ -3998,37 +3998,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "DG-M1",
       "category": "data-governance",
       "title": "Production retrieval corpora and indexes must have owners, versioning, and refresh cadence",
-      "description": "Production retrieval corpora and indexes shall have owners, versioning, and refresh cadence",
-      "whyItMatters": "Production retrieval corpora and indexes shall have owners, versioning, and refresh cadence Failing this leaves a production gap against: 100% of production indexes have owner + version ID + refresh cadence; 0 indexes missing any field; stale beyond cadence flagged or rebuilt",
+      "description": "Every production retrieval corpus and index shall have a named owner, a version ID, and a refresh cadence; indexes stale beyond cadence shall be flagged or rebuilt.\n",
+      "whyItMatters": "Unowned or unversioned retrieval indexes silently drift—stale chunks, orphaned embeddings, and unknown blast radius when content changes. Without a refresh cadence and stale handling, RAG answers degrade while looking production-ready. An inventory that covers owner, version, and cadence turns corpora into operable assets.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production indexes have owner + version ID + refresh cadence; 0 indexes missing any field; stale beyond cadence flagged or rebuilt",
+      "passCondition": "100% of production indexes have owner + version ID + refresh cadence; 0 indexes missing any field; stale beyond cadence are flagged or rebuilt (inventory measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Corpus/index inventory with owner, version ID, and refresh schedule"
+        "Corpus/index inventory listing production indexes with owner, version ID, and refresh schedule",
+        "Evidence stale-beyond-cadence indexes are flagged or rebuilt"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
             "id": "repo-rag-corpus-config",
-            "params": {}
+            "params": {
+              "hint": "Discover RAG corpus/index configs and inventories with owner, version, and refresh/cadence signals.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Corpus/index inventory with owner, version ID, and refresh schedule"
+              "hint": "If automation cannot prove 100% coverage, attest a production inventory with zero missing owner/version/cadence fields and stale handling (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Production retrieval corpora and indexes must have owners, versioning, and refresh cadence): inspect current evidence for [Corpus/index inventory with owner, version ID, and refresh schedule] and confirm the pass condition holds — 100% of production indexes have owner + version ID + refresh cadence; 0 indexes missing any field; stale beyond cadence flagged or rebuilt",
-      "falsePositiveGuidance": "(Data Governance & Quality): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm the system uses production retrieval corpora or vector indexes. If none, score NOT_APPLICABLE. 2) Obtain the corpus/index inventory for production. 3) Confirm every production index has owner, version ID, and refresh cadence. 4) Confirm indexes past cadence are flagged or rebuilt. 5) PASS only if coverage is 100% and stale handling holds. Dev-only indexes do not substitute for production. Eval/fine-tune provenance cards do not satisfy retrieval-index governance.\n",
+      "falsePositiveGuidance": "Do not pass a README that names a vector DB without an inventory. Do not pass partial inventories that omit owner, version, or cadence. Do not pass “refresh when needed” without a cadence. Do not pass stale indexes that are neither flagged nor rebuilt. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Production retrieval corpora and indexes must have owners, versioning, and refresh cadence",
-        "Retain evidence artifacts required by this Check, starting with: Corpus/index inventory with owner, version ID, and refresh schedule",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish a production corpus/index inventory with owner, version ID, and refresh cadence",
+        "Alert or rebuild when indexes exceed cadence",
+        "Retain inventory exports under imports/rag-corpus-governance/",
+        "Block new production index registration until owner/version/cadence are set"
       ],
       "references": [
         {
@@ -4045,12 +4048,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DG-M3",
         "DG-R1",
         "DG-R2",
-        "DG-R3"
+        "MEM-M1",
+        "CTX-M1"
       ],
       "tags": [
         "data-governance",
         "mandatory",
-        "hybrid"
+        "hybrid",
+        "rag",
+        "corpus"
       ],
       "applicability": {
         "technologies": [
@@ -4067,33 +4073,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "DG-M2",
       "category": "data-governance",
       "title": "Data used for evals or fine-tuning must have documented provenance and quality criteria",
-      "description": "Data used for evals or fine-tuning shall have documented provenance and quality criteria",
-      "whyItMatters": "Data used for evals or fine-tuning shall have documented provenance and quality criteria Failing this leaves a production gap against: 100% of datasets used in production gates or fine-tunes have provenance + quality criteria documented; promotion blocked if missing (CI or review checklist evidence)",
+      "description": "Every dataset used in production eval gates or fine-tunes shall have documented provenance and quality criteria, and promotion shall be blocked when those are missing.\n",
+      "whyItMatters": "Eval and fine-tune sets without provenance or quality bars silently bake in bias, leakage, or unlicensed content. Gates that pass on undocumented data give false confidence; fine-tunes on mystery corpora are hard to recall or remediate. Documented cards plus a promotion brake make training and eval data first-class production artifacts.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of datasets used in production gates or fine-tunes have provenance + quality criteria documented; promotion blocked if missing (CI or review checklist evidence)",
+      "passCondition": "100% of datasets used in production gates or fine-tunes have provenance + quality criteria documented; promotion is blocked if missing (CI or review checklist evidence; inventory measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Dataset cards or registry entries for eval/fine-tune sets"
+        "Dataset cards or registry entries for eval/fine-tune sets covering provenance and quality criteria",
+        "CI or review-checklist evidence that promotion is blocked when cards are missing"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-dataset-provenance",
+            "params": {
+              "hint": "Discover dataset cards, datasheets, or registry entries for eval/fine-tune sets with provenance and quality criteria, plus promotion-gate signals.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Dataset cards or registry entries for eval/fine-tune sets"
+              "hint": "If automation cannot prove 100% coverage or promotion blocking, attest inventory with zero missing provenance/quality fields and promotionBlockedIfMissing (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Data used for evals or fine-tuning must have documented provenance and quality criteria): inspect current evidence for [Dataset cards or registry entries for eval/fine-tune sets] and confirm the pass condition holds — 100% of datasets used in production gates or fine-tunes have provenance + quality criteria documented; promotion blocked if missing (CI or review checklist evidence)",
-      "falsePositiveGuidance": "(Data Governance & Quality): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the system uses datasets for production eval gates or fine-tunes. If neither, score NOT_APPLICABLE. 2) Inventory those datasets. 3) Confirm each has documented provenance and quality criteria (dataset card or registry). 4) Confirm promotion/release is blocked when cards are missing (CI check or review checklist). 5) PASS only if coverage is 100% and the promotion brake holds. Retrieval-index inventories (DG-M1) do not satisfy. Informal README lists without provenance/quality fields do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass empty Hugging Face card stubs. Do not pass provenance without quality criteria (or the reverse). Do not pass cards for unused sample datasets as covering production gates. Do not pass advisory linters that never block promote. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Data used for evals or fine-tuning must have documented provenance and quality criteria",
-        "Retain evidence artifacts required by this Check, starting with: Dataset cards or registry entries for eval/fine-tune sets",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish dataset cards with provenance and quality criteria for every eval/fine-tune set",
+        "Add a CI or review checklist gate that blocks promote when cards are missing",
+        "Retain inventory under imports/dataset-provenance-governance/",
+        "Refuse fine-tune or gate promotion jobs that reference undocumented datasets"
       ],
       "references": [
         {
@@ -4108,14 +4121,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "DG-M1",
         "DG-M3",
-        "DG-R1",
-        "DG-R2",
-        "DG-R3"
+        "DG-R3",
+        "EVL-M1",
+        "MOD-M1",
+        "SCI-M2"
       ],
       "tags": [
         "data-governance",
         "mandatory",
-        "manual"
+        "hybrid",
+        "dataset-cards",
+        "provenance"
       ],
       "applicability": {
         "technologies": [
@@ -4132,33 +4148,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "DG-M3",
       "category": "data-governance",
       "title": "Feedback or memory promotion paths that affect future answers must be governed",
-      "description": "Feedback or memory promotion paths that affect future answers shall be governed",
-      "whyItMatters": "Feedback or memory promotion paths that affect future answers shall be governed Failing this leaves a production gap against: 100% of promotion paths require policy check or human approval; tests show ungated promotion to durable memory/training is denied",
+      "description": "Every path that promotes user feedback or working memory into durable memory or training data shall require a policy check or human approval, and ungated promotion shall be denied by test.\n",
+      "whyItMatters": "Ungated thumbs-up loops and silent memory writes turn one bad answer into tomorrow’s training or retrieval signal. Unlike static corpus ownership or offline dataset cards, this write path actively reshapes future behavior. Policy or human gates plus deny tests keep feedback from poisoning durable stores.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of promotion paths require policy check or human approval; tests show ungated promotion to durable memory/training is denied",
+      "passCondition": "100% of feedback→durable-memory/training promotion paths require a policy check or human approval; automated tests show ungated promotion is denied (deny evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Promotion policy + write-path controls for feedback→memory/training"
+        "Promotion policy listing feedback/memory→durable/training write paths",
+        "Write-path controls (policy engine or human approval) on those paths",
+        "Automated tests showing ungated promotion is denied"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-feedback-promotion",
+            "params": {
+              "hint": "Discover feedback→memory/training promotion configs, policy/approval gates, and deny/bypass tests for ungated writes.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Promotion policy + write-path controls for feedback→memory/training"
+              "hint": "If automation cannot prove all paths are gated, attest promotion inventory plus ungatedPromotionDenied tests (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Feedback or memory promotion paths that affect future answers must be governed): inspect current evidence for [Promotion policy + write-path controls for feedback→memory/training] and confirm the pass condition holds — 100% of promotion paths require policy check or human approval; tests show ungated promotion to durable memory/training is denied",
-      "falsePositiveGuidance": "(Data Governance & Quality): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the system promotes feedback or working memory into durable memory or training. If no such write path exists, score NOT_APPLICABLE. 2) Inventory those promotion paths. 3) Confirm each requires a policy check or human approval. 4) Confirm tests deny ungated promotion. 5) PASS only if coverage is 100% and deny tests hold. MEM architecture docs without deny tests do not satisfy. HUM gates on unrelated tools do not satisfy this feedback→durable path.\n",
+      "falsePositiveGuidance": "Do not pass logging of feedback without a promotion gate. Do not pass “reviewed eventually” without a blocking policy or approval step. Do not pass unit tests that never exercise an ungated write. Do not pass working- memory TTL alone as promotion governance. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Feedback or memory promotion paths that affect future answers must be governed",
-        "Retain evidence artifacts required by this Check, starting with: Promotion policy + write-path controls for feedback→memory/training",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Require policy check or human approval on every feedback→durable/training path",
+        "Add automated deny tests for ungated promotion",
+        "Retain inventory + deny proof under imports/feedback-promotion-governance/",
+        "Fail closed when a new promotion path is registered without a gate"
       ],
       "references": [
         {
@@ -4173,14 +4197,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "DG-M1",
         "DG-M2",
-        "DG-R1",
-        "DG-R2",
-        "DG-R3"
+        "MEM-M1",
+        "MEM-R3",
+        "HUM-M1",
+        "HUM-M2"
       ],
       "tags": [
         "data-governance",
         "mandatory",
-        "manual"
+        "hybrid",
+        "feedback-loops",
+        "memory-promotion"
       ],
       "applicability": {
         "technologies": [
@@ -4196,34 +4223,42 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DG-R1",
       "category": "data-governance",
-      "title": "Production systems should have automated freshness and coverage metrics for critical corpora",
-      "description": "Automated freshness and coverage metrics for critical corpora",
-      "whyItMatters": "Automated freshness and coverage metrics for critical corpora Failing this leaves a production gap against: Each critical corpus has a documented freshness SLO (e.g. max age hours); ≥95% of sampled docs meet the SLO in the last 7 days; alert fires on freshness breach",
+      "title": "Critical corpora should have automated freshness and coverage metrics",
+      "description": "Each critical corpus shall have a documented freshness SLO, ≥95% of sampled docs shall meet that SLO in the last 7 days, and an alert shall fire on freshness breach.\n",
+      "whyItMatters": "Without automated freshness metrics and alerts, stale corpora still serve production quietly. Coverage gaps hide missing documents that never enter retrieval. Measured SLO compliance plus breach alerts turn index governance into an operable control loop.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Each critical corpus has a documented freshness SLO (e.g. max age hours); ≥95% of sampled docs meet the SLO in the last 7 days; alert fires on freshness breach",
+      "passCondition": "Each critical corpus has a documented freshness SLO (e.g. max age hours); ≥95% of sampled docs meet the SLO in the last 7 days; an alert fires on freshness breach (sample/alert evidence measuredAt ≤7 days).\n",
       "evidenceRequired": [
-        "Corpus freshness dashboard (or job report) + alert config export covering each critical corpus ID"
+        "Freshness SLO definitions for each critical corpus ID",
+        "Dashboard or job report showing ≥95% SLO compliance over the last 7 days",
+        "Alert config (or firing proof) covering freshness breaches"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-corpus-freshness",
+            "params": {
+              "hint": "Discover corpus freshness/coverage metric configs, SLO definitions, dashboards/jobs, and freshness-breach alerts.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Corpus freshness dashboard (or job report) + alert config export covering each critical corpus ID"
+              "hint": "If automation cannot prove compliance, attest critical-corpus coverage, freshness SLOs, ≥95% sample meet-rate, and alert on breach (measuredAt ≤7 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Automated freshness and coverage metrics for critical corpora): inspect current evidence for [Corpus freshness dashboard (or job report) + alert config export covering each critical corpus ID] and confirm the pass condition holds — Each critical corpus has a documented freshness SLO (e.g. max age hours); ≥95% of sampled docs meet the SLO in the last 7 days; alert fires on freshness breach",
-      "falsePositiveGuidance": "(Data Governance & Quality): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm critical production corpora/indexes exist. If none, score NOT_APPLICABLE. 2) Locate freshness SLO (max age / freshness hours) per critical corpus. 3) Review last-7-day sample or job report: ≥95% of sampled docs meet the SLO. 4) Confirm an alert fires (or is configured to page) on freshness breach. 5) PASS only if SLOs, sample compliance, and alert hold. Ownership/cadence inventory without metrics does not satisfy. One-off manual audits older than 7 days do not satisfy the sample window.\n",
+      "falsePositiveGuidance": "Do not pass cadence docs without a numeric freshness SLO. Do not pass a dashboard with no per-corpus series. Do not pass sample windows older than 7 days. Do not pass logging-only “alerts” that never notify an owner. Named exceptions need owner and expiry ≤30 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Automated freshness and coverage metrics for critical corpora",
-        "Retain evidence artifacts required by this Check, starting with: Corpus freshness dashboard (or job report) + alert config export covering each critical corpus ID",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Define freshness SLOs for every critical corpus ID",
+        "Publish automated freshness (and coverage) jobs/dashboards with ≥95% meet-rate",
+        "Wire freshness-breach alerts to an owned channel",
+        "Retain sample/alert proof under imports/corpus-freshness-metrics/"
       ],
       "references": [
         {
@@ -4238,14 +4273,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "DG-M1",
         "DG-M2",
-        "DG-M3",
         "DG-R2",
-        "DG-R3"
+        "OBS-M1",
+        "OBS-M2"
       ],
       "tags": [
         "data-governance",
         "recommended",
-        "manual"
+        "hybrid",
+        "freshness",
+        "coverage"
       ],
       "applicability": {
         "technologies": [
@@ -4261,34 +4298,42 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DG-R2",
       "category": "data-governance",
-      "title": "Production systems should have train/serve skew monitoring for features or embeddings",
-      "description": "Train/serve skew monitoring for features or embeddings",
-      "whyItMatters": "Train/serve skew monitoring for features or embeddings Failing this leaves a production gap against: Skew job ran within the last 7 days for every production embedding/feature pipeline; at least one documented threshold exists; breach creates a tracked ticket or page",
+      "title": "Production embedding and feature pipelines should monitor train/serve skew",
+      "description": "Every production embedding or feature pipeline shall run a train/serve skew job within the last 7 days, document at least one skew threshold, and open a tracked ticket or page on breach.\n",
+      "whyItMatters": "When train-time embeddings or features drift from what serve-time traffic sees, retrieval quality and ranking degrade without an obvious model change. Undetected skew looks like random hallucinations or recall loss. Regular skew jobs with thresholds and paging turn distribution drift into an owned operational signal.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Skew job ran within the last 7 days for every production embedding/feature pipeline; at least one documented threshold exists; breach creates a tracked ticket or page",
+      "passCondition": "A skew job ran within the last 7 days for every production embedding/feature pipeline; at least one documented threshold exists; breach creates a tracked ticket or page (job/alert evidence measuredAt ≤7 days).\n",
       "evidenceRequired": [
-        "Skew monitor config + last weekly skew report comparing train vs serve feature/embedding distributions"
+        "Skew monitor config covering each production embedding/feature pipeline",
+        "Last weekly (or ≤7-day) skew report comparing train vs serve distributions",
+        "Threshold definition plus ticket/page routing on breach"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-train-serve-skew",
+            "params": {
+              "hint": "Discover train/serve skew monitors for embeddings or features, threshold configs, and breach ticket/page hooks.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Skew monitor config + last weekly skew report comparing train vs serve feature/embedding distributions"
+              "hint": "If automation cannot prove recent runs, attest per-pipeline skew job ≤7 days, threshold present, and breach creates ticket/page (measuredAt ≤7 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Train/serve skew monitoring for features or embeddings): inspect current evidence for [Skew monitor config + last weekly skew report comparing train vs serve feature/embedding distributions] and confirm the pass condition holds — Skew job ran within the last 7 days for every production embedding/feature pipeline; at least one documented threshold exists; breach creates a tracked ticket or page",
-      "falsePositiveGuidance": "(Data Governance & Quality): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production embedding or feature pipelines exist. If none, score NOT_APPLICABLE. 2) Locate skew monitor config for each pipeline. 3) Confirm a skew job ran within the last 7 days. 4) Confirm at least one documented threshold. 5) Confirm breach opens a tracked ticket or page. 6) PASS only if all pipelines, recent run, threshold, and breach routing hold. Corpus freshness metrics alone do not satisfy. One-off notebooks without schedule or paging do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass offline EDA charts without a recurring job. Do not pass train-only distribution plots that never compare to serve. Do not pass a threshold with no ticket/page on breach. Do not pass reports older than 7 days as current. Named exceptions need owner and expiry ≤30 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Train/serve skew monitoring for features or embeddings",
-        "Retain evidence artifacts required by this Check, starting with: Skew monitor config + last weekly skew report comparing train vs serve feature/embedding distributions",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Schedule train/serve skew jobs for every production embedding/feature pipeline",
+        "Document numeric skew thresholds and wire breach to ticket or page",
+        "Retain last-run reports under imports/train-serve-skew-monitor/",
+        "Fail closed when a new production pipeline ships without a skew monitor"
       ],
       "references": [
         {
@@ -4302,15 +4347,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "relatedRules": [
         "DG-M1",
-        "DG-M2",
-        "DG-M3",
         "DG-R1",
-        "DG-R3"
+        "DG-R3",
+        "OBS-M1",
+        "OBS-M2",
+        "MOD-M1"
       ],
       "tags": [
         "data-governance",
         "recommended",
-        "manual"
+        "hybrid",
+        "train-serve-skew"
       ],
       "applicability": {
         "technologies": [
@@ -4326,34 +4373,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DG-R3",
       "category": "data-governance",
-      "title": "Production systems should have dataset cards for major eval and fine-tune sets",
-      "description": "Dataset cards for major eval and fine-tune sets",
-      "whyItMatters": "Dataset cards for major eval and fine-tune sets Failing this leaves a production gap against: 100% of major eval/fine-tune sets used in production promotion have a dataset card with purpose, source, PII handling, and last-updated date ≤12 months",
+      "title": "Major eval and fine-tune sets should have dataset cards with purpose, source, and PII handling",
+      "description": "Every major eval or fine-tune set used in production promotion shall have a dataset card covering purpose, source, PII handling, and a last-updated date within 12 months.\n",
+      "whyItMatters": "Thin provenance notes are not enough to operate major eval and fine-tune corpora. Without purpose, source, and PII handling on a living card, teams cannot tell what a set is for, whether it may leave the boundary, or when it went stale. Annual freshness keeps cards from becoming abandoned wiki pages.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "100% of major eval/fine-tune sets used in production promotion have a dataset card with purpose, source, PII handling, and last-updated date ≤12 months",
+      "passCondition": "100% of major eval/fine-tune sets used in production promotion have a dataset card with purpose, source, PII handling, and last-updated date ≤12 months (inventory measuredAt ≤90 days; card last-updated ≤365 days).\n",
       "evidenceRequired": [
-        "Dataset cards (or equivalent metadata) for each major eval and fine-tune corpus in the registry"
+        "Dataset cards (or registry metadata) for each major eval and fine-tune corpus",
+        "Fields covering purpose, source, PII handling, and last-updated date"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-dataset-cards",
+            "params": {
+              "hint": "Discover dataset cards/datasheets for major eval and fine-tune sets with purpose, source, PII handling, and last-updated signals.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Dataset cards (or equivalent metadata) for each major eval and fine-tune corpus in the registry"
+              "hint": "If automation cannot prove 100% coverage, attest major-set inventory with zero missing purpose/source/PII fields and cards updated within 12 months (inventory measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Dataset cards for major eval and fine-tune sets): inspect current evidence for [Dataset cards (or equivalent metadata) for each major eval and fine-tune corpus in the registry] and confirm the pass condition holds — 100% of major eval/fine-tune sets used in production promotion have a dataset card with purpose, source, PII handling, and last-updated date ≤12 months",
-      "falsePositiveGuidance": "(Data Governance & Quality): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm major eval or fine-tune sets are used in production promotion. If none, score NOT_APPLICABLE. 2) Inventory those major sets. 3) Confirm each has a dataset card with purpose, source, and PII handling. 4) Confirm last-updated is within 12 months. 5) PASS only if coverage is 100% and freshness holds. Provenance/quality notes alone without purpose, source, and PII fields do not satisfy. Cards older than 12 months do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass empty Hugging Face card stubs. Do not pass purpose without source or PII handling (or the reverse). Do not pass minor fixture sets as “major” production-promotion corpora. Do not pass cards with unknown last-updated. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Dataset cards for major eval and fine-tune sets",
-        "Retain evidence artifacts required by this Check, starting with: Dataset cards (or equivalent metadata) for each major eval and fine-tune corpus in the registry",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish dataset cards with purpose, source, PII handling, and last-updated for every major set",
+        "Review cards at least annually",
+        "Retain inventory under imports/dataset-cards-registry/",
+        "Block promotion that references a major set without a current card"
       ],
       "references": [
         {
@@ -4366,16 +4420,18 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         }
       ],
       "relatedRules": [
-        "DG-M1",
         "DG-M2",
-        "DG-M3",
         "DG-R1",
-        "DG-R2"
+        "DG-R2",
+        "EVL-M1",
+        "PRI-M1",
+        "MOD-M1"
       ],
       "tags": [
         "data-governance",
         "recommended",
-        "manual"
+        "hybrid",
+        "dataset-cards"
       ],
       "applicability": {
         "technologies": [

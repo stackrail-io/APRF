@@ -1,0 +1,29 @@
+id: feedback-promotion-governance
+title: Feedback/memory promotion gates (DG-M3)
+version: "0.2.0"
+executor: collectors/feedback-promotion-governance.ts
+evidenceClass: policy
+alsoEmits: [code]
+detectorIds: [repo-feedback-promotion]
+inputs:
+  - "Target repo (feedback→memory/training promotion policies and tests)"
+  - "Optional suite: aprf-assessment/imports/feedback-promotion-governance/*.{json}"
+collect:
+  - "Detect feedback/memory promotion paths and policy/approval gates"
+  - "Detect ungated-promotion deny tests"
+  - "Ingest inventory; write feedback-promotion-governance-report.json"
+emits:
+  nodeClass: policy
+  refPattern: "aprf-assessment/imports/feedback-promotion-governance/*"
+  signals:
+    - feedback-promotion-governance
+    - dg-m3
+    - repo-feedback-promotion
+mapsToChecks: [DG-M3]
+whenUnavailable: >
+  Path signals alone are PARTIAL. DG-M3 PASS needs imported
+  coversAllPromotionPaths, missingGateCount=0, and ungatedPromotionDenied with
+  measuredAt ≤90 days. No feedback→durable/training surface → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline promotion-gate heuristics + optional imported deny-test JSON.

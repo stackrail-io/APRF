@@ -149,7 +149,8 @@ categoryDefaults:
       - "**/rag/**"
       - "**/index*"
       - "**/*lineage*"
-    signals: [corpus ownership, labeling, refresh]
+    plugins: [rag-corpus-governance, dataset-provenance-governance, feedback-promotion-governance, corpus-freshness-metrics, train-serve-skew-monitor, dataset-cards-registry, repo-filesystem]
+    signals: [corpus ownership, labeling, refresh, dataset provenance, feedback promotion, freshness metrics, train-serve skew, dataset cards]
   memory-management:
     search:
       - "**/*memory*"
@@ -688,6 +689,101 @@ checks:
       PASS if platform-dx-metrics statusHint=pass (ttsp+bypass formulas + ≥30d series + bypass alert/threshold + named owner + measuredAt ≤90d).
       PARTIAL if metric name signals without complete import.
       NOT_APPLICABLE when no AI-platform DX metric signals.
+  DG-M1:
+    requiredEvidence:
+      - "Production corpus/index inventory with owner, version ID, refresh cadence"
+      - "Stale-beyond-cadence flagged or rebuilt under imports/rag-corpus-governance/"
+    searchExtra:
+      - "**/corpus*"
+      - "**/rag/**"
+      - "**/*vector*"
+      - "**/*pinecone*"
+      - "**/*weaviate*"
+      - "**/*qdrant*"
+    plugins: [rag-corpus-governance, repo-filesystem]
+    naWhen: "No production retrieval corpora or vector indexes"
+    evaluation: |
+      PASS if rag-corpus-governance statusHint=pass (coversAllProductionIndexes + missing owner/version/cadence = 0 + staleUnhandledCount=0 + measuredAt ≤90d).
+      PARTIAL if corpus/index config signals without complete import.
+      NOT_APPLICABLE when no RAG/corpus/index signals.
+  DG-M2:
+    requiredEvidence:
+      - "Dataset cards with provenance + quality criteria for eval/fine-tune sets"
+      - "Promotion blocked if missing under imports/dataset-provenance-governance/"
+    searchExtra:
+      - "**/*dataset*card*"
+      - "**/*datasheet*"
+      - "**/*provenance*"
+      - "**/*fine*tune*"
+      - "**/*eval*set*"
+    plugins: [dataset-provenance-governance, promptfoo, repo-filesystem]
+    naWhen: "No production eval gates or fine-tune datasets"
+    evaluation: |
+      PASS if dataset-provenance-governance statusHint=pass (coversAllEvalAndFinetuneDatasets + missing provenance/quality = 0 + promotionBlockedIfMissing + measuredAt ≤90d).
+      PARTIAL if dataset-card signals without complete import.
+      NOT_APPLICABLE when no eval/fine-tune dataset signals.
+  DG-M3:
+    requiredEvidence:
+      - "Promotion policy + policy/approval gates on feedback→durable/training paths"
+      - "Ungated deny tests under imports/feedback-promotion-governance/"
+    searchExtra:
+      - "**/*feedback*"
+      - "**/*promotion*"
+      - "**/*durable*memory*"
+      - "**/*thumbs*"
+      - "**/*rlhf*"
+    plugins: [feedback-promotion-governance, human-approval-gates, repo-filesystem]
+    naWhen: "No feedback→durable memory/training write path"
+    evaluation: |
+      PASS if feedback-promotion-governance statusHint=pass (coversAllPromotionPaths + missingGateCount=0 + ungatedPromotionDenied + measuredAt ≤90d).
+      PARTIAL if promotion-path signals without complete import.
+      NOT_APPLICABLE when no feedback/memory promotion signals.
+  DG-R1:
+    requiredEvidence:
+      - "Freshness SLOs for each critical corpus"
+      - "≥95% meet-rate (≤7d) + freshness alert under imports/corpus-freshness-metrics/"
+    searchExtra:
+      - "**/*freshness*"
+      - "**/*coverage*metric*"
+      - "**/*corpus*slo*"
+      - "**/*stale*alert*"
+    plugins: [corpus-freshness-metrics, rag-corpus-governance, repo-filesystem]
+    naWhen: "No critical production corpora"
+    evaluation: |
+      PASS if corpus-freshness-metrics statusHint=pass (coversAllCriticalCorpora + freshnessSloDefinedForAll + sampledMeetSloPct≥95 + freshnessAlertConfigured + measuredAt ≤7d).
+      PARTIAL if freshness/metric signals without complete import.
+      NOT_APPLICABLE when no corpus freshness signals.
+  DG-R2:
+    requiredEvidence:
+      - "Skew monitor for each production embedding/feature pipeline"
+      - "≤7d skew job + threshold + breach ticket/page under imports/train-serve-skew-monitor/"
+    searchExtra:
+      - "**/*skew*"
+      - "**/*train*serve*"
+      - "**/*embedding*drift*"
+      - "**/*feature*drift*"
+      - "**/*psi*"
+    plugins: [train-serve-skew-monitor, repo-filesystem]
+    naWhen: "No production embedding or feature pipelines"
+    evaluation: |
+      PASS if train-serve-skew-monitor statusHint=pass (coversAllProductionPipelines + skewJobWithin7Days + thresholdDocumented + breachCreatesTicketOrPage + measuredAt ≤7d).
+      PARTIAL if skew-monitor signals without complete import.
+      NOT_APPLICABLE when no embedding/feature skew signals.
+  DG-R3:
+    requiredEvidence:
+      - "Dataset cards with purpose, source, PII handling, last-updated ≤12 months"
+      - "Major-set inventory under imports/dataset-cards-registry/"
+    searchExtra:
+      - "**/*dataset*card*"
+      - "**/*datasheet*"
+      - "**/*fine*tune*"
+      - "**/*eval*set*"
+    plugins: [dataset-cards-registry, dataset-provenance-governance, repo-filesystem]
+    naWhen: "No major eval/fine-tune sets in production promotion"
+    evaluation: |
+      PASS if dataset-cards-registry statusHint=pass (coversAllMajorEvalFinetuneSets + missing purpose/source/PII = 0 + staleCardCount=0 + measuredAt ≤90d).
+      PARTIAL if card signals without complete import.
+      NOT_APPLICABLE when no major dataset-card signals.
   DEP-M1:
     requiredEvidence:
       - "Documented/tested rollback for model/prompt/tool promotion"

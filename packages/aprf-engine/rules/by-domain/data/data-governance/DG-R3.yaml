@@ -1,52 +1,73 @@
 id: "DG-R3"
 category: "data-governance"
-title: "Production systems should have dataset cards for major eval and fine-tune sets"
-description: "Dataset cards for major eval and fine-tune sets"
-whyItMatters: "Dataset cards for major eval and fine-tune sets Failing this leaves a production gap
-  against: 100% of major eval/fine-tune sets used in production promotion have a dataset card with
-  purpose, source, PII handling, and last-updated date ≤12 months"
+title: "Major eval and fine-tune sets should have dataset cards with purpose, source, and PII handling"
+description: >
+  Every major eval or fine-tune set used in production promotion shall have a
+  dataset card covering purpose, source, PII handling, and a last-updated date
+  within 12 months.
+whyItMatters: >
+  Thin provenance notes are not enough to operate major eval and fine-tune
+  corpora. Without purpose, source, and PII handling on a living card, teams
+  cannot tell what a set is for, whether it may leave the boundary, or when it
+  went stale. Annual freshness keeps cards from becoming abandoned wiki pages.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "100% of major eval/fine-tune sets used in production promotion have a dataset card
-  with purpose, source, PII handling, and last-updated date ≤12 months"
+passCondition: >
+  100% of major eval/fine-tune sets used in production promotion have a dataset
+  card with purpose, source, PII handling, and last-updated date ≤12 months
+  (inventory measuredAt ≤90 days; card last-updated ≤365 days).
 evidenceRequired:
-  - "Dataset cards (or equivalent metadata) for each major eval and fine-tune corpus in the registry"
+  - "Dataset cards (or registry metadata) for each major eval and fine-tune corpus"
+  - "Fields covering purpose, source, PII handling, and last-updated date"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-dataset-cards"
+      params:
+        hint: >
+          Discover dataset cards/datasheets for major eval and fine-tune sets
+          with purpose, source, PII handling, and last-updated signals.
     - id: "manual-attest"
       params:
-        hint: "Dataset cards (or equivalent metadata) for each major eval and fine-tune corpus in the
-          registry"
-manualVerification: "For this Check (Dataset cards for major eval and fine-tune sets): inspect
-  current evidence for [Dataset cards (or equivalent metadata) for each major eval and fine-tune
-  corpus in the registry] and confirm the pass condition holds — 100% of major eval/fine-tune sets
-  used in production promotion have a dataset card with purpose, source, PII handling, and
-  last-updated date ≤12 months"
-falsePositiveGuidance: "(Data Governance & Quality): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove 100% coverage, attest major-set inventory
+          with zero missing purpose/source/PII fields and cards updated within
+          12 months (inventory measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm major eval or fine-tune sets are used in production promotion. If
+  none, score NOT_APPLICABLE. 2) Inventory those major sets. 3) Confirm each
+  has a dataset card with purpose, source, and PII handling. 4) Confirm
+  last-updated is within 12 months. 5) PASS only if coverage is 100% and
+  freshness holds. Provenance/quality notes alone without purpose, source, and
+  PII fields do not satisfy. Cards older than 12 months do not satisfy.
+falsePositiveGuidance: >
+  Do not pass empty Hugging Face card stubs. Do not pass purpose without source
+  or PII handling (or the reverse). Do not pass minor fixture sets as “major”
+  production-promotion corpora. Do not pass cards with unknown last-updated.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Dataset cards for major eval and fine-tune sets"
-  - "Retain evidence artifacts required by this Check, starting with: Dataset cards (or equivalent
-    metadata) for each major eval and fine-tune corpus in the registry"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish dataset cards with purpose, source, PII handling, and last-updated for every major set"
+  - "Review cards at least annually"
+  - "Retain inventory under imports/dataset-cards-registry/"
+  - "Block promotion that references a major set without a current card"
 references:
   - title: "NIST AI RMF — Map and Measure (data)"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
   - title: "ML systems engineering — data quality practices"
     url: "https://ml-ops.org/"
 relatedRules:
-  - "DG-M1"
   - "DG-M2"
-  - "DG-M3"
   - "DG-R1"
   - "DG-R2"
+  - "EVL-M1"
+  - "PRI-M1"
+  - "MOD-M1"
 tags:
   - "data-governance"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "dataset-cards"
 applicability:
   technologies:
     - "vector-databases"

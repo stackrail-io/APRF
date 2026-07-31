@@ -1,39 +1,58 @@
 id: "DG-R1"
 category: "data-governance"
-title: "Production systems should have automated freshness and coverage metrics for critical corpora"
-description: "Automated freshness and coverage metrics for critical corpora"
-whyItMatters: "Automated freshness and coverage metrics for critical corpora Failing this leaves a
-  production gap against: Each critical corpus has a documented freshness SLO (e.g. max age hours);
-  ≥95% of sampled docs meet the SLO in the last 7 days; alert fires on freshness breach"
+title: "Critical corpora should have automated freshness and coverage metrics"
+description: >
+  Each critical corpus shall have a documented freshness SLO, ≥95% of sampled
+  docs shall meet that SLO in the last 7 days, and an alert shall fire on
+  freshness breach.
+whyItMatters: >
+  Without automated freshness metrics and alerts, stale corpora still serve
+  production quietly. Coverage gaps hide missing documents that never enter
+  retrieval. Measured SLO compliance plus breach alerts turn index governance
+  into an operable control loop.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Each critical corpus has a documented freshness SLO (e.g. max age hours); ≥95% of
-  sampled docs meet the SLO in the last 7 days; alert fires on freshness breach"
+passCondition: >
+  Each critical corpus has a documented freshness SLO (e.g. max age hours);
+  ≥95% of sampled docs meet the SLO in the last 7 days; an alert fires on
+  freshness breach (sample/alert evidence measuredAt ≤7 days).
 evidenceRequired:
-  - "Corpus freshness dashboard (or job report) + alert config export covering each critical corpus
-    ID"
+  - "Freshness SLO definitions for each critical corpus ID"
+  - "Dashboard or job report showing ≥95% SLO compliance over the last 7 days"
+  - "Alert config (or firing proof) covering freshness breaches"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-corpus-freshness"
+      params:
+        hint: >
+          Discover corpus freshness/coverage metric configs, SLO definitions,
+          dashboards/jobs, and freshness-breach alerts.
     - id: "manual-attest"
       params:
-        hint: "Corpus freshness dashboard (or job report) + alert config export covering each critical
-          corpus ID"
-manualVerification: "For this Check (Automated freshness and coverage metrics for critical corpora):
-  inspect current evidence for [Corpus freshness dashboard (or job report) + alert config export
-  covering each critical corpus ID] and confirm the pass condition holds — Each critical corpus has
-  a documented freshness SLO (e.g. max age hours); ≥95% of sampled docs meet the SLO in the last 7
-  days; alert fires on freshness breach"
-falsePositiveGuidance: "(Data Governance & Quality): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove compliance, attest critical-corpus
+          coverage, freshness SLOs, ≥95% sample meet-rate, and alert on breach
+          (measuredAt ≤7 days).
+manualVerification: >
+  1) Confirm critical production corpora/indexes exist. If none, score
+  NOT_APPLICABLE. 2) Locate freshness SLO (max age / freshness hours) per
+  critical corpus. 3) Review last-7-day sample or job report: ≥95% of sampled
+  docs meet the SLO. 4) Confirm an alert fires (or is configured to page)
+  on freshness breach. 5) PASS only if SLOs, sample compliance, and alert
+  hold. Ownership/cadence inventory without metrics does not satisfy. One-off manual
+  audits older than 7 days do not satisfy the sample window.
+falsePositiveGuidance: >
+  Do not pass cadence docs without a numeric freshness SLO. Do not pass a
+  dashboard with no per-corpus series. Do not pass sample windows older than
+  7 days. Do not pass logging-only “alerts” that never notify an owner.
+  Named exceptions need owner and expiry ≤30 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Automated freshness and coverage metrics for critical
-    corpora"
-  - "Retain evidence artifacts required by this Check, starting with: Corpus freshness dashboard (or
-    job report) + alert config export covering each critical corpus ID"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Define freshness SLOs for every critical corpus ID"
+  - "Publish automated freshness (and coverage) jobs/dashboards with ≥95% meet-rate"
+  - "Wire freshness-breach alerts to an owned channel"
+  - "Retain sample/alert proof under imports/corpus-freshness-metrics/"
 references:
   - title: "NIST AI RMF — Map and Measure (data)"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -42,13 +61,15 @@ references:
 relatedRules:
   - "DG-M1"
   - "DG-M2"
-  - "DG-M3"
   - "DG-R2"
-  - "DG-R3"
+  - "OBS-M1"
+  - "OBS-M2"
 tags:
   - "data-governance"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "freshness"
+  - "coverage"
 applicability:
   technologies:
     - "vector-databases"

@@ -165,6 +165,30 @@ DX-R3 DX metrics (TTSP + bypass rate):
   npm run aprf:dx-metrics -- --target <app> --out <app>/aprf-assessment
   # PASS needs formulas + ≥30d series + bypass alert/owner under imports/platform-dx-metrics/
 
+DG-M1 production RAG corpus/index ownership + cadence:
+  npm run aprf:rag-corpus -- --target <app> --out <app>/aprf-assessment
+  # PASS needs complete inventory under imports/rag-corpus-governance/
+
+DG-M2 eval/fine-tune dataset provenance + quality:
+  npm run aprf:dataset-provenance -- --target <app> --out <app>/aprf-assessment
+  # PASS needs inventory + promotionBlockedIfMissing under imports/dataset-provenance-governance/
+
+DG-M3 feedback/memory promotion gates:
+  npm run aprf:feedback-promotion -- --target <app> --out <app>/aprf-assessment
+  # PASS needs gated paths + ungatedPromotionDenied under imports/feedback-promotion-governance/
+
+DG-R1 critical corpus freshness metrics:
+  npm run aprf:corpus-freshness -- --target <app> --out <app>/aprf-assessment
+  # PASS needs SLOs + ≥95% meet-rate + alert under imports/corpus-freshness-metrics/
+
+DG-R2 train/serve skew monitoring:
+  npm run aprf:train-serve-skew -- --target <app> --out <app>/aprf-assessment
+  # PASS needs recent skew job + threshold + breach ticket/page under imports/train-serve-skew-monitor/
+
+DG-R3 major eval/fine-tune dataset cards:
+  npm run aprf:dataset-cards -- --target <app> --out <app>/aprf-assessment
+  # PASS needs purpose/source/PII + ≤12mo cards under imports/dataset-cards-registry/
+
 Import runtime evidence without live APIs:
   mkdir -p <out>/imports/langsmith && cp traces.json <out>/imports/langsmith/
 `);

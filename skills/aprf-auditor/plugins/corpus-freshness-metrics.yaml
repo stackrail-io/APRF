@@ -1,0 +1,30 @@
+id: corpus-freshness-metrics
+title: Critical corpus freshness SLO + alerts (DG-R1)
+version: "0.2.0"
+executor: collectors/corpus-freshness-metrics.ts
+evidenceClass: runtime-config
+alsoEmits: [code]
+detectorIds: [repo-corpus-freshness]
+inputs:
+  - "Target repo (freshness/coverage metric configs, SLOs, alerts)"
+  - "Optional suite: aprf-assessment/imports/corpus-freshness-metrics/*.{json}"
+collect:
+  - "Detect freshness/coverage metric and SLO signals for corpora"
+  - "Detect freshness-breach alert configs"
+  - "Ingest sample compliance; write corpus-freshness-metrics-report.json"
+emits:
+  nodeClass: runtime-config
+  refPattern: "aprf-assessment/imports/corpus-freshness-metrics/*"
+  signals:
+    - corpus-freshness-metrics
+    - dg-r1
+    - repo-corpus-freshness
+mapsToChecks: [DG-R1]
+whenUnavailable: >
+  Metric config alone is PARTIAL. DG-R1 PASS needs imported
+  coversAllCriticalCorpora + freshnessSloDefinedForAll + sampledMeetSloPct≥95
+  + freshnessAlertConfigured with measuredAt ≤7 days. No critical corpora →
+  NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline freshness-config heuristics + optional imported sample JSON.

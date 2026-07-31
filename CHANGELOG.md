@@ -13,12 +13,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 - Rewrote **agent-governance** pillar (goal-conflict plan policy) from template stub to hybrid Check + collector; synced `aprf-spec.json` method to hybrid.
 - Rewrote **human-approval** Checks **HUM-M1–M4, HUM-R1, HUM-R3** from template stubs to hybrid catalog quality; added `human-approval*` collectors; synced `aprf-spec.json` human-approval pillar.
 - Rewrote **cost-optimization** from template stub to hybrid Check + collectors; synced `aprf-spec.json` method to hybrid.
-- Rewrote **DX-M1** (AI golden-path documentation) from template stub to hybrid Check + `platform-golden-path` collector; synced `aprf-spec.json` method to hybrid.
-- Rewrote **DX-M2** (AI pipeline auth/secret-scan/eval gates) from template stub to hybrid Check + `platform-ai-pipeline-gates` collector; synced `aprf-spec.json` method to hybrid.
-- Demoted former **DX-M3** → **DX-R4** (AI platform ownership + support channel): recommended gate, `requiredFromLevel` 4; collector remains `platform-ownership-support`; removed from gate blockers.
-- Rewrote **DX-R2** (inner-loop eval runners before PR) from template stub to hybrid Check + `platform-inner-loop-evals` collector; synced `aprf-spec.json` method to hybrid.
-- Rewrote **DX-R3** (TTSP + bypass DX metrics) from template stub to hybrid Check + `platform-dx-metrics` collector; synced `aprf-spec.json` method to hybrid.
-- Rewrote **DX-R1** (agent/RAG/MCP scaffolding templates) from template stub to hybrid Check + `platform-scaffolding-templates` collector; synced `aprf-spec.json` requirement/passCondition.
+- Rewrote **cross-cutting** platform-engineering Checks (**DX-M1–M2**, **DX-R1–R4**; former DX-M3 demoted to DX-R4) from template stubs to hybrid quality with collectors; synced `aprf-spec.json`.
+- Rewrote **DG-M1** (production RAG corpus/index ownership + cadence) from template stub to hybrid Check + `rag-corpus-governance` collector; synced `aprf-spec.json` passCondition freshness.
+- Rewrote **DG-M2** (eval/fine-tune dataset provenance + quality criteria) from template stub to hybrid Check + `dataset-provenance-governance` collector; synced `aprf-spec.json` method to hybrid.
+- Rewrote **DG-M3** (feedback/memory promotion gates) from template stub to hybrid Check + `feedback-promotion-governance` collector; kept mandatory (write-path integrity); synced `aprf-spec.json` method to hybrid.
+- Rewrote **DG-R1** (critical corpus freshness SLO + alerts) from template stub to hybrid Check + `corpus-freshness-metrics` collector; synced `aprf-spec.json` method to hybrid.
+- Rewrote **DG-R2** (train/serve skew monitoring) from template stub to hybrid Check + `train-serve-skew-monitor` collector; synced `aprf-spec.json` method to hybrid.
+- Rewrote **DG-R3** (major eval/fine-tune dataset cards) from template stub to hybrid Check + `dataset-cards-registry` collector; synced `aprf-spec.json` method to hybrid.
 
 ### Added
 - Portable **APRF Auditor** skill under [`skills/aprf-auditor/`](skills/aprf-auditor/): vendor-neutral local assessment package (`system.md`, `workflow.md`, evidence map, scoring, output schema, adapters for Cursor/Claude/Codex/Copilot/MCP). No StackRail backend required.

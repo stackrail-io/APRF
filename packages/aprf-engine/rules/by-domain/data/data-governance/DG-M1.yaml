@@ -1,41 +1,58 @@
 id: "DG-M1"
 category: "data-governance"
 title: "Production retrieval corpora and indexes must have owners, versioning, and refresh cadence"
-description: "Production retrieval corpora and indexes shall have owners, versioning, and refresh cadence"
-whyItMatters: "Production retrieval corpora and indexes shall have owners, versioning, and refresh
-  cadence Failing this leaves a production gap against: 100% of production indexes have owner +
-  version ID + refresh cadence; 0 indexes missing any field; stale beyond cadence flagged or
-  rebuilt"
+description: >
+  Every production retrieval corpus and index shall have a named owner, a
+  version ID, and a refresh cadence; indexes stale beyond cadence shall be
+  flagged or rebuilt.
+whyItMatters: >
+  Unowned or unversioned retrieval indexes silently drift—stale chunks,
+  orphaned embeddings, and unknown blast radius when content changes. Without
+  a refresh cadence and stale handling, RAG answers degrade while looking
+  production-ready. An inventory that covers owner, version, and cadence turns
+  corpora into operable assets.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "100% of production indexes have owner + version ID + refresh cadence; 0 indexes
-  missing any field; stale beyond cadence flagged or rebuilt"
+passCondition: >
+  100% of production indexes have owner + version ID + refresh cadence;
+  0 indexes missing any field; stale beyond cadence are flagged or rebuilt
+  (inventory measuredAt ≤90 days).
 evidenceRequired:
-  - "Corpus/index inventory with owner, version ID, and refresh schedule"
+  - "Corpus/index inventory listing production indexes with owner, version ID, and refresh schedule"
+  - "Evidence stale-beyond-cadence indexes are flagged or rebuilt"
 detection:
   capability: "hybrid"
   detectors:
     - id: "repo-rag-corpus-config"
-      params: {}
+      params:
+        hint: >
+          Discover RAG corpus/index configs and inventories with owner,
+          version, and refresh/cadence signals.
     - id: "manual-attest"
       params:
-        hint: "Corpus/index inventory with owner, version ID, and refresh schedule"
-manualVerification: "For this Check (Production retrieval corpora and indexes must have owners,
-  versioning, and refresh cadence): inspect current evidence for [Corpus/index inventory with owner,
-  version ID, and refresh schedule] and confirm the pass condition holds — 100% of production
-  indexes have owner + version ID + refresh cadence; 0 indexes missing any field; stale beyond
-  cadence flagged or rebuilt"
-falsePositiveGuidance: "(Data Governance & Quality): when automation and attestation disagree,
-  prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal
-  covers the gap."
+        hint: >
+          If automation cannot prove 100% coverage, attest a production
+          inventory with zero missing owner/version/cadence fields and stale
+          handling (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the system uses production retrieval corpora or vector indexes.
+  If none, score NOT_APPLICABLE. 2) Obtain the corpus/index inventory for
+  production. 3) Confirm every production index has owner, version ID, and
+  refresh cadence. 4) Confirm indexes past cadence are flagged or rebuilt.
+  5) PASS only if coverage is 100% and stale handling holds. Dev-only indexes
+  do not substitute for production. Eval/fine-tune provenance cards do not
+  satisfy retrieval-index governance.
+falsePositiveGuidance: >
+  Do not pass a README that names a vector DB without an inventory. Do not
+  pass partial inventories that omit owner, version, or cadence. Do not pass
+  “refresh when needed” without a cadence. Do not pass stale indexes that are
+  neither flagged nor rebuilt. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Production retrieval corpora and indexes must have owners,
-    versioning, and refresh cadence"
-  - "Retain evidence artifacts required by this Check, starting with: Corpus/index inventory with
-    owner, version ID, and refresh schedule"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish a production corpus/index inventory with owner, version ID, and refresh cadence"
+  - "Alert or rebuild when indexes exceed cadence"
+  - "Retain inventory exports under imports/rag-corpus-governance/"
+  - "Block new production index registration until owner/version/cadence are set"
 references:
   - title: "NIST AI RMF — Map and Measure (data)"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -46,11 +63,14 @@ relatedRules:
   - "DG-M3"
   - "DG-R1"
   - "DG-R2"
-  - "DG-R3"
+  - "MEM-M1"
+  - "CTX-M1"
 tags:
   - "data-governance"
   - "mandatory"
   - "hybrid"
+  - "rag"
+  - "corpus"
 applicability:
   technologies:
     - "vector-databases"

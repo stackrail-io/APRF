@@ -37,6 +37,12 @@ import { platformOwnershipSupportCollector } from "./platform-ownership-support.
 import { platformScaffoldingTemplatesCollector } from "./platform-scaffolding-templates.ts";
 import { platformInnerLoopEvalsCollector } from "./platform-inner-loop-evals.ts";
 import { platformDxMetricsCollector } from "./platform-dx-metrics.ts";
+import { ragCorpusGovernanceCollector } from "./rag-corpus-governance.ts";
+import { datasetProvenanceGovernanceCollector } from "./dataset-provenance-governance.ts";
+import { feedbackPromotionGovernanceCollector } from "./feedback-promotion-governance.ts";
+import { corpusFreshnessMetricsCollector } from "./corpus-freshness-metrics.ts";
+import { trainServeSkewMonitorCollector } from "./train-serve-skew-monitor.ts";
+import { datasetCardsRegistryCollector } from "./dataset-cards-registry.ts";
 import {
   awsCollector,
   azureCollector,
@@ -81,6 +87,12 @@ export const COLLECTORS: Collector[] = [
   platformScaffoldingTemplatesCollector,
   platformInnerLoopEvalsCollector,
   platformDxMetricsCollector,
+  ragCorpusGovernanceCollector,
+  datasetProvenanceGovernanceCollector,
+  feedbackPromotionGovernanceCollector,
+  corpusFreshnessMetricsCollector,
+  trainServeSkewMonitorCollector,
+  datasetCardsRegistryCollector,
   a2aPeerAuthCollector,
   awsCollector,
   azureCollector,
