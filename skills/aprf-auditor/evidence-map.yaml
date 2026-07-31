@@ -409,6 +409,48 @@ checks:
       PASS if a2a-peer-auth report statusHint=pass (auth+scope + unauth/forged/over-scoped deny + measuredAt ≤90d).
       PARTIAL if handoff/auth config found without measured deny results.
       NOT_APPLICABLE when no multi-agent handoff signals.
+  AGN-R1:
+    requiredEvidence:
+      - "Versioned goal-conflict / disallowed-goal plan policy with named owner"
+      - "Deny/allow traces; imported synthetic conflict deny ≤90d under imports/agent-goal-policy/"
+    searchExtra:
+      - "**/*goal*conflict*"
+      - "**/*plan*polic*"
+      - "**/*disallowed*goal*"
+    plugins: [agent-goal-policy, repo-filesystem]
+    naWhen: "No planning / side-effecting agents in system"
+    evaluation: |
+      PASS if agent-goal-policy report statusHint=pass (policy + owner + syntheticConflictDenied + measuredAt ≤90d).
+      PARTIAL if policy/deny-test signals found without complete import.
+      NOT_APPLICABLE when no agent/policy signals.
+  AGN-R2:
+    requiredEvidence:
+      - "Sandbox/simulation environment config for agent behaviors"
+      - "Imported linked pre-prod sim report ≤30d before release under imports/agent-sandbox-sim/"
+    searchExtra:
+      - "**/*sandbox*"
+      - "**/*simul*"
+      - "**/*pre*prod*"
+    plugins: [agent-sandbox-sim, repo-filesystem]
+    naWhen: "No agent behavior promotions / frozen agent behaviors"
+    evaluation: |
+      PASS if agent-sandbox-sim report statusHint=pass (sandbox env + linked run daysBeforeRelease≤30 + criteria + measuredAt ≤90d).
+      PARTIAL if sandbox/sim signals found without complete import.
+      NOT_APPLICABLE when no agent/sandbox signals.
+  AGN-R3:
+    requiredEvidence:
+      - "Versioned RACI / ownership register with Responsible + Accountable"
+      - "Imported register export with orphanCount=0 under imports/agent-raci-ownership/"
+    searchExtra:
+      - "**/*raci*"
+      - "**/*ownership*"
+      - "**/*owner*matrix*"
+    plugins: [agent-raci-ownership, repo-filesystem]
+    naWhen: "No production AI systems / agents"
+    evaluation: |
+      PASS if agent-raci-ownership report statusHint=pass (RACI + R/A + orphanCount=0 + coversAllProductionIds + measuredAt ≤90d).
+      PARTIAL if RACI signals found without complete import.
+      NOT_APPLICABLE when no agent/RACI signals.
   HUM-M1:
     requiredEvidence:
       - "Human approval path for high-impact actions"

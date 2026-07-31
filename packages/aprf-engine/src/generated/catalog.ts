@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:1a7901995f8a86f97cc254026526c189f4f17417c84fcfc2786b4692aa436e9a",
+  "generatedAt": "sha256:c370edd446caa69004c4e2edc7b36b278531288ec977ea8235d16c23623a884b",
   "ruleCount": 177,
   "domains": [
     {
@@ -878,34 +878,49 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "AGN-R1",
       "category": "agent-governance",
       "title": "Production systems should have goal conflict detection and policy checks before plan execution",
-      "description": "Goal conflict detection and policy checks before plan execution",
-      "whyItMatters": "Goal conflict detection and policy checks before plan execution Failing this leaves a production gap against: Agent planner runs policy checks before side-effecting tools; ≥1 synthetic conflict is denied in test or prod logs within 90 days; rules have a named owner",
+      "description": "Production agent planners should run policy checks for goal conflicts and disallowed goals before invoking side-effecting tools. Checks must be enforced by the platform or planner runtime—not by prompt wording alone— and denied plans must leave an observable deny/allow trace.\n",
+      "whyItMatters": "Agents optimize for stated goals; when a user, tool result, or peer injects a conflicting or disallowed objective, an unchecked planner will pursue it with the same tools and budgets as a legitimate task. Prompt-only “stay on mission” instructions are bypassable. Pre-tool policy gates convert goal conflicts into measurable denies with an accountable rule owner, instead of discovering overreach only after side effects land.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Agent planner runs policy checks before side-effecting tools; ≥1 synthetic conflict is denied in test or prod logs within 90 days; rules have a named owner",
+      "passCondition": "Agent planner runs policy checks for goal conflicts / disallowed goals before side-effecting tools; ≥1 synthetic conflict is denied in test or production logs within the last 90 days with retained deny/allow traces; the policy rule set has a named owner.\n",
       "evidenceRequired": [
-        "Pre-execution policy checks for agent plans (goal-conflict / disallowed-goal rules) + sample deny/allow traces"
+        "Versioned pre-execution policy rules (goal-conflict / disallowed-goal) with named owner",
+        "Sample deny/allow traces showing the planner gated side-effecting tools",
+        "≥1 synthetic conflict deny record (test or prod) ≤90 days"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-agent-goal-policy",
+            "params": {
+              "hint": "Discover goal-conflict / disallowed-goal / plan-policy gates that run before side-effecting tools, plus named owner and deny-test signals.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove a ≤90-day synthetic deny, attest policy rules with named owner plus a retained deny/allow trace for a synthetic conflict within 90 days.\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (Goal conflict detection and policy checks before plan execution): inspect current evidence for [Pre-execution policy checks for agent plans (goal-conflict / disallowed-goal rules) + sample deny/allow traces] and confirm the pass condition holds — Agent planner runs policy checks before side-effecting tools; ≥1 synthetic conflict is denied in test or prod logs within 90 days; rules have a named owner",
-      "falsePositiveGuidance": "(Agent Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production agents plan or invoke side-effecting tools. If none, score NOT_APPLICABLE. 2) Locate pre-execution policy (code, config, or policy engine) that evaluates goal conflicts / disallowed goals before tool calls. Prompt-only instructions without a gate fail. 3) Verify the rule set has a named owner. 4) Review ≥1 synthetic conflict deny in test or prod logs ≤90 days with deny/allow traces. 5) PASS only if gate + owner + fresh deny evidence all hold.\n",
+      "falsePositiveGuidance": "Do not pass on charter purpose text or system-prompt “refuse conflicting goals” without a pre-tool gate. Do not pass because tool allowlists exist (TOL)—those constrain tools, not goals. Do not pass a unit test that only asserts a config key without denying a conflicting goal. Sibling Checks (loop limits, kill switch, human approval) do not prove goal-conflict policy. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Goal conflict detection and policy checks before plan execution",
-        "Retain evidence artifacts required by this Check, starting with: Pre-execution policy checks for agent plans (goal-conflict / disallowed-goal rules) + sample deny/allow traces",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Add a pre-tool plan policy that denies conflicting or disallowed goals before side-effecting tools run",
+        "Assign a named owner to the goal-conflict / disallowed-goal rule set; version it in-repo or in the policy store",
+        "Add a synthetic conflict fixture that must be denied; retain deny/allow traces and gate releases on pass",
+        "Schedule a ≤90-day review of deny rates and rule coverage with the policy owner"
       ],
       "references": [
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
-          "title": "NIST AI RMF — Govern",
+          "title": "NIST AI Risk Management Framework — Govern / Manage",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
@@ -914,18 +929,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AGN-M2",
         "AGN-M3",
         "AGN-M4",
-        "AGN-R2"
+        "AGN-R2",
+        "TOL-M1",
+        "HUM-M1",
+        "SAF-M1"
       ],
       "tags": [
         "agent-governance",
         "recommended",
-        "manual"
+        "hybrid",
+        "goal-conflict",
+        "plan-policy"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -936,61 +953,70 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "AGN-R2",
       "category": "agent-governance",
       "title": "Production systems should have simulation/sandbox runs for new agent behaviors before production",
-      "description": "Simulation/sandbox runs for new agent behaviors before production",
-      "whyItMatters": "Simulation/sandbox runs for new agent behaviors before production Failing this leaves a production gap against: Last new agent behavior promoted to production has a linked sandbox run ≤30 days before release with pass/fail criteria recorded",
+      "description": "New or materially changed production agent behaviors should be exercised in a sandbox or simulation environment before promotion, with recorded pass/fail criteria. The last such promotion should link to a sandbox run completed within 30 days before release.\n",
+      "whyItMatters": "Agent behaviors that only meet unit tests or prompt reviews still fail in production under tool side effects, multi-step plans, and peer handoffs. Promoting unsimulated changes turns every release into a live experiment on customers and connected systems. A linked pre-prod sandbox run with explicit pass/fail criteria makes behavior risk reviewable before blast radius grows.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Last new agent behavior promoted to production has a linked sandbox run ≤30 days before release with pass/fail criteria recorded",
+      "passCondition": "Last new agent behavior promoted to production has a linked sandbox or simulation run completed ≤30 days before release with pass/fail criteria recorded; the sandbox/simulation environment used for agent behaviors is documented or configured.\n",
       "evidenceRequired": [
-        "Sandbox/simulation environment config for agents + last pre-prod simulation report for a behavior change"
+        "Sandbox/simulation environment config (or equivalent) for agent behaviors",
+        "Last pre-prod simulation/sandbox report for a behavior change, linked to the production promotion",
+        "Recorded pass/fail criteria and outcome for that run (≤30 days before release)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-agent-sandbox-sim",
+            "params": {
+              "hint": "Discover agent sandbox/simulation environment config and pre-prod sim/report or CI gate signals for behavior changes.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Sandbox/simulation environment config for agents + last pre-prod simulation report for a behavior change"
+              "hint": "If automation cannot prove linkage, attest the last production agent-behavior promotion with a sandbox/sim report ≤30 days before release and recorded pass/fail criteria.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Simulation/sandbox runs for new agent behaviors before production): inspect current evidence for [Sandbox/simulation environment config for agents + last pre-prod simulation report for a behavior change] and confirm the pass condition holds — Last new agent behavior promoted to production has a linked sandbox run ≤30 days before release with pass/fail criteria recorded",
-      "falsePositiveGuidance": "(Agent Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the system promotes new or changed agent behaviors to production. If agents never change behavior after initial deploy, score NOT_APPLICABLE with evidence of the freeze. 2) Locate the sandbox/simulation environment (config, staging stack, or documented sim harness) used for agent runs. 3) For the last promoted behavior change, open the linked sandbox/sim report and verify pass/fail criteria and outcome; confirm the run date is ≤30 days before the production release. 4) PASS only if environment + linked fresh report with criteria all hold. Prompt-only “we tested it” without a report fails.\n",
+      "falsePositiveGuidance": "Do not pass on generic staging deploys that never exercise agent tools/plans. Do not pass unit or eval suites that are not a sandbox/sim of the promoted behavior. Do not pass a sandbox report older than 30 days relative to the release, or one with no pass/fail criteria. Sibling Checks (charters, loop limits, goal-conflict policy) do not prove pre-prod simulation. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Simulation/sandbox runs for new agent behaviors before production",
-        "Retain evidence artifacts required by this Check, starting with: Sandbox/simulation environment config for agents + last pre-prod simulation report for a behavior change",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Stand up or document an agent sandbox/simulation environment that can run representative plans and tools safely",
+        "Require a linked sandbox/sim report with pass/fail criteria on every agent-behavior promotion PR/release",
+        "Gate production promotion when the linked run is missing, failed, or older than 30 days before release",
+        "Retain the last promotion’s sandbox report under imports/agent-sandbox-sim/ for assessment"
       ],
       "references": [
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
-          "title": "NIST AI RMF — Govern",
+          "title": "NIST AI Risk Management Framework — Govern / Manage",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
         "AGN-M1",
         "AGN-M2",
-        "AGN-M3",
-        "AGN-M4",
-        "AGN-R1"
+        "AGN-R1",
+        "AGN-R3",
+        "EVL-M1",
+        "CHG-M1",
+        "CHG-M3"
       ],
       "tags": [
         "agent-governance",
         "recommended",
-        "manual"
+        "hybrid",
+        "sandbox",
+        "simulation"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -1001,54 +1027,69 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "AGN-R3",
       "category": "agent-governance",
       "title": "Production systems should have formal RACI for agent ownership across teams",
-      "description": "Formal RACI for agent ownership across teams",
-      "whyItMatters": "Formal RACI for agent ownership across teams Failing this leaves a production gap against: Every production AI system ID has non-empty owner fields for required domains; inventory query returns 0 orphans",
+      "description": "Every production AI system and production agent should appear in a versioned RACI or ownership register that names Responsible and Accountable parties (and Consulted/Informed where used) across the teams that operate the agent fleet. Inventory queries should return 0 orphan system or agent IDs missing required ownership fields.\n",
+      "whyItMatters": "Agents cut across product, platform, security, and on-call teams. A single charter owner (AGN-M1) does not resolve who is Responsible vs Accountable when tools fail, spend spikes, or a peer agent misbehaves. Without a formal RACI, incidents stall on “whose agent is this?” and changes ship without a clear accountable steward. Cross-team ownership converts agent fleet risk into assignable duty.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Every production AI system ID has non-empty owner fields for required domains; inventory query returns 0 orphans",
+      "passCondition": "Every production AI system ID (and production agent ID in scope) has non-empty Responsible and Accountable owner fields for the organization’s required domains/roles; inventory query returns 0 orphans.\n",
       "evidenceRequired": [
-        "RACI or ownership register entry for the system"
+        "Versioned RACI or ownership register covering production AI systems / agents",
+        "Required ownership fields defined (at minimum Responsible + Accountable)",
+        "Inventory export or query result showing 0 orphans for those fields"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-agent-raci",
+            "params": {
+              "hint": "Discover RACI / ownership-register artifacts for agents or AI systems with Responsible/Accountable (and optional C/I) role signals.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove zero orphans, attest a versioned RACI register export with Responsible+Accountable filled for every production AI system/agent ID in scope.\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (Formal RACI for agent ownership across teams): inspect current evidence for [RACI or ownership register entry for the system] and confirm the pass condition holds — Every production AI system ID has non-empty owner fields for required domains; inventory query returns 0 orphans",
-      "falsePositiveGuidance": "(Agent Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Define the production AI system and agent ID scope (align with AGN-M1 inventory where present). If no production agents/systems, score NOT_APPLICABLE. 2) Open the RACI or ownership register; confirm required fields include at least Responsible and Accountable (document any additional required domains). 3) Query for orphans (empty/missing R or A). 4) PASS only if the query returns 0 orphans. A CODEOWNERS file alone or a single charter owner without RACI roles does not satisfy this Check unless it encodes R and A for every in-scope ID.\n",
+      "falsePositiveGuidance": "Do not pass on AGN-M1 charters that list one owner without Responsible vs Accountable across teams. Do not pass ORG-M2 system-domain owners as a substitute unless the same register explicitly covers agent IDs with RACI roles. Do not pass a stale register (>90 days) or a template with blank rows. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Formal RACI for agent ownership across teams",
-        "Retain evidence artifacts required by this Check, starting with: RACI or ownership register entry for the system",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Create a versioned agent/AI-system RACI register with Responsible and Accountable columns (add C/I as needed)",
+        "Backfill every production system and agent ID; fail closed on empty R or A",
+        "Export the register under imports/agent-raci-ownership/ with orphanCount=0 for assessments",
+        "Review RACI on agent promotion and at least every 90 days with a named steward"
       ],
       "references": [
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
-          "title": "NIST AI RMF — Govern",
+          "title": "NIST AI Risk Management Framework — Govern",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
         "AGN-M1",
-        "AGN-M2",
-        "AGN-M3",
-        "AGN-M4",
-        "AGN-R1"
+        "AGN-R1",
+        "AGN-R2",
+        "ORG-M2",
+        "ORG-M1",
+        "HUM-M1"
       ],
       "tags": [
         "agent-governance",
         "recommended",
-        "manual"
+        "hybrid",
+        "raci",
+        "ownership"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },

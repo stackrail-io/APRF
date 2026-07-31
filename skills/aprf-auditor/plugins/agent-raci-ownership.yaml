@@ -1,0 +1,30 @@
+id: agent-raci-ownership
+title: Agent / AI-system RACI ownership register (AGN-R3)
+version: "0.2.0"
+executor: collectors/agent-raci-ownership.ts
+evidenceClass: policy
+alsoEmits: [docs, code]
+detectorIds: [repo-agent-raci]
+inputs:
+  - "Target repo (RACI matrices, ownership registers for agents/AI systems)"
+  - "Optional export: aprf-assessment/imports/agent-raci-ownership/*.{json}"
+collect:
+  - "Detect RACI / ownership-register artifacts"
+  - "Detect Responsible + Accountable role signals"
+  - "Ingest imported register exports; write agent-raci-ownership-report.json"
+emits:
+  nodeClass: policy
+  refPattern: "aprf-assessment/imports/agent-raci-ownership/*"
+  signals:
+    - agent-raci-ownership
+    - agn-r3
+    - repo-agent-raci
+    - raci
+mapsToChecks: [AGN-R3]
+whenUnavailable: >
+  RACI docs alone are PARTIAL. AGN-R3 PASS needs imported register with
+  orphanCount=0, coversAllProductionIds=true, Responsible+Accountable complete,
+  and measuredAt ≤90 days. No production agents/systems → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline repo heuristics + optional imported RACI/ownership JSON.

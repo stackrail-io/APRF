@@ -101,6 +101,18 @@ AGN-M4 A2A peer auth:
   npm run aprf:a2a-auth -- --target <app> --out <app>/aprf-assessment
   # PASS needs deny suite under imports/a2a-peer-auth/
 
+AGN-R1 goal-conflict plan policy:
+  npm run aprf:agent-goal-policy -- --target <app> --out <app>/aprf-assessment
+  # PASS needs synthetic deny under imports/agent-goal-policy/
+
+AGN-R2 agent sandbox / simulation:
+  npm run aprf:agent-sandbox -- --target <app> --out <app>/aprf-assessment
+  # PASS needs linked ≤30d sim report under imports/agent-sandbox-sim/
+
+AGN-R3 agent RACI ownership:
+  npm run aprf:agent-raci -- --target <app> --out <app>/aprf-assessment
+  # PASS needs register export under imports/agent-raci-ownership/
+
 Import runtime evidence without live APIs:
   mkdir -p <out>/imports/langsmith && cp traces.json <out>/imports/langsmith/
 `);

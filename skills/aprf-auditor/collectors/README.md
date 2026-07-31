@@ -58,6 +58,9 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **agent-loop-limits** | `agent-loop-limits.ts` | agent limit config/tests | `imports/agent-loop-limits/` | — |
 | **agent-kill-switch** | `agent-kill-switch.ts` | kill API / cancel tests | `imports/agent-kill-switch/` | — |
 | **a2a-peer-auth** | `a2a-peer-auth.ts` | A2A handoff auth/scope | `imports/a2a-peer-auth/` | — |
+| **agent-goal-policy** | `agent-goal-policy.ts` | goal-conflict plan policy | `imports/agent-goal-policy/` | — |
+| **agent-sandbox-sim** | `agent-sandbox-sim.ts` | sandbox/sim before prod | `imports/agent-sandbox-sim/` | — |
+| **agent-raci-ownership** | `agent-raci-ownership.ts` | agent RACI register | `imports/agent-raci-ownership/` | — |
 
 ### AGN-M1 — agent charters
 
@@ -89,6 +92,30 @@ npm run aprf:agent-kill -- --target /path/to/app --out /path/to/app/aprf-assessm
 npm run aprf:a2a-auth -- --target /path/to/app --out /path/to/app/aprf-assessment
 # Optional PASS unlock — 100% deny suite (unauth / forged / over-scoped):
 # imports/a2a-peer-auth/suite.json
+```
+
+### AGN-R1 — goal-conflict plan policy
+
+```bash
+npm run aprf:agent-goal-policy -- --target /path/to/app --out /path/to/app/aprf-assessment
+# Optional PASS unlock — synthetic conflict deny ≤90d:
+# imports/agent-goal-policy/suite.json
+```
+
+### AGN-R2 — agent sandbox / simulation
+
+```bash
+npm run aprf:agent-sandbox -- --target /path/to/app --out /path/to/app/aprf-assessment
+# Optional PASS unlock — linked sim ≤30 days before release:
+# imports/agent-sandbox-sim/suite.json
+```
+
+### AGN-R3 — agent RACI ownership
+
+```bash
+npm run aprf:agent-raci -- --target /path/to/app --out /path/to/app/aprf-assessment
+# Optional PASS unlock — register export with orphanCount=0:
+# imports/agent-raci-ownership/register.json
 ```
 
 ### AUTHN-M1 — live auth probe

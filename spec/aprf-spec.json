@@ -3791,44 +3791,46 @@
       "engineeringPhilosophy": "Autonomy is a dial, not a virtue. Production agents have explicit charters: allowed goals, max steps, escalation paths, and kill switches. Multi-agent and A2A systems require governance of the mesh, not only of each node.",
       "whyItMatters": "Unconstrained agents loop, spend unbounded budget, escalate privileges across A2A links, or pursue goals that conflict with business and safety policy. Governance failures look like 'the agent went rogue' but are usually missing product controls.",
       "commonFailures": [
-        "No maximum step or time budget for agent loops",
-        "Agents that can redefine their own goals without oversight",
-        "A2A trust assumed by network presence alone",
-        "No kill switch or pause for runaway agents"
+        "No maximum step, wall-clock, or spawn-depth budget for agent loops",
+        "Agents that can redefine or pursue conflicting goals without a pre-tool policy gate",
+        "A2A trust assumed by network presence alone (no peer auth or scoped capabilities)",
+        "No operator kill switch, cancellation of in-flight/queued work, or drill evidence",
+        "Agent behavior promotions without a linked sandbox/simulation run",
+        "Orphan agent or AI-system IDs without Responsible/Accountable ownership"
       ],
       "mandatoryChecks": [
         {
           "id": "AGN-M1",
-          "requirement": "Each production agent shall have a documented charter: purpose, allowed tools, data scope, autonomy limits, and a named owner",
-          "artifact": "Versioned agent inventory listing every production agent with owner and charter URI/id; per-agent charter records covering purpose, tool allowlist reference, data scope, and autonomy limits",
-          "passCondition": "100% of production agents appear in an inventory with a charter that includes purpose, tool allowlist reference, data scope, autonomy limits, and named owner; inventory query returns 0 agents missing any required field",
+          "requirement": "Each production agent (any autonomous or semi-autonomous runtime that plans, loops, or invokes tools on behalf of a product capability\u2014including in-process agents, MCP clients/servers acting as agents, and A2A participants) shall have a versioned charter covering purpose, allowed tools, data scope, autonomy limits, and a named owner.",
+          "artifact": "Versioned agent inventory listing every production agent with owner and charter URI/id + Per-agent charter documents (or equivalent structured records) covering purpose, tool allowlist reference, data scope, and autonomy limits",
+          "passCondition": "100% of production agents appear in an inventory with a charter that includes purpose, tool allowlist reference, data scope, autonomy limits, and named owner; inventory query returns 0 agents missing any required field.",
           "method": "automated",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "AGN-M2",
-          "requirement": "Hard limits shall exist on steps, wall-clock time, and recursive agent spawning, enforced by the platform or runtime (not prompt wording alone)",
-          "artifact": "Runtime/platform configuration declaring max steps, wall-clock timeout, and spawn depth for each production agent (or shared policy bound) + enforcement test results showing abort/fail-closed when each limit is exceeded",
-          "passCondition": "100% of production agents have finite max-steps, wall-clock timeout, and spawn-depth \u2264 configured bound; enforcement tests show the run aborts (or otherwise fails closed) when any limit is exceeded; 0 production agents rely solely on prompt text for these limits",
+          "requirement": "Every production agent runtime shall enforce finite hard limits on plan/tool steps, wall-clock execution time, and recursive agent spawning (child/sub-agent depth). Limits must be enforced by the platform or runtime\u2014not by prompt wording alone\u2014and exceeding a limit must abort or fail closed the run.",
+          "artifact": "Runtime/platform configuration declaring max steps, wall-clock timeout, and spawn depth for each production agent (or shared policy bound) + Enforcement test results showing abort/fail-closed when each limit is exceeded (steps, time, spawn depth)",
+          "passCondition": "100% of production agents have finite max-steps, wall-clock timeout, and spawn-depth \u2264 configured bound; enforcement tests show the run aborts (or otherwise fails closed) when any limit is exceeded; 0 production agents rely solely on prompt text for these limits.",
           "method": "automated",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "AGN-M3",
-          "requirement": "Operators shall be able to pause or terminate production agent runs through a control-plane action that stops further planning and in-flight or queued tool/MCP/A2A side effects within a documented time-to-effect SLO; the control must not depend on the model cooperating and must not be disableable by the agent runtime itself",
-          "artifact": "Kill-switch/pause runbook (authorized operators, scope, numeric time-to-effect SLO) + cancellation suite proving queued work, running tasks, and child agents stop + \u226490-day drill or production use record with invoke\u2192effect timestamps; architecture attest that the agent cannot disable the kill path",
-          "passCondition": "Documented pause/terminate control exists for production agents; control is restricted to authorized operators (not end-user-only and not model-invoked); \u22651 successful pause or terminate action in drill or production in the last 90 days shows recorded time-to-effect \u2264 documented numeric SLO; evidence shows further tool/MCP/A2A side effects for that run (and its spawned children, if any) were stopped or drained without requiring the model to refuse",
+          "requirement": "Authorized operators shall be able to pause or terminate production agent runs through a control-plane action that stops further planning and in-flight or queued tool/MCP/A2A side effects within a documented time-to-effect SLO. The control must not depend on the model cooperating and must not be disableable by the agent runtime itself.",
+          "artifact": "Kill-switch/pause runbook: who may invoke, scope (run / agent type / fleet), expected effect, and numeric time-to-effect SLO + Successful drill or production use record (\u226490 days) with timestamps for invoke \u2192 effect, covering at least one production agent path + Cancellation suite or import proving queued work, running tasks, and child agents stop without new dispatch",
+          "passCondition": "Documented pause/terminate control exists for production agents; control is restricted to authorized operators (not end-user-only and not model-invoked); \u22651 successful pause or terminate action in drill or production in the last 90 days shows recorded time-to-effect \u2264 documented numeric SLO; evidence shows further tool/MCP/A2A side effects for that run (and its spawned children, if any) were stopped or drained without requiring the model to refuse.",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "AGN-M4",
-          "requirement": "A2A and multi-agent handoffs shall authenticate peers and authorize a scoped capability set (tools, data, actions) independent of network presence",
-          "artifact": "Inventory of production A2A/multi-agent handoff paths with authn/authz mechanism per path + capability token/schema examples + negative test results for unauthenticated, forged identity, and over-scoped capability cases",
-          "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers and scoped capabilities; negative tests show unauthenticated, forged-peer, and over-scoped handoffs denied at 100%; 0 production handoff paths that accept anonymous or network-presence-only trust",
+          "requirement": "Every production agent-to-agent (A2A) or multi-agent handoff path shall authenticate the peer identity and authorize a scoped capability set (tools, data, actions) independent of network presence. Unauthenticated, spoofed, or over-scoped handoffs shall be denied by the platform\u2014not by prompt instructions alone.",
+          "artifact": "Inventory of production A2A/multi-agent handoff paths with authn/authz mechanism per path + Capability token/schema (or equivalent) examples showing scoped grants for handoffs + Negative test results: unauthenticated, forged identity, and over-scoped capability cases denied at 100%",
+          "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers and scoped capabilities; negative tests show unauthenticated, forged-peer, and over-scoped handoffs denied at 100%; 0 production handoff paths that accept anonymous or network-presence-only trust.",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3837,55 +3839,67 @@
       "recommendedChecks": [
         {
           "id": "AGN-R1",
-          "requirement": "Goal conflict detection and policy checks before plan execution",
-          "artifact": "Pre-execution policy checks for agent plans (goal-conflict / disallowed-goal rules) + sample deny/allow traces",
-          "passCondition": "Agent planner runs policy checks before side-effecting tools; \u22651 synthetic conflict is denied in test or prod logs within 90 days; rules have a named owner",
-          "method": "manual",
+          "requirement": "Production agent planners should run policy checks for goal conflicts and disallowed goals before invoking side-effecting tools. Checks must be enforced by the platform or planner runtime\u2014not by prompt wording alone\u2014 and denied plans must leave an observable deny/allow trace.",
+          "artifact": "Versioned pre-execution policy rules (goal-conflict / disallowed-goal) with named owner + Sample deny/allow traces showing the planner gated side-effecting tools + \u22651 synthetic conflict deny record (test or prod) \u226490 days",
+          "passCondition": "Agent planner runs policy checks for goal conflicts / disallowed goals before side-effecting tools; \u22651 synthetic conflict is denied in test or production logs within the last 90 days with retained deny/allow traces; the policy rule set has a named owner.",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "AGN-R2",
-          "requirement": "Simulation/sandbox runs for new agent behaviors before production",
-          "artifact": "Sandbox/simulation environment config for agents + last pre-prod simulation report for a behavior change",
-          "passCondition": "Last new agent behavior promoted to production has a linked sandbox run \u226430 days before release with pass/fail criteria recorded",
-          "method": "manual",
+          "requirement": "New or materially changed production agent behaviors should be exercised in a sandbox or simulation environment before promotion, with recorded pass/fail criteria. The last such promotion should link to a sandbox run completed within 30 days before release.",
+          "artifact": "Sandbox/simulation environment config (or equivalent) for agent behaviors + Last pre-prod simulation/sandbox report for a behavior change, linked to the production promotion + Recorded pass/fail criteria and outcome for that run (\u226430 days before release)",
+          "passCondition": "Last new agent behavior promoted to production has a linked sandbox or simulation run completed \u226430 days before release with pass/fail criteria recorded; the sandbox/simulation environment used for agent behaviors is documented or configured.",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "AGN-R3",
-          "requirement": "Formal RACI for agent ownership across teams",
-          "artifact": "RACI or ownership register entry for the system",
-          "passCondition": "Every production AI system ID has non-empty owner fields for required domains; inventory query returns 0 orphans",
-          "method": "manual",
+          "requirement": "Every production AI system and production agent should appear in a versioned RACI or ownership register that names Responsible and Accountable parties (and Consulted/Informed where used) across the teams that operate the agent fleet. Inventory queries should return 0 orphan system or agent IDs missing required ownership fields.",
+          "artifact": "Versioned RACI or ownership register covering production AI systems / agents + Required ownership fields defined (at minimum Responsible + Accountable) + Inventory export or query result showing 0 orphans for those fields",
+          "passCondition": "Every production AI system ID (and production agent ID in scope) has non-empty Responsible and Accountable owner fields for the organization\u2019s required domains/roles; inventory query returns 0 orphans.",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
       ],
       "evidenceRequired": [
-        "Agent inventory with charters and owners",
-        "Loop/budget configuration evidence",
-        "Kill-switch runbook and test record"
+        "Versioned agent inventory with charters and owners (AGN-M1)",
+        "Runtime max-steps / wall-clock / spawn-depth config + abort-on-exceed evidence (AGN-M2)",
+        "Kill-switch/pause runbook, cancellation suite, and \u226490-day drill record (AGN-M3)",
+        "A2A/multi-agent handoff inventory with peer auth, scoped capabilities, and deny tests (AGN-M4)",
+        "Goal-conflict / disallowed-goal plan policy with named owner and synthetic deny traces (AGN-R1)",
+        "Agent sandbox/simulation environment config and linked \u226430-day pre-release sim reports (AGN-R2)",
+        "Agent/AI-system RACI register with Responsible + Accountable and 0 orphans (AGN-R3)"
       ],
       "engineeringBestPractices": [
         "Prefer narrow agents composed into workflows over one universal agent",
         "Log plans and intermediate decisions for reconstructability",
         "Escalate to humans on ambiguity or high-impact branches",
-        "Treat agent-to-agent messages as untrusted until verified"
+        "Treat agent-to-agent messages as untrusted until verified",
+        "Gate agent-behavior promotions on a linked sandbox/sim report \u226430 days before release",
+        "Keep a versioned RACI with Responsible and Accountable for every production agent ID"
       ],
       "automaticValidations": [
-        "Runtime enforcement of step and cost budgets",
-        "Denial of unauthorized A2A peers",
+        "Runtime enforcement of step, wall-clock, and spawn-depth limits with abort-on-exceed",
+        "Denial of unauthenticated, forged-peer, and over-scoped A2A handoffs",
+        "Kill-switch cancellation suite (queued, running, and child-agent paths)",
+        "Goal-conflict / disallowed-goal policy gate before side-effecting tools",
         "Alerts on loop detection and repeated identical tool calls"
       ],
       "manualValidations": [
-        "Charter review for each new agent class",
-        "Tabletop of multi-agent failure cascades"
+        "Charter and inventory completeness review for each production agent class",
+        "Architecture review that agents cannot disable their own kill path",
+        "RACI ownership review across teams for production AI systems and agents",
+        "Tabletop of multi-agent failure cascades and kill-switch drill within SLO"
       ],
       "examples": [
         "A research agent may browse and summarize but cannot send email; a separate approved workflow handles outreach",
-        "A2A task delegation includes expiring capability tokens, not open network trust"
+        "A2A task delegation includes expiring capability tokens, not open network trust",
+        "On-call invokes an authenticated pause API; queued tools cancel and child agents terminate within the time-to-effect SLO",
+        "A synthetic goal-conflict fixture is denied by plan policy before any write tool runs"
       ],
       "references": [
         {
@@ -3897,7 +3911,7 @@
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
-      "futureEvolution": "Interoperable agent identity and capability attestation standards for A2A ecosystems."
+      "futureEvolution": "Interoperable agent identity and capability attestation standards for A2A ecosystems; shared sandbox/sim scorecards and portable RACI/inventory exports for assessments."
     },
     {
       "id": "APRF-17",

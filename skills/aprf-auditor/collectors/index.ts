@@ -13,7 +13,10 @@ import { injectionPolicyGateCollector } from "./injection-policy-gate.ts";
 import { agentLoopLimitsCollector } from "./agent-loop-limits.ts";
 import { a2aPeerAuthCollector } from "./a2a-peer-auth.ts";
 import { agentCharterInventoryCollector } from "./agent-charter-inventory.ts";
+import { agentGoalPolicyCollector } from "./agent-goal-policy.ts";
 import { agentKillSwitchCollector } from "./agent-kill-switch.ts";
+import { agentSandboxSimCollector } from "./agent-sandbox-sim.ts";
+import { agentRaciOwnershipCollector } from "./agent-raci-ownership.ts";
 import {
   awsCollector,
   azureCollector,
@@ -37,6 +40,9 @@ export const COLLECTORS: Collector[] = [
   agentCharterInventoryCollector,
   agentLoopLimitsCollector,
   agentKillSwitchCollector,
+  agentGoalPolicyCollector,
+  agentSandboxSimCollector,
+  agentRaciOwnershipCollector,
   a2aPeerAuthCollector,
   awsCollector,
   azureCollector,

@@ -1,51 +1,84 @@
 id: "AGN-R3"
 category: "agent-governance"
 title: "Production systems should have formal RACI for agent ownership across teams"
-description: "Formal RACI for agent ownership across teams"
-whyItMatters: "Formal RACI for agent ownership across teams Failing this leaves a production gap
-  against: Every production AI system ID has non-empty owner fields for required domains; inventory
-  query returns 0 orphans"
+description: >
+  Every production AI system and production agent should appear in a versioned
+  RACI or ownership register that names Responsible and Accountable parties
+  (and Consulted/Informed where used) across the teams that operate the agent
+  fleet. Inventory queries should return 0 orphan system or agent IDs missing
+  required ownership fields.
+whyItMatters: >
+  Agents cut across product, platform, security, and on-call teams. A single
+  charter owner (AGN-M1) does not resolve who is Responsible vs Accountable when
+  tools fail, spend spikes, or a peer agent misbehaves. Without a formal RACI,
+  incidents stall on “whose agent is this?” and changes ship without a clear
+  accountable steward. Cross-team ownership converts agent fleet risk into
+  assignable duty.
 severity: "critical"
 weight: 4
 gate: "recommended"
-passCondition: "Every production AI system ID has non-empty owner fields for required domains;
-  inventory query returns 0 orphans"
+passCondition: >
+  Every production AI system ID (and production agent ID in scope) has non-empty
+  Responsible and Accountable owner fields for the organization’s required
+  domains/roles; inventory query returns 0 orphans.
 evidenceRequired:
-  - "RACI or ownership register entry for the system"
+  - "Versioned RACI or ownership register covering production AI systems / agents"
+  - "Required ownership fields defined (at minimum Responsible + Accountable)"
+  - "Inventory export or query result showing 0 orphans for those fields"
 detection:
-  capability: "manual"
-  detectors: []
-manualVerification: "For this Check (Formal RACI for agent ownership across teams): inspect current
-  evidence for [RACI or ownership register entry for the system] and confirm the pass condition
-  holds — Every production AI system ID has non-empty owner fields for required domains; inventory
-  query returns 0 orphans"
-falsePositiveGuidance: "(Agent Governance): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+  capability: "hybrid"
+  detectors:
+    - id: "repo-agent-raci"
+      params:
+        hint: >
+          Discover RACI / ownership-register artifacts for agents or AI systems
+          with Responsible/Accountable (and optional C/I) role signals.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove zero orphans, attest a versioned RACI
+          register export with Responsible+Accountable filled for every
+          production AI system/agent ID in scope.
+manualVerification: >
+  1) Define the production AI system and agent ID scope (align with AGN-M1
+  inventory where present). If no production agents/systems, score
+  NOT_APPLICABLE. 2) Open the RACI or ownership register; confirm required
+  fields include at least Responsible and Accountable (document any additional
+  required domains). 3) Query for orphans (empty/missing R or A). 4) PASS only
+  if the query returns 0 orphans. A CODEOWNERS file alone or a single charter
+  owner without RACI roles does not satisfy this Check unless it encodes R and A
+  for every in-scope ID.
+falsePositiveGuidance: >
+  Do not pass on AGN-M1 charters that list one owner without Responsible vs
+  Accountable across teams. Do not pass ORG-M2 system-domain owners as a
+  substitute unless the same register explicitly covers agent IDs with RACI
+  roles. Do not pass a stale register (>90 days) or a template with blank rows.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Formal RACI for agent ownership across teams"
-  - "Retain evidence artifacts required by this Check, starting with: RACI or ownership register
-    entry for the system"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Create a versioned agent/AI-system RACI register with Responsible and Accountable columns (add C/I as needed)"
+  - "Backfill every production system and agent ID; fail closed on empty R or A"
+  - "Export the register under imports/agent-raci-ownership/ with orphanCount=0 for assessments"
+  - "Review RACI on agent promotion and at least every 90 days with a named steward"
 references:
-  - title: "OWASP LLM — Excessive Agency"
+  - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
-  - title: "NIST AI RMF — Govern"
+  - title: "NIST AI Risk Management Framework — Govern"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "AGN-M1"
-  - "AGN-M2"
-  - "AGN-M3"
-  - "AGN-M4"
   - "AGN-R1"
+  - "AGN-R2"
+  - "ORG-M2"
+  - "ORG-M1"
+  - "HUM-M1"
 tags:
   - "agent-governance"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "raci"
+  - "ownership"
 applicability:
-  technologies:
-    - "a2a"
-    - "mcp"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

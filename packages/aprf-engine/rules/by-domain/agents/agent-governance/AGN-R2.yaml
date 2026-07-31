@@ -1,58 +1,86 @@
 id: "AGN-R2"
 category: "agent-governance"
 title: "Production systems should have simulation/sandbox runs for new agent behaviors before production"
-description: "Simulation/sandbox runs for new agent behaviors before production"
-whyItMatters: "Simulation/sandbox runs for new agent behaviors before production Failing this leaves
-  a production gap against: Last new agent behavior promoted to production has a linked sandbox run
-  ≤30 days before release with pass/fail criteria recorded"
+description: >
+  New or materially changed production agent behaviors should be exercised in a
+  sandbox or simulation environment before promotion, with recorded pass/fail
+  criteria. The last such promotion should link to a sandbox run completed
+  within 30 days before release.
+whyItMatters: >
+  Agent behaviors that only meet unit tests or prompt reviews still fail in
+  production under tool side effects, multi-step plans, and peer handoffs.
+  Promoting unsimulated changes turns every release into a live experiment on
+  customers and connected systems. A linked pre-prod sandbox run with explicit
+  pass/fail criteria makes behavior risk reviewable before blast radius grows.
 severity: "critical"
 weight: 4
 gate: "recommended"
-passCondition: "Last new agent behavior promoted to production has a linked sandbox run ≤30 days
-  before release with pass/fail criteria recorded"
+passCondition: >
+  Last new agent behavior promoted to production has a linked sandbox or
+  simulation run completed ≤30 days before release with pass/fail criteria
+  recorded; the sandbox/simulation environment used for agent behaviors is
+  documented or configured.
 evidenceRequired:
-  - "Sandbox/simulation environment config for agents + last pre-prod simulation report for a
-    behavior change"
+  - "Sandbox/simulation environment config (or equivalent) for agent behaviors"
+  - "Last pre-prod simulation/sandbox report for a behavior change, linked to the production promotion"
+  - "Recorded pass/fail criteria and outcome for that run (≤30 days before release)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-agent-sandbox-sim"
+      params:
+        hint: >
+          Discover agent sandbox/simulation environment config and pre-prod
+          sim/report or CI gate signals for behavior changes.
     - id: "manual-attest"
       params:
-        hint: "Sandbox/simulation environment config for agents + last pre-prod simulation report for a
-          behavior change"
-manualVerification: "For this Check (Simulation/sandbox runs for new agent behaviors before
-  production): inspect current evidence for [Sandbox/simulation environment config for agents + last
-  pre-prod simulation report for a behavior change] and confirm the pass condition holds — Last new
-  agent behavior promoted to production has a linked sandbox run ≤30 days before release with
-  pass/fail criteria recorded"
-falsePositiveGuidance: "(Agent Governance): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove linkage, attest the last production
+          agent-behavior promotion with a sandbox/sim report ≤30 days before
+          release and recorded pass/fail criteria.
+manualVerification: >
+  1) Confirm the system promotes new or changed agent behaviors to production.
+  If agents never change behavior after initial deploy, score NOT_APPLICABLE
+  with evidence of the freeze. 2) Locate the sandbox/simulation environment
+  (config, staging stack, or documented sim harness) used for agent runs.
+  3) For the last promoted behavior change, open the linked sandbox/sim report
+  and verify pass/fail criteria and outcome; confirm the run date is ≤30 days
+  before the production release. 4) PASS only if environment + linked fresh
+  report with criteria all hold. Prompt-only “we tested it” without a report
+  fails.
+falsePositiveGuidance: >
+  Do not pass on generic staging deploys that never exercise agent tools/plans.
+  Do not pass unit or eval suites that are not a sandbox/sim of the promoted
+  behavior. Do not pass a sandbox report older than 30 days relative to the
+  release, or one with no pass/fail criteria. Sibling Checks (charters, loop
+  limits, goal-conflict policy) do not prove pre-prod simulation. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Simulation/sandbox runs for new agent behaviors
-    before production"
-  - "Retain evidence artifacts required by this Check, starting with: Sandbox/simulation environment
-    config for agents + last pre-prod simulation report for a behavior change"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Stand up or document an agent sandbox/simulation environment that can run representative plans and tools safely"
+  - "Require a linked sandbox/sim report with pass/fail criteria on every agent-behavior promotion PR/release"
+  - "Gate production promotion when the linked run is missing, failed, or older than 30 days before release"
+  - "Retain the last promotion’s sandbox report under imports/agent-sandbox-sim/ for assessment"
 references:
-  - title: "OWASP LLM — Excessive Agency"
+  - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
-  - title: "NIST AI RMF — Govern"
+  - title: "NIST AI Risk Management Framework — Govern / Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "AGN-M1"
   - "AGN-M2"
-  - "AGN-M3"
-  - "AGN-M4"
   - "AGN-R1"
+  - "AGN-R3"
+  - "EVL-M1"
+  - "CHG-M1"
+  - "CHG-M3"
 tags:
   - "agent-governance"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "sandbox"
+  - "simulation"
 applicability:
-  technologies:
-    - "a2a"
-    - "mcp"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"
