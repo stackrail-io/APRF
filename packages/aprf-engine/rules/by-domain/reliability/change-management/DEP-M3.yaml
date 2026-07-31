@@ -1,41 +1,58 @@
 id: "DEP-M3"
 category: "change-management"
 title: "Infrastructure and AI config must be defined as code or equivalent declarative config"
-description: "Infrastructure and AI config shall be defined as code or equivalent declarative config"
-whyItMatters: "Infrastructure and AI config shall be defined as code or equivalent declarative
-  config Failing this leaves a production gap against: Drift check shows 0 unmanaged production AI
-  config resources outside declarative sources; sample of live pins matches declared versions at
-  100%"
+description: >
+  Production AI gateway, model pins, tool catalogs, and prompts should be
+  declared in IaC or equivalent declarative config, with drift checks showing
+  no unmanaged resources and live pins matching declared versions.
+whyItMatters: >
+  Console-edited AI config drifts from what was reviewed and is hard to roll
+  back. Declarative sources plus a recent drift check keep live pins equal to
+  what the repo says is production.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "Drift check shows 0 unmanaged production AI config resources outside declarative
-  sources; sample of live pins matches declared versions at 100%"
+passCondition: >
+  Drift check shows 0 unmanaged production AI config resources outside
+  declarative sources; sample of live pins matches declared versions at 100%
+  (drift evidence measuredAt ≤90 days).
 evidenceRequired:
   - "IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts"
+  - "Drift check showing 0 unmanaged AI config resources + 100% live-pin match"
 detection:
-  capability: "automated"
+  capability: "hybrid"
   detectors:
     - id: "repo-ai-config-as-code"
-      params: {}
+      params:
+        hint: >
+          Discover declarative AI config (gateway, model pins, tool catalogs,
+          prompts) and ingest drift/live-pin coverage.
     - id: "manual-attest"
       params:
-        hint: "IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts"
-manualVerification: "For this Check (Infrastructure and AI config must be defined as code or
-  equivalent declarative config): inspect current evidence for [IaC/config repo paths for AI
-  gateway, model pins, tool catalogs, and prompts] and confirm the pass condition holds — Drift
-  check shows 0 unmanaged production AI config resources outside declarative sources; sample of live
-  pins matches declared versions at 100%"
-falsePositiveGuidance: "(Change Management & Release): confirm the detector target matches the
-  production path for this Check before waiving. Named exceptions need an owner and expiry ≤90
-  days."
+        hint: >
+          If automation cannot prove drift coverage, attest 0 unmanaged
+          production AI config resources and 100% live-pin match to declared
+          versions (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI config exists (gateway, model pins, tool catalogs,
+  or prompts). If none, score NOT_APPLICABLE. 2) Confirm declarative
+  IaC/config sources cover those resources. 3) Confirm a drift check shows 0
+  unmanaged production AI config resources outside those sources. 4) Confirm a
+  sample of live pins matches declared versions at 100%. 5) PASS only if
+  declarative coverage + drift = 0 + live match = 100% hold with measuredAt
+  ≤90 days. DEP-M1 promotion path alone does not prove config-as-code. DEP-M2
+  change records alone do not prove live pins match declared versions. Generic
+  app Terraform without AI gateway/pins/tools/prompts does not satisfy.
+falsePositiveGuidance: >
+  Do not pass README-only config docs without declarative sources. Do not pass
+  a drift check that excludes model pins or tool catalogs in scope. Do not
+  pass evidence older than 90 days. Named exceptions need owner and expiry
+  ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Infrastructure and AI config must be defined as code or
-    equivalent declarative config"
-  - "Retain evidence artifacts required by this Check, starting with: IaC/config repo paths for AI
-    gateway, model pins, tool catalogs, and prompts"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Declare AI gateway, model pins, tool catalogs, and prompts as code"
+  - "Run and retain drift checks showing 0 unmanaged resources and 100% live-pin match"
+  - "Retain evidence under imports/ai-config-as-code/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Workbook — Configuration Management"
     url: "https://sre.google/workbook/"
@@ -51,16 +68,16 @@ relatedRules:
   - "CHG-M1"
   - "CHG-M2"
   - "CHG-M3"
+  - "MOD-M1"
+  - "PRM-M1"
 tags:
   - "change-management"
   - "mandatory"
-  - "automated"
+  - "hybrid"
+  - "config-as-code"
+  - "drift"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "azure-devops"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

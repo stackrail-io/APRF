@@ -1,0 +1,25 @@
+id: env-parity-model-tool-catalog
+title: Prod vs staging parity for model pins and tool catalogs (DEP-R2)
+version: "0.2.0"
+executor: collectors/env-parity-model-tool-catalog.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-env-parity-model-tool-catalog]
+inputs:
+  - "Target repo (env parity checks for model pins + tool catalogs)"
+  - "Optional suite: aprf-assessment/imports/env-parity-model-tool-catalog/*.{json}"
+collect:
+  - "Detect environment parity signals for model pins and tool catalogs"
+  - "Ingest coverage; write env-parity-model-tool-catalog-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/env-parity-model-tool-catalog/*"
+  signals: [env-parity-model-tool-catalog, dep-r2, repo-env-parity-model-tool-catalog]
+mapsToChecks: [DEP-R2]
+whenUnavailable: >
+  Parity signals alone are PARTIAL. DEP-R2 PASS needs
+  lastParityScanWithin30Days (or parityScanAgeDays≤30),
+  unexplainedParityDrifts=0, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline env-parity heuristics + optional imported JSON.

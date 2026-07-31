@@ -1,0 +1,26 @@
+id: ai-artifact-promotion-path
+title: Non-prod→prod promotion path for prompts/models/tools (DEP-M1)
+version: "0.2.0"
+executor: collectors/ai-artifact-promotion-path.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-artifact-promotion-path]
+inputs:
+  - "Target repo (promotion pipelines/runbooks for prompts, models, tools)"
+  - "Optional suite: aprf-assessment/imports/ai-artifact-promotion-path/*.{json}"
+collect:
+  - "Detect non-prod→prod promotion path + hot-edit policy signals"
+  - "Ingest coverage; write ai-artifact-promotion-path-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-artifact-promotion-path/*"
+  signals: [ai-artifact-promotion-path, dep-m1, repo-ai-artifact-promotion-path]
+mapsToChecks: [DEP-M1]
+whenUnavailable: >
+  Promotion signals alone are PARTIAL. DEP-M1 PASS needs
+  promotionPathDocumented, releasesThroughPromotionPathPct=100 (or
+  productionReleasesMissingPromotionPath=0),
+  productionHotEditsWithoutChangeRecord=0, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline promotion-path heuristics + optional imported JSON.

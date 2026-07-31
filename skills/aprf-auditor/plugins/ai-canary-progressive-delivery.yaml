@@ -1,0 +1,26 @@
+id: ai-canary-progressive-delivery
+title: Canary / progressive delivery for high-traffic AI changes (DEP-R1)
+version: "0.2.0"
+executor: collectors/ai-canary-progressive-delivery.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-canary-progressive-delivery]
+inputs:
+  - "Target repo (canary/progressive delivery for high-traffic AI changes)"
+  - "Optional suite: aprf-assessment/imports/ai-canary-progressive-delivery/*.{json}"
+collect:
+  - "Detect canary/progressive delivery + automated rollback criteria"
+  - "Ingest coverage; write ai-canary-progressive-delivery-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-canary-progressive-delivery/*"
+  signals: [ai-canary-progressive-delivery, dep-r1, repo-ai-canary-progressive-delivery]
+mapsToChecks: [DEP-R1]
+whenUnavailable: >
+  Canary signals alone are PARTIAL. DEP-R1 PASS needs
+  canaryOrProgressiveConfigured, automatedRollbackCriteriaPresent,
+  lastHighTrafficReleaseHasCanaryMetricsLink, measuredAt ≤90 days.
+  N/A when highTrafficAiChangeCount=0.
+live:
+  required: false
+  note: Offline canary/progressive heuristics + optional imported JSON.

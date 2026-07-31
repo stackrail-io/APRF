@@ -1,0 +1,25 @@
+id: ai-artifact-change-records
+title: Who/what/when + review-linked AI artifact change records (DEP-M2)
+version: "0.2.0"
+executor: collectors/ai-artifact-change-records.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-artifact-change-records]
+inputs:
+  - "Target repo (change logs / ticket exports for AI artifact releases)"
+  - "Optional suite: aprf-assessment/imports/ai-artifact-change-records/*.{json}"
+collect:
+  - "Detect change-log and who/what/when + review-link signals"
+  - "Ingest coverage; write ai-artifact-change-records-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-artifact-change-records/*"
+  signals: [ai-artifact-change-records, dep-m2, repo-ai-artifact-change-records]
+mapsToChecks: [DEP-M2]
+whenUnavailable: >
+  Change-record signals alone are PARTIAL. DEP-M2 PASS needs
+  changesWithWhoWhatWhenAndReviewLinkPct=100 (or
+  changesMissingWhoWhatWhenOrReviewLink=0), measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline change-record heuristics + optional imported JSON.

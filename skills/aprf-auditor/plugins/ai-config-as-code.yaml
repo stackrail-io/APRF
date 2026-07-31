@@ -1,0 +1,25 @@
+id: ai-config-as-code
+title: Declarative AI config + drift / live-pin match (DEP-M3)
+version: "0.2.0"
+executor: collectors/ai-config-as-code.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-config-as-code]
+inputs:
+  - "Target repo (IaC/declarative AI gateway, model pins, tool catalogs, prompts)"
+  - "Optional suite: aprf-assessment/imports/ai-config-as-code/*.{json}"
+collect:
+  - "Detect declarative AI config + drift/live-pin signals"
+  - "Ingest coverage; write ai-config-as-code-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-config-as-code/*"
+  signals: [ai-config-as-code, dep-m3, repo-ai-config-as-code]
+mapsToChecks: [DEP-M3]
+whenUnavailable: >
+  Config-as-code signals alone are PARTIAL. DEP-M3 PASS needs
+  unmanagedProductionAiConfigResources=0, livePinsMatchDeclaredPct=100,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline config-as-code heuristics + optional imported JSON.

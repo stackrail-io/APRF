@@ -56,6 +56,12 @@ import { rollbackDrillCollector } from "./rollback-drill.ts";
 import { qualitySloAutoRollbackCollector } from "./quality-slo-auto-rollback.ts";
 import { oneClickAiRollbackCollector } from "./one-click-ai-rollback.ts";
 import { agentBehaviorFeatureFlagsCollector } from "./agent-behavior-feature-flags.ts";
+import { aiArtifactPromotionPathCollector } from "./ai-artifact-promotion-path.ts";
+import { aiArtifactChangeRecordsCollector } from "./ai-artifact-change-records.ts";
+import { aiConfigAsCodeCollector } from "./ai-config-as-code.ts";
+import { aiCanaryProgressiveDeliveryCollector } from "./ai-canary-progressive-delivery.ts";
+import { envParityModelToolCatalogCollector } from "./env-parity-model-tool-catalog.ts";
+import { embeddingIndexMigrationCollector } from "./embedding-index-migration.ts";
 import { aiCostAlertsCollector } from "./ai-cost-alerts.ts";
 import { aiRetryAmplificationCollector } from "./ai-retry-amplification.ts";
 import { aiPromptCacheCollector } from "./ai-prompt-cache.ts";
@@ -160,6 +166,12 @@ export const COLLECTORS: Collector[] = [
   qualitySloAutoRollbackCollector,
   oneClickAiRollbackCollector,
   agentBehaviorFeatureFlagsCollector,
+  aiArtifactPromotionPathCollector,
+  aiArtifactChangeRecordsCollector,
+  aiConfigAsCodeCollector,
+  aiCanaryProgressiveDeliveryCollector,
+  envParityModelToolCatalogCollector,
+  embeddingIndexMigrationCollector,
   aiCostAlertsCollector,
   aiRetryAmplificationCollector,
   aiPromptCacheCollector,

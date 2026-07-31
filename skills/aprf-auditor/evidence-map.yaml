@@ -243,8 +243,8 @@ categoryDefaults:
       - "**/changelog*"
       - "**/*version*retention*"
       - "**/*restore*dry*"
-    plugins: [prompt-model-version-retention, rollback-runbook, rollback-drill, quality-slo-auto-rollback, one-click-ai-rollback, agent-behavior-feature-flags, github-actions, repo-filesystem]
-    signals: [promotion pipeline, rollback tested, version retention, restore dry-run, rollback runbook, on-call drill, rollback drill, RTO, SLO burn, auto-rollback, one-click rollback, feature flags, agent behavior flags]
+    plugins: [prompt-model-version-retention, rollback-runbook, rollback-drill, quality-slo-auto-rollback, one-click-ai-rollback, agent-behavior-feature-flags, ai-artifact-promotion-path, ai-artifact-change-records, ai-config-as-code, ai-canary-progressive-delivery, env-parity-model-tool-catalog, embedding-index-migration, github-actions, repo-filesystem]
+    signals: [promotion pipeline, rollback tested, version retention, restore dry-run, rollback runbook, on-call drill, rollback drill, RTO, SLO burn, auto-rollback, one-click rollback, feature flags, agent behavior flags, non-prod to prod, change records, who what when, config as code, drift, canary, progressive delivery, environment parity, embedding migration, index upgrade]
   incident-readiness:
     search:
       - "**/runbook*"
@@ -1649,10 +1649,103 @@ checks:
       NOT_APPLICABLE when no org-sampling signals. Distinct from CMP-R3 Level-5-only coverage.
   DEP-M1:
     requiredEvidence:
-      - "Documented/tested rollback for model/prompt/tool promotion"
+      - "Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools"
+      - "promotionPathDocumented + releasesThroughPromotionPathPct=100 + productionHotEditsWithoutChangeRecord=0 under imports/ai-artifact-promotion-path/"
     searchExtra:
-      - "**/*rollback*"
+      - "**/*promot*"
       - "**/deploy*"
+      - "**/*release*"
+      - "**/*staging*prod*"
+      - "**/*non*prod*"
+    plugins: [ai-artifact-promotion-path, github-actions, repo-filesystem]
+    naWhen: "No production prompt/model/tool releases"
+    evaluation: |
+      PASS if ai-artifact-promotion-path statusHint=pass (promotionPathDocumented + releasesThroughPromotionPathPct=100 or productionReleasesMissingPromotionPath=0 + productionHotEditsWithoutChangeRecord=0 + measuredAt ≤90d).
+      PARTIAL if promotion signals without complete import.
+      NOT_APPLICABLE when no AI-artifact/promotion signals. Distinct from DEP-M2 change logs and DEP-M3 config-as-code.
+  DEP-M2:
+    requiredEvidence:
+      - "Change log or ticket export for AI artifact releases"
+      - "changesWithWhoWhatWhenAndReviewLinkPct=100 under imports/ai-artifact-change-records/"
+    searchExtra:
+      - "**/*change*log*"
+      - "**/*changelog*"
+      - "**/*ticket*export*"
+      - "**/*change*record*"
+      - "**/*release*notes*"
+    plugins: [ai-artifact-change-records, github-actions, repo-filesystem]
+    naWhen: "No production AI artifact changes"
+    evaluation: |
+      PASS if ai-artifact-change-records statusHint=pass (changesWithWhoWhatWhenAndReviewLinkPct=100 or changesMissingWhoWhatWhenOrReviewLink=0 + measuredAt ≤90d).
+      PARTIAL if change-log signals without complete import.
+      NOT_APPLICABLE when no AI-artifact/change-record signals. Distinct from DEP-M1 promotion path and DEP-M3 config-as-code.
+  DEP-M3:
+    requiredEvidence:
+      - "IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts"
+      - "unmanagedProductionAiConfigResources=0 + livePinsMatchDeclaredPct=100 under imports/ai-config-as-code/"
+    searchExtra:
+      - "**/*.tf"
+      - "**/terraform/**"
+      - "**/pulumi/**"
+      - "**/helm/**"
+      - "**/*model*pin*"
+      - "**/*tool*catalog*"
+      - "**/*drift*"
+    plugins: [ai-config-as-code, aws, azure, gcp, repo-filesystem]
+    naWhen: "No production AI config in scope"
+    evaluation: |
+      PASS if ai-config-as-code statusHint=pass (unmanagedProductionAiConfigResources=0 + livePinsMatchDeclaredPct=100 + measuredAt ≤90d).
+      PARTIAL if declarative/drift signals without complete import.
+      NOT_APPLICABLE when no AI-config/declarative signals. Distinct from DEP-M1 promotion path and DEP-M2 change records.
+  DEP-R1:
+    requiredEvidence:
+      - "Progressive delivery/canary config for high-traffic AI changes"
+      - "canaryOrProgressiveConfigured + automatedRollbackCriteriaPresent + lastHighTrafficReleaseHasCanaryMetricsLink under imports/ai-canary-progressive-delivery/"
+    searchExtra:
+      - "**/*canary*"
+      - "**/*progressive*"
+      - "**/*rollout*"
+      - "**/*flagger*"
+      - "**/*argo*rollout*"
+    plugins: [ai-canary-progressive-delivery, github-actions, repo-filesystem]
+    naWhen: "No high-traffic AI changes (highTrafficAiChangeCount=0)"
+    evaluation: |
+      PASS if ai-canary-progressive-delivery statusHint=pass (canaryOrProgressiveConfigured + automatedRollbackCriteriaPresent + lastHighTrafficReleaseHasCanaryMetricsLink + measuredAt ≤90d).
+      PARTIAL if canary signals without complete import.
+      NOT_APPLICABLE when highTrafficAiChangeCount=0 or no AI-change/canary signals. Distinct from CHG-R3 SLO auto-rollback and EVL shadow/canary evals.
+  DEP-R2:
+    requiredEvidence:
+      - "Environment parity checklist for model pins and tool catalogs"
+      - "lastParityScanWithin30Days + unexplainedParityDrifts=0 under imports/env-parity-model-tool-catalog/"
+    searchExtra:
+      - "**/*parity*"
+      - "**/*env*diff*"
+      - "**/*model*pin*"
+      - "**/*tool*catalog*"
+      - "**/*staging*prod*"
+    plugins: [env-parity-model-tool-catalog, repo-filesystem]
+    naWhen: "No model pins or tool catalogs across prod/staging"
+    evaluation: |
+      PASS if env-parity-model-tool-catalog statusHint=pass (lastParityScanWithin30Days or parityScanAgeDays≤30 + unexplainedParityDrifts=0 + measuredAt ≤90d).
+      PARTIAL if parity signals without complete import.
+      NOT_APPLICABLE when no model-pin/tool-catalog or parity signals. Distinct from DEP-M3 live-vs-declared drift.
+  DEP-R3:
+    requiredEvidence:
+      - "Embedding/index migration runbook with validation gates"
+      - "automatedMigrationWithValidationGates + lastUpgradeSucceededWithoutDualWriteGaps under imports/embedding-index-migration/"
+    searchExtra:
+      - "**/*embed*migrat*"
+      - "**/*reindex*"
+      - "**/*re-embed*"
+      - "**/*vector*index*"
+      - "**/*pinecone*"
+      - "**/*faiss*"
+    plugins: [embedding-index-migration, repo-filesystem]
+    naWhen: "No embeddings/indexes, or noUpgradeInWindowAttested=true"
+    evaluation: |
+      PASS if embedding-index-migration statusHint=pass (automatedMigrationWithValidationGates + lastUpgradeWithin12Months + lastUpgradeSucceededWithoutDualWriteGaps + measuredAt ≤90d).
+      PARTIAL if migration signals without complete import.
+      NOT_APPLICABLE when no embedding/index signals or noUpgradeInWindowAttested. Distinct from DEP-M3 and DEP-R2.
 
 # Global fail-closed patterns (support FAIL with high confidence when matched in scope)
 globalFailSignals:

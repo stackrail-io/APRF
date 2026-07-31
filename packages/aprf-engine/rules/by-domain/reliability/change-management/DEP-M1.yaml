@@ -1,38 +1,57 @@
 id: "DEP-M1"
 category: "change-management"
 title: "A promotion path must exist from non-prod to prod for prompts, models, and tools"
-description: "A promotion path shall exist from non-prod to prod for prompts, models, and tools"
-whyItMatters: "A promotion path shall exist from non-prod to prod for prompts, models, and tools
-  Failing this leaves a production gap against: 100% of production prompt/model/tool releases in the
-  last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked
-  change record"
+description: >
+  Production prompt, model, and tool releases must flow through a documented
+  non-prod→prod promotion path, with no production hot-edits lacking a linked
+  change record.
+whyItMatters: >
+  Hot-editing prompts, model pins, or tools in production skips review and
+  rollbackability. A documented promotion path makes every production AI
+  artifact change reconstructible and reversible.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "100% of production prompt/model/tool releases in the last 30 days flowed through the
-  documented promotion path; 0 production hot-edits without a linked change record"
+passCondition: >
+  100% of production prompt/model/tool releases in the last 30 days flowed
+  through the documented promotion path; 0 production hot-edits without a
+  linked change record (promotion evidence measuredAt ≤90 days).
 evidenceRequired:
   - "Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools"
+  - "Last-30-day release coverage showing path adherence + 0 hot-edits without change records"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-artifact-promotion-path"
+      params:
+        hint: >
+          Discover non-prod→prod promotion pipelines/runbooks for prompts,
+          models, and tools, plus release-coverage evidence.
     - id: "manual-attest"
       params:
-        hint: "Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools"
-manualVerification: "For this Check (A promotion path must exist from non-prod to prod for prompts,
-  models, and tools): inspect current evidence for [Pipeline/runbook documenting non-prod→prod
-  promotion for prompts, models, and tools] and confirm the pass condition holds — 100% of
-  production prompt/model/tool releases in the last 30 days flowed through the documented promotion
-  path; 0 production hot-edits without a linked change record"
-falsePositiveGuidance: "(Change Management & Release): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest 100% of last-30-day
+          production prompt/model/tool releases used the documented path and
+          hot-edits without change records = 0 (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production prompt/model/tool releases exist. If none, score
+  NOT_APPLICABLE. 2) Confirm a documented non-prod→prod promotion path covers
+  prompts, models, and tools. 3) Confirm 100% of such releases in the last 30
+  days used that path. 4) Confirm 0 production hot-edits without a linked
+  change record. 5) PASS only if path + coverage + hot-edit = 0 hold with
+  measuredAt ≤90 days. DEP-M2 change-log completeness alone does not prove a
+  promotion path. DEP-M3 config-as-code alone does not prove non-prod→prod
+  flow. CHG rollback Checks alone do not satisfy promotion-path adherence.
+falsePositiveGuidance: >
+  Do not pass a generic app CD pipeline that excludes prompts/models/tools.
+  Do not pass staging-only promotion docs. Do not pass coverage older than 90
+  days or windows shorter than the last 30 days of releases. Named exceptions
+  need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: A promotion path must exist from non-prod to prod for prompts,
-    models, and tools"
-  - "Retain evidence artifacts required by this Check, starting with: Pipeline/runbook documenting
-    non-prod→prod promotion for prompts, models, and tools"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Document and enforce non-prod→prod promotion for prompts, models, and tools"
+  - "Eliminate production hot-edits without linked change records"
+  - "Retain evidence under imports/ai-artifact-promotion-path/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Workbook — Configuration Management"
     url: "https://sre.google/workbook/"
@@ -48,16 +67,16 @@ relatedRules:
   - "CHG-M1"
   - "CHG-M2"
   - "CHG-M3"
+  - "PRM-M1"
+  - "MOD-M1"
 tags:
   - "change-management"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "promotion-path"
+  - "ai-artifacts"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "azure-devops"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

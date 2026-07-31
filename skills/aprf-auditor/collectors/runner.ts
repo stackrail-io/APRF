@@ -242,6 +242,30 @@ CHG-R2 feature flags for new agent behaviors:
   npm run aprf:agent-behavior-feature-flags -- --target <app> --out <app>/aprf-assessment
   # PASS needs newAgentBehaviorsBehindFlags + flagStateChangesAudited + killDisablePathTestedLast90Days under imports/agent-behavior-feature-flags/
 
+DEP-M1 non-prod→prod promotion path for prompts/models/tools:
+  npm run aprf:ai-artifact-promotion-path -- --target <app> --out <app>/aprf-assessment
+  # PASS needs promotionPathDocumented + releasesThroughPromotionPathPct=100 + productionHotEditsWithoutChangeRecord=0 under imports/ai-artifact-promotion-path/
+
+DEP-M2 who/what/when + review-linked AI artifact change records:
+  npm run aprf:ai-artifact-change-records -- --target <app> --out <app>/aprf-assessment
+  # PASS needs changesWithWhoWhatWhenAndReviewLinkPct=100 (or changesMissingWhoWhatWhenOrReviewLink=0) under imports/ai-artifact-change-records/
+
+DEP-M3 declarative AI config + drift / live-pin match:
+  npm run aprf:ai-config-as-code -- --target <app> --out <app>/aprf-assessment
+  # PASS needs unmanagedProductionAiConfigResources=0 + livePinsMatchDeclaredPct=100 under imports/ai-config-as-code/
+
+DEP-R1 canary / progressive delivery for high-traffic AI changes:
+  npm run aprf:ai-canary-progressive-delivery -- --target <app> --out <app>/aprf-assessment
+  # PASS needs canaryOrProgressiveConfigured + automatedRollbackCriteriaPresent + lastHighTrafficReleaseHasCanaryMetricsLink under imports/ai-canary-progressive-delivery/
+
+DEP-R2 prod vs staging parity for model pins and tool catalogs:
+  npm run aprf:env-parity-model-tool-catalog -- --target <app> --out <app>/aprf-assessment
+  # PASS needs lastParityScanWithin30Days + unexplainedParityDrifts=0 under imports/env-parity-model-tool-catalog/
+
+DEP-R3 automated embedding/index version migration:
+  npm run aprf:embedding-index-migration -- --target <app> --out <app>/aprf-assessment
+  # PASS needs automatedMigrationWithValidationGates + lastUpgradeWithin12Months + lastUpgradeSucceededWithoutDualWriteGaps under imports/embedding-index-migration/
+
 COST-M2 AI cost budget-burn / anomaly alerts:
   npm run aprf:cost-alerts -- --target <app> --out <app>/aprf-assessment
   # PASS needs notify proof under imports/ai-cost-alerts/

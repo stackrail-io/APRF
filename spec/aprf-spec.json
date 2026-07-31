@@ -4492,28 +4492,28 @@
         },
         {
           "id": "DEP-M1",
-          "requirement": "A promotion path shall exist from non-prod to prod for prompts, models, and tools",
-          "artifact": "Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools",
-          "passCondition": "100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record",
-          "method": "manual",
+          "requirement": "Production prompt, model, and tool releases must flow through a documented non-prod→prod promotion path, with no production hot-edits lacking a linked change record.",
+          "artifact": "Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools + Last-30-day release coverage showing path adherence + 0 hot-edits without change records",
+          "passCondition": "100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record (promotion evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "DEP-M2",
-          "requirement": "Production changes shall be recorded (who/what/when) and linked to reviews",
-          "artifact": "Change log or ticket export for AI artifact releases",
-          "passCondition": "100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID)",
-          "method": "manual",
+          "requirement": "Every production AI artifact change should record who changed what and when, and link to a review (PR, ticket, or approval ID).",
+          "artifact": "Change log or ticket export for AI artifact releases + Last-30-day coverage showing who/what/when + review link on every change",
+          "passCondition": "100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID) (change-record evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "DEP-M3",
-          "requirement": "Infrastructure and AI config shall be defined as code or equivalent declarative config",
-          "artifact": "IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts",
-          "passCondition": "Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100%",
-          "method": "automated",
+          "requirement": "Production AI gateway, model pins, tool catalogs, and prompts should be declared in IaC or equivalent declarative config, with drift checks showing no unmanaged resources and live pins matching declared versions.",
+          "artifact": "IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts + Drift check showing 0 unmanaged AI config resources + 100% live-pin match",
+          "passCondition": "Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100% (drift evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -4548,28 +4548,28 @@
         },
         {
           "id": "DEP-R1",
-          "requirement": "Canary or progressive delivery for high-traffic AI changes",
-          "artifact": "Progressive delivery/canary config for high-traffic AI changes + last canary promotion log",
-          "passCondition": "High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release ≤90 days includes canary metrics link",
-          "method": "manual",
+          "requirement": "High-traffic AI changes should roll out via canary or progressive delivery with automated rollback criteria, and the last such release within 90 days should include a canary metrics link.",
+          "artifact": "Progressive delivery/canary config for high-traffic AI changes + Last canary promotion log with metrics link (≤90 days)",
+          "passCondition": "High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release ≤90 days includes canary metrics link (canary evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "DEP-R2",
-          "requirement": "Environment parity checks for model pins and tool catalogs",
-          "artifact": "Environment parity checklist for model pins and tool catalogs + last parity scan across envs",
-          "passCondition": "Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan ≤30 days with 0 unexplained drifts",
-          "method": "manual",
+          "requirement": "Prod and staging model pins and tool catalogs should match except documented deltas, proven by a parity scan within the last 30 days with zero unexplained drifts.",
+          "artifact": "Environment parity checklist for model pins and tool catalogs + Last parity scan across envs with 0 unexplained drifts (≤30 days)",
+          "passCondition": "Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan ≤30 days with 0 unexplained drifts (parity evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "DEP-R3",
-          "requirement": "Automated migration for embedding/index version upgrades",
-          "artifact": "Embedding/index migration runbook + last automated migration job log and validation",
-          "passCondition": "Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps",
-          "method": "manual",
+          "requirement": "Embedding and index version upgrades should run via automated migration with validation gates, and the last upgrade within 12 months should succeed without dual-write gaps—or an N/A attestation when no upgrade occurred.",
+          "artifact": "Embedding/index migration runbook with validation gates + Last automated migration job log and validation (≤12 months) or no-upgrade attestation",
+          "passCondition": "Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps (migration evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }

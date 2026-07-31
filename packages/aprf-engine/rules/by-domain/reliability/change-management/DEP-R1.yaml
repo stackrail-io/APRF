@@ -1,37 +1,58 @@
 id: "DEP-R1"
 category: "change-management"
-title: "Production systems should have canary or progressive delivery for high-traffic AI changes"
-description: "Canary or progressive delivery for high-traffic AI changes"
-whyItMatters: "Canary or progressive delivery for high-traffic AI changes Failing this leaves a
-  production gap against: High-traffic AI changes use canary or progressive rollout with automated
-  rollback criteria; last such release ≤90 days includes canary metrics link"
+title: "Production systems should use canary or progressive delivery for high-traffic AI changes"
+description: >
+  High-traffic AI changes should roll out via canary or progressive delivery
+  with automated rollback criteria, and the last such release within 90 days
+  should include a canary metrics link.
+whyItMatters: >
+  Shipping high-traffic prompt, model, or tool changes at 100% traffic makes
+  bad releases instantly global. Canary or progressive delivery with automated
+  rollback criteria limits blast radius—and a recent metrics-linked release
+  proves the path is used.
 severity: "critical"
 weight: 4
 gate: "recommended"
-passCondition: "High-traffic AI changes use canary or progressive rollout with automated rollback
-  criteria; last such release ≤90 days includes canary metrics link"
+passCondition: >
+  High-traffic AI changes use canary or progressive rollout with automated
+  rollback criteria; last such release ≤90 days includes canary metrics link
+  (canary evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Progressive delivery/canary config for high-traffic AI changes + last canary promotion log"
+  - "Progressive delivery/canary config for high-traffic AI changes"
+  - "Last canary promotion log with metrics link (≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-canary-progressive-delivery"
+      params:
+        hint: >
+          Discover canary/progressive delivery for high-traffic AI changes,
+          automated rollback criteria, and a recent metrics-linked release.
     - id: "manual-attest"
       params:
-        hint: "Progressive delivery/canary config for high-traffic AI changes + last canary promotion log"
-manualVerification: "For this Check (Canary or progressive delivery for high-traffic AI changes):
-  inspect current evidence for [Progressive delivery/canary config for high-traffic AI changes +
-  last canary promotion log] and confirm the pass condition holds — High-traffic AI changes use
-  canary or progressive rollout with automated rollback criteria; last such release ≤90 days
-  includes canary metrics link"
-falsePositiveGuidance: "(Change Management & Release): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest high-traffic AI changes
+          use canary/progressive rollout with automated rollback criteria and
+          the last such release ≤90 days includes a canary metrics link
+          (measuredAt ≤90 days). Score N/A if no high-traffic AI changes.
+manualVerification: >
+  1) Confirm high-traffic AI changes exist in scope. If none, score
+  NOT_APPLICABLE. 2) Confirm canary or progressive delivery is configured for
+  those changes. 3) Confirm automated rollback criteria are defined. 4) Confirm
+  the last such release ≤90 days includes a canary metrics link. 5) PASS only
+  if config + rollback criteria + metrics-linked release hold with measuredAt
+  ≤90 days. CHG-R3 quality-SLO auto-rollback alone does not prove progressive
+  delivery. EVL shadow/canary eval Checks alone do not prove production canary
+  rollout. Generic app canaries that exclude AI artifacts do not satisfy.
+falsePositiveGuidance: >
+  Do not pass manual percentage bumps without automated rollback criteria. Do
+  not pass a canary config never used in the last 90 days. Do not pass metrics
+  links older than 90 days. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Canary or progressive delivery for high-traffic AI
-    changes"
-  - "Retain evidence artifacts required by this Check, starting with: Progressive delivery/canary
-    config for high-traffic AI changes + last canary promotion log"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Configure canary/progressive delivery with automated rollback for high-traffic AI changes"
+  - "Retain last canary promotion log with metrics link ≤90 days"
+  - "Retain evidence under imports/ai-canary-progressive-delivery/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Workbook — Configuration Management"
     url: "https://sre.google/workbook/"
@@ -47,16 +68,16 @@ relatedRules:
   - "DEP-M3"
   - "CHG-M1"
   - "CHG-M2"
+  - "CHG-R3"
+  - "EVL-R2"
 tags:
   - "change-management"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "canary"
+  - "progressive-delivery"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "azure-devops"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

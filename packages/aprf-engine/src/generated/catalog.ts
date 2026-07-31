@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:33120bb64b3bdc0e350dc687c1a864f9f354202b2d8f734556e137f684c0eba3",
+  "generatedAt": "sha256:97b7754b721e5fc7db654ea33460c2a220d1dc6ee9b33b2cea9880e2c64ee37c",
   "ruleCount": 177,
   "domains": [
     {
@@ -3735,33 +3735,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "DEP-M1",
       "category": "change-management",
       "title": "A promotion path must exist from non-prod to prod for prompts, models, and tools",
-      "description": "A promotion path shall exist from non-prod to prod for prompts, models, and tools",
-      "whyItMatters": "A promotion path shall exist from non-prod to prod for prompts, models, and tools Failing this leaves a production gap against: 100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record",
+      "description": "Production prompt, model, and tool releases must flow through a documented non-prod→prod promotion path, with no production hot-edits lacking a linked change record.\n",
+      "whyItMatters": "Hot-editing prompts, model pins, or tools in production skips review and rollbackability. A documented promotion path makes every production AI artifact change reconstructible and reversible.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record",
+      "passCondition": "100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record (promotion evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools"
+        "Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools",
+        "Last-30-day release coverage showing path adherence + 0 hot-edits without change records"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-artifact-promotion-path",
+            "params": {
+              "hint": "Discover non-prod→prod promotion pipelines/runbooks for prompts, models, and tools, plus release-coverage evidence.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools"
+              "hint": "If automation cannot prove coverage, attest 100% of last-30-day production prompt/model/tool releases used the documented path and hot-edits without change records = 0 (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (A promotion path must exist from non-prod to prod for prompts, models, and tools): inspect current evidence for [Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools] and confirm the pass condition holds — 100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record",
-      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production prompt/model/tool releases exist. If none, score NOT_APPLICABLE. 2) Confirm a documented non-prod→prod promotion path covers prompts, models, and tools. 3) Confirm 100% of such releases in the last 30 days used that path. 4) Confirm 0 production hot-edits without a linked change record. 5) PASS only if path + coverage + hot-edit = 0 hold with measuredAt ≤90 days. DEP-M2 change-log completeness alone does not prove a promotion path. DEP-M3 config-as-code alone does not prove non-prod→prod flow. CHG rollback Checks alone do not satisfy promotion-path adherence.\n",
+      "falsePositiveGuidance": "Do not pass a generic app CD pipeline that excludes prompts/models/tools. Do not pass staging-only promotion docs. Do not pass coverage older than 90 days or windows shorter than the last 30 days of releases. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: A promotion path must exist from non-prod to prod for prompts, models, and tools",
-        "Retain evidence artifacts required by this Check, starting with: Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Document and enforce non-prod→prod promotion for prompts, models, and tools",
+        "Eliminate production hot-edits without linked change records",
+        "Retain evidence under imports/ai-artifact-promotion-path/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -3786,20 +3793,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DEP-M3",
         "CHG-M1",
         "CHG-M2",
-        "CHG-M3"
+        "CHG-M3",
+        "PRM-M1",
+        "MOD-M1"
       ],
       "tags": [
         "change-management",
         "mandatory",
-        "manual"
+        "hybrid",
+        "promotion-path",
+        "ai-artifacts"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "azure-devops",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -3809,34 +3815,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DEP-M2",
       "category": "change-management",
-      "title": "Production changes must be recorded (who/what/when) and linked to reviews",
-      "description": "Production changes shall be recorded (who/what/when) and linked to reviews",
-      "whyItMatters": "Production changes shall be recorded (who/what/when) and linked to reviews Failing this leaves a production gap against: 100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID)",
+      "title": "Production AI artifact changes must be recorded (who/what/when) and linked to reviews",
+      "description": "Every production AI artifact change should record who changed what and when, and link to a review (PR, ticket, or approval ID).\n",
+      "whyItMatters": "Without who/what/when plus a review link, production prompt, model, and tool changes cannot be audited or blamed correctly—and silent hotfixes become invisible to reconstruct after an incident.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID)",
+      "passCondition": "100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID) (change-record evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Change log or ticket export for AI artifact releases"
+        "Change log or ticket export for AI artifact releases",
+        "Last-30-day coverage showing who/what/when + review link on every change"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-artifact-change-records",
+            "params": {
+              "hint": "Discover change logs / ticket exports for AI artifact releases with who/what/when fields and review links.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Change log or ticket export for AI artifact releases"
+              "hint": "If automation cannot prove coverage, attest 100% of last-30-day production AI artifact changes have who/what/when and a review link (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Be recorded (who/what/when) and linked to reviews): inspect current evidence for [Change log or ticket export for AI artifact releases] and confirm the pass condition holds — 100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID)",
-      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI artifact changes exist. If none, score NOT_APPLICABLE. 2) Confirm a change log or ticket export covers those releases. 3) Confirm 100% of changes in the last 30 days have who, what, when, and a review link (PR, ticket, or approval ID). 4) PASS only if coverage holds with measuredAt ≤90 days. DEP-M1 promotion-path adherence alone does not prove who/what/when completeness. DEP-M3 config-as-code alone does not prove review linkage. Generic app deploy logs without AI artifact scope do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass changelogs missing actor, timestamp, or review ID. Do not pass bulk \"system\" actors without a linked review. Do not pass coverage older than 90 days or windows shorter than the last 30 days of changes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Production changes must be recorded (who/what/when) and linked to reviews",
-        "Retain evidence artifacts required by this Check, starting with: Change log or ticket export for AI artifact releases",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Require who/what/when + review link on every production AI artifact change",
+        "Export and retain last-30-day change coverage for prompts/models/tools",
+        "Retain evidence under imports/ai-artifact-change-records/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -3861,20 +3874,18 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DEP-M3",
         "CHG-M1",
         "CHG-M2",
-        "CHG-M3"
+        "CHG-M3",
+        "PRM-M2"
       ],
       "tags": [
         "change-management",
         "mandatory",
-        "manual"
+        "hybrid",
+        "change-records",
+        "ai-artifacts"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "azure-devops",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -3885,37 +3896,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "DEP-M3",
       "category": "change-management",
       "title": "Infrastructure and AI config must be defined as code or equivalent declarative config",
-      "description": "Infrastructure and AI config shall be defined as code or equivalent declarative config",
-      "whyItMatters": "Infrastructure and AI config shall be defined as code or equivalent declarative config Failing this leaves a production gap against: Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100%",
+      "description": "Production AI gateway, model pins, tool catalogs, and prompts should be declared in IaC or equivalent declarative config, with drift checks showing no unmanaged resources and live pins matching declared versions.\n",
+      "whyItMatters": "Console-edited AI config drifts from what was reviewed and is hard to roll back. Declarative sources plus a recent drift check keep live pins equal to what the repo says is production.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100%",
+      "passCondition": "Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100% (drift evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts"
+        "IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts",
+        "Drift check showing 0 unmanaged AI config resources + 100% live-pin match"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
             "id": "repo-ai-config-as-code",
-            "params": {}
+            "params": {
+              "hint": "Discover declarative AI config (gateway, model pins, tool catalogs, prompts) and ingest drift/live-pin coverage.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts"
+              "hint": "If automation cannot prove drift coverage, attest 0 unmanaged production AI config resources and 100% live-pin match to declared versions (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Infrastructure and AI config must be defined as code or equivalent declarative config): inspect current evidence for [IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts] and confirm the pass condition holds — Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100%",
-      "falsePositiveGuidance": "(Change Management & Release): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm production AI config exists (gateway, model pins, tool catalogs, or prompts). If none, score NOT_APPLICABLE. 2) Confirm declarative IaC/config sources cover those resources. 3) Confirm a drift check shows 0 unmanaged production AI config resources outside those sources. 4) Confirm a sample of live pins matches declared versions at 100%. 5) PASS only if declarative coverage + drift = 0 + live match = 100% hold with measuredAt ≤90 days. DEP-M1 promotion path alone does not prove config-as-code. DEP-M2 change records alone do not prove live pins match declared versions. Generic app Terraform without AI gateway/pins/tools/prompts does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass README-only config docs without declarative sources. Do not pass a drift check that excludes model pins or tool catalogs in scope. Do not pass evidence older than 90 days. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Infrastructure and AI config must be defined as code or equivalent declarative config",
-        "Retain evidence artifacts required by this Check, starting with: IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Declare AI gateway, model pins, tool catalogs, and prompts as code",
+        "Run and retain drift checks showing 0 unmanaged resources and 100% live-pin match",
+        "Retain evidence under imports/ai-config-as-code/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -3940,20 +3954,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DEP-M2",
         "CHG-M1",
         "CHG-M2",
-        "CHG-M3"
+        "CHG-M3",
+        "MOD-M1",
+        "PRM-M1"
       ],
       "tags": [
         "change-management",
         "mandatory",
-        "automated"
+        "hybrid",
+        "config-as-code",
+        "drift"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "azure-devops",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -3963,34 +3976,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DEP-R1",
       "category": "change-management",
-      "title": "Production systems should have canary or progressive delivery for high-traffic AI changes",
-      "description": "Canary or progressive delivery for high-traffic AI changes",
-      "whyItMatters": "Canary or progressive delivery for high-traffic AI changes Failing this leaves a production gap against: High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release ≤90 days includes canary metrics link",
+      "title": "Production systems should use canary or progressive delivery for high-traffic AI changes",
+      "description": "High-traffic AI changes should roll out via canary or progressive delivery with automated rollback criteria, and the last such release within 90 days should include a canary metrics link.\n",
+      "whyItMatters": "Shipping high-traffic prompt, model, or tool changes at 100% traffic makes bad releases instantly global. Canary or progressive delivery with automated rollback criteria limits blast radius—and a recent metrics-linked release proves the path is used.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release ≤90 days includes canary metrics link",
+      "passCondition": "High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release ≤90 days includes canary metrics link (canary evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Progressive delivery/canary config for high-traffic AI changes + last canary promotion log"
+        "Progressive delivery/canary config for high-traffic AI changes",
+        "Last canary promotion log with metrics link (≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-canary-progressive-delivery",
+            "params": {
+              "hint": "Discover canary/progressive delivery for high-traffic AI changes, automated rollback criteria, and a recent metrics-linked release.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Progressive delivery/canary config for high-traffic AI changes + last canary promotion log"
+              "hint": "If automation cannot prove coverage, attest high-traffic AI changes use canary/progressive rollout with automated rollback criteria and the last such release ≤90 days includes a canary metrics link (measuredAt ≤90 days). Score N/A if no high-traffic AI changes.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Canary or progressive delivery for high-traffic AI changes): inspect current evidence for [Progressive delivery/canary config for high-traffic AI changes + last canary promotion log] and confirm the pass condition holds — High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release ≤90 days includes canary metrics link",
-      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm high-traffic AI changes exist in scope. If none, score NOT_APPLICABLE. 2) Confirm canary or progressive delivery is configured for those changes. 3) Confirm automated rollback criteria are defined. 4) Confirm the last such release ≤90 days includes a canary metrics link. 5) PASS only if config + rollback criteria + metrics-linked release hold with measuredAt ≤90 days. CHG-R3 quality-SLO auto-rollback alone does not prove progressive delivery. EVL shadow/canary eval Checks alone do not prove production canary rollout. Generic app canaries that exclude AI artifacts do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass manual percentage bumps without automated rollback criteria. Do not pass a canary config never used in the last 90 days. Do not pass metrics links older than 90 days. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Canary or progressive delivery for high-traffic AI changes",
-        "Retain evidence artifacts required by this Check, starting with: Progressive delivery/canary config for high-traffic AI changes + last canary promotion log",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Configure canary/progressive delivery with automated rollback for high-traffic AI changes",
+        "Retain last canary promotion log with metrics link ≤90 days",
+        "Retain evidence under imports/ai-canary-progressive-delivery/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -4015,20 +4035,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DEP-M2",
         "DEP-M3",
         "CHG-M1",
-        "CHG-M2"
+        "CHG-M2",
+        "CHG-R3",
+        "EVL-R2"
       ],
       "tags": [
         "change-management",
         "recommended",
-        "manual"
+        "hybrid",
+        "canary",
+        "progressive-delivery"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "azure-devops",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -4038,34 +4057,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DEP-R2",
       "category": "change-management",
-      "title": "Production systems should have environment parity checks for model pins and tool catalogs",
-      "description": "Environment parity checks for model pins and tool catalogs",
-      "whyItMatters": "Environment parity checks for model pins and tool catalogs Failing this leaves a production gap against: Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan ≤30 days with 0 unexplained drifts",
+      "title": "Production systems should run environment parity checks for model pins and tool catalogs",
+      "description": "Prod and staging model pins and tool catalogs should match except documented deltas, proven by a parity scan within the last 30 days with zero unexplained drifts.\n",
+      "whyItMatters": "Staging that silently diverges from production model pins or tool catalogs makes promotions unrepresentative. A recent parity scan with unexplained drifts at zero keeps non-prod a trustworthy rehearsal of prod.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan ≤30 days with 0 unexplained drifts",
+      "passCondition": "Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan ≤30 days with 0 unexplained drifts (parity evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Environment parity checklist for model pins and tool catalogs + last parity scan across envs"
+        "Environment parity checklist for model pins and tool catalogs",
+        "Last parity scan across envs with 0 unexplained drifts (≤30 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-env-parity-model-tool-catalog",
+            "params": {
+              "hint": "Discover prod vs staging parity checks for model pins and tool catalogs, plus a recent scan with unexplained drifts = 0.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Environment parity checklist for model pins and tool catalogs + last parity scan across envs"
+              "hint": "If automation cannot prove coverage, attest prod vs staging model pins and tool catalogs match except documented deltas, with last parity scan ≤30 days and unexplained drifts = 0 (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Environment parity checks for model pins and tool catalogs): inspect current evidence for [Environment parity checklist for model pins and tool catalogs + last parity scan across envs] and confirm the pass condition holds — Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan ≤30 days with 0 unexplained drifts",
-      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm model pins and/or tool catalogs exist across prod and staging. If none, score NOT_APPLICABLE. 2) Confirm a parity checklist or scan covers both model pins and tool catalogs. 3) Confirm the last scan is ≤30 days old. 4) Confirm unexplained drifts = 0 (documented deltas allowed). 5) PASS only if scan freshness + unexplained = 0 hold with measuredAt ≤90 days. DEP-M3 live-vs-declared drift alone does not prove prod-vs-staging parity. DEP-R1 canary alone does not prove environment parity. Generic env-diff tools that omit model pins or tool catalogs do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass parity that covers only app config and skips model pins/tool catalogs. Do not pass unexplained drifts marked \"known\" without owner and expiry. Do not pass a scan older than 30 days. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Environment parity checks for model pins and tool catalogs",
-        "Retain evidence artifacts required by this Check, starting with: Environment parity checklist for model pins and tool catalogs + last parity scan across envs",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Run prod vs staging parity for model pins and tool catalogs on a ≤30-day cadence",
+        "Document allowed deltas; remediate unexplained drifts to 0",
+        "Retain evidence under imports/env-parity-model-tool-catalog/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -4089,21 +4115,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DEP-M1",
         "DEP-M2",
         "DEP-M3",
+        "DEP-R1",
         "CHG-M1",
-        "CHG-M2"
+        "CHG-M2",
+        "MOD-M1"
       ],
       "tags": [
         "change-management",
         "recommended",
-        "manual"
+        "hybrid",
+        "environment-parity",
+        "model-pins",
+        "tool-catalogs"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "azure-devops",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -4113,34 +4139,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DEP-R3",
       "category": "change-management",
-      "title": "Production systems should have automated migration for embedding/index version upgrades",
-      "description": "Automated migration for embedding/index version upgrades",
-      "whyItMatters": "Automated migration for embedding/index version upgrades Failing this leaves a production gap against: Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps",
+      "title": "Production systems should automate migration for embedding/index version upgrades",
+      "description": "Embedding and index version upgrades should run via automated migration with validation gates, and the last upgrade within 12 months should succeed without dual-write gaps—or an N/A attestation when no upgrade occurred.\n",
+      "whyItMatters": "Manual re-embeds leave dual-write windows and silent retrieval breakage. Automated migration with validation gates keeps index versions coherent—and a recent successful upgrade (or attested no-upgrade) proves the path is real.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps",
+      "passCondition": "Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps (migration evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Embedding/index migration runbook + last automated migration job log and validation"
+        "Embedding/index migration runbook with validation gates",
+        "Last automated migration job log and validation (≤12 months) or no-upgrade attestation"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-embedding-index-migration",
+            "params": {
+              "hint": "Discover automated embedding/index migration with validation gates and last-upgrade (or no-upgrade) evidence.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Embedding/index migration runbook + last automated migration job log and validation"
+              "hint": "If automation cannot prove coverage, attest automated migration with validation gates and last upgrade ≤12 months succeeded without dual-write gaps—or attest no upgrade in window (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Automated migration for embedding/index version upgrades): inspect current evidence for [Embedding/index migration runbook + last automated migration job log and validation] and confirm the pass condition holds — Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps",
-      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production embeddings or vector indexes exist. If none, score NOT_APPLICABLE. 2) If no version upgrade occurred in the last 12 months, score NOT_APPLICABLE only with a retained no-upgrade attestation. 3) Confirm upgrades run via automated migration with validation gates. 4) Confirm the last upgrade ≤12 months succeeded without dual-write gaps. 5) PASS only if automation + validation + successful last upgrade hold with measuredAt ≤90 days. DEP-M3 config-as-code alone does not prove migration automation. DEP-R2 env parity alone does not prove embedding/index upgrades. Manual re-index scripts without validation gates do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a one-off notebook re-embed without automation and gates. Do not pass dual-write periods left open without cutover validation. Do not pass an upgrade older than 12 months as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Automated migration for embedding/index version upgrades",
-        "Retain evidence artifacts required by this Check, starting with: Embedding/index migration runbook + last automated migration job log and validation",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Automate embedding/index version migrations with validation gates",
+        "Retain last successful migration log ≤12 months (or no-upgrade attestation)",
+        "Retain evidence under imports/embedding-index-migration/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -4164,21 +4197,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DEP-M1",
         "DEP-M2",
         "DEP-M3",
+        "DEP-R1",
+        "DEP-R2",
         "CHG-M1",
-        "CHG-M2"
+        "CHG-M2",
+        "DG-M1"
       ],
       "tags": [
         "change-management",
         "recommended",
-        "manual"
+        "hybrid",
+        "embedding-migration",
+        "index-upgrade"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "azure-devops",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },

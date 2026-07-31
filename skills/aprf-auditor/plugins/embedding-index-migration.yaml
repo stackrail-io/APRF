@@ -1,0 +1,27 @@
+id: embedding-index-migration
+title: Automated embedding/index version migration (DEP-R3)
+version: "0.2.0"
+executor: collectors/embedding-index-migration.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-embedding-index-migration]
+inputs:
+  - "Target repo (embedding/index migration runbooks and jobs)"
+  - "Optional suite: aprf-assessment/imports/embedding-index-migration/*.{json}"
+collect:
+  - "Detect automated embedding/index migration + validation gates"
+  - "Ingest coverage; write embedding-index-migration-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/embedding-index-migration/*"
+  signals: [embedding-index-migration, dep-r3, repo-embedding-index-migration]
+mapsToChecks: [DEP-R3]
+whenUnavailable: >
+  Migration signals alone are PARTIAL. DEP-R3 PASS needs
+  automatedMigrationWithValidationGates,
+  lastUpgradeWithin12Months,
+  lastUpgradeSucceededWithoutDualWriteGaps, measuredAt ≤90 days.
+  N/A when no embeddings/indexes or noUpgradeInWindowAttested=true.
+live:
+  required: false
+  note: Offline embedding/index migration heuristics + optional imported JSON.

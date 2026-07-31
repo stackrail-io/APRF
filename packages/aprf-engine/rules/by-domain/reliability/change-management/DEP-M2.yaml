@@ -1,36 +1,56 @@
 id: "DEP-M2"
 category: "change-management"
-title: "Production changes must be recorded (who/what/when) and linked to reviews"
-description: "Production changes shall be recorded (who/what/when) and linked to reviews"
-whyItMatters: "Production changes shall be recorded (who/what/when) and linked to reviews Failing
-  this leaves a production gap against: 100% of production AI artifact changes in the last 30 days
-  have who/what/when fields and a review link (PR, ticket, or approval ID)"
+title: "Production AI artifact changes must be recorded (who/what/when) and linked to reviews"
+description: >
+  Every production AI artifact change should record who changed what and when,
+  and link to a review (PR, ticket, or approval ID).
+whyItMatters: >
+  Without who/what/when plus a review link, production prompt, model, and tool
+  changes cannot be audited or blamed correctly—and silent hotfixes become
+  invisible to reconstruct after an incident.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "100% of production AI artifact changes in the last 30 days have who/what/when fields
-  and a review link (PR, ticket, or approval ID)"
+passCondition: >
+  100% of production AI artifact changes in the last 30 days have who/what/when
+  fields and a review link (PR, ticket, or approval ID) (change-record evidence
+  measuredAt ≤90 days).
 evidenceRequired:
   - "Change log or ticket export for AI artifact releases"
+  - "Last-30-day coverage showing who/what/when + review link on every change"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-artifact-change-records"
+      params:
+        hint: >
+          Discover change logs / ticket exports for AI artifact releases with
+          who/what/when fields and review links.
     - id: "manual-attest"
       params:
-        hint: "Change log or ticket export for AI artifact releases"
-manualVerification: "For this Check (Be recorded (who/what/when) and linked to reviews): inspect
-  current evidence for [Change log or ticket export for AI artifact releases] and confirm the pass
-  condition holds — 100% of production AI artifact changes in the last 30 days have who/what/when
-  fields and a review link (PR, ticket, or approval ID)"
-falsePositiveGuidance: "(Change Management & Release): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest 100% of last-30-day
+          production AI artifact changes have who/what/when and a review link
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI artifact changes exist. If none, score
+  NOT_APPLICABLE. 2) Confirm a change log or ticket export covers those
+  releases. 3) Confirm 100% of changes in the last 30 days have who, what,
+  when, and a review link (PR, ticket, or approval ID). 4) PASS only if
+  coverage holds with measuredAt ≤90 days. DEP-M1 promotion-path adherence
+  alone does not prove who/what/when completeness. DEP-M3 config-as-code alone
+  does not prove review linkage. Generic app deploy logs without AI artifact
+  scope do not satisfy.
+falsePositiveGuidance: >
+  Do not pass changelogs missing actor, timestamp, or review ID. Do not pass
+  bulk "system" actors without a linked review. Do not pass coverage older than
+  90 days or windows shorter than the last 30 days of changes. Named exceptions
+  need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Production changes must be recorded (who/what/when) and linked to
-    reviews"
-  - "Retain evidence artifacts required by this Check, starting with: Change log or ticket export
-    for AI artifact releases"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Require who/what/when + review link on every production AI artifact change"
+  - "Export and retain last-30-day change coverage for prompts/models/tools"
+  - "Retain evidence under imports/ai-artifact-change-records/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Workbook — Configuration Management"
     url: "https://sre.google/workbook/"
@@ -46,16 +66,15 @@ relatedRules:
   - "CHG-M1"
   - "CHG-M2"
   - "CHG-M3"
+  - "PRM-M2"
 tags:
   - "change-management"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "change-records"
+  - "ai-artifacts"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "azure-devops"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

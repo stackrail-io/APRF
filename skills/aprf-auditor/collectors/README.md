@@ -93,6 +93,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **quality-slo-auto-rollback** | `quality-slo-auto-rollback.ts` | quality SLO burn → auto-rollback or page (CHG-R3) | `imports/quality-slo-auto-rollback/` | — |
 | **one-click-ai-rollback** | `one-click-ai-rollback.ts` | one-click / single-command AI release rollback (CHG-R1) | `imports/one-click-ai-rollback/` | — |
 | **agent-behavior-feature-flags** | `agent-behavior-feature-flags.ts` | feature flags for new agent behaviors (CHG-R2) | `imports/agent-behavior-feature-flags/` | — |
+| **ai-artifact-promotion-path** | `ai-artifact-promotion-path.ts` | non-prod→prod promotion for prompts/models/tools (DEP-M1) | `imports/ai-artifact-promotion-path/` | — |
+| **ai-artifact-change-records** | `ai-artifact-change-records.ts` | who/what/when + review-linked AI change records (DEP-M2) | `imports/ai-artifact-change-records/` | — |
+| **ai-config-as-code** | `ai-config-as-code.ts` | declarative AI config + drift / live-pin match (DEP-M3) | `imports/ai-config-as-code/` | — |
+| **ai-canary-progressive-delivery** | `ai-canary-progressive-delivery.ts` | canary / progressive delivery for high-traffic AI (DEP-R1) | `imports/ai-canary-progressive-delivery/` | — |
+| **env-parity-model-tool-catalog** | `env-parity-model-tool-catalog.ts` | prod vs staging parity for model pins + tool catalogs (DEP-R2) | `imports/env-parity-model-tool-catalog/` | — |
+| **embedding-index-migration** | `embedding-index-migration.ts` | automated embedding/index version migration (DEP-R3) | `imports/embedding-index-migration/` | — |
 | **ai-cost-alerts** | `ai-cost-alerts.ts` | budget-burn + anomaly alerts | `imports/ai-cost-alerts/` | — |
 | **ai-retry-amplification** | `ai-retry-amplification.ts` | retry/loop cost bounds | `imports/ai-retry-amplification/` | — |
 | **ai-prompt-cache** | `ai-prompt-cache.ts` | prompt cache + hit-rate | `imports/ai-prompt-cache/` | — |
