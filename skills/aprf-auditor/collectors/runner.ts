@@ -261,6 +261,30 @@ CMP-R3 Level-5 independent assessment:
   npm run aprf:ai-independent-assessment -- --target <app> --out <app>/aprf-assessment
   # PASS needs coversAllLevel5Systems + sampled Check IDs + remediation owners + assessment ≤12m under imports/ai-independent-assessment/
 
+ORG-M1 AI acceptable-use / prohibited-applications policy:
+  npm run aprf:ai-acceptable-use-policy -- --target <app> --out <app>/aprf-assessment
+  # PASS needs version + owner + both sections + review ≤12m under imports/ai-acceptable-use-policy/
+
+ORG-R2 critical APRF domain owners:
+  npm run aprf:ai-domain-ownership -- --target <app> --out <app>/aprf-assessment
+  # PASS needs coversAllProductionAiSystems + systemsMissingRequiredDomainOwners=0 under imports/ai-domain-ownership/
+
+ORG-R4 control-gap risk acceptance:
+  npm run aprf:ai-risk-acceptance -- --target <app> --out <app>/aprf-assessment
+  # PASS needs openWaiversIncomplete=0 + expiredWaiversWithoutEscalation=0 under imports/ai-risk-acceptance/
+
+ORG-R1 leadership AI risk / APRF maturity review:
+  npm run aprf:ai-leadership-review -- --target <app> --out <app>/aprf-assessment
+  # PASS needs reviewAgeDays≤90 + openActionsIncomplete=0 under imports/ai-leadership-review/
+
+ORG-R3 continual improvement backlog:
+  npm run aprf:ai-improvement-backlog -- --target <app> --out <app>/aprf-assessment
+  # PASS needs linkageRatePct≥80 + closedOrPlannedRatePct≥50 under imports/ai-improvement-backlog/
+
+ORG-R5 org-wide APRF evidence sampling:
+  npm run aprf:ai-org-aprf-sampling -- --target <app> --out <app>/aprf-assessment
+  # PASS needs assessmentAgeDays≤365 + sampledCheckIdCount>0 + findingsListed under imports/ai-org-aprf-sampling/
+
 Import runtime evidence without live APIs:
   mkdir -p <out>/imports/langsmith && cp traces.json <out>/imports/langsmith/
 `);

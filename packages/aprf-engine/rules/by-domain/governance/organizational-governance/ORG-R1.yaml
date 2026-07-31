@@ -1,48 +1,72 @@
 id: "ORG-R1"
 category: "organizational-governance"
 title: "Production systems should have periodic leadership review of AI risk posture and APRF maturity"
-description: "Periodic leadership review of AI risk posture and APRF maturity"
-whyItMatters: "Periodic leadership review of AI risk posture and APRF maturity Failing this leaves a
-  production gap against: Leadership reviewed AI risk posture and APRF capability attained ≤90 days
-  ago; open actions have owners and due dates"
+description: >
+  Leadership should review AI risk posture and APRF capability attained within
+  the last 90 days; every open action from that review should have an owner and
+  due date.
+whyItMatters: >
+  Without a recent leadership look at AI risk and attained APRF maturity,
+  blockers and capability gaps stay buried in engineering. A dated review with
+  owned actions turns governance from a paper charter into an executive cadence.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago; open
-  actions have owners and due dates"
+passCondition: >
+  Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago;
+  open actions have owners and due dates (review evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Leadership AI risk / APRF maturity review minutes (or board pack excerpt) + action log"
+  - "Leadership AI risk / APRF maturity review minutes (or board pack excerpt) with review date"
+  - "Action log showing owners and due dates for open items"
 detection:
-  capability: "manual"
-  detectors: []
-manualVerification: "For this Check (Periodic leadership review of AI risk posture and APRF
-  maturity): inspect current evidence for [Leadership AI risk / APRF maturity review minutes (or
-  board pack excerpt) + action log] and confirm the pass condition holds — Leadership reviewed AI
-  risk posture and APRF capability attained ≤90 days ago; open actions have owners and due dates"
-falsePositiveGuidance: "(Organizational Governance): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-leadership-review"
+      params:
+        hint: >
+          Discover leadership AI risk / APRF maturity review minutes and action
+          logs with owners and due dates.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove the last review, attest leadership reviewed
+          AI risk and APRF capability ≤90 days ago with owned open actions
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the organization runs production AI systems. If none, score
+  NOT_APPLICABLE. 2) Open the latest leadership AI risk / APRF maturity review
+  minutes or board pack. 3) Confirm review date ≤90 days. 4) Confirm open
+  actions have owners and due dates. 5) PASS only if review freshness + action
+  ownership hold with measuredAt ≤90 days. An engineering-only retro that never
+  reaches leadership does not satisfy. A review without an action log does not
+  satisfy.
+falsePositiveGuidance: >
+  Do not pass generic board minutes that never mention AI risk or APRF
+  capability. Do not pass reviews older than 90 days. Do not pass action lists
+  missing owners or due dates. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Periodic leadership review of AI risk posture and
-    APRF maturity"
-  - "Retain evidence artifacts required by this Check, starting with: Leadership AI risk / APRF
-    maturity review minutes (or board pack excerpt) + action log"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Schedule a recurring leadership AI risk / APRF maturity review (≤90 days)"
+  - "Record open actions with owner and due date"
+  - "Retain minutes under imports/ai-leadership-review/"
 references:
   - title: "ISO/IEC 42001 — AI management systems"
     url: "https://www.iso.org/standard/81230.html"
   - title: "NIST AI RMF — Govern"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "APRF maturity"
+    url: "https://stackrail.io/aprf/how/#maturity"
 relatedRules:
   - "ORG-M1"
-  - "ORG-M2"
-  - "ORG-M3"
-  - "ORG-M4"
+  - "ORG-R2"
   - "ORG-R3"
+  - "ORG-R4"
+  - "ORG-R5"
 tags:
   - "organizational-governance"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "leadership-review"
+  - "maturity"
 applicability:
   technologies: []
   minCriticality: 2

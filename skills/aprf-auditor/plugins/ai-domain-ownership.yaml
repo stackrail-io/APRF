@@ -1,0 +1,29 @@
+id: ai-domain-ownership
+title: Production AI critical-domain owners (ORG-R2)
+version: "0.2.0"
+executor: collectors/ai-domain-ownership.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-ai-domain-ownership]
+inputs:
+  - "Target repo (system inventory / domain-owner registers)"
+  - "Optional suite: aprf-assessment/imports/ai-domain-ownership/*.{json}"
+collect:
+  - "Detect inventories and critical-domain owner signals"
+  - "Ingest coverage evidence; write ai-domain-ownership-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/ai-domain-ownership/*"
+  signals:
+    - ai-domain-ownership
+    - org-r2
+    - repo-ai-domain-ownership
+mapsToChecks: [ORG-R2]
+whenUnavailable: >
+  Ownership signals alone are PARTIAL. ORG-R2 PASS needs imported
+  coversAllProductionAiSystems, systemsMissingRequiredDomainOwners=0,
+  requiredDomainOwnerFieldCount>0, measuredAt ≤90 days. No production AI →
+  NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline inventory heuristics + optional imported coverage JSON.

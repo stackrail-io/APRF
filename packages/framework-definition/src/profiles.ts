@@ -57,7 +57,6 @@ export const PROFILE_CORE: AprfProfile = {
     "INC-M2",
     "COST-M1",
     "COST-M3",
-    "ORG-M2",
   ],
   rationale: [
     "Identity and authorization before any customer traffic (AUTHN/AUTHZ).",
@@ -66,7 +65,6 @@ export const PROFILE_CORE: AprfProfile = {
     "Pinned prompts/models with promotion evidence (PRM/MOD).",
     "Observability, timeouts, degraded mode, and tested rollback (OBS/REL/CHG).",
     "Spend ceilings to prevent denial-of-wallet (COST).",
-    "Named owners so gates have stewards (ORG-M2).",
   ],
 };
 
@@ -83,7 +81,6 @@ export const PROFILE_REGULATED: AprfProfile = {
   mandatoryCheckIds: [
     ...PROFILE_CORE.mandatoryCheckIds,
     "REL-M6",
-    "ORG-M3",
     "CMP-M2",
     "SEC-M5",
     "AUTHN-M4",
@@ -101,7 +98,6 @@ export const PROFILE_REGULATED: AprfProfile = {
     "REL-M8",
     "CHG-M4",
     "INC-M4",
-    "ORG-M4",
   ],
   rationale: [
     "Includes every Core gate — regulated systems must still clear production minimums.",

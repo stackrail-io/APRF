@@ -60,7 +60,7 @@ mandatoryCheckIds:
   - CHG-M3
   - INC-M1
   - INC-M2
-  - ORG-M2
+  - ORG-R2
 
 # Core mandatories intentionally out of scope for this subset
 excludedFromCore:

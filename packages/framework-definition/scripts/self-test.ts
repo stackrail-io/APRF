@@ -13,7 +13,7 @@ import {
   unionProfileAndLenses,
   LENS_ID_RAG,
   type AprfPolicy,
-} from "../src/index.ts";
+} from "../src/index.js";
 
 function assert(cond: unknown, msg: string): asserts cond {
   if (!cond) throw new Error(msg);
@@ -21,16 +21,16 @@ function assert(cond: unknown, msg: string): asserts cond {
 
 assert(PROFILE_ID_CORE === "aprf-profile-core", "core id");
 assert(PROFILE_CORE.targetCriticality === 2, "tier 2");
-assert(PROFILE_CORE.mandatoryCheckIds.length === 40, "core has 40 mandatories");
+assert(PROFILE_CORE.mandatoryCheckIds.length === 39, "core has 39 mandatories");
 assert(
-  PROFILE_REGULATED.mandatoryCheckIds.length === 60,
-  "regulated has 61 mandatories",
+  PROFILE_REGULATED.mandatoryCheckIds.length === 57,
+  "regulated has 57 mandatories",
 );
 assert(
   PROFILE_REGULATED.mandatoryCheckIds.includes("AUTHN-M1"),
   "regulated includes core",
 );
-assert(getTier3OnlyMandatoryIds().length === 20, "tier3-only count");
+assert(getTier3OnlyMandatoryIds().length === 18, "tier3-only count");
 
 assert(
   resolveCheckApplicability("AUTHN-M1", PROFILE_CORE) === "mandatory",

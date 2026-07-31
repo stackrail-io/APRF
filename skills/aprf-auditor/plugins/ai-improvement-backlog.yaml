@@ -1,0 +1,24 @@
+id: ai-improvement-backlog
+title: Continual improvement backlog from incidents/evals (ORG-R3)
+version: "0.2.0"
+executor: collectors/ai-improvement-backlog.ts
+evidenceClass: docs
+alsoEmits: []
+detectorIds: [repo-ai-improvement-backlog]
+inputs:
+  - "Target repo (improvement backlog / incident links)"
+  - "Optional suite: aprf-assessment/imports/ai-improvement-backlog/*.{json}"
+collect:
+  - "Detect backlog and incident/eval linkage signals"
+  - "Ingest metrics; write ai-improvement-backlog-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/ai-improvement-backlog/*"
+  signals: [ai-improvement-backlog, org-r3, repo-ai-improvement-backlog]
+mapsToChecks: [ORG-R3]
+whenUnavailable: >
+  Backlog signals alone are PARTIAL. ORG-R3 PASS needs linkageRatePct≥80,
+  closedOrPlannedRatePct≥50, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline backlog heuristics + optional imported JSON.

@@ -1,39 +1,56 @@
 id: "ORG-R3"
 category: "organizational-governance"
 title: "Production systems should have continual improvement backlog fed by incidents and eval failures"
-description: "Continual improvement backlog fed by incidents and eval failures"
-whyItMatters: "Continual improvement backlog fed by incidents and eval failures Failing this leaves
-  a production gap against: ≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter
-  produced a backlog item; ≥50% of those items closed or have a dated plan"
+description: >
+  Sev-1/2 AI incidents and critical eval failures in the last quarter should
+  produce improvement backlog items (≥80%); ≥50% of those items should be closed
+  or have a dated plan.
+whyItMatters: >
+  Incidents and eval fails that never become backlog work repeat. Linking Sev-1/2
+  AI incidents and critical eval failures into owned improvement items—and
+  closing or dating a plan for most of them—turns pain into durable control
+  changes.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a
-  backlog item; ≥50% of those items closed or have a dated plan"
+passCondition: >
+  ≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter
+  produced a backlog item; ≥50% of those items closed or have a dated plan
+  (backlog evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Improvement backlog (tickets) linked from incidents and eval failures + sample of closed items
-    last quarter"
+  - "Improvement backlog (tickets) linked from Sev-1/2 AI incidents and critical eval failures"
+  - "Quarterly sample showing linkage rate ≥80% and closed-or-planned rate ≥50%"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-improvement-backlog"
+      params:
+        hint: >
+          Discover improvement backlogs linked from AI incidents and eval
+          failures, plus quarterly linkage/closure metrics.
     - id: "manual-attest"
       params:
-        hint: "Improvement backlog (tickets) linked from incidents and eval failures + sample of closed
-          items last quarter"
-manualVerification: "For this Check (Continual improvement backlog fed by incidents and eval
-  failures): inspect current evidence for [Improvement backlog (tickets) linked from incidents and
-  eval failures + sample of closed items last quarter] and confirm the pass condition holds — ≥80%
-  of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; ≥50%
-  of those items closed or have a dated plan"
-falsePositiveGuidance: "(Organizational Governance): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove rates, attest ≥80% of Sev-1/2 AI incidents
+          and critical eval fails last quarter produced backlog items and ≥50%
+          of those are closed or have a dated plan (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm Sev-1/2 AI incidents or critical eval failures occurred in the last
+  quarter (or a defined empty quarter with attestation). If the org has no AI
+  incident/eval practice, score NOT_APPLICABLE. 2) Open the improvement backlog
+  and linkage evidence. 3) Confirm ≥80% of those events produced a backlog item.
+  4) Confirm ≥50% of those items are closed or have a dated plan. 5) PASS only
+  if both rates hold with measuredAt ≤90 days. A backlog unrelated to incidents
+  or eval fails does not satisfy. Linkage without closure/plan tracking does
+  not satisfy.
+falsePositiveGuidance: >
+  Do not pass generic eng backlogs with no incident/eval links. Do not pass
+  rates below the ≥80% / ≥50% thresholds. Do not pass samples older than 90 days
+  as current. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Continual improvement backlog fed by incidents and
-    eval failures"
-  - "Retain evidence artifacts required by this Check, starting with: Improvement backlog (tickets)
-    linked from incidents and eval failures + sample of closed items last quarter"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Require a backlog item for every Sev-1/2 AI incident and critical eval fail"
+  - "Track closed-or-dated-plan rate; aim ≥50% within the quarter"
+  - "Retain the quarterly sample under imports/ai-improvement-backlog/"
 references:
   - title: "ISO/IEC 42001 — AI management systems"
     url: "https://www.iso.org/standard/81230.html"
@@ -41,14 +58,18 @@ references:
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "ORG-M1"
-  - "ORG-M2"
-  - "ORG-M3"
-  - "ORG-M4"
   - "ORG-R1"
+  - "ORG-R2"
+  - "ORG-R4"
+  - "ORG-R5"
+  - "INC-M1"
+  - "EVL-M1"
 tags:
   - "organizational-governance"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "continual-improvement"
+  - "backlog"
 applicability:
   technologies: []
   minCriticality: 2

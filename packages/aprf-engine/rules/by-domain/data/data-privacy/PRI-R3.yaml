@@ -65,7 +65,7 @@ relatedRules:
   - "PRI-M3"
   - "PRI-R1"
   - "PRI-R2"
-  - "ORG-M4"
+  - "ORG-R5"
 tags:
   - "data-privacy"
   - "recommended"
