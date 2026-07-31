@@ -1,55 +1,75 @@
 id: "HUM-M4"
 category: "human-approval"
 title: "Dual control must be required for Level 5 irreversible actions"
-description: "Dual control shall be required for Level 5 irreversible actions"
-whyItMatters: "Dual control shall be required for Level 5 irreversible actions Failing this leaves a
-  production gap against: PASS if Level 5 irreversible actions are inventoried and 100% of sampled
-  executions show dual approval; 0 single-approver completes in the sample"
+description: >
+  Irreversible actions in Level 5 (regulated / highest capability) systems shall
+  require dual control: two distinct authorized humans must approve before
+  execution. Sampled executions shall show dual approval with 0 single-approver
+  completes.
+whyItMatters: >
+  At Level 5 blast radius, a single fatigued or compromised approver can
+  authorize irreversible harm. Dual control separates intent from execution and
+  raises the cost of insider or session abuse. Without it, HUM-M1 gates remain
+  single-point-of-failure approvals for the highest stakes.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "PASS if Level 5 irreversible actions are inventoried and 100% of sampled executions
-  show dual approval; 0 single-approver completes in the sample"
+passCondition: >
+  Level 5 irreversible action classes are inventoried; 100% of sampled
+  executions of those classes show dual approval by two distinct actors; 0
+  single-approver completes in the sample.
 evidenceRequired:
-  - "Dual-control workflow config + sample approval records for irreversible actions"
+  - "Inventory of Level 5 irreversible action classes requiring dual control"
+  - "Dual-control workflow configuration (two distinct approvers)"
+  - "Sample approval records showing dual approval and 0 single-approver completes"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-dual-control-config"
+      params:
+        hint: >
+          Discover dual-control / four-eyes / two-person approval config for
+          irreversible high-impact actions.
     - id: "manual-attest"
       params:
-        hint: "Dual-control workflow config + sample approval records for irreversible actions"
-manualVerification: "For this Check (Dual control must be required for Level 5 irreversible
-  actions): inspect current evidence for [Dual-control workflow config + sample approval records for
-  irreversible actions] and confirm the pass condition holds — PASS if Level 5 irreversible actions
-  are inventoried and 100% of sampled executions show dual approval; 0 single-approver completes in
-  the sample"
-falsePositiveGuidance: "(Human Approval): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove samples, attest dual-control config plus
+          sampled records with 100% dual approval and 0 single-approver completes.
+manualVerification: >
+  1) Confirm the system is assessed at requiredFromLevel ≥5 / Level 5 scope; if
+  not in Level 5 scope, score NOT_APPLICABLE. 2) Inventory irreversible action
+  classes requiring dual control. 3) Verify workflow config requires two distinct
+  approvers. 4) Sample recent executions: 100% dual approval, 0 single-approver.
+  5) PASS only if inventory + config + sample all hold.
+falsePositiveGuidance: >
+  Do not pass two clicks by the same user/session as dual control. Do not pass
+  maker-checker that allows the same principal both roles. Do not apply this
+  Check as a Level 3 substitute—use HUM-M1/M3 for single-gate systems. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Dual control must be required for Level 5 irreversible actions"
-  - "Retain evidence artifacts required by this Check, starting with: Dual-control workflow config +
-    sample approval records for irreversible actions"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Mark irreversible Level 5 actions and require two distinct approver identities in workflow config"
+  - "Reject dual-control completions where both approvals share the same actor or session"
+  - "Export dual-control samples under imports/human-dual-control/ for assessments"
+  - "Alert on single-approver attempts against dual-control classes"
 references:
   - title: "NIST AI RMF — Govern and Manage (human oversight)"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
-  - title: "OWASP LLM — Excessive Agency"
+  - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
   - "HUM-M1"
   - "HUM-M2"
   - "HUM-M3"
-  - "HUM-R1"
-  - "HUM-R3"
+  - "ORG-M4"
+  - "CHG-M1"
 tags:
   - "human-approval"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "dual-control"
+  - "level-5"
 applicability:
-  technologies:
-    - "a2a"
-    - "mcp"
+  technologies: []
   minCriticality: 3
   requiredFromLevel: 5
 status: "active"

@@ -1,0 +1,29 @@
+id: ai-cost-alerts
+title: AI cost budget-burn and anomaly alerts with notify proof (COST-M2)
+version: "0.2.0"
+executor: collectors/ai-cost-alerts.ts
+evidenceClass: runtime-config
+alsoEmits: [code, ci]
+detectorIds: [repo-cost-alert-config]
+inputs:
+  - "Target repo (budget-burn / spend-anomaly alerts, cost dashboards)"
+  - "Optional suite: aprf-assessment/imports/ai-cost-alerts/*.{json}"
+collect:
+  - "Detect budget-burn and spend-anomaly alert policies"
+  - "Detect cost/spend dashboard signals"
+  - "Ingest notify proof; write ai-cost-alerts-report.json"
+emits:
+  nodeClass: runtime-config
+  refPattern: "aprf-assessment/imports/ai-cost-alerts/*"
+  signals:
+    - ai-cost-alerts
+    - cost-m2
+    - repo-cost-alert-config
+mapsToChecks: [COST-M2]
+whenUnavailable: >
+  Alert/dashboard config alone is PARTIAL. COST-M2 PASS needs both alert
+  classes plus imported notifyProven=true (age ≤90d) and measuredAt ≤90 days.
+  No production AI spend → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline heuristics + optional imported notify-proof JSON.

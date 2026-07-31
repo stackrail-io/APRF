@@ -1,0 +1,29 @@
+id: ai-model-routing
+title: Cheap-vs-premium model routing with eval and misroute monitoring (COST-R2)
+version: "0.2.0"
+executor: collectors/ai-model-routing.ts
+evidenceClass: runtime-config
+alsoEmits: [code]
+detectorIds: [repo-model-routing-config]
+inputs:
+  - "Target repo (model router / cheap vs premium task-class policy)"
+  - "Optional suite: aprf-assessment/imports/ai-model-routing/*.{json}"
+collect:
+  - "Detect model-routing policy for low-risk → cheaper models"
+  - "Detect eval signals tied to routing"
+  - "Ingest eval + misroute evidence; write ai-model-routing-report.json"
+emits:
+  nodeClass: runtime-config
+  refPattern: "aprf-assessment/imports/ai-model-routing/*"
+  signals:
+    - ai-model-routing
+    - cost-r2
+    - repo-model-routing-config
+mapsToChecks: [COST-R2]
+whenUnavailable: >
+  Routing policy alone is PARTIAL. COST-R2 PASS needs imported
+  evalWithinTolerance=true and misrouteMonitored=true with monitorWindowDays
+  ≤30 and measuredAt ≤90 days. No multi-model routing surface → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline heuristics + optional imported eval/misroute JSON.

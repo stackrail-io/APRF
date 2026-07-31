@@ -1,6 +1,6 @@
 /**
  * Extra Check-YAML lint rules beyond Ajv schema.
- * Used by validate.ts and fixture unit tests.
+ * Used by validate-catalog.ts (CLI + unit catalog sweep) and fixture unit tests.
  */
 import type { AprfRule } from "./types.js";
 
@@ -77,6 +77,12 @@ const FORBIDDEN_PROSE_PATTERNS: Array<{ re: RegExp; label: string }> = [
   { re: /\bTBD\b/, label: "TBD placeholder" },
   { re: /\[placeholder\]/i, label: "[placeholder] marker" },
   { re: /lorem ipsum/i, label: "lorem ipsum placeholder" },
+];
+
+/** Markers forbidden anywhere in Check YAML source (including comments). */
+const FORBIDDEN_RAW_FILE_PATTERNS: Array<{ re: RegExp; label: string }> = [
+  { re: /\u2026/, label: "unicode ellipsis (…)" },
+  { re: /\.\.\./, label: "ASCII ellipsis (...)" },
 ];
 
 const PROSE_FIELDS: Array<keyof AprfRule | "detection.hint"> = [
@@ -188,6 +194,20 @@ export function lintForbiddenProse(raw: unknown): string[] {
     }
   }
 
+  return errors;
+}
+
+/**
+ * Reject truncation ellipsis anywhere in Check YAML source text
+ * (prose, hints, comments). Used by the by-domain catalog sweep.
+ */
+export function lintRawYamlNoEllipsis(source: string): string[] {
+  const errors: string[] = [];
+  for (const { re, label } of FORBIDDEN_RAW_FILE_PATTERNS) {
+    if (re.test(source)) {
+      errors.push(`file contains ${label} — truncated or incomplete Check prose`);
+    }
+  }
   return errors;
 }
 

@@ -3926,45 +3926,47 @@
       "engineeringPhilosophy": "Human-in-the-loop is not a product apology\u2014it is a control. The goal is calibrated oversight: humans approve what machines should not decide alone.",
       "whyItMatters": "Autonomous execution of irreversible actions (money movement, data deletion, external communications, code deploy) without approval creates unacceptable blast radius.",
       "commonFailures": [
-        "Rubber-stamp UIs that hide risk details",
-        "Approval only in UI while API/agent path bypasses it",
-        "No dual control for mission-critical actions",
-        "Approvals without audit trail"
+        "Rubber-stamp UIs that hide tool args, diffs, or confidence",
+        "Approval only in UI while API/agent/job paths bypass it",
+        "No dual control for Level 5 irreversible actions",
+        "Approvals without attributable audit trail",
+        "High-impact classes missing from the approval inventory",
+        "Approval queue backlog without SLA driving unsafe workarounds"
       ],
       "mandatoryChecks": [
         {
           "id": "HUM-M1",
-          "requirement": "High-impact action classes shall be inventoried and gated by human approval in production",
-          "artifact": "High-impact action inventory + gate wiring evidence",
-          "passCondition": "100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests fail at 100%",
+          "requirement": "Every high-impact action class an AI system or agent can invoke in production (write/irreversible/financial/external-comms/privileged side effects) shall be listed in a versioned inventory and blocked until a human approval gate succeeds. Ungated execution of inventoried classes shall fail closed.",
+          "artifact": "Versioned high-impact action inventory (class, risk tier, gate id/owner) + Gate wiring evidence (policy/config) mapping each class to an approval control + Ungated execution test results showing 100% deny/fail-closed for inventoried classes",
+          "passCondition": "100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests for those classes fail at 100%.",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "HUM-M2",
-          "requirement": "Approval decisions shall be logged with actor, context, and outcome",
-          "artifact": "Approval audit log schema + sample records",
-          "passCondition": "100% of sampled approvals in last 30 days include actor ID, action context, and approve/deny outcome; schema validation test passes",
-          "method": "manual",
+          "requirement": "Every human approval or denial of a gated high-impact action shall be recorded with actor identity, action context (what was proposed), and approve/deny outcome in a durable audit log that passes schema validation.",
+          "artifact": "Approval audit log schema (actor, context, outcome, timestamp) as code or documented contract + Sample approval records from the last 30 days covering required fields + Schema validation test or import proving samples conform",
+          "passCondition": "100% of sampled approvals in the last 30 days include actor ID, action context, and approve/deny outcome; schema validation for the approval audit log passes.",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "HUM-M3",
-          "requirement": "Approval shall not be bypassable via alternate agent or API paths",
-          "artifact": "Bypass-path threat tests across UI, API, and agent entry points",
-          "passCondition": "Automated or reviewed tests attempt bypass via alternate paths; 0 successful ungated high-impact executions",
-          "method": "manual",
+          "requirement": "Human approval gates for high-impact actions shall apply on every entry path (UI, API, agent/tool, batch/job)\u2014not only the primary console. Alternate-path bypass tests shall show 0 successful ungated high-impact executions.",
+          "artifact": "Bypass-path threat model or test matrix across UI, API, and agent/job entry points + Test results showing 0 successful ungated high-impact executions",
+          "passCondition": "Automated or reviewed bypass tests cover alternate UI, API, and agent/job entry points for inventoried high-impact actions; 0 successful ungated high-impact executions in those tests.",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "HUM-M4",
-          "requirement": "Dual control shall be required for Level 5 irreversible actions",
-          "artifact": "Dual-control workflow config + sample approval records for irreversible actions",
-          "passCondition": "PASS if Level 5 irreversible actions are inventoried and 100% of sampled executions show dual approval; 0 single-approver completes in the sample",
-          "method": "manual",
+          "requirement": "Irreversible actions in Level 5 (regulated / highest capability) systems shall require dual control: two distinct authorized humans must approve before execution. Sampled executions shall show dual approval with 0 single-approver completes.",
+          "artifact": "Inventory of Level 5 irreversible action classes requiring dual control + Dual-control workflow configuration (two distinct approvers) + Sample approval records showing dual approval and 0 single-approver completes",
+          "passCondition": "Level 5 irreversible action classes are inventoried; 100% of sampled executions of those classes show dual approval by two distinct actors; 0 single-approver completes in the sample.",
+          "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -3972,46 +3974,56 @@
       "recommendedChecks": [
         {
           "id": "HUM-R1",
-          "requirement": "Risk-based UI showing tool args, diffs, and confidence before approve",
-          "artifact": "Approval UI screenshots/spec showing tool args, diffs, and confidence + sample approval records",
-          "passCondition": "High-impact approvals display tool args, change diff (or equivalent), and confidence/risk; \u226510 sampled approvals in 90 days show those fields populated",
-          "method": "manual",
+          "requirement": "High-impact approval experiences should present tool arguments, a change diff (or equivalent preview), and confidence/risk context before the human approves or denies\u2014so decisions are informed, not rubber-stamped.",
+          "artifact": "Approval UI/spec showing tool args, diff/preview, and confidence/risk fields + \u226510 sampled approval records (\u226490 days) with those fields populated",
+          "passCondition": "High-impact approvals display tool args, change diff (or equivalent), and confidence/risk; \u226510 sampled approvals in the last 90 days show those fields populated.",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "HUM-R3",
-          "requirement": "SLA for approval queues to avoid unsafe workarounds",
-          "artifact": "Approval-queue SLA definition + queue age/metrics dashboard for the last 30 days",
-          "passCondition": "Documented SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is within SLA or open exceptions have owners and expiry",
-          "method": "manual",
+          "requirement": "Approval queues for high-impact actions should have a documented service level (for example p95 queue age) and measured performance for the last 30 days within that SLA\u2014or open exceptions with named owners and expiry\u2014so operators do not bypass gates under backlog pressure.",
+          "artifact": "Documented approval-queue SLA (metric, threshold, owner) + Queue age/metrics evidence for the last 30 days (dashboard export or report) + Open exception register with owners and expiry when SLA is breached",
+          "passCondition": "A documented approval-queue SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is within SLA, or every open exception has a named owner and expiry \u226490 days.",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
       ],
       "evidenceRequired": [
-        "High-impact action inventory",
-        "Sample approval audit logs",
-        "Architecture proof that bypass paths are closed"
+        "Versioned high-impact action inventory + gate wiring + ungated deny suite (HUM-M1)",
+        "Approval audit log schema and \u226430-day samples with actor/context/outcome (HUM-M2)",
+        "Bypass-path tests across UI/API/agent with 0 ungated successes (HUM-M3)",
+        "Dual-control workflow and samples for Level 5 irreversible actions (HUM-M4)",
+        "Approval UI/spec showing tool args, diffs, and confidence + \u226510 samples (HUM-R1)",
+        "Approval-queue SLA definition + \u226430-day queue metrics (HUM-R3)"
       ],
       "engineeringBestPractices": [
         "Classify actions by impact tier with default gates",
+        "Enforce approval in a shared execution layer used by UI, API, and agents",
         "Allow break-glass with heightened logging for emergencies",
-        "Never ask the model to 'pretend' approval was granted",
-        "Design approvals for voice and async channels, not only web UI"
+        "Never ask the model to pretend approval was granted",
+        "Design approvals for voice and async channels, not only web UI",
+        "Publish a numeric approval-queue SLA and alert on burn"
       ],
       "automaticValidations": [
-        "Tests that gated tools fail without approval tokens",
-        "Monitoring of approval bypass attempts",
-        "Alerts on abnormal approval velocity"
+        "Ungated execution tests fail at 100% for inventoried high-impact classes",
+        "Bypass suites across UI/API/agent show 0 successful ungated executions",
+        "Schema validation for approval audit logs (actor, context, outcome)",
+        "Dual-approval enforcement with 0 single-approver completes for Level 5 irreversible actions",
+        "Monitoring of approval bypass attempts and abnormal approval velocity"
       ],
       "manualValidations": [
-        "Process review of approval fatigue risk",
-        "Sample audits of approved vs executed actions"
+        "Inventory completeness review for high-impact action classes",
+        "Process review of approval fatigue and queue SLA exceptions",
+        "Spot-check that approval UI context matches what approvers saw"
       ],
       "examples": [
-        "A coding agent opens a PR but cannot merge to main without human review",
-        "A finance agent queues wire transfers for dual approval above a threshold"
+        "Send-email and wire-transfer tool classes are inventoried and blocked without an approval token",
+        "API and agent entry points deny the same high-impact class when approval is omitted",
+        "Level 5 irreversible delete requires two distinct approvers before execution",
+        "Approvers see tool args, a diff preview, and confidence before the approve control enables"
       ],
       "references": [
         {
@@ -4023,7 +4035,7 @@
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
-      "futureEvolution": "Standard approval protocols for cross-system agents with portable audit receipts."
+      "futureEvolution": "Portable approval evidence packs (inventory, ungated/bypass suites, audit samples, dual-control and queue SLA exports) and shared HITL UX patterns across agent platforms."
     },
     {
       "id": "APRF-09",
@@ -4756,33 +4768,45 @@
         "No per-tenant or per-feature budgets",
         "Retry storms that multiply completions",
         "Sending huge contexts when retrieval would suffice",
-        "Using frontier models for trivial classification tasks"
+        "Using frontier models for trivial classification tasks",
+        "Soft cost dashboards without enforce-on-exceed",
+        "CI concurrency or generic HTTP limits mistaken for AI spend ceilings",
+        "Cost dashboards without budget-burn or anomaly alert policies",
+        "Alert definitions with no proven page/notify path",
+        "Unbounded maxRetries or missing backoff on AI/model clients",
+        "Relying on AGN-M2 alone while non-agent clients retry without bound",
+        "Cache library present without enabled idempotent paths or safety exclusions",
+        "No hit-rate/savings report for \u226530 days",
+        "All traffic on frontier models with no low-risk task-class routing",
+        "Cheap routing without eval coverage or misroute monitoring",
+        "Aggregate spend dashboards without per-product unit-cost metrics",
+        "FinOps reviews without named owners for cost outliers"
       ],
       "mandatoryChecks": [
         {
           "id": "COST-M1",
-          "requirement": "Production AI workloads shall have hard spend or rate limits",
-          "artifact": "Gateway/provider quota config",
-          "passCondition": "Enforced limit demonstrably denies or throttles when exceeded (automated test or production event log within last 90 days)",
-          "method": "automated",
+          "requirement": "Production AI workloads shall enforce finite hard spend ceilings and/or request rate limits (provider, gateway, or application) that deny or throttle when exceeded\u2014not soft dashboards or prompt-only budgets alone.",
+          "artifact": "Gateway/provider/application config declaring finite spend ceiling and/or rate limit (TPM/RPM/$, tokens) + Enforcement evidence: automated exceed test or \u226490-day production deny/throttle event log",
+          "passCondition": "A finite hard spend ceiling and/or rate limit is configured for production AI workloads; enforcement demonstrably denies or throttles when the limit is exceeded (automated test or production event log within the last 90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 2,
           "minCriticality": 1
         },
         {
           "id": "COST-M2",
-          "requirement": "Cost shall be monitored with alerts on anomaly and budget burn",
-          "artifact": "Cost dashboard + alert policies for anomaly and budget burn",
-          "passCondition": "Alerts exist for budget burn and spend anomaly; synthetic or historical burn event would page/notify per runbook (alert test or documented fire in last 90 days)",
-          "method": "manual",
+          "requirement": "Production AI spend shall be monitored with alert policies for budget burn and spend anomaly that notify operators per runbook\u2014not dashboards alone.",
+          "artifact": "Cost/spend dashboard or telemetry views covering production AI workloads + Alert policies for budget burn and spend anomaly (IaC, provider, or gateway) + Notify proof: alert test or documented fire \u226490 days with page/notify outcome",
+          "passCondition": "Alerts exist for both budget burn and spend anomaly covering production AI spend; a synthetic or historical burn/anomaly event would page/notify per runbook (alert test or documented fire within the last 90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "COST-M3",
-          "requirement": "Retry and loop policies shall prevent unbounded cost amplification",
-          "artifact": "Retry/backoff and agent-loop budget config + amplification tests",
-          "passCondition": "Max retries and max agent loops are finite for 100% of production AI clients; tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling hit)",
-          "method": "manual",
+          "requirement": "Production AI clients shall enforce finite retry/backoff and loop budgets so forced failures cannot amplify completions without bound\u2014covering HTTP/SDK clients and agent loops, not prompt-only \u201ctry again\u201d guidance.",
+          "artifact": "Retry/backoff config (finite maxRetries + backoff) for production AI/model clients + Agent or client loop budget config where applicable (finite iterations/steps) + Amplification test results: forced failure/retry hits a bounded token or $ ceiling (\u226490 days)",
+          "passCondition": "Max retries and max agent/client loops are finite for 100% of production AI clients; amplification tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling hit within the last 90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -4790,33 +4814,35 @@
       "recommendedChecks": [
         {
           "id": "COST-R1",
-          "requirement": "Caching for idempotent or repeated prompts where safe",
-          "artifact": "Prompt/response cache config with safety exclusions + hit-rate report for 30 days",
-          "passCondition": "Cache enabled for documented idempotent paths; sensitive/personalized prompts are excluded; hit-rate and savings reported for \u226530 days",
-          "method": "manual",
+          "requirement": "Production AI systems should cache prompt/response results for documented idempotent or repeated paths, with explicit exclusions for sensitive or personalized prompts, and report hit-rate and savings for \u226530 days.",
+          "artifact": "Prompt/response cache config naming idempotent paths and safety exclusions + Hit-rate and savings report covering \u226530 days (import or dashboard export)",
+          "passCondition": "Cache is enabled for documented idempotent/repeated prompt paths; sensitive/personalized prompts are excluded; hit-rate and savings are reported for a window of \u226530 days (report measuredAt within the last 90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "COST-R2",
-          "requirement": "Model routing: cheaper models for low-risk tasks with eval coverage",
-          "artifact": "Model-routing policy (cheap vs premium) + eval coverage report for low-risk routed tasks",
-          "passCondition": "Low-risk task classes route to cheaper models by default; eval shows quality within tolerance vs premium baseline; misroute rate monitored \u226430 days",
-          "method": "manual",
+          "requirement": "Production AI systems should route documented low-risk task classes to cheaper models by default, with eval coverage proving quality within tolerance of a premium baseline and misroute rate monitored \u226430 days.",
+          "artifact": "Model-routing policy mapping low-risk task classes to cheap vs premium models + Eval coverage report for low-risk routed tasks vs premium baseline + Misroute-rate monitoring evidence covering \u226430 days",
+          "passCondition": "Documented low-risk task classes route to cheaper models by default; eval shows quality within tolerance versus a premium baseline; misroute rate is monitored for a window of \u226430 days (report measuredAt within the last 90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "COST-R3",
-          "requirement": "FinOps reviews of AI unit economics per product",
-          "artifact": "Per-product AI unit-economics report (cost per successful task / journey) + FinOps review minutes",
-          "passCondition": "Each customer-facing AI product has unit-cost metrics for the last quarter; review occurred \u226490 days with owners for outliers above documented thresholds",
-          "method": "manual",
+          "requirement": "Each customer-facing AI product should publish unit-cost metrics (e.g. cost per successful task or journey) for the last quarter and undergo a FinOps review \u226490 days with named owners for outliers above documented thresholds.",
+          "artifact": "Per-product AI unit-economics report (cost per successful task / journey) for the last quarter + FinOps review minutes \u226490 days with outlier owners and thresholds",
+          "passCondition": "Each customer-facing AI product has unit-cost metrics for the last quarter; a FinOps review occurred within the last 90 days with named owners for outliers above documented thresholds (review measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
       ],
       "evidenceRequired": [
+        "Enforce-on-exceed deny/throttle evidence (\u226490 days)",
+        "Hard spend/rate limit config for production AI workloads",
         "Budget and quota configuration",
         "Cost dashboards and alert policies",
         "Documented retry/loop limits"
@@ -4830,7 +4856,19 @@
       "automaticValidations": [
         "Gateway enforcement of quotas",
         "Anomaly detection on token spend",
-        "CI checks estimating token cost of prompt changes"
+        "CI checks estimating token cost of prompt changes",
+        "Repo spend/rate-limit config heuristics (ai-spend-limits collector)",
+        "Imported enforce-on-exceed suite under imports/ai-spend-limits/",
+        "Repo budget-burn / spend-anomaly alert heuristics (ai-cost-alerts collector)",
+        "Imported notify proof under imports/ai-cost-alerts/",
+        "Repo retry/loop budget heuristics (ai-retry-amplification collector)",
+        "Imported amplification suite under imports/ai-retry-amplification/",
+        "Repo prompt-cache heuristics (ai-prompt-cache collector)",
+        "Imported \u226530-day hit-rate/savings under imports/ai-prompt-cache/",
+        "Repo model-routing heuristics (ai-model-routing collector)",
+        "Imported eval + misroute suite under imports/ai-model-routing/",
+        "Repo FinOps/unit-economics heuristics (ai-finops-unit-economics collector)",
+        "Imported quarterly metrics + review under imports/ai-finops-unit-economics/"
       ],
       "manualValidations": [
         "Quarterly cost architecture review",

@@ -1,38 +1,56 @@
 id: "COST-R3"
 category: "cost-optimization"
-title: "Production systems should have finOps reviews of AI unit economics per product"
-description: "FinOps reviews of AI unit economics per product"
-whyItMatters: "FinOps reviews of AI unit economics per product Failing this leaves a production gap
-  against: Each customer-facing AI product has unit-cost metrics for the last quarter; review
-  occurred ≤90 days with owners for outliers above documented thresholds"
+title: "Production systems should have FinOps reviews of AI unit economics per product"
+description: >
+  Each customer-facing AI product should publish unit-cost metrics (e.g. cost
+  per successful task or journey) for the last quarter and undergo a FinOps
+  review ≤90 days with named owners for outliers above documented thresholds.
+whyItMatters: >
+  Aggregate spend dashboards hide which products are economically unsafe.
+  Without per-product unit economics, teams cannot prioritize caching, routing,
+  or feature cuts. Reviews without outlier owners leave known cost problems
+  unowned. Quarterly metrics plus a dated review with owners convert FinOps
+  from a report into an operating rhythm.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Each customer-facing AI product has unit-cost metrics for the last quarter; review
-  occurred ≤90 days with owners for outliers above documented thresholds"
+passCondition: >
+  Each customer-facing AI product has unit-cost metrics for the last quarter;
+  a FinOps review occurred within the last 90 days with named owners for
+  outliers above documented thresholds (review measuredAt ≤90 days).
 evidenceRequired:
-  - "Per-product AI unit-economics report (cost per successful task / journey) + FinOps review
-    minutes"
+  - "Per-product AI unit-economics report (cost per successful task / journey) for the last quarter"
+  - "FinOps review minutes ≤90 days with outlier owners and thresholds"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-finops-unit-economics"
+      params:
+        hint: >
+          Discover unit-cost / cost-per-task / FinOps product economics metrics,
+          dashboards-as-code, or review runbooks for AI products.
     - id: "manual-attest"
       params:
-        hint: "Per-product AI unit-economics report (cost per successful task / journey) + FinOps review
-          minutes"
-manualVerification: "For this Check (FinOps reviews of AI unit economics per product): inspect
-  current evidence for [Per-product AI unit-economics report (cost per successful task / journey) +
-  FinOps review minutes] and confirm the pass condition holds — Each customer-facing AI product has
-  unit-cost metrics for the last quarter; review occurred ≤90 days with owners for outliers above
-  documented thresholds"
-falsePositiveGuidance: "(Cost Optimization): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove the quarterly review, attest per-product
+          unit-cost metrics plus FinOps minutes ≤90 days with outlier owners.
+manualVerification: >
+  1) Confirm customer-facing AI products exist. If none, score NOT_APPLICABLE.
+  2) Locate unit-cost metrics per product for the last quarter (cost per
+  successful task/journey or equivalent). Aggregate $ only without unit metrics
+  fails. 3) Review FinOps minutes ≤90 days covering those products. 4) Confirm
+  documented thresholds and named owners for outliers. 5) PASS only if metrics
+  + review + owners hold. COST-M2 alerts and COST-R2 routing do not substitute.
+falsePositiveGuidance: >
+  Do not pass provider invoices or total spend charts without per-product unit
+  metrics. Do not pass a one-time spreadsheet without a ≤90-day review. Do not
+  pass reviews that list outliers without owners. Do not pass COST-M1/M2 alone.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: FinOps reviews of AI unit economics per product"
-  - "Retain evidence artifacts required by this Check, starting with: Per-product AI unit-economics
-    report (cost per successful task / journey) + FinOps review minutes"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Instrument cost-per-successful-task (or journey) per customer-facing AI product"
+  - "Schedule FinOps reviews at least quarterly; retain minutes under imports/ai-finops-unit-economics/"
+  - "Document outlier thresholds and assign owners with due dates"
+  - "Tie outlier remediations to COST-R1/R2 or product roadmap items"
 references:
   - title: "AWS Well-Architected — Cost Optimization"
     url: "https://aws.amazon.com/architecture/well-architected/"
@@ -41,18 +59,18 @@ references:
 relatedRules:
   - "COST-M1"
   - "COST-M2"
-  - "COST-M3"
   - "COST-R1"
   - "COST-R2"
+  - "ORG-M2"
+  - "ORG-R3"
 tags:
   - "cost-optimization"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "finops"
+  - "unit-economics"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

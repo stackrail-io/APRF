@@ -1,54 +1,72 @@
 id: "HUM-M3"
 category: "human-approval"
 title: "Approval must not be bypassable via alternate agent or API paths"
-description: "Approval shall not be bypassable via alternate agent or API paths"
-whyItMatters: "Approval shall not be bypassable via alternate agent or API paths Failing this leaves
-  a production gap against: Automated or reviewed tests attempt bypass via alternate paths; 0
-  successful ungated high-impact executions"
+description: >
+  Human approval gates for high-impact actions shall apply on every entry path
+  (UI, API, agent/tool, batch/job)—not only the primary console. Alternate-path
+  bypass tests shall show 0 successful ungated high-impact executions.
+whyItMatters: >
+  A gate that exists only in the web UI is not a control: agents, internal APIs,
+  and cron jobs routinely hit the same side effects. Attackers and confused
+  deputies prefer the ungated path. Bypass tests across entry points prove the
+  gate is a platform invariant, not a frontend courtesy.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "Automated or reviewed tests attempt bypass via alternate paths; 0 successful ungated
-  high-impact executions"
+passCondition: >
+  Automated or reviewed bypass tests cover alternate UI, API, and agent/job
+  entry points for inventoried high-impact actions; 0 successful ungated
+  high-impact executions in those tests.
 evidenceRequired:
-  - "Bypass-path threat tests across UI, API, and agent entry points"
+  - "Bypass-path threat model or test matrix across UI, API, and agent/job entry points"
+  - "Test results showing 0 successful ungated high-impact executions"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-approval-bypass-tests"
+      params:
+        hint: >
+          Discover bypass/negative tests that attempt high-impact actions via
+          alternate API/agent/job paths without approval.
     - id: "manual-attest"
       params:
-        hint: "Bypass-path threat tests across UI, API, and agent entry points"
-manualVerification: "For this Check (Approval must not be bypassable via alternate agent or API
-  paths): inspect current evidence for [Bypass-path threat tests across UI, API, and agent entry
-  points] and confirm the pass condition holds — Automated or reviewed tests attempt bypass via
-  alternate paths; 0 successful ungated high-impact executions"
-falsePositiveGuidance: "(Human Approval): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest a reviewed bypass suite
+          across UI/API/agent paths with 0 successful ungated executions.
+manualVerification: >
+  1) Confirm high-impact gates exist (HUM-M1 scope). 2) List entry paths that
+  can invoke those actions (UI, public/private API, agent tools, batch). 3)
+  Review bypass tests that omit approval tokens/sessions on each path. 4) PASS
+  only if tests (or imports) show 0 successful ungated high-impact executions.
+  A single gated UI with open APIs fails.
+falsePositiveGuidance: >
+  Do not pass unit tests of the approval service alone without path coverage.
+  Do not pass network ACLs as a substitute for approval on privileged APIs.
+  Do not pass because HUM-M1 inventory exists without bypass evidence. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Approval must not be bypassable via alternate agent or API paths"
-  - "Retain evidence artifacts required by this Check, starting with: Bypass-path threat tests
-    across UI, API, and agent entry points"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Enforce approval checks in the shared authorization/execution layer shared by UI, API, and agents"
+  - "Add automated bypass tests for each high-impact class across alternate entry points"
+  - "Block releases when bypass suites are missing or any ungated execution succeeds"
+  - "Retain bypass results under imports/human-approval-bypass/"
 references:
   - title: "NIST AI RMF — Govern and Manage (human oversight)"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
-  - title: "OWASP LLM — Excessive Agency"
+  - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
   - "HUM-M1"
   - "HUM-M2"
-  - "HUM-M4"
-  - "HUM-R1"
-  - "HUM-R3"
+  - "AUTHZ-M1"
+  - "AUTHN-M1"
+  - "TOL-M1"
 tags:
   - "human-approval"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "bypass"
 applicability:
-  technologies:
-    - "a2a"
-    - "mcp"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

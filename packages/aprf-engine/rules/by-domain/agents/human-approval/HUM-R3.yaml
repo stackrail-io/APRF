@@ -1,54 +1,75 @@
 id: "HUM-R3"
 category: "human-approval"
-title: "Production systems should have sLA for approval queues to avoid unsafe workarounds"
-description: "SLA for approval queues to avoid unsafe workarounds"
-whyItMatters: "SLA for approval queues to avoid unsafe workarounds Failing this leaves a production
-  gap against: Documented SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is
-  within SLA or open exceptions have owners and expiry"
+title: "Production systems should have an SLA for approval queues to avoid unsafe workarounds"
+description: >
+  Approval queues for high-impact actions should have a documented service level
+  (for example p95 queue age) and measured performance for the last 30 days
+  within that SLA—or open exceptions with named owners and expiry—so operators
+  do not bypass gates under backlog pressure.
+whyItMatters: >
+  Slow approval queues create shadow paths: engineers disable gates, share
+  break-glass tokens, or move work to ungated APIs. An SLA with measured queue
+  age makes fatigue and backlog visible before HUM-M3 bypasses become culture.
+  Exceptions without owners and expiry become permanent holes.
 severity: "critical"
 weight: 4
 gate: "recommended"
-passCondition: "Documented SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is
-  within SLA or open exceptions have owners and expiry"
+passCondition: >
+  A documented approval-queue SLA (e.g. p95 queue age) exists; measured p95 for
+  the last 30 days is within SLA, or every open exception has a named owner and
+  expiry ≤90 days.
 evidenceRequired:
-  - "Approval-queue SLA definition + queue age/metrics dashboard for the last 30 days"
+  - "Documented approval-queue SLA (metric, threshold, owner)"
+  - "Queue age/metrics evidence for the last 30 days (dashboard export or report)"
+  - "Open exception register with owners and expiry when SLA is breached"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-approval-queue-sla"
+      params:
+        hint: >
+          Discover approval-queue SLA docs/config and queue-age metrics or
+          alerting for human approval backlogs.
     - id: "manual-attest"
       params:
-        hint: "Approval-queue SLA definition + queue age/metrics dashboard for the last 30 days"
-manualVerification: "For this Check (SLA for approval queues to avoid unsafe workarounds): inspect
-  current evidence for [Approval-queue SLA definition + queue age/metrics dashboard for the last 30
-  days] and confirm the pass condition holds — Documented SLA (e.g. p95 queue age) exists; measured
-  p95 for the last 30 days is within SLA or open exceptions have owners and expiry"
-falsePositiveGuidance: "(Human Approval): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove metrics, attest SLA definition plus ≤30-day
+          p95 measurement within SLA (or exceptions with owner and expiry).
+manualVerification: >
+  1) Confirm approval queues exist for high-impact actions. 2) Open the SLA
+  (metric + numeric threshold + owner). 3) Review last-30-day queue metrics
+  (p95 or equivalent). 4) If breached, verify each open exception has owner and
+  expiry ≤90 days. 5) PASS only if SLA + in-SLA measurement or valid exceptions
+  hold.
+falsePositiveGuidance: >
+  Do not pass a generic “we respond quickly” without a numeric SLA. Do not pass
+  ticket SLAs unrelated to AI/action approval queues. Do not pass breached SLAs
+  without owned, time-boxed exceptions. Named exceptions need owner and expiry
+  ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: SLA for approval queues to avoid unsafe workarounds"
-  - "Retain evidence artifacts required by this Check, starting with: Approval-queue SLA definition
-    + queue age/metrics dashboard for the last 30 days"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Define a numeric approval-queue SLA (e.g. p95 age ≤ N minutes) with a named owner"
+  - "Instrument queue age; alert on SLO burn; publish a 30-day dashboard"
+  - "Require owner+expiry on any SLA exception; auto-expire waivers"
+  - "Export SLA + metrics under imports/human-approval-sla/ for assessments"
 references:
   - title: "NIST AI RMF — Govern and Manage (human oversight)"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
-  - title: "OWASP LLM — Excessive Agency"
+  - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
   - "HUM-M1"
-  - "HUM-M2"
   - "HUM-M3"
-  - "HUM-M4"
   - "HUM-R1"
+  - "PERF-M1"
+  - "INC-M1"
 tags:
   - "human-approval"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "sla"
+  - "queue"
 applicability:
-  technologies:
-    - "a2a"
-    - "mcp"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

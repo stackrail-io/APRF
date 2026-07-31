@@ -1,0 +1,24 @@
+id: human-approval-gates
+title: High-impact action inventory + approval gates (HUM-M1)
+version: "0.2.0"
+executor: collectors/human-approval.ts
+evidenceClass: policy
+alsoEmits: [code, ci]
+detectorIds: [repo-human-approval-config]
+inputs:
+  - "Target repo (high-impact inventory, HITL/approval gates, ungated deny tests)"
+  - "Optional suite: aprf-assessment/imports/human-approval-gates/*.{json}"
+collect:
+  - "Detect high-impact inventory and approval gate wiring"
+  - "Ingest ungated deny suite; write human-approval-gates-report.json"
+emits:
+  nodeClass: policy
+  refPattern: "aprf-assessment/imports/human-approval-gates/*"
+  signals: [human-approval-gates, hum-m1, repo-human-approval-config]
+mapsToChecks: [HUM-M1]
+whenUnavailable: >
+  Inventory/gates alone are PARTIAL. PASS needs inventoryComplete=true,
+  ungatedDenyRatePct=100, measuredAt ≤90d. No high-impact actions → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline heuristics + optional imported ungated deny JSON.

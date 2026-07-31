@@ -1,0 +1,24 @@
+id: human-approval-audit
+title: Approval audit log actor/context/outcome (HUM-M2)
+version: "0.2.0"
+executor: collectors/human-approval.ts
+evidenceClass: runtime
+alsoEmits: [code]
+detectorIds: [repo-approval-audit-log]
+inputs:
+  - "Target repo (approval audit schema/emitters)"
+  - "Optional samples: aprf-assessment/imports/human-approval-audit/*.{json}"
+collect:
+  - "Detect approval audit schema signals"
+  - "Ingest ≤30-day samples; write human-approval-audit-report.json"
+emits:
+  nodeClass: runtime
+  refPattern: "aprf-assessment/imports/human-approval-audit/*"
+  signals: [human-approval-audit, hum-m2, repo-approval-audit-log]
+mapsToChecks: [HUM-M2]
+whenUnavailable: >
+  Schema alone is PARTIAL. PASS needs samples with actor/context/outcome at 100%
+  and measuredAt ≤90d.
+live:
+  required: false
+  note: Offline heuristics + optional imported approval samples.

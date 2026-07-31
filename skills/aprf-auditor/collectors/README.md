@@ -61,6 +61,13 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **agent-goal-policy** | `agent-goal-policy.ts` | goal-conflict plan policy | `imports/agent-goal-policy/` | — |
 | **agent-sandbox-sim** | `agent-sandbox-sim.ts` | sandbox/sim before prod | `imports/agent-sandbox-sim/` | — |
 | **agent-raci-ownership** | `agent-raci-ownership.ts` | agent RACI register | `imports/agent-raci-ownership/` | — |
+| **human-approval-*** | `human-approval.ts` | HITL gates/audit/bypass/dual/UI/SLA | `imports/human-approval-*/` | — |
+| **ai-spend-limits** | `ai-spend-limits.ts` | spend/rate hard limits | `imports/ai-spend-limits/` | — |
+| **ai-cost-alerts** | `ai-cost-alerts.ts` | budget-burn + anomaly alerts | `imports/ai-cost-alerts/` | — |
+| **ai-retry-amplification** | `ai-retry-amplification.ts` | retry/loop cost bounds | `imports/ai-retry-amplification/` | — |
+| **ai-prompt-cache** | `ai-prompt-cache.ts` | prompt cache + hit-rate | `imports/ai-prompt-cache/` | — |
+| **ai-model-routing** | `ai-model-routing.ts` | cheap/premium routing | `imports/ai-model-routing/` | — |
+| **ai-finops-unit-economics** | `ai-finops-unit-economics.ts` | unit cost + FinOps review | `imports/ai-finops-unit-economics/` | — |
 
 ### AGN-M1 — agent charters
 

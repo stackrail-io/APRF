@@ -1,38 +1,58 @@
 id: "COST-M1"
 category: "cost-optimization"
 title: "Production AI workloads must have hard spend or rate limits"
-description: "Production AI workloads shall have hard spend or rate limits"
-whyItMatters: "Production AI workloads shall have hard spend or rate limits Failing this leaves a
-  production gap against: Enforced limit demonstrably denies or throttles when exceeded (automated
-  test or production event log within last 90 days)"
+description: >
+  Production AI workloads shall enforce finite hard spend ceilings and/or
+  request rate limits (provider, gateway, or application) that deny or throttle
+  when exceeded—not soft dashboards or prompt-only budgets alone.
+whyItMatters: >
+  Unbounded completions, agent loops, and retry storms are a denial-of-wallet
+  path: a single runaway session can burn through provider quota and budget
+  before humans notice. Soft alerts without enforce-on-exceed leave spend
+  unbounded under load or abuse. Hard limits convert cost risk into a
+  fail-closed, measurable control.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Enforced limit demonstrably denies or throttles when exceeded (automated test or
-  production event log within last 90 days)"
+passCondition: >
+  A finite hard spend ceiling and/or rate limit is configured for production AI
+  workloads; enforcement demonstrably denies or throttles when the limit is
+  exceeded (automated test or production event log within the last 90 days).
 evidenceRequired:
-  - "Gateway/provider quota config"
+  - "Gateway/provider/application config declaring finite spend ceiling and/or rate limit (TPM/RPM/$, tokens)"
+  - "Enforcement evidence: automated exceed test or ≤90-day production deny/throttle event log"
 detection:
-  capability: "automated"
+  capability: "hybrid"
   detectors:
     - id: "repo-rate-limit-config"
-      params: {}
-    - id: "cicd-concurrency-present"
-      params: {}
+      params:
+        hint: >
+          Discover production spend ceilings, token/RPM/TPM quotas, or gateway
+          rate limits that apply to AI/model/agent workloads.
     - id: "manual-attest"
       params:
-        hint: "Gateway/provider quota config"
-manualVerification: "For this Check (Production AI workloads must have hard spend or rate limits):
-  inspect current evidence for [Gateway/provider quota config] and confirm the pass condition holds
-  — Enforced limit demonstrably denies or throttles when exceeded (automated test or production
-  event log within last 90 days)"
-falsePositiveGuidance: "(Cost Optimization): confirm the detector target matches the production path
-  for this Check before waiving. Named exceptions need an owner and expiry ≤90 days."
+        hint: >
+          If automation cannot prove enforce-on-exceed, attest finite limit
+          config plus a ≤90-day deny/throttle test or production event.
+manualVerification: >
+  1) Confirm production AI/model/agent traffic exists. If none, score
+  NOT_APPLICABLE. 2) Locate the hard spend ceiling and/or rate limit (provider
+  quota, API gateway, app middleware). Soft budgets without deny/throttle fail.
+  3) Review enforcement: automated exceed test or production log ≤90 days
+  showing deny or throttle when exceeded. 4) PASS only if config + enforcement
+  evidence both hold. CI job concurrency alone does not satisfy this Check.
+falsePositiveGuidance: >
+  Do not pass on cost dashboards or FinOps reports without enforce-on-exceed.
+  Do not pass prompt-only “be frugal” instructions. Do not pass CI
+  concurrency limits or generic HTTP rate limits that do not cover AI/model
+  spend paths. Do not pass infinite or unset quotas. Sibling Checks (COST-M2
+  alerts, AGN-M2 loop limits) do not substitute for a hard spend/rate ceiling.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Production AI workloads must have hard spend or rate limits"
-  - "Retain evidence artifacts required by this Check, starting with: Gateway/provider quota config"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Set finite provider/gateway/application spend or rate limits on all production AI paths; fail closed when unset"
+  - "Add an automated exceed test that asserts deny or throttle; retain results under imports/ai-spend-limits/"
+  - "Alert when limit-hit rates rise so operators can tune without removing enforcement"
+  - "Document break-glass quota raises with owner and expiry ≤90 days"
 references:
   - title: "AWS Well-Architected — Cost Optimization"
     url: "https://aws.amazon.com/architecture/well-architected/"
@@ -41,18 +61,17 @@ references:
 relatedRules:
   - "COST-M2"
   - "COST-M3"
-  - "COST-R1"
-  - "COST-R2"
-  - "COST-R3"
+  - "AGN-M2"
+  - "PERF-M1"
+  - "REL-M1"
 tags:
   - "cost-optimization"
   - "mandatory"
-  - "automated"
+  - "hybrid"
+  - "spend-limit"
+  - "rate-limit"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
+  technologies: []
   minCriticality: 1
   requiredFromLevel: 2
 status: "active"
