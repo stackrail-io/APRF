@@ -1,0 +1,80 @@
+id: "DX-R4"
+category: "platform-engineering"
+title: "Ownership and support channel should exist for the AI platform/paved road"
+description: >
+  A named owner team and a support channel should exist for the AI platform /
+  paved road, with either a published response SLA proven by a recent test
+  ping or a listed on-call rotation.
+whyItMatters: >
+  Golden paths and CI gates (DX-M1/M2) stall when builders cannot reach a
+  human who owns the platform. Anonymous wiki pages and dead Slack channels
+  leave incidents and onboarding stuck. A named owner plus a reachable support
+  path (SLA-backed channel or on-call) keeps the paved road operable without
+  blocking the production gate when docs and CI already hold.
+severity: "medium"
+weight: 2
+gate: "recommended"
+passCondition: >
+  Named owner team and support channel are documented for the AI platform /
+  paved road; either a test ping met the published SLA within 90 days, or an
+  on-call rotation is listed (support proof measuredAt ≤90 days).
+evidenceRequired:
+  - "Platform ownership record naming the owner team for the AI paved road"
+  - "Support channel (Slack, ticket queue, or equivalent) documented"
+  - "Test-ping within published SLA (≤90 days) or listed on-call rotation"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-platform-ownership"
+      params:
+        hint: >
+          Discover AI platform / paved-road ownership and support-channel
+          signals (CODEOWNERS, OWNERS, on-call, Slack, ticket queue).
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove reachability, attest owner team, support
+          channel, and either pingWithinSla or onCallListed (measuredAt ≤90d).
+manualVerification: >
+  1) Confirm the org operates an AI platform or paved road. If none, score
+  NOT_APPLICABLE. 2) Locate ownership record (CODEOWNERS, platform portal,
+  team page) naming the owner team. 3) Locate the support channel (Slack,
+  ticket queue, email alias). 4) Confirm either a recent test ping met the
+  published SLA (≤90 days) or an on-call rotation is listed. 5) PASS only if
+  owner + channel + (ping SLA or on-call) hold. Generic company-wide support
+  without AI-platform ownership does not satisfy. DX-M1 docs alone do not
+  satisfy without a reachable support path.
+falsePositiveGuidance: >
+  Do not pass a stale wiki contact with no owner team. Do not pass CODEOWNERS
+  for unrelated paths as AI-platform ownership. Do not pass a Slack channel
+  name without evidence it is the published support path. Do not pass
+  “someone will answer eventually” without SLA or on-call. Named exceptions
+  need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Publish a named owner team for the AI platform / paved road"
+  - "Document the support channel and either a response SLA or on-call rotation"
+  - "Run a periodic test ping and retain proof under imports/platform-ownership-support/"
+  - "Link ownership and support from the golden-path (DX-M1) entry point"
+references:
+  - title: "Google SRE Workbook — Soft skills / platform thinking parallels"
+    url: "https://sre.google/workbook/"
+  - title: "CNCF platforms white papers — paved roads concept"
+    url: "https://www.cncf.io/"
+relatedRules:
+  - "DX-M1"
+  - "DX-M2"
+  - "DX-R1"
+  - "DX-R3"
+  - "ORG-M1"
+  - "ORG-M2"
+tags:
+  - "platform-engineering"
+  - "recommended"
+  - "hybrid"
+  - "ownership"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

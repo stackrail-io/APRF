@@ -1,37 +1,57 @@
 id: "DX-M2"
 category: "platform-engineering"
 title: "Local or CI self-serve checks must cover critical mandatory controls (auth, secrets, basic evals)"
-description: "Local or CI self-serve checks shall cover critical mandatory controls (auth, secrets,
-  basic evals)"
-whyItMatters: "Local or CI self-serve checks shall cover critical mandatory controls (auth, secrets,
-  basic evals) Failing this leaves a production gap against: Default AI pipeline runs auth,
-  secret-scan, and basic eval checks; failing any blocks merge/promote in the golden-path template"
+description: >
+  The default AI golden-path pipeline (local and/or CI) shall run authentication,
+  secret-scan, and basic eval checks, and failing any of them shall block
+  merge or promote.
+whyItMatters: >
+  Documented golden paths (DX-M1) fail in practice when builders can merge
+  without auth wiring, with leaked secrets, or without eval gates. Self-serve
+  checks in the default template convert policy into a merge/promote brake.
+  Optional or non-blocking jobs leave the unsafe path as easy as the safe one.
 severity: "medium"
 weight: 2
 gate: "mandatory"
-passCondition: "Default AI pipeline runs auth, secret-scan, and basic eval checks; failing any
-  blocks merge/promote in the golden-path template"
+passCondition: >
+  The default AI pipeline runs auth, secret-scan, and basic eval checks; failing
+  any blocks merge or promote in the golden-path template (blocking evidence
+  measuredAt ≤90 days).
 evidenceRequired:
-  - "CI/local check config covering auth, secrets, and basic evals"
+  - "CI and/or local check config covering auth, secret-scan, and basic evals"
+  - "Evidence those checks are required (blocking) on merge/promote for the AI golden-path template"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-pipeline-gates"
+      params:
+        hint: >
+          Discover default AI/CI/local pipelines that run auth checks, secret
+          scanning, and basic evals, preferably with blocking/required status.
     - id: "manual-attest"
       params:
-        hint: "CI/local check config covering auth, secrets, and basic evals"
-manualVerification: "For this Check (Cover critical mandatory controls (auth, secrets, basic
-  evals)): inspect current evidence for [CI/local check config covering auth, secrets, and basic
-  evals] and confirm the pass condition holds — Default AI pipeline runs auth, secret-scan, and
-  basic eval checks; failing any blocks merge/promote in the golden-path template"
-falsePositiveGuidance: "(Platform Engineering): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove all three gates block merge/promote, attest
+          pipeline config plus blocking evidence (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm AI features use a golden-path or default AI pipeline. If no AI
+  build/promote surface, score NOT_APPLICABLE. 2) Locate the default CI workflow
+  and/or local pre-commit/make targets for that path. 3) Confirm jobs/steps for
+  auth (or authz smoke), secret-scan, and basic evals. 4) Confirm failing any
+  blocks merge/promote (required checks, protected branch, or equivalent).
+  5) PASS only if all three run and block. DX-M1 docs alone do not satisfy.
+  Org-wide unrelated CI without AI template coverage does not satisfy.
+falsePositiveGuidance: >
+  Do not pass optional/advisory workflows that never block. Do not pass
+  secret-scan alone without auth and eval gates. Do not pass eval suites that
+  are not wired into the default AI template pipeline. Do not pass DX-M1
+  documentation as a substitute for executable checks. Named exceptions need
+  owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Local or CI self-serve checks must cover critical mandatory
-    controls (auth, secrets, basic evals)"
-  - "Retain evidence artifacts required by this Check, starting with: CI/local check config covering
-    auth, secrets, and basic evals"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Add required auth, secret-scan, and basic eval jobs to the AI golden-path CI/local template"
+  - "Mark those checks required for merge/promote on protected branches"
+  - "Retain blocking proof under imports/platform-ai-pipeline-gates/"
+  - "Fail closed when any of the three gates is missing from the default template"
 references:
   - title: "Google SRE Workbook — Soft skills / platform thinking parallels"
     url: "https://sre.google/workbook/"
@@ -39,20 +59,19 @@ references:
     url: "https://www.cncf.io/"
 relatedRules:
   - "DX-M1"
-  - "DX-M3"
-  - "DX-R1"
-  - "DX-R2"
-  - "DX-R3"
+  - "DX-R4"
+  - "AUTHN-M1"
+  - "SEC2-M1"
+  - "SEC2-R1"
+  - "EVL-M1"
+  - "CHG-M1"
 tags:
   - "platform-engineering"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "ci-gates"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "cicd"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

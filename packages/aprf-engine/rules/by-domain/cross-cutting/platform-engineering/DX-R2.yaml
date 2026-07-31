@@ -1,36 +1,58 @@
 id: "DX-R2"
 category: "platform-engineering"
-title: "Production systems should have inner-loop eval runners developers can run before PR"
-description: "Inner-loop eval runners developers can run before PR"
-whyItMatters: "Inner-loop eval runners developers can run before PR Failing this leaves a production
-  gap against: Developers can run the core eval subset locally or in a one-command inner loop; last
-  sampled AI PR (≤30 days) shows pre-PR eval evidence or documented waiver"
+title: "Builders should have inner-loop eval runners they can run before opening a PR"
+description: >
+  Developers shall be able to run the core AI eval subset locally or via a
+  one-command inner loop before opening a PR, and the last sampled AI PR
+  (≤30 days) shall show pre-PR eval evidence or a documented waiver.
+whyItMatters: >
+  CI-only eval gates (DX-M2) catch regressions late and burn CI minutes on
+  avoidable failures. Without a local or one-command inner-loop runner,
+  builders skip evals until review or merge. Pre-PR evidence (or an owned
+  waiver) proves the runner is actually used, not just documented.
 severity: "medium"
 weight: 2
 gate: "recommended"
-passCondition: "Developers can run the core eval subset locally or in a one-command inner loop; last
-  sampled AI PR (≤30 days) shows pre-PR eval evidence or documented waiver"
+passCondition: >
+  A local or one-command inner-loop runner exists for the core AI eval subset;
+  the last sampled AI PR (≤30 days) shows pre-PR eval evidence or a documented
+  waiver (sample/waiver measuredAt ≤30 days).
 evidenceRequired:
-  - "Local/inner-loop eval runner docs + package + sample developer run log before a recent PR"
+  - "Local/inner-loop eval runner docs and package or script entrypoint"
+  - "Evidence the core eval subset runs in one command (or documented equivalent)"
+  - "Sample AI PR (≤30 days) with pre-PR eval evidence or documented waiver"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-inner-loop-evals"
+      params:
+        hint: >
+          Discover local/inner-loop eval runners (promptfoo, npm/make scripts,
+          docs) distinct from CI-only gates.
     - id: "manual-attest"
       params:
-        hint: "Local/inner-loop eval runner docs + package + sample developer run log before a recent PR"
-manualVerification: "For this Check (Inner-loop eval runners developers can run before PR): inspect
-  current evidence for [Local/inner-loop eval runner docs + package + sample developer run log
-  before a recent PR] and confirm the pass condition holds — Developers can run the core eval subset
-  locally or in a one-command inner loop; last sampled AI PR (≤30 days) shows pre-PR eval evidence
-  or documented waiver"
-falsePositiveGuidance: "(Platform Engineering): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove pre-PR use, attest runner + one-command
+          path plus pre-PR eval evidence or waiver (measuredAt ≤30 days).
+manualVerification: >
+  1) Confirm the org ships AI features with eval suites. If no AI eval surface,
+  score NOT_APPLICABLE. 2) Locate the inner-loop runner (docs + package/script).
+  3) Confirm developers can run the core subset locally or in one command.
+  4) Sample a recent AI PR (≤30 days): pre-PR eval log/comment/check, or a
+  documented waiver with owner. 5) PASS only if runner + one-command path +
+  sample/waiver hold. CI-only DX-M2 gates without a local runner do not
+  satisfy. EVL suite definitions without an inner-loop entrypoint do not
+  satisfy.
+falsePositiveGuidance: >
+  Do not pass CI workflows alone as the inner-loop runner. Do not pass a full
+  nightly suite that developers cannot run quickly. Do not pass README mentions
+  without a working script/package. Do not pass a PR older than 30 days as the
+  sample. Named exceptions need owner and expiry ≤30 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Inner-loop eval runners developers can run before PR"
-  - "Retain evidence artifacts required by this Check, starting with: Local/inner-loop eval runner
-    docs + package + sample developer run log before a recent PR"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish a one-command local eval target (e.g. npm run eval:core / make eval-local)"
+  - "Document the inner-loop path from the golden path (DX-M1)"
+  - "Retain pre-PR sample or waiver under imports/platform-inner-loop-evals/"
+  - "Keep the inner-loop subset fast enough that builders actually run it"
 references:
   - title: "Google SRE Workbook — Soft skills / platform thinking parallels"
     url: "https://sre.google/workbook/"
@@ -39,19 +61,18 @@ references:
 relatedRules:
   - "DX-M1"
   - "DX-M2"
-  - "DX-M3"
   - "DX-R1"
   - "DX-R3"
+  - "DX-R4"
+  - "EVL-M1"
+  - "EVL-M2"
 tags:
   - "platform-engineering"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "inner-loop"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "cicd"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

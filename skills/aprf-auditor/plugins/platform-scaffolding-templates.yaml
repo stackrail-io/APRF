@@ -1,0 +1,30 @@
+id: platform-scaffolding-templates
+title: Agent / RAG / MCP scaffolding templates (DX-R1)
+version: "0.2.0"
+executor: collectors/platform-scaffolding-templates.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-scaffolding-templates]
+inputs:
+  - "Target repo (template catalogs, cookiecutter/backstage/copier scaffolds)"
+  - "Optional suite: aprf-assessment/imports/platform-scaffolding-templates/*.{json}"
+collect:
+  - "Detect agent, RAG, and MCP scaffolding templates"
+  - "Detect auth / secrets / logging default signals in template context"
+  - "Ingest adoption proof; write platform-scaffolding-templates-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/platform-scaffolding-templates/*"
+  signals:
+    - platform-scaffolding-templates
+    - dx-r1
+    - repo-scaffolding-templates
+mapsToChecks: [DX-R1]
+whenUnavailable: >
+  Template signals alone are PARTIAL. DX-R1 PASS needs imported agent+RAG+MCP
+  templates with auth/secrets/logging defaults and (usedInLast90Days or
+  adoptionTargetDocumented) with measuredAt ≤90 days. No agent/RAG/MCP surface →
+  NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline template heuristics + optional imported adoption JSON.

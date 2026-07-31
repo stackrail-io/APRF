@@ -1,39 +1,59 @@
 id: "DX-R3"
 category: "platform-engineering"
-title: "Production systems should have dX metrics: time-to-safe-production and bypass rate"
-description: "DX metrics: time-to-safe-production and bypass rate"
-whyItMatters: "DX metrics: time-to-safe-production and bypass rate Failing this leaves a production
-  gap against: Both metrics are defined with formulas; published for ≥30 consecutive days; bypass
-  rate has an alert or review threshold with a named owner"
+title: "Platform teams should publish DX metrics for time-to-safe-production and bypass rate"
+description: >
+  Time-to-safe-production and policy-bypass rate shall be defined with formulas,
+  published for ≥30 consecutive days, and bypass rate shall have an alert or
+  review threshold with a named owner.
+whyItMatters: >
+  Without measured friction and bypass, paved-road investment is anecdotal.
+  Teams cannot tell whether golden paths (DX-M1/M2) are getting faster or
+  whether builders routinely escape them. Published DX metrics with ownership
+  turn platform health into a managed signal instead of a slide-deck claim.
 severity: "medium"
 weight: 2
 gate: "recommended"
-passCondition: "Both metrics are defined with formulas; published for ≥30 consecutive days; bypass
-  rate has an alert or review threshold with a named owner"
+passCondition: >
+  Both metrics are defined with formulas; published for ≥30 consecutive days;
+  bypass rate has an alert or review threshold with a named owner (series /
+  ownership proof measuredAt ≤90 days).
 evidenceRequired:
-  - "Platform DX dashboard (or weekly report) with time-to-safe-production and policy-bypass rate
-    definitions + last 30 days series"
+  - "Definitions/formulas for time-to-safe-production and policy-bypass rate"
+  - "Dashboard or weekly report with ≥30 consecutive days of series"
+  - "Bypass-rate alert or review threshold with named owner"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-dx-metrics"
+      params:
+        hint: >
+          Discover DX metric docs/dashboards for time-to-safe-production and
+          policy-bypass rate, plus alert/owner signals.
     - id: "manual-attest"
       params:
-        hint: "Platform DX dashboard (or weekly report) with time-to-safe-production and policy-bypass rate
-          definitions + last 30 days series"
-manualVerification: "For this Check (DX metrics: time-to-safe-production and bypass rate): inspect
-  current evidence for [Platform DX dashboard (or weekly report) with time-to-safe-production and
-  policy-bypass rate definitions + last 30 days series] and confirm the pass condition holds — Both
-  metrics are defined with formulas; published for ≥30 consecutive days; bypass rate has an alert or
-  review threshold with a named owner"
-falsePositiveGuidance: "(Platform Engineering): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove series length or ownership, attest both
+          formulas, ≥30d publish window, and bypass alert/threshold + owner
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the org operates an AI platform / paved road with enough traffic
+  to measure. If none, score NOT_APPLICABLE. 2) Locate metric definitions for
+  time-to-safe-production and policy-bypass rate (formulas, not slogans).
+  3) Confirm a dashboard or weekly report covers ≥30 consecutive days.
+  4) Confirm bypass rate has an alert or review threshold and a named owner.
+  5) PASS only if both metrics, series length, and bypass ownership hold.
+  Generic engineering lead-time charts without AI paved-road / bypass scope
+  do not satisfy. DX-M1 docs alone do not satisfy.
+falsePositiveGuidance: >
+  Do not pass metric names without formulas. Do not pass a one-off snapshot
+  as a 30-day series. Do not pass org-wide DORA metrics that omit AI platform
+  bypass. Do not pass an unowned Slack channel as the bypass threshold owner.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: DX metrics: time-to-safe-production and bypass rate"
-  - "Retain evidence artifacts required by this Check, starting with: Platform DX dashboard (or
-    weekly report) with time-to-safe-production and policy-bypass rate definitions + last 30 days
-    series"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Define formulas for time-to-safe-production and policy-bypass rate"
+  - "Publish a dashboard or weekly series for ≥30 consecutive days"
+  - "Assign a bypass-rate alert/threshold owner and retain proof under imports/platform-dx-metrics/"
+  - "Review bypass outliers in the platform DX forum"
 references:
   - title: "Google SRE Workbook — Soft skills / platform thinking parallels"
     url: "https://sre.google/workbook/"
@@ -42,19 +62,17 @@ references:
 relatedRules:
   - "DX-M1"
   - "DX-M2"
-  - "DX-M3"
   - "DX-R1"
   - "DX-R2"
+  - "DX-R4"
+  - "OBS-M1"
 tags:
   - "platform-engineering"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "dx-metrics"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "cicd"
-    - "kubernetes"
+  technologies: []
   minCriticality: 3
   requiredFromLevel: 5
 status: "active"

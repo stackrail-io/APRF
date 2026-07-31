@@ -5128,33 +5128,26 @@
         "No internal AI platform or golden paths",
         "Docs that explain policy but not how to comply",
         "Slow security review with no self-serve checklists",
-        "Local development that cannot run evals or policy checks"
+        "Local development that cannot run evals or policy checks",
+        "Stale or ownerless golden-path wiki without annual review",
+        "Generic service deploy docs missing AI auth/secrets/evals/promote sections"
       ],
       "mandatoryChecks": [
         {
           "id": "DX-M1",
-          "requirement": "Builders shall have a documented golden path for deploying AI features to production",
-          "artifact": "Golden-path documentation with steps from scaffold to production",
-          "passCondition": "Doc exists with version/owner; covers auth, secrets, evals, and promote steps; reviewed \u2264 12 months",
-          "method": "manual",
+          "requirement": "Builders shall have a versioned, owned golden-path document for deploying AI features to production that covers authentication, secrets, evals, and promote steps, reviewed within the last 12 months.",
+          "artifact": "Golden-path documentation from scaffold to production with version and owner + Evidence the doc covers auth, secrets, evals, and promote steps + Review attestation or changelog showing review within 12 months",
+          "passCondition": "A golden-path document exists with version and owner; it covers authentication, secrets, evals, and promote steps for AI features; last review is within 12 months (review measuredAt \u2264365 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "DX-M2",
-          "requirement": "Local or CI self-serve checks shall cover critical mandatory controls (auth, secrets, basic evals)",
-          "artifact": "CI/local check config covering auth, secrets, and basic evals",
-          "passCondition": "Default AI pipeline runs auth, secret-scan, and basic eval checks; failing any blocks merge/promote in the golden-path template",
-          "method": "manual",
-          "requiredFromLevel": 3,
-          "minCriticality": 2
-        },
-        {
-          "id": "DX-M3",
-          "requirement": "Ownership and support channel shall exist for the AI platform/paved road",
-          "artifact": "Platform ownership record + support channel (on-call, Slack, ticket queue)",
-          "passCondition": "Named owner team and support channel documented; channel responds to a test ping within published SLA or has on-call rotation listed",
-          "method": "manual",
+          "requirement": "The default AI golden-path pipeline (local and/or CI) shall run authentication, secret-scan, and basic eval checks, and failing any of them shall block merge or promote.",
+          "artifact": "CI and/or local check config covering auth, secret-scan, and basic evals + Evidence those checks are required (blocking) on merge/promote for the AI golden-path template",
+          "passCondition": "The default AI pipeline runs auth, secret-scan, and basic eval checks; failing any blocks merge or promote in the golden-path template (blocking evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -5162,33 +5155,44 @@
       "recommendedChecks": [
         {
           "id": "DX-R1",
-          "requirement": "Scaffolding templates for agents, RAG, and MCP with safe defaults",
-          "artifact": "Scaffolding template repo/catalog for agents, RAG, and MCP with default security settings + adoption metrics",
-          "passCondition": "Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults on; \u22651 new service used a template in the last 90 days or adoption target is documented",
+          "requirement": "Scaffolding templates shall exist for agents, RAG, and MCP with authentication, secrets, and logging defaults enabled, and either \u22651 new service used a template in the last 90 days or an adoption target is documented.",
+          "artifact": "Scaffolding template repo/catalog covering agents, RAG, and MCP + Evidence auth, secrets, and logging defaults are enabled in those templates + Adoption metrics (\u22651 use in 90 days) or documented adoption target",
+          "passCondition": "Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults on; \u22651 new service used a template in the last 90 days or an adoption target is documented (adoption proof measuredAt \u226490 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "DX-R2",
-          "requirement": "Inner-loop eval runners developers can run before PR",
-          "artifact": "Local/inner-loop eval runner docs + package + sample developer run log before a recent PR",
-          "passCondition": "Developers can run the core eval subset locally or in a one-command inner loop; last sampled AI PR (\u226430 days) shows pre-PR eval evidence or documented waiver",
-          "method": "manual",
+          "requirement": "Developers shall be able to run the core AI eval subset locally or via a one-command inner loop before opening a PR, and the last sampled AI PR (\u226430 days) shall show pre-PR eval evidence or a documented waiver.",
+          "artifact": "Local/inner-loop eval runner docs and package or script entrypoint + Evidence the core eval subset runs in one command (or documented equivalent) + Sample AI PR (\u226430 days) with pre-PR eval evidence or documented waiver",
+          "passCondition": "A local or one-command inner-loop runner exists for the core AI eval subset; the last sampled AI PR (\u226430 days) shows pre-PR eval evidence or a documented waiver (sample/waiver measuredAt \u226430 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "DX-R3",
-          "requirement": "DX metrics: time-to-safe-production and bypass rate",
-          "artifact": "Platform DX dashboard (or weekly report) with time-to-safe-production and policy-bypass rate definitions + last 30 days series",
-          "passCondition": "Both metrics are defined with formulas; published for \u226530 consecutive days; bypass rate has an alert or review threshold with a named owner",
-          "method": "manual",
+          "requirement": "Time-to-safe-production and policy-bypass rate shall be defined with formulas, published for \u226530 consecutive days, and bypass rate shall have an alert or review threshold with a named owner.",
+          "artifact": "Definitions/formulas for time-to-safe-production and policy-bypass rate + Dashboard or weekly report with \u226530 consecutive days of series + Bypass-rate alert or review threshold with named owner",
+          "passCondition": "Both metrics are defined with formulas; published for \u226530 consecutive days; bypass rate has an alert or review threshold with a named owner (series / ownership proof measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
+        },
+        {
+          "id": "DX-R4",
+          "requirement": "A named owner team and a support channel shall exist for the AI platform / paved road, with either a published response SLA proven by a recent test ping or a listed on-call rotation.",
+          "artifact": "Platform ownership record naming the owner team for the AI paved road + Support channel (Slack, ticket queue, or equivalent) documented + Test-ping within published SLA (\u226490 days) or listed on-call rotation",
+          "passCondition": "Named owner team and support channel are documented for the AI platform / paved road; either a test ping met the published SLA within 90 days, or an on-call rotation is listed (support proof measuredAt \u226490 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 4,
+          "minCriticality": 2
         }
       ],
       "evidenceRequired": [
+        "Review attestation within 12 months",
+        "Versioned AI golden-path documentation with owner",
         "Golden path documentation",
         "Template/repository inventory",
         "Support ownership for AI platform"
@@ -5202,7 +5206,9 @@
       "automaticValidations": [
         "Template CI that fails if safe defaults are removed",
         "Telemetry on gateway vs direct-provider usage",
-        "Lint rules guiding builders to approved libraries"
+        "Lint rules guiding builders to approved libraries",
+        "Repo golden-path doc heuristics (platform-golden-path collector)",
+        "Imported review attestation under imports/platform-golden-path/"
       ],
       "manualValidations": [
         "Builder interviews on friction points",

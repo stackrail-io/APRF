@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:609ebd62c20e098268cf5c0cd45e2a1a0245d09d7b409c0ccaab60eb27ca5c41",
+  "generatedAt": "sha256:6de592d119937f054e22942717faf453b6173d79a7b537dde5377eca6c4cb8ce",
   "ruleCount": 177,
   "domains": [
     {
@@ -4392,26 +4392,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "DX-M1",
       "category": "platform-engineering",
       "title": "Builders must have a documented golden path for deploying AI features to production",
-      "description": "Builders shall have a documented golden path for deploying AI features to production",
-      "whyItMatters": "Builders shall have a documented golden path for deploying AI features to production Failing this leaves a production gap against: Doc exists with version/owner; covers auth, secrets, evals, and promote steps; reviewed ≤ 12 months",
+      "description": "Builders shall have a versioned, owned golden-path document for deploying AI features to production that covers authentication, secrets, evals, and promote steps, reviewed within the last 12 months.\n",
+      "whyItMatters": "Without a paved road from scaffold to production, each team invents a different path—often skipping auth wiring, secrets managers, eval gates, or controlled promotion. Policy docs that name controls without steps leave builders guessing; stale paths silently diverge from current platform defaults. A living golden path makes the safe route the easy route.\n",
       "severity": "medium",
       "weight": 2,
       "gate": "mandatory",
-      "passCondition": "Doc exists with version/owner; covers auth, secrets, evals, and promote steps; reviewed ≤ 12 months",
+      "passCondition": "A golden-path document exists with version and owner; it covers authentication, secrets, evals, and promote steps for AI features; last review is within 12 months (review measuredAt ≤365 days).\n",
       "evidenceRequired": [
-        "Golden-path documentation with steps from scaffold to production"
+        "Golden-path documentation from scaffold to production with version and owner",
+        "Evidence the doc covers auth, secrets, evals, and promote steps",
+        "Review attestation or changelog showing review within 12 months"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-golden-path-docs",
+            "params": {
+              "hint": "Discover golden-path / paved-road / platform AI deploy docs covering auth, secrets, evals, and promote steps.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove freshness or section coverage, attest the golden-path doc with version/owner, required sections, and review ≤12 months.\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (Builders must have a documented golden path for deploying AI features to production): inspect current evidence for [Golden-path documentation with steps from scaffold to production] and confirm the pass condition holds — Doc exists with version/owner; covers auth, secrets, evals, and promote steps; reviewed ≤ 12 months",
-      "falsePositiveGuidance": "(Platform Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the org builds or deploys AI features. If none, score NOT_APPLICABLE. 2) Locate the golden-path / paved-road doc (platform portal, internal handbook, or repo). 3) Confirm version and named owner. 4) Verify sections cover authentication, secrets handling, evals, and promote/release steps. 5) Confirm last review ≤12 months. 6) PASS only if all hold. Generic “how to deploy any service” without AI-specific auth/secrets/evals/promote does not satisfy. DX-M2 CI checks do not substitute for the documented path.\n",
+      "falsePositiveGuidance": "Do not pass an outdated wiki page without version/owner or review date. Do not pass security policy alone without deploy steps. Do not pass scaffold README that omits auth, secrets, evals, or promote. Do not pass DX-M2 pipeline config as the golden-path document. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Builders must have a documented golden path for deploying AI features to production",
-        "Retain evidence artifacts required by this Check, starting with: Golden-path documentation with steps from scaffold to production",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish a versioned golden-path doc with owner covering auth, secrets, evals, and promote",
+        "Link the path from platform portals and AI templates; review at least annually",
+        "Retain review attestation under imports/platform-golden-path/",
+        "Deprecate alternate deploy runbooks that bypass the golden path"
       ],
       "references": [
         {
@@ -4425,23 +4440,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "relatedRules": [
         "DX-M2",
-        "DX-M3",
+        "DX-R4",
         "DX-R1",
-        "DX-R2",
-        "DX-R3"
+        "AUTHN-M1",
+        "SEC2-M1",
+        "EVL-M1",
+        "CHG-M1"
       ],
       "tags": [
         "platform-engineering",
         "mandatory",
-        "manual"
+        "hybrid",
+        "golden-path"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "cicd",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -4452,33 +4465,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "DX-M2",
       "category": "platform-engineering",
       "title": "Local or CI self-serve checks must cover critical mandatory controls (auth, secrets, basic evals)",
-      "description": "Local or CI self-serve checks shall cover critical mandatory controls (auth, secrets, basic evals)",
-      "whyItMatters": "Local or CI self-serve checks shall cover critical mandatory controls (auth, secrets, basic evals) Failing this leaves a production gap against: Default AI pipeline runs auth, secret-scan, and basic eval checks; failing any blocks merge/promote in the golden-path template",
+      "description": "The default AI golden-path pipeline (local and/or CI) shall run authentication, secret-scan, and basic eval checks, and failing any of them shall block merge or promote.\n",
+      "whyItMatters": "Documented golden paths (DX-M1) fail in practice when builders can merge without auth wiring, with leaked secrets, or without eval gates. Self-serve checks in the default template convert policy into a merge/promote brake. Optional or non-blocking jobs leave the unsafe path as easy as the safe one.\n",
       "severity": "medium",
       "weight": 2,
       "gate": "mandatory",
-      "passCondition": "Default AI pipeline runs auth, secret-scan, and basic eval checks; failing any blocks merge/promote in the golden-path template",
+      "passCondition": "The default AI pipeline runs auth, secret-scan, and basic eval checks; failing any blocks merge or promote in the golden-path template (blocking evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "CI/local check config covering auth, secrets, and basic evals"
+        "CI and/or local check config covering auth, secret-scan, and basic evals",
+        "Evidence those checks are required (blocking) on merge/promote for the AI golden-path template"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-pipeline-gates",
+            "params": {
+              "hint": "Discover default AI/CI/local pipelines that run auth checks, secret scanning, and basic evals, preferably with blocking/required status.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "CI/local check config covering auth, secrets, and basic evals"
+              "hint": "If automation cannot prove all three gates block merge/promote, attest pipeline config plus blocking evidence (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Cover critical mandatory controls (auth, secrets, basic evals)): inspect current evidence for [CI/local check config covering auth, secrets, and basic evals] and confirm the pass condition holds — Default AI pipeline runs auth, secret-scan, and basic eval checks; failing any blocks merge/promote in the golden-path template",
-      "falsePositiveGuidance": "(Platform Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm AI features use a golden-path or default AI pipeline. If no AI build/promote surface, score NOT_APPLICABLE. 2) Locate the default CI workflow and/or local pre-commit/make targets for that path. 3) Confirm jobs/steps for auth (or authz smoke), secret-scan, and basic evals. 4) Confirm failing any blocks merge/promote (required checks, protected branch, or equivalent). 5) PASS only if all three run and block. DX-M1 docs alone do not satisfy. Org-wide unrelated CI without AI template coverage does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass optional/advisory workflows that never block. Do not pass secret-scan alone without auth and eval gates. Do not pass eval suites that are not wired into the default AI template pipeline. Do not pass DX-M1 documentation as a substitute for executable checks. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Local or CI self-serve checks must cover critical mandatory controls (auth, secrets, basic evals)",
-        "Retain evidence artifacts required by this Check, starting with: CI/local check config covering auth, secrets, and basic evals",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Add required auth, secret-scan, and basic eval jobs to the AI golden-path CI/local template",
+        "Mark those checks required for merge/promote on protected branches",
+        "Retain blocking proof under imports/platform-ai-pipeline-gates/",
+        "Fail closed when any of the three gates is missing from the default template"
       ],
       "references": [
         {
@@ -4492,83 +4512,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "relatedRules": [
         "DX-M1",
-        "DX-M3",
-        "DX-R1",
-        "DX-R2",
-        "DX-R3"
+        "DX-R4",
+        "AUTHN-M1",
+        "SEC2-M1",
+        "SEC2-R1",
+        "EVL-M1",
+        "CHG-M1"
       ],
       "tags": [
         "platform-engineering",
         "mandatory",
-        "manual"
+        "hybrid",
+        "ci-gates"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "cicd",
-          "kubernetes"
-        ],
-        "minCriticality": 2,
-        "requiredFromLevel": 3
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "DX-M3",
-      "category": "platform-engineering",
-      "title": "Ownership and support channel must exist for the AI platform/paved road",
-      "description": "Ownership and support channel shall exist for the AI platform/paved road",
-      "whyItMatters": "Ownership and support channel shall exist for the AI platform/paved road Failing this leaves a production gap against: Named owner team and support channel documented; channel responds to a test ping within published SLA or has on-call rotation listed",
-      "severity": "medium",
-      "weight": 2,
-      "gate": "mandatory",
-      "passCondition": "Named owner team and support channel documented; channel responds to a test ping within published SLA or has on-call rotation listed",
-      "evidenceRequired": [
-        "Platform ownership record + support channel (on-call, Slack, ticket queue)"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": []
-      },
-      "manualVerification": "For this Check (Ownership and support channel must exist for the AI platform/paved road): inspect current evidence for [Platform ownership record + support channel (on-call, Slack, ticket queue)] and confirm the pass condition holds — Named owner team and support channel documented; channel responds to a test ping within published SLA or has on-call rotation listed",
-      "falsePositiveGuidance": "(Platform Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: Ownership and support channel must exist for the AI platform/paved road",
-        "Retain evidence artifacts required by this Check, starting with: Platform ownership record + support channel (on-call, Slack, ticket queue)",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "Google SRE Workbook — Soft skills / platform thinking parallels",
-          "url": "https://sre.google/workbook/"
-        },
-        {
-          "title": "CNCF platforms white papers — paved roads concept",
-          "url": "https://www.cncf.io/"
-        }
-      ],
-      "relatedRules": [
-        "DX-M1",
-        "DX-M2",
-        "DX-R1",
-        "DX-R2",
-        "DX-R3"
-      ],
-      "tags": [
-        "platform-engineering",
-        "mandatory",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "cicd",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -4578,38 +4536,42 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DX-R1",
       "category": "platform-engineering",
-      "title": "Production systems should have scaffolding templates for agents, RAG, and MCP with safe defaults",
-      "description": "Scaffolding templates for agents, RAG, and MCP with safe defaults",
-      "whyItMatters": "Scaffolding templates for agents, RAG, and MCP with safe defaults Failing this leaves a production gap against: Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults on; ≥1 new service used a template in the last 90 days or adoption target is documented",
+      "title": "Builders should have scaffolding templates for agents, RAG, and MCP with safe defaults",
+      "description": "Scaffolding templates shall exist for agents, RAG, and MCP with authentication, secrets, and logging defaults enabled, and either ≥1 new service used a template in the last 90 days or an adoption target is documented.\n",
+      "whyItMatters": "Without opinionated templates, each team copies unsafe starter code—skipping auth wiring, embedding secrets, or omitting logging. Catalog entries that exist but are unused leave builders on ad-hoc paths. Safe-by-default scaffolds plus recent adoption (or a tracked target) make the paved road the first choice for new AI services.\n",
       "severity": "medium",
       "weight": 2,
       "gate": "recommended",
-      "passCondition": "Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults on; ≥1 new service used a template in the last 90 days or adoption target is documented",
+      "passCondition": "Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults on; ≥1 new service used a template in the last 90 days or an adoption target is documented (adoption proof measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Scaffolding template repo/catalog for agents, RAG, and MCP with default security settings + adoption metrics"
+        "Scaffolding template repo/catalog covering agents, RAG, and MCP",
+        "Evidence auth, secrets, and logging defaults are enabled in those templates",
+        "Adoption metrics (≥1 use in 90 days) or documented adoption target"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
             "id": "repo-scaffolding-templates",
-            "params": {}
+            "params": {
+              "hint": "Discover agent, RAG, and MCP scaffolding templates (cookiecutter, backstage, copier, template catalogs) with auth/secrets/logging defaults.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Scaffolding template repo/catalog for agents, RAG, and MCP with default security settings + adoption metrics"
+              "hint": "If automation cannot prove all three templates or adoption, attest template catalog plus adoption use-or-target (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Scaffolding templates for agents, RAG, and MCP with safe defaults): inspect current evidence for [Scaffolding template repo/catalog for agents, RAG, and MCP with default security settings + adoption metrics] and confirm the pass condition holds — Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults on; ≥1 new service used a template in the last 90 days or adoption target is documented",
-      "falsePositiveGuidance": "(Platform Engineering): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm the org builds agent, RAG, or MCP services. If none planned and no AI surface, score NOT_APPLICABLE. 2) Locate scaffolding templates or a template catalog for agents, RAG, and MCP. 3) Confirm each enables auth, secrets, and logging by default. 4) Confirm ≥1 new service used a template in the last 90 days, or an adoption target is documented. 5) PASS only if all three templates, safe defaults, and adoption (use or target) hold. Generic microservice templates without AI/agent/RAG/MCP variants do not satisfy. DX-M1 docs alone do not substitute for usable scaffolds.\n",
+      "falsePositiveGuidance": "Do not pass empty Backstage catalog stubs without agent/RAG/MCP templates. Do not pass templates that leave auth/secrets/logging as optional unfinished stubs. Do not pass a single RAG notebook as covering agents and MCP. Do not pass adoption claims older than 90 days without a documented target. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Scaffolding templates for agents, RAG, and MCP with safe defaults",
-        "Retain evidence artifacts required by this Check, starting with: Scaffolding template repo/catalog for agents, RAG, and MCP with default security settings + adoption metrics",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish agent, RAG, and MCP scaffolds with auth, secrets, and logging defaults on",
+        "List them in the platform catalog and link from the golden path (DX-M1)",
+        "Track adoption (≥1 use / 90d or target) under imports/platform-scaffolding-templates/",
+        "Deprecate starter repos that ship without those defaults"
       ],
       "references": [
         {
@@ -4624,22 +4586,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "DX-M1",
         "DX-M2",
-        "DX-M3",
+        "DX-R4",
         "DX-R2",
-        "DX-R3"
+        "DX-R3",
+        "AGN-M1",
+        "AUTHN-M1",
+        "SEC2-M1",
+        "OBS-M1"
       ],
       "tags": [
         "platform-engineering",
         "recommended",
-        "hybrid"
+        "hybrid",
+        "scaffolding"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "cicd",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -4649,34 +4611,42 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DX-R2",
       "category": "platform-engineering",
-      "title": "Production systems should have inner-loop eval runners developers can run before PR",
-      "description": "Inner-loop eval runners developers can run before PR",
-      "whyItMatters": "Inner-loop eval runners developers can run before PR Failing this leaves a production gap against: Developers can run the core eval subset locally or in a one-command inner loop; last sampled AI PR (≤30 days) shows pre-PR eval evidence or documented waiver",
+      "title": "Builders should have inner-loop eval runners they can run before opening a PR",
+      "description": "Developers shall be able to run the core AI eval subset locally or via a one-command inner loop before opening a PR, and the last sampled AI PR (≤30 days) shall show pre-PR eval evidence or a documented waiver.\n",
+      "whyItMatters": "CI-only eval gates (DX-M2) catch regressions late and burn CI minutes on avoidable failures. Without a local or one-command inner-loop runner, builders skip evals until review or merge. Pre-PR evidence (or an owned waiver) proves the runner is actually used, not just documented.\n",
       "severity": "medium",
       "weight": 2,
       "gate": "recommended",
-      "passCondition": "Developers can run the core eval subset locally or in a one-command inner loop; last sampled AI PR (≤30 days) shows pre-PR eval evidence or documented waiver",
+      "passCondition": "A local or one-command inner-loop runner exists for the core AI eval subset; the last sampled AI PR (≤30 days) shows pre-PR eval evidence or a documented waiver (sample/waiver measuredAt ≤30 days).\n",
       "evidenceRequired": [
-        "Local/inner-loop eval runner docs + package + sample developer run log before a recent PR"
+        "Local/inner-loop eval runner docs and package or script entrypoint",
+        "Evidence the core eval subset runs in one command (or documented equivalent)",
+        "Sample AI PR (≤30 days) with pre-PR eval evidence or documented waiver"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-inner-loop-evals",
+            "params": {
+              "hint": "Discover local/inner-loop eval runners (promptfoo, npm/make scripts, docs) distinct from CI-only gates.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Local/inner-loop eval runner docs + package + sample developer run log before a recent PR"
+              "hint": "If automation cannot prove pre-PR use, attest runner + one-command path plus pre-PR eval evidence or waiver (measuredAt ≤30 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Inner-loop eval runners developers can run before PR): inspect current evidence for [Local/inner-loop eval runner docs + package + sample developer run log before a recent PR] and confirm the pass condition holds — Developers can run the core eval subset locally or in a one-command inner loop; last sampled AI PR (≤30 days) shows pre-PR eval evidence or documented waiver",
-      "falsePositiveGuidance": "(Platform Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the org ships AI features with eval suites. If no AI eval surface, score NOT_APPLICABLE. 2) Locate the inner-loop runner (docs + package/script). 3) Confirm developers can run the core subset locally or in one command. 4) Sample a recent AI PR (≤30 days): pre-PR eval log/comment/check, or a documented waiver with owner. 5) PASS only if runner + one-command path + sample/waiver hold. CI-only DX-M2 gates without a local runner do not satisfy. EVL suite definitions without an inner-loop entrypoint do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass CI workflows alone as the inner-loop runner. Do not pass a full nightly suite that developers cannot run quickly. Do not pass README mentions without a working script/package. Do not pass a PR older than 30 days as the sample. Named exceptions need owner and expiry ≤30 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Inner-loop eval runners developers can run before PR",
-        "Retain evidence artifacts required by this Check, starting with: Local/inner-loop eval runner docs + package + sample developer run log before a recent PR",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish a one-command local eval target (e.g. npm run eval:core / make eval-local)",
+        "Document the inner-loop path from the golden path (DX-M1)",
+        "Retain pre-PR sample or waiver under imports/platform-inner-loop-evals/",
+        "Keep the inner-loop subset fast enough that builders actually run it"
       ],
       "references": [
         {
@@ -4691,22 +4661,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "DX-M1",
         "DX-M2",
-        "DX-M3",
         "DX-R1",
-        "DX-R3"
+        "DX-R3",
+        "DX-R4",
+        "EVL-M1",
+        "EVL-M2"
       ],
       "tags": [
         "platform-engineering",
         "recommended",
-        "manual"
+        "hybrid",
+        "inner-loop"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "cicd",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -4716,34 +4684,42 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "DX-R3",
       "category": "platform-engineering",
-      "title": "Production systems should have dX metrics: time-to-safe-production and bypass rate",
-      "description": "DX metrics: time-to-safe-production and bypass rate",
-      "whyItMatters": "DX metrics: time-to-safe-production and bypass rate Failing this leaves a production gap against: Both metrics are defined with formulas; published for ≥30 consecutive days; bypass rate has an alert or review threshold with a named owner",
+      "title": "Platform teams should publish DX metrics for time-to-safe-production and bypass rate",
+      "description": "Time-to-safe-production and policy-bypass rate shall be defined with formulas, published for ≥30 consecutive days, and bypass rate shall have an alert or review threshold with a named owner.\n",
+      "whyItMatters": "Without measured friction and bypass, paved-road investment is anecdotal. Teams cannot tell whether golden paths (DX-M1/M2) are getting faster or whether builders routinely escape them. Published DX metrics with ownership turn platform health into a managed signal instead of a slide-deck claim.\n",
       "severity": "medium",
       "weight": 2,
       "gate": "recommended",
-      "passCondition": "Both metrics are defined with formulas; published for ≥30 consecutive days; bypass rate has an alert or review threshold with a named owner",
+      "passCondition": "Both metrics are defined with formulas; published for ≥30 consecutive days; bypass rate has an alert or review threshold with a named owner (series / ownership proof measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Platform DX dashboard (or weekly report) with time-to-safe-production and policy-bypass rate definitions + last 30 days series"
+        "Definitions/formulas for time-to-safe-production and policy-bypass rate",
+        "Dashboard or weekly report with ≥30 consecutive days of series",
+        "Bypass-rate alert or review threshold with named owner"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-dx-metrics",
+            "params": {
+              "hint": "Discover DX metric docs/dashboards for time-to-safe-production and policy-bypass rate, plus alert/owner signals.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Platform DX dashboard (or weekly report) with time-to-safe-production and policy-bypass rate definitions + last 30 days series"
+              "hint": "If automation cannot prove series length or ownership, attest both formulas, ≥30d publish window, and bypass alert/threshold + owner (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (DX metrics: time-to-safe-production and bypass rate): inspect current evidence for [Platform DX dashboard (or weekly report) with time-to-safe-production and policy-bypass rate definitions + last 30 days series] and confirm the pass condition holds — Both metrics are defined with formulas; published for ≥30 consecutive days; bypass rate has an alert or review threshold with a named owner",
-      "falsePositiveGuidance": "(Platform Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the org operates an AI platform / paved road with enough traffic to measure. If none, score NOT_APPLICABLE. 2) Locate metric definitions for time-to-safe-production and policy-bypass rate (formulas, not slogans). 3) Confirm a dashboard or weekly report covers ≥30 consecutive days. 4) Confirm bypass rate has an alert or review threshold and a named owner. 5) PASS only if both metrics, series length, and bypass ownership hold. Generic engineering lead-time charts without AI paved-road / bypass scope do not satisfy. DX-M1 docs alone do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass metric names without formulas. Do not pass a one-off snapshot as a 30-day series. Do not pass org-wide DORA metrics that omit AI platform bypass. Do not pass an unowned Slack channel as the bypass threshold owner. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: DX metrics: time-to-safe-production and bypass rate",
-        "Retain evidence artifacts required by this Check, starting with: Platform DX dashboard (or weekly report) with time-to-safe-production and policy-bypass rate definitions + last 30 days series",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Define formulas for time-to-safe-production and policy-bypass rate",
+        "Publish a dashboard or weekly series for ≥30 consecutive days",
+        "Assign a bypass-rate alert/threshold owner and retain proof under imports/platform-dx-metrics/",
+        "Review bypass outliers in the platform DX forum"
       ],
       "references": [
         {
@@ -4758,24 +4734,93 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "DX-M1",
         "DX-M2",
-        "DX-M3",
         "DX-R1",
-        "DX-R2"
+        "DX-R2",
+        "DX-R4",
+        "OBS-M1"
       ],
       "tags": [
         "platform-engineering",
         "recommended",
-        "manual"
+        "hybrid",
+        "dx-metrics"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "cicd",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 3,
         "requiredFromLevel": 5
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "DX-R4",
+      "category": "platform-engineering",
+      "title": "Ownership and support channel should exist for the AI platform/paved road",
+      "description": "A named owner team and a support channel should exist for the AI platform / paved road, with either a published response SLA proven by a recent test ping or a listed on-call rotation.\n",
+      "whyItMatters": "Golden paths and CI gates (DX-M1/M2) stall when builders cannot reach a human who owns the platform. Anonymous wiki pages and dead Slack channels leave incidents and onboarding stuck. A named owner plus a reachable support path (SLA-backed channel or on-call) keeps the paved road operable without blocking the production gate when docs and CI already hold.\n",
+      "severity": "medium",
+      "weight": 2,
+      "gate": "recommended",
+      "passCondition": "Named owner team and support channel are documented for the AI platform / paved road; either a test ping met the published SLA within 90 days, or an on-call rotation is listed (support proof measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Platform ownership record naming the owner team for the AI paved road",
+        "Support channel (Slack, ticket queue, or equivalent) documented",
+        "Test-ping within published SLA (≤90 days) or listed on-call rotation"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-platform-ownership",
+            "params": {
+              "hint": "Discover AI platform / paved-road ownership and support-channel signals (CODEOWNERS, OWNERS, on-call, Slack, ticket queue).\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove reachability, attest owner team, support channel, and either pingWithinSla or onCallListed (measuredAt ≤90d).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm the org operates an AI platform or paved road. If none, score NOT_APPLICABLE. 2) Locate ownership record (CODEOWNERS, platform portal, team page) naming the owner team. 3) Locate the support channel (Slack, ticket queue, email alias). 4) Confirm either a recent test ping met the published SLA (≤90 days) or an on-call rotation is listed. 5) PASS only if owner + channel + (ping SLA or on-call) hold. Generic company-wide support without AI-platform ownership does not satisfy. DX-M1 docs alone do not satisfy without a reachable support path.\n",
+      "falsePositiveGuidance": "Do not pass a stale wiki contact with no owner team. Do not pass CODEOWNERS for unrelated paths as AI-platform ownership. Do not pass a Slack channel name without evidence it is the published support path. Do not pass “someone will answer eventually” without SLA or on-call. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Publish a named owner team for the AI platform / paved road",
+        "Document the support channel and either a response SLA or on-call rotation",
+        "Run a periodic test ping and retain proof under imports/platform-ownership-support/",
+        "Link ownership and support from the golden-path (DX-M1) entry point"
+      ],
+      "references": [
+        {
+          "title": "Google SRE Workbook — Soft skills / platform thinking parallels",
+          "url": "https://sre.google/workbook/"
+        },
+        {
+          "title": "CNCF platforms white papers — paved roads concept",
+          "url": "https://www.cncf.io/"
+        }
+      ],
+      "relatedRules": [
+        "DX-M1",
+        "DX-M2",
+        "DX-R1",
+        "DX-R3",
+        "ORG-M1",
+        "ORG-M2"
+      ],
+      "tags": [
+        "platform-engineering",
+        "recommended",
+        "hybrid",
+        "ownership"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 4
       },
       "status": "active",
       "introducedIn": "0.10.0"

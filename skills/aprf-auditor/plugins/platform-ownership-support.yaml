@@ -1,0 +1,29 @@
+id: platform-ownership-support
+title: AI platform ownership + support channel (DX-R4)
+version: "0.2.0"
+executor: collectors/platform-ownership-support.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-platform-ownership]
+inputs:
+  - "Target repo (ownership docs, CODEOWNERS, support/on-call pages)"
+  - "Optional suite: aprf-assessment/imports/platform-ownership-support/*.{json}"
+collect:
+  - "Detect named owner and support-channel signals for the AI paved road"
+  - "Detect on-call / SLA mentions"
+  - "Ingest reachability proof; write platform-ownership-support-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/platform-ownership-support/*"
+  signals:
+    - platform-ownership-support
+    - dx-r4
+    - repo-platform-ownership
+mapsToChecks: [DX-R4]
+whenUnavailable: >
+  Owner/channel docs alone are PARTIAL. DX-R4 PASS needs imported
+  ownerTeamPresent + supportChannelPresent + (pingWithinSla or onCallListed)
+  with measuredAt ≤90 days. No AI paved road → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline ownership/support heuristics + optional imported reachability JSON.

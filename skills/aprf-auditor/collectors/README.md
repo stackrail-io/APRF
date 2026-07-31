@@ -68,6 +68,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **ai-prompt-cache** | `ai-prompt-cache.ts` | prompt cache + hit-rate | `imports/ai-prompt-cache/` | — |
 | **ai-model-routing** | `ai-model-routing.ts` | cheap/premium routing | `imports/ai-model-routing/` | — |
 | **ai-finops-unit-economics** | `ai-finops-unit-economics.ts` | unit cost + FinOps review | `imports/ai-finops-unit-economics/` | — |
+| **platform-golden-path** | `platform-golden-path.ts` | AI golden-path docs (DX-M1) | `imports/platform-golden-path/` | — |
+| **platform-ai-pipeline-gates** | `platform-ai-pipeline-gates.ts` | auth/secret/eval CI gates | `imports/platform-ai-pipeline-gates/` | — |
+| **platform-ownership-support** | `platform-ownership-support.ts` | AI platform owner + support (DX-R4) | `imports/platform-ownership-support/` | — |
+| **platform-scaffolding-templates** | `platform-scaffolding-templates.ts` | agent/RAG/MCP scaffolds (DX-R1) | `imports/platform-scaffolding-templates/` | — |
+| **platform-inner-loop-evals** | `platform-inner-loop-evals.ts` | pre-PR local eval runners (DX-R2) | `imports/platform-inner-loop-evals/` | — |
+| **platform-dx-metrics** | `platform-dx-metrics.ts` | TTSP + bypass DX metrics (DX-R3) | `imports/platform-dx-metrics/` | — |
 
 ### AGN-M1 — agent charters
 

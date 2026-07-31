@@ -31,6 +31,12 @@ import { aiRetryAmplificationCollector } from "./ai-retry-amplification.ts";
 import { aiPromptCacheCollector } from "./ai-prompt-cache.ts";
 import { aiModelRoutingCollector } from "./ai-model-routing.ts";
 import { aiFinopsUnitEconomicsCollector } from "./ai-finops-unit-economics.ts";
+import { platformGoldenPathCollector } from "./platform-golden-path.ts";
+import { platformAiPipelineGatesCollector } from "./platform-ai-pipeline-gates.ts";
+import { platformOwnershipSupportCollector } from "./platform-ownership-support.ts";
+import { platformScaffoldingTemplatesCollector } from "./platform-scaffolding-templates.ts";
+import { platformInnerLoopEvalsCollector } from "./platform-inner-loop-evals.ts";
+import { platformDxMetricsCollector } from "./platform-dx-metrics.ts";
 import {
   awsCollector,
   azureCollector,
@@ -69,6 +75,12 @@ export const COLLECTORS: Collector[] = [
   aiPromptCacheCollector,
   aiModelRoutingCollector,
   aiFinopsUnitEconomicsCollector,
+  platformGoldenPathCollector,
+  platformAiPipelineGatesCollector,
+  platformOwnershipSupportCollector,
+  platformScaffoldingTemplatesCollector,
+  platformInnerLoopEvalsCollector,
+  platformDxMetricsCollector,
   a2aPeerAuthCollector,
   awsCollector,
   azureCollector,
