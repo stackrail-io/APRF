@@ -194,6 +194,30 @@ MOD-R3 license/provenance review for open-weight and fine-tuned models:
   npm run aprf:model-license-provenance -- --target <app> --out <app>/aprf-assessment
   # PASS needs openWeightOrFineTunedMissingReview=0 + reviewsOlderThan12Months=0 + blockedLicensesMissingException=0 under imports/model-license-provenance/
 
+PRM-M1 prompt immutable version IDs + owners:
+  npm run aprf:prompt-version-registry -- --target <app> --out <app>/aprf-assessment
+  # PASS needs unversionedProductionPrompts=0 + productionPromptsMissingOwner=0 under imports/prompt-version-registry/
+
+PRM-M2 prompt release review + eval gate:
+  npm run aprf:prompt-change-review-eval -- --target <app> --out <app>/aprf-assessment
+  # PASS needs releasesMissingReviewOrEval=0 + promoteWithoutReviewAndEvalBlocked under imports/prompt-change-review-eval/
+
+PRM-M3 prompt rollback without full app redeploy:
+  npm run aprf:prompt-rollback -- --target <app> --out <app>/aprf-assessment
+  # PASS needs priorPromptRestoredWithinRto + rollbackWithoutFullAppRedeploy under imports/prompt-rollback/
+
+PRM-R1 parameterized templates; no secrets/PII:
+  npm run aprf:prompt-template-hygiene -- --target <app> --out <app>/aprf-assessment
+  # PASS needs templatesMissingParameters=0 + hardcodedSecretsInTemplates=0 + hardcodedPiiInTemplates=0 under imports/prompt-template-hygiene/
+
+PRM-R2 blocking prompt lint on change PRs:
+  npm run aprf:prompt-lint-ci -- --target <app> --out <app>/aprf-assessment
+  # PASS needs promptChangePrsMissingLint=0 + blockingPromptLintRulesPresent + lastFailingLintExampleRetained under imports/prompt-lint-ci/
+
+PRM-R3 A/B or shadow eval for high-traffic prompt changes:
+  npm run aprf:prompt-ab-shadow-eval -- --target <app> --out <app>/aprf-assessment
+  # PASS needs lastHighTrafficPromptChangeUsedAbOrShadow + preRegisteredMetricsPresent + promotionRequiredNonInferiority under imports/prompt-ab-shadow-eval/
+
 COST-M2 AI cost budget-burn / anomaly alerts:
   npm run aprf:cost-alerts -- --target <app> --out <app>/aprf-assessment
   # PASS needs notify proof under imports/ai-cost-alerts/

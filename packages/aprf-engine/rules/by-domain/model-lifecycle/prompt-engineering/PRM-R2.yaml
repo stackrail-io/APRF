@@ -1,43 +1,57 @@
 id: "PRM-R2"
 category: "prompt-engineering"
-title: "Production systems should have prompt linting for length, forbidden patterns, and
-  injection-prone constructs"
-description: "Prompt linting for length, forbidden patterns, and injection-prone constructs"
-whyItMatters: "Prompt linting for length, forbidden patterns, and injection-prone constructs Failing
-  this leaves a production gap against: Lint runs on every prompt change PR; blocking rules exist
-  for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation;
-  last failing lint example retained"
+title: "Production systems should lint prompts for length, forbidden patterns, and injection-prone constructs"
+description: >
+  Production prompt changes should run blocking lint on every PR for length
+  limits, secrets patterns, injection-prone constructs, and unbounded user
+  concatenation—with a recent failing lint example retained.
+whyItMatters: >
+  Untested prompt edits ship injection-prone concatenation, secret patterns,
+  and unbounded context. Blocking lint on the PR path catches those before
+  promote; a retained failing example proves the gate is real—not advisory.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Lint runs on every prompt change PR; blocking rules exist for length limits, secrets
-  patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example
-  retained"
+passCondition: >
+  Lint runs on every prompt change PR; blocking rules exist for length limits,
+  secrets patterns, injection-prone constructs, and unbounded user
+  concatenation; last failing lint example retained (lint evidence measuredAt
+  ≤90 days).
 evidenceRequired:
-  - "Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint
-    report"
+  - "Prompt-lint CI config covering length, secrets patterns, injection-prone constructs, unbounded user concatenation"
+  - "Proof lint is required on prompt-change PRs + retained example of a failing lint"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-prompt-lint-ci"
+      params:
+        hint: >
+          Discover prompt-lint CI/workflows with blocking rules for length,
+          secrets, injection-prone constructs, and unbounded concatenation.
     - id: "manual-attest"
       params:
-        hint: "Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint
-          report"
-manualVerification: "For this Check (Prompt linting for length, forbidden patterns, and
-  injection-prone constructs): inspect current evidence for [Prompt-lint CI config (length,
-  forbidden patterns, injection-prone constructs) + latest lint report] and confirm the pass
-  condition holds — Lint runs on every prompt change PR; blocking rules exist for length limits,
-  secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint
-  example retained"
-falsePositiveGuidance: "(Prompt Engineering): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest lint runs on every prompt
+          change PR with blocking rules and a retained failing example
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production prompt files/templates exist. If none, score
+  NOT_APPLICABLE. 2) Open CI/lint config; confirm it runs on prompt-change PRs
+  and is blocking. 3) Confirm rules cover length limits, secrets patterns,
+  injection-prone constructs, and unbounded user concatenation. 4) Confirm a
+  recent failing lint example is retained. 5) PASS only if PR coverage +
+  blocking rules + retained failure hold with measuredAt ≤90 days. PRM-R1
+  inventory/scan alone does not satisfy. Optional (non-blocking) lint does not
+  satisfy. Generic repo linters without prompt-specific rules do not satisfy.
+falsePositiveGuidance: >
+  Do not pass warn-only checks as blocking. Do not pass a green lint run without
+  a retained failing example proving the gate fires. Do not pass evidence older
+  than 90 days as current. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Prompt linting for length, forbidden patterns, and
-    injection-prone constructs"
-  - "Retain evidence artifacts required by this Check, starting with: Prompt-lint CI config (length,
-    forbidden patterns, injection-prone constructs) + latest lint report"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Add blocking prompt-lint CI on every prompt-change PR"
+  - "Cover length, secrets patterns, injection-prone constructs, and unbounded concatenation"
+  - "Retain a failing lint example under imports/prompt-lint-ci/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Workbook — Managing Risk (change management parallels)"
     url: "https://sre.google/workbook/"
@@ -49,13 +63,16 @@ relatedRules:
   - "PRM-M3"
   - "PRM-R1"
   - "PRM-R3"
+  - "SEC-M1"
+  - "SEC-M3"
 tags:
   - "prompt-engineering"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "prompt-lint"
+  - "ci-gate"
 applicability:
-  technologies:
-    - "prompt-templates"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

@@ -1,0 +1,25 @@
+id: prompt-lint-ci
+title: Blocking prompt lint on change PRs (PRM-R2)
+version: "0.2.0"
+executor: collectors/prompt-lint-ci.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-prompt-lint-ci]
+inputs:
+  - "Target repo (prompt-lint CI/workflows, rule configs, failing examples)"
+  - "Optional suite: aprf-assessment/imports/prompt-lint-ci/*.{json}"
+collect:
+  - "Detect prompt-lint CI, blocking rules, and retained failing examples"
+  - "Ingest coverage; write prompt-lint-ci-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/prompt-lint-ci/*"
+  signals: [prompt-lint-ci, prm-r2, repo-prompt-lint-ci]
+mapsToChecks: [PRM-R2]
+whenUnavailable: >
+  Lint signals alone are PARTIAL. PRM-R2 PASS needs
+  promptChangePrsMissingLint=0, blockingPromptLintRulesPresent,
+  lastFailingLintExampleRetained, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline prompt-lint heuristics + optional imported JSON.

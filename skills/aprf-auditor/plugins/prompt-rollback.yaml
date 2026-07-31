@@ -1,0 +1,25 @@
+id: prompt-rollback
+title: Prompt version rollback without full app redeploy (PRM-M3)
+version: "0.2.0"
+executor: collectors/prompt-rollback.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-prompt-rollback]
+inputs:
+  - "Target repo (prompt rollback runbooks, RTO, restore drills)"
+  - "Optional suite: aprf-assessment/imports/prompt-rollback/*.{json}"
+collect:
+  - "Detect prompt-specific rollback procedure, RTO, no-full-redeploy path, drills"
+  - "Ingest coverage; write prompt-rollback-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/prompt-rollback/*"
+  signals: [prompt-rollback, prm-m3, repo-prompt-rollback]
+mapsToChecks: [PRM-M3]
+whenUnavailable: >
+  Rollback signals alone are PARTIAL. PRM-M3 PASS needs
+  priorPromptRestoredWithinRto, rollbackWithoutFullAppRedeploy,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline prompt-rollback heuristics + optional imported JSON.

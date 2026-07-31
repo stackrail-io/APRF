@@ -1,0 +1,25 @@
+id: prompt-version-registry
+title: Prompt version IDs and owners (PRM-M1)
+version: "0.2.0"
+executor: collectors/prompt-version-registry.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [prompt-versioned, prompt-has-owner]
+inputs:
+  - "Target repo (prompt registry, versioned prompts, owners)"
+  - "Optional suite: aprf-assessment/imports/prompt-version-registry/*.{json}"
+collect:
+  - "Detect prompt registry, immutable versions, and owners"
+  - "Ingest coverage; write prompt-version-registry-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/prompt-version-registry/*"
+  signals: [prompt-version-registry, prm-m1, prompt-versioned, prompt-has-owner]
+mapsToChecks: [PRM-M1]
+whenUnavailable: >
+  Registry signals alone are PARTIAL. PRM-M1 PASS needs
+  unversionedProductionPrompts=0, productionPromptsMissingOwner=0,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline prompt-registry heuristics + optional imported JSON.

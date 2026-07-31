@@ -1,0 +1,26 @@
+id: prompt-ab-shadow-eval
+title: A/B or shadow eval for high-traffic prompt changes (PRM-R3)
+version: "0.2.0"
+executor: collectors/prompt-ab-shadow-eval.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-prompt-ab-shadow-eval]
+inputs:
+  - "Target repo (prompt A/B/shadow configs, experiment reports, promotion gates)"
+  - "Optional suite: aprf-assessment/imports/prompt-ab-shadow-eval/*.{json}"
+collect:
+  - "Detect A/B or shadow eval for high-traffic prompt changes"
+  - "Ingest coverage; write prompt-ab-shadow-eval-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/prompt-ab-shadow-eval/*"
+  signals: [prompt-ab-shadow-eval, prm-r3, repo-prompt-ab-shadow-eval]
+mapsToChecks: [PRM-R3]
+whenUnavailable: >
+  Experiment signals alone are PARTIAL. PRM-R3 PASS needs
+  lastHighTrafficPromptChangeUsedAbOrShadow, preRegisteredMetricsPresent,
+  promotionRequiredNonInferiority, measuredAt ≤90 days.
+  highTrafficPromptChangeCount=0 → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline prompt A/B/shadow heuristics + optional imported JSON.

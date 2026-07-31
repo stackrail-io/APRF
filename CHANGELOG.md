@@ -8,6 +8,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
+- Rewrote **PRM-R3** (A/B or shadow eval for high-traffic prompt changes) from template stub to hybrid Check + `prompt-ab-shadow-eval` collector; cleared `technologies` filter; synced `aprf-spec.json`.
+- Rewrote **PRM-R2** (blocking prompt lint on change PRs) from template stub to hybrid Check + `prompt-lint-ci` collector; cleared `technologies` filter; synced `aprf-spec.json`.
+- Rewrote **PRM-R1** (parameterized templates; no secrets/PII) from template stub to hybrid Check + `prompt-template-hygiene` collector; cleared `technologies` filter; synced `aprf-spec.json`.
+- Rewrote **PRM-M3** (prompt rollback without full app redeploy) from template stub to hybrid Check + `prompt-rollback` collector; cleared `technologies` filter; synced `aprf-spec.json`.
+- Rewrote **PRM-M2** (prompt change review + eval before release) from template stub to hybrid Check + `prompt-change-review-eval` collector; cleared `technologies` filter; synced `aprf-spec.json`.
+- Rewrote **PRM-M1** (immutable prompt version IDs + owners) from template stub to hybrid Check + `prompt-version-registry` collector; cleared `technologies` filter; synced `aprf-spec.json`.
 - Rewrote **model-governance** from template stub to hybrid Check + collector; cleared cloud-only `technologies`; synced `aprf-spec.json`.
 - Rewrote **evaluation** from template stub to hybrid Check + collectors; synced `aprf-spec.json`.
 - Rewrote **context-engineering** from template stub to hybrid Check + collectors; synced `aprf-spec.json`.

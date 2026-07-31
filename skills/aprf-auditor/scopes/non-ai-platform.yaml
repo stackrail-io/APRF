@@ -85,7 +85,9 @@ excludedFromCore:
   - id: PRM-M1
     reason: "Prompt versioning — no product prompts"
   - id: PRM-M2
-    reason: "Prompt controls — no product prompts"
+    reason: "Prompt release review/eval — no product prompts"
+  - id: PRM-M3
+    reason: "Prompt rollback — no product prompts"
   - id: MOD-M1
     reason: "Model governance — no production model product"
   - id: EVL-M1

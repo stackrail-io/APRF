@@ -44,6 +44,12 @@ import { modelPromotionEvalCollector } from "./model-promotion-eval.ts";
 import { modelDeprecationSunsetCollector } from "./model-deprecation-sunset.ts";
 import { modelCapabilityAllowlistCollector } from "./model-capability-allowlist.ts";
 import { modelLicenseProvenanceCollector } from "./model-license-provenance.ts";
+import { promptVersionRegistryCollector } from "./prompt-version-registry.ts";
+import { promptChangeReviewEvalCollector } from "./prompt-change-review-eval.ts";
+import { promptRollbackCollector } from "./prompt-rollback.ts";
+import { promptTemplateHygieneCollector } from "./prompt-template-hygiene.ts";
+import { promptLintCiCollector } from "./prompt-lint-ci.ts";
+import { promptAbShadowEvalCollector } from "./prompt-ab-shadow-eval.ts";
 import { aiCostAlertsCollector } from "./ai-cost-alerts.ts";
 import { aiRetryAmplificationCollector } from "./ai-retry-amplification.ts";
 import { aiPromptCacheCollector } from "./ai-prompt-cache.ts";
@@ -136,6 +142,12 @@ export const COLLECTORS: Collector[] = [
   modelDeprecationSunsetCollector,
   modelCapabilityAllowlistCollector,
   modelLicenseProvenanceCollector,
+  promptVersionRegistryCollector,
+  promptChangeReviewEvalCollector,
+  promptRollbackCollector,
+  promptTemplateHygieneCollector,
+  promptLintCiCollector,
+  promptAbShadowEvalCollector,
   aiCostAlertsCollector,
   aiRetryAmplificationCollector,
   aiPromptCacheCollector,

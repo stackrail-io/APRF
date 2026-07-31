@@ -81,6 +81,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **model-deprecation-sunset** | `model-deprecation-sunset.ts` | deprecation/sunset policy for models+embeddings (MOD-R1) | `imports/model-deprecation-sunset/` | — |
 | **model-capability-allowlist** | `model-capability-allowlist.ts` | per-workload model capability allowlists (MOD-R2) | `imports/model-capability-allowlist/` | — |
 | **model-license-provenance** | `model-license-provenance.ts` | license+provenance review for open-weight/fine-tuned (MOD-R3) | `imports/model-license-provenance/` | — |
+| **prompt-version-registry** | `prompt-version-registry.ts` | immutable prompt version IDs + owners (PRM-M1) | `imports/prompt-version-registry/` | — |
+| **prompt-change-review-eval** | `prompt-change-review-eval.ts` | prompt release review + eval gate (PRM-M2) | `imports/prompt-change-review-eval/` | — |
+| **prompt-rollback** | `prompt-rollback.ts` | prompt rollback without full app redeploy (PRM-M3) | `imports/prompt-rollback/` | — |
+| **prompt-template-hygiene** | `prompt-template-hygiene.ts` | parameterized templates; no secrets/PII (PRM-R1) | `imports/prompt-template-hygiene/` | — |
+| **prompt-lint-ci** | `prompt-lint-ci.ts` | blocking prompt lint on change PRs (PRM-R2) | `imports/prompt-lint-ci/` | — |
+| **prompt-ab-shadow-eval** | `prompt-ab-shadow-eval.ts` | A/B or shadow eval for high-traffic prompt changes (PRM-R3) | `imports/prompt-ab-shadow-eval/` | — |
 | **ai-cost-alerts** | `ai-cost-alerts.ts` | budget-burn + anomaly alerts | `imports/ai-cost-alerts/` | — |
 | **ai-retry-amplification** | `ai-retry-amplification.ts` | retry/loop cost bounds | `imports/ai-retry-amplification/` | — |
 | **ai-prompt-cache** | `ai-prompt-cache.ts` | prompt cache + hit-rate | `imports/ai-prompt-cache/` | — |

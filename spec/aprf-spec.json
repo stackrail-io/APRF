@@ -3456,27 +3456,27 @@
       "mandatoryChecks": [
         {
           "id": "PRM-M1",
-          "requirement": "Every production prompt shall have an immutable version identifier and owner",
-          "artifact": "Prompt registry export",
-          "passCondition": "100% of production prompts have immutable version ID + owner; 0 unversioned production prompts",
-          "method": "automated",
+          "requirement": "Every production prompt shall carry an immutable version identifier and a named owner in a registry (or equivalent versioned store)—with zero unversioned production prompts and zero prompts missing an owner.",
+          "artifact": "Prompt registry (or versioned prompt store) listing production prompts with immutable version IDs + Owner field populated for each production prompt; query showing 0 unversioned / 0 missing-owner",
+          "passCondition": "100% of production prompts have an immutable version ID and named owner; 0 unversioned production prompts (registry evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "PRM-M2",
-          "requirement": "Prompt changes shall go through review and be tied to evaluation results before release",
-          "artifact": "Change records linking prompt versions to review + eval artifacts",
-          "passCondition": "100% of production prompt releases in last 30 days have review ID and eval pass artifact; promote without both is blocked",
-          "method": "manual",
+          "requirement": "Production prompt releases shall go through human (or equivalent) review and link a passing eval artifact before promotion, with promote-without-review-and-eval blocked on the release path.",
+          "artifact": "Change records linking prompt versions to review IDs and eval pass artifacts + CI/registry gate (or equivalent) blocking promote without review + eval",
+          "passCondition": "100% of production prompt releases in the last 30 days have a review ID and eval pass artifact; promote-without-both is blocked (release evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "PRM-M3",
-          "requirement": "Rollback to a prior prompt version shall be possible without redeploying unrelated services",
-          "artifact": "Prompt rollback procedure + timed restore test",
-          "passCondition": "Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in last 90 days",
+          "requirement": "Production systems shall restore a prior prompt version within a documented RTO without a full application redeploy—proven by a timed restore test in the last 90 days.",
+          "artifact": "Prompt rollback procedure documenting RTO and restore without full app redeploy + Timed restore test record showing prior prompt version restored within RTO (≤90 days)",
+          "passCondition": "Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in the last 90 days (restore evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3485,28 +3485,28 @@
       "recommendedChecks": [
         {
           "id": "PRM-R1",
-          "requirement": "Prompt templates are parameterized; secrets and PII never hardcoded",
-          "artifact": "Prompt template inventory showing parameters + static analysis or review finding zero hardcoded secrets/PII",
-          "passCondition": "100% of production prompt templates are parameterized for variable inputs; scan of templates finds 0 secrets and 0 hardcoded customer PII fields",
-          "method": "manual",
+          "requirement": "Production prompt templates should parameterize variable inputs and contain zero hardcoded secrets and zero hardcoded customer PII fields.",
+          "artifact": "Prompt template inventory showing parameterized slots for variable inputs + Static analysis or review finding zero hardcoded secrets and zero hardcoded customer PII",
+          "passCondition": "100% of production prompt templates are parameterized for variable inputs; scan of templates finds 0 secrets and 0 hardcoded customer PII fields (hygiene evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 2,
           "minCriticality": 1
         },
         {
           "id": "PRM-R2",
-          "requirement": "Prompt linting for length, forbidden patterns, and injection-prone constructs",
-          "artifact": "Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint report",
-          "passCondition": "Lint runs on every prompt change PR; blocking rules exist for secrets patterns and unbounded user concatenation; last failing lint example retained",
-          "method": "manual",
+          "requirement": "Production prompt changes should run blocking lint on every PR for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation—with a recent failing lint example retained.",
+          "artifact": "Prompt-lint CI config covering length, secrets patterns, injection-prone constructs, unbounded user concatenation + Proof lint is required on prompt-change PRs + retained example of a failing lint",
+          "passCondition": "Lint runs on every prompt change PR; blocking rules exist for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example retained (lint evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "PRM-R3",
-          "requirement": "A/B or shadow evaluation for high-traffic prompt changes",
-          "artifact": "A/B or shadow-eval config for high-traffic prompt changes + last experiment report with quality/safety deltas",
-          "passCondition": "Last high-traffic prompt change used A/B or shadow eval with pre-registered metrics; promotion required non-inferiority (or better) on safety and primary quality SLI",
-          "method": "manual",
+          "requirement": "High-traffic production prompt changes should run A/B or shadow evaluation with pre-registered metrics, and promotion should require non-inferiority (or better) on safety and the primary quality SLI.",
+          "artifact": "A/B or shadow-eval config for high-traffic prompt changes + Last experiment report with quality/safety deltas + non-inferiority promotion gate",
+          "passCondition": "Last high-traffic prompt change used A/B or shadow eval with pre-registered metrics; promotion required non-inferiority (or better) on safety and primary quality SLI (experiment evidence measuredAt ≤90 days). If no high-traffic prompt change is in scope, score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }

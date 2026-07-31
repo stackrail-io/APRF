@@ -1,0 +1,25 @@
+id: prompt-template-hygiene
+title: Parameterized prompt templates; no secrets/PII (PRM-R1)
+version: "0.2.0"
+executor: collectors/prompt-template-hygiene.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-prompt-template-hygiene]
+inputs:
+  - "Target repo (prompt templates, parameterization, secret/PII scan configs)"
+  - "Optional suite: aprf-assessment/imports/prompt-template-hygiene/*.{json}"
+collect:
+  - "Detect parameterized templates and secret/PII hygiene signals"
+  - "Ingest coverage; write prompt-template-hygiene-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/prompt-template-hygiene/*"
+  signals: [prompt-template-hygiene, prm-r1, repo-prompt-template-hygiene]
+mapsToChecks: [PRM-R1]
+whenUnavailable: >
+  Hygiene signals alone are PARTIAL. PRM-R1 PASS needs
+  templatesMissingParameters=0, hardcodedSecretsInTemplates=0,
+  hardcodedPiiInTemplates=0, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline template-hygiene heuristics + optional imported JSON.

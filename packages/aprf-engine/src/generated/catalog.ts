@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:b74b195acf1c0ae10d7a62908c2d81ffd2b3bb9f09a5bc9d911d21500189d780",
+  "generatedAt": "sha256:06b1e04336a7180363f6ec9e280a37db314d63c3bb7c3061235405158d77166f",
   "ruleCount": 177,
   "domains": [
     {
@@ -9669,40 +9669,45 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "PRM-M1",
       "category": "prompt-engineering",
       "title": "Every production prompt must have an immutable version identifier and owner",
-      "description": "Every production prompt shall have an immutable version identifier and owner",
-      "whyItMatters": "Every production prompt shall have an immutable version identifier and owner Failing this leaves a production gap against: 100% of production prompts have immutable version ID + owner; 0 unversioned production prompts",
+      "description": "Every production prompt shall carry an immutable version identifier and a named owner in a registry (or equivalent versioned store)—with zero unversioned production prompts and zero prompts missing an owner.\n",
+      "whyItMatters": "Unversioned prompts cannot be reviewed, rolled back, or tied to eval gates. Missing owners leave regressions without a pager. Immutable IDs plus named ownership turn prompts into release artifacts—not anonymous strings in code.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production prompts have immutable version ID + owner; 0 unversioned production prompts",
+      "passCondition": "100% of production prompts have an immutable version ID and named owner; 0 unversioned production prompts (registry evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Prompt registry export"
+        "Prompt registry (or versioned prompt store) listing production prompts with immutable version IDs",
+        "Owner field populated for each production prompt; query showing 0 unversioned / 0 missing-owner"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
             "id": "prompt-versioned",
-            "params": {}
+            "params": {
+              "hint": "Discover production prompts with immutable version identifiers in a registry or versioned prompt store.\n"
+            }
           },
           {
             "id": "prompt-has-owner",
-            "params": {}
+            "params": {
+              "hint": "Discover named owners on production prompt registry entries.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Prompt registry export"
+              "hint": "If automation cannot prove coverage, attest 100% of production prompts have immutable version IDs and named owners with 0 unversioned prompts (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Every production prompt must have an immutable version identifier and owner): inspect current evidence for [Prompt registry export] and confirm the pass condition holds — 100% of production prompts have immutable version ID + owner; 0 unversioned production prompts",
-      "falsePositiveGuidance": "(Prompt Engineering): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm the system ships production prompts (templates, system prompts, or managed prompt configs). If none, score NOT_APPLICABLE. 2) Open the prompt registry or versioned store; confirm each production prompt has an immutable version ID (not “latest”/floating alias). 3) Confirm each has a named owner. 4) Query for unversioned or ownerless production prompts: both counts = 0. 5) PASS only if version + owner coverage hold with measuredAt ≤90 days. Hardcoded prompt strings in app code without registry IDs do not satisfy. PRM-M2 review/eval linkage alone does not satisfy version+owner inventory.\n",
+      "falsePositiveGuidance": "Do not pass git history of a single file as an immutable version ID. Do not pass “team” without a named owner. Do not pass floating aliases (latest, current) as immutable versions. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Every production prompt must have an immutable version identifier and owner",
-        "Retain evidence artifacts required by this Check, starting with: Prompt registry export",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Register every production prompt with an immutable version ID and named owner",
+        "Eliminate unversioned production prompts; fail closed on missing owner/version",
+        "Retain registry export under imports/prompt-version-registry/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
@@ -9716,21 +9721,23 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         }
       ],
       "relatedRules": [
-        "PRM-M2",
         "PRM-M3",
         "PRM-R1",
         "PRM-R2",
-        "PRM-R3"
+        "PRM-R3",
+        "PRM-M2",
+        "MOD-M1",
+        "EVL-M1"
       ],
       "tags": [
         "prompt-engineering",
         "mandatory",
-        "automated"
+        "hybrid",
+        "prompt-version",
+        "ownership"
       ],
       "applicability": {
-        "technologies": [
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -9741,32 +9748,39 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "PRM-M2",
       "category": "prompt-engineering",
       "title": "Prompt changes must go through review and be tied to evaluation results before release",
-      "description": "Prompt changes shall go through review and be tied to evaluation results before release",
-      "whyItMatters": "Prompt changes shall go through review and be tied to evaluation results before release Failing this leaves a production gap against: 100% of production prompt releases in last 30 days have review ID and eval pass artifact; promote without both is blocked",
+      "description": "Production prompt releases shall go through human (or equivalent) review and link a passing eval artifact before promotion, with promote-without-review- and-eval blocked on the release path.\n",
+      "whyItMatters": "Prompt edits change model behavior as much as model swaps—but often ship as “config.” Without review IDs and linked eval passes, regressions land on customers first. Gating promotion on both turns prompt change into a deliberate, measurable release.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production prompt releases in last 30 days have review ID and eval pass artifact; promote without both is blocked",
+      "passCondition": "100% of production prompt releases in the last 30 days have a review ID and eval pass artifact; promote-without-both is blocked (release evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Change records linking prompt versions to review + eval artifacts"
+        "Change records linking prompt versions to review IDs and eval pass artifacts",
+        "CI/registry gate (or equivalent) blocking promote without review + eval"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-prompt-change-review-eval",
+            "params": {
+              "hint": "Discover prompt-release change records with review IDs and eval pass artifacts, and gates that block promote-without-both.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Change records linking prompt versions to review + eval artifacts"
+              "hint": "If automation cannot prove coverage, attest 100% of production prompt releases in the last 30 days have review ID + eval pass artifact and promote-without-both is blocked (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Prompt changes must go through review and be tied to evaluation results before release): inspect current evidence for [Change records linking prompt versions to review + eval artifacts] and confirm the pass condition holds — 100% of production prompt releases in last 30 days have review ID and eval pass artifact; promote without both is blocked",
-      "falsePositiveGuidance": "(Prompt Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production prompt releases occur. If none, score NOT_APPLICABLE. 2) Open change records for the last 30 days; confirm each release links a review ID and an eval pass artifact. 3) Confirm promote-without-both is blocked (failed/missing gate prevents release). 4) PASS only if 100% linkage + blocking gate hold with measuredAt ≤90 days. PRM-M1 version/owner inventory alone does not satisfy. EVL-M1 journey suites without prompt-release linkage do not satisfy. MOD-M2 model-promotion gates alone do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass informal Slack approvals without a review ID. Do not pass eval runs unrelated to the released prompt version. Do not pass optional CI checks that can be skipped. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Prompt changes must go through review and be tied to evaluation results before release",
-        "Retain evidence artifacts required by this Check, starting with: Change records linking prompt versions to review + eval artifacts",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Require review ID + eval pass artifact on every production prompt release",
+        "Block promote-without-both in CI or the prompt registry",
+        "Retain change records under imports/prompt-change-review-eval/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
@@ -9784,17 +9798,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "PRM-M3",
         "PRM-R1",
         "PRM-R2",
-        "PRM-R3"
+        "PRM-R3",
+        "EVL-M1",
+        "EVL-M2",
+        "MOD-M2",
+        "CHG-M1"
       ],
       "tags": [
         "prompt-engineering",
         "mandatory",
-        "manual"
+        "hybrid",
+        "prompt-review",
+        "eval-gate"
       ],
       "applicability": {
-        "technologies": [
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -9805,36 +9823,39 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "PRM-M3",
       "category": "prompt-engineering",
       "title": "Rollback to a prior prompt version must be possible without redeploying unrelated services",
-      "description": "Rollback to a prior prompt version shall be possible without redeploying unrelated services",
-      "whyItMatters": "Rollback to a prior prompt version shall be possible without redeploying unrelated services Failing this leaves a production gap against: Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in last 90 days",
+      "description": "Production systems shall restore a prior prompt version within a documented RTO without a full application redeploy—proven by a timed restore test in the last 90 days.\n",
+      "whyItMatters": "Prompt regressions can be as severe as model regressions. If rollback means shipping a new app build, MTTR balloons and on-call cannot contain quality or safety incidents. Independent prompt rollback keeps recovery within the prompt control plane.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in last 90 days",
+      "passCondition": "Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in the last 90 days (restore evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Prompt rollback procedure + timed restore test"
+        "Prompt rollback procedure documenting RTO and restore without full app redeploy",
+        "Timed restore test record showing prior prompt version restored within RTO (≤90 days)"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
-            "id": "repo-rollback-runbook",
-            "params": {}
+            "id": "repo-prompt-rollback",
+            "params": {
+              "hint": "Discover prompt-specific rollback procedures, RTO, and restore paths that avoid full application redeploy.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Prompt rollback procedure + timed restore test"
+              "hint": "If automation cannot prove coverage, attest a timed restore of a prior prompt version within documented RTO without full app redeploy (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Rollback to a prior prompt version must be possible without redeploying unrelated services): inspect current evidence for [Prompt rollback procedure + timed restore test] and confirm the pass condition holds — Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in last 90 days",
-      "falsePositiveGuidance": "(Prompt Engineering): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm production prompts are versioned and released. If none, score NOT_APPLICABLE. 2) Open the prompt rollback procedure; confirm a documented RTO and a restore path that does not require full app redeploy. 3) Confirm a timed restore test in the last 90 days restored a prior prompt version within that RTO. 4) PASS only if procedure + timed demo hold with measuredAt ≤90 days. PRM-M1 version inventory alone does not satisfy. CHG-M2 general rollback runbooks without a prompt-specific path do not satisfy. Full app redeploy as the only restore path does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass git revert of the whole service as prompt rollback. Do not pass an undated drill or one older than 90 days. Do not pass “rollback possible” without a measured restore time against RTO. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Rollback to a prior prompt version must be possible without redeploying unrelated services",
-        "Retain evidence artifacts required by this Check, starting with: Prompt rollback procedure + timed restore test",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Document prompt rollback with RTO and a path that avoids full app redeploy",
+        "Run and retain a timed restore test (≥ prior version within RTO, ≤90 days)",
+        "Retain evidence under imports/prompt-rollback/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
@@ -9852,17 +9873,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "PRM-M2",
         "PRM-R1",
         "PRM-R2",
-        "PRM-R3"
+        "PRM-R3",
+        "CHG-M2",
+        "CHG-M3",
+        "REL-M1"
       ],
       "tags": [
         "prompt-engineering",
         "mandatory",
-        "hybrid"
+        "hybrid",
+        "prompt-rollback",
+        "rto"
       ],
       "applicability": {
-        "technologies": [
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -9872,34 +9896,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PRM-R1",
       "category": "prompt-engineering",
-      "title": "Production systems should have prompt templates are parameterized; secrets and PII never hardcoded",
-      "description": "Prompt templates are parameterized; secrets and PII never hardcoded",
-      "whyItMatters": "Prompt templates are parameterized; secrets and PII never hardcoded Failing this leaves a production gap against: 100% of production prompt templates are parameterized for variable inputs; scan of templates finds 0 secrets and 0 hardcoded customer PII fields",
+      "title": "Production systems should use parameterized prompt templates; secrets and PII never hardcoded",
+      "description": "Production prompt templates should parameterize variable inputs and contain zero hardcoded secrets and zero hardcoded customer PII fields.\n",
+      "whyItMatters": "Hardcoded secrets in prompts leak via logs, evals, and model providers. Inline customer PII expands blast radius and breaks minimization. Unparameterized templates force copy-paste forks—so hygiene and versioning cannot stick.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "100% of production prompt templates are parameterized for variable inputs; scan of templates finds 0 secrets and 0 hardcoded customer PII fields",
+      "passCondition": "100% of production prompt templates are parameterized for variable inputs; scan of templates finds 0 secrets and 0 hardcoded customer PII fields (hygiene evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Prompt template inventory showing parameters + static analysis or review finding zero hardcoded secrets/PII"
+        "Prompt template inventory showing parameterized slots for variable inputs",
+        "Static analysis or review finding zero hardcoded secrets and zero hardcoded customer PII"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-prompt-template-hygiene",
+            "params": {
+              "hint": "Discover parameterized prompt templates and scans/reviews for hardcoded secrets or customer PII in templates.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Prompt template inventory showing parameters + static analysis or review finding zero hardcoded secrets/PII"
+              "hint": "If automation cannot prove coverage, attest 100% of production prompt templates are parameterized with 0 secrets and 0 hardcoded customer PII (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Prompt templates are parameterized; secrets and PII never hardcoded): inspect current evidence for [Prompt template inventory showing parameters + static analysis or review finding zero hardcoded secrets/PII] and confirm the pass condition holds — 100% of production prompt templates are parameterized for variable inputs; scan of templates finds 0 secrets and 0 hardcoded customer PII fields",
-      "falsePositiveGuidance": "(Prompt Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production prompt templates exist. If none, score NOT_APPLICABLE. 2) Open the template inventory; confirm variable inputs use parameters/slots (not pasted literals per caller). 3) Confirm a scan or review finds 0 secrets and 0 hardcoded customer PII fields in those templates. 4) PASS only if parameterization + zero findings hold with measuredAt ≤90 days. PRM-R2 lint CI alone does not satisfy without inventory/scan coverage. SEC2 repo secret scanning without prompt-template scope does not satisfy. Placeholder demo strings that are not customer PII do not fail this Check.\n",
+      "falsePositiveGuidance": "Do not fail on documented synthetic/fixture strings labeled non-production. Do not pass “we use env vars elsewhere” if templates still embed API keys or emails. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Prompt templates are parameterized; secrets and PII never hardcoded",
-        "Retain evidence artifacts required by this Check, starting with: Prompt template inventory showing parameters + static analysis or review finding zero hardcoded secrets/PII",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Parameterize all production prompt templates for variable inputs",
+        "Remove hardcoded secrets and customer PII from templates; fail closed on findings",
+        "Retain inventory/scan under imports/prompt-template-hygiene/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -9916,17 +9947,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "PRM-M2",
         "PRM-M3",
         "PRM-R2",
-        "PRM-R3"
+        "PRM-R3",
+        "SEC2-M1",
+        "SEC-M1",
+        "PRI-M1"
       ],
       "tags": [
         "prompt-engineering",
         "recommended",
-        "manual"
+        "hybrid",
+        "parameterization",
+        "secrets",
+        "pii"
       ],
       "applicability": {
-        "technologies": [
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 1,
         "requiredFromLevel": 2
       },
@@ -9936,34 +9971,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PRM-R2",
       "category": "prompt-engineering",
-      "title": "Production systems should have prompt linting for length, forbidden patterns, and injection-prone constructs",
-      "description": "Prompt linting for length, forbidden patterns, and injection-prone constructs",
-      "whyItMatters": "Prompt linting for length, forbidden patterns, and injection-prone constructs Failing this leaves a production gap against: Lint runs on every prompt change PR; blocking rules exist for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example retained",
+      "title": "Production systems should lint prompts for length, forbidden patterns, and injection-prone constructs",
+      "description": "Production prompt changes should run blocking lint on every PR for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation—with a recent failing lint example retained.\n",
+      "whyItMatters": "Untested prompt edits ship injection-prone concatenation, secret patterns, and unbounded context. Blocking lint on the PR path catches those before promote; a retained failing example proves the gate is real—not advisory.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Lint runs on every prompt change PR; blocking rules exist for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example retained",
+      "passCondition": "Lint runs on every prompt change PR; blocking rules exist for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example retained (lint evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint report"
+        "Prompt-lint CI config covering length, secrets patterns, injection-prone constructs, unbounded user concatenation",
+        "Proof lint is required on prompt-change PRs + retained example of a failing lint"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-prompt-lint-ci",
+            "params": {
+              "hint": "Discover prompt-lint CI/workflows with blocking rules for length, secrets, injection-prone constructs, and unbounded concatenation.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint report"
+              "hint": "If automation cannot prove coverage, attest lint runs on every prompt change PR with blocking rules and a retained failing example (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Prompt linting for length, forbidden patterns, and injection-prone constructs): inspect current evidence for [Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint report] and confirm the pass condition holds — Lint runs on every prompt change PR; blocking rules exist for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example retained",
-      "falsePositiveGuidance": "(Prompt Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production prompt files/templates exist. If none, score NOT_APPLICABLE. 2) Open CI/lint config; confirm it runs on prompt-change PRs and is blocking. 3) Confirm rules cover length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation. 4) Confirm a recent failing lint example is retained. 5) PASS only if PR coverage + blocking rules + retained failure hold with measuredAt ≤90 days. PRM-R1 inventory/scan alone does not satisfy. Optional (non-blocking) lint does not satisfy. Generic repo linters without prompt-specific rules do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass warn-only checks as blocking. Do not pass a green lint run without a retained failing example proving the gate fires. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Prompt linting for length, forbidden patterns, and injection-prone constructs",
-        "Retain evidence artifacts required by this Check, starting with: Prompt-lint CI config (length, forbidden patterns, injection-prone constructs) + latest lint report",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Add blocking prompt-lint CI on every prompt-change PR",
+        "Cover length, secrets patterns, injection-prone constructs, and unbounded concatenation",
+        "Retain a failing lint example under imports/prompt-lint-ci/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -9980,17 +10022,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "PRM-M2",
         "PRM-M3",
         "PRM-R1",
-        "PRM-R3"
+        "PRM-R3",
+        "SEC-M1",
+        "SEC-M3"
       ],
       "tags": [
         "prompt-engineering",
         "recommended",
-        "manual"
+        "hybrid",
+        "prompt-lint",
+        "ci-gate"
       ],
       "applicability": {
-        "technologies": [
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -10000,34 +10044,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PRM-R3",
       "category": "prompt-engineering",
-      "title": "Production systems should have a/B or shadow evaluation for high-traffic prompt changes",
-      "description": "A/B or shadow evaluation for high-traffic prompt changes",
-      "whyItMatters": "A/B or shadow evaluation for high-traffic prompt changes Failing this leaves a production gap against: Last high-traffic prompt change used A/B or shadow eval with pre-registered metrics; promotion required non-inferiority (or better) on safety and primary quality SLI",
+      "title": "Production systems should use A/B or shadow evaluation for high-traffic prompt changes",
+      "description": "High-traffic production prompt changes should run A/B or shadow evaluation with pre-registered metrics, and promotion should require non-inferiority (or better) on safety and the primary quality SLI.\n",
+      "whyItMatters": "High-traffic prompt edits move quality and safety for most users at once. Offline review alone misses live distribution shift. A/B or shadow with pre-registered metrics—and a non-inferiority promotion gate—keeps regressions from becoming the default path.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Last high-traffic prompt change used A/B or shadow eval with pre-registered metrics; promotion required non-inferiority (or better) on safety and primary quality SLI",
+      "passCondition": "Last high-traffic prompt change used A/B or shadow eval with pre-registered metrics; promotion required non-inferiority (or better) on safety and primary quality SLI (experiment evidence measuredAt ≤90 days). If no high-traffic prompt change is in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "A/B or shadow-eval config for high-traffic prompt changes + last experiment report with quality/safety deltas"
+        "A/B or shadow-eval config for high-traffic prompt changes",
+        "Last experiment report with quality/safety deltas + non-inferiority promotion gate"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-prompt-ab-shadow-eval",
+            "params": {
+              "hint": "Discover A/B or shadow eval configs and promotion gates for high-traffic prompt changes with pre-registered metrics.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "A/B or shadow-eval config for high-traffic prompt changes + last experiment report with quality/safety deltas"
+              "hint": "If automation cannot prove coverage, attest the last high-traffic prompt change used A/B or shadow eval with pre-registered metrics and a non-inferiority promotion gate (measuredAt ≤90 days)—or attest no high-traffic prompt changes in scope.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (A/B or shadow evaluation for high-traffic prompt changes): inspect current evidence for [A/B or shadow-eval config for high-traffic prompt changes + last experiment report with quality/safety deltas] and confirm the pass condition holds — Last high-traffic prompt change used A/B or shadow eval with pre-registered metrics; promotion required non-inferiority (or better) on safety and primary quality SLI",
-      "falsePositiveGuidance": "(Prompt Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm high-traffic production prompt changes occur. If none in scope, score NOT_APPLICABLE. 2) Open A/B or shadow-eval config for prompt changes; confirm pre-registered metrics. 3) Confirm the last high-traffic prompt change ran that experiment and retained quality/safety deltas. 4) Confirm promotion requires non-inferiority (or better) on safety and primary quality SLI. 5) PASS only if experiment + gate hold with measuredAt ≤90 days. PRM-M2 review/eval linkage alone does not satisfy. EVL-M4 model/system cutover shadow alone does not satisfy. Offline-only suites without live A/B/shadow do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass feature-flag rollouts without eval metrics. Do not pass experiments without pre-registered success criteria. Do not pass promotion that ignores safety SLI. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: A/B or shadow evaluation for high-traffic prompt changes",
-        "Retain evidence artifacts required by this Check, starting with: A/B or shadow-eval config for high-traffic prompt changes + last experiment report with quality/safety deltas",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Require A/B or shadow eval on high-traffic prompt changes with pre-registered metrics",
+        "Gate promotion on non-inferiority for safety and primary quality SLI",
+        "Retain experiment reports under imports/prompt-ab-shadow-eval/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -10044,17 +10095,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "PRM-M2",
         "PRM-M3",
         "PRM-R1",
-        "PRM-R2"
+        "PRM-R2",
+        "EVL-M1",
+        "EVL-M2",
+        "EVL-M4"
       ],
       "tags": [
         "prompt-engineering",
         "recommended",
-        "manual"
+        "hybrid",
+        "ab-test",
+        "shadow-eval"
       ],
       "applicability": {
-        "technologies": [
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },

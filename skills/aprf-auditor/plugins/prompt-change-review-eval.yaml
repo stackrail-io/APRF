@@ -1,0 +1,25 @@
+id: prompt-change-review-eval
+title: Prompt release review + eval gate (PRM-M2)
+version: "0.2.0"
+executor: collectors/prompt-change-review-eval.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-prompt-change-review-eval]
+inputs:
+  - "Target repo (prompt release change records, review/eval gates)"
+  - "Optional suite: aprf-assessment/imports/prompt-change-review-eval/*.{json}"
+collect:
+  - "Detect prompt-release review, eval linkage, and blocking gates"
+  - "Ingest coverage; write prompt-change-review-eval-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/prompt-change-review-eval/*"
+  signals: [prompt-change-review-eval, prm-m2, repo-prompt-change-review-eval]
+mapsToChecks: [PRM-M2]
+whenUnavailable: >
+  Release signals alone are PARTIAL. PRM-M2 PASS needs
+  releasesMissingReviewOrEval=0, promoteWithoutReviewAndEvalBlocked,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline prompt-release heuristics + optional imported JSON.

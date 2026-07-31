@@ -1,40 +1,56 @@
 id: "PRM-R1"
 category: "prompt-engineering"
-title: "Production systems should have prompt templates are parameterized; secrets and PII never
-  hardcoded"
-description: "Prompt templates are parameterized; secrets and PII never hardcoded"
-whyItMatters: "Prompt templates are parameterized; secrets and PII never hardcoded Failing this
-  leaves a production gap against: 100% of production prompt templates are parameterized for
-  variable inputs; scan of templates finds 0 secrets and 0 hardcoded customer PII fields"
+title: "Production systems should use parameterized prompt templates; secrets and PII never hardcoded"
+description: >
+  Production prompt templates should parameterize variable inputs and contain
+  zero hardcoded secrets and zero hardcoded customer PII fields.
+whyItMatters: >
+  Hardcoded secrets in prompts leak via logs, evals, and model providers. Inline
+  customer PII expands blast radius and breaks minimization. Unparameterized
+  templates force copy-paste forks—so hygiene and versioning cannot stick.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "100% of production prompt templates are parameterized for variable inputs; scan of
-  templates finds 0 secrets and 0 hardcoded customer PII fields"
+passCondition: >
+  100% of production prompt templates are parameterized for variable inputs;
+  scan of templates finds 0 secrets and 0 hardcoded customer PII fields
+  (hygiene evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Prompt template inventory showing parameters + static analysis or review finding zero hardcoded
-    secrets/PII"
+  - "Prompt template inventory showing parameterized slots for variable inputs"
+  - "Static analysis or review finding zero hardcoded secrets and zero hardcoded customer PII"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-prompt-template-hygiene"
+      params:
+        hint: >
+          Discover parameterized prompt templates and scans/reviews for
+          hardcoded secrets or customer PII in templates.
     - id: "manual-attest"
       params:
-        hint: "Prompt template inventory showing parameters + static analysis or review finding zero
-          hardcoded secrets/PII"
-manualVerification: "For this Check (Prompt templates are parameterized; secrets and PII never
-  hardcoded): inspect current evidence for [Prompt template inventory showing parameters + static
-  analysis or review finding zero hardcoded secrets/PII] and confirm the pass condition holds — 100%
-  of production prompt templates are parameterized for variable inputs; scan of templates finds 0
-  secrets and 0 hardcoded customer PII fields"
-falsePositiveGuidance: "(Prompt Engineering): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest 100% of production prompt
+          templates are parameterized with 0 secrets and 0 hardcoded customer
+          PII (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production prompt templates exist. If none, score NOT_APPLICABLE.
+  2) Open the template inventory; confirm variable inputs use parameters/slots
+  (not pasted literals per caller). 3) Confirm a scan or review finds 0 secrets
+  and 0 hardcoded customer PII fields in those templates. 4) PASS only if
+  parameterization + zero findings hold with measuredAt ≤90 days. PRM-R2 lint
+  CI alone does not satisfy without inventory/scan coverage. SEC2 repo secret
+  scanning without prompt-template scope does not satisfy. Placeholder demo
+  strings that are not customer PII do not fail this Check.
+falsePositiveGuidance: >
+  Do not fail on documented synthetic/fixture strings labeled non-production.
+  Do not pass “we use env vars elsewhere” if templates still embed API keys or
+  emails. Do not pass evidence older than 90 days as current. Named exceptions
+  need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Prompt templates are parameterized; secrets and PII
-    never hardcoded"
-  - "Retain evidence artifacts required by this Check, starting with: Prompt template inventory
-    showing parameters + static analysis or review finding zero hardcoded secrets/PII"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Parameterize all production prompt templates for variable inputs"
+  - "Remove hardcoded secrets and customer PII from templates; fail closed on findings"
+  - "Retain inventory/scan under imports/prompt-template-hygiene/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Workbook — Managing Risk (change management parallels)"
     url: "https://sre.google/workbook/"
@@ -46,13 +62,18 @@ relatedRules:
   - "PRM-M3"
   - "PRM-R2"
   - "PRM-R3"
+  - "SEC2-M1"
+  - "SEC-M1"
+  - "PRI-M1"
 tags:
   - "prompt-engineering"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "parameterization"
+  - "secrets"
+  - "pii"
 applicability:
-  technologies:
-    - "prompt-templates"
+  technologies: []
   minCriticality: 1
   requiredFromLevel: 2
 status: "active"

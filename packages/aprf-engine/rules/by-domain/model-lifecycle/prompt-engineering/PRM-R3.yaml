@@ -1,40 +1,61 @@
 id: "PRM-R3"
 category: "prompt-engineering"
-title: "Production systems should have a/B or shadow evaluation for high-traffic prompt changes"
-description: "A/B or shadow evaluation for high-traffic prompt changes"
-whyItMatters: "A/B or shadow evaluation for high-traffic prompt changes Failing this leaves a
-  production gap against: Last high-traffic prompt change used A/B or shadow eval with
-  pre-registered metrics; promotion required non-inferiority (or better) on safety and primary
-  quality SLI"
+title: "Production systems should use A/B or shadow evaluation for high-traffic prompt changes"
+description: >
+  High-traffic production prompt changes should run A/B or shadow evaluation
+  with pre-registered metrics, and promotion should require non-inferiority (or
+  better) on safety and the primary quality SLI.
+whyItMatters: >
+  High-traffic prompt edits move quality and safety for most users at once.
+  Offline review alone misses live distribution shift. A/B or shadow with
+  pre-registered metrics—and a non-inferiority promotion gate—keeps regressions
+  from becoming the default path.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Last high-traffic prompt change used A/B or shadow eval with pre-registered metrics;
-  promotion required non-inferiority (or better) on safety and primary quality SLI"
+passCondition: >
+  Last high-traffic prompt change used A/B or shadow eval with pre-registered
+  metrics; promotion required non-inferiority (or better) on safety and primary
+  quality SLI (experiment evidence measuredAt ≤90 days). If no high-traffic
+  prompt change is in scope, score NOT_APPLICABLE.
 evidenceRequired:
-  - "A/B or shadow-eval config for high-traffic prompt changes + last experiment report with
-    quality/safety deltas"
+  - "A/B or shadow-eval config for high-traffic prompt changes"
+  - "Last experiment report with quality/safety deltas + non-inferiority promotion gate"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-prompt-ab-shadow-eval"
+      params:
+        hint: >
+          Discover A/B or shadow eval configs and promotion gates for
+          high-traffic prompt changes with pre-registered metrics.
     - id: "manual-attest"
       params:
-        hint: "A/B or shadow-eval config for high-traffic prompt changes + last experiment report with
-          quality/safety deltas"
-manualVerification: "For this Check (A/B or shadow evaluation for high-traffic prompt changes):
-  inspect current evidence for [A/B or shadow-eval config for high-traffic prompt changes + last
-  experiment report with quality/safety deltas] and confirm the pass condition holds — Last
-  high-traffic prompt change used A/B or shadow eval with pre-registered metrics; promotion required
-  non-inferiority (or better) on safety and primary quality SLI"
-falsePositiveGuidance: "(Prompt Engineering): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest the last high-traffic
+          prompt change used A/B or shadow eval with pre-registered metrics and
+          a non-inferiority promotion gate (measuredAt ≤90 days)—or attest no
+          high-traffic prompt changes in scope.
+manualVerification: >
+  1) Confirm high-traffic production prompt changes occur. If none in scope,
+  score NOT_APPLICABLE. 2) Open A/B or shadow-eval config for prompt changes;
+  confirm pre-registered metrics. 3) Confirm the last high-traffic prompt
+  change ran that experiment and retained quality/safety deltas. 4) Confirm
+  promotion requires non-inferiority (or better) on safety and primary quality
+  SLI. 5) PASS only if experiment + gate hold with measuredAt ≤90 days. PRM-M2
+  review/eval linkage alone does not satisfy. EVL-M4 model/system cutover
+  shadow alone does not satisfy. Offline-only suites without live A/B/shadow
+  do not satisfy.
+falsePositiveGuidance: >
+  Do not pass feature-flag rollouts without eval metrics. Do not pass
+  experiments without pre-registered success criteria. Do not pass promotion
+  that ignores safety SLI. Do not pass evidence older than 90 days as current.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: A/B or shadow evaluation for high-traffic prompt
-    changes"
-  - "Retain evidence artifacts required by this Check, starting with: A/B or shadow-eval config for
-    high-traffic prompt changes + last experiment report with quality/safety deltas"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Require A/B or shadow eval on high-traffic prompt changes with pre-registered metrics"
+  - "Gate promotion on non-inferiority for safety and primary quality SLI"
+  - "Retain experiment reports under imports/prompt-ab-shadow-eval/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Workbook — Managing Risk (change management parallels)"
     url: "https://sre.google/workbook/"
@@ -46,13 +67,17 @@ relatedRules:
   - "PRM-M3"
   - "PRM-R1"
   - "PRM-R2"
+  - "EVL-M1"
+  - "EVL-M2"
+  - "EVL-M4"
 tags:
   - "prompt-engineering"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "ab-test"
+  - "shadow-eval"
 applicability:
-  technologies:
-    - "prompt-templates"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

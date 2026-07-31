@@ -175,7 +175,8 @@ categoryDefaults:
       - "**/prompts/**"
       - "**/*prompt*"
       - "**/*.prompt.md"
-    signals: [versioned prompts, review, registry]
+    plugins: [prompt-version-registry, prompt-change-review-eval, prompt-rollback, prompt-template-hygiene, prompt-lint-ci, prompt-ab-shadow-eval, repo-filesystem, github-actions]
+    signals: [versioned prompts, prompt owner, prompt registry, review, eval linkage, prompt rollback, RTO, parameterized templates, no secrets/PII, prompt lint, A/B, shadow eval]
   context-engineering:
     search:
       - "**/rag/**"
@@ -343,12 +344,95 @@ checks:
       NOT_DEMONSTRATED if neither found.
   PRM-M1:
     requiredEvidence:
-      - "Versioned prompt files or registry references"
+      - "Prompt registry with immutable version IDs on production prompts"
+      - "Owner field + 0 unversioned/missing-owner under imports/prompt-version-registry/"
     searchExtra:
       - "**/prompts/**"
+      - "**/*prompt*"
+      - "**/*.prompt.md"
+      - "**/*prompt*registry*"
+    plugins: [prompt-version-registry, repo-filesystem]
+    naWhen: "No production prompts"
     evaluation: |
-      PASS if prompts are version-controlled with clear ownership.
-      NOT_DEMONSTRATED if no prompt artifacts found (do not invent).
+      PASS if prompt-version-registry statusHint=pass (unversionedProductionPrompts=0 + productionPromptsMissingOwner=0 + measuredAt ≤90d).
+      PARTIAL if registry/version/owner signals without complete import.
+      NOT_APPLICABLE when no prompt signals.
+  PRM-M2:
+    requiredEvidence:
+      - "Change records linking prompt versions to review IDs and eval pass artifacts"
+      - "0 missing review/eval + promoteWithoutReviewAndEvalBlocked under imports/prompt-change-review-eval/"
+    searchExtra:
+      - "**/prompts/**"
+      - "**/*prompt*release*"
+      - "**/*prompt*review*"
+      - "**/.github/workflows/*prompt*"
+    plugins: [prompt-change-review-eval, github-actions, repo-filesystem]
+    naWhen: "No production prompt releases"
+    evaluation: |
+      PASS if prompt-change-review-eval statusHint=pass (releasesMissingReviewOrEval=0 + promoteWithoutReviewAndEvalBlocked + measuredAt ≤90d).
+      PARTIAL if release/review/eval signals without complete import.
+      NOT_APPLICABLE when no prompt release signals.
+  PRM-M3:
+    requiredEvidence:
+      - "Prompt rollback procedure with RTO and restore without full app redeploy"
+      - "priorPromptRestoredWithinRto + rollbackWithoutFullAppRedeploy under imports/prompt-rollback/"
+    searchExtra:
+      - "**/prompts/**"
+      - "**/*prompt*rollback*"
+      - "**/*prompt*restore*"
+      - "**/runbooks/**/*prompt*"
+    plugins: [prompt-rollback, repo-filesystem]
+    naWhen: "No production prompts"
+    evaluation: |
+      PASS if prompt-rollback statusHint=pass (priorPromptRestoredWithinRto + rollbackWithoutFullAppRedeploy + measuredAt ≤90d).
+      PARTIAL if procedure/RTO/drill signals without complete import.
+      NOT_APPLICABLE when no prompt signals.
+  PRM-R1:
+    requiredEvidence:
+      - "Prompt template inventory showing parameterized slots"
+      - "0 missing params + 0 secrets + 0 PII under imports/prompt-template-hygiene/"
+    searchExtra:
+      - "**/prompts/**"
+      - "**/*prompt*template*"
+      - "**/*.prompt.md"
+      - "**/*prompt*inventory*"
+    plugins: [prompt-template-hygiene, repo-filesystem]
+    naWhen: "No production prompt templates"
+    evaluation: |
+      PASS if prompt-template-hygiene statusHint=pass (templatesMissingParameters=0 + hardcodedSecretsInTemplates=0 + hardcodedPiiInTemplates=0 + measuredAt ≤90d).
+      PARTIAL if parameterization/scan signals without complete import.
+      NOT_APPLICABLE when no prompt template signals.
+  PRM-R2:
+    requiredEvidence:
+      - "Prompt-lint CI with blocking rules (length/secrets/injection/unbounded concat)"
+      - "promptChangePrsMissingLint=0 + blocking rules + retained fail under imports/prompt-lint-ci/"
+    searchExtra:
+      - "**/*prompt*lint*"
+      - "**/.github/workflows/*prompt*"
+      - "**/.github/workflows/*lint*"
+      - "**/prompts/**"
+    plugins: [prompt-lint-ci, github-actions, repo-filesystem]
+    naWhen: "No production prompts"
+    evaluation: |
+      PASS if prompt-lint-ci statusHint=pass (promptChangePrsMissingLint=0 + blockingPromptLintRulesPresent + lastFailingLintExampleRetained + measuredAt ≤90d).
+      PARTIAL if lint/rule signals without complete import.
+      NOT_APPLICABLE when no prompt signals.
+  PRM-R3:
+    requiredEvidence:
+      - "A/B or shadow-eval config for high-traffic prompt changes"
+      - "lastHighTrafficPromptChangeUsedAbOrShadow + metrics + non-inferiority under imports/prompt-ab-shadow-eval/"
+    searchExtra:
+      - "**/*prompt*ab*"
+      - "**/*prompt*shadow*"
+      - "**/*shadow*prompt*"
+      - "**/experiments/**"
+      - "**/prompts/**"
+    plugins: [prompt-ab-shadow-eval, repo-filesystem]
+    naWhen: "No high-traffic prompt changes"
+    evaluation: |
+      PASS if prompt-ab-shadow-eval statusHint=pass (lastHighTrafficPromptChangeUsedAbOrShadow + preRegisteredMetricsPresent + promotionRequiredNonInferiority + measuredAt ≤90d).
+      PARTIAL if A/B/shadow signals without complete import.
+      NOT_APPLICABLE when highTrafficPromptChangeCount=0 or no prompt signals.
   OBS-M1:
     requiredEvidence:
       - "Tracing/logging that can reconstruct model+tool path"

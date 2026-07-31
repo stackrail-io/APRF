@@ -1,38 +1,56 @@
 id: "PRM-M3"
 category: "prompt-engineering"
 title: "Rollback to a prior prompt version must be possible without redeploying unrelated services"
-description: "Rollback to a prior prompt version shall be possible without redeploying unrelated services"
-whyItMatters: "Rollback to a prior prompt version shall be possible without redeploying unrelated
-  services Failing this leaves a production gap against: Prior prompt version restored in ≤
-  documented RTO without full app redeploy; demonstrated in last 90 days"
+description: >
+  Production systems shall restore a prior prompt version within a documented
+  RTO without a full application redeploy—proven by a timed restore test in
+  the last 90 days.
+whyItMatters: >
+  Prompt regressions can be as severe as model regressions. If rollback means
+  shipping a new app build, MTTR balloons and on-call cannot contain quality
+  or safety incidents. Independent prompt rollback keeps recovery within the
+  prompt control plane.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Prior prompt version restored in ≤ documented RTO without full app redeploy;
-  demonstrated in last 90 days"
+passCondition: >
+  Prior prompt version restored in ≤ documented RTO without full app redeploy;
+  demonstrated in the last 90 days (restore evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Prompt rollback procedure + timed restore test"
+  - "Prompt rollback procedure documenting RTO and restore without full app redeploy"
+  - "Timed restore test record showing prior prompt version restored within RTO (≤90 days)"
 detection:
   capability: "hybrid"
   detectors:
-    - id: "repo-rollback-runbook"
-      params: {}
+    - id: "repo-prompt-rollback"
+      params:
+        hint: >
+          Discover prompt-specific rollback procedures, RTO, and restore paths
+          that avoid full application redeploy.
     - id: "manual-attest"
       params:
-        hint: "Prompt rollback procedure + timed restore test"
-manualVerification: "For this Check (Rollback to a prior prompt version must be possible without
-  redeploying unrelated services): inspect current evidence for [Prompt rollback procedure + timed
-  restore test] and confirm the pass condition holds — Prior prompt version restored in ≤ documented
-  RTO without full app redeploy; demonstrated in last 90 days"
-falsePositiveGuidance: "(Prompt Engineering): when automation and attestation disagree, prefer the
-  stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the
-  gap."
+        hint: >
+          If automation cannot prove coverage, attest a timed restore of a prior
+          prompt version within documented RTO without full app redeploy
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production prompts are versioned and released. If none, score
+  NOT_APPLICABLE. 2) Open the prompt rollback procedure; confirm a documented
+  RTO and a restore path that does not require full app redeploy. 3) Confirm a
+  timed restore test in the last 90 days restored a prior prompt version within
+  that RTO. 4) PASS only if procedure + timed demo hold with measuredAt ≤90
+  days. PRM-M1 version inventory alone does not satisfy. CHG-M2 general
+  rollback runbooks without a prompt-specific path do not satisfy. Full app
+  redeploy as the only restore path does not satisfy.
+falsePositiveGuidance: >
+  Do not pass git revert of the whole service as prompt rollback. Do not pass
+  an undated drill or one older than 90 days. Do not pass “rollback possible”
+  without a measured restore time against RTO. Named exceptions need owner and
+  expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Rollback to a prior prompt version must be possible without
-    redeploying unrelated services"
-  - "Retain evidence artifacts required by this Check, starting with: Prompt rollback procedure +
-    timed restore test"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
+  - "Document prompt rollback with RTO and a path that avoids full app redeploy"
+  - "Run and retain a timed restore test (≥ prior version within RTO, ≤90 days)"
+  - "Retain evidence under imports/prompt-rollback/"
   - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
 references:
   - title: "Google SRE Workbook — Managing Risk (change management parallels)"
@@ -45,13 +63,17 @@ relatedRules:
   - "PRM-R1"
   - "PRM-R2"
   - "PRM-R3"
+  - "CHG-M2"
+  - "CHG-M3"
+  - "REL-M1"
 tags:
   - "prompt-engineering"
   - "mandatory"
   - "hybrid"
+  - "prompt-rollback"
+  - "rto"
 applicability:
-  technologies:
-    - "prompt-templates"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"
