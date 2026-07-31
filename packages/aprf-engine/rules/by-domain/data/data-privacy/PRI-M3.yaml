@@ -1,38 +1,60 @@
 id: "PRI-M3"
 category: "data-privacy"
-title: "Users or tenants must have deletion/export paths covering AI memory and logs where required"
-description: "Users or tenants shall have deletion/export paths covering AI memory and logs where required"
-whyItMatters: "Users or tenants shall have deletion/export paths covering AI memory and logs where
-  required Failing this leaves a production gap against: Documented API/runbook covers AI memory and
-  in-scope logs; test shows deletion/export completes within SLA for a sample tenant/user (measured
-  duration recorded)"
+title: "Residency-constrained routing must be enforced for regulated workloads"
+description: >
+  Regulated workloads shall be labeled, and model/tool routing shall keep 100%
+  of sampled regulated requests in approved regions—enforced by policy or
+  gateway controls, not prompt instructions alone.
+whyItMatters: >
+  Cross-region model calls and tool hops can move regulated payloads out of
+  approved boundaries without an application bug. Unlabeled tenants and
+  default global endpoints make residency accidental. Labeled workloads plus
+  sampled routing proof turn data-residency policy into an enforceable control
+  on the AI path.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "Documented API/runbook covers AI memory and in-scope logs; test shows
-  deletion/export completes within SLA for a sample tenant/user (measured duration recorded)"
+passCondition: >
+  Regulated workloads are labeled; 100% of sampled regulated requests stay in
+  approved regions (routing sample/policy evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Deletion/export procedure + successful test execution record"
+  - "Routing policy config naming approved regions for regulated tenants/workloads"
+  - "Sample routing decisions (or deny logs) showing 100% of sampled regulated requests stayed in approved regions"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-residency-routing"
+      params:
+        hint: >
+          Discover residency/region routing policy for regulated AI workloads
+          and sample/deny evidence that regulated requests stay in approved
+          regions.
     - id: "manual-attest"
       params:
-        hint: "Deletion/export procedure + successful test execution record"
-manualVerification: "For this Check (Users or tenants must have deletion/export paths covering AI
-  memory and logs where required): inspect current evidence for [Deletion/export procedure +
-  successful test execution record] and confirm the pass condition holds — Documented API/runbook
-  covers AI memory and in-scope logs; test shows deletion/export completes within SLA for a sample
-  tenant/user (measured duration recorded)"
-falsePositiveGuidance: "(Data Privacy): re-verify against a current artifact for this specific Check
-  , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove samples, attest regulated workload labels,
+          approved-region policy, and a sample with 100% in-region routing
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm regulated workloads or tenants exist (or residency constraints
+  apply). If none, score NOT_APPLICABLE. 2) Confirm regulated workloads are
+  labeled (tenant tag, data class, or equivalent). 3) Open routing policy:
+  approved regions/endpoints for those labels. 4) Review a sample of regulated
+  model/tool requests: 100% stayed in approved regions (or were denied). 5)
+  PASS only if labels + policy + 100% in-region sample hold with measuredAt
+  ≤90 days. DNS/geo defaults without labeled enforcement do not satisfy.
+  Prompt-only “stay in region” does not satisfy.
+falsePositiveGuidance: >
+  Do not pass a cloud region preference that agents/APIs can bypass. Do not
+  pass unlabeled “EU customers” spreadsheets without runtime routing evidence.
+  Do not pass samples that mix unregulated traffic into the denominator. Do
+  not pass policy docs older than 90 days without a fresh sample. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Users or tenants must have deletion/export paths covering AI
-    memory and logs where required"
-  - "Retain evidence artifacts required by this Check, starting with: Deletion/export procedure +
-    successful test execution record"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Label regulated tenants/workloads and bind them to approved-region model/tool routes"
+  - "Enforce residency in the gateway or router; deny cross-region for regulated labels"
+  - "Export ≤90-day routing samples under imports/ai-residency-routing/"
+  - "Alert when regulated traffic hits a non-approved region or endpoint"
 references:
   - title: "NIST AI RMF — privacy considerations"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -41,20 +63,23 @@ references:
 relatedRules:
   - "PRI-M1"
   - "PRI-M2"
-  - "PRI-M4"
-  - "PRI-M5"
+  - "PRI-R3"
   - "PRI-R1"
+  - "PRI-R2"
+  - "AUTHZ-M1"
 tags:
   - "data-privacy"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "residency"
+  - "routing"
 applicability:
   technologies:
     - "aws"
     - "gcp"
     - "azure"
     - "vector-databases"
-  minCriticality: 2
-  requiredFromLevel: 3
+  minCriticality: 3
+  requiredFromLevel: 4
 status: "active"
 introducedIn: "0.10.0"

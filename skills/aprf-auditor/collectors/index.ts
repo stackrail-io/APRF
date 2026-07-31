@@ -43,6 +43,12 @@ import { feedbackPromotionGovernanceCollector } from "./feedback-promotion-gover
 import { corpusFreshnessMetricsCollector } from "./corpus-freshness-metrics.ts";
 import { trainServeSkewMonitorCollector } from "./train-serve-skew-monitor.ts";
 import { datasetCardsRegistryCollector } from "./dataset-cards-registry.ts";
+import { modelPayloadClassificationCollector } from "./model-payload-classification.ts";
+import { modelPayloadRedactionCollector } from "./model-payload-redaction.ts";
+import { vendorModelTermsCollector } from "./vendor-model-terms.ts";
+import { aiDeletionExportCollector } from "./ai-deletion-export.ts";
+import { aiResidencyRoutingCollector } from "./ai-residency-routing.ts";
+import { aiDpiaCollector } from "./ai-dpia.ts";
 import {
   awsCollector,
   azureCollector,
@@ -93,6 +99,12 @@ export const COLLECTORS: Collector[] = [
   corpusFreshnessMetricsCollector,
   trainServeSkewMonitorCollector,
   datasetCardsRegistryCollector,
+  modelPayloadClassificationCollector,
+  modelPayloadRedactionCollector,
+  vendorModelTermsCollector,
+  aiDeletionExportCollector,
+  aiResidencyRoutingCollector,
+  aiDpiaCollector,
   a2aPeerAuthCollector,
   awsCollector,
   azureCollector,

@@ -8,6 +8,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
+- Rewrote **PRI-M1** (AI/model payload classification + sensitive handling) from template stub to hybrid Check + `model-payload-classification` collector; synced `aprf-spec.json`.
+- Demoted former vendor-terms **PRI-M2** → **PRI-R2** (training use + retention): recommended gate, `requiredFromLevel` 4; `vendor-model-terms` collector.
+- Rewrote former **PRI-M3** (AI memory/log deletion/export) as hybrid **PRI-M2** + `ai-deletion-export` collector; renumbered ID; synced `aprf-spec.json`.
+- Rewrote former **PRI-M4** (residency-constrained routing) as hybrid **PRI-M3** + `ai-residency-routing` collector; renumbered ID; synced `aprf-spec.json`.
+- Rewrote former **PRI-M5** (DPIA/PIA before production) as hybrid recommended **PRI-R3** + `ai-dpia` collector (demoted from brief **PRI-M4** slot; process gate, not runtime floor); synced `aprf-spec.json` and Regulated profile.
+- Tightened data-privacy prose: rewrote stub **PRI-R1** (pre-model tokenization/redaction) to hybrid + `model-payload-redaction` collector; aligned severity/weight with other recommended privacy Checks; trimmed sibling-control listing from PRI-R3 `whyItMatters`.
 - Tightened Agents domain prose: removed sibling Check IDs from AGN-R3/HUM-M4/HUM-R3 `whyItMatters`; aligned AGN-M4, AGN-R3, HUM-M1/M3/M4 `passCondition` with collector `measuredAt` ≤90d.
 - Tightened Cost domain prose: removed sibling Check IDs from COST-M2/M3 `whyItMatters`; aligned COST-M1–M3 `passCondition`/attest hints with collector `measuredAt` ≤90d.
 - `spec/aprf-spec.json` agent-governance mandatory Checks **AGN-M1–M4** aligned to catalog SoT: methods (M1 automated, M3/M4 hybrid), owner in M1, cancel-suite + operator authz in M3, forged-peer in M4.

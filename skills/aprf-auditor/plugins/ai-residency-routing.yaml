@@ -1,0 +1,29 @@
+id: ai-residency-routing
+title: Residency-constrained AI routing (PRI-M3)
+version: "0.2.0"
+executor: collectors/ai-residency-routing.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-ai-residency-routing]
+inputs:
+  - "Target repo (residency/region routing for regulated AI workloads)"
+  - "Optional suite: aprf-assessment/imports/ai-residency-routing/*.{json}"
+collect:
+  - "Detect residency policy, regulated labels, routing, sample/deny signals"
+  - "Ingest in-region sample; write ai-residency-routing-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/ai-residency-routing/*"
+  signals:
+    - ai-residency-routing
+    - pri-m3
+    - repo-ai-residency-routing
+mapsToChecks: [PRI-M3]
+whenUnavailable: >
+  Policy signals alone are PARTIAL. PRI-M3 PASS needs imported
+  regulatedWorkloadsLabeled + approvedRegionsDocumented +
+  sampleInApprovedRegionPct=100, measuredAt ≤90 days. No regulated residency
+  workloads → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline residency-routing heuristics + optional imported sample JSON.

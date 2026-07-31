@@ -189,6 +189,30 @@ DG-R3 major eval/fine-tune dataset cards:
   npm run aprf:dataset-cards -- --target <app> --out <app>/aprf-assessment
   # PASS needs purpose/source/PII + ≤12mo cards under imports/dataset-cards-registry/
 
+PRI-M1 model payload classification:
+  npm run aprf:payload-classification -- --target <app> --out <app>/aprf-assessment
+  # PASS needs scheme + sensitive rules + 100% tagged audit under imports/model-payload-classification/
+
+PRI-R1 pre-model tokenization/redaction:
+  npm run aprf:payload-redaction -- --target <app> --out <app>/aprf-assessment
+  # PASS needs field inventory + fail-closed pipeline + ≥50 clean samples under imports/model-payload-redaction/
+
+PRI-R2 vendor model terms (training use + retention):
+  npm run aprf:vendor-model-terms -- --target <app> --out <app>/aprf-assessment
+  # PASS needs provider inventory + ≤12mo reviews under imports/vendor-model-terms/
+
+PRI-M2 AI memory/log deletion and export:
+  npm run aprf:ai-deletion-export -- --target <app> --out <app>/aprf-assessment
+  # PASS needs AI-scoped procedure + within-SLA timed test under imports/ai-deletion-export/
+
+PRI-M3 residency-constrained routing:
+  npm run aprf:ai-residency-routing -- --target <app> --out <app>/aprf-assessment
+  # PASS needs labeled regulated workloads + 100% in-region sample under imports/ai-residency-routing/
+
+PRI-R3 DPIA/PIA before production:
+  npm run aprf:ai-dpia -- --target <app> --out <app>/aprf-assessment
+  # PASS needs major-feature inventory + signed pre-prod DPIAs under imports/ai-dpia/
+
 Import runtime evidence without live APIs:
   mkdir -p <out>/imports/langsmith && cp traces.json <out>/imports/langsmith/
 `);

@@ -35,7 +35,7 @@ export const PROFILE_CORE: AprfProfile = {
     "SAF-M2",
     "SAF-M3",
     "PRI-M1",
-    "PRI-M3",
+    "PRI-M2",
     "MEM-M1",
     "PRM-M1",
     "PRM-M2",
@@ -77,7 +77,7 @@ export const PROFILE_REGULATED: AprfProfile = {
   id: PROFILE_ID_REGULATED,
   name: "Regulated (Tier 3)",
   summary:
-    "Core Profile plus Tier-3-only mandatories for mission-critical or regulated AI (residency/DPIA, fairness, dual control, signed supply chain, chaos/continuity, independent assessment). Target capability Level 5.",
+    "Core Profile plus Tier-3-only mandatories for mission-critical or regulated AI (residency, fairness, dual control, signed supply chain, chaos/continuity, independent assessment). Target capability Level 5.",
   targetCriticality: 3,
   targetCapability: 5,
   mandatoryCheckIds: [
@@ -93,8 +93,7 @@ export const PROFILE_REGULATED: AprfProfile = {
     "INF-M4",
     "SAF-M4",
     "EXP-M4",
-    "PRI-M4",
-    "PRI-M5",
+    "PRI-M3",
     "MEM-M4",
     "EVL-M4",
     "HUM-M4",
@@ -106,7 +105,7 @@ export const PROFILE_REGULATED: AprfProfile = {
   ],
   rationale: [
     "Includes every Core gate — regulated systems must still clear production minimums.",
-    "Adds residency/DPIA, fairness, dual control, and signed admission for regulated blast radius.",
+    "Adds residency, fairness, dual control, and signed admission for regulated blast radius.",
     "Requires chaos/continuity drills, independent assessment sampling, and automated quality rollback triggers.",
     "Target capability Level 5 — Tier 3 is not Core with a different label.",
   ],

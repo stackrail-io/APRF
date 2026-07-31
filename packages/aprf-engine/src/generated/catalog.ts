@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:d5eb5490ff6e4adb227b902096302356fec0254cc2ac895bb9908dbe42ebce3c",
+  "generatedAt": "sha256:9fb669967db6dfcdd433a5c14a53baa474207df7fe8554ef264b865c3c0b6cbb",
   "ruleCount": 177,
   "domains": [
     {
@@ -8800,37 +8800,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "PRI-M1",
       "category": "data-privacy",
       "title": "Data flowing to models must be classified; sensitive classes must have documented handling rules",
-      "description": "Data flowing to models shall be classified; sensitive classes shall have documented handling rules",
-      "whyItMatters": "Data flowing to models shall be classified; sensitive classes shall have documented handling rules Failing this leaves a production gap against: Classification scheme covers AI payload classes; ≥1 automated or sampled audit shows 100% of sampled production model requests tagged with a class, and sensitive-class handling matches policy",
+      "description": "Every production path that sends data to models shall apply a documented classification scheme covering AI payload classes, and every sensitive class shall have written handling rules (allow, redact, block, or equivalent).\n",
+      "whyItMatters": "Unclassified model payloads turn privacy policy into guesswork: teams cannot tell which prompts carry regulated data, which may leave the boundary, or what handling is required. Missing sensitive-class rules leave redaction and residency controls unanchored. Classification plus handling rules make model-bound data an operable privacy control—not a post-incident label.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Classification scheme covers AI payload classes; ≥1 automated or sampled audit shows 100% of sampled production model requests tagged with a class, and sensitive-class handling matches policy",
+      "passCondition": "A classification scheme covers AI payload classes; ≥1 automated or sampled audit shows 100% of sampled production model requests tagged with a class; sensitive-class handling matches documented policy (audit/scheme measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Data classification scheme + handling rules for model-bound payloads"
+        "Data classification scheme covering AI/model-bound payload classes",
+        "Handling rules for each sensitive class (allow / redact / block or equivalent)",
+        "Automated or sampled audit showing 100% of sampled production model requests tagged, with sensitive handling matching policy"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
-            "id": "prompt-no-pii-patterns",
-            "params": {}
+            "id": "repo-model-payload-classification",
+            "params": {
+              "hint": "Discover AI/model payload classification schemes, sensitive-class handling rules, and tagging/audit signals on production model paths.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Data classification scheme + handling rules for model-bound payloads"
+              "hint": "If automation cannot prove 100% tagged samples, attest the scheme, sensitive handling rules, and an audit with 100% tagged samples and policy-matched sensitive handling (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Data flowing to models must be classified; sensitive classes must have documented handling rules): inspect current evidence for [Data classification scheme + handling rules for model-bound payloads] and confirm the pass condition holds — Classification scheme covers AI payload classes; ≥1 automated or sampled audit shows 100% of sampled production model requests tagged with a class, and sensitive-class handling matches policy",
-      "falsePositiveGuidance": "(Data Privacy): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm production traffic sends data to models. If none, score NOT_APPLICABLE. 2) Open the classification scheme; confirm it covers AI payload classes (not only static data stores). 3) Confirm each sensitive class has documented handling rules. 4) Review ≥1 automated or sampled audit of production model requests: 100% tagged with a class; sensitive-class handling matches policy. 5) PASS only if scheme + sensitive rules + audit all hold with measuredAt ≤90 days. Tokenization/redaction pipelines alone without a classification scheme do not satisfy. Generic DLP for email/file stores without model-payload classes does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a corporate data-classification PDF that never mentions model prompts, embeddings, or tool payloads. Do not pass PII regex filters without a class taxonomy and sensitive handling rules. Do not pass samples older than 90 days or audits with untagged requests. Do not pass “handle carefully” without allow/redact/block (or equivalent) per sensitive class. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Data flowing to models must be classified; sensitive classes must have documented handling rules",
-        "Retain evidence artifacts required by this Check, starting with: Data classification scheme + handling rules for model-bound payloads",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish an AI payload classification scheme with sensitive-class handling rules",
+        "Tag production model requests with class labels; fail closed when untagged",
+        "Run a recurring ≤90-day audit that asserts 100% tagged samples and policy-matched sensitive handling",
+        "Retain scheme + audit under imports/model-payload-classification/"
       ],
       "references": [
         {
@@ -8843,16 +8847,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         }
       ],
       "relatedRules": [
+        "PRI-R2",
         "PRI-M2",
         "PRI-M3",
-        "PRI-M4",
-        "PRI-M5",
-        "PRI-R1"
+        "PRI-R3",
+        "PRI-R1",
+        "DG-R3",
+        "SEC2-M2"
       ],
       "tags": [
         "data-privacy",
         "mandatory",
-        "hybrid"
+        "hybrid",
+        "classification",
+        "model-payload"
       ],
       "applicability": {
         "technologies": [
@@ -8870,27 +8878,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PRI-M2",
       "category": "data-privacy",
-      "title": "Third-party model processing terms must be reviewed for training use and retention",
-      "description": "Third-party model processing terms shall be reviewed for training use and retention",
-      "whyItMatters": "Third-party model processing terms shall be reviewed for training use and retention Failing this leaves a production gap against: 100% of production model providers have a review record ≤ 12 months covering training use and retention; 0 unreviewed providers in the inventory",
+      "title": "Users or tenants must have deletion/export paths covering AI memory and logs where required",
+      "description": "Where regulation or policy requires it, users or tenants shall have documented deletion and/or export paths that cover AI memory (conversation, durable, or retrieval-augmented stores) and in-scope AI logs, with a tested completion within a published SLA.\n",
+      "whyItMatters": "Model traffic leaves residue in memory stores and logs long after the UI “delete chat” button. Without tested deletion/export paths that reach those AI artifacts, subject-rights requests and offboarding fail silently—or only clear the application DB. Measured SLA completion proves the path works under production-like conditions, not just that a runbook exists.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production model providers have a review record ≤ 12 months covering training use and retention; 0 unreviewed providers in the inventory",
+      "passCondition": "Documented API/runbook covers AI memory and in-scope logs; a test shows deletion/export completes within SLA for a sample tenant/user with measured duration recorded (test evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Vendor terms review record (DPA/training/retention) with date and owner"
+        "Deletion/export procedure or API covering AI memory and in-scope AI logs",
+        "Successful test execution record for a sample tenant/user with measured duration vs SLA"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-deletion-export",
+            "params": {
+              "hint": "Discover deletion/export APIs or runbooks covering AI memory and AI/log stores, plus SLA and test harness signals.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove a recent test, attest the procedure covers AI memory and in-scope logs plus a sample tenant/user test that met SLA with measured duration (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (Third-party model processing terms must be reviewed for training use and retention): inspect current evidence for [Vendor terms review record (DPA/training/retention) with date and owner] and confirm the pass condition holds — 100% of production model providers have a review record ≤ 12 months covering training use and retention; 0 unreviewed providers in the inventory",
-      "falsePositiveGuidance": "(Data Privacy): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the system retains AI memory or AI-related logs for users/tenants and that deletion/export is required by policy or regulation. If neither memory nor in-scope logs exist (or deletion/export is not required), score NOT_APPLICABLE with rationale. 2) Open the deletion/export API or runbook; confirm it names AI memory stores and in-scope logs (not only primary app DB rows). 3) Review a sample tenant/user test: completion within published SLA and measured duration recorded. 4) PASS only if procedure scope + within-SLA test hold with measuredAt ≤90 days. Application-only GDPR erase that skips vector/memory/log sinks does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a generic “delete user” job that never touches AI memory or model/tool logs. Do not pass a runbook without a timed test. Do not pass tests older than 90 days as current. Do not pass soft-delete flags without evidence the AI artifacts are actually purged or exported. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Third-party model processing terms must be reviewed for training use and retention",
-        "Retain evidence artifacts required by this Check, starting with: Vendor terms review record (DPA/training/retention) with date and owner",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Document deletion/export APIs covering AI memory and in-scope AI logs with a numeric SLA",
+        "Add an automated or scripted sample-tenant test that records duration and asserts SLA",
+        "Fail closed when new AI memory sinks are registered without a deletion/export path",
+        "Retain procedure + test under imports/ai-deletion-export/"
       ],
       "references": [
         {
@@ -8905,14 +8927,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "PRI-M1",
         "PRI-M3",
-        "PRI-M4",
-        "PRI-M5",
-        "PRI-R1"
+        "PRI-R3",
+        "PRI-R1",
+        "PRI-R2",
+        "MEM-M1",
+        "MEM-R3"
       ],
       "tags": [
         "data-privacy",
         "mandatory",
-        "manual"
+        "hybrid",
+        "deletion",
+        "export",
+        "ai-memory"
       ],
       "applicability": {
         "technologies": [
@@ -8930,101 +8957,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PRI-M3",
       "category": "data-privacy",
-      "title": "Users or tenants must have deletion/export paths covering AI memory and logs where required",
-      "description": "Users or tenants shall have deletion/export paths covering AI memory and logs where required",
-      "whyItMatters": "Users or tenants shall have deletion/export paths covering AI memory and logs where required Failing this leaves a production gap against: Documented API/runbook covers AI memory and in-scope logs; test shows deletion/export completes within SLA for a sample tenant/user (measured duration recorded)",
-      "severity": "critical",
-      "weight": 4,
-      "gate": "mandatory",
-      "passCondition": "Documented API/runbook covers AI memory and in-scope logs; test shows deletion/export completes within SLA for a sample tenant/user (measured duration recorded)",
-      "evidenceRequired": [
-        "Deletion/export procedure + successful test execution record"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": [
-          {
-            "id": "manual-attest",
-            "params": {
-              "hint": "Deletion/export procedure + successful test execution record"
-            }
-          }
-        ]
-      },
-      "manualVerification": "For this Check (Users or tenants must have deletion/export paths covering AI memory and logs where required): inspect current evidence for [Deletion/export procedure + successful test execution record] and confirm the pass condition holds — Documented API/runbook covers AI memory and in-scope logs; test shows deletion/export completes within SLA for a sample tenant/user (measured duration recorded)",
-      "falsePositiveGuidance": "(Data Privacy): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: Users or tenants must have deletion/export paths covering AI memory and logs where required",
-        "Retain evidence artifacts required by this Check, starting with: Deletion/export procedure + successful test execution record",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "NIST AI RMF — privacy considerations",
-          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
-        },
-        {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
-        }
-      ],
-      "relatedRules": [
-        "PRI-M1",
-        "PRI-M2",
-        "PRI-M4",
-        "PRI-M5",
-        "PRI-R1"
-      ],
-      "tags": [
-        "data-privacy",
-        "mandatory",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "vector-databases"
-        ],
-        "minCriticality": 2,
-        "requiredFromLevel": 3
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "PRI-M4",
-      "category": "data-privacy",
       "title": "Residency-constrained routing must be enforced for regulated workloads",
-      "description": "Residency-constrained routing shall be enforced for regulated workloads",
-      "whyItMatters": "Residency-constrained routing shall be enforced for regulated workloads Failing this leaves a production gap against: PASS if regulated workloads are labeled and 100% of sampled regulated requests stay in approved regions",
+      "description": "Regulated workloads shall be labeled, and model/tool routing shall keep 100% of sampled regulated requests in approved regions—enforced by policy or gateway controls, not prompt instructions alone.\n",
+      "whyItMatters": "Cross-region model calls and tool hops can move regulated payloads out of approved boundaries without an application bug. Unlabeled tenants and default global endpoints make residency accidental. Labeled workloads plus sampled routing proof turn data-residency policy into an enforceable control on the AI path.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "PASS if regulated workloads are labeled and 100% of sampled regulated requests stay in approved regions",
+      "passCondition": "Regulated workloads are labeled; 100% of sampled regulated requests stay in approved regions (routing sample/policy evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Routing policy config + sample routing decisions for regulated tenants/regions"
+        "Routing policy config naming approved regions for regulated tenants/workloads",
+        "Sample routing decisions (or deny logs) showing 100% of sampled regulated requests stayed in approved regions"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-residency-routing",
+            "params": {
+              "hint": "Discover residency/region routing policy for regulated AI workloads and sample/deny evidence that regulated requests stay in approved regions.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Routing policy config + sample routing decisions for regulated tenants/regions"
+              "hint": "If automation cannot prove samples, attest regulated workload labels, approved-region policy, and a sample with 100% in-region routing (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Residency-constrained routing must be enforced for regulated workloads): inspect current evidence for [Routing policy config + sample routing decisions for regulated tenants/regions] and confirm the pass condition holds — PASS if regulated workloads are labeled and 100% of sampled regulated requests stay in approved regions",
-      "falsePositiveGuidance": "(Data Privacy): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm regulated workloads or tenants exist (or residency constraints apply). If none, score NOT_APPLICABLE. 2) Confirm regulated workloads are labeled (tenant tag, data class, or equivalent). 3) Open routing policy: approved regions/endpoints for those labels. 4) Review a sample of regulated model/tool requests: 100% stayed in approved regions (or were denied). 5) PASS only if labels + policy + 100% in-region sample hold with measuredAt ≤90 days. DNS/geo defaults without labeled enforcement do not satisfy. Prompt-only “stay in region” does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a cloud region preference that agents/APIs can bypass. Do not pass unlabeled “EU customers” spreadsheets without runtime routing evidence. Do not pass samples that mix unregulated traffic into the denominator. Do not pass policy docs older than 90 days without a fresh sample. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Residency-constrained routing must be enforced for regulated workloads",
-        "Retain evidence artifacts required by this Check, starting with: Routing policy config + sample routing decisions for regulated tenants/regions",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Label regulated tenants/workloads and bind them to approved-region model/tool routes",
+        "Enforce residency in the gateway or router; deny cross-region for regulated labels",
+        "Export ≤90-day routing samples under imports/ai-residency-routing/",
+        "Alert when regulated traffic hits a non-approved region or endpoint"
       ],
       "references": [
         {
@@ -9039,81 +9006,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "PRI-M1",
         "PRI-M2",
-        "PRI-M3",
-        "PRI-M5",
-        "PRI-R1"
+        "PRI-R3",
+        "PRI-R1",
+        "PRI-R2",
+        "AUTHZ-M1"
       ],
       "tags": [
         "data-privacy",
         "mandatory",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "vector-databases"
-        ],
-        "minCriticality": 3,
-        "requiredFromLevel": 4
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "PRI-M5",
-      "category": "data-privacy",
-      "title": "DPIA/PIA equivalents must exist for major AI features before production",
-      "description": "DPIA/PIA equivalents shall exist for major AI features before production",
-      "whyItMatters": "DPIA/PIA equivalents shall exist for major AI features before production Failing this leaves a production gap against: PASS if 100% of major in-scope AI features have a completed assessment with owner sign-off before production traffic",
-      "severity": "critical",
-      "weight": 4,
-      "gate": "mandatory",
-      "passCondition": "PASS if 100% of major in-scope AI features have a completed assessment with owner sign-off before production traffic",
-      "evidenceRequired": [
-        "Completed DPIA/PIA (or equivalent) with sign-off for each major in-scope AI feature"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": [
-          {
-            "id": "manual-attest",
-            "params": {
-              "hint": "Completed DPIA/PIA (or equivalent) with sign-off for each major in-scope AI feature"
-            }
-          }
-        ]
-      },
-      "manualVerification": "For this Check (DPIA/PIA equivalents must exist for major AI features before production): inspect current evidence for [Completed DPIA/PIA (or equivalent) with sign-off for each major in-scope AI feature] and confirm the pass condition holds — PASS if 100% of major in-scope AI features have a completed assessment with owner sign-off before production traffic",
-      "falsePositiveGuidance": "(Data Privacy): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: DPIA/PIA equivalents must exist for major AI features before production",
-        "Retain evidence artifacts required by this Check, starting with: Completed DPIA/PIA (or equivalent) with sign-off for each major in-scope AI feature",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "NIST AI RMF — privacy considerations",
-          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
-        },
-        {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
-        }
-      ],
-      "relatedRules": [
-        "PRI-M1",
-        "PRI-M2",
-        "PRI-M3",
-        "PRI-M4",
-        "PRI-R1"
-      ],
-      "tags": [
-        "data-privacy",
-        "mandatory",
-        "manual"
+        "hybrid",
+        "residency",
+        "routing"
       ],
       "applicability": {
         "technologies": [
@@ -9132,37 +9035,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "PRI-R1",
       "category": "data-privacy",
       "title": "Production systems should have tokenization or redaction before model calls for high-sensitivity fields",
-      "description": "Tokenization or redaction before model calls for high-sensitivity fields",
-      "whyItMatters": "Tokenization or redaction before model calls for high-sensitivity fields Failing this leaves a production gap against: Documented high-sensitivity fields never appear in cleartext in model request samples (≥50 sampled calls); pipeline fails closed when redaction errors",
-      "severity": "critical",
-      "weight": 4,
+      "description": "Production paths that send data to models should tokenize or redact documented high-sensitivity fields before the model call, with fail-closed behavior when redaction errors.\n",
+      "whyItMatters": "High-sensitivity fields in cleartext model requests expand blast radius: vendor logs, training opt-ins, and tool hops see data classification alone cannot strip. Tokenization or redaction before the call—plus fail-closed on pipeline errors—keeps those fields out of the model path. Classification without pre-model scrubbing still leaks. This strengthens maturity beyond the mandatory classification floor.\n",
+      "severity": "high",
+      "weight": 3,
       "gate": "recommended",
-      "passCondition": "Documented high-sensitivity fields never appear in cleartext in model request samples (≥50 sampled calls); pipeline fails closed when redaction errors",
+      "passCondition": "Documented high-sensitivity fields never appear in cleartext in ≥50 sampled production model requests; the pre-model tokenization/redaction pipeline fails closed on errors (sample/pipeline evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Pre-model tokenization/redaction pipeline config + sample of redacted payloads for high-sensitivity fields"
+        "Inventory or policy listing high-sensitivity fields subject to pre-model tokenization/redaction",
+        "Pre-model tokenization/redaction pipeline config with fail-closed on redaction errors",
+        "Sample of ≥50 production model requests showing 0 cleartext hits for those fields"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
-            "id": "prompt-no-pii-patterns",
-            "params": {}
+            "id": "repo-model-payload-redaction",
+            "params": {
+              "hint": "Discover pre-model tokenization/redaction pipelines, high-sensitivity field inventories, fail-closed error handling, and sample evidence.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Pre-model tokenization/redaction pipeline config + sample of redacted payloads for high-sensitivity fields"
+              "hint": "If automation cannot prove samples, attest documented high-sensitivity fields, a fail-closed pre-model pipeline, and ≥50 samples with 0 cleartext hits (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Tokenization or redaction before model calls for high-sensitivity fields): inspect current evidence for [Pre-model tokenization/redaction pipeline config + sample of redacted payloads for high-sensitivity fields] and confirm the pass condition holds — Documented high-sensitivity fields never appear in cleartext in model request samples (≥50 sampled calls); pipeline fails closed when redaction errors",
-      "falsePositiveGuidance": "(Data Privacy): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm production traffic sends data to models and high-sensitivity fields exist in scope. If none, score NOT_APPLICABLE. 2) Open the field inventory or policy naming high-sensitivity fields subject to pre-model scrubbing. 3) Open the tokenization/redaction pipeline config; confirm it runs before the model call and fails closed on redaction errors. 4) Review ≥50 sampled production model requests: 0 cleartext hits for those fields. 5) PASS only if inventory + fail-closed pipeline + clean sample hold with measuredAt ≤90 days. Log/trace secret redaction alone (post-call) does not satisfy. Classification tags without scrubbing do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass UI-only masking that still sends cleartext to the model. Do not pass regex filters applied only in logging after the call. Do not pass samples under 50 requests or older than 90 days. Do not pass pipelines that soft-fail and forward unredacted payloads on error. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Tokenization or redaction before model calls for high-sensitivity fields",
-        "Retain evidence artifacts required by this Check, starting with: Pre-model tokenization/redaction pipeline config + sample of redacted payloads for high-sensitivity fields",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Document high-sensitivity fields and require tokenization/redaction before every model call",
+        "Fail closed when the redaction pipeline errors or skips a required field",
+        "Export ≤90-day ≥50-request samples under imports/model-payload-redaction/",
+        "Alert when cleartext high-sensitivity patterns appear in outbound model payloads"
       ],
       "references": [
         {
@@ -9178,13 +9085,171 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "PRI-M1",
         "PRI-M2",
         "PRI-M3",
-        "PRI-M4",
-        "PRI-M5"
+        "PRI-R2",
+        "PRI-R3",
+        "SEC2-M2"
       ],
       "tags": [
         "data-privacy",
         "recommended",
-        "hybrid"
+        "hybrid",
+        "tokenization",
+        "redaction",
+        "model-payload"
+      ],
+      "applicability": {
+        "technologies": [
+          "aws",
+          "gcp",
+          "azure",
+          "vector-databases"
+        ],
+        "minCriticality": 2,
+        "requiredFromLevel": 4
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "PRI-R2",
+      "category": "data-privacy",
+      "title": "Third-party model processing terms should be reviewed for training use and retention",
+      "description": "Every production third-party model provider should have a dated review of processing terms covering training use and retention, with a named owner; reviews older than 12 months should be treated as missing.\n",
+      "whyItMatters": "Provider defaults often allow training on customer prompts or retain completions longer than policy allows. Unreviewed terms leave those risks invisible until a breach, subpoena, or vendor change. Annual reviews with training-use and retention coverage turn vendor DPAs into an owned control rather than a signed PDF nobody reopens. This is a recurring legal/ops review—not a runtime fail-closed gate—so it strengthens maturity without blocking the mandatory privacy floor.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "recommended",
+      "passCondition": "100% of production model providers have a review record ≤12 months covering training use and retention; 0 unreviewed providers in the inventory (inventory measuredAt ≤90 days; each review dated ≤365 days).\n",
+      "evidenceRequired": [
+        "Inventory of production model providers",
+        "Vendor terms review records (DPA/training/retention) with date and owner per provider"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-vendor-model-terms",
+            "params": {
+              "hint": "Discover vendor/provider inventories and DPA or terms reviews covering training use and retention for production model providers.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove 100% coverage, attest a provider inventory with zero unreviewed or >12-month-stale reviews covering training use and retention (inventory measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm production traffic uses third-party model providers. If all models are fully self-hosted with no third-party processing, score NOT_APPLICABLE. 2) Inventory production providers (API vendors, hosted inference, managed fine-tune). 3) For each, open a review record covering training use and retention with date and owner. 4) Confirm every review is ≤12 months old. 5) PASS only if coverage is 100% and freshness holds. A signed MSA without training/retention findings does not satisfy. Marketing “we don’t train” blog posts without a dated owner review do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a company-wide DPA that never names the model provider or AI processing. Do not pass reviews older than 12 months. Do not pass an incomplete inventory that omits shadow providers (secondary regions, eval vendors used in production gates). Do not pass procurement checklists that skip training-use or retention. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Publish a production model-provider inventory with owner per vendor",
+        "Review DPA/terms for training use and retention at least annually; record date and owner",
+        "Require a current review before onboarding a new production provider",
+        "Retain inventory + reviews under imports/vendor-model-terms/"
+      ],
+      "references": [
+        {
+          "title": "NIST AI RMF — privacy considerations",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        }
+      ],
+      "relatedRules": [
+        "PRI-M1",
+        "PRI-M2",
+        "PRI-M3",
+        "PRI-R3",
+        "PRI-R1",
+        "MOD-M1"
+      ],
+      "tags": [
+        "data-privacy",
+        "recommended",
+        "hybrid",
+        "vendor-terms",
+        "dpa"
+      ],
+      "applicability": {
+        "technologies": [
+          "aws",
+          "gcp",
+          "azure",
+          "vector-databases"
+        ],
+        "minCriticality": 2,
+        "requiredFromLevel": 4
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "PRI-R3",
+      "category": "data-privacy",
+      "title": "DPIA/PIA equivalents should exist for major AI features before production",
+      "description": "Every major in-scope AI feature should have a completed DPIA/PIA (or equivalent privacy assessment) with owner sign-off before production traffic.\n",
+      "whyItMatters": "Shipping AI features without a privacy impact assessment leaves training use, retention, residency, and subject-rights gaps undiscovered until regulators or customers force a retrofit. Owner sign-off before production ties privacy risk to a named accountable person—not a draft template in a wiki. This is a pre-launch assessment gate—not a runtime fail-closed control—so it strengthens maturity without blocking the mandatory privacy floor.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "recommended",
+      "passCondition": "100% of major in-scope AI features have a completed DPIA/PIA (or equivalent) with owner sign-off dated before production traffic (inventory/assessment evidence measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Inventory of major in-scope AI features in or entering production",
+        "Completed DPIA/PIA (or equivalent) with owner sign-off per feature, dated before production traffic"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-dpia",
+            "params": {
+              "hint": "Discover DPIA/PIA (or equivalent) artifacts and feature inventories linking major AI features to signed assessments before production.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest major-feature inventory with zero missing completed signed DPIA/PIA equivalents dated before production (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm major in-scope AI features exist (or are entering production). If none, score NOT_APPLICABLE. 2) Inventory those features. 3) For each, open a completed DPIA/PIA (or equivalent) with owner sign-off. 4) Confirm sign-off predates production traffic for that feature. 5) PASS only if coverage is 100% and freshness of the inventory/attest holds (measuredAt ≤90 days). Blank templates, unsigned drafts, or post-hoc assessments after production launch do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a company-wide privacy policy as a feature DPIA. Do not pass unsigned or “in progress” assessments. Do not pass assessments that never name the AI feature or model/tool surface. Do not pass a partial inventory that omits major features already serving production. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Inventory major AI features and require a completed signed DPIA/PIA before production enablement",
+        "Block release/promote when the DPIA gate is missing or unsigned",
+        "Retain assessments under imports/ai-dpia/",
+        "Review assessments when features materially change (new data classes, regions, or model providers)"
+      ],
+      "references": [
+        {
+          "title": "NIST AI RMF — privacy considerations",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        }
+      ],
+      "relatedRules": [
+        "PRI-M1",
+        "PRI-M2",
+        "PRI-M3",
+        "PRI-R1",
+        "PRI-R2",
+        "ORG-M4"
+      ],
+      "tags": [
+        "data-privacy",
+        "recommended",
+        "hybrid",
+        "dpia",
+        "pia"
       ],
       "applicability": {
         "technologies": [

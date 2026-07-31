@@ -80,6 +80,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **corpus-freshness-metrics** | `corpus-freshness-metrics.ts` | corpus freshness SLO + alerts (DG-R1) | `imports/corpus-freshness-metrics/` | — |
 | **train-serve-skew-monitor** | `train-serve-skew-monitor.ts` | train/serve skew monitors (DG-R2) | `imports/train-serve-skew-monitor/` | — |
 | **dataset-cards-registry** | `dataset-cards-registry.ts` | major dataset cards (DG-R3) | `imports/dataset-cards-registry/` | — |
+| **model-payload-classification** | `model-payload-classification.ts` | AI payload classification (PRI-M1) | `imports/model-payload-classification/` | — |
+| **model-payload-redaction** | `model-payload-redaction.ts` | pre-model tokenization/redaction (PRI-R1) | `imports/model-payload-redaction/` | — |
+| **vendor-model-terms** | `vendor-model-terms.ts` | vendor DPA/terms review (PRI-R2) | `imports/vendor-model-terms/` | — |
+| **ai-deletion-export** | `ai-deletion-export.ts` | AI memory/log deletion+export (PRI-M2) | `imports/ai-deletion-export/` | — |
+| **ai-residency-routing** | `ai-residency-routing.ts` | residency routing (PRI-M3) | `imports/ai-residency-routing/` | — |
+| **ai-dpia** | `ai-dpia.ts` | DPIA/PIA before production (PRI-R3) | `imports/ai-dpia/` | — |
 
 ### AGN-M1 — agent charters
 

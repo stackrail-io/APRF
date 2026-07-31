@@ -188,7 +188,7 @@ For each Check, open its YAML under `packages/aprf-engine/rules/` and copy **exa
 ```text
 # BAD — paraphrased
 1. SEC2-M1 — Production secrets in a secrets manager (not repos/prompts)
-11. PRI-M3 — Deletion/export covering AI memory/logs (beyond delete_investigation)
+11. PRI-M2 — Deletion/export covering AI memory/logs (beyond delete_investigation)
 ```
 
 **Required shape** (do this):

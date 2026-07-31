@@ -1,0 +1,28 @@
+id: ai-dpia
+title: DPIA/PIA for major AI features (PRI-R3)
+version: "0.2.0"
+executor: collectors/ai-dpia.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-ai-dpia]
+inputs:
+  - "Target repo (DPIA/PIA equivalents for major AI features)"
+  - "Optional suite: aprf-assessment/imports/ai-dpia/*.{json}"
+collect:
+  - "Detect DPIA/PIA artifacts, sign-off, and feature-inventory signals"
+  - "Ingest inventory; write ai-dpia-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/ai-dpia/*"
+  signals:
+    - ai-dpia
+    - pri-m4
+    - repo-ai-dpia
+mapsToChecks: [PRI-R3]
+whenUnavailable: >
+  DPIA signals alone are PARTIAL. PRI-R3 PASS needs imported
+  coversAllMajorAiFeatures with missingAssessment/SignOff/postProduction
+  counts = 0, measuredAt ≤90 days. No major AI features → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline DPIA heuristics + optional imported inventory JSON.

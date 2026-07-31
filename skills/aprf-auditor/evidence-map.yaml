@@ -141,7 +141,9 @@ categoryDefaults:
       - "**/*redact*"
       - "**/dpia*"
       - "**/*retention*"
-    signals: [minimization, classification, DLP]
+      - "**/*classif*"
+    plugins: [model-payload-classification, model-payload-redaction, vendor-model-terms, ai-deletion-export, ai-residency-routing, ai-dpia, secret-redaction, repo-filesystem]
+    signals: [minimization, classification, DLP, model payload classes, vendor terms, deletion/export, residency, DPIA]
   data-governance:
     search:
       - "**/corpus*"
@@ -784,6 +786,102 @@ checks:
       PASS if dataset-cards-registry statusHint=pass (coversAllMajorEvalFinetuneSets + missing purpose/source/PII = 0 + staleCardCount=0 + measuredAt ≤90d).
       PARTIAL if card signals without complete import.
       NOT_APPLICABLE when no major dataset-card signals.
+  PRI-M1:
+    requiredEvidence:
+      - "AI/model payload classification scheme + sensitive-class handling rules"
+      - "Audit with 100% tagged samples under imports/model-payload-classification/"
+    searchExtra:
+      - "**/*classif*"
+      - "**/*payload*class*"
+      - "**/*sensitivity*"
+      - "**/*pii*policy*"
+      - "**/*dlp*"
+    plugins: [model-payload-classification, secret-redaction, repo-filesystem]
+    naWhen: "No production traffic sending data to models"
+    evaluation: |
+      PASS if model-payload-classification statusHint=pass (classificationSchemeCoversAiPayloads + sensitiveHandlingRulesDocumented + sampleTaggedPct=100 + sensitiveHandlingMatchesPolicy + measuredAt ≤90d).
+      PARTIAL if classification signals without complete import.
+      NOT_APPLICABLE when no model-payload classification signals.
+  PRI-R1:
+    requiredEvidence:
+      - "High-sensitivity field inventory + fail-closed pre-model tokenization/redaction"
+      - "≥50-sample audit with 0 cleartext hits under imports/model-payload-redaction/"
+    searchExtra:
+      - "**/*tokeniz*"
+      - "**/*redact*"
+      - "**/*mask*pii*"
+      - "**/*pre*model*"
+      - "**/*payload*scrub*"
+    plugins: [model-payload-redaction, model-payload-classification, secret-redaction, repo-filesystem]
+    naWhen: "No production model traffic with high-sensitivity fields in scope"
+    evaluation: |
+      PASS if model-payload-redaction statusHint=pass (highSensitivityFieldsDocumented + pipelineFailClosed + sampleSize≥50 + cleartextHits=0 + measuredAt ≤90d).
+      PARTIAL if redaction signals without complete import.
+      NOT_APPLICABLE when no pre-model redaction / model-traffic signals.
+  PRI-M2:
+    requiredEvidence:
+      - "Deletion/export procedure covering AI memory and in-scope AI logs"
+      - "Within-SLA timed sample test under imports/ai-deletion-export/"
+    searchExtra:
+      - "**/*delet*"
+      - "**/*export*"
+      - "**/*gdpr*"
+      - "**/*dsar*"
+      - "**/*erasure*"
+      - "**/*ai*memory*"
+    plugins: [ai-deletion-export, vendor-model-terms, repo-filesystem]
+    naWhen: "No AI memory/logs requiring user/tenant deletion or export"
+    evaluation: |
+      PASS if ai-deletion-export statusHint=pass (procedureCoversAiMemory + procedureCoversAiLogs + sampleTestCompleted + completedWithinSla + measuredDurationPresent + measuredAt ≤90d).
+      PARTIAL if deletion/export signals without complete import.
+      NOT_APPLICABLE when no deletion/AI-memory signals.
+  PRI-M3:
+    requiredEvidence:
+      - "Residency routing policy for regulated AI workloads"
+      - "Sample with 100% in-approved-region under imports/ai-residency-routing/"
+    searchExtra:
+      - "**/*residenc*"
+      - "**/*region*rout*"
+      - "**/*data*local*"
+      - "**/*sovereign*"
+      - "**/*geo*fence*"
+    plugins: [ai-residency-routing, model-payload-classification, repo-filesystem]
+    naWhen: "No regulated workloads requiring residency-constrained routing"
+    evaluation: |
+      PASS if ai-residency-routing statusHint=pass (regulatedWorkloadsLabeled + approvedRegionsDocumented + sampleInApprovedRegionPct=100 + measuredAt ≤90d).
+      PARTIAL if residency signals without complete import.
+      NOT_APPLICABLE when no residency/regulated-routing signals.
+  PRI-R3:
+    requiredEvidence:
+      - "Major AI feature inventory + completed signed DPIA/PIA (or equivalent)"
+      - "Sign-off before production under imports/ai-dpia/"
+    searchExtra:
+      - "**/dpia*"
+      - "**/pia*"
+      - "**/*privacy*impact*"
+      - "**/*privacy*assess*"
+    plugins: [ai-dpia, ai-residency-routing, repo-filesystem]
+    naWhen: "No major in-scope AI features"
+    evaluation: |
+      PASS if ai-dpia statusHint=pass (coversAllMajorAiFeatures + missingAssessment/SignOff/postProduction = 0 + measuredAt ≤90d).
+      PARTIAL if DPIA signals without complete import.
+      NOT_APPLICABLE when no DPIA/major-feature signals.
+  PRI-R2:
+    requiredEvidence:
+      - "Production model-provider inventory + DPA/terms reviews (training use + retention)"
+      - "Reviews ≤12 months under imports/vendor-model-terms/"
+    searchExtra:
+      - "**/*dpa*"
+      - "**/*vendor*terms*"
+      - "**/*processing*agreement*"
+      - "**/*sub*processor*"
+      - "**/*provider*inventory*"
+    plugins: [vendor-model-terms, model-payload-classification, repo-filesystem]
+    naWhen: "No third-party model providers (fully self-hosted processing only)"
+    evaluation: |
+      PASS if vendor-model-terms statusHint=pass (coversAllProductionProviders + unreviewed/stale/missing training|retention = 0 + measuredAt ≤90d).
+      PARTIAL if vendor-terms signals without complete import.
+      NOT_APPLICABLE when no third-party provider signals.
   DEP-M1:
     requiredEvidence:
       - "Documented/tested rollback for model/prompt/tool promotion"
