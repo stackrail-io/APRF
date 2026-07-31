@@ -12,12 +12,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 - AGN auditor collectors harden PASS unlocks: `measuredAt` ≤90d (M1–M4), `coversAllProductionAgents` (M1), operator authz + numeric SLO + `architectureReviewOk` (M3), all three deny cases (M4).
 - Rewrote **agent-governance** pillar (goal-conflict plan policy) from template stub to hybrid Check + collector; synced `aprf-spec.json` method to hybrid.
 - Rewrote **human-approval** Checks **HUM-M1–M4, HUM-R1, HUM-R3** from template stubs to hybrid catalog quality; added `human-approval*` collectors; synced `aprf-spec.json` human-approval pillar.
-- Rewrote **COST-M1** (hard AI spend/rate limits) from template stub to hybrid Check + `ai-spend-limits` collector; synced `aprf-spec.json` method to hybrid.
-- Rewrote **COST-M2** (budget-burn + spend-anomaly alerts) from template stub to hybrid Check + `ai-cost-alerts` collector; synced `aprf-spec.json` method to hybrid.
-- Rewrote **COST-M3** (retry/loop cost amplification bounds) from template stub to hybrid Check + `ai-retry-amplification` collector; synced `aprf-spec.json` method to hybrid. Distinct from AGN-M2 (agency step limits).
-- Rewrote **COST-R1** (prompt/response cache where safe) from template stub to hybrid Check + `ai-prompt-cache` collector; synced `aprf-spec.json` method to hybrid.
-- Rewrote **COST-R2** (cheap-vs-premium model routing with eval) from template stub to hybrid Check + `ai-model-routing` collector; synced `aprf-spec.json` method to hybrid.
-- Rewrote **COST-R3** (FinOps AI unit economics per product) from template stub to hybrid Check + `ai-finops-unit-economics` collector; synced `aprf-spec.json` method to hybrid. Cost-optimization pillar (M1–M3, R1–R3) now at hybrid catalog quality.
+- Rewrote **cost-optimization** from template stub to hybrid Check + collectors; synced `aprf-spec.json` method to hybrid.
 
 ### Added
 - Portable **APRF Auditor** skill under [`skills/aprf-auditor/`](skills/aprf-auditor/): vendor-neutral local assessment package (`system.md`, `workflow.md`, evidence map, scoring, output schema, adapters for Cursor/Claude/Codex/Copilot/MCP). No StackRail backend required.
