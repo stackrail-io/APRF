@@ -218,6 +218,30 @@ PRM-R3 A/B or shadow eval for high-traffic prompt changes:
   npm run aprf:prompt-ab-shadow-eval -- --target <app> --out <app>/aprf-assessment
   # PASS needs lastHighTrafficPromptChangeUsedAbOrShadow + preRegisteredMetricsPresent + promotionRequiredNonInferiority under imports/prompt-ab-shadow-eval/
 
+CHG-M1 prior prompt/model-pin versions retained + restore dry-run:
+  npm run aprf:prompt-model-version-retention -- --target <app> --out <app>/aprf-assessment
+  # PASS needs retainedPriorProductionVersions≥2 + immediatePriorRestoreDryRunPassed under imports/prompt-model-version-retention/
+
+CHG-M2 rollback runbook operable by on-call:
+  npm run aprf:rollback-runbook -- --target <app> --out <app>/aprf-assessment
+  # PASS needs runbookHasCommandsAndOwners + onCallWalkthroughOrDrillCompleted under imports/rollback-runbook/
+
+CHG-M3 successful rollback drill within RTO:
+  npm run aprf:rollback-drill -- --target <app> --out <app>/aprf-assessment
+  # PASS needs successfulRollbacksLast90Days≥1 + measuredTimeToRestoreWithinRto under imports/rollback-drill/
+
+CHG-R3 quality SLO burn → auto-rollback or page:
+  npm run aprf:quality-slo-auto-rollback -- --target <app> --out <app>/aprf-assessment
+  # PASS needs qualitySloBurnWiredToRollbackOrPage + testOrDrillOccurredLast90Days (+ auto rollback or measured MTTA) under imports/quality-slo-auto-rollback/
+
+CHG-R1 one-click / single-command AI release rollback:
+  npm run aprf:one-click-ai-rollback -- --target <app> --out <app>/aprf-assessment
+  # PASS needs singleCommandOrActionRollbackDocumented + exerciseOrRealRollbackWithinRtoLast90Days under imports/one-click-ai-rollback/
+
+CHG-R2 feature flags for new agent behaviors:
+  npm run aprf:agent-behavior-feature-flags -- --target <app> --out <app>/aprf-assessment
+  # PASS needs newAgentBehaviorsBehindFlags + flagStateChangesAudited + killDisablePathTestedLast90Days under imports/agent-behavior-feature-flags/
+
 COST-M2 AI cost budget-burn / anomaly alerts:
   npm run aprf:cost-alerts -- --target <app> --out <app>/aprf-assessment
   # PASS needs notify proof under imports/ai-cost-alerts/

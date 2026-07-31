@@ -1,0 +1,25 @@
+id: agent-behavior-feature-flags
+title: Feature flags for new agent behaviors (CHG-R2)
+version: "0.2.0"
+executor: collectors/agent-behavior-feature-flags.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-agent-behavior-feature-flags]
+inputs:
+  - "Target repo (agent feature flags, audit trails, kill/disable tests)"
+  - "Optional suite: aprf-assessment/imports/agent-behavior-feature-flags/*.{json}"
+collect:
+  - "Detect agent-behavior feature flags, audited changes, kill/disable tests"
+  - "Ingest coverage; write agent-behavior-feature-flags-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/agent-behavior-feature-flags/*"
+  signals: [agent-behavior-feature-flags, chg-r2, repo-agent-behavior-feature-flags]
+mapsToChecks: [CHG-R2]
+whenUnavailable: >
+  Flag signals alone are PARTIAL. CHG-R2 PASS needs
+  newAgentBehaviorsBehindFlags, flagStateChangesAudited,
+  killDisablePathTestedLast90Days, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline agent feature-flag heuristics + optional imported JSON.

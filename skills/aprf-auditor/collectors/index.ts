@@ -50,6 +50,12 @@ import { promptRollbackCollector } from "./prompt-rollback.ts";
 import { promptTemplateHygieneCollector } from "./prompt-template-hygiene.ts";
 import { promptLintCiCollector } from "./prompt-lint-ci.ts";
 import { promptAbShadowEvalCollector } from "./prompt-ab-shadow-eval.ts";
+import { promptModelVersionRetentionCollector } from "./prompt-model-version-retention.ts";
+import { rollbackRunbookCollector } from "./rollback-runbook.ts";
+import { rollbackDrillCollector } from "./rollback-drill.ts";
+import { qualitySloAutoRollbackCollector } from "./quality-slo-auto-rollback.ts";
+import { oneClickAiRollbackCollector } from "./one-click-ai-rollback.ts";
+import { agentBehaviorFeatureFlagsCollector } from "./agent-behavior-feature-flags.ts";
 import { aiCostAlertsCollector } from "./ai-cost-alerts.ts";
 import { aiRetryAmplificationCollector } from "./ai-retry-amplification.ts";
 import { aiPromptCacheCollector } from "./ai-prompt-cache.ts";
@@ -148,6 +154,12 @@ export const COLLECTORS: Collector[] = [
   promptTemplateHygieneCollector,
   promptLintCiCollector,
   promptAbShadowEvalCollector,
+  promptModelVersionRetentionCollector,
+  rollbackRunbookCollector,
+  rollbackDrillCollector,
+  qualitySloAutoRollbackCollector,
+  oneClickAiRollbackCollector,
+  agentBehaviorFeatureFlagsCollector,
   aiCostAlertsCollector,
   aiRetryAmplificationCollector,
   aiPromptCacheCollector,

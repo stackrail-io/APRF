@@ -1,35 +1,56 @@
 id: "CHG-M3"
 category: "change-management"
 title: "Rollback must be tested in a drill or real event on a defined cadence"
-description: "Rollback shall be tested in a drill or real event on a defined cadence"
-whyItMatters: "Rollback shall be tested in a drill or real event on a defined cadence Failing this
-  leaves a production gap against: ≥1 successful rollback (drill or real) in the last 90 days with
-  measured time-to-restore ≤ documented RTO"
+description: >
+  Production systems shall complete ≥1 successful rollback (drill or real
+  incident) in the last 90 days with measured time-to-restore ≤ documented RTO.
+whyItMatters: >
+  Walkthroughs prove operators can find the runbook; only a timed restore proves
+  the path still works under real constraints. Cadenced successful rollback
+  within RTO is the difference between a documented hope and a rehearsed escape
+  hatch.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "≥1 successful rollback (drill or real) in the last 90 days with measured
-  time-to-restore ≤ documented RTO"
+passCondition: >
+  ≥1 successful rollback (drill or real) in the last 90 days with measured
+  time-to-restore ≤ documented RTO (drill evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Drill or incident record with timestamps and outcome"
+  - "Documented RTO for AI/prompt/model/deploy rollback"
+  - "Drill or incident record with timestamps, outcome, and measured time-to-restore"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-rollback-drill"
+      params:
+        hint: >
+          Discover rollback drill or incident records showing successful restore
+          within documented RTO in the last 90 days.
     - id: "manual-attest"
       params:
-        hint: "Drill or incident record with timestamps and outcome"
-manualVerification: "For this Check (Rollback must be tested in a drill or real event on a defined
-  cadence): inspect current evidence for [Drill or incident record with timestamps and outcome] and
-  confirm the pass condition holds — ≥1 successful rollback (drill or real) in the last 90 days with
-  measured time-to-restore ≤ documented RTO"
-falsePositiveGuidance: "(Change Management & Release): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest ≥1 successful rollback
+          (drill or real) in the last 90 days with measured time-to-restore ≤
+          documented RTO (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI changes that may need rollback. If none, score
+  NOT_APPLICABLE. 2) Confirm a documented RTO for rollback. 3) Open the latest
+  drill or incident record; confirm a successful rollback with timestamps and
+  measured time-to-restore ≤ RTO, completed within the last 90 days. 4) PASS
+  only if successful restore-within-RTO holds with measuredAt ≤90 days. CHG-M2
+  on-call walkthroughs without a successful restore do not satisfy. CHG-M1
+  retention dry-runs in staging alone do not satisfy a timed production-path
+  drill/incident. PRM-M3 prompt-only restore does not cover full AI rollback
+  scope for this Check unless that is the only rollback class in scope.
+falsePositiveGuidance: >
+  Do not pass a tabletop without an executed restore. Do not pass a failed
+  rollback as success. Do not pass time-to-execute of reading a runbook as
+  time-to-restore. Do not pass evidence older than 90 days. Named exceptions
+  need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Rollback must be tested in a drill or real event on a defined
-    cadence"
-  - "Retain evidence artifacts required by this Check, starting with: Drill or incident record with
-    timestamps and outcome"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Schedule and execute a rollback drill with measured time-to-restore ≤ RTO"
+  - "Retain drill/incident records with timestamps and outcome"
+  - "Retain evidence under imports/rollback-drill/"
   - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
 references:
   - title: "Google SRE Workbook — Configuration Management"
@@ -46,16 +67,17 @@ relatedRules:
   - "DEP-M3"
   - "CHG-M1"
   - "CHG-M2"
+  - "CHG-R3"
+  - "PRM-M3"
+  - "REL-M1"
 tags:
   - "change-management"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "rollback-drill"
+  - "rto"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "azure-devops"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

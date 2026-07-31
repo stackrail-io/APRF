@@ -1,37 +1,56 @@
 id: "CHG-M2"
 category: "change-management"
 title: "Rollback procedure must be documented and operable by on-call"
-description: "Rollback procedure shall be documented and operable by on-call"
-whyItMatters: "Rollback procedure shall be documented and operable by on-call Failing this leaves a
-  production gap against: Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer
-  completed a walkthrough or drill in the last 90 days with recorded time-to-execute"
+description: >
+  Production systems shall maintain a rollback runbook with exact commands or
+  UI steps and named owners, and prove ≥1 on-call engineer completed a
+  walkthrough or drill in the last 90 days with recorded time-to-execute.
+whyItMatters: >
+  A runbook nobody has practiced is fiction under pager load. Documented steps
+  plus a recent on-call walkthrough with measured time-to-execute turn rollback
+  from tribal knowledge into an operable control.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a
-  walkthrough or drill in the last 90 days with recorded time-to-execute"
+passCondition: >
+  Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer
+  completed a walkthrough or drill in the last 90 days with recorded
+  time-to-execute (operability evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Rollback runbook + on-call acknowledgment or drill checklist"
+  - "Rollback runbook listing exact commands/UI steps and owners"
+  - "On-call acknowledgment or drill checklist with recorded time-to-execute (≤90 days)"
 detection:
   capability: "hybrid"
   detectors:
     - id: "repo-rollback-runbook"
-      params: {}
+      params:
+        hint: >
+          Discover rollback runbooks with commands/UI steps and owners, and
+          on-call walkthrough or drill evidence with time-to-execute.
     - id: "manual-attest"
       params:
-        hint: "Rollback runbook + on-call acknowledgment or drill checklist"
-manualVerification: "For this Check (Rollback procedure must be documented and operable by on-call):
-  inspect current evidence for [Rollback runbook + on-call acknowledgment or drill checklist] and
-  confirm the pass condition holds — Runbook lists exact commands/UI steps and owners; ≥1 on-call
-  engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute"
-falsePositiveGuidance: "(Change Management & Release): when automation and attestation disagree,
-  prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal
-  covers the gap."
+        hint: >
+          If automation cannot prove coverage, attest a complete rollback
+          runbook (commands/UI + owners) and ≥1 on-call walkthrough/drill in
+          the last 90 days with recorded time-to-execute (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI changes (prompts, models, tools, or AI deploys) that
+  may need rollback. If none, score NOT_APPLICABLE. 2) Open the rollback
+  runbook; confirm exact commands or UI steps and named owners. 3) Confirm ≥1
+  on-call engineer completed a walkthrough or drill in the last 90 days with
+  recorded time-to-execute. 4) PASS only if runbook completeness + operability
+  hold with measuredAt ≤90 days. CHG-M1 retention/dry-run alone does not
+  satisfy. CHG-M3 successful restore-within-RTO alone does not satisfy a
+  documented on-call-operable procedure. PRM-M3 prompt-only rollback does not
+  cover model/tool/deploy rollback scope for this Check.
+falsePositiveGuidance: >
+  Do not pass a wiki page without commands/UI steps. Do not pass “team owns
+  rollback” without a named owner. Do not pass a drill older than 90 days or
+  without time-to-execute. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Rollback procedure must be documented and operable by on-call"
-  - "Retain evidence artifacts required by this Check, starting with: Rollback runbook + on-call
-    acknowledgment or drill checklist"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
+  - "Document rollback with exact commands/UI steps and named owners"
+  - "Complete an on-call walkthrough or drill ≤90 days with recorded time-to-execute"
+  - "Retain evidence under imports/rollback-runbook/"
   - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
 references:
   - title: "Google SRE Workbook — Configuration Management"
@@ -48,16 +67,17 @@ relatedRules:
   - "DEP-M3"
   - "CHG-M1"
   - "CHG-M3"
+  - "CHG-R3"
+  - "PRM-M3"
+  - "REL-M1"
 tags:
   - "change-management"
   - "mandatory"
   - "hybrid"
+  - "rollback-runbook"
+  - "on-call"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "azure-devops"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

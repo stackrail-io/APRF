@@ -1,0 +1,85 @@
+id: "CHG-R3"
+category: "change-management"
+title: "Production systems should trigger automated rollback on quality SLO burn for AI releases"
+description: >
+  AI releases should wire quality SLO burn to automated rollback—or to page +
+  runbook with measured MTTA—and prove a test or drill of that path in the last
+  90 days.
+whyItMatters: >
+  Quality regressions often arrive as slow burns, not hard crashes. Waiting for
+  a human to notice SLO burn extends customer harm. Wiring burn to automated
+  rollback (or a paged, timed runbook) closes the loop before MTTR balloons.
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: >
+  Quality SLO burn is wired to automated rollback (or page+runbook with
+  measured MTTA) and a test/drill occurred ≤90 days (automation evidence
+  measuredAt ≤90 days).
+evidenceRequired:
+  - "Rollback automation (or page+runbook) config tied to quality SLO burn signals"
+  - "Sample trigger/test or drill evidence of that path within ≤90 days"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-quality-slo-auto-rollback"
+      params:
+        hint: >
+          Discover quality SLO burn signals wired to automated rollback or
+          page+runbook with measured MTTA, plus a recent test/drill.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest quality SLO burn is wired
+          to automated rollback or page+runbook with measured MTTA, and a
+          test/drill occurred ≤90 days (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm AI releases with quality SLOs exist. If none, score NOT_APPLICABLE.
+  2) Confirm quality SLO burn triggers automated rollback or pages on-call with
+  a runbook and measured MTTA. 3) Confirm a test or drill of that path occurred
+  in the last 90 days. 4) PASS only if wiring + test/drill hold with measuredAt
+  ≤90 days. CHG-M3 manual rollback drills alone do not satisfy automated/paged
+  burn response. CHG-M2 runbook walkthroughs without SLO burn wiring do not
+  satisfy. Generic infrastructure auto-rollback without quality SLO signals does
+  not satisfy.
+falsePositiveGuidance: >
+  Do not pass availability-only auto-rollback without quality/safety SLOs. Do
+  not pass page-without-measured-MTTA as equivalent to automated rollback. Do
+  not pass a test older than 90 days. Named exceptions need owner and expiry
+  ≤90 days.
+recommendedFixes:
+  - "Wire quality SLO burn to automated rollback or page+runbook with measured MTTA"
+  - "Run and retain a test/drill of that path ≤90 days"
+  - "Retain evidence under imports/quality-slo-auto-rollback/"
+  - "Time-box gaps with owner and expiry ≤90 days"
+references:
+  - title: "Google SRE Workbook — Configuration Management"
+    url: "https://sre.google/workbook/"
+  - title: "AWS Well-Architected — Operational Excellence"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "Google SRE — Emergency Response"
+    url: "https://sre.google/sre-book/emergency-response/"
+  - title: "AWS Well-Architected — Reliability"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+relatedRules:
+  - "DEP-M1"
+  - "DEP-M2"
+  - "DEP-M3"
+  - "CHG-M1"
+  - "CHG-M2"
+  - "CHG-M3"
+  - "CHG-R1"
+  - "EVL-M2"
+  - "REL-M1"
+tags:
+  - "change-management"
+  - "recommended"
+  - "hybrid"
+  - "slo-burn"
+  - "auto-rollback"
+applicability:
+  technologies: []
+  minCriticality: 3
+  requiredFromLevel: 5
+status: "active"
+introducedIn: "0.10.0"

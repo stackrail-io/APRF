@@ -1,37 +1,57 @@
 id: "CHG-R1"
 category: "change-management"
 title: "Production systems should have one-click or single-command rollback for AI release units"
-description: "One-click or single-command rollback for AI release units"
-whyItMatters: "One-click or single-command rollback for AI release units Failing this leaves a
-  production gap against: AI release unit can be rolled back with a single documented
-  command/action; exercise or real rollback ≤90 days completed within documented RTO"
+description: >
+  AI release units (prompts, model pins, tool configs, or AI deploys) should
+  roll back with a single documented command or action, proven by an exercise
+  or real rollback in the last 90 days completed within documented RTO.
+whyItMatters: >
+  Multi-step tribal rollback fails under pager load. A single documented action
+  plus a recent timed exercise keeps AI release units as reversible units—not
+  irreversible config spaghetti.
 severity: "critical"
 weight: 4
 gate: "recommended"
-passCondition: "AI release unit can be rolled back with a single documented command/action; exercise
-  or real rollback ≤90 days completed within documented RTO"
+passCondition: >
+  AI release unit can be rolled back with a single documented command/action;
+  exercise or real rollback ≤90 days completed within documented RTO
+  (exercise evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Rollback runbook or one-command script for AI release units + last rollback exercise log"
+  - "One-command or one-click rollback script/action for AI release units"
+  - "Last rollback exercise or real event log showing completion within documented RTO (≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-one-click-ai-rollback"
+      params:
+        hint: >
+          Discover single-command/one-click rollback for AI release units and a
+          recent exercise or real rollback within RTO.
     - id: "manual-attest"
       params:
-        hint: "Rollback runbook or one-command script for AI release units + last rollback exercise log"
-manualVerification: "For this Check (One-click or single-command rollback for AI release units):
-  inspect current evidence for [Rollback runbook or one-command script for AI release units + last
-  rollback exercise log] and confirm the pass condition holds — AI release unit can be rolled back
-  with a single documented command/action; exercise or real rollback ≤90 days completed within
-  documented RTO"
-falsePositiveGuidance: "(Change Management & Release): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest a single documented
+          command/action rolls back AI release units and an exercise or real
+          rollback ≤90 days completed within RTO (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm AI release units ship (prompts, model pins, tools, or AI deploys).
+  If none, score NOT_APPLICABLE. 2) Confirm a single documented command or
+  one-click action rolls back an AI release unit. 3) Confirm an exercise or
+  real rollback in the last 90 days completed within documented RTO. 4) PASS
+  only if single-action path + timed exercise hold with measuredAt ≤90 days.
+  CHG-M2 multi-step runbook walkthroughs alone do not satisfy. CHG-M3 successful
+  restore without a single-action path does not satisfy. CHG-R3 SLO-burn
+  automation alone does not satisfy a documented one-click operator path.
+falsePositiveGuidance: >
+  Do not pass a multi-step kubectl/playbook as one-click. Do not pass undeploy
+  of the whole service as AI-unit rollback. Do not pass an exercise older than
+  90 days or without RTO comparison. Named exceptions need owner and expiry
+  ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: One-click or single-command rollback for AI release
-    units"
-  - "Retain evidence artifacts required by this Check, starting with: Rollback runbook or
-    one-command script for AI release units + last rollback exercise log"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Provide a single documented command or one-click action to roll back AI release units"
+  - "Exercise that path ≤90 days and retain completion within RTO"
+  - "Retain evidence under imports/one-click-ai-rollback/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Workbook — Configuration Management"
     url: "https://sre.google/workbook/"
@@ -47,16 +67,17 @@ relatedRules:
   - "DEP-M3"
   - "CHG-M1"
   - "CHG-M2"
+  - "CHG-M3"
+  - "CHG-R2"
+  - "CHG-R3"
 tags:
   - "change-management"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "one-click-rollback"
+  - "ai-release-unit"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "azure-devops"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

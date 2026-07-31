@@ -1,0 +1,25 @@
+id: prompt-model-version-retention
+title: Retain prior prompt/model-pin versions + restore dry-run (CHG-M1)
+version: "0.2.0"
+executor: collectors/prompt-model-version-retention.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-prompt-model-version-retention]
+inputs:
+  - "Target repo (retention policy, version registries, restore dry-run records)"
+  - "Optional suite: aprf-assessment/imports/prompt-model-version-retention/*.{json}"
+collect:
+  - "Detect retention policy, registries, and immediate-prior restore dry-runs"
+  - "Ingest coverage; write prompt-model-version-retention-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/prompt-model-version-retention/*"
+  signals: [prompt-model-version-retention, chg-m1, repo-prompt-model-version-retention]
+mapsToChecks: [CHG-M1]
+whenUnavailable: >
+  Retention signals alone are PARTIAL. CHG-M1 PASS needs
+  retainedPriorProductionVersions≥2 (or ≥policyMinimumN),
+  immediatePriorRestoreDryRunPassed, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline retention heuristics + optional imported JSON.

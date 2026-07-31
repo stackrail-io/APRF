@@ -1,0 +1,25 @@
+id: rollback-runbook
+title: Rollback runbook operable by on-call (CHG-M2)
+version: "0.2.0"
+executor: collectors/rollback-runbook.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-rollback-runbook]
+inputs:
+  - "Target repo (rollback runbooks, on-call drill/walkthrough records)"
+  - "Optional suite: aprf-assessment/imports/rollback-runbook/*.{json}"
+collect:
+  - "Detect rollback runbooks with commands/UI steps and owners"
+  - "Detect on-call walkthrough/drill signals; ingest coverage; write rollback-runbook-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/rollback-runbook/*"
+  signals: [rollback-runbook, chg-m2, repo-rollback-runbook]
+mapsToChecks: [CHG-M2]
+whenUnavailable: >
+  Runbook signals alone are PARTIAL. CHG-M2 PASS needs
+  runbookHasCommandsAndOwners, onCallWalkthroughOrDrillCompleted,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline rollback-runbook heuristics + optional imported JSON.

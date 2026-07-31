@@ -622,13 +622,12 @@
         "HUM-M4",
         "REL-M7",
         "REL-M8",
-        "CHG-M4",
         "INC-M4"
       ],
       "rationale": [
         "Includes every Core gate — regulated systems must still clear production minimums.",
         "Adds residency, fairness, dual control, and signed admission for regulated blast radius.",
-        "Requires chaos/continuity drills, independent assessment sampling, and automated quality rollback triggers.",
+        "Requires chaos/continuity drills and independent assessment sampling.",
         "Target capability Level 5 — Tier 3 is not Core with a different label."
       ]
     }
@@ -4466,39 +4465,30 @@
       "mandatoryChecks": [
         {
           "id": "CHG-M1",
-          "requirement": "Prior production versions of prompts and model pins shall be retained and restorable",
-          "artifact": "Version retention policy + registry listing of prior production versions",
-          "passCondition": "≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env",
-          "method": "manual",
+          "requirement": "Production systems shall retain at least N prior production versions of prompts and model pins per policy (minimum N=2) and prove a restore dry-run that loads the immediate prior version in staging or a prod-adjacent environment.",
+          "artifact": "Version retention policy + registry listing of prior production prompt and model-pin versions + Restore dry-run record showing immediate prior version loaded in staging or prod-adjacent env",
+          "passCondition": "≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env (retention evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "CHG-M2",
-          "requirement": "Rollback procedure shall be documented and operable by on-call",
-          "artifact": "Rollback runbook + on-call acknowledgment or drill checklist",
-          "passCondition": "Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute",
+          "requirement": "Production systems shall maintain a rollback runbook with exact commands or UI steps and named owners, and prove ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute.",
+          "artifact": "Rollback runbook listing exact commands/UI steps and owners + On-call acknowledgment or drill checklist with recorded time-to-execute (≤90 days)",
+          "passCondition": "Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute (operability evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "CHG-M3",
-          "requirement": "Rollback shall be tested in a drill or real event on a defined cadence",
-          "artifact": "Drill or incident record with timestamps and outcome",
-          "passCondition": "≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO",
-          "method": "manual",
+          "requirement": "Production systems shall complete ≥1 successful rollback (drill or real incident) in the last 90 days with measured time-to-restore ≤ documented RTO.",
+          "artifact": "Documented RTO for AI/prompt/model/deploy rollback + Drill or incident record with timestamps, outcome, and measured time-to-restore",
+          "passCondition": "≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO (drill evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
-        },
-        {
-          "id": "CHG-M4",
-          "requirement": "Automated rollback shall trigger on quality SLO burn for AI releases",
-          "artifact": "Rollback automation config + sample trigger/test evidence tied to quality SLOs",
-          "passCondition": "PASS if quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred ≤90 days",
-          "method": "manual",
-          "requiredFromLevel": 5,
-          "minCriticality": 3
         },
         {
           "id": "DEP-M1",
@@ -4531,21 +4521,30 @@
       "recommendedChecks": [
         {
           "id": "CHG-R1",
-          "requirement": "One-click or single-command rollback for AI release units",
-          "artifact": "Rollback runbook or one-command script for AI release units + last rollback exercise log",
-          "passCondition": "AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO",
-          "method": "manual",
+          "requirement": "AI release units (prompts, model pins, tool configs, or AI deploys) should roll back with a single documented command or action, proven by an exercise or real rollback in the last 90 days completed within documented RTO.",
+          "artifact": "One-command or one-click rollback script/action for AI release units + Last rollback exercise or real event log showing completion within documented RTO (≤90 days)",
+          "passCondition": "AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO (exercise evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "CHG-R2",
-          "requirement": "Feature flags for new agent behaviors",
-          "artifact": "Feature-flag config covering new agent behaviors + sample flag change audit trail",
-          "passCondition": "New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago",
-          "method": "manual",
+          "requirement": "New agent behaviors should ship behind feature flags, flag state changes should be audited, and the kill/disable path should be tested within the last 90 days.",
+          "artifact": "Feature-flag config covering new agent behaviors + Sample flag-change audit trail + kill/disable path test record (≤90 days)",
+          "passCondition": "New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago (flag evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
+        },
+        {
+          "id": "CHG-R3",
+          "requirement": "AI releases should wire quality SLO burn to automated rollback—or to page + runbook with measured MTTA—and prove a test or drill of that path in the last 90 days.",
+          "artifact": "Rollback automation (or page+runbook) config tied to quality SLO burn signals + Sample trigger/test or drill evidence of that path within ≤90 days",
+          "passCondition": "Quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred ≤90 days (automation evidence measuredAt ≤90 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 5,
+          "minCriticality": 3
         },
         {
           "id": "DEP-R1",

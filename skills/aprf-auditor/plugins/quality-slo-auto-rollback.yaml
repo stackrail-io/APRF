@@ -1,0 +1,25 @@
+id: quality-slo-auto-rollback
+title: Quality SLO burn → auto-rollback or page (CHG-R3)
+version: "0.2.0"
+executor: collectors/quality-slo-auto-rollback.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-quality-slo-auto-rollback]
+inputs:
+  - "Target repo (SLO burn alerts, auto-rollback/page wiring, test/drill records)"
+  - "Optional suite: aprf-assessment/imports/quality-slo-auto-rollback/*.{json}"
+collect:
+  - "Detect quality SLO burn → rollback/page automation and recent tests"
+  - "Ingest coverage; write quality-slo-auto-rollback-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/quality-slo-auto-rollback/*"
+  signals: [quality-slo-auto-rollback, chg-r3, repo-quality-slo-auto-rollback]
+mapsToChecks: [CHG-R3]
+whenUnavailable: >
+  Automation signals alone are PARTIAL. CHG-R3 PASS needs
+  qualitySloBurnWiredToRollbackOrPage, testOrDrillOccurredLast90Days,
+  and automatedRollbackConfigured or measuredMttaPresent; measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline SLO-burn rollback heuristics + optional imported JSON.

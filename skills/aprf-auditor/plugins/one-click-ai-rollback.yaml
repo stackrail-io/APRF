@@ -1,0 +1,25 @@
+id: one-click-ai-rollback
+title: One-click / single-command AI release rollback (CHG-R1)
+version: "0.2.0"
+executor: collectors/one-click-ai-rollback.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-one-click-ai-rollback]
+inputs:
+  - "Target repo (one-click/single-command rollback scripts, exercise logs)"
+  - "Optional suite: aprf-assessment/imports/one-click-ai-rollback/*.{json}"
+collect:
+  - "Detect single-command/one-click AI rollback paths and recent exercises"
+  - "Ingest coverage; write one-click-ai-rollback-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/one-click-ai-rollback/*"
+  signals: [one-click-ai-rollback, chg-r1, repo-one-click-ai-rollback]
+mapsToChecks: [CHG-R1]
+whenUnavailable: >
+  One-click signals alone are PARTIAL. CHG-R1 PASS needs
+  singleCommandOrActionRollbackDocumented,
+  exerciseOrRealRollbackWithinRtoLast90Days, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline one-click rollback heuristics + optional imported JSON.

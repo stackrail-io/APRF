@@ -1,35 +1,55 @@
 id: "CHG-R2"
 category: "change-management"
-title: "Production systems should have feature flags for new agent behaviors"
-description: "Feature flags for new agent behaviors"
-whyItMatters: "Feature flags for new agent behaviors Failing this leaves a production gap against:
-  New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested
-  ≤90 days ago"
+title: "Production systems should use feature flags for new agent behaviors"
+description: >
+  New agent behaviors should ship behind feature flags, flag state changes
+  should be audited, and the kill/disable path should be tested within the last
+  90 days.
+whyItMatters: >
+  Unflagged agent behaviors are hard to contain once live. Flags plus an audited
+  kill path let operators disable risky autonomy without a full redeploy—and a
+  recent disable test proves that path still works.
 severity: "critical"
 weight: 4
 gate: "recommended"
-passCondition: "New agent behaviors ship behind flags; flag state changes are audited; kill/disable
-  path tested ≤90 days ago"
+passCondition: >
+  New agent behaviors ship behind flags; flag state changes are audited;
+  kill/disable path tested ≤90 days ago (flag evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Feature-flag config covering new agent behaviors + sample flag change audit trail"
+  - "Feature-flag config covering new agent behaviors"
+  - "Sample flag-change audit trail + kill/disable path test record (≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-agent-behavior-feature-flags"
+      params:
+        hint: >
+          Discover feature flags for new agent behaviors, audited flag-state
+          changes, and a recent kill/disable path test.
     - id: "manual-attest"
       params:
-        hint: "Feature-flag config covering new agent behaviors + sample flag change audit trail"
-manualVerification: "For this Check (Feature flags for new agent behaviors): inspect current
-  evidence for [Feature-flag config covering new agent behaviors + sample flag change audit trail]
-  and confirm the pass condition holds — New agent behaviors ship behind flags; flag state changes
-  are audited; kill/disable path tested ≤90 days ago"
-falsePositiveGuidance: "(Change Management & Release): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest new agent behaviors ship
+          behind flags, flag changes are audited, and kill/disable was tested
+          ≤90 days ago (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production agents with shippable behaviors exist. If none, score
+  NOT_APPLICABLE. 2) Confirm new agent behaviors ship behind feature flags.
+  3) Confirm flag state changes leave an audit trail. 4) Confirm the
+  kill/disable path was tested in the last 90 days. 5) PASS only if flags +
+  audit + disable test hold with measuredAt ≤90 days. AGN kill-switch Checks
+  alone do not satisfy behavior-level feature flags. CHG-R1 one-click rollback
+  alone does not satisfy flag-gated agent behaviors. Generic app feature flags
+  without agent-behavior coverage do not satisfy.
+falsePositiveGuidance: >
+  Do not pass permanent env toggles without audit. Do not pass a flag that
+  cannot be disabled in production. Do not pass a disable test older than 90
+  days. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Feature flags for new agent behaviors"
-  - "Retain evidence artifacts required by this Check, starting with: Feature-flag config covering
-    new agent behaviors + sample flag change audit trail"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Ship new agent behaviors behind feature flags with audited state changes"
+  - "Test and retain the kill/disable path ≤90 days"
+  - "Retain evidence under imports/agent-behavior-feature-flags/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Workbook — Configuration Management"
     url: "https://sre.google/workbook/"
@@ -45,16 +65,19 @@ relatedRules:
   - "DEP-M3"
   - "CHG-M1"
   - "CHG-M2"
+  - "CHG-R1"
+  - "CHG-R3"
+  - "AGN-M1"
+  - "AGN-M2"
+  - "AGN-M3"
 tags:
   - "change-management"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "feature-flags"
+  - "agent-behavior"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "azure-devops"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

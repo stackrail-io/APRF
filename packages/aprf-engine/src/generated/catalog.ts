@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:06b1e04336a7180363f6ec9e280a37db314d63c3bb7c3061235405158d77166f",
+  "generatedAt": "sha256:33120bb64b3bdc0e350dc687c1a864f9f354202b2d8f734556e137f684c0eba3",
   "ruleCount": 177,
   "domains": [
     {
@@ -1915,32 +1915,39 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "CHG-M1",
       "category": "change-management",
       "title": "Prior production versions of prompts and model pins must be retained and restorable",
-      "description": "Prior production versions of prompts and model pins shall be retained and restorable",
-      "whyItMatters": "Prior production versions of prompts and model pins shall be retained and restorable Failing this leaves a production gap against: ≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env",
+      "description": "Production systems shall retain at least N prior production versions of prompts and model pins per policy (minimum N=2) and prove a restore dry-run that loads the immediate prior version in staging or a prod-adjacent environment.\n",
+      "whyItMatters": "Without retained prior pins, a bad prompt or model bump has no safe landing. Inventory alone is not enough—operators must prove the immediate prior version still loads before an incident forces improvisation.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env",
+      "passCondition": "≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env (retention evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Version retention policy + registry listing of prior production versions"
+        "Version retention policy + registry listing of prior production prompt and model-pin versions",
+        "Restore dry-run record showing immediate prior version loaded in staging or prod-adjacent env"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-prompt-model-version-retention",
+            "params": {
+              "hint": "Discover retention policy and registries keeping prior production prompt and model-pin versions, plus restore dry-run evidence.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Version retention policy + registry listing of prior production versions"
+              "hint": "If automation cannot prove coverage, attest ≥N prior production versions retained (minimum N=2) and a successful immediate-prior restore dry-run in staging or prod-adjacent (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Prior production versions of prompts and model pins must be retained and restorable): inspect current evidence for [Version retention policy + registry listing of prior production versions] and confirm the pass condition holds — ≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env",
-      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production prompts and/or model pins are used. If neither, score NOT_APPLICABLE. 2) Open retention policy; confirm minimum retained prior versions N≥2. 3) Open registry listing; confirm ≥N prior production versions are present for prompts and model pins in scope. 4) Confirm a restore dry-run loaded the immediate prior version in staging or prod-adjacent. 5) PASS only if retention + dry-run hold with measuredAt ≤90 days. PRM-M1 version IDs alone do not satisfy. PRM-M3 prompt-rollback RTO alone does not satisfy retention depth. CHG-M2 on-call runbook drills alone do not satisfy registry retention.\n",
+      "falsePositiveGuidance": "Do not pass git history of a single floating “latest” alias as retained versions. Do not pass a dry-run older than 90 days. Do not pass retention of prompts without model pins when both ship in production (or vice versa) unless the missing class is documented as out of scope. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Prior production versions of prompts and model pins must be retained and restorable",
-        "Retain evidence artifacts required by this Check, starting with: Version retention policy + registry listing of prior production versions",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Retain ≥2 prior production prompt and model-pin versions in a registry",
+        "Run and retain an immediate-prior restore dry-run in staging or prod-adjacent",
+        "Retain evidence under imports/prompt-model-version-retention/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
@@ -1966,20 +1973,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DEP-M2",
         "DEP-M3",
         "CHG-M2",
-        "CHG-M3"
+        "CHG-M3",
+        "PRM-M1",
+        "PRM-M3",
+        "MOD-M1"
       ],
       "tags": [
         "change-management",
         "mandatory",
-        "manual"
+        "hybrid",
+        "version-retention",
+        "restore-dry-run"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "azure-devops",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -1990,36 +1997,39 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "CHG-M2",
       "category": "change-management",
       "title": "Rollback procedure must be documented and operable by on-call",
-      "description": "Rollback procedure shall be documented and operable by on-call",
-      "whyItMatters": "Rollback procedure shall be documented and operable by on-call Failing this leaves a production gap against: Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute",
+      "description": "Production systems shall maintain a rollback runbook with exact commands or UI steps and named owners, and prove ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute.\n",
+      "whyItMatters": "A runbook nobody has practiced is fiction under pager load. Documented steps plus a recent on-call walkthrough with measured time-to-execute turn rollback from tribal knowledge into an operable control.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute",
+      "passCondition": "Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute (operability evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Rollback runbook + on-call acknowledgment or drill checklist"
+        "Rollback runbook listing exact commands/UI steps and owners",
+        "On-call acknowledgment or drill checklist with recorded time-to-execute (≤90 days)"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
             "id": "repo-rollback-runbook",
-            "params": {}
+            "params": {
+              "hint": "Discover rollback runbooks with commands/UI steps and owners, and on-call walkthrough or drill evidence with time-to-execute.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Rollback runbook + on-call acknowledgment or drill checklist"
+              "hint": "If automation cannot prove coverage, attest a complete rollback runbook (commands/UI + owners) and ≥1 on-call walkthrough/drill in the last 90 days with recorded time-to-execute (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Rollback procedure must be documented and operable by on-call): inspect current evidence for [Rollback runbook + on-call acknowledgment or drill checklist] and confirm the pass condition holds — Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute",
-      "falsePositiveGuidance": "(Change Management & Release): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm production AI changes (prompts, models, tools, or AI deploys) that may need rollback. If none, score NOT_APPLICABLE. 2) Open the rollback runbook; confirm exact commands or UI steps and named owners. 3) Confirm ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute. 4) PASS only if runbook completeness + operability hold with measuredAt ≤90 days. CHG-M1 retention/dry-run alone does not satisfy. CHG-M3 successful restore-within-RTO alone does not satisfy a documented on-call-operable procedure. PRM-M3 prompt-only rollback does not cover model/tool/deploy rollback scope for this Check.\n",
+      "falsePositiveGuidance": "Do not pass a wiki page without commands/UI steps. Do not pass “team owns rollback” without a named owner. Do not pass a drill older than 90 days or without time-to-execute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Rollback procedure must be documented and operable by on-call",
-        "Retain evidence artifacts required by this Check, starting with: Rollback runbook + on-call acknowledgment or drill checklist",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Document rollback with exact commands/UI steps and named owners",
+        "Complete an on-call walkthrough or drill ≤90 days with recorded time-to-execute",
+        "Retain evidence under imports/rollback-runbook/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
@@ -2045,20 +2055,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DEP-M2",
         "DEP-M3",
         "CHG-M1",
-        "CHG-M3"
+        "CHG-M3",
+        "CHG-R3",
+        "PRM-M3",
+        "REL-M1"
       ],
       "tags": [
         "change-management",
         "mandatory",
-        "hybrid"
+        "hybrid",
+        "rollback-runbook",
+        "on-call"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "azure-devops",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -2069,32 +2079,39 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "CHG-M3",
       "category": "change-management",
       "title": "Rollback must be tested in a drill or real event on a defined cadence",
-      "description": "Rollback shall be tested in a drill or real event on a defined cadence",
-      "whyItMatters": "Rollback shall be tested in a drill or real event on a defined cadence Failing this leaves a production gap against: ≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO",
+      "description": "Production systems shall complete ≥1 successful rollback (drill or real incident) in the last 90 days with measured time-to-restore ≤ documented RTO.\n",
+      "whyItMatters": "Walkthroughs prove operators can find the runbook; only a timed restore proves the path still works under real constraints. Cadenced successful rollback within RTO is the difference between a documented hope and a rehearsed escape hatch.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO",
+      "passCondition": "≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO (drill evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Drill or incident record with timestamps and outcome"
+        "Documented RTO for AI/prompt/model/deploy rollback",
+        "Drill or incident record with timestamps, outcome, and measured time-to-restore"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-rollback-drill",
+            "params": {
+              "hint": "Discover rollback drill or incident records showing successful restore within documented RTO in the last 90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Drill or incident record with timestamps and outcome"
+              "hint": "If automation cannot prove coverage, attest ≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Rollback must be tested in a drill or real event on a defined cadence): inspect current evidence for [Drill or incident record with timestamps and outcome] and confirm the pass condition holds — ≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO",
-      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI changes that may need rollback. If none, score NOT_APPLICABLE. 2) Confirm a documented RTO for rollback. 3) Open the latest drill or incident record; confirm a successful rollback with timestamps and measured time-to-restore ≤ RTO, completed within the last 90 days. 4) PASS only if successful restore-within-RTO holds with measuredAt ≤90 days. CHG-M2 on-call walkthroughs without a successful restore do not satisfy. CHG-M1 retention dry-runs in staging alone do not satisfy a timed production-path drill/incident. PRM-M3 prompt-only restore does not cover full AI rollback scope for this Check unless that is the only rollback class in scope.\n",
+      "falsePositiveGuidance": "Do not pass a tabletop without an executed restore. Do not pass a failed rollback as success. Do not pass time-to-execute of reading a runbook as time-to-restore. Do not pass evidence older than 90 days. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Rollback must be tested in a drill or real event on a defined cadence",
-        "Retain evidence artifacts required by this Check, starting with: Drill or incident record with timestamps and outcome",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Schedule and execute a rollback drill with measured time-to-restore ≤ RTO",
+        "Retain drill/incident records with timestamps and outcome",
+        "Retain evidence under imports/rollback-drill/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
@@ -2120,97 +2137,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DEP-M2",
         "DEP-M3",
         "CHG-M1",
-        "CHG-M2"
+        "CHG-M2",
+        "CHG-R3",
+        "PRM-M3",
+        "REL-M1"
       ],
       "tags": [
         "change-management",
         "mandatory",
-        "manual"
+        "hybrid",
+        "rollback-drill",
+        "rto"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "azure-devops",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "CHG-M4",
-      "category": "change-management",
-      "title": "Automated rollback must trigger on quality SLO burn for AI releases",
-      "description": "Automated rollback shall trigger on quality SLO burn for AI releases",
-      "whyItMatters": "Automated rollback shall trigger on quality SLO burn for AI releases Failing this leaves a production gap against: PASS if quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred ≤90 days",
-      "severity": "critical",
-      "weight": 4,
-      "gate": "mandatory",
-      "passCondition": "PASS if quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred ≤90 days",
-      "evidenceRequired": [
-        "Rollback automation config + sample trigger/test evidence tied to quality SLOs"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": [
-          {
-            "id": "manual-attest",
-            "params": {
-              "hint": "Rollback automation config + sample trigger/test evidence tied to quality SLOs"
-            }
-          }
-        ]
-      },
-      "manualVerification": "For this Check (Automated rollback must trigger on quality SLO burn for AI releases): inspect current evidence for [Rollback automation config + sample trigger/test evidence tied to quality SLOs] and confirm the pass condition holds — PASS if quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred ≤90 days",
-      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: Automated rollback must trigger on quality SLO burn for AI releases",
-        "Retain evidence artifacts required by this Check, starting with: Rollback automation config + sample trigger/test evidence tied to quality SLOs",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "Google SRE Workbook — Configuration Management",
-          "url": "https://sre.google/workbook/"
-        },
-        {
-          "title": "AWS Well-Architected — Operational Excellence",
-          "url": "https://aws.amazon.com/architecture/well-architected/"
-        },
-        {
-          "title": "Google SRE — Emergency Response",
-          "url": "https://sre.google/sre-book/emergency-response/"
-        },
-        {
-          "title": "AWS Well-Architected — Reliability",
-          "url": "https://aws.amazon.com/architecture/well-architected/"
-        }
-      ],
-      "relatedRules": [
-        "DEP-M1",
-        "DEP-M2",
-        "DEP-M3",
-        "CHG-M1",
-        "CHG-M2"
-      ],
-      "tags": [
-        "change-management",
-        "mandatory",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "azure-devops",
-          "cicd"
-        ],
-        "minCriticality": 3,
-        "requiredFromLevel": 5
       },
       "status": "active",
       "introducedIn": "0.10.0"
@@ -2219,33 +2161,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "CHG-R1",
       "category": "change-management",
       "title": "Production systems should have one-click or single-command rollback for AI release units",
-      "description": "One-click or single-command rollback for AI release units",
-      "whyItMatters": "One-click or single-command rollback for AI release units Failing this leaves a production gap against: AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO",
+      "description": "AI release units (prompts, model pins, tool configs, or AI deploys) should roll back with a single documented command or action, proven by an exercise or real rollback in the last 90 days completed within documented RTO.\n",
+      "whyItMatters": "Multi-step tribal rollback fails under pager load. A single documented action plus a recent timed exercise keeps AI release units as reversible units—not irreversible config spaghetti.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO",
+      "passCondition": "AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO (exercise evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Rollback runbook or one-command script for AI release units + last rollback exercise log"
+        "One-command or one-click rollback script/action for AI release units",
+        "Last rollback exercise or real event log showing completion within documented RTO (≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-one-click-ai-rollback",
+            "params": {
+              "hint": "Discover single-command/one-click rollback for AI release units and a recent exercise or real rollback within RTO.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Rollback runbook or one-command script for AI release units + last rollback exercise log"
+              "hint": "If automation cannot prove coverage, attest a single documented command/action rolls back AI release units and an exercise or real rollback ≤90 days completed within RTO (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (One-click or single-command rollback for AI release units): inspect current evidence for [Rollback runbook or one-command script for AI release units + last rollback exercise log] and confirm the pass condition holds — AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO",
-      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm AI release units ship (prompts, model pins, tools, or AI deploys). If none, score NOT_APPLICABLE. 2) Confirm a single documented command or one-click action rolls back an AI release unit. 3) Confirm an exercise or real rollback in the last 90 days completed within documented RTO. 4) PASS only if single-action path + timed exercise hold with measuredAt ≤90 days. CHG-M2 multi-step runbook walkthroughs alone do not satisfy. CHG-M3 successful restore without a single-action path does not satisfy. CHG-R3 SLO-burn automation alone does not satisfy a documented one-click operator path.\n",
+      "falsePositiveGuidance": "Do not pass a multi-step kubectl/playbook as one-click. Do not pass undeploy of the whole service as AI-unit rollback. Do not pass an exercise older than 90 days or without RTO comparison. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: One-click or single-command rollback for AI release units",
-        "Retain evidence artifacts required by this Check, starting with: Rollback runbook or one-command script for AI release units + last rollback exercise log",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Provide a single documented command or one-click action to roll back AI release units",
+        "Exercise that path ≤90 days and retain completion within RTO",
+        "Retain evidence under imports/one-click-ai-rollback/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -2270,20 +2219,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DEP-M2",
         "DEP-M3",
         "CHG-M1",
-        "CHG-M2"
+        "CHG-M2",
+        "CHG-M3",
+        "CHG-R2",
+        "CHG-R3"
       ],
       "tags": [
         "change-management",
         "recommended",
-        "manual"
+        "hybrid",
+        "one-click-rollback",
+        "ai-release-unit"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "azure-devops",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -2293,34 +2242,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CHG-R2",
       "category": "change-management",
-      "title": "Production systems should have feature flags for new agent behaviors",
-      "description": "Feature flags for new agent behaviors",
-      "whyItMatters": "Feature flags for new agent behaviors Failing this leaves a production gap against: New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago",
+      "title": "Production systems should use feature flags for new agent behaviors",
+      "description": "New agent behaviors should ship behind feature flags, flag state changes should be audited, and the kill/disable path should be tested within the last 90 days.\n",
+      "whyItMatters": "Unflagged agent behaviors are hard to contain once live. Flags plus an audited kill path let operators disable risky autonomy without a full redeploy—and a recent disable test proves that path still works.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago",
+      "passCondition": "New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago (flag evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Feature-flag config covering new agent behaviors + sample flag change audit trail"
+        "Feature-flag config covering new agent behaviors",
+        "Sample flag-change audit trail + kill/disable path test record (≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-agent-behavior-feature-flags",
+            "params": {
+              "hint": "Discover feature flags for new agent behaviors, audited flag-state changes, and a recent kill/disable path test.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Feature-flag config covering new agent behaviors + sample flag change audit trail"
+              "hint": "If automation cannot prove coverage, attest new agent behaviors ship behind flags, flag changes are audited, and kill/disable was tested ≤90 days ago (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Feature flags for new agent behaviors): inspect current evidence for [Feature-flag config covering new agent behaviors + sample flag change audit trail] and confirm the pass condition holds — New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago",
-      "falsePositiveGuidance": "(Change Management & Release): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production agents with shippable behaviors exist. If none, score NOT_APPLICABLE. 2) Confirm new agent behaviors ship behind feature flags. 3) Confirm flag state changes leave an audit trail. 4) Confirm the kill/disable path was tested in the last 90 days. 5) PASS only if flags + audit + disable test hold with measuredAt ≤90 days. AGN kill-switch Checks alone do not satisfy behavior-level feature flags. CHG-R1 one-click rollback alone does not satisfy flag-gated agent behaviors. Generic app feature flags without agent-behavior coverage do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass permanent env toggles without audit. Do not pass a flag that cannot be disabled in production. Do not pass a disable test older than 90 days. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Feature flags for new agent behaviors",
-        "Retain evidence artifacts required by this Check, starting with: Feature-flag config covering new agent behaviors + sample flag change audit trail",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Ship new agent behaviors behind feature flags with audited state changes",
+        "Test and retain the kill/disable path ≤90 days",
+        "Retain evidence under imports/agent-behavior-feature-flags/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -2345,22 +2301,107 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DEP-M2",
         "DEP-M3",
         "CHG-M1",
-        "CHG-M2"
+        "CHG-M2",
+        "CHG-R1",
+        "CHG-R3",
+        "AGN-M1",
+        "AGN-M2",
+        "AGN-M3"
       ],
       "tags": [
         "change-management",
         "recommended",
-        "manual"
+        "hybrid",
+        "feature-flags",
+        "agent-behavior"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "azure-devops",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "CHG-R3",
+      "category": "change-management",
+      "title": "Production systems should trigger automated rollback on quality SLO burn for AI releases",
+      "description": "AI releases should wire quality SLO burn to automated rollback—or to page + runbook with measured MTTA—and prove a test or drill of that path in the last 90 days.\n",
+      "whyItMatters": "Quality regressions often arrive as slow burns, not hard crashes. Waiting for a human to notice SLO burn extends customer harm. Wiring burn to automated rollback (or a paged, timed runbook) closes the loop before MTTR balloons.\n",
+      "severity": "critical",
+      "weight": 4,
+      "gate": "recommended",
+      "passCondition": "Quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred ≤90 days (automation evidence measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Rollback automation (or page+runbook) config tied to quality SLO burn signals",
+        "Sample trigger/test or drill evidence of that path within ≤90 days"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-quality-slo-auto-rollback",
+            "params": {
+              "hint": "Discover quality SLO burn signals wired to automated rollback or page+runbook with measured MTTA, plus a recent test/drill.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest quality SLO burn is wired to automated rollback or page+runbook with measured MTTA, and a test/drill occurred ≤90 days (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm AI releases with quality SLOs exist. If none, score NOT_APPLICABLE. 2) Confirm quality SLO burn triggers automated rollback or pages on-call with a runbook and measured MTTA. 3) Confirm a test or drill of that path occurred in the last 90 days. 4) PASS only if wiring + test/drill hold with measuredAt ≤90 days. CHG-M3 manual rollback drills alone do not satisfy automated/paged burn response. CHG-M2 runbook walkthroughs without SLO burn wiring do not satisfy. Generic infrastructure auto-rollback without quality SLO signals does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass availability-only auto-rollback without quality/safety SLOs. Do not pass page-without-measured-MTTA as equivalent to automated rollback. Do not pass a test older than 90 days. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Wire quality SLO burn to automated rollback or page+runbook with measured MTTA",
+        "Run and retain a test/drill of that path ≤90 days",
+        "Retain evidence under imports/quality-slo-auto-rollback/",
+        "Time-box gaps with owner and expiry ≤90 days"
+      ],
+      "references": [
+        {
+          "title": "Google SRE Workbook — Configuration Management",
+          "url": "https://sre.google/workbook/"
+        },
+        {
+          "title": "AWS Well-Architected — Operational Excellence",
+          "url": "https://aws.amazon.com/architecture/well-architected/"
+        },
+        {
+          "title": "Google SRE — Emergency Response",
+          "url": "https://sre.google/sre-book/emergency-response/"
+        },
+        {
+          "title": "AWS Well-Architected — Reliability",
+          "url": "https://aws.amazon.com/architecture/well-architected/"
+        }
+      ],
+      "relatedRules": [
+        "DEP-M1",
+        "DEP-M2",
+        "DEP-M3",
+        "CHG-M1",
+        "CHG-M2",
+        "CHG-M3",
+        "CHG-R1",
+        "EVL-M2",
+        "REL-M1"
+      ],
+      "tags": [
+        "change-management",
+        "recommended",
+        "hybrid",
+        "slo-burn",
+        "auto-rollback"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 3,
+        "requiredFromLevel": 5
       },
       "status": "active",
       "introducedIn": "0.10.0"

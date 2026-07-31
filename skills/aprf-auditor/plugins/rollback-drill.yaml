@@ -1,0 +1,25 @@
+id: rollback-drill
+title: Successful rollback drill within RTO (CHG-M3)
+version: "0.2.0"
+executor: collectors/rollback-drill.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-rollback-drill]
+inputs:
+  - "Target repo (rollback drill/incident records, RTO docs)"
+  - "Optional suite: aprf-assessment/imports/rollback-drill/*.{json}"
+collect:
+  - "Detect successful rollback drills/incidents and RTO signals"
+  - "Ingest coverage; write rollback-drill-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/rollback-drill/*"
+  signals: [rollback-drill, chg-m3, repo-rollback-drill]
+mapsToChecks: [CHG-M3]
+whenUnavailable: >
+  Drill signals alone are PARTIAL. CHG-M3 PASS needs
+  successfulRollbacksLast90Days≥1, measuredTimeToRestoreWithinRto,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline rollback-drill heuristics + optional imported JSON.

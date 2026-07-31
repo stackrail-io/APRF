@@ -241,7 +241,10 @@ categoryDefaults:
       - "**/*rollback*"
       - "**/release*"
       - "**/changelog*"
-    signals: [promotion pipeline, rollback tested]
+      - "**/*version*retention*"
+      - "**/*restore*dry*"
+    plugins: [prompt-model-version-retention, rollback-runbook, rollback-drill, quality-slo-auto-rollback, one-click-ai-rollback, agent-behavior-feature-flags, github-actions, repo-filesystem]
+    signals: [promotion pipeline, rollback tested, version retention, restore dry-run, rollback runbook, on-call drill, rollback drill, RTO, SLO burn, auto-rollback, one-click rollback, feature flags, agent behavior flags]
   incident-readiness:
     search:
       - "**/runbook*"
@@ -433,6 +436,101 @@ checks:
       PASS if prompt-ab-shadow-eval statusHint=pass (lastHighTrafficPromptChangeUsedAbOrShadow + preRegisteredMetricsPresent + promotionRequiredNonInferiority + measuredAt ≤90d).
       PARTIAL if A/B/shadow signals without complete import.
       NOT_APPLICABLE when highTrafficPromptChangeCount=0 or no prompt signals.
+  CHG-M1:
+    requiredEvidence:
+      - "Version retention policy + registry of prior prompt/model-pin versions"
+      - "retainedPriorProductionVersions≥2 + immediatePriorRestoreDryRunPassed under imports/prompt-model-version-retention/"
+    searchExtra:
+      - "**/*version*retention*"
+      - "**/*restore*dry*"
+      - "**/*prompt*registry*"
+      - "**/*model*registry*"
+      - "**/*model*pin*"
+    plugins: [prompt-model-version-retention, repo-filesystem]
+    naWhen: "No production prompts or model pins"
+    evaluation: |
+      PASS if prompt-model-version-retention statusHint=pass (retainedPriorProductionVersions≥max(2,policyMinimumN) + immediatePriorRestoreDryRunPassed + measuredAt ≤90d).
+      PARTIAL if retention/registry/dry-run signals without complete import.
+      NOT_APPLICABLE when no prompt/model-pin signals.
+  CHG-M2:
+    requiredEvidence:
+      - "Rollback runbook with exact commands/UI steps and named owners"
+      - "runbookHasCommandsAndOwners + onCallWalkthroughOrDrillCompleted under imports/rollback-runbook/"
+    searchExtra:
+      - "**/*rollback*runbook*"
+      - "**/*rollback*procedure*"
+      - "**/runbooks/**"
+      - "**/*oncall*"
+      - "**/*on-call*"
+    plugins: [rollback-runbook, repo-filesystem]
+    naWhen: "No production AI changes that need rollback"
+    evaluation: |
+      PASS if rollback-runbook statusHint=pass (runbookHasCommandsAndOwners + onCallWalkthroughOrDrillCompleted + measuredAt ≤90d).
+      PARTIAL if runbook/drill signals without complete import.
+      NOT_APPLICABLE when no AI-change signals.
+  CHG-M3:
+    requiredEvidence:
+      - "Documented RTO + drill/incident record with timestamps and measured time-to-restore"
+      - "successfulRollbacksLast90Days≥1 + measuredTimeToRestoreWithinRto under imports/rollback-drill/"
+    searchExtra:
+      - "**/*rollback*drill*"
+      - "**/*game*day*"
+      - "**/incidents/**"
+      - "**/drills/**"
+      - "**/*time*to*restore*"
+    plugins: [rollback-drill, repo-filesystem]
+    naWhen: "No production AI changes that need rollback"
+    evaluation: |
+      PASS if rollback-drill statusHint=pass (successfulRollbacksLast90Days≥1 + measuredTimeToRestoreWithinRto + measuredAt ≤90d).
+      PARTIAL if drill/RTO signals without complete import.
+      NOT_APPLICABLE when no AI-change signals.
+  CHG-R3:
+    requiredEvidence:
+      - "Quality SLO burn wired to automated rollback or page+runbook with measured MTTA"
+      - "qualitySloBurnWiredToRollbackOrPage + testOrDrillOccurredLast90Days under imports/quality-slo-auto-rollback/"
+    searchExtra:
+      - "**/*slo*burn*"
+      - "**/*auto*rollback*"
+      - "**/*quality*slo*"
+      - "**/*error*budget*"
+    plugins: [quality-slo-auto-rollback, repo-filesystem]
+    naWhen: "No AI releases with quality SLOs"
+    evaluation: |
+      PASS if quality-slo-auto-rollback statusHint=pass (wired + test/drill + auto-rollback or measured MTTA + measuredAt ≤90d).
+      PARTIAL if SLO-burn/automation signals without complete import.
+      NOT_APPLICABLE when no AI-release signals.
+  CHG-R1:
+    requiredEvidence:
+      - "One-command or one-click rollback for AI release units"
+      - "singleCommandOrActionRollbackDocumented + exercise within RTO under imports/one-click-ai-rollback/"
+    searchExtra:
+      - "**/*one*click*rollback*"
+      - "**/*single*command*rollback*"
+      - "**/rollback.sh"
+      - "**/*ai*release*rollback*"
+    plugins: [one-click-ai-rollback, repo-filesystem]
+    naWhen: "No AI release units"
+    evaluation: |
+      PASS if one-click-ai-rollback statusHint=pass (singleCommandOrActionRollbackDocumented + exerciseOrRealRollbackWithinRtoLast90Days + measuredAt ≤90d).
+      PARTIAL if one-click/script signals without complete import.
+      NOT_APPLICABLE when no AI-release signals.
+  CHG-R2:
+    requiredEvidence:
+      - "Feature-flag config covering new agent behaviors"
+      - "newAgentBehaviorsBehindFlags + flagStateChangesAudited + killDisablePathTestedLast90Days under imports/agent-behavior-feature-flags/"
+    searchExtra:
+      - "**/*feature*flag*"
+      - "**/*agent*flag*"
+      - "**/*behavior*flag*"
+      - "**/*launchdarkly*"
+      - "**/*unleash*"
+      - "**/*flagsmith*"
+    plugins: [agent-behavior-feature-flags, repo-filesystem]
+    naWhen: "No production agents shipping new behaviors"
+    evaluation: |
+      PASS if agent-behavior-feature-flags statusHint=pass (newAgentBehaviorsBehindFlags + flagStateChangesAudited + killDisablePathTestedLast90Days + measuredAt ≤90d).
+      PARTIAL if flag/audit/kill signals without complete import.
+      NOT_APPLICABLE when no agent/flag signals.
   OBS-M1:
     requiredEvidence:
       - "Tracing/logging that can reconstruct model+tool path"

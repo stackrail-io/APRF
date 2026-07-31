@@ -96,13 +96,12 @@ export const PROFILE_REGULATED: AprfProfile = {
     "HUM-M4",
     "REL-M7",
     "REL-M8",
-    "CHG-M4",
     "INC-M4",
   ],
   rationale: [
     "Includes every Core gate — regulated systems must still clear production minimums.",
     "Adds residency, fairness, dual control, and signed admission for regulated blast radius.",
-    "Requires chaos/continuity drills, independent assessment sampling, and automated quality rollback triggers.",
+    "Requires chaos/continuity drills and independent assessment sampling.",
     "Target capability Level 5 — Tier 3 is not Core with a different label.",
   ],
 };
