@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:c370edd446caa69004c4e2edc7b36b278531288ec977ea8235d16c23623a884b",
+  "generatedAt": "sha256:609ebd62c20e098268cf5c0cd45e2a1a0245d09d7b409c0ccaab60eb27ca5c41",
   "ruleCount": 177,
   "domains": [
     {
@@ -2720,41 +2720,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "COST-M1",
       "category": "cost-optimization",
       "title": "Production AI workloads must have hard spend or rate limits",
-      "description": "Production AI workloads shall have hard spend or rate limits",
-      "whyItMatters": "Production AI workloads shall have hard spend or rate limits Failing this leaves a production gap against: Enforced limit demonstrably denies or throttles when exceeded (automated test or production event log within last 90 days)",
+      "description": "Production AI workloads shall enforce finite hard spend ceilings and/or request rate limits (provider, gateway, or application) that deny or throttle when exceeded—not soft dashboards or prompt-only budgets alone.\n",
+      "whyItMatters": "Unbounded completions, agent loops, and retry storms are a denial-of-wallet path: a single runaway session can burn through provider quota and budget before humans notice. Soft alerts without enforce-on-exceed leave spend unbounded under load or abuse. Hard limits convert cost risk into a fail-closed, measurable control.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Enforced limit demonstrably denies or throttles when exceeded (automated test or production event log within last 90 days)",
+      "passCondition": "A finite hard spend ceiling and/or rate limit is configured for production AI workloads; enforcement demonstrably denies or throttles when the limit is exceeded (automated test or production event log within the last 90 days).\n",
       "evidenceRequired": [
-        "Gateway/provider quota config"
+        "Gateway/provider/application config declaring finite spend ceiling and/or rate limit (TPM/RPM/$, tokens)",
+        "Enforcement evidence: automated exceed test or ≤90-day production deny/throttle event log"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
             "id": "repo-rate-limit-config",
-            "params": {}
-          },
-          {
-            "id": "cicd-concurrency-present",
-            "params": {}
+            "params": {
+              "hint": "Discover production spend ceilings, token/RPM/TPM quotas, or gateway rate limits that apply to AI/model/agent workloads.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Gateway/provider quota config"
+              "hint": "If automation cannot prove enforce-on-exceed, attest finite limit config plus a ≤90-day deny/throttle test or production event.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Production AI workloads must have hard spend or rate limits): inspect current evidence for [Gateway/provider quota config] and confirm the pass condition holds — Enforced limit demonstrably denies or throttles when exceeded (automated test or production event log within last 90 days)",
-      "falsePositiveGuidance": "(Cost Optimization): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm production AI/model/agent traffic exists. If none, score NOT_APPLICABLE. 2) Locate the hard spend ceiling and/or rate limit (provider quota, API gateway, app middleware). Soft budgets without deny/throttle fail. 3) Review enforcement: automated exceed test or production log ≤90 days showing deny or throttle when exceeded. 4) PASS only if config + enforcement evidence both hold. CI job concurrency alone does not satisfy this Check.\n",
+      "falsePositiveGuidance": "Do not pass on cost dashboards or FinOps reports without enforce-on-exceed. Do not pass prompt-only “be frugal” instructions. Do not pass CI concurrency limits or generic HTTP rate limits that do not cover AI/model spend paths. Do not pass infinite or unset quotas. Sibling Checks (COST-M2 alerts, AGN-M2 loop limits) do not substitute for a hard spend/rate ceiling. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Production AI workloads must have hard spend or rate limits",
-        "Retain evidence artifacts required by this Check, starting with: Gateway/provider quota config",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Set finite provider/gateway/application spend or rate limits on all production AI paths; fail closed when unset",
+        "Add an automated exceed test that asserts deny or throttle; retain results under imports/ai-spend-limits/",
+        "Alert when limit-hit rates rise so operators can tune without removing enforcement",
+        "Document break-glass quota raises with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -2769,21 +2768,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "COST-M2",
         "COST-M3",
-        "COST-R1",
-        "COST-R2",
-        "COST-R3"
+        "AGN-M2",
+        "PERF-M1",
+        "REL-M1"
       ],
       "tags": [
         "cost-optimization",
         "mandatory",
-        "automated"
+        "hybrid",
+        "spend-limit",
+        "rate-limit"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure"
-        ],
+        "technologies": [],
         "minCriticality": 1,
         "requiredFromLevel": 2
       },
@@ -2794,33 +2791,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "COST-M2",
       "category": "cost-optimization",
       "title": "Cost must be monitored with alerts on anomaly and budget burn",
-      "description": "Cost shall be monitored with alerts on anomaly and budget burn",
-      "whyItMatters": "Cost shall be monitored with alerts on anomaly and budget burn Failing this leaves a production gap against: Alerts exist for budget burn and spend anomaly; synthetic or historical burn event would page/notify per runbook (alert test or documented fire in last 90 days)",
+      "description": "Production AI spend shall be monitored with alert policies for budget burn and spend anomaly that notify operators per runbook—not dashboards alone.\n",
+      "whyItMatters": "Hard spend ceilings (COST-M1) stop unbounded burn, but without budget-burn and anomaly alerts operators learn too late that quotas are being hit, tenants are runaway, or unit economics have drifted. A dashboard nobody pages on is not a control. Proven notify (synthetic test or ≤90-day fire) turns FinOps telemetry into an operational signal.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Alerts exist for budget burn and spend anomaly; synthetic or historical burn event would page/notify per runbook (alert test or documented fire in last 90 days)",
+      "passCondition": "Alerts exist for both budget burn and spend anomaly covering production AI spend; a synthetic or historical burn/anomaly event would page/notify per runbook (alert test or documented fire within the last 90 days).\n",
       "evidenceRequired": [
-        "Cost dashboard + alert policies for anomaly and budget burn"
+        "Cost/spend dashboard or telemetry views covering production AI workloads",
+        "Alert policies for budget burn and spend anomaly (IaC, provider, or gateway)",
+        "Notify proof: alert test or documented fire ≤90 days with page/notify outcome"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-cost-alert-config",
+            "params": {
+              "hint": "Discover budget-burn and spend-anomaly alert policies, cost dashboards, or FinOps/gateway cost alarm config for AI/model/agent workloads.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Cost dashboard + alert policies for anomaly and budget burn"
+              "hint": "If automation cannot prove notify, attest both alert types plus a ≤90-day alert test or documented fire that paged/notified.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Cost must be monitored with alerts on anomaly and budget burn): inspect current evidence for [Cost dashboard + alert policies for anomaly and budget burn] and confirm the pass condition holds — Alerts exist for budget burn and spend anomaly; synthetic or historical burn event would page/notify per runbook (alert test or documented fire in last 90 days)",
-      "falsePositiveGuidance": "(Cost Optimization): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI spend exists. If none, score NOT_APPLICABLE. 2) Locate monitoring for AI/model/agent cost (tokens, $, RPM). Generic infra CPU alerts alone fail. 3) Confirm distinct (or clearly dual-purpose) alerts for budget burn and spend anomaly with notify destinations. 4) Review notify proof ≤90 days (synthetic fire or production page). 5) PASS only if both alert classes and notify proof hold. COST-M1 hard limits do not substitute.\n",
+      "falsePositiveGuidance": "Do not pass on cost dashboards without alert policies. Do not pass a single generic “high spend” alert that does not cover both budget burn and anomaly intent unless the policy explicitly encodes both. Do not pass CPU/latency SLO alerts as cost controls. Do not pass COST-M1 enforce-on-exceed alone. Do not pass alert definitions with no notify channel or unproven routing. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Cost must be monitored with alerts on anomaly and budget burn",
-        "Retain evidence artifacts required by this Check, starting with: Cost dashboard + alert policies for anomaly and budget burn",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Add budget-burn and spend-anomaly alerts on production AI cost metrics; page/notify on-call or FinOps owner",
+        "Run a synthetic burn/anomaly alert test at least quarterly; retain under imports/ai-cost-alerts/",
+        "Tag alerts by tenant/feature so responders can attribute runaway spend",
+        "Document mute/suppress windows with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -2835,21 +2840,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "COST-M1",
         "COST-M3",
-        "COST-R1",
-        "COST-R2",
-        "COST-R3"
+        "OBS-M1",
+        "OBS-M2",
+        "INC-M1"
       ],
       "tags": [
         "cost-optimization",
         "mandatory",
-        "manual"
+        "hybrid",
+        "budget-burn",
+        "anomaly-alert"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -2860,33 +2863,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "COST-M3",
       "category": "cost-optimization",
       "title": "Retry and loop policies must prevent unbounded cost amplification",
-      "description": "Retry and loop policies shall prevent unbounded cost amplification",
-      "whyItMatters": "Retry and loop policies shall prevent unbounded cost amplification Failing this leaves a production gap against: Max retries and max agent loops are finite for 100% of production AI clients; tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling hit)",
+      "description": "Production AI clients shall enforce finite retry/backoff and loop budgets so forced failures cannot amplify completions without bound—covering HTTP/SDK clients and agent loops, not prompt-only “try again” guidance.\n",
+      "whyItMatters": "Provider blips, tool timeouts, and flaky dependencies trigger retry storms that multiply token spend far beyond the original request. Unbounded maxRetries, missing backoff, or open agent loops turn a transient error into denial-of-wallet even when hard spend ceilings (COST-M1) eventually trip. Finite retry and loop policies with amplification tests keep cost growth bounded under failure.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Max retries and max agent loops are finite for 100% of production AI clients; tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling hit)",
+      "passCondition": "Max retries and max agent/client loops are finite for 100% of production AI clients; amplification tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling hit within the last 90 days).\n",
       "evidenceRequired": [
-        "Retry/backoff and agent-loop budget config + amplification tests"
+        "Retry/backoff config (finite maxRetries + backoff) for production AI/model clients",
+        "Agent or client loop budget config where applicable (finite iterations/steps)",
+        "Amplification test results: forced failure/retry hits a bounded token or $ ceiling (≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-retry-amplification-config",
+            "params": {
+              "hint": "Discover finite maxRetries/backoff and AI client or agent loop budgets that bound completion amplification under failure.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Retry/backoff and agent-loop budget config + amplification tests"
+              "hint": "If automation cannot prove amplification bounds, attest finite retry and loop config plus a ≤90-day amplification test hitting a token/$ ceiling.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Retry and loop policies must prevent unbounded cost amplification): inspect current evidence for [Retry/backoff and agent-loop budget config + amplification tests] and confirm the pass condition holds — Max retries and max agent loops are finite for 100% of production AI clients; tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling hit)",
-      "falsePositiveGuidance": "(Cost Optimization): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI/model clients exist. If none, score NOT_APPLICABLE. 2) For each client path (SDK, gateway, agent runtime), locate finite maxRetries/backoff and any loop/iteration budget. Infinite, null, or unset-as-unlimited fails. 3) Review amplification tests: under forced failure/retry, spend hits a documented token or $ bound (not unbounded growth). 4) PASS only if config coverage is complete and ≤90-day test evidence holds. AGN-M2 step limits help agents but do not alone prove client retry bounds; COST-M1 ceilings do not substitute for preventing retry storms.\n",
+      "falsePositiveGuidance": "Do not pass prompt-only “limit retries” instructions. Do not pass CI job retries or generic HTTP retries that do not cover AI/model completion paths. Do not pass AGN-M2 alone when non-agent AI clients lack finite maxRetries. Do not pass COST-M1 enforce-on-exceed alone without retry/loop policy evidence. Do not pass backoff without a finite max retry count. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Retry and loop policies must prevent unbounded cost amplification",
-        "Retain evidence artifacts required by this Check, starting with: Retry/backoff and agent-loop budget config + amplification tests",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Set finite maxRetries + exponential backoff on all production AI/model clients; fail closed when unset",
+        "Cap agent/client loop iterations; align with AGN-M2 where agents are in scope",
+        "Add an amplification test that forces failure/retry and asserts a token or $ ceiling; retain under imports/ai-retry-amplification/",
+        "Alert when retry rates spike so operators can tune without removing bounds"
       ],
       "references": [
         {
@@ -2901,21 +2912,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "COST-M1",
         "COST-M2",
-        "COST-R1",
-        "COST-R2",
-        "COST-R3"
+        "AGN-M2",
+        "PERF-M1",
+        "REL-M1"
       ],
       "tags": [
         "cost-optimization",
         "mandatory",
-        "manual"
+        "hybrid",
+        "retry",
+        "amplification"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -2926,33 +2935,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "COST-R1",
       "category": "cost-optimization",
       "title": "Production systems should have caching for idempotent or repeated prompts where safe",
-      "description": "Caching for idempotent or repeated prompts where safe",
-      "whyItMatters": "Caching for idempotent or repeated prompts where safe Failing this leaves a production gap against: Cache enabled for documented idempotent paths; sensitive/personalized prompts are excluded; hit-rate and savings reported for ≥30 days",
+      "description": "Production AI systems should cache prompt/response results for documented idempotent or repeated paths, with explicit exclusions for sensitive or personalized prompts, and report hit-rate and savings for ≥30 days.\n",
+      "whyItMatters": "Identical or near-identical completions burned on every request waste tokens and latency. Caching safe idempotent paths cuts spend without changing answers; caching personalized or sensitive prompts leaks data across users or sessions. Hit-rate and savings reports prove the control is operating—not just that a cache library is imported.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Cache enabled for documented idempotent paths; sensitive/personalized prompts are excluded; hit-rate and savings reported for ≥30 days",
+      "passCondition": "Cache is enabled for documented idempotent/repeated prompt paths; sensitive/personalized prompts are excluded; hit-rate and savings are reported for a window of ≥30 days (report measuredAt within the last 90 days).\n",
       "evidenceRequired": [
-        "Prompt/response cache config with safety exclusions + hit-rate report for 30 days"
+        "Prompt/response cache config naming idempotent paths and safety exclusions",
+        "Hit-rate and savings report covering ≥30 days (import or dashboard export)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-prompt-cache-config",
+            "params": {
+              "hint": "Discover prompt/response/semantic cache config for AI workloads and exclusion rules for sensitive or personalized prompts.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Prompt/response cache config with safety exclusions + hit-rate report for 30 days"
+              "hint": "If automation cannot prove hit-rate/savings, attest cache config with exclusions plus a ≥30-day report (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Caching for idempotent or repeated prompts where safe): inspect current evidence for [Prompt/response cache config with safety exclusions + hit-rate report for 30 days] and confirm the pass condition holds — Cache enabled for documented idempotent paths; sensitive/personalized prompts are excluded; hit-rate and savings reported for ≥30 days",
-      "falsePositiveGuidance": "(Cost Optimization): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI traffic with potentially cacheable prompts. If none (or all paths are documented non-cacheable/sensitive), score NOT_APPLICABLE. 2) Locate cache config (provider prompt cache, app semantic/exact cache, gateway). 3) Confirm documented idempotent paths and explicit exclusions for sensitive/personalized prompts. 4) Review hit-rate and savings for ≥30 days. 5) PASS only if config + exclusions + report hold. HTTP CDN or generic Redis without AI prompt scope does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a cache library import without enabled paths and exclusions. Do not pass caching of user-specific or secret-bearing prompts. Do not pass browser/HTTP caches for static assets as prompt caching. Do not pass COST-M1 spend limits or COST-R2 model routing as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Caching for idempotent or repeated prompts where safe",
-        "Retain evidence artifacts required by this Check, starting with: Prompt/response cache config with safety exclusions + hit-rate report for 30 days",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Enable exact or semantic cache on documented idempotent AI paths; fail closed for unmarked sensitive paths",
+        "Document and enforce exclusions for personalized, PII, or secret-bearing prompts",
+        "Export ≥30-day hit-rate and savings under imports/ai-prompt-cache/",
+        "Alert when hit-rate collapses so regressions are visible"
       ],
       "references": [
         {
@@ -2969,19 +2985,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "COST-M2",
         "COST-M3",
         "COST-R2",
-        "COST-R3"
+        "PRI-M1",
+        "SEC2-M2"
       ],
       "tags": [
         "cost-optimization",
         "recommended",
-        "manual"
+        "hybrid",
+        "prompt-cache"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -2991,34 +3005,42 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "COST-R2",
       "category": "cost-optimization",
-      "title": "Production systems should have model routing: cheaper models for low-risk tasks with eval coverage",
-      "description": "Model routing: cheaper models for low-risk tasks with eval coverage",
-      "whyItMatters": "Model routing: cheaper models for low-risk tasks with eval coverage Failing this leaves a production gap against: Low-risk task classes route to cheaper models by default; eval shows quality within tolerance vs premium baseline; misroute rate monitored ≤30 days",
+      "title": "Production systems should have cheaper-model routing for low-risk tasks with eval coverage",
+      "description": "Production AI systems should route documented low-risk task classes to cheaper models by default, with eval coverage proving quality within tolerance of a premium baseline and misroute rate monitored ≤30 days.\n",
+      "whyItMatters": "Sending every request to a frontier model burns cost on classification, extraction, and other low-risk work that smaller models handle well. Blind cheap routing without eval coverage silently degrades quality; routing without misroute monitoring drifts as task mix changes. Policy plus measured eval and misroute rates keep cost wins durable.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Low-risk task classes route to cheaper models by default; eval shows quality within tolerance vs premium baseline; misroute rate monitored ≤30 days",
+      "passCondition": "Documented low-risk task classes route to cheaper models by default; eval shows quality within tolerance versus a premium baseline; misroute rate is monitored for a window of ≤30 days (report measuredAt within the last 90 days).\n",
       "evidenceRequired": [
-        "Model-routing policy (cheap vs premium) + eval coverage report for low-risk routed tasks"
+        "Model-routing policy mapping low-risk task classes to cheap vs premium models",
+        "Eval coverage report for low-risk routed tasks vs premium baseline",
+        "Misroute-rate monitoring evidence covering ≤30 days"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-model-routing-config",
+            "params": {
+              "hint": "Discover model-routing / router policy that sends low-risk tasks to cheaper models (vs premium/frontier defaults).\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Model-routing policy (cheap vs premium) + eval coverage report for low-risk routed tasks"
+              "hint": "If automation cannot prove eval and misroute monitoring, attest routing policy plus ≤30-day eval and misroute evidence (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Model routing: cheaper models for low-risk tasks with eval coverage): inspect current evidence for [Model-routing policy (cheap vs premium) + eval coverage report for low-risk routed tasks] and confirm the pass condition holds — Low-risk task classes route to cheaper models by default; eval shows quality within tolerance vs premium baseline; misroute rate monitored ≤30 days",
-      "falsePositiveGuidance": "(Cost Optimization): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI with multiple model choices / task classes. If a single fixed model with no routing surface, score NOT_APPLICABLE. 2) Locate routing policy (cheap vs premium by task class). 3) Review eval coverage for routed low-risk classes vs premium baseline within documented tolerance. 4) Confirm misroute rate monitored ≤30 days. 5) PASS only if policy + eval + misroute evidence hold. COST-R1 caching and MOD-M1 model pins do not substitute.\n",
+      "falsePositiveGuidance": "Do not pass a hard-coded single cheap model with no task-class policy. Do not pass routing without eval coverage for routed classes. Do not pass prompt-only “use the small model” instructions. Do not pass A/B experiments without a production default route. Do not pass MOD-M1 pin evidence alone. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Model routing: cheaper models for low-risk tasks with eval coverage",
-        "Retain evidence artifacts required by this Check, starting with: Model-routing policy (cheap vs premium) + eval coverage report for low-risk routed tasks",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Define low-risk task classes and default them to cheaper models in router/config",
+        "Add eval suites comparing cheap vs premium quality within tolerance; retain under imports/ai-model-routing/",
+        "Monitor misroute rate ≤30 days and alert when it exceeds threshold",
+        "Document break-glass premium overrides with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -3032,22 +3054,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "relatedRules": [
         "COST-M1",
-        "COST-M2",
-        "COST-M3",
         "COST-R1",
-        "COST-R3"
+        "COST-R3",
+        "MOD-M1",
+        "EVL-M1",
+        "EVL-M2"
       ],
       "tags": [
         "cost-optimization",
         "recommended",
-        "manual"
+        "hybrid",
+        "model-routing"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -3057,34 +3077,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "COST-R3",
       "category": "cost-optimization",
-      "title": "Production systems should have finOps reviews of AI unit economics per product",
-      "description": "FinOps reviews of AI unit economics per product",
-      "whyItMatters": "FinOps reviews of AI unit economics per product Failing this leaves a production gap against: Each customer-facing AI product has unit-cost metrics for the last quarter; review occurred ≤90 days with owners for outliers above documented thresholds",
+      "title": "Production systems should have FinOps reviews of AI unit economics per product",
+      "description": "Each customer-facing AI product should publish unit-cost metrics (e.g. cost per successful task or journey) for the last quarter and undergo a FinOps review ≤90 days with named owners for outliers above documented thresholds.\n",
+      "whyItMatters": "Aggregate spend dashboards hide which products are economically unsafe. Without per-product unit economics, teams cannot prioritize caching, routing, or feature cuts. Reviews without outlier owners leave known cost problems unowned. Quarterly metrics plus a dated review with owners convert FinOps from a report into an operating rhythm.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Each customer-facing AI product has unit-cost metrics for the last quarter; review occurred ≤90 days with owners for outliers above documented thresholds",
+      "passCondition": "Each customer-facing AI product has unit-cost metrics for the last quarter; a FinOps review occurred within the last 90 days with named owners for outliers above documented thresholds (review measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Per-product AI unit-economics report (cost per successful task / journey) + FinOps review minutes"
+        "Per-product AI unit-economics report (cost per successful task / journey) for the last quarter",
+        "FinOps review minutes ≤90 days with outlier owners and thresholds"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-finops-unit-economics",
+            "params": {
+              "hint": "Discover unit-cost / cost-per-task / FinOps product economics metrics, dashboards-as-code, or review runbooks for AI products.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Per-product AI unit-economics report (cost per successful task / journey) + FinOps review minutes"
+              "hint": "If automation cannot prove the quarterly review, attest per-product unit-cost metrics plus FinOps minutes ≤90 days with outlier owners.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (FinOps reviews of AI unit economics per product): inspect current evidence for [Per-product AI unit-economics report (cost per successful task / journey) + FinOps review minutes] and confirm the pass condition holds — Each customer-facing AI product has unit-cost metrics for the last quarter; review occurred ≤90 days with owners for outliers above documented thresholds",
-      "falsePositiveGuidance": "(Cost Optimization): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm customer-facing AI products exist. If none, score NOT_APPLICABLE. 2) Locate unit-cost metrics per product for the last quarter (cost per successful task/journey or equivalent). Aggregate $ only without unit metrics fails. 3) Review FinOps minutes ≤90 days covering those products. 4) Confirm documented thresholds and named owners for outliers. 5) PASS only if metrics + review + owners hold. COST-M2 alerts and COST-R2 routing do not substitute.\n",
+      "falsePositiveGuidance": "Do not pass provider invoices or total spend charts without per-product unit metrics. Do not pass a one-time spreadsheet without a ≤90-day review. Do not pass reviews that list outliers without owners. Do not pass COST-M1/M2 alone. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: FinOps reviews of AI unit economics per product",
-        "Retain evidence artifacts required by this Check, starting with: Per-product AI unit-economics report (cost per successful task / journey) + FinOps review minutes",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Instrument cost-per-successful-task (or journey) per customer-facing AI product",
+        "Schedule FinOps reviews at least quarterly; retain minutes under imports/ai-finops-unit-economics/",
+        "Document outlier thresholds and assign owners with due dates",
+        "Tie outlier remediations to COST-R1/R2 or product roadmap items"
       ],
       "references": [
         {
@@ -3099,21 +3126,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "COST-M1",
         "COST-M2",
-        "COST-M3",
         "COST-R1",
-        "COST-R2"
+        "COST-R2",
+        "ORG-M2",
+        "ORG-R3"
       ],
       "tags": [
         "cost-optimization",
         "recommended",
-        "manual"
+        "hybrid",
+        "finops",
+        "unit-economics"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -5487,37 +5513,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "HUM-M1",
       "category": "human-approval",
       "title": "High-impact action classes must be inventoried and gated by human approval in production",
-      "description": "High-impact action classes shall be inventoried and gated by human approval in production",
-      "whyItMatters": "High-impact action classes shall be inventoried and gated by human approval in production Failing this leaves a production gap against: 100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests fail at 100%",
+      "description": "Every high-impact action class an AI system or agent can invoke in production (write/irreversible/financial/external-comms/privileged side effects) shall be listed in a versioned inventory and blocked until a human approval gate succeeds. Ungated execution of inventoried classes shall fail closed.\n",
+      "whyItMatters": "Agents and tools that can move money, delete data, message customers, or change production state without a human gate convert model mistakes into irreversible incidents. An incomplete inventory leaves shadow paths ungated; gates without fail-closed enforcement are theater. Inventories plus ungated deny tests make high-impact agency reviewable before blast radius grows.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests fail at 100%",
+      "passCondition": "100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests for those classes fail at 100%.\n",
       "evidenceRequired": [
-        "High-impact action inventory + gate wiring evidence"
+        "Versioned high-impact action inventory (class, risk tier, gate id/owner)",
+        "Gate wiring evidence (policy/config) mapping each class to an approval control",
+        "Ungated execution test results showing 100% deny/fail-closed for inventoried classes"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
             "id": "repo-human-approval-config",
-            "params": {}
+            "params": {
+              "hint": "Discover high-impact action inventory and human-approval gate wiring (HITL, approval tokens, break-glass) for production agent/tool paths.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "High-impact action inventory + gate wiring evidence"
+              "hint": "If automation cannot prove ungated denies, attest the inventory plus ungated execution results at 100% fail-closed for every inventoried class.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (High-impact action classes must be inventoried and gated by human approval in production): inspect current evidence for [High-impact action inventory + gate wiring evidence] and confirm the pass condition holds — 100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests fail at 100%",
-      "falsePositiveGuidance": "(Human Approval): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Define high-impact for this system (writes, irreversible, financial, external communications, privileged admin). If none apply, score NOT_APPLICABLE with rationale. 2) Build/open the inventory of action classes and confirm each maps to a production approval gate. 3) Review ungated execution tests (or imports): attempts without approval must fail at 100%. 4) PASS only if inventory coverage + gate wiring + ungated deny evidence all hold.\n",
+      "falsePositiveGuidance": "Do not pass on a UI confirm dialog that agents/APIs can bypass. Do not pass because HUM-M2 logs exist without gates. Do not pass a partial inventory that omits agent/tool paths. Prompt-only “ask a human” without a runtime gate fails. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: High-impact action classes must be inventoried and gated by human approval in production",
-        "Retain evidence artifacts required by this Check, starting with: High-impact action inventory + gate wiring evidence",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish a versioned high-impact action inventory with risk tier and gate owner per class",
+        "Wire fail-closed approval gates on every inventoried class in production",
+        "Add ungated execution tests for each class; gate releases on 100% deny",
+        "Retain inventory + ungated suite under imports/human-approval-gates/"
       ],
       "references": [
         {
@@ -5525,7 +5555,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -5533,19 +5563,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "HUM-M2",
         "HUM-M3",
         "HUM-M4",
-        "HUM-R1",
-        "HUM-R3"
+        "TOL-M1",
+        "AGN-M1",
+        "AUTHZ-M1"
       ],
       "tags": [
         "human-approval",
         "mandatory",
-        "hybrid"
+        "hybrid",
+        "hitl",
+        "high-impact"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -5556,33 +5586,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "HUM-M2",
       "category": "human-approval",
       "title": "Approval decisions must be logged with actor, context, and outcome",
-      "description": "Approval decisions shall be logged with actor, context, and outcome",
-      "whyItMatters": "Approval decisions shall be logged with actor, context, and outcome Failing this leaves a production gap against: 100% of sampled approvals in last 30 days include actor ID, action context, and approve/deny outcome; schema validation test passes",
+      "description": "Every human approval or denial of a gated high-impact action shall be recorded with actor identity, action context (what was proposed), and approve/deny outcome in a durable audit log that passes schema validation.\n",
+      "whyItMatters": "Gates without attributable logs cannot support incident reconstruction, regulator questions, or insider-abuse review. Missing actor or context turns approvals into unverifiable clicks. Schema-valid logs convert HITL into an auditable control rather than an informal chat ack.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of sampled approvals in last 30 days include actor ID, action context, and approve/deny outcome; schema validation test passes",
+      "passCondition": "100% of sampled approvals in the last 30 days include actor ID, action context, and approve/deny outcome; schema validation for the approval audit log passes.\n",
       "evidenceRequired": [
-        "Approval audit log schema + sample records"
+        "Approval audit log schema (actor, context, outcome, timestamp) as code or documented contract",
+        "Sample approval records from the last 30 days covering required fields",
+        "Schema validation test or import proving samples conform"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-approval-audit-log",
+            "params": {
+              "hint": "Discover approval audit log schema/emitters and tests that require actor, context, and outcome fields.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Approval audit log schema + sample records"
+              "hint": "If automation cannot prove sample coverage, attest ≤30-day samples with 100% required fields plus a passing schema validation result.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Approval decisions must be logged with actor, context, and outcome): inspect current evidence for [Approval audit log schema + sample records] and confirm the pass condition holds — 100% of sampled approvals in last 30 days include actor ID, action context, and approve/deny outcome; schema validation test passes",
-      "falsePositiveGuidance": "(Human Approval): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm gated approvals exist (else NOT_APPLICABLE with HUM-M1 N/A or no gates). 2) Open the audit log schema; require actor ID, action context, and approve/deny outcome (plus timestamp). 3) Sample approvals from the last 30 days; 100% must include those fields. 4) Confirm schema validation tests or imports pass. 5) PASS only if schema + complete samples hold.\n",
+      "falsePositiveGuidance": "Do not pass on application access logs that omit action context. Do not pass chat transcripts as the approval system of record. Do not pass schemas without recent samples. Sibling Checks (gates, bypass tests) do not prove audit completeness. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Approval decisions must be logged with actor, context, and outcome",
-        "Retain evidence artifacts required by this Check, starting with: Approval audit log schema + sample records",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Define and version an approval audit schema with actor, context, outcome, and timestamp",
+        "Emit durable records on every approve/deny; block emit paths that omit required fields",
+        "Add schema validation tests; retain ≤30-day sample export under imports/human-approval-audit/",
+        "Alert on approval events missing required fields"
       ],
       "references": [
         {
@@ -5590,27 +5628,24 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
       "relatedRules": [
         "HUM-M1",
         "HUM-M3",
-        "HUM-M4",
-        "HUM-R1",
-        "HUM-R3"
+        "OBS-M1",
+        "CMP-M2"
       ],
       "tags": [
         "human-approval",
         "mandatory",
-        "manual"
+        "hybrid",
+        "audit-log"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -5621,33 +5656,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "HUM-M3",
       "category": "human-approval",
       "title": "Approval must not be bypassable via alternate agent or API paths",
-      "description": "Approval shall not be bypassable via alternate agent or API paths",
-      "whyItMatters": "Approval shall not be bypassable via alternate agent or API paths Failing this leaves a production gap against: Automated or reviewed tests attempt bypass via alternate paths; 0 successful ungated high-impact executions",
+      "description": "Human approval gates for high-impact actions shall apply on every entry path (UI, API, agent/tool, batch/job)—not only the primary console. Alternate-path bypass tests shall show 0 successful ungated high-impact executions.\n",
+      "whyItMatters": "A gate that exists only in the web UI is not a control: agents, internal APIs, and cron jobs routinely hit the same side effects. Attackers and confused deputies prefer the ungated path. Bypass tests across entry points prove the gate is a platform invariant, not a frontend courtesy.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Automated or reviewed tests attempt bypass via alternate paths; 0 successful ungated high-impact executions",
+      "passCondition": "Automated or reviewed bypass tests cover alternate UI, API, and agent/job entry points for inventoried high-impact actions; 0 successful ungated high-impact executions in those tests.\n",
       "evidenceRequired": [
-        "Bypass-path threat tests across UI, API, and agent entry points"
+        "Bypass-path threat model or test matrix across UI, API, and agent/job entry points",
+        "Test results showing 0 successful ungated high-impact executions"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-approval-bypass-tests",
+            "params": {
+              "hint": "Discover bypass/negative tests that attempt high-impact actions via alternate API/agent/job paths without approval.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Bypass-path threat tests across UI, API, and agent entry points"
+              "hint": "If automation cannot prove coverage, attest a reviewed bypass suite across UI/API/agent paths with 0 successful ungated executions.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Approval must not be bypassable via alternate agent or API paths): inspect current evidence for [Bypass-path threat tests across UI, API, and agent entry points] and confirm the pass condition holds — Automated or reviewed tests attempt bypass via alternate paths; 0 successful ungated high-impact executions",
-      "falsePositiveGuidance": "(Human Approval): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm high-impact gates exist (HUM-M1 scope). 2) List entry paths that can invoke those actions (UI, public/private API, agent tools, batch). 3) Review bypass tests that omit approval tokens/sessions on each path. 4) PASS only if tests (or imports) show 0 successful ungated high-impact executions. A single gated UI with open APIs fails.\n",
+      "falsePositiveGuidance": "Do not pass unit tests of the approval service alone without path coverage. Do not pass network ACLs as a substitute for approval on privileged APIs. Do not pass because HUM-M1 inventory exists without bypass evidence. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Approval must not be bypassable via alternate agent or API paths",
-        "Retain evidence artifacts required by this Check, starting with: Bypass-path threat tests across UI, API, and agent entry points",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Enforce approval checks in the shared authorization/execution layer shared by UI, API, and agents",
+        "Add automated bypass tests for each high-impact class across alternate entry points",
+        "Block releases when bypass suites are missing or any ungated execution succeeds",
+        "Retain bypass results under imports/human-approval-bypass/"
       ],
       "references": [
         {
@@ -5655,27 +5697,25 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
       "relatedRules": [
         "HUM-M1",
         "HUM-M2",
-        "HUM-M4",
-        "HUM-R1",
-        "HUM-R3"
+        "AUTHZ-M1",
+        "AUTHN-M1",
+        "TOL-M1"
       ],
       "tags": [
         "human-approval",
         "mandatory",
-        "manual"
+        "hybrid",
+        "bypass"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -5686,33 +5726,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "HUM-M4",
       "category": "human-approval",
       "title": "Dual control must be required for Level 5 irreversible actions",
-      "description": "Dual control shall be required for Level 5 irreversible actions",
-      "whyItMatters": "Dual control shall be required for Level 5 irreversible actions Failing this leaves a production gap against: PASS if Level 5 irreversible actions are inventoried and 100% of sampled executions show dual approval; 0 single-approver completes in the sample",
+      "description": "Irreversible actions in Level 5 (regulated / highest capability) systems shall require dual control: two distinct authorized humans must approve before execution. Sampled executions shall show dual approval with 0 single-approver completes.\n",
+      "whyItMatters": "At Level 5 blast radius, a single fatigued or compromised approver can authorize irreversible harm. Dual control separates intent from execution and raises the cost of insider or session abuse. Without it, HUM-M1 gates remain single-point-of-failure approvals for the highest stakes.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "PASS if Level 5 irreversible actions are inventoried and 100% of sampled executions show dual approval; 0 single-approver completes in the sample",
+      "passCondition": "Level 5 irreversible action classes are inventoried; 100% of sampled executions of those classes show dual approval by two distinct actors; 0 single-approver completes in the sample.\n",
       "evidenceRequired": [
-        "Dual-control workflow config + sample approval records for irreversible actions"
+        "Inventory of Level 5 irreversible action classes requiring dual control",
+        "Dual-control workflow configuration (two distinct approvers)",
+        "Sample approval records showing dual approval and 0 single-approver completes"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-dual-control-config",
+            "params": {
+              "hint": "Discover dual-control / four-eyes / two-person approval config for irreversible high-impact actions.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Dual-control workflow config + sample approval records for irreversible actions"
+              "hint": "If automation cannot prove samples, attest dual-control config plus sampled records with 100% dual approval and 0 single-approver completes.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Dual control must be required for Level 5 irreversible actions): inspect current evidence for [Dual-control workflow config + sample approval records for irreversible actions] and confirm the pass condition holds — PASS if Level 5 irreversible actions are inventoried and 100% of sampled executions show dual approval; 0 single-approver completes in the sample",
-      "falsePositiveGuidance": "(Human Approval): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the system is assessed at requiredFromLevel ≥5 / Level 5 scope; if not in Level 5 scope, score NOT_APPLICABLE. 2) Inventory irreversible action classes requiring dual control. 3) Verify workflow config requires two distinct approvers. 4) Sample recent executions: 100% dual approval, 0 single-approver. 5) PASS only if inventory + config + sample all hold.\n",
+      "falsePositiveGuidance": "Do not pass two clicks by the same user/session as dual control. Do not pass maker-checker that allows the same principal both roles. Do not apply this Check as a Level 3 substitute—use HUM-M1/M3 for single-gate systems. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Dual control must be required for Level 5 irreversible actions",
-        "Retain evidence artifacts required by this Check, starting with: Dual-control workflow config + sample approval records for irreversible actions",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Mark irreversible Level 5 actions and require two distinct approver identities in workflow config",
+        "Reject dual-control completions where both approvals share the same actor or session",
+        "Export dual-control samples under imports/human-dual-control/ for assessments",
+        "Alert on single-approver attempts against dual-control classes"
       ],
       "references": [
         {
@@ -5720,7 +5768,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -5728,19 +5776,18 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "HUM-M1",
         "HUM-M2",
         "HUM-M3",
-        "HUM-R1",
-        "HUM-R3"
+        "ORG-M4",
+        "CHG-M1"
       ],
       "tags": [
         "human-approval",
         "mandatory",
-        "manual"
+        "hybrid",
+        "dual-control",
+        "level-5"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 3,
         "requiredFromLevel": 5
       },
@@ -5751,33 +5798,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "HUM-R1",
       "category": "human-approval",
       "title": "Production systems should have risk-based UI showing tool args, diffs, and confidence before approve",
-      "description": "Risk-based UI showing tool args, diffs, and confidence before approve",
-      "whyItMatters": "Risk-based UI showing tool args, diffs, and confidence before approve Failing this leaves a production gap against: High-impact approvals display tool args, change diff (or equivalent), and confidence/risk; ≥10 sampled approvals in 90 days show those fields populated",
+      "description": "High-impact approval experiences should present tool arguments, a change diff (or equivalent preview), and confidence/risk context before the human approves or denies—so decisions are informed, not rubber-stamped.\n",
+      "whyItMatters": "Approvers who see only “Approve action?” absorb model risk without evidence. Hidden tool args and missing diffs produce rubber-stamp HITL that fails under incident review. Surfacing args, diffs, and confidence makes human judgment real and measurable in sampled approvals.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "High-impact approvals display tool args, change diff (or equivalent), and confidence/risk; ≥10 sampled approvals in 90 days show those fields populated",
+      "passCondition": "High-impact approvals display tool args, change diff (or equivalent), and confidence/risk; ≥10 sampled approvals in the last 90 days show those fields populated.\n",
       "evidenceRequired": [
-        "Approval UI screenshots/spec showing tool args, diffs, and confidence + sample approval records"
+        "Approval UI/spec showing tool args, diff/preview, and confidence/risk fields",
+        "≥10 sampled approval records (≤90 days) with those fields populated"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-approval-ui-context",
+            "params": {
+              "hint": "Discover approval UI/components or schemas that render tool args, diffs/previews, and confidence/risk before approve.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Approval UI screenshots/spec showing tool args, diffs, and confidence + sample approval records"
+              "hint": "If automation cannot prove samples, attest UI/spec evidence plus ≥10 sampled approvals ≤90 days with args, diff, and confidence populated.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Risk-based UI showing tool args, diffs, and confidence before approve): inspect current evidence for [Approval UI screenshots/spec showing tool args, diffs, and confidence + sample approval records] and confirm the pass condition holds — High-impact approvals display tool args, change diff (or equivalent), and confidence/risk; ≥10 sampled approvals in 90 days show those fields populated",
-      "falsePositiveGuidance": "(Human Approval): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm high-impact approval UI/flows exist. 2) Verify the approve surface shows tool args, diff/preview, and confidence/risk (screenshots or spec). 3) Sample ≥10 approvals from the last 90 days; required fields must be populated. 4) PASS only if UI/spec + sample volume/completeness hold. Voice/async channels need equivalent context payloads, not only web UI.\n",
+      "falsePositiveGuidance": "Do not pass generic modal confirms without args/diff. Do not pass logs that store fields the UI never showed the approver. Do not pass <10 samples or samples older than 90 days. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Risk-based UI showing tool args, diffs, and confidence before approve",
-        "Retain evidence artifacts required by this Check, starting with: Approval UI screenshots/spec showing tool args, diffs, and confidence + sample approval records",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Extend the approval UX to require tool args, diff/preview, and confidence/risk before enable approve",
+        "Persist those fields on the approval record for audit (align with HUM-M2)",
+        "Sample ≥10 recent approvals per assessment window; export under imports/human-approval-ui/",
+        "Block approve CTA when required context fields are missing"
       ],
       "references": [
         {
@@ -5785,27 +5839,24 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
       "relatedRules": [
         "HUM-M1",
         "HUM-M2",
-        "HUM-M3",
-        "HUM-M4",
-        "HUM-R3"
+        "HUM-R3",
+        "DX-M1"
       ],
       "tags": [
         "human-approval",
         "recommended",
-        "manual"
+        "hybrid",
+        "approval-ui"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -5815,34 +5866,42 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "HUM-R3",
       "category": "human-approval",
-      "title": "Production systems should have sLA for approval queues to avoid unsafe workarounds",
-      "description": "SLA for approval queues to avoid unsafe workarounds",
-      "whyItMatters": "SLA for approval queues to avoid unsafe workarounds Failing this leaves a production gap against: Documented SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is within SLA or open exceptions have owners and expiry",
+      "title": "Production systems should have an SLA for approval queues to avoid unsafe workarounds",
+      "description": "Approval queues for high-impact actions should have a documented service level (for example p95 queue age) and measured performance for the last 30 days within that SLA—or open exceptions with named owners and expiry—so operators do not bypass gates under backlog pressure.\n",
+      "whyItMatters": "Slow approval queues create shadow paths: engineers disable gates, share break-glass tokens, or move work to ungated APIs. An SLA with measured queue age makes fatigue and backlog visible before HUM-M3 bypasses become culture. Exceptions without owners and expiry become permanent holes.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Documented SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is within SLA or open exceptions have owners and expiry",
+      "passCondition": "A documented approval-queue SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is within SLA, or every open exception has a named owner and expiry ≤90 days.\n",
       "evidenceRequired": [
-        "Approval-queue SLA definition + queue age/metrics dashboard for the last 30 days"
+        "Documented approval-queue SLA (metric, threshold, owner)",
+        "Queue age/metrics evidence for the last 30 days (dashboard export or report)",
+        "Open exception register with owners and expiry when SLA is breached"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-approval-queue-sla",
+            "params": {
+              "hint": "Discover approval-queue SLA docs/config and queue-age metrics or alerting for human approval backlogs.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Approval-queue SLA definition + queue age/metrics dashboard for the last 30 days"
+              "hint": "If automation cannot prove metrics, attest SLA definition plus ≤30-day p95 measurement within SLA (or exceptions with owner and expiry).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (SLA for approval queues to avoid unsafe workarounds): inspect current evidence for [Approval-queue SLA definition + queue age/metrics dashboard for the last 30 days] and confirm the pass condition holds — Documented SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is within SLA or open exceptions have owners and expiry",
-      "falsePositiveGuidance": "(Human Approval): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm approval queues exist for high-impact actions. 2) Open the SLA (metric + numeric threshold + owner). 3) Review last-30-day queue metrics (p95 or equivalent). 4) If breached, verify each open exception has owner and expiry ≤90 days. 5) PASS only if SLA + in-SLA measurement or valid exceptions hold.\n",
+      "falsePositiveGuidance": "Do not pass a generic “we respond quickly” without a numeric SLA. Do not pass ticket SLAs unrelated to AI/action approval queues. Do not pass breached SLAs without owned, time-boxed exceptions. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: SLA for approval queues to avoid unsafe workarounds",
-        "Retain evidence artifacts required by this Check, starting with: Approval-queue SLA definition + queue age/metrics dashboard for the last 30 days",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Define a numeric approval-queue SLA (e.g. p95 age ≤ N minutes) with a named owner",
+        "Instrument queue age; alert on SLO burn; publish a 30-day dashboard",
+        "Require owner+expiry on any SLA exception; auto-expire waivers",
+        "Export SLA + metrics under imports/human-approval-sla/ for assessments"
       ],
       "references": [
         {
@@ -5850,27 +5909,26 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
       "relatedRules": [
         "HUM-M1",
-        "HUM-M2",
         "HUM-M3",
-        "HUM-M4",
-        "HUM-R1"
+        "HUM-R1",
+        "PERF-M1",
+        "INC-M1"
       ],
       "tags": [
         "human-approval",
         "recommended",
-        "manual"
+        "hybrid",
+        "sla",
+        "queue"
       ],
       "applicability": {
-        "technologies": [
-          "a2a",
-          "mcp"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },

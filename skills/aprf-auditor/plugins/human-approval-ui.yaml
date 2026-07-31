@@ -1,0 +1,24 @@
+id: human-approval-ui
+title: Risk-based approval UI context (HUM-R1)
+version: "0.2.0"
+executor: collectors/human-approval.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-approval-ui-context]
+inputs:
+  - "Target repo (approval UI showing args/diff/confidence)"
+  - "Optional samples: aprf-assessment/imports/human-approval-ui/*.{json}"
+collect:
+  - "Detect approval UI context field signals"
+  - "Ingest ≥10 samples; write human-approval-ui-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/human-approval-ui/*"
+  signals: [human-approval-ui, hum-r1, repo-approval-ui-context]
+mapsToChecks: [HUM-R1]
+whenUnavailable: >
+  UI signals alone are PARTIAL. PASS needs ≥10 samples with args/diff/confidence
+  at 100% + measuredAt ≤90d.
+live:
+  required: false
+  note: Offline heuristics + optional imported approval UI samples.

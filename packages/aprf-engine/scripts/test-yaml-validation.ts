@@ -1,5 +1,6 @@
 /**
- * Unit tests for Check YAML lint (schema-adjacent + spec mapping).
+ * Unit tests for Check YAML lint (schema-adjacent + spec mapping) plus a full
+ * by-domain catalog sweep (same checks as validate.ts).
  * Run: npm run test:yaml -w @stackrail-io/aprf-engine
  */
 import { parse as parseYaml } from "yaml";
@@ -13,9 +14,11 @@ import {
   lintTitleObligation,
   lintYamlRule,
   missingMandatoryFields,
+  lintRawYamlNoEllipsis,
   type SpecCheckRef,
   type YamlLintContext,
 } from "../src/yaml-lint.js";
+import { validateAllByDomainYaml } from "./validate-catalog.js";
 
 function assert(cond: unknown, msg: string): asserts cond {
   if (!cond) throw new Error(msg);
@@ -148,6 +151,20 @@ assertIncludes(
   }),
   "ASCII ellipsis",
   "ASCII ellipsis rejected",
+);
+assertIncludes(
+  lintRawYamlNoEllipsis("title: incomplete...\n"),
+  "ASCII ellipsis",
+  "raw file ASCII ellipsis rejected",
+);
+assertIncludes(
+  lintRawYamlNoEllipsis("title: incomplete…\n"),
+  "unicode ellipsis",
+  "raw file unicode ellipsis rejected",
+);
+assertNone(
+  lintRawYamlNoEllipsis("title: complete sentence.\n"),
+  "raw file without ellipsis ok",
 );
 assertIncludes(
   lintForbiddenProse({ ...baseRule, title: "TODO fix this" }),
@@ -353,6 +370,26 @@ assertNone(lintYamlRule(baseRule, ctx), "valid fixture passes full lint");
   });
   assert(map.get("SEC-M1")?.gate === "mandatory", "index mandatory");
   assert(map.get("SEC-R1")?.gate === "recommended", "index recommended");
+}
+
+// Full catalog: every by-domain/*.yaml (same path as npm run validate)
+{
+  const catalog = validateAllByDomainYaml();
+  assert(
+    catalog.fileCount > 0,
+    `expected by-domain YAML files, got fileCount=${catalog.fileCount}`,
+  );
+  assert(
+    catalog.errors.length === 0,
+    `by-domain catalog lint failed (${catalog.errors.length}):\n  - ${catalog.errors.slice(0, 20).join("\n  - ")}${catalog.errors.length > 20 ? `\n  ... +${catalog.errors.length - 20} more` : ""}`,
+  );
+  assert(
+    catalog.ruleCount === catalog.fileCount,
+    `loader ruleCount (${catalog.ruleCount}) != by-domain fileCount (${catalog.fileCount})`,
+  );
+  console.log(
+    `aprf-engine by-domain catalog OK (${catalog.fileCount} files, ${catalog.ruleCount} rules, spec-mapped=${catalog.specMappedCount})`,
+  );
 }
 
 console.log("aprf-engine yaml-validation tests OK");

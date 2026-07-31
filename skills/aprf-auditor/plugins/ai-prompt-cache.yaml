@@ -1,0 +1,29 @@
+id: ai-prompt-cache
+title: Prompt/response cache with safety exclusions and hit-rate report (COST-R1)
+version: "0.2.0"
+executor: collectors/ai-prompt-cache.ts
+evidenceClass: runtime-config
+alsoEmits: [code]
+detectorIds: [repo-prompt-cache-config]
+inputs:
+  - "Target repo (prompt/response/semantic cache + exclusion rules)"
+  - "Optional report: aprf-assessment/imports/ai-prompt-cache/*.{json}"
+collect:
+  - "Detect prompt/response cache config for AI workloads"
+  - "Detect sensitive/personalized exclusion signals"
+  - "Ingest ≥30-day hit-rate/savings report; write ai-prompt-cache-report.json"
+emits:
+  nodeClass: runtime-config
+  refPattern: "aprf-assessment/imports/ai-prompt-cache/*"
+  signals:
+    - ai-prompt-cache
+    - cost-r1
+    - repo-prompt-cache-config
+mapsToChecks: [COST-R1]
+whenUnavailable: >
+  Cache config alone is PARTIAL. COST-R1 PASS needs exclusions plus imported
+  hitRateReported + savingsReported with reportWindowDays ≥30 and measuredAt
+  ≤90 days. No cacheable production prompts → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline heuristics + optional imported hit-rate/savings JSON.

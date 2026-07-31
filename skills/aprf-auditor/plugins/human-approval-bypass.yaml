@@ -1,0 +1,23 @@
+id: human-approval-bypass
+title: Approval bypass-path tests (HUM-M3)
+version: "0.2.0"
+executor: collectors/human-approval.ts
+evidenceClass: policy
+alsoEmits: [code, ci]
+detectorIds: [repo-approval-bypass-tests]
+inputs:
+  - "Target repo (bypass/negative tests across UI/API/agent)"
+  - "Optional suite: aprf-assessment/imports/human-approval-bypass/*.{json}"
+collect:
+  - "Detect bypass-path test signals"
+  - "Ingest bypass results; write human-approval-bypass-report.json"
+emits:
+  nodeClass: policy
+  refPattern: "aprf-assessment/imports/human-approval-bypass/*"
+  signals: [human-approval-bypass, hum-m3, repo-approval-bypass-tests]
+mapsToChecks: [HUM-M3]
+whenUnavailable: >
+  Tests alone are PARTIAL. PASS needs imported ungatedSuccessCount=0 + measuredAt ≤90d.
+live:
+  required: false
+  note: Offline heuristics + optional imported bypass suite JSON.

@@ -18,6 +18,20 @@ import { agentKillSwitchCollector } from "./agent-kill-switch.ts";
 import { agentSandboxSimCollector } from "./agent-sandbox-sim.ts";
 import { agentRaciOwnershipCollector } from "./agent-raci-ownership.ts";
 import {
+  humanApprovalAuditCollector,
+  humanApprovalBypassCollector,
+  humanApprovalGatesCollector,
+  humanApprovalSlaCollector,
+  humanApprovalUiCollector,
+  humanDualControlCollector,
+} from "./human-approval.ts";
+import { aiSpendLimitsCollector } from "./ai-spend-limits.ts";
+import { aiCostAlertsCollector } from "./ai-cost-alerts.ts";
+import { aiRetryAmplificationCollector } from "./ai-retry-amplification.ts";
+import { aiPromptCacheCollector } from "./ai-prompt-cache.ts";
+import { aiModelRoutingCollector } from "./ai-model-routing.ts";
+import { aiFinopsUnitEconomicsCollector } from "./ai-finops-unit-economics.ts";
+import {
   awsCollector,
   azureCollector,
   gcpCollector,
@@ -43,6 +57,18 @@ export const COLLECTORS: Collector[] = [
   agentGoalPolicyCollector,
   agentSandboxSimCollector,
   agentRaciOwnershipCollector,
+  humanApprovalGatesCollector,
+  humanApprovalAuditCollector,
+  humanApprovalBypassCollector,
+  humanDualControlCollector,
+  humanApprovalUiCollector,
+  humanApprovalSlaCollector,
+  aiSpendLimitsCollector,
+  aiCostAlertsCollector,
+  aiRetryAmplificationCollector,
+  aiPromptCacheCollector,
+  aiModelRoutingCollector,
+  aiFinopsUnitEconomicsCollector,
   a2aPeerAuthCollector,
   awsCollector,
   azureCollector,

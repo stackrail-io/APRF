@@ -7,8 +7,8 @@ import { readFileSync, readdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { parse as parseYaml } from "yaml";
-import Ajv2020 from "ajv/dist/2020.js";
-import addFormats from "ajv-formats";
+import { createRequire } from "module";
+import type { ErrorObject } from "ajv";
 import type {
   AprfRule,
   CategoryDef,
@@ -19,6 +19,16 @@ import type {
 import { TECHNOLOGIES } from "./types.js";
 import { buildRuleIndex } from "./index-builder.js";
 import { listCatalogDetectorIds } from "./detectors/catalog-ids.js";
+
+// Ajv is CJS; load via createRequire so NodeNext tsc and tsx both work.
+const require = createRequire(import.meta.url);
+const Ajv2020 = require("ajv/dist/2020.js") as new (opts?: object) => {
+  compile: (schema: object) => {
+    (data: unknown): boolean;
+    errors: ErrorObject[] | null | undefined;
+  };
+};
+const addFormats = require("ajv-formats") as (ajv: unknown) => unknown;
 
 export function rulesRootDir(fromFile = import.meta.url): string {
   const here = dirname(fileURLToPath(fromFile));
@@ -164,7 +174,7 @@ export function loadRulesFromDisk(rulesRoot?: string): {
 
     if (!validate(raw)) {
       const detail = (validate.errors ?? [])
-        .map((e) => `${e.instancePath || "/"} ${e.message}`)
+        .map((e: ErrorObject) => `${e.instancePath || "/"} ${e.message}`)
         .join("; ");
       errors.push(`${file}: schema invalid: ${detail}`);
       continue;

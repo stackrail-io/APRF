@@ -1,0 +1,24 @@
+id: human-dual-control
+title: Dual control for Level 5 irreversible actions (HUM-M4)
+version: "0.2.0"
+executor: collectors/human-approval.ts
+evidenceClass: policy
+alsoEmits: [code]
+detectorIds: [repo-dual-control-config]
+inputs:
+  - "Target repo (dual-control / four-eyes workflows)"
+  - "Optional samples: aprf-assessment/imports/human-dual-control/*.{json}"
+collect:
+  - "Detect dual-control config signals"
+  - "Ingest dual-approval samples; write human-dual-control-report.json"
+emits:
+  nodeClass: policy
+  refPattern: "aprf-assessment/imports/human-dual-control/*"
+  signals: [human-dual-control, hum-m4, repo-dual-control-config]
+mapsToChecks: [HUM-M4]
+whenUnavailable: >
+  Config alone is PARTIAL. PASS needs dualApprovalPct=100, singleApproverCount=0,
+  measuredAt ≤90d. No Level 5 irreversible actions → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline heuristics + optional imported dual-control samples.

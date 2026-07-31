@@ -1,58 +1,77 @@
 id: "HUM-M1"
 category: "human-approval"
 title: "High-impact action classes must be inventoried and gated by human approval in production"
-description: "High-impact action classes shall be inventoried and gated by human approval in production"
-whyItMatters: "High-impact action classes shall be inventoried and gated by human approval in
-  production Failing this leaves a production gap against: 100% of inventoried high-impact action
-  classes have an approval gate in production; ungated execution tests fail at 100%"
+description: >
+  Every high-impact action class an AI system or agent can invoke in production
+  (write/irreversible/financial/external-comms/privileged side effects) shall be
+  listed in a versioned inventory and blocked until a human approval gate
+  succeeds. Ungated execution of inventoried classes shall fail closed.
+whyItMatters: >
+  Agents and tools that can move money, delete data, message customers, or
+  change production state without a human gate convert model mistakes into
+  irreversible incidents. An incomplete inventory leaves shadow paths ungated;
+  gates without fail-closed enforcement are theater. Inventories plus ungated
+  deny tests make high-impact agency reviewable before blast radius grows.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "100% of inventoried high-impact action classes have an approval gate in production;
-  ungated execution tests fail at 100%"
+passCondition: >
+  100% of inventoried high-impact action classes have an approval gate in
+  production; ungated execution tests for those classes fail at 100%.
 evidenceRequired:
-  - "High-impact action inventory + gate wiring evidence"
+  - "Versioned high-impact action inventory (class, risk tier, gate id/owner)"
+  - "Gate wiring evidence (policy/config) mapping each class to an approval control"
+  - "Ungated execution test results showing 100% deny/fail-closed for inventoried classes"
 detection:
   capability: "hybrid"
   detectors:
     - id: "repo-human-approval-config"
-      params: {}
+      params:
+        hint: >
+          Discover high-impact action inventory and human-approval gate wiring
+          (HITL, approval tokens, break-glass) for production agent/tool paths.
     - id: "manual-attest"
       params:
-        hint: "High-impact action inventory + gate wiring evidence"
-manualVerification: "For this Check (High-impact action classes must be inventoried and gated by
-  human approval in production): inspect current evidence for [High-impact action inventory + gate
-  wiring evidence] and confirm the pass condition holds — 100% of inventoried high-impact action
-  classes have an approval gate in production; ungated execution tests fail at 100%"
-falsePositiveGuidance: "(Human Approval): when automation and attestation disagree, prefer the
-  stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the
-  gap."
+        hint: >
+          If automation cannot prove ungated denies, attest the inventory plus
+          ungated execution results at 100% fail-closed for every inventoried class.
+manualVerification: >
+  1) Define high-impact for this system (writes, irreversible, financial,
+  external communications, privileged admin). If none apply, score NOT_APPLICABLE
+  with rationale. 2) Build/open the inventory of action classes and confirm each
+  maps to a production approval gate. 3) Review ungated execution tests (or
+  imports): attempts without approval must fail at 100%. 4) PASS only if
+  inventory coverage + gate wiring + ungated deny evidence all hold.
+falsePositiveGuidance: >
+  Do not pass on a UI confirm dialog that agents/APIs can bypass. Do not pass
+  because HUM-M2 logs exist without gates. Do not pass a partial inventory that
+  omits agent/tool paths. Prompt-only “ask a human” without a runtime gate fails.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: High-impact action classes must be inventoried and gated by human
-    approval in production"
-  - "Retain evidence artifacts required by this Check, starting with: High-impact action inventory +
-    gate wiring evidence"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish a versioned high-impact action inventory with risk tier and gate owner per class"
+  - "Wire fail-closed approval gates on every inventoried class in production"
+  - "Add ungated execution tests for each class; gate releases on 100% deny"
+  - "Retain inventory + ungated suite under imports/human-approval-gates/"
 references:
   - title: "NIST AI RMF — Govern and Manage (human oversight)"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
-  - title: "OWASP LLM — Excessive Agency"
+  - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
   - "HUM-M2"
   - "HUM-M3"
   - "HUM-M4"
-  - "HUM-R1"
-  - "HUM-R3"
+  - "TOL-M1"
+  - "AGN-M1"
+  - "AUTHZ-M1"
 tags:
   - "human-approval"
   - "mandatory"
   - "hybrid"
+  - "hitl"
+  - "high-impact"
 applicability:
-  technologies:
-    - "a2a"
-    - "mcp"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

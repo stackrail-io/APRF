@@ -1,37 +1,62 @@
 id: "COST-M3"
 category: "cost-optimization"
 title: "Retry and loop policies must prevent unbounded cost amplification"
-description: "Retry and loop policies shall prevent unbounded cost amplification"
-whyItMatters: "Retry and loop policies shall prevent unbounded cost amplification Failing this
-  leaves a production gap against: Max retries and max agent loops are finite for 100% of production
-  AI clients; tests show cost cannot grow without bound under forced failure/retry (bounded token or
-  $ ceiling hit)"
+description: >
+  Production AI clients shall enforce finite retry/backoff and loop budgets so
+  forced failures cannot amplify completions without bound—covering HTTP/SDK
+  clients and agent loops, not prompt-only “try again” guidance.
+whyItMatters: >
+  Provider blips, tool timeouts, and flaky dependencies trigger retry storms
+  that multiply token spend far beyond the original request. Unbounded
+  maxRetries, missing backoff, or open agent loops turn a transient error into
+  denial-of-wallet even when hard spend ceilings (COST-M1) eventually trip.
+  Finite retry and loop policies with amplification tests keep cost growth
+  bounded under failure.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Max retries and max agent loops are finite for 100% of production AI clients; tests
-  show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling hit)"
+passCondition: >
+  Max retries and max agent/client loops are finite for 100% of production AI
+  clients; amplification tests show cost cannot grow without bound under forced
+  failure/retry (bounded token or $ ceiling hit within the last 90 days).
 evidenceRequired:
-  - "Retry/backoff and agent-loop budget config + amplification tests"
+  - "Retry/backoff config (finite maxRetries + backoff) for production AI/model clients"
+  - "Agent or client loop budget config where applicable (finite iterations/steps)"
+  - "Amplification test results: forced failure/retry hits a bounded token or $ ceiling (≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-retry-amplification-config"
+      params:
+        hint: >
+          Discover finite maxRetries/backoff and AI client or agent loop budgets
+          that bound completion amplification under failure.
     - id: "manual-attest"
       params:
-        hint: "Retry/backoff and agent-loop budget config + amplification tests"
-manualVerification: "For this Check (Retry and loop policies must prevent unbounded cost
-  amplification): inspect current evidence for [Retry/backoff and agent-loop budget config +
-  amplification tests] and confirm the pass condition holds — Max retries and max agent loops are
-  finite for 100% of production AI clients; tests show cost cannot grow without bound under forced
-  failure/retry (bounded token or $ ceiling hit)"
-falsePositiveGuidance: "(Cost Optimization): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove amplification bounds, attest finite retry
+          and loop config plus a ≤90-day amplification test hitting a token/$ ceiling.
+manualVerification: >
+  1) Confirm production AI/model clients exist. If none, score NOT_APPLICABLE.
+  2) For each client path (SDK, gateway, agent runtime), locate finite
+  maxRetries/backoff and any loop/iteration budget. Infinite, null, or
+  unset-as-unlimited fails. 3) Review amplification tests: under forced
+  failure/retry, spend hits a documented token or $ bound (not unbounded growth).
+  4) PASS only if config coverage is complete and ≤90-day test evidence holds.
+  AGN-M2 step limits help agents but do not alone prove client retry bounds;
+  COST-M1 ceilings do not substitute for preventing retry storms.
+falsePositiveGuidance: >
+  Do not pass prompt-only “limit retries” instructions. Do not pass CI job
+  retries or generic HTTP retries that do not cover AI/model completion paths.
+  Do not pass AGN-M2 alone when non-agent AI clients lack finite maxRetries.
+  Do not pass COST-M1 enforce-on-exceed alone without retry/loop policy evidence.
+  Do not pass backoff without a finite max retry count. Named exceptions need
+  owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Retry and loop policies must prevent unbounded cost amplification"
-  - "Retain evidence artifacts required by this Check, starting with: Retry/backoff and agent-loop
-    budget config + amplification tests"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Set finite maxRetries + exponential backoff on all production AI/model clients; fail closed when unset"
+  - "Cap agent/client loop iterations; align with AGN-M2 where agents are in scope"
+  - "Add an amplification test that forces failure/retry and asserts a token or $ ceiling; retain under imports/ai-retry-amplification/"
+  - "Alert when retry rates spike so operators can tune without removing bounds"
 references:
   - title: "AWS Well-Architected — Cost Optimization"
     url: "https://aws.amazon.com/architecture/well-architected/"
@@ -40,18 +65,17 @@ references:
 relatedRules:
   - "COST-M1"
   - "COST-M2"
-  - "COST-R1"
-  - "COST-R2"
-  - "COST-R3"
+  - "AGN-M2"
+  - "PERF-M1"
+  - "REL-M1"
 tags:
   - "cost-optimization"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "retry"
+  - "amplification"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

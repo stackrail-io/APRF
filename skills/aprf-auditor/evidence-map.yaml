@@ -245,7 +245,10 @@ categoryDefaults:
       - "**/*cache*"
       - "**/*routing*"
       - "**/*token*"
-    signals: [spend cap, cache, model routing]
+      - "**/*rate*limit*"
+      - "**/*spend*"
+    plugins: [ai-spend-limits, ai-cost-alerts, ai-retry-amplification, ai-prompt-cache, ai-model-routing, ai-finops-unit-economics, helicone, otel, cloudwatch, prometheus]
+    signals: [spend cap, rate limit, budget-burn alert, anomaly alert, retry bound, prompt cache, model routing, unit economics, finops]
   organizational-governance:
     search:
       - "**/POLICY*"
@@ -453,8 +456,141 @@ checks:
       NOT_APPLICABLE when no agent/RACI signals.
   HUM-M1:
     requiredEvidence:
-      - "Human approval path for high-impact actions"
+      - "Versioned high-impact action inventory + gate wiring"
+      - "Ungated deny suite under imports/human-approval-gates/"
+    searchExtra:
+      - "**/*approv*"
+      - "**/*hitl*"
+      - "**/*high*impact*"
+    plugins: [human-approval-gates, repo-filesystem]
     naWhen: "No high-impact autonomous actions"
+    evaluation: |
+      PASS if human-approval-gates statusHint=pass (inventoryComplete + ungatedDenyRatePct=100 + measuredAt ≤90d).
+      PARTIAL if inventory/gate signals without complete import.
+  HUM-M2:
+    requiredEvidence:
+      - "Approval audit schema + ≤30-day samples under imports/human-approval-audit/"
+    plugins: [human-approval-audit, repo-filesystem]
+    naWhen: "No approval gates / no high-impact actions"
+    evaluation: |
+      PASS if human-approval-audit statusHint=pass (actor/context/outcome 100% + measuredAt ≤90d).
+  HUM-M3:
+    requiredEvidence:
+      - "Bypass suite across UI/API/agent under imports/human-approval-bypass/"
+    plugins: [human-approval-bypass, repo-filesystem]
+    naWhen: "No high-impact gated actions"
+    evaluation: |
+      PASS if human-approval-bypass statusHint=pass (ungatedSuccessCount=0 + measuredAt ≤90d).
+  HUM-M4:
+    requiredEvidence:
+      - "Dual-control config + samples under imports/human-dual-control/"
+    plugins: [human-dual-control, repo-filesystem]
+    naWhen: "Not Level 5 / no irreversible dual-control actions"
+    evaluation: |
+      PASS if human-dual-control statusHint=pass (dualApprovalPct=100, singleApproverCount=0).
+  HUM-R1:
+    requiredEvidence:
+      - "Approval UI context + ≥10 samples under imports/human-approval-ui/"
+    plugins: [human-approval-ui, repo-filesystem]
+    naWhen: "No high-impact approval UI"
+    evaluation: |
+      PASS if human-approval-ui statusHint=pass (≥10 samples with args/diff/confidence).
+  HUM-R3:
+    requiredEvidence:
+      - "Approval-queue SLA + ≤30-day metrics under imports/human-approval-sla/"
+    plugins: [human-approval-sla, repo-filesystem]
+    naWhen: "No approval queues"
+    evaluation: |
+      PASS if human-approval-sla statusHint=pass (withinSla or owned exceptions + measuredAt ≤90d).
+  COST-M1:
+    requiredEvidence:
+      - "Finite spend ceiling and/or rate limit config for production AI workloads"
+      - "Enforce-on-exceed deny/throttle suite under imports/ai-spend-limits/"
+    searchExtra:
+      - "**/*rate*limit*"
+      - "**/*spend*"
+      - "**/*quota*"
+      - "**/*budget*"
+      - "**/*tpm*"
+      - "**/*rpm*"
+    plugins: [ai-spend-limits, repo-filesystem]
+    naWhen: "No production AI workloads"
+    evaluation: |
+      PASS if ai-spend-limits statusHint=pass (limitPresent + enforcedDenyOrThrottle=true + measuredAt ≤90d).
+      PARTIAL if limit/enforce-test signals without complete import.
+      NOT_APPLICABLE when no AI/spend-limit signals.
+  COST-M2:
+    requiredEvidence:
+      - "Budget-burn and spend-anomaly alert policies for production AI spend"
+      - "Notify proof (alert test or fire) under imports/ai-cost-alerts/"
+    searchExtra:
+      - "**/*budget*burn*"
+      - "**/*cost*anomal*"
+      - "**/*spend*alert*"
+      - "**/*finops*"
+    plugins: [ai-cost-alerts, repo-filesystem, helicone, cloudwatch, prometheus, grafana]
+    naWhen: "No production AI spend"
+    evaluation: |
+      PASS if ai-cost-alerts statusHint=pass (both alert classes + notifyProven + measuredAt ≤90d).
+      PARTIAL if alert/dashboard signals without complete import.
+      NOT_APPLICABLE when no AI/cost-alert signals.
+  COST-M3:
+    requiredEvidence:
+      - "Finite maxRetries/backoff + loop budgets for production AI clients"
+      - "Amplification test suite under imports/ai-retry-amplification/"
+    searchExtra:
+      - "**/*retr*"
+      - "**/*backoff*"
+      - "**/*max*iter*"
+      - "**/*amplif*"
+    plugins: [ai-retry-amplification, agent-loop-limits, repo-filesystem]
+    naWhen: "No production AI clients"
+    evaluation: |
+      PASS if ai-retry-amplification statusHint=pass (finiteRetries + amplificationBounded + measuredAt ≤90d).
+      PARTIAL if retry/loop signals without complete import.
+      NOT_APPLICABLE when no AI/retry signals. AGN-M2 alone does not satisfy.
+  COST-R1:
+    requiredEvidence:
+      - "Prompt/response cache config with sensitive/personalized exclusions"
+      - "≥30-day hit-rate and savings report under imports/ai-prompt-cache/"
+    searchExtra:
+      - "**/*prompt*cache*"
+      - "**/*semantic*cache*"
+      - "**/*llm*cache*"
+    plugins: [ai-prompt-cache, repo-filesystem]
+    naWhen: "No cacheable production prompts / all paths documented non-cacheable"
+    evaluation: |
+      PASS if ai-prompt-cache statusHint=pass (cache + exclusions + hitRate/savings window≥30d + measuredAt ≤90d).
+      PARTIAL if cache signals without complete import.
+      NOT_APPLICABLE when no AI/cache signals.
+  COST-R2:
+    requiredEvidence:
+      - "Model-routing policy (low-risk → cheaper models)"
+      - "Eval + ≤30-day misroute evidence under imports/ai-model-routing/"
+    searchExtra:
+      - "**/*model*rout*"
+      - "**/*cheap*model*"
+      - "**/*router*"
+    plugins: [ai-model-routing, promptfoo, repo-filesystem]
+    naWhen: "No multi-model routing surface"
+    evaluation: |
+      PASS if ai-model-routing statusHint=pass (routing + evalWithinTolerance + misrouteMonitored window≤30d + measuredAt ≤90d).
+      PARTIAL if routing signals without complete import.
+      NOT_APPLICABLE when no AI/routing signals.
+  COST-R3:
+    requiredEvidence:
+      - "Per-product unit-cost metrics for the last quarter"
+      - "FinOps review minutes ≤90d under imports/ai-finops-unit-economics/"
+    searchExtra:
+      - "**/*finops*"
+      - "**/*unit*econ*"
+      - "**/*cost*per*"
+    plugins: [ai-finops-unit-economics, repo-filesystem]
+    naWhen: "No customer-facing AI products"
+    evaluation: |
+      PASS if ai-finops-unit-economics statusHint=pass (unit metrics + product coverage + quarter + review + outlier owners + measuredAt ≤90d).
+      PARTIAL if FinOps/unit-cost signals without complete import.
+      NOT_APPLICABLE when no AI/FinOps signals.
   DEP-M1:
     requiredEvidence:
       - "Documented/tested rollback for model/prompt/tool promotion"
@@ -555,5 +691,7 @@ aiSpecificStrategies:
       - "**/*budget*"
       - "**/*cost*"
       - "**/*token*limit*"
-    plugins: [helicone, otel, cloudwatch, prometheus]
-    signals: [budget-alarm, anomaly-rule, per-tenant-cap]
+      - "**/*rate*limit*"
+      - "**/*spend*"
+    plugins: [ai-spend-limits, ai-cost-alerts, helicone, otel, cloudwatch, prometheus]
+    signals: [budget-alarm, anomaly-rule, per-tenant-cap, spend-or-rate-limit]

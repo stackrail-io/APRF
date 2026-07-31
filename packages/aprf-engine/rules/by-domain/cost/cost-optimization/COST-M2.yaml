@@ -1,36 +1,58 @@
 id: "COST-M2"
 category: "cost-optimization"
 title: "Cost must be monitored with alerts on anomaly and budget burn"
-description: "Cost shall be monitored with alerts on anomaly and budget burn"
-whyItMatters: "Cost shall be monitored with alerts on anomaly and budget burn Failing this leaves a
-  production gap against: Alerts exist for budget burn and spend anomaly; synthetic or historical
-  burn event would page/notify per runbook (alert test or documented fire in last 90 days)"
+description: >
+  Production AI spend shall be monitored with alert policies for budget burn
+  and spend anomaly that notify operators per runbook—not dashboards alone.
+whyItMatters: >
+  Hard spend ceilings (COST-M1) stop unbounded burn, but without budget-burn
+  and anomaly alerts operators learn too late that quotas are being hit,
+  tenants are runaway, or unit economics have drifted. A dashboard nobody
+  pages on is not a control. Proven notify (synthetic test or ≤90-day fire)
+  turns FinOps telemetry into an operational signal.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Alerts exist for budget burn and spend anomaly; synthetic or historical burn event
-  would page/notify per runbook (alert test or documented fire in last 90 days)"
+passCondition: >
+  Alerts exist for both budget burn and spend anomaly covering production AI
+  spend; a synthetic or historical burn/anomaly event would page/notify per
+  runbook (alert test or documented fire within the last 90 days).
 evidenceRequired:
-  - "Cost dashboard + alert policies for anomaly and budget burn"
+  - "Cost/spend dashboard or telemetry views covering production AI workloads"
+  - "Alert policies for budget burn and spend anomaly (IaC, provider, or gateway)"
+  - "Notify proof: alert test or documented fire ≤90 days with page/notify outcome"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-cost-alert-config"
+      params:
+        hint: >
+          Discover budget-burn and spend-anomaly alert policies, cost dashboards,
+          or FinOps/gateway cost alarm config for AI/model/agent workloads.
     - id: "manual-attest"
       params:
-        hint: "Cost dashboard + alert policies for anomaly and budget burn"
-manualVerification: "For this Check (Cost must be monitored with alerts on anomaly and budget burn):
-  inspect current evidence for [Cost dashboard + alert policies for anomaly and budget burn] and
-  confirm the pass condition holds — Alerts exist for budget burn and spend anomaly; synthetic or
-  historical burn event would page/notify per runbook (alert test or documented fire in last 90
-  days)"
-falsePositiveGuidance: "(Cost Optimization): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove notify, attest both alert types plus a
+          ≤90-day alert test or documented fire that paged/notified.
+manualVerification: >
+  1) Confirm production AI spend exists. If none, score NOT_APPLICABLE.
+  2) Locate monitoring for AI/model/agent cost (tokens, $, RPM). Generic infra
+  CPU alerts alone fail. 3) Confirm distinct (or clearly dual-purpose) alerts
+  for budget burn and spend anomaly with notify destinations. 4) Review notify
+  proof ≤90 days (synthetic fire or production page). 5) PASS only if both
+  alert classes and notify proof hold. COST-M1 hard limits do not substitute.
+falsePositiveGuidance: >
+  Do not pass on cost dashboards without alert policies. Do not pass a single
+  generic “high spend” alert that does not cover both budget burn and anomaly
+  intent unless the policy explicitly encodes both. Do not pass CPU/latency
+  SLO alerts as cost controls. Do not pass COST-M1 enforce-on-exceed alone.
+  Do not pass alert definitions with no notify channel or unproven routing.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Cost must be monitored with alerts on anomaly and budget burn"
-  - "Retain evidence artifacts required by this Check, starting with: Cost dashboard + alert
-    policies for anomaly and budget burn"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Add budget-burn and spend-anomaly alerts on production AI cost metrics; page/notify on-call or FinOps owner"
+  - "Run a synthetic burn/anomaly alert test at least quarterly; retain under imports/ai-cost-alerts/"
+  - "Tag alerts by tenant/feature so responders can attribute runaway spend"
+  - "Document mute/suppress windows with owner and expiry ≤90 days"
 references:
   - title: "AWS Well-Architected — Cost Optimization"
     url: "https://aws.amazon.com/architecture/well-architected/"
@@ -39,18 +61,17 @@ references:
 relatedRules:
   - "COST-M1"
   - "COST-M3"
-  - "COST-R1"
-  - "COST-R2"
-  - "COST-R3"
+  - "OBS-M1"
+  - "OBS-M2"
+  - "INC-M1"
 tags:
   - "cost-optimization"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "budget-burn"
+  - "anomaly-alert"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

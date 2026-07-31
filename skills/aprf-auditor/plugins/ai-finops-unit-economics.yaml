@@ -1,0 +1,30 @@
+id: ai-finops-unit-economics
+title: Per-product AI unit economics with FinOps review (COST-R3)
+version: "0.2.0"
+executor: collectors/ai-finops-unit-economics.ts
+evidenceClass: runtime-config
+alsoEmits: [docs]
+detectorIds: [repo-finops-unit-economics]
+inputs:
+  - "Target repo (unit-cost metrics, FinOps review runbooks)"
+  - "Optional suite: aprf-assessment/imports/ai-finops-unit-economics/*.{json}"
+collect:
+  - "Detect unit-cost / cost-per-task / FinOps product economics signals"
+  - "Detect FinOps review runbook signals"
+  - "Ingest quarterly metrics + review minutes; write ai-finops-unit-economics-report.json"
+emits:
+  nodeClass: runtime-config
+  refPattern: "aprf-assessment/imports/ai-finops-unit-economics/*"
+  signals:
+    - ai-finops-unit-economics
+    - cost-r3
+    - repo-finops-unit-economics
+mapsToChecks: [COST-R3]
+whenUnavailable: >
+  Metrics/review signals alone are PARTIAL. COST-R3 PASS needs imported
+  unitMetricsPresent, coversCustomerFacingProducts, quarterCovered,
+  reviewOccurred, outliersHaveOwners=true with measuredAt ≤90 days.
+  No customer-facing AI products → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline heuristics + optional imported FinOps review JSON.

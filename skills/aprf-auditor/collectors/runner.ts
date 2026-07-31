@@ -113,6 +113,34 @@ AGN-R3 agent RACI ownership:
   npm run aprf:agent-raci -- --target <app> --out <app>/aprf-assessment
   # PASS needs register export under imports/agent-raci-ownership/
 
+Human approval (HUM-M1–M4, R1, R3):
+  npm run aprf:human-approval -- --target <app> --out <app>/aprf-assessment
+  # PASS unlocks via imports/human-approval-*/ suite JSON per Check
+
+COST-M1 AI spend / rate limits:
+  npm run aprf:spend-limits -- --target <app> --out <app>/aprf-assessment
+  # PASS needs enforce-on-exceed under imports/ai-spend-limits/
+
+COST-M2 AI cost budget-burn / anomaly alerts:
+  npm run aprf:cost-alerts -- --target <app> --out <app>/aprf-assessment
+  # PASS needs notify proof under imports/ai-cost-alerts/
+
+COST-M3 AI retry / loop cost amplification:
+  npm run aprf:retry-amplification -- --target <app> --out <app>/aprf-assessment
+  # PASS needs amplificationBounded under imports/ai-retry-amplification/
+
+COST-R1 AI prompt/response cache:
+  npm run aprf:prompt-cache -- --target <app> --out <app>/aprf-assessment
+  # PASS needs ≥30-day hit-rate/savings under imports/ai-prompt-cache/
+
+COST-R2 AI cheap-vs-premium model routing:
+  npm run aprf:model-routing -- --target <app> --out <app>/aprf-assessment
+  # PASS needs eval + misroute under imports/ai-model-routing/
+
+COST-R3 AI FinOps unit economics:
+  npm run aprf:finops-unit-economics -- --target <app> --out <app>/aprf-assessment
+  # PASS needs quarterly metrics + review under imports/ai-finops-unit-economics/
+
 Import runtime evidence without live APIs:
   mkdir -p <out>/imports/langsmith && cp traces.json <out>/imports/langsmith/
 `);

@@ -1,0 +1,24 @@
+id: human-approval-sla
+title: Approval queue SLA (HUM-R3)
+version: "0.2.0"
+executor: collectors/human-approval.ts
+evidenceClass: runtime-config
+alsoEmits: [docs]
+detectorIds: [repo-approval-queue-sla]
+inputs:
+  - "Target repo (approval-queue SLA docs/metrics)"
+  - "Optional metrics: aprf-assessment/imports/human-approval-sla/*.{json}"
+collect:
+  - "Detect approval-queue SLA signals"
+  - "Ingest ≤30-day p95 metrics; write human-approval-sla-report.json"
+emits:
+  nodeClass: runtime-config
+  refPattern: "aprf-assessment/imports/human-approval-sla/*"
+  signals: [human-approval-sla, hum-r3, repo-approval-queue-sla]
+mapsToChecks: [HUM-R3]
+whenUnavailable: >
+  SLA docs alone are PARTIAL. PASS needs withinSla=true (or owned exceptions) +
+  measuredAt ≤90d.
+live:
+  required: false
+  note: Offline heuristics + optional imported queue metrics JSON.

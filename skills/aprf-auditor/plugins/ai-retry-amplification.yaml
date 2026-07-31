@@ -1,0 +1,30 @@
+id: ai-retry-amplification
+title: AI retry/loop policies bounding cost amplification (COST-M3)
+version: "0.2.0"
+executor: collectors/ai-retry-amplification.ts
+evidenceClass: runtime-config
+alsoEmits: [code, ci]
+detectorIds: [repo-retry-amplification-config]
+inputs:
+  - "Target repo (maxRetries/backoff, agent/client loop budgets)"
+  - "Optional suite: aprf-assessment/imports/ai-retry-amplification/*.{json}"
+collect:
+  - "Detect finite retry/backoff on AI/model clients"
+  - "Detect loop/iteration budgets"
+  - "Ingest amplification test results; write ai-retry-amplification-report.json"
+emits:
+  nodeClass: runtime-config
+  refPattern: "aprf-assessment/imports/ai-retry-amplification/*"
+  signals:
+    - ai-retry-amplification
+    - cost-m3
+    - repo-retry-amplification-config
+mapsToChecks: [COST-M3]
+whenUnavailable: >
+  Retry/loop config alone is PARTIAL. COST-M3 PASS needs imported
+  amplificationBounded=true (age ≤90d) plus measuredAt ≤90 days and finite
+  retries. No production AI clients → NOT_APPLICABLE. AGN-M2 does not alone
+  satisfy non-agent client retry bounds.
+live:
+  required: false
+  note: Offline heuristics + optional imported amplification-test JSON.

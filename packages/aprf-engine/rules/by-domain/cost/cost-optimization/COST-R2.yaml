@@ -1,38 +1,58 @@
 id: "COST-R2"
 category: "cost-optimization"
-title: "Production systems should have model routing: cheaper models for low-risk tasks with eval
-  coverage"
-description: "Model routing: cheaper models for low-risk tasks with eval coverage"
-whyItMatters: "Model routing: cheaper models for low-risk tasks with eval coverage Failing this
-  leaves a production gap against: Low-risk task classes route to cheaper models by default; eval
-  shows quality within tolerance vs premium baseline; misroute rate monitored ≤30 days"
+title: "Production systems should have cheaper-model routing for low-risk tasks with eval coverage"
+description: >
+  Production AI systems should route documented low-risk task classes to
+  cheaper models by default, with eval coverage proving quality within
+  tolerance of a premium baseline and misroute rate monitored ≤30 days.
+whyItMatters: >
+  Sending every request to a frontier model burns cost on classification,
+  extraction, and other low-risk work that smaller models handle well.
+  Blind cheap routing without eval coverage silently degrades quality;
+  routing without misroute monitoring drifts as task mix changes. Policy
+  plus measured eval and misroute rates keep cost wins durable.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Low-risk task classes route to cheaper models by default; eval shows quality within
-  tolerance vs premium baseline; misroute rate monitored ≤30 days"
+passCondition: >
+  Documented low-risk task classes route to cheaper models by default; eval
+  shows quality within tolerance versus a premium baseline; misroute rate is
+  monitored for a window of ≤30 days (report measuredAt within the last 90 days).
 evidenceRequired:
-  - "Model-routing policy (cheap vs premium) + eval coverage report for low-risk routed tasks"
+  - "Model-routing policy mapping low-risk task classes to cheap vs premium models"
+  - "Eval coverage report for low-risk routed tasks vs premium baseline"
+  - "Misroute-rate monitoring evidence covering ≤30 days"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-model-routing-config"
+      params:
+        hint: >
+          Discover model-routing / router policy that sends low-risk tasks to
+          cheaper models (vs premium/frontier defaults).
     - id: "manual-attest"
       params:
-        hint: "Model-routing policy (cheap vs premium) + eval coverage report for low-risk routed tasks"
-manualVerification: "For this Check (Model routing: cheaper models for low-risk tasks with eval
-  coverage): inspect current evidence for [Model-routing policy (cheap vs premium) + eval coverage
-  report for low-risk routed tasks] and confirm the pass condition holds — Low-risk task classes
-  route to cheaper models by default; eval shows quality within tolerance vs premium baseline;
-  misroute rate monitored ≤30 days"
-falsePositiveGuidance: "(Cost Optimization): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove eval and misroute monitoring, attest routing
+          policy plus ≤30-day eval and misroute evidence (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI with multiple model choices / task classes. If a
+  single fixed model with no routing surface, score NOT_APPLICABLE. 2) Locate
+  routing policy (cheap vs premium by task class). 3) Review eval coverage for
+  routed low-risk classes vs premium baseline within documented tolerance.
+  4) Confirm misroute rate monitored ≤30 days. 5) PASS only if policy + eval +
+  misroute evidence hold. COST-R1 caching and MOD-M1 model pins do not substitute.
+falsePositiveGuidance: >
+  Do not pass a hard-coded single cheap model with no task-class policy.
+  Do not pass routing without eval coverage for routed classes. Do not pass
+  prompt-only “use the small model” instructions. Do not pass A/B experiments
+  without a production default route. Do not pass MOD-M1 pin evidence alone.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Model routing: cheaper models for low-risk tasks with
-    eval coverage"
-  - "Retain evidence artifacts required by this Check, starting with: Model-routing policy (cheap vs
-    premium) + eval coverage report for low-risk routed tasks"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Define low-risk task classes and default them to cheaper models in router/config"
+  - "Add eval suites comparing cheap vs premium quality within tolerance; retain under imports/ai-model-routing/"
+  - "Monitor misroute rate ≤30 days and alert when it exceeds threshold"
+  - "Document break-glass premium overrides with owner and expiry ≤90 days"
 references:
   - title: "AWS Well-Architected — Cost Optimization"
     url: "https://aws.amazon.com/architecture/well-architected/"
@@ -40,19 +60,18 @@ references:
     url: "https://www.finops.org/"
 relatedRules:
   - "COST-M1"
-  - "COST-M2"
-  - "COST-M3"
   - "COST-R1"
   - "COST-R3"
+  - "MOD-M1"
+  - "EVL-M1"
+  - "EVL-M2"
 tags:
   - "cost-optimization"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "model-routing"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

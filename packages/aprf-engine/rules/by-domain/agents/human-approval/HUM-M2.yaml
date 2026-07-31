@@ -1,55 +1,72 @@
 id: "HUM-M2"
 category: "human-approval"
 title: "Approval decisions must be logged with actor, context, and outcome"
-description: "Approval decisions shall be logged with actor, context, and outcome"
-whyItMatters: "Approval decisions shall be logged with actor, context, and outcome Failing this
-  leaves a production gap against: 100% of sampled approvals in last 30 days include actor ID,
-  action context, and approve/deny outcome; schema validation test passes"
+description: >
+  Every human approval or denial of a gated high-impact action shall be recorded
+  with actor identity, action context (what was proposed), and approve/deny
+  outcome in a durable audit log that passes schema validation.
+whyItMatters: >
+  Gates without attributable logs cannot support incident reconstruction,
+  regulator questions, or insider-abuse review. Missing actor or context turns
+  approvals into unverifiable clicks. Schema-valid logs convert HITL into an
+  auditable control rather than an informal chat ack.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "100% of sampled approvals in last 30 days include actor ID, action context, and
-  approve/deny outcome; schema validation test passes"
+passCondition: >
+  100% of sampled approvals in the last 30 days include actor ID, action
+  context, and approve/deny outcome; schema validation for the approval audit
+  log passes.
 evidenceRequired:
-  - "Approval audit log schema + sample records"
+  - "Approval audit log schema (actor, context, outcome, timestamp) as code or documented contract"
+  - "Sample approval records from the last 30 days covering required fields"
+  - "Schema validation test or import proving samples conform"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-approval-audit-log"
+      params:
+        hint: >
+          Discover approval audit log schema/emitters and tests that require
+          actor, context, and outcome fields.
     - id: "manual-attest"
       params:
-        hint: "Approval audit log schema + sample records"
-manualVerification: "For this Check (Approval decisions must be logged with actor, context, and
-  outcome): inspect current evidence for [Approval audit log schema + sample records] and confirm
-  the pass condition holds — 100% of sampled approvals in last 30 days include actor ID, action
-  context, and approve/deny outcome; schema validation test passes"
-falsePositiveGuidance: "(Human Approval): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove sample coverage, attest ≤30-day samples
+          with 100% required fields plus a passing schema validation result.
+manualVerification: >
+  1) Confirm gated approvals exist (else NOT_APPLICABLE with HUM-M1 N/A or no
+  gates). 2) Open the audit log schema; require actor ID, action context, and
+  approve/deny outcome (plus timestamp). 3) Sample approvals from the last 30
+  days; 100% must include those fields. 4) Confirm schema validation tests or
+  imports pass. 5) PASS only if schema + complete samples hold.
+falsePositiveGuidance: >
+  Do not pass on application access logs that omit action context. Do not pass
+  chat transcripts as the approval system of record. Do not pass schemas without
+  recent samples. Sibling Checks (gates, bypass tests) do not prove audit
+  completeness. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Approval decisions must be logged with actor, context, and
-    outcome"
-  - "Retain evidence artifacts required by this Check, starting with: Approval audit log schema +
-    sample records"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Define and version an approval audit schema with actor, context, outcome, and timestamp"
+  - "Emit durable records on every approve/deny; block emit paths that omit required fields"
+  - "Add schema validation tests; retain ≤30-day sample export under imports/human-approval-audit/"
+  - "Alert on approval events missing required fields"
 references:
   - title: "NIST AI RMF — Govern and Manage (human oversight)"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
-  - title: "OWASP LLM — Excessive Agency"
+  - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
   - "HUM-M1"
   - "HUM-M3"
-  - "HUM-M4"
-  - "HUM-R1"
-  - "HUM-R3"
+  - "OBS-M1"
+  - "CMP-M2"
 tags:
   - "human-approval"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "audit-log"
 applicability:
-  technologies:
-    - "a2a"
-    - "mcp"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"
