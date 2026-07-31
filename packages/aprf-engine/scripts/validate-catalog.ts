@@ -1,17 +1,18 @@
 /**
  * Load + lint every Check YAML under rules/by-domain/.
  * Shared by validate.ts CLI and test-yaml-validation.ts.
+ * Kept under scripts/ (not src/) so the published build never pulls in loader.ts.
  */
 import { readFileSync, existsSync, readdirSync } from "fs";
 import { join, dirname } from "path";
 import { parse as parseYaml } from "yaml";
-import { loadRulesFromDisk, rulesRootDir } from "./loader.js";
+import { loadRulesFromDisk, rulesRootDir } from "../src/loader.js";
 import {
   buildSpecCheckIndex,
   lintYamlRule,
   lintRawYamlNoEllipsis,
   type YamlLintContext,
-} from "./yaml-lint.js";
+} from "../src/yaml-lint.js";
 
 export interface CatalogValidationResult {
   rulesRoot: string;

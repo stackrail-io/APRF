@@ -1,6 +1,6 @@
 /**
  * Extra Check-YAML lint rules beyond Ajv schema.
- * Used by validate-catalog.ts (CLI + unit catalog sweep) and fixture unit tests.
+ * Used by scripts/validate-catalog.ts (CLI + unit catalog sweep) and fixture unit tests.
  */
 import type { AprfRule } from "./types.js";
 

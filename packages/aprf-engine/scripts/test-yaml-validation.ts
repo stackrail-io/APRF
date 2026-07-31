@@ -18,7 +18,7 @@ import {
   type SpecCheckRef,
   type YamlLintContext,
 } from "../src/yaml-lint.js";
-import { validateAllByDomainYaml } from "../src/validate-catalog.js";
+import { validateAllByDomainYaml } from "./validate-catalog.js";
 
 function assert(cond: unknown, msg: string): asserts cond {
   if (!cond) throw new Error(msg);

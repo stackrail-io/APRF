@@ -3,7 +3,7 @@
  * published-spec mapping.
  * Run: npm run validate -w @stackrail-io/aprf-engine
  */
-import { validateAllByDomainYaml } from "../src/validate-catalog.js";
+import { validateAllByDomainYaml } from "./validate-catalog.js";
 
 function main() {
   const result = validateAllByDomainYaml();
