@@ -61,7 +61,7 @@ relatedRules:
   - "HUM-M1"
   - "HUM-M2"
   - "HUM-M3"
-  - "ORG-M4"
+  - "ORG-R5"
   - "CHG-M1"
 tags:
   - "human-approval"

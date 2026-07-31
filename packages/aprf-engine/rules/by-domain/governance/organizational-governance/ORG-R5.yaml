@@ -1,0 +1,79 @@
+id: "ORG-R5"
+category: "organizational-governance"
+title: "Internal audit or independent assessment should sample APRF evidence on a defined cadence"
+description: >
+  On an org-wide cadence, internal audit or independent assessment should sample
+  APRF evidence; the last sampling report shall be ≤12 months old and list
+  sampled Check IDs and findings. This is organizational sampling—not the same
+  as CMP-R3 coverage of every capability Level 5 system.
+whyItMatters: >
+  Self-attested APRF evidence drifts without external sampling. A recurring
+  internal-audit or independent review that lists Check IDs and findings keeps
+  ownership and control claims honest across the AI portfolio—even when no
+  system is rated capability Level 5.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  Last org sampling report age ≤12 months; lists sampled Check IDs and findings
+  (report evidence measuredAt ≤90 days).
+evidenceRequired:
+  - "Independent assessment or internal-audit sampling report against APRF evidence (org cadence)"
+  - "Sampled Check IDs and findings from the last ≤12 month cycle"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-org-aprf-sampling"
+      params:
+        hint: >
+          Discover org-wide internal-audit or independent APRF evidence sampling
+          reports with Check IDs and findings.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove the last cycle, attest an org sampling
+          report ≤12 months old lists sampled Check IDs and findings
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the organization assesses AI systems against APRF (or equivalent
+  gates). If no AI systems are in production assessment scope, score
+  NOT_APPLICABLE. 2) Open the latest org-wide internal-audit or independent
+  sampling report. 3) Confirm report age ≤12 months. 4) Confirm sampled Check
+  IDs and findings are listed. 5) PASS only if freshness + sample content hold
+  with measuredAt ≤90 days. A product-team self-assessment alone does not
+  satisfy. CMP-R3 Level-5-only coverage does not satisfy this Check unless the
+  same report is explicitly scoped as the org cadence sample.
+falsePositiveGuidance: >
+  Do not pass product-team self-attestations as independent or internal-audit
+  sampling. Do not pass SOC2/ISO reports that never sample APRF Check IDs. Do
+  not pass reports older than 12 months. Do not pass CMP-R3 Level-5-only
+  coverage as org-wide cadence unless the report explicitly states that scope.
+  Named exceptions need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Schedule annual org-wide internal-audit or independent sampling of APRF evidence"
+  - "Record sampled Check IDs, findings, and remediation owners"
+  - "Retain the report under imports/ai-org-aprf-sampling/"
+references:
+  - title: "ISO/IEC 42001 — AI management systems"
+    url: "https://www.iso.org/standard/81230.html"
+  - title: "NIST AI RMF — Govern"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "ORG-M1"
+  - "ORG-R1"
+  - "ORG-R2"
+  - "ORG-R3"
+  - "ORG-R4"
+  - "CMP-R3"
+tags:
+  - "organizational-governance"
+  - "recommended"
+  - "hybrid"
+  - "independent-assessment"
+  - "internal-audit"
+applicability:
+  technologies: []
+  minCriticality: 3
+  requiredFromLevel: 5
+status: "active"
+introducedIn: "0.10.0"

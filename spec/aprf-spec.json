@@ -549,8 +549,7 @@
         "INC-M1",
         "INC-M2",
         "COST-M1",
-        "COST-M3",
-        "ORG-M2"
+        "COST-M3"
       ],
       "rationale": [
         "Identity and authorization before any customer traffic (AUTHN/AUTHZ).",
@@ -558,8 +557,7 @@
         "Safety policy + eval gates so quality/harm regressions cannot silently ship (SAF/EVL).",
         "Pinned prompts/models with promotion evidence (PRM/MOD).",
         "Observability, timeouts, degraded mode, and tested rollback (OBS/REL/CHG).",
-        "Spend ceilings to prevent denial-of-wallet (COST).",
-        "Named owners so gates have stewards (ORG-M2)."
+        "Spend ceilings to prevent denial-of-wallet (COST)."
       ]
     },
     {
@@ -608,9 +606,7 @@
         "INC-M2",
         "COST-M1",
         "COST-M3",
-        "ORG-M2",
         "REL-M6",
-        "ORG-M3",
         "CMP-M2",
         "SEC-M5",
         "AUTHN-M4",
@@ -627,8 +623,7 @@
         "REL-M7",
         "REL-M8",
         "CHG-M4",
-        "INC-M4",
-        "ORG-M4"
+        "INC-M4"
       ],
       "rationale": [
         "Includes every Core gate \u2014 regulated systems must still clear production minimums.",
@@ -860,8 +855,8 @@
           ],
           "aprfCheckIds": [
             "ORG-M1",
-            "ORG-M2",
-            "ORG-M3",
+            "ORG-R2",
+            "ORG-R4",
             "CMP-M1",
             "HUM-M1"
           ],
@@ -999,7 +994,7 @@
             "change-management"
           ],
           "aprfCheckIds": [
-            "ORG-M2",
+            "ORG-R2",
             "HUM-M1",
             "EXP-M3",
             "CHG-M3"
@@ -1079,7 +1074,7 @@
             "human-approval"
           ],
           "aprfCheckIds": [
-            "ORG-M2",
+            "ORG-R2",
             "HUM-M1"
           ],
           "relation": "supports"
@@ -1093,7 +1088,7 @@
             "cost-optimization"
           ],
           "aprfCheckIds": [
-            "ORG-M3",
+            "ORG-R4",
             "SAF-M1",
             "EVL-M1",
             "COST-M1"
@@ -1154,7 +1149,7 @@
           ],
           "aprfCheckIds": [
             "INC-M2",
-            "ORG-M3",
+            "ORG-R4",
             "CHG-M1"
           ],
           "relation": "aligns-with"
@@ -1460,7 +1455,7 @@
           ],
           "aprfCheckIds": [
             "ORG-M1",
-            "ORG-M2",
+            "ORG-R2",
             "CMP-M1"
           ],
           "relation": "evidence-for"
@@ -1473,7 +1468,7 @@
             "evaluation"
           ],
           "aprfCheckIds": [
-            "ORG-M3",
+            "ORG-R4",
             "SAF-M1",
             "EVL-M1"
           ],
@@ -1683,7 +1678,7 @@
             "OBS-M1",
             "INC-M1",
             "CHG-M1",
-            "ORG-M2"
+            "ORG-R2"
           ],
           "relation": "aligns-with"
         },
@@ -4910,59 +4905,59 @@
       "mandatoryChecks": [
         {
           "id": "ORG-M1",
-          "requirement": "Documented AI policy covering acceptable use and prohibited applications shall exist",
-          "artifact": "Approved AI acceptable-use / prohibited-applications policy",
-          "passCondition": "Policy has version, owner, and review date \u2264 12 months; includes both acceptable-use and prohibited-application sections",
+          "requirement": "An approved AI policy shall exist with version, named owner, and review date \u226412 months, and shall include both acceptable-use and prohibited-application sections.",
+          "artifact": "Approved AI acceptable-use / prohibited-applications policy with version, owner, and review date + Confirmation that both acceptable-use and prohibited-application sections are present",
+          "passCondition": "Policy has version, owner, and review date \u226412 months; includes both acceptable-use and prohibited-application sections (policy evidence measuredAt \u226490 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
-        },
-        {
-          "id": "ORG-M2",
-          "requirement": "Each production AI system shall have named owners for critical APRF domains",
-          "artifact": "System inventory with owner fields for critical domains",
-          "passCondition": "0 production systems missing required domain owners in inventory query",
-          "method": "hybrid",
-          "requiredFromLevel": 3,
-          "minCriticality": 2
-        },
-        {
-          "id": "ORG-M3",
-          "requirement": "Risk acceptance for known control gaps shall be recorded with owner and expiry",
-          "artifact": "Risk-acceptance register samples",
-          "passCondition": "100% of open control-gap waivers have owner + expiry date; 0 expired waivers without escalation record",
-          "method": "manual",
-          "requiredFromLevel": 4,
-          "minCriticality": 3
-        },
-        {
-          "id": "ORG-M4",
-          "requirement": "Internal audit or independent assessment shall sample APRF evidence on a defined cadence",
-          "artifact": "Independent assessment or internal-audit sampling report against APRF evidence",
-          "passCondition": "PASS if the last sampling report is \u226412 months old and lists sampled check IDs and findings",
-          "method": "manual",
-          "requiredFromLevel": 5,
-          "minCriticality": 3
         }
       ],
       "recommendedChecks": [
         {
           "id": "ORG-R1",
-          "requirement": "Periodic leadership review of AI risk posture and APRF maturity",
-          "artifact": "Leadership AI risk / APRF maturity review minutes (or board pack excerpt) + action log",
-          "passCondition": "Leadership reviewed AI risk posture and APRF capability attained \u226490 days ago; open actions have owners and due dates",
-          "method": "manual",
+          "requirement": "Leadership should review AI risk posture and APRF capability attained within the last 90 days; every open action from that review should have an owner and due date.",
+          "artifact": "Leadership AI risk / APRF maturity review minutes (or board pack excerpt) with review date + Action log showing owners and due dates for open items",
+          "passCondition": "Leadership reviewed AI risk posture and APRF capability attained \u226490 days ago; open actions have owners and due dates (review evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
+          "id": "ORG-R2",
+          "requirement": "Every production AI system should name owners for each org-declared required critical APRF domain (commonly security, safety, data, reliability, and model/governance) in a system inventory, with zero systems missing a required domain owner.",
+          "artifact": "Production AI system inventory listing the org-declared required critical-domain owner fields + Query/report showing 0 systems missing required domain owners",
+          "passCondition": "0 production AI systems missing any required critical-domain owner in the inventory; inventory covers all production AI system IDs; required domain set is declared (inventory evidence measuredAt \u226490 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 3,
+          "minCriticality": 2
+        },
+        {
           "id": "ORG-R3",
-          "requirement": "Continual improvement backlog fed by incidents and eval failures",
-          "artifact": "Improvement backlog (tickets) linked from incidents and eval failures + sample of closed items last quarter",
-          "passCondition": "\u226580% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; \u226550% of those items closed or have a dated plan",
-          "method": "manual",
+          "requirement": "Sev-1/2 AI incidents and critical eval failures in the last quarter should produce improvement backlog items (\u226580%); \u226550% of those items should be closed or have a dated plan.",
+          "artifact": "Improvement backlog (tickets) linked from Sev-1/2 AI incidents and critical eval failures + Quarterly sample showing linkage rate \u226580% and closed-or-planned rate \u226550%",
+          "passCondition": "\u226580% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; \u226550% of those items closed or have a dated plan (backlog evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
+        },
+        {
+          "id": "ORG-R4",
+          "requirement": "Every open control-gap waiver (risk acceptance) shall record a named owner and expiry date; every expired waiver shall have an escalation record\u2014or be closed\u2014before it remains unowned.",
+          "artifact": "Risk-acceptance / control-gap waiver register for in-scope AI systems + Confirmation that open waivers have owner+expiry and expired waivers have escalation (or are closed)",
+          "passCondition": "100% of open control-gap waivers have owner + expiry; 0 expired waivers without an escalation record (register evidence measuredAt \u226490 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 4,
+          "minCriticality": 3
+        },
+        {
+          "id": "ORG-R5",
+          "requirement": "On an org-wide cadence, internal audit or independent assessment should sample APRF evidence; the last sampling report shall be \u226412 months old and list sampled Check IDs and findings. This is organizational sampling\u2014not the same as CMP-R3 coverage of every capability Level 5 system.",
+          "artifact": "Independent assessment or internal-audit sampling report against APRF evidence (org cadence) + Sampled Check IDs and findings from the last \u226412 month cycle",
+          "passCondition": "Last org sampling report age \u226412 months; lists sampled Check IDs and findings (report evidence measuredAt \u226490 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 5,
+          "minCriticality": 3
         }
       ],
       "evidenceRequired": [

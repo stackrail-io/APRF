@@ -1,0 +1,24 @@
+id: ai-leadership-review
+title: Leadership AI risk / APRF maturity review (ORG-R1)
+version: "0.2.0"
+executor: collectors/ai-leadership-review.ts
+evidenceClass: docs
+alsoEmits: []
+detectorIds: [repo-ai-leadership-review]
+inputs:
+  - "Target repo (leadership review minutes / board packs)"
+  - "Optional suite: aprf-assessment/imports/ai-leadership-review/*.{json}"
+collect:
+  - "Detect leadership review and action-log signals"
+  - "Ingest attestation; write ai-leadership-review-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/ai-leadership-review/*"
+  signals: [ai-leadership-review, org-r1, repo-ai-leadership-review]
+mapsToChecks: [ORG-R1]
+whenUnavailable: >
+  Review signals alone are PARTIAL. ORG-R1 PASS needs reviewAgeDays≤90,
+  openActionsIncomplete=0, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline review heuristics + optional imported JSON.

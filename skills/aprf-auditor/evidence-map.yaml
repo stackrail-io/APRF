@@ -260,7 +260,10 @@ categoryDefaults:
       - "**/owners*"
       - "**/CODEOWNERS"
       - "**/RACI*"
-    signals: [AI policy, named owners]
+      - "**/*acceptable*use*"
+      - "**/*ai*policy*"
+    plugins: [ai-acceptable-use-policy, ai-domain-ownership, ai-risk-acceptance, ai-leadership-review, ai-improvement-backlog, ai-org-aprf-sampling, repo-filesystem]
+    signals: [AI policy, acceptable use, prohibited applications, named owners, domain ownership, risk acceptance, leadership review, improvement backlog, org APRF sampling]
   compliance:
     search:
       - "**/compliance*"
@@ -1075,6 +1078,100 @@ checks:
       PASS if ai-independent-assessment statusHint=pass (coversAllLevel5Systems + sampledCheckIdCount>0 + findingsHaveRemediationOwners + assessmentAgeDays≤365 + measuredAt ≤90d).
       PARTIAL if assessment signals without complete import.
       NOT_APPLICABLE when no Level-5 / assessment signals.
+  ORG-M1:
+    requiredEvidence:
+      - "Approved AI acceptable-use / prohibited-applications policy with version, owner, review date"
+      - "Both sections present under imports/ai-acceptable-use-policy/"
+    searchExtra:
+      - "**/*acceptable*use*"
+      - "**/*prohibited*"
+      - "**/*ai*policy*"
+      - "**/POLICY*"
+      - "**/*governance*"
+    plugins: [ai-acceptable-use-policy, repo-filesystem]
+    naWhen: "Organization does not use AI"
+    evaluation: |
+      PASS if ai-acceptable-use-policy statusHint=pass (hasVersion + hasOwner + both sections + reviewAgeDays≤365 + measuredAt ≤90d).
+      PARTIAL if policy signals without complete import.
+      NOT_APPLICABLE when no AI-policy signals.
+  ORG-R2:
+    requiredEvidence:
+      - "Production AI system inventory with required critical-domain owner fields"
+      - "0 systems missing required domain owners under imports/ai-domain-ownership/"
+    searchExtra:
+      - "**/*inventory*"
+      - "**/*owner*"
+      - "**/*raci*"
+      - "**/CODEOWNERS"
+      - "**/*domain*"
+    plugins: [ai-domain-ownership, repo-filesystem]
+    naWhen: "No production AI systems"
+    evaluation: |
+      PASS if ai-domain-ownership statusHint=pass (coversAllProductionAiSystems + systemsMissingRequiredDomainOwners=0 + requiredDomainOwnerFieldCount>0 + measuredAt ≤90d).
+      PARTIAL if ownership signals without complete import.
+      NOT_APPLICABLE when no domain-ownership signals.
+  ORG-R4:
+    requiredEvidence:
+      - "Risk-acceptance / control-gap waiver register with owner + expiry"
+      - "0 incomplete open waivers and 0 expired-without-escalation under imports/ai-risk-acceptance/"
+    searchExtra:
+      - "**/*waiver*"
+      - "**/*risk*accept*"
+      - "**/*exception*"
+      - "**/*control*gap*"
+      - "**/*escalat*"
+    plugins: [ai-risk-acceptance, repo-filesystem]
+    naWhen: "No AI control-gap waivers / risk-acceptance practice"
+    evaluation: |
+      PASS if ai-risk-acceptance statusHint=pass (openWaiversIncomplete=0 + expiredWaiversWithoutEscalation=0 + measuredAt ≤90d).
+      PARTIAL if risk/waiver signals without complete import.
+      NOT_APPLICABLE when no risk-acceptance signals.
+  ORG-R1:
+    requiredEvidence:
+      - "Leadership AI risk / APRF maturity review minutes with review date"
+      - "Action log with owners and due dates under imports/ai-leadership-review/"
+    searchExtra:
+      - "**/*leadership*"
+      - "**/*board*pack*"
+      - "**/*ai*risk*"
+      - "**/*aprf*maturity*"
+      - "**/*action*log*"
+    plugins: [ai-leadership-review, repo-filesystem]
+    naWhen: "No production AI systems"
+    evaluation: |
+      PASS if ai-leadership-review statusHint=pass (reviewAgeDays≤90 + openActionsIncomplete=0 + measuredAt ≤90d).
+      PARTIAL if review signals without complete import.
+      NOT_APPLICABLE when no leadership-review signals.
+  ORG-R3:
+    requiredEvidence:
+      - "Improvement backlog linked from Sev-1/2 AI incidents and critical eval failures"
+      - "Quarterly linkage ≥80% and closed-or-planned ≥50% under imports/ai-improvement-backlog/"
+    searchExtra:
+      - "**/*improvement*backlog*"
+      - "**/*continual*improvement*"
+      - "**/*post*incident*"
+      - "**/*eval*fail*"
+    plugins: [ai-improvement-backlog, repo-filesystem]
+    naWhen: "No AI incident/eval practice"
+    evaluation: |
+      PASS if ai-improvement-backlog statusHint=pass (linkageRatePct≥80 + closedOrPlannedRatePct≥50 + measuredAt ≤90d).
+      PARTIAL if backlog signals without complete import.
+      NOT_APPLICABLE when no improvement-backlog signals.
+  ORG-R5:
+    requiredEvidence:
+      - "Org-wide internal-audit or independent APRF sampling report ≤12 months old"
+      - "Sampled Check IDs and findings under imports/ai-org-aprf-sampling/"
+    searchExtra:
+      - "**/*internal*audit*"
+      - "**/*independent*assess*"
+      - "**/*aprf*sampl*"
+      - "**/*org*sampl*"
+    plugins: [ai-org-aprf-sampling, repo-filesystem]
+    naWhen: "No AI systems in production assessment scope"
+    evaluation: |
+      PASS if ai-org-aprf-sampling statusHint=pass (assessmentAgeDays≤365 + sampledCheckIdCount>0 + findingsListed + measuredAt ≤90d).
+      PARTIAL if sampling signals without complete import.
+      NOT_APPLICABLE when no org-sampling signals. Distinct from CMP-R3 Level-5-only coverage.
   DEP-M1:
     requiredEvidence:
       - "Documented/tested rollback for model/prompt/tool promotion"

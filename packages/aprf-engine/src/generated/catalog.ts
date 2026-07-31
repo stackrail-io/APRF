@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:cdb96c1d31b349f4c4400b447b5dcd5489d103f2ae34499deadb1a52168c12c8",
+  "generatedAt": "sha256:afcd620332bca217f9765ec38f61dc92e700966b5d45bdba938fd7526249e322",
   "ruleCount": 177,
   "domains": [
     {
@@ -1056,7 +1056,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         ]
       },
       "manualVerification": "1) Define the production AI system and agent ID scope (align with AGN-M1 inventory where present). If no production agents/systems, score NOT_APPLICABLE. 2) Open the RACI or ownership register; confirm required fields include at least Responsible and Accountable (document any additional required domains). 3) Query for orphans (empty/missing R or A). 4) PASS only if the query returns 0 orphans. A CODEOWNERS file alone or a single charter owner without RACI roles does not satisfy this Check unless it encodes R and A for every in-scope ID. Register/export measuredAt must be ≤90 days.\n",
-      "falsePositiveGuidance": "Do not pass on AGN-M1 charters that list one owner without Responsible vs Accountable across teams. Do not pass ORG-M2 system-domain owners as a substitute unless the same register explicitly covers agent IDs with RACI roles. Do not pass a stale register (>90 days) or a template with blank rows. Named exceptions need owner and expiry ≤90 days.\n",
+      "falsePositiveGuidance": "Do not pass on AGN-M1 charters that list one owner without Responsible vs Accountable across teams. Do not pass ORG-R2 system-domain owners as a substitute unless the same register explicitly covers agent IDs with RACI roles. Do not pass a stale register (>90 days) or a template with blank rows. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Create a versioned agent/AI-system RACI register with Responsible and Accountable columns (add C/I as needed)",
         "Backfill every production system and agent ID; fail closed on empty R or A",
@@ -1077,7 +1077,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AGN-M1",
         "AGN-R1",
         "AGN-R2",
-        "ORG-M2",
+        "ORG-R2",
         "ORG-M1",
         "HUM-M1"
       ],
@@ -3213,7 +3213,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "COST-M2",
         "COST-R1",
         "COST-R2",
-        "ORG-M2",
+        "ORG-R2",
         "ORG-R3"
       ],
       "tags": [
@@ -4950,7 +4950,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DX-R1",
         "DX-R3",
         "ORG-M1",
-        "ORG-M2"
+        "ORG-R2"
       ],
       "tags": [
         "platform-engineering",
@@ -5962,7 +5962,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "HUM-M1",
         "HUM-M2",
         "HUM-M3",
-        "ORG-M4",
+        "ORG-R5",
         "CHG-M1"
       ],
       "tags": [
@@ -8206,37 +8206,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "ORG-M1",
       "category": "organizational-governance",
       "title": "Documented AI policy covering acceptable use and prohibited applications must exist",
-      "description": "Documented AI policy covering acceptable use and prohibited applications shall exist",
-      "whyItMatters": "Documented AI policy covering acceptable use and prohibited applications shall exist Failing this leaves a production gap against: Policy has version, owner, and review date ≤ 12 months; includes both acceptable-use and prohibited-application sections",
+      "description": "An approved AI policy shall exist with version, named owner, and review date ≤12 months, and shall include both acceptable-use and prohibited-application sections.\n",
+      "whyItMatters": "Without a current, owned AI acceptable-use policy, teams invent local norms for what models and use cases are allowed—and prohibited applications stay informal folklore. A versioned policy with both sections is the shared rule set that security, legal, and product can enforce before risky AI work ships.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Policy has version, owner, and review date ≤ 12 months; includes both acceptable-use and prohibited-application sections",
+      "passCondition": "Policy has version, owner, and review date ≤12 months; includes both acceptable-use and prohibited-application sections (policy evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Approved AI acceptable-use / prohibited-applications policy"
+        "Approved AI acceptable-use / prohibited-applications policy with version, owner, and review date",
+        "Confirmation that both acceptable-use and prohibited-application sections are present"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
-            "id": "repo-security-md-present",
-            "params": {}
+            "id": "repo-ai-acceptable-use-policy",
+            "params": {
+              "hint": "Discover AI acceptable-use / prohibited-applications policies with version, owner, and review-date signals.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Approved AI acceptable-use / prohibited-applications policy"
+              "hint": "If automation cannot prove freshness, attest an approved AI policy has version, owner, review ≤12 months, and both acceptable-use and prohibited-application sections (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Documented AI policy covering acceptable use and prohibited applications must exist): inspect current evidence for [Approved AI acceptable-use / prohibited-applications policy] and confirm the pass condition holds — Policy has version, owner, and review date ≤ 12 months; includes both acceptable-use and prohibited-application sections",
-      "falsePositiveGuidance": "(Organizational Governance): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm the organization operates AI systems in scope. If AI is not used at all, score NOT_APPLICABLE. 2) Open the approved AI policy. 3) Confirm version and named owner are present. 4) Confirm review date ≤12 months. 5) Confirm an acceptable-use section and a prohibited-applications section both exist. 6) PASS only if metadata + both sections hold with measuredAt ≤90 days. A generic code-of-conduct or SECURITY.md that never covers AI use does not satisfy. A draft or unowned wiki page does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass SECURITY.md or CONTRIBUTING alone as AI acceptable-use policy. Do not pass policies missing either acceptable-use or prohibited-application sections. Do not pass reviews older than 12 months. Do not pass policies without version or named owner. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Documented AI policy covering acceptable use and prohibited applications must exist",
-        "Retain evidence artifacts required by this Check, starting with: Approved AI acceptable-use / prohibited-applications policy",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish an approved AI acceptable-use / prohibited-applications policy with version and owner",
+        "Require both acceptable-use and prohibited-application sections",
+        "Review at least annually; treat reviews >12 months as missing",
+        "Retain policy attestation under imports/ai-acceptable-use-policy/"
       ],
       "references": [
         {
@@ -8249,204 +8252,24 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         }
       ],
       "relatedRules": [
-        "ORG-M2",
-        "ORG-M3",
-        "ORG-M4",
         "ORG-R1",
-        "ORG-R3"
+        "ORG-R2",
+        "ORG-R3",
+        "ORG-R4",
+        "ORG-R5",
+        "CMP-M1"
       ],
       "tags": [
         "organizational-governance",
         "mandatory",
-        "hybrid"
+        "hybrid",
+        "acceptable-use",
+        "ai-policy"
       ],
       "applicability": {
         "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "ORG-M2",
-      "category": "organizational-governance",
-      "title": "Each production AI system must have named owners for critical APRF domains",
-      "description": "Each production AI system shall have named owners for critical APRF domains",
-      "whyItMatters": "Each production AI system shall have named owners for critical APRF domains Failing this leaves a production gap against: 0 production systems missing required domain owners in inventory query",
-      "severity": "high",
-      "weight": 3,
-      "gate": "mandatory",
-      "passCondition": "0 production systems missing required domain owners in inventory query",
-      "evidenceRequired": [
-        "System inventory with owner fields for critical domains"
-      ],
-      "detection": {
-        "capability": "hybrid",
-        "detectors": [
-          {
-            "id": "repo-codeowners-present",
-            "params": {}
-          },
-          {
-            "id": "manual-attest",
-            "params": {
-              "hint": "System inventory with owner fields for critical domains"
-            }
-          }
-        ]
-      },
-      "manualVerification": "For this Check (Each production AI system must have named owners for critical APRF domains): inspect current evidence for [System inventory with owner fields for critical domains] and confirm the pass condition holds — 0 production systems missing required domain owners in inventory query",
-      "falsePositiveGuidance": "(Organizational Governance): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
-      "recommendedFixes": [
-        "Implement and operationalize: Each production AI system must have named owners for critical APRF domains",
-        "Retain evidence artifacts required by this Check, starting with: System inventory with owner fields for critical domains",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "ISO/IEC 42001 — AI management systems",
-          "url": "https://www.iso.org/standard/81230.html"
-        },
-        {
-          "title": "NIST AI RMF — Govern",
-          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
-        }
-      ],
-      "relatedRules": [
-        "ORG-M1",
-        "ORG-M3",
-        "ORG-M4",
-        "ORG-R1",
-        "ORG-R3"
-      ],
-      "tags": [
-        "organizational-governance",
-        "mandatory",
-        "hybrid"
-      ],
-      "applicability": {
-        "technologies": [],
-        "minCriticality": 2,
-        "requiredFromLevel": 3
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "ORG-M3",
-      "category": "organizational-governance",
-      "title": "Risk acceptance for known control gaps must be recorded with owner and expiry",
-      "description": "Risk acceptance for known control gaps shall be recorded with owner and expiry",
-      "whyItMatters": "Risk acceptance for known control gaps shall be recorded with owner and expiry Failing this leaves a production gap against: 100% of open control-gap waivers have owner + expiry date; 0 expired waivers without escalation record",
-      "severity": "high",
-      "weight": 3,
-      "gate": "mandatory",
-      "passCondition": "100% of open control-gap waivers have owner + expiry date; 0 expired waivers without escalation record",
-      "evidenceRequired": [
-        "Risk-acceptance register samples"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": [
-          {
-            "id": "manual-attest",
-            "params": {
-              "hint": "Risk-acceptance register samples"
-            }
-          }
-        ]
-      },
-      "manualVerification": "For this Check (Risk acceptance for known control gaps must be recorded with owner and expiry): inspect current evidence for [Risk-acceptance register samples] and confirm the pass condition holds — 100% of open control-gap waivers have owner + expiry date; 0 expired waivers without escalation record",
-      "falsePositiveGuidance": "(Organizational Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: Risk acceptance for known control gaps must be recorded with owner and expiry",
-        "Retain evidence artifacts required by this Check, starting with: Risk-acceptance register samples",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "ISO/IEC 42001 — AI management systems",
-          "url": "https://www.iso.org/standard/81230.html"
-        },
-        {
-          "title": "NIST AI RMF — Govern",
-          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
-        }
-      ],
-      "relatedRules": [
-        "ORG-M1",
-        "ORG-M2",
-        "ORG-M4",
-        "ORG-R1",
-        "ORG-R3"
-      ],
-      "tags": [
-        "organizational-governance",
-        "mandatory",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [],
-        "minCriticality": 3,
-        "requiredFromLevel": 4
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "ORG-M4",
-      "category": "organizational-governance",
-      "title": "Internal audit or independent assessment must sample APRF evidence on a defined cadence",
-      "description": "Internal audit or independent assessment shall sample APRF evidence on a defined cadence",
-      "whyItMatters": "Internal audit or independent assessment shall sample APRF evidence on a defined cadence Failing this leaves a production gap against: PASS if the last sampling report is ≤12 months old and lists sampled check IDs and findings",
-      "severity": "high",
-      "weight": 3,
-      "gate": "mandatory",
-      "passCondition": "PASS if the last sampling report is ≤12 months old and lists sampled check IDs and findings",
-      "evidenceRequired": [
-        "Independent assessment or internal-audit sampling report against APRF evidence"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": []
-      },
-      "manualVerification": "For this Check (Internal audit or independent assessment must sample APRF evidence on a defined cadence): inspect current evidence for [Independent assessment or internal-audit sampling report against APRF evidence] and confirm the pass condition holds — PASS if the last sampling report is ≤12 months old and lists sampled check IDs and findings",
-      "falsePositiveGuidance": "(Organizational Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: Internal audit or independent assessment must sample APRF evidence on a defined cadence",
-        "Retain evidence artifacts required by this Check, starting with: Independent assessment or internal-audit sampling report against APRF evidence",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "ISO/IEC 42001 — AI management systems",
-          "url": "https://www.iso.org/standard/81230.html"
-        },
-        {
-          "title": "NIST AI RMF — Govern",
-          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
-        }
-      ],
-      "relatedRules": [
-        "ORG-M1",
-        "ORG-M2",
-        "ORG-M3",
-        "ORG-R1",
-        "ORG-R3"
-      ],
-      "tags": [
-        "organizational-governance",
-        "mandatory",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [],
-        "minCriticality": 3,
-        "requiredFromLevel": 5
       },
       "status": "active",
       "introducedIn": "0.10.0"
@@ -8455,26 +8278,39 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "ORG-R1",
       "category": "organizational-governance",
       "title": "Production systems should have periodic leadership review of AI risk posture and APRF maturity",
-      "description": "Periodic leadership review of AI risk posture and APRF maturity",
-      "whyItMatters": "Periodic leadership review of AI risk posture and APRF maturity Failing this leaves a production gap against: Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago; open actions have owners and due dates",
+      "description": "Leadership should review AI risk posture and APRF capability attained within the last 90 days; every open action from that review should have an owner and due date.\n",
+      "whyItMatters": "Without a recent leadership look at AI risk and attained APRF maturity, blockers and capability gaps stay buried in engineering. A dated review with owned actions turns governance from a paper charter into an executive cadence.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago; open actions have owners and due dates",
+      "passCondition": "Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago; open actions have owners and due dates (review evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Leadership AI risk / APRF maturity review minutes (or board pack excerpt) + action log"
+        "Leadership AI risk / APRF maturity review minutes (or board pack excerpt) with review date",
+        "Action log showing owners and due dates for open items"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-leadership-review",
+            "params": {
+              "hint": "Discover leadership AI risk / APRF maturity review minutes and action logs with owners and due dates.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove the last review, attest leadership reviewed AI risk and APRF capability ≤90 days ago with owned open actions (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (Periodic leadership review of AI risk posture and APRF maturity): inspect current evidence for [Leadership AI risk / APRF maturity review minutes (or board pack excerpt) + action log] and confirm the pass condition holds — Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago; open actions have owners and due dates",
-      "falsePositiveGuidance": "(Organizational Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the organization runs production AI systems. If none, score NOT_APPLICABLE. 2) Open the latest leadership AI risk / APRF maturity review minutes or board pack. 3) Confirm review date ≤90 days. 4) Confirm open actions have owners and due dates. 5) PASS only if review freshness + action ownership hold with measuredAt ≤90 days. An engineering-only retro that never reaches leadership does not satisfy. A review without an action log does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass generic board minutes that never mention AI risk or APRF capability. Do not pass reviews older than 90 days. Do not pass action lists missing owners or due dates. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Periodic leadership review of AI risk posture and APRF maturity",
-        "Retain evidence artifacts required by this Check, starting with: Leadership AI risk / APRF maturity review minutes (or board pack excerpt) + action log",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Schedule a recurring leadership AI risk / APRF maturity review (≤90 days)",
+        "Record open actions with owner and due date",
+        "Retain minutes under imports/ai-leadership-review/"
       ],
       "references": [
         {
@@ -8484,19 +8320,25 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "NIST AI RMF — Govern",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "title": "APRF maturity",
+          "url": "https://stackrail.io/aprf/how/#maturity"
         }
       ],
       "relatedRules": [
         "ORG-M1",
-        "ORG-M2",
-        "ORG-M3",
-        "ORG-M4",
-        "ORG-R3"
+        "ORG-R2",
+        "ORG-R3",
+        "ORG-R4",
+        "ORG-R5"
       ],
       "tags": [
         "organizational-governance",
         "recommended",
-        "manual"
+        "hybrid",
+        "leadership-review",
+        "maturity"
       ],
       "applicability": {
         "technologies": [],
@@ -8507,36 +8349,43 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "introducedIn": "0.10.0"
     },
     {
-      "id": "ORG-R3",
+      "id": "ORG-R2",
       "category": "organizational-governance",
-      "title": "Production systems should have continual improvement backlog fed by incidents and eval failures",
-      "description": "Continual improvement backlog fed by incidents and eval failures",
-      "whyItMatters": "Continual improvement backlog fed by incidents and eval failures Failing this leaves a production gap against: ≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; ≥50% of those items closed or have a dated plan",
+      "title": "Each production AI system should have named owners for critical APRF domains",
+      "description": "Every production AI system should name owners for each org-declared required critical APRF domain (commonly security, safety, data, reliability, and model/governance) in a system inventory, with zero systems missing a required domain owner.\n",
+      "whyItMatters": "Unowned production AI domains create silent gaps: incidents and control failures have no accountable person for security, safety, data, or reliability. A living inventory that names owners for every required critical domain turns “someone’s problem” into a queryable ownership map.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; ≥50% of those items closed or have a dated plan",
+      "passCondition": "0 production AI systems missing any required critical-domain owner in the inventory; inventory covers all production AI system IDs; required domain set is declared (inventory evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Improvement backlog (tickets) linked from incidents and eval failures + sample of closed items last quarter"
+        "Production AI system inventory listing the org-declared required critical-domain owner fields",
+        "Query/report showing 0 systems missing required domain owners"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-domain-ownership",
+            "params": {
+              "hint": "Discover production AI system inventories with critical APRF domain owner fields and coverage/missing-owner signals.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Improvement backlog (tickets) linked from incidents and eval failures + sample of closed items last quarter"
+              "hint": "If automation cannot prove coverage, attest 0 production AI systems missing required critical-domain owners, inventory covers all production AI system IDs, and the required domain set is declared (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Continual improvement backlog fed by incidents and eval failures): inspect current evidence for [Improvement backlog (tickets) linked from incidents and eval failures + sample of closed items last quarter] and confirm the pass condition holds — ≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; ≥50% of those items closed or have a dated plan",
-      "falsePositiveGuidance": "(Organizational Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI systems exist. If none, score NOT_APPLICABLE. 2) Confirm the org has declared which critical APRF domains require owners for each system (for example security, safety, data, reliability, model/governance)—the set may be org-standard, not every APRF pillar. 3) Open the system inventory with those owner fields. 4) Confirm every production AI system ID is listed. 5) Confirm each required domain field has a named owner (person or team). 6) PASS only if systems missing required owners = 0, the required set is non-empty, and inventory freshness holds (measuredAt ≤90 days). CODEOWNERS alone (repo paths without per-system domain owners) does not satisfy. An inventory missing any production AI system ID does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass CODEOWNERS or a single product owner as covering all required domains. Do not pass inventories that omit shadow AI systems in production. Do not pass blank or placeholder domain-owner cells. Do not pass an empty required-domain set as coverage. Do not pass agent RACI matrices (AGN) as a substitute for system-domain ownership. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Continual improvement backlog fed by incidents and eval failures",
-        "Retain evidence artifacts required by this Check, starting with: Improvement backlog (tickets) linked from incidents and eval failures + sample of closed items last quarter",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Declare the required critical-domain owner set for production AI systems",
+        "Publish a production AI system inventory with those owner columns filled",
+        "Reconcile inventory against known production AI system IDs at least quarterly",
+        "Retain inventory under imports/ai-domain-ownership/"
       ],
       "references": [
         {
@@ -8550,20 +8399,239 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "relatedRules": [
         "ORG-M1",
-        "ORG-M2",
-        "ORG-M3",
-        "ORG-M4",
-        "ORG-R1"
+        "ORG-R1",
+        "ORG-R3",
+        "ORG-R4",
+        "ORG-R5",
+        "AGN-R3",
+        "CMP-M1"
       ],
       "tags": [
         "organizational-governance",
         "recommended",
-        "manual"
+        "hybrid",
+        "ownership",
+        "inventory"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 3
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "ORG-R3",
+      "category": "organizational-governance",
+      "title": "Production systems should have continual improvement backlog fed by incidents and eval failures",
+      "description": "Sev-1/2 AI incidents and critical eval failures in the last quarter should produce improvement backlog items (≥80%); ≥50% of those items should be closed or have a dated plan.\n",
+      "whyItMatters": "Incidents and eval fails that never become backlog work repeat. Linking Sev-1/2 AI incidents and critical eval failures into owned improvement items—and closing or dating a plan for most of them—turns pain into durable control changes.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "recommended",
+      "passCondition": "≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; ≥50% of those items closed or have a dated plan (backlog evidence measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Improvement backlog (tickets) linked from Sev-1/2 AI incidents and critical eval failures",
+        "Quarterly sample showing linkage rate ≥80% and closed-or-planned rate ≥50%"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-improvement-backlog",
+            "params": {
+              "hint": "Discover improvement backlogs linked from AI incidents and eval failures, plus quarterly linkage/closure metrics.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove rates, attest ≥80% of Sev-1/2 AI incidents and critical eval fails last quarter produced backlog items and ≥50% of those are closed or have a dated plan (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm Sev-1/2 AI incidents or critical eval failures occurred in the last quarter (or a defined empty quarter with attestation). If the org has no AI incident/eval practice, score NOT_APPLICABLE. 2) Open the improvement backlog and linkage evidence. 3) Confirm ≥80% of those events produced a backlog item. 4) Confirm ≥50% of those items are closed or have a dated plan. 5) PASS only if both rates hold with measuredAt ≤90 days. A backlog unrelated to incidents or eval fails does not satisfy. Linkage without closure/plan tracking does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass generic eng backlogs with no incident/eval links. Do not pass rates below the ≥80% / ≥50% thresholds. Do not pass samples older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Require a backlog item for every Sev-1/2 AI incident and critical eval fail",
+        "Track closed-or-dated-plan rate; aim ≥50% within the quarter",
+        "Retain the quarterly sample under imports/ai-improvement-backlog/"
+      ],
+      "references": [
+        {
+          "title": "ISO/IEC 42001 — AI management systems",
+          "url": "https://www.iso.org/standard/81230.html"
+        },
+        {
+          "title": "NIST AI RMF — Govern",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        }
+      ],
+      "relatedRules": [
+        "ORG-M1",
+        "ORG-R1",
+        "ORG-R2",
+        "ORG-R4",
+        "ORG-R5",
+        "INC-M1",
+        "EVL-M1"
+      ],
+      "tags": [
+        "organizational-governance",
+        "recommended",
+        "hybrid",
+        "continual-improvement",
+        "backlog"
       ],
       "applicability": {
         "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "ORG-R4",
+      "category": "organizational-governance",
+      "title": "Risk acceptance for known control gaps should be recorded with owner and expiry",
+      "description": "Every open control-gap waiver (risk acceptance) should record a named owner and expiry date; every expired waiver should have an escalation record—or be closed—before it remains unowned.\n",
+      "whyItMatters": "Known AI control gaps without owned, time-boxed risk acceptance become permanent exceptions. A living risk-acceptance register forces expiry and escalation, so waived controls cannot silently outlive the decision that allowed them.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "recommended",
+      "passCondition": "100% of open control-gap waivers have owner + expiry; 0 expired waivers without an escalation record (register evidence measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Risk-acceptance / control-gap waiver register for in-scope AI systems",
+        "Confirmation that open waivers have owner+expiry and expired waivers have escalation (or are closed)"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-risk-acceptance",
+            "params": {
+              "hint": "Discover risk-acceptance / control-gap waiver registers with owner, expiry, and escalation signals.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest 100% of open control-gap waivers have owner + expiry and 0 expired waivers lack escalation (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm known AI control gaps or a risk-acceptance practice exist. If the organization has no open or expired control-gap waivers and no AI control gaps in scope, score NOT_APPLICABLE. 2) Open the risk-acceptance register. 3) Confirm every open waiver has a named owner and expiry date. 4) Confirm every expired waiver has an escalation record (or is closed). 5) PASS only if incomplete open waivers = 0 and expired-without-escalation = 0 with measuredAt ≤90 days. A spreadsheet of gaps without owners or expiry does not satisfy. Expired waivers left open with no escalation do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass generic exception logs that never name control-gap / APRF Check IDs. Do not pass open waivers missing owner or expiry. Do not pass expired waivers without escalation or closure. Do not pass oral approvals. Named exceptions need owner and expiry ≤90 days unless a longer documented policy expiry applies.\n",
+      "recommendedFixes": [
+        "Publish a risk-acceptance register for AI control-gap waivers",
+        "Require owner + expiry on every open waiver; escalate or close on expiry",
+        "Reconcile the register at least monthly against known open control gaps",
+        "Retain evidence under imports/ai-risk-acceptance/"
+      ],
+      "references": [
+        {
+          "title": "ISO/IEC 42001 — AI management systems",
+          "url": "https://www.iso.org/standard/81230.html"
+        },
+        {
+          "title": "NIST AI RMF — Govern",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        }
+      ],
+      "relatedRules": [
+        "ORG-M1",
+        "ORG-R2",
+        "ORG-R5",
+        "ORG-R1",
+        "ORG-R3",
+        "CMP-R1"
+      ],
+      "tags": [
+        "organizational-governance",
+        "recommended",
+        "hybrid",
+        "risk-acceptance",
+        "waivers"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 3,
+        "requiredFromLevel": 4
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "ORG-R5",
+      "category": "organizational-governance",
+      "title": "Internal audit or independent assessment should sample APRF evidence on a defined cadence",
+      "description": "On an org-wide cadence, internal audit or independent assessment should sample APRF evidence; the last sampling report shall be ≤12 months old and list sampled Check IDs and findings. This is organizational sampling—not the same as CMP-R3 coverage of every capability Level 5 system.\n",
+      "whyItMatters": "Self-attested APRF evidence drifts without external sampling. A recurring internal-audit or independent review that lists Check IDs and findings keeps ownership and control claims honest across the AI portfolio—even when no system is rated capability Level 5.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "recommended",
+      "passCondition": "Last org sampling report age ≤12 months; lists sampled Check IDs and findings (report evidence measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Independent assessment or internal-audit sampling report against APRF evidence (org cadence)",
+        "Sampled Check IDs and findings from the last ≤12 month cycle"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-org-aprf-sampling",
+            "params": {
+              "hint": "Discover org-wide internal-audit or independent APRF evidence sampling reports with Check IDs and findings.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove the last cycle, attest an org sampling report ≤12 months old lists sampled Check IDs and findings (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm the organization assesses AI systems against APRF (or equivalent gates). If no AI systems are in production assessment scope, score NOT_APPLICABLE. 2) Open the latest org-wide internal-audit or independent sampling report. 3) Confirm report age ≤12 months. 4) Confirm sampled Check IDs and findings are listed. 5) PASS only if freshness + sample content hold with measuredAt ≤90 days. A product-team self-assessment alone does not satisfy. CMP-R3 Level-5-only coverage does not satisfy this Check unless the same report is explicitly scoped as the org cadence sample.\n",
+      "falsePositiveGuidance": "Do not pass product-team self-attestations as independent or internal-audit sampling. Do not pass SOC2/ISO reports that never sample APRF Check IDs. Do not pass reports older than 12 months. Do not pass CMP-R3 Level-5-only coverage as org-wide cadence unless the report explicitly states that scope. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Schedule annual org-wide internal-audit or independent sampling of APRF evidence",
+        "Record sampled Check IDs, findings, and remediation owners",
+        "Retain the report under imports/ai-org-aprf-sampling/"
+      ],
+      "references": [
+        {
+          "title": "ISO/IEC 42001 — AI management systems",
+          "url": "https://www.iso.org/standard/81230.html"
+        },
+        {
+          "title": "NIST AI RMF — Govern",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        }
+      ],
+      "relatedRules": [
+        "ORG-M1",
+        "ORG-R1",
+        "ORG-R2",
+        "ORG-R3",
+        "ORG-R4",
+        "CMP-R3"
+      ],
+      "tags": [
+        "organizational-governance",
+        "recommended",
+        "hybrid",
+        "independent-assessment",
+        "internal-audit"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 3,
+        "requiredFromLevel": 5
       },
       "status": "active",
       "introducedIn": "0.10.0"
@@ -9398,7 +9466,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "PRI-M3",
         "PRI-R1",
         "PRI-R2",
-        "ORG-M4"
+        "ORG-R5"
       ],
       "tags": [
         "data-privacy",

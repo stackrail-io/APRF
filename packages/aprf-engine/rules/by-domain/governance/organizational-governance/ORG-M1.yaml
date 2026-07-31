@@ -1,54 +1,76 @@
 id: "ORG-M1"
 category: "organizational-governance"
 title: "Documented AI policy covering acceptable use and prohibited applications must exist"
-description: "Documented AI policy covering acceptable use and prohibited applications shall exist"
-whyItMatters: "Documented AI policy covering acceptable use and prohibited applications shall exist
-  Failing this leaves a production gap against: Policy has version, owner, and review date ≤ 12
-  months; includes both acceptable-use and prohibited-application sections"
+description: >
+  An approved AI policy shall exist with version, named owner, and review date
+  ≤12 months, and shall include both acceptable-use and prohibited-application
+  sections.
+whyItMatters: >
+  Without a current, owned AI acceptable-use policy, teams invent local norms
+  for what models and use cases are allowed—and prohibited applications stay
+  informal folklore. A versioned policy with both sections is the shared rule
+  set that security, legal, and product can enforce before risky AI work ships.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Policy has version, owner, and review date ≤ 12 months; includes both acceptable-use
-  and prohibited-application sections"
+passCondition: >
+  Policy has version, owner, and review date ≤12 months; includes both
+  acceptable-use and prohibited-application sections (policy evidence
+  measuredAt ≤90 days).
 evidenceRequired:
-  - "Approved AI acceptable-use / prohibited-applications policy"
+  - "Approved AI acceptable-use / prohibited-applications policy with version, owner, and review date"
+  - "Confirmation that both acceptable-use and prohibited-application sections are present"
 detection:
   capability: "hybrid"
   detectors:
-    - id: "repo-security-md-present"
-      params: {}
+    - id: "repo-ai-acceptable-use-policy"
+      params:
+        hint: >
+          Discover AI acceptable-use / prohibited-applications policies with
+          version, owner, and review-date signals.
     - id: "manual-attest"
       params:
-        hint: "Approved AI acceptable-use / prohibited-applications policy"
-manualVerification: "For this Check (Documented AI policy covering acceptable use and prohibited
-  applications must exist): inspect current evidence for [Approved AI acceptable-use /
-  prohibited-applications policy] and confirm the pass condition holds — Policy has version, owner,
-  and review date ≤ 12 months; includes both acceptable-use and prohibited-application sections"
-falsePositiveGuidance: "(Organizational Governance): when automation and attestation disagree,
-  prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal
-  covers the gap."
+        hint: >
+          If automation cannot prove freshness, attest an approved AI policy
+          has version, owner, review ≤12 months, and both acceptable-use and
+          prohibited-application sections (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the organization operates AI systems in scope. If AI is not used
+  at all, score NOT_APPLICABLE. 2) Open the approved AI policy. 3) Confirm
+  version and named owner are present. 4) Confirm review date ≤12 months. 5)
+  Confirm an acceptable-use section and a prohibited-applications section both
+  exist. 6) PASS only if metadata + both sections hold with measuredAt ≤90
+  days. A generic code-of-conduct or SECURITY.md that never covers AI use does
+  not satisfy. A draft or unowned wiki page does not satisfy.
+falsePositiveGuidance: >
+  Do not pass SECURITY.md or CONTRIBUTING alone as AI acceptable-use policy. Do
+  not pass policies missing either acceptable-use or prohibited-application
+  sections. Do not pass reviews older than 12 months. Do not pass policies
+  without version or named owner. Named exceptions need owner and expiry ≤90
+  days.
 recommendedFixes:
-  - "Implement and operationalize: Documented AI policy covering acceptable use and prohibited
-    applications must exist"
-  - "Retain evidence artifacts required by this Check, starting with: Approved AI acceptable-use /
-    prohibited-applications policy"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish an approved AI acceptable-use / prohibited-applications policy with version and owner"
+  - "Require both acceptable-use and prohibited-application sections"
+  - "Review at least annually; treat reviews >12 months as missing"
+  - "Retain policy attestation under imports/ai-acceptable-use-policy/"
 references:
   - title: "ISO/IEC 42001 — AI management systems"
     url: "https://www.iso.org/standard/81230.html"
   - title: "NIST AI RMF — Govern"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
-  - "ORG-M2"
-  - "ORG-M3"
-  - "ORG-M4"
   - "ORG-R1"
+  - "ORG-R2"
   - "ORG-R3"
+  - "ORG-R4"
+  - "ORG-R5"
+  - "CMP-M1"
 tags:
   - "organizational-governance"
   - "mandatory"
   - "hybrid"
+  - "acceptable-use"
+  - "ai-policy"
 applicability:
   technologies: []
   minCriticality: 2

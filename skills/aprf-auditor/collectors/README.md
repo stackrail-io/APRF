@@ -98,6 +98,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **ai-control-testing** | `ai-control-testing.ts` | control testing + exceptions (CMP-R1) | `imports/ai-control-testing/` | — |
 | **ai-trust-documentation** | `ai-trust-documentation.ts` | customer trust doc (CMP-R2) | `imports/ai-trust-documentation/` | — |
 | **ai-independent-assessment** | `ai-independent-assessment.ts` | Level-5 independent assessment (CMP-R3) | `imports/ai-independent-assessment/` | — |
+| **ai-acceptable-use-policy** | `ai-acceptable-use-policy.ts` | AI acceptable-use policy (ORG-M1) | `imports/ai-acceptable-use-policy/` | — |
+| **ai-domain-ownership** | `ai-domain-ownership.ts` | critical-domain owners (ORG-R2) | `imports/ai-domain-ownership/` | — |
+| **ai-risk-acceptance** | `ai-risk-acceptance.ts` | control-gap waivers (ORG-R4) | `imports/ai-risk-acceptance/` | — |
+| **ai-leadership-review** | `ai-leadership-review.ts` | leadership AI risk review (ORG-R1) | `imports/ai-leadership-review/` | — |
+| **ai-improvement-backlog** | `ai-improvement-backlog.ts` | continual improvement backlog (ORG-R3) | `imports/ai-improvement-backlog/` | — |
+| **ai-org-aprf-sampling** | `ai-org-aprf-sampling.ts` | org-wide APRF sampling (ORG-R5) | `imports/ai-org-aprf-sampling/` | — |
 
 ### AGN-M1 — agent charters
 

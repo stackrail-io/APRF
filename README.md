@@ -58,7 +58,7 @@ npm install @stackrail-io/aprf-engine @stackrail-io/aprf-framework-definition
 | Package | Role |
 | --- | --- |
 | `@stackrail-io/aprf-engine` | YAML Checks as the source of truth; JSON Schema; generated TypeScript catalog; index/evaluate helpers |
-| `@stackrail-io/aprf-framework-definition` | Core (40) / Regulated (61) profiles, lenses (RAG/Agents/Voice/Coding), Policy overlays, Check applicability |
+| `@stackrail-io/aprf-framework-definition` | Core (39) / Regulated (57) profiles, lenses (RAG/Agents/Voice/Coding), Policy overlays, Check applicability |
 
 Today the catalog holds **177 Checks** across **27 categories** (pillars). New Checks are data files — no engine code changes required.
 
@@ -153,8 +153,8 @@ git add packages/aprf-engine/src/generated/catalog.ts
 
 | Profile | Mandatory Checks | Target |
 | --- | --- | --- |
-| **Core** (`aprf-profile-core`) | 40 | Tier 2 / capability level 3 |
-| **Regulated** (`aprf-profile-regulated`) | 61 (Core + 21 Tier-3-only) | Tier 3 / capability level 5 |
+| **Core** (`aprf-profile-core`) | 39 | Tier 2 / capability level 3 |
+| **Regulated** (`aprf-profile-regulated`) | 57 (Core + 18 Tier-3-only) | Tier 3 / capability level 5 |
 
 Lenses (RAG, Agents, Voice, Coding) add additional mandatory Check IDs. Gating is binary: all in-scope mandatories must **pass** or be formally **N/A** with rationale.
 

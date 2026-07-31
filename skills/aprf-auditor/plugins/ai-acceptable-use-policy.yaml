@@ -1,0 +1,28 @@
+id: ai-acceptable-use-policy
+title: AI acceptable-use / prohibited-applications policy (ORG-M1)
+version: "0.2.0"
+executor: collectors/ai-acceptable-use-policy.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-ai-acceptable-use-policy]
+inputs:
+  - "Target repo (AI policy / acceptable-use / prohibited-applications docs)"
+  - "Optional suite: aprf-assessment/imports/ai-acceptable-use-policy/*.{json}"
+collect:
+  - "Detect AI policy docs with acceptable-use and prohibited sections"
+  - "Ingest attestation; write ai-acceptable-use-policy-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/ai-acceptable-use-policy/*"
+  signals:
+    - ai-acceptable-use-policy
+    - org-m1
+    - repo-ai-acceptable-use-policy
+mapsToChecks: [ORG-M1]
+whenUnavailable: >
+  Policy signals alone are PARTIAL. ORG-M1 PASS needs imported hasVersion,
+  hasOwner, both sections, reviewAgeDays≤365, measuredAt ≤90 days. No AI use →
+  NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline policy heuristics + optional imported attestation JSON.

@@ -51,7 +51,7 @@ manualVerification: >
   for every in-scope ID. Register/export measuredAt must be ≤90 days.
 falsePositiveGuidance: >
   Do not pass on AGN-M1 charters that list one owner without Responsible vs
-  Accountable across teams. Do not pass ORG-M2 system-domain owners as a
+  Accountable across teams. Do not pass ORG-R2 system-domain owners as a
   substitute unless the same register explicitly covers agent IDs with RACI
   roles. Do not pass a stale register (>90 days) or a template with blank rows.
   Named exceptions need owner and expiry ≤90 days.
@@ -69,7 +69,7 @@ relatedRules:
   - "AGN-M1"
   - "AGN-R1"
   - "AGN-R2"
-  - "ORG-M2"
+  - "ORG-R2"
   - "ORG-M1"
   - "HUM-M1"
 tags:

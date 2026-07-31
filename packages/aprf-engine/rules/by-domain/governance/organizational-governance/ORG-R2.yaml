@@ -1,0 +1,87 @@
+id: "ORG-R2"
+category: "organizational-governance"
+title: "Each production AI system should have named owners for critical APRF domains"
+description: >
+  Every production AI system should name owners for each org-declared required
+  critical APRF domain (commonly security, safety, data, reliability, and
+  model/governance) in a system inventory, with zero systems missing a required
+  domain owner.
+whyItMatters: >
+  Unowned production AI domains create silent gaps: incidents and control
+  failures have no accountable person for security, safety, data, or
+  reliability. A living inventory that names owners for every required critical
+  domain turns “someone’s problem” into a queryable ownership map.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  0 production AI systems missing any required critical-domain owner in the
+  inventory; inventory covers all production AI system IDs; required domain set
+  is declared (inventory evidence measuredAt ≤90 days).
+evidenceRequired:
+  - "Production AI system inventory listing the org-declared required critical-domain owner fields"
+  - "Query/report showing 0 systems missing required domain owners"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-domain-ownership"
+      params:
+        hint: >
+          Discover production AI system inventories with critical APRF domain
+          owner fields and coverage/missing-owner signals.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest 0 production AI systems
+          missing required critical-domain owners, inventory covers all
+          production AI system IDs, and the required domain set is declared
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI systems exist. If none, score NOT_APPLICABLE. 2)
+  Confirm the org has declared which critical APRF domains require owners for
+  each system (for example security, safety, data, reliability,
+  model/governance)—the set may be org-standard, not every APRF pillar. 3) Open
+  the system inventory with those owner fields. 4) Confirm every production AI
+  system ID is listed. 5) Confirm each required domain field has a named owner
+  (person or team). 6) PASS only if systems missing required owners = 0, the
+  required set is non-empty, and inventory freshness holds (measuredAt ≤90
+  days). CODEOWNERS alone (repo paths without per-system domain owners) does
+  not satisfy. An inventory missing any production AI system ID does not
+  satisfy.
+falsePositiveGuidance: >
+  Do not pass CODEOWNERS or a single product owner as covering all required
+  domains. Do not pass inventories that omit shadow AI systems in production.
+  Do not pass blank or placeholder domain-owner cells. Do not pass an empty
+  required-domain set as coverage. Do not pass agent RACI matrices (AGN) as a
+  substitute for system-domain ownership. Named exceptions need owner and
+  expiry ≤90 days.
+recommendedFixes:
+  - "Declare the required critical-domain owner set for production AI systems"
+  - "Publish a production AI system inventory with those owner columns filled"
+  - "Reconcile inventory against known production AI system IDs at least quarterly"
+  - "Retain inventory under imports/ai-domain-ownership/"
+references:
+  - title: "ISO/IEC 42001 — AI management systems"
+    url: "https://www.iso.org/standard/81230.html"
+  - title: "NIST AI RMF — Govern"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "ORG-M1"
+  - "ORG-R1"
+  - "ORG-R3"
+  - "ORG-R4"
+  - "ORG-R5"
+  - "AGN-R3"
+  - "CMP-M1"
+tags:
+  - "organizational-governance"
+  - "recommended"
+  - "hybrid"
+  - "ownership"
+  - "inventory"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

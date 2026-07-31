@@ -62,7 +62,7 @@ relatedRules:
   - "COST-M2"
   - "COST-R1"
   - "COST-R2"
-  - "ORG-M2"
+  - "ORG-R2"
   - "ORG-R3"
 tags:
   - "cost-optimization"

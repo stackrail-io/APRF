@@ -1,0 +1,24 @@
+id: ai-org-aprf-sampling
+title: Org-wide APRF evidence sampling (ORG-R5)
+version: "0.2.0"
+executor: collectors/ai-org-aprf-sampling.ts
+evidenceClass: docs
+alsoEmits: []
+detectorIds: [repo-ai-org-aprf-sampling]
+inputs:
+  - "Target repo (internal-audit / independent sampling reports)"
+  - "Optional suite: aprf-assessment/imports/ai-org-aprf-sampling/*.{json}"
+collect:
+  - "Detect org sampling reports with Check IDs and findings"
+  - "Ingest coverage; write ai-org-aprf-sampling-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/ai-org-aprf-sampling/*"
+  signals: [ai-org-aprf-sampling, org-r5, repo-ai-org-aprf-sampling]
+mapsToChecks: [ORG-R5]
+whenUnavailable: >
+  Sampling signals alone are PARTIAL. ORG-R5 PASS needs assessmentAgeDays≤365,
+  sampledCheckIdCount>0, findingsListed, measuredAt ≤90 days. Distinct from CMP-R3.
+live:
+  required: false
+  note: Offline sampling heuristics + optional imported JSON.

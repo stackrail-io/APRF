@@ -1,0 +1,79 @@
+id: "ORG-R4"
+category: "organizational-governance"
+title: "Risk acceptance for known control gaps should be recorded with owner and expiry"
+description: >
+  Every open control-gap waiver (risk acceptance) should record a named owner
+  and expiry date; every expired waiver should have an escalation record—or be
+  closed—before it remains unowned.
+whyItMatters: >
+  Known AI control gaps without owned, time-boxed risk acceptance become
+  permanent exceptions. A living risk-acceptance register forces expiry and
+  escalation, so waived controls cannot silently outlive the decision that
+  allowed them.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  100% of open control-gap waivers have owner + expiry; 0 expired waivers
+  without an escalation record (register evidence measuredAt ≤90 days).
+evidenceRequired:
+  - "Risk-acceptance / control-gap waiver register for in-scope AI systems"
+  - "Confirmation that open waivers have owner+expiry and expired waivers have escalation (or are closed)"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-risk-acceptance"
+      params:
+        hint: >
+          Discover risk-acceptance / control-gap waiver registers with owner,
+          expiry, and escalation signals.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest 100% of open control-gap
+          waivers have owner + expiry and 0 expired waivers lack escalation
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm known AI control gaps or a risk-acceptance practice exist. If the
+  organization has no open or expired control-gap waivers and no AI control
+  gaps in scope, score NOT_APPLICABLE. 2) Open the risk-acceptance register. 3)
+  Confirm every open waiver has a named owner and expiry date. 4) Confirm every
+  expired waiver has an escalation record (or is closed). 5) PASS only if
+  incomplete open waivers = 0 and expired-without-escalation = 0 with
+  measuredAt ≤90 days. A spreadsheet of gaps without owners or expiry does not
+  satisfy. Expired waivers left open with no escalation do not satisfy.
+falsePositiveGuidance: >
+  Do not pass generic exception logs that never name control-gap / APRF Check
+  IDs. Do not pass open waivers missing owner or expiry. Do not pass expired
+  waivers without escalation or closure. Do not pass oral approvals. Named
+  exceptions need owner and expiry ≤90 days unless a longer documented policy
+  expiry applies.
+recommendedFixes:
+  - "Publish a risk-acceptance register for AI control-gap waivers"
+  - "Require owner + expiry on every open waiver; escalate or close on expiry"
+  - "Reconcile the register at least monthly against known open control gaps"
+  - "Retain evidence under imports/ai-risk-acceptance/"
+references:
+  - title: "ISO/IEC 42001 — AI management systems"
+    url: "https://www.iso.org/standard/81230.html"
+  - title: "NIST AI RMF — Govern"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "ORG-M1"
+  - "ORG-R2"
+  - "ORG-R5"
+  - "ORG-R1"
+  - "ORG-R3"
+  - "CMP-R1"
+tags:
+  - "organizational-governance"
+  - "recommended"
+  - "hybrid"
+  - "risk-acceptance"
+  - "waivers"
+applicability:
+  technologies: []
+  minCriticality: 3
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

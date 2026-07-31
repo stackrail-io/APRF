@@ -61,6 +61,12 @@ import { aiControlPlaneAuditLogsCollector } from "./ai-control-plane-audit-logs.
 import { aiControlTestingCollector } from "./ai-control-testing.ts";
 import { aiTrustDocumentationCollector } from "./ai-trust-documentation.ts";
 import { aiIndependentAssessmentCollector } from "./ai-independent-assessment.ts";
+import { aiAcceptableUsePolicyCollector } from "./ai-acceptable-use-policy.ts";
+import { aiDomainOwnershipCollector } from "./ai-domain-ownership.ts";
+import { aiRiskAcceptanceCollector } from "./ai-risk-acceptance.ts";
+import { aiLeadershipReviewCollector } from "./ai-leadership-review.ts";
+import { aiImprovementBacklogCollector } from "./ai-improvement-backlog.ts";
+import { aiOrgAprfSamplingCollector } from "./ai-org-aprf-sampling.ts";
 import {
   awsCollector,
   azureCollector,
@@ -129,6 +135,12 @@ export const COLLECTORS: Collector[] = [
   aiControlTestingCollector,
   aiTrustDocumentationCollector,
   aiIndependentAssessmentCollector,
+  aiAcceptableUsePolicyCollector,
+  aiDomainOwnershipCollector,
+  aiRiskAcceptanceCollector,
+  aiLeadershipReviewCollector,
+  aiImprovementBacklogCollector,
+  aiOrgAprfSamplingCollector,
   a2aPeerAuthCollector,
   awsCollector,
   azureCollector,
