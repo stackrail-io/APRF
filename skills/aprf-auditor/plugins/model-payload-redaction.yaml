@@ -1,0 +1,29 @@
+id: model-payload-redaction
+title: Pre-model tokenization/redaction (PRI-R1)
+version: "0.2.0"
+executor: collectors/model-payload-redaction.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-model-payload-redaction]
+inputs:
+  - "Target repo (pre-model tokenization/redaction for high-sensitivity fields)"
+  - "Optional suite: aprf-assessment/imports/model-payload-redaction/*.{json}"
+collect:
+  - "Detect field inventory, pre-model pipeline, fail-closed signals"
+  - "Ingest sample audit; write model-payload-redaction-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/model-payload-redaction/*"
+  signals:
+    - model-payload-redaction
+    - pri-r1
+    - repo-model-payload-redaction
+mapsToChecks: [PRI-R1]
+whenUnavailable: >
+  Redaction signals alone are PARTIAL. PRI-R1 PASS needs imported
+  highSensitivityFieldsDocumented, pipelineFailClosed, sampleSize≥50,
+  cleartextHits=0, measuredAt ≤90 days. No model traffic / no high-sensitivity
+  fields → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline redaction heuristics + optional imported sample JSON.

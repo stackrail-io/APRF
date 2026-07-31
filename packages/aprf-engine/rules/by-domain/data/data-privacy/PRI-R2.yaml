@@ -1,0 +1,88 @@
+id: "PRI-R2"
+category: "data-privacy"
+title: "Third-party model processing terms should be reviewed for training use and retention"
+description: >
+  Every production third-party model provider should have a dated review of
+  processing terms covering training use and retention, with a named owner;
+  reviews older than 12 months should be treated as missing.
+whyItMatters: >
+  Provider defaults often allow training on customer prompts or retain
+  completions longer than policy allows. Unreviewed terms leave those risks
+  invisible until a breach, subpoena, or vendor change. Annual reviews with
+  training-use and retention coverage turn vendor DPAs into an owned control
+  rather than a signed PDF nobody reopens. This is a recurring legal/ops
+  review—not a runtime fail-closed gate—so it strengthens maturity without
+  blocking the mandatory privacy floor.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  100% of production model providers have a review record ≤12 months covering
+  training use and retention; 0 unreviewed providers in the inventory
+  (inventory measuredAt ≤90 days; each review dated ≤365 days).
+evidenceRequired:
+  - "Inventory of production model providers"
+  - "Vendor terms review records (DPA/training/retention) with date and owner per provider"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-vendor-model-terms"
+      params:
+        hint: >
+          Discover vendor/provider inventories and DPA or terms reviews covering
+          training use and retention for production model providers.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove 100% coverage, attest a provider inventory
+          with zero unreviewed or >12-month-stale reviews covering training use
+          and retention (inventory measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production traffic uses third-party model providers. If all models
+  are fully self-hosted with no third-party processing, score NOT_APPLICABLE.
+  2) Inventory production providers (API vendors, hosted inference, managed
+  fine-tune). 3) For each, open a review record covering training use and
+  retention with date and owner. 4) Confirm every review is ≤12 months old.
+  5) PASS only if coverage is 100% and freshness holds. A signed MSA without
+  training/retention findings does not satisfy. Marketing “we don’t train”
+  blog posts without a dated owner review do not satisfy.
+falsePositiveGuidance: >
+  Do not pass a company-wide DPA that never names the model provider or AI
+  processing. Do not pass reviews older than 12 months. Do not pass an
+  incomplete inventory that omits shadow providers (secondary regions, eval
+  vendors used in production gates). Do not pass procurement checklists that
+  skip training-use or retention. Named exceptions need owner and expiry ≤90
+  days.
+recommendedFixes:
+  - "Publish a production model-provider inventory with owner per vendor"
+  - "Review DPA/terms for training use and retention at least annually; record date and owner"
+  - "Require a current review before onboarding a new production provider"
+  - "Retain inventory + reviews under imports/vendor-model-terms/"
+references:
+  - title: "NIST AI RMF — privacy considerations"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Sensitive Information Disclosure"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "PRI-M1"
+  - "PRI-M2"
+  - "PRI-M3"
+  - "PRI-R3"
+  - "PRI-R1"
+  - "MOD-M1"
+tags:
+  - "data-privacy"
+  - "recommended"
+  - "hybrid"
+  - "vendor-terms"
+  - "dpa"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "vector-databases"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

@@ -1,0 +1,84 @@
+id: "PRI-R3"
+category: "data-privacy"
+title: "DPIA/PIA equivalents should exist for major AI features before production"
+description: >
+  Every major in-scope AI feature should have a completed DPIA/PIA (or
+  equivalent privacy assessment) with owner sign-off before production traffic.
+whyItMatters: >
+  Shipping AI features without a privacy impact assessment leaves training use,
+  retention, residency, and subject-rights gaps undiscovered until regulators
+  or customers force a retrofit. Owner sign-off before production ties privacy
+  risk to a named accountable person—not a draft template in a wiki. This is a
+  pre-launch assessment gate—not a runtime fail-closed control—so it strengthens
+  maturity without blocking the mandatory privacy floor.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  100% of major in-scope AI features have a completed DPIA/PIA (or equivalent)
+  with owner sign-off dated before production traffic (inventory/assessment
+  evidence measuredAt ≤90 days).
+evidenceRequired:
+  - "Inventory of major in-scope AI features in or entering production"
+  - "Completed DPIA/PIA (or equivalent) with owner sign-off per feature, dated before production traffic"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-dpia"
+      params:
+        hint: >
+          Discover DPIA/PIA (or equivalent) artifacts and feature inventories
+          linking major AI features to signed assessments before production.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest major-feature inventory
+          with zero missing completed signed DPIA/PIA equivalents dated before
+          production (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm major in-scope AI features exist (or are entering production). If
+  none, score NOT_APPLICABLE. 2) Inventory those features. 3) For each, open a
+  completed DPIA/PIA (or equivalent) with owner sign-off. 4) Confirm sign-off
+  predates production traffic for that feature. 5) PASS only if coverage is
+  100% and freshness of the inventory/attest holds (measuredAt ≤90 days).
+  Blank templates, unsigned drafts, or post-hoc assessments after production
+  launch do not satisfy.
+falsePositiveGuidance: >
+  Do not pass a company-wide privacy policy as a feature DPIA. Do not pass
+  unsigned or “in progress” assessments. Do not pass assessments that never
+  name the AI feature or model/tool surface. Do not pass a partial inventory
+  that omits major features already serving production. Named exceptions need
+  owner and expiry ≤90 days.
+recommendedFixes:
+  - "Inventory major AI features and require a completed signed DPIA/PIA before production enablement"
+  - "Block release/promote when the DPIA gate is missing or unsigned"
+  - "Retain assessments under imports/ai-dpia/"
+  - "Review assessments when features materially change (new data classes, regions, or model providers)"
+references:
+  - title: "NIST AI RMF — privacy considerations"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM — Sensitive Information Disclosure"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+relatedRules:
+  - "PRI-M1"
+  - "PRI-M2"
+  - "PRI-M3"
+  - "PRI-R1"
+  - "PRI-R2"
+  - "ORG-M4"
+tags:
+  - "data-privacy"
+  - "recommended"
+  - "hybrid"
+  - "dpia"
+  - "pia"
+applicability:
+  technologies:
+    - "aws"
+    - "gcp"
+    - "azure"
+    - "vector-databases"
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

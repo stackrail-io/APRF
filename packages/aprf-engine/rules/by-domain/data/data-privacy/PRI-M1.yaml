@@ -1,58 +1,83 @@
 id: "PRI-M1"
 category: "data-privacy"
 title: "Data flowing to models must be classified; sensitive classes must have documented handling rules"
-description: "Data flowing to models shall be classified; sensitive classes shall have documented
-  handling rules"
-whyItMatters: "Data flowing to models shall be classified; sensitive classes shall have documented
-  handling rules Failing this leaves a production gap against: Classification scheme covers AI
-  payload classes; ≥1 automated or sampled audit shows 100% of sampled production model requests
-  tagged with a class, and sensitive-class handling matches policy"
+description: >
+  Every production path that sends data to models shall apply a documented
+  classification scheme covering AI payload classes, and every sensitive class
+  shall have written handling rules (allow, redact, block, or equivalent).
+whyItMatters: >
+  Unclassified model payloads turn privacy policy into guesswork: teams cannot
+  tell which prompts carry regulated data, which may leave the boundary, or
+  what handling is required. Missing sensitive-class rules leave redaction and
+  residency controls unanchored. Classification plus handling rules make
+  model-bound data an operable privacy control—not a post-incident label.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "Classification scheme covers AI payload classes; ≥1 automated or sampled audit shows
-  100% of sampled production model requests tagged with a class, and sensitive-class handling
-  matches policy"
+passCondition: >
+  A classification scheme covers AI payload classes; ≥1 automated or sampled
+  audit shows 100% of sampled production model requests tagged with a class;
+  sensitive-class handling matches documented policy (audit/scheme measuredAt
+  ≤90 days).
 evidenceRequired:
-  - "Data classification scheme + handling rules for model-bound payloads"
+  - "Data classification scheme covering AI/model-bound payload classes"
+  - "Handling rules for each sensitive class (allow / redact / block or equivalent)"
+  - "Automated or sampled audit showing 100% of sampled production model requests tagged, with sensitive handling matching policy"
 detection:
   capability: "hybrid"
   detectors:
-    - id: "prompt-no-pii-patterns"
-      params: {}
+    - id: "repo-model-payload-classification"
+      params:
+        hint: >
+          Discover AI/model payload classification schemes, sensitive-class
+          handling rules, and tagging/audit signals on production model paths.
     - id: "manual-attest"
       params:
-        hint: "Data classification scheme + handling rules for model-bound payloads"
-manualVerification: "For this Check (Data flowing to models must be classified; sensitive classes
-  must have documented handling rules): inspect current evidence for [Data classification scheme +
-  handling rules for model-bound payloads] and confirm the pass condition holds — Classification
-  scheme covers AI payload classes; ≥1 automated or sampled audit shows 100% of sampled production
-  model requests tagged with a class, and sensitive-class handling matches policy"
-falsePositiveGuidance: "(Data Privacy): when automation and attestation disagree, prefer the
-  stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the
-  gap."
+        hint: >
+          If automation cannot prove 100% tagged samples, attest the scheme,
+          sensitive handling rules, and an audit with 100% tagged samples and
+          policy-matched sensitive handling (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production traffic sends data to models. If none, score
+  NOT_APPLICABLE. 2) Open the classification scheme; confirm it covers AI
+  payload classes (not only static data stores). 3) Confirm each sensitive
+  class has documented handling rules. 4) Review ≥1 automated or sampled audit
+  of production model requests: 100% tagged with a class; sensitive-class
+  handling matches policy. 5) PASS only if scheme + sensitive rules + audit
+  all hold with measuredAt ≤90 days. Tokenization/redaction pipelines alone
+  without a classification scheme do not satisfy. Generic DLP for email/file
+  stores without model-payload classes does not satisfy.
+falsePositiveGuidance: >
+  Do not pass a corporate data-classification PDF that never mentions model
+  prompts, embeddings, or tool payloads. Do not pass PII regex filters without
+  a class taxonomy and sensitive handling rules. Do not pass samples older than
+  90 days or audits with untagged requests. Do not pass “handle carefully”
+  without allow/redact/block (or equivalent) per sensitive class. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Data flowing to models must be classified; sensitive classes must
-    have documented handling rules"
-  - "Retain evidence artifacts required by this Check, starting with: Data classification scheme +
-    handling rules for model-bound payloads"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish an AI payload classification scheme with sensitive-class handling rules"
+  - "Tag production model requests with class labels; fail closed when untagged"
+  - "Run a recurring ≤90-day audit that asserts 100% tagged samples and policy-matched sensitive handling"
+  - "Retain scheme + audit under imports/model-payload-classification/"
 references:
   - title: "NIST AI RMF — privacy considerations"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
   - title: "OWASP LLM — Sensitive Information Disclosure"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
+  - "PRI-R2"
   - "PRI-M2"
   - "PRI-M3"
-  - "PRI-M4"
-  - "PRI-M5"
+  - "PRI-R3"
   - "PRI-R1"
+  - "DG-R3"
+  - "SEC2-M2"
 tags:
   - "data-privacy"
   - "mandatory"
   - "hybrid"
+  - "classification"
+  - "model-payload"
 applicability:
   technologies:
     - "aws"

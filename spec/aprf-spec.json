@@ -528,7 +528,7 @@
         "SAF-M2",
         "SAF-M3",
         "PRI-M1",
-        "PRI-M3",
+        "PRI-M2",
         "MEM-M1",
         "PRM-M1",
         "PRM-M2",
@@ -565,7 +565,7 @@
     {
       "id": "aprf-profile-regulated",
       "name": "Regulated (Tier 3)",
-      "summary": "Core Profile plus Tier-3-only mandatories for mission-critical or regulated AI (residency/DPIA, fairness, dual control, signed supply chain, chaos/continuity, independent assessment). Target capability Level 5.",
+      "summary": "Core Profile plus Tier-3-only mandatories for mission-critical or regulated AI (residency, fairness, dual control, signed supply chain, chaos/continuity, independent assessment). Target capability Level 5.",
       "targetCriticality": 3,
       "targetCapability": 5,
       "mandatoryCheckIds": [
@@ -586,7 +586,7 @@
         "SAF-M2",
         "SAF-M3",
         "PRI-M1",
-        "PRI-M3",
+        "PRI-M2",
         "MEM-M1",
         "PRM-M1",
         "PRM-M2",
@@ -620,8 +620,7 @@
         "INF-M4",
         "SAF-M4",
         "EXP-M4",
-        "PRI-M4",
-        "PRI-M5",
+        "PRI-M3",
         "MEM-M4",
         "EVL-M4",
         "HUM-M4",
@@ -633,7 +632,7 @@
       ],
       "rationale": [
         "Includes every Core gate \u2014 regulated systems must still clear production minimums.",
-        "Adds residency/DPIA, fairness, dual control, and signed admission for regulated blast radius.",
+        "Adds residency, fairness, dual control, and signed admission for regulated blast radius.",
         "Requires chaos/continuity drills, independent assessment sampling, and automated quality rollback triggers.",
         "Target capability Level 5 \u2014 Tier 3 is not Core with a different label."
       ]
@@ -729,7 +728,7 @@
         "AUTHN-M1",
         "AUTHN-M2",
         "PRI-M1",
-        "PRI-M3",
+        "PRI-M2",
         "OBS-M1",
         "OBS-M3",
         "PERF-M1",
@@ -971,7 +970,7 @@
           ],
           "aprfCheckIds": [
             "PRI-M1",
-            "PRI-M3",
+            "PRI-M2",
             "MEM-M1"
           ],
           "relation": "aligns-with"
@@ -1260,7 +1259,7 @@
           ],
           "aprfCheckIds": [
             "PRI-M1",
-            "PRI-M3",
+            "PRI-M2",
             "SEC2-M1",
             "MEM-M1"
           ],
@@ -1581,7 +1580,7 @@
           ],
           "aprfCheckIds": [
             "PRI-M1",
-            "PRI-M3",
+            "PRI-M2",
             "SEC2-M1",
             "MEM-M1"
           ],
@@ -1611,7 +1610,7 @@
           ],
           "aprfCheckIds": [
             "PRI-M1",
-            "PRI-M2",
+            "PRI-R2",
             "DG-M1",
             "CMP-M3"
           ],
@@ -3016,46 +3015,28 @@
       "mandatoryChecks": [
         {
           "id": "PRI-M1",
-          "requirement": "Data flowing to models shall be classified; sensitive classes shall have documented handling rules",
-          "artifact": "Data classification scheme + handling rules for model-bound payloads",
-          "passCondition": "Classification scheme covers AI payload classes; \u22651 automated or sampled audit shows 100% of sampled production model requests tagged with a class, and sensitive-class handling matches policy",
+          "requirement": "Every production path that sends data to models shall apply a documented classification scheme covering AI payload classes, and every sensitive class shall have written handling rules (allow, redact, block, or equivalent).",
+          "artifact": "Data classification scheme covering AI/model-bound payload classes + Handling rules for each sensitive class (allow / redact / block or equivalent) + Automated or sampled audit showing 100% of sampled production model requests tagged, with sensitive handling matching policy",
+          "passCondition": "A classification scheme covers AI payload classes; \u22651 automated or sampled audit shows 100% of sampled production model requests tagged with a class; sensitive-class handling matches documented policy (audit/scheme measuredAt \u226490 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "PRI-M2",
-          "requirement": "Third-party model processing terms shall be reviewed for training use and retention",
-          "artifact": "Vendor terms review record (DPA/training/retention) with date and owner",
-          "passCondition": "100% of production model providers have a review record \u2264 12 months covering training use and retention; 0 unreviewed providers in the inventory",
-          "method": "manual",
+          "requirement": "Where regulation or policy requires it, users or tenants shall have documented deletion and/or export paths that cover AI memory (conversation, durable, or retrieval-augmented stores) and in-scope AI logs, with a tested completion within a published SLA.",
+          "artifact": "Deletion/export procedure or API covering AI memory and in-scope AI logs + Successful test execution record for a sample tenant/user with measured duration vs SLA",
+          "passCondition": "Documented API/runbook covers AI memory and in-scope logs; a test shows deletion/export completes within SLA for a sample tenant/user with measured duration recorded (test evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "PRI-M3",
-          "requirement": "Users or tenants shall have deletion/export paths covering AI memory and logs where required",
-          "artifact": "Deletion/export procedure + successful test execution record",
-          "passCondition": "Documented API/runbook covers AI memory and in-scope logs; test shows deletion/export completes within SLA for a sample tenant/user (measured duration recorded)",
-          "method": "manual",
-          "requiredFromLevel": 3,
-          "minCriticality": 2
-        },
-        {
-          "id": "PRI-M4",
-          "requirement": "Residency-constrained routing shall be enforced for regulated workloads",
-          "artifact": "Routing policy config + sample routing decisions for regulated tenants/regions",
-          "passCondition": "PASS if regulated workloads are labeled and 100% of sampled regulated requests stay in approved regions",
-          "method": "manual",
-          "requiredFromLevel": 4,
-          "minCriticality": 3
-        },
-        {
-          "id": "PRI-M5",
-          "requirement": "DPIA/PIA equivalents shall exist for major AI features before production",
-          "artifact": "Completed DPIA/PIA (or equivalent) with sign-off for each major in-scope AI feature",
-          "passCondition": "PASS if 100% of major in-scope AI features have a completed assessment with owner sign-off before production traffic",
-          "method": "manual",
+          "requirement": "Regulated workloads shall be labeled, and model/tool routing shall keep 100% of sampled regulated requests in approved regions\u2014enforced by policy or gateway controls, not prompt instructions alone.",
+          "artifact": "Routing policy config naming approved regions for regulated tenants/workloads + Sample routing decisions (or deny logs) showing 100% of sampled regulated requests stayed in approved regions",
+          "passCondition": "Regulated workloads are labeled; 100% of sampled regulated requests stay in approved regions (routing sample/policy evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 3
         }
@@ -3063,9 +3044,27 @@
       "recommendedChecks": [
         {
           "id": "PRI-R1",
-          "requirement": "Tokenization or redaction before model calls for high-sensitivity fields",
-          "artifact": "Pre-model tokenization/redaction pipeline config + sample of redacted payloads for high-sensitivity fields",
-          "passCondition": "Documented high-sensitivity fields never appear in cleartext in model request samples (\u226550 sampled calls); pipeline fails closed when redaction errors",
+          "requirement": "Production paths that send data to models should tokenize or redact documented high-sensitivity fields before the model call, with fail-closed behavior when redaction errors.",
+          "artifact": "Inventory or policy listing high-sensitivity fields subject to pre-model tokenization/redaction + Pre-model tokenization/redaction pipeline config with fail-closed on redaction errors + Sample of \u226550 production model requests showing 0 cleartext hits for those fields",
+          "passCondition": "Documented high-sensitivity fields never appear in cleartext in \u226550 sampled production model requests; the pre-model tokenization/redaction pipeline fails closed on errors (sample/pipeline evidence measuredAt \u226490 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 4,
+          "minCriticality": 2
+        },
+        {
+          "id": "PRI-R2",
+          "requirement": "Every production third-party model provider should have a dated review of processing terms covering training use and retention, with a named owner; reviews older than 12 months should be treated as missing.",
+          "artifact": "Inventory of production model providers + Vendor terms review records (DPA/training/retention) with date and owner per provider",
+          "passCondition": "100% of production model providers have a review record \u226412 months covering training use and retention; 0 unreviewed providers in the inventory (inventory measuredAt \u226490 days; each review dated \u2264365 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 4,
+          "minCriticality": 2
+        },
+        {
+          "id": "PRI-R3",
+          "requirement": "Every major in-scope AI feature should have a completed DPIA/PIA (or equivalent privacy assessment) with owner sign-off before production traffic.",
+          "artifact": "Inventory of major in-scope AI features in or entering production + Completed DPIA/PIA (or equivalent) with owner sign-off per feature, dated before production traffic",
+          "passCondition": "100% of major in-scope AI features have a completed DPIA/PIA (or equivalent) with owner sign-off dated before production traffic (inventory/assessment evidence measuredAt \u226490 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2

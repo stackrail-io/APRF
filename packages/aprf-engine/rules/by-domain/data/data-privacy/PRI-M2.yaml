@@ -1,34 +1,62 @@
 id: "PRI-M2"
 category: "data-privacy"
-title: "Third-party model processing terms must be reviewed for training use and retention"
-description: "Third-party model processing terms shall be reviewed for training use and retention"
-whyItMatters: "Third-party model processing terms shall be reviewed for training use and retention
-  Failing this leaves a production gap against: 100% of production model providers have a review
-  record ≤ 12 months covering training use and retention; 0 unreviewed providers in the inventory"
+title: "Users or tenants must have deletion/export paths covering AI memory and logs where required"
+description: >
+  Where regulation or policy requires it, users or tenants shall have
+  documented deletion and/or export paths that cover AI memory (conversation,
+  durable, or retrieval-augmented stores) and in-scope AI logs, with a tested
+  completion within a published SLA.
+whyItMatters: >
+  Model traffic leaves residue in memory stores and logs long after the UI
+  “delete chat” button. Without tested deletion/export paths that reach those
+  AI artifacts, subject-rights requests and offboarding fail silently—or only
+  clear the application DB. Measured SLA completion proves the path works
+  under production-like conditions, not just that a runbook exists.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "100% of production model providers have a review record ≤ 12 months covering
-  training use and retention; 0 unreviewed providers in the inventory"
+passCondition: >
+  Documented API/runbook covers AI memory and in-scope logs; a test shows
+  deletion/export completes within SLA for a sample tenant/user with measured
+  duration recorded (test evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Vendor terms review record (DPA/training/retention) with date and owner"
+  - "Deletion/export procedure or API covering AI memory and in-scope AI logs"
+  - "Successful test execution record for a sample tenant/user with measured duration vs SLA"
 detection:
-  capability: "manual"
-  detectors: []
-manualVerification: "For this Check (Third-party model processing terms must be reviewed for
-  training use and retention): inspect current evidence for [Vendor terms review record
-  (DPA/training/retention) with date and owner] and confirm the pass condition holds — 100% of
-  production model providers have a review record ≤ 12 months covering training use and retention; 0
-  unreviewed providers in the inventory"
-falsePositiveGuidance: "(Data Privacy): re-verify against a current artifact for this specific Check
-  , not a sibling control. Document named exceptions with owner and expiry."
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-deletion-export"
+      params:
+        hint: >
+          Discover deletion/export APIs or runbooks covering AI memory and
+          AI/log stores, plus SLA and test harness signals.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove a recent test, attest the procedure covers
+          AI memory and in-scope logs plus a sample tenant/user test that met
+          SLA with measured duration (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the system retains AI memory or AI-related logs for users/tenants
+  and that deletion/export is required by policy or regulation. If neither
+  memory nor in-scope logs exist (or deletion/export is not required), score
+  NOT_APPLICABLE with rationale. 2) Open the deletion/export API or runbook;
+  confirm it names AI memory stores and in-scope logs (not only primary app
+  DB rows). 3) Review a sample tenant/user test: completion within published
+  SLA and measured duration recorded. 4) PASS only if procedure scope +
+  within-SLA test hold with measuredAt ≤90 days. Application-only GDPR erase
+  that skips vector/memory/log sinks does not satisfy.
+falsePositiveGuidance: >
+  Do not pass a generic “delete user” job that never touches AI memory or
+  model/tool logs. Do not pass a runbook without a timed test. Do not pass
+  tests older than 90 days as current. Do not pass soft-delete flags without
+  evidence the AI artifacts are actually purged or exported. Named exceptions
+  need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Third-party model processing terms must be reviewed for training
-    use and retention"
-  - "Retain evidence artifacts required by this Check, starting with: Vendor terms review record
-    (DPA/training/retention) with date and owner"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Document deletion/export APIs covering AI memory and in-scope AI logs with a numeric SLA"
+  - "Add an automated or scripted sample-tenant test that records duration and asserts SLA"
+  - "Fail closed when new AI memory sinks are registered without a deletion/export path"
+  - "Retain procedure + test under imports/ai-deletion-export/"
 references:
   - title: "NIST AI RMF — privacy considerations"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -37,13 +65,18 @@ references:
 relatedRules:
   - "PRI-M1"
   - "PRI-M3"
-  - "PRI-M4"
-  - "PRI-M5"
+  - "PRI-R3"
   - "PRI-R1"
+  - "PRI-R2"
+  - "MEM-M1"
+  - "MEM-R3"
 tags:
   - "data-privacy"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "deletion"
+  - "export"
+  - "ai-memory"
 applicability:
   technologies:
     - "aws"

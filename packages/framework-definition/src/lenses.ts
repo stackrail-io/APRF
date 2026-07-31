@@ -96,7 +96,7 @@ export const LENS_VOICE: AprfLens = {
     "AUTHN-M1",
     "AUTHN-M2",
     "PRI-M1",
-    "PRI-M3",
+    "PRI-M2",
     "OBS-M1",
     "OBS-M3",
     "PERF-M1",

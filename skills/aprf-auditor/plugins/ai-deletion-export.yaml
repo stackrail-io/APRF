@@ -1,0 +1,29 @@
+id: ai-deletion-export
+title: AI memory/log deletion and export paths (PRI-M2)
+version: "0.2.0"
+executor: collectors/ai-deletion-export.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-ai-deletion-export]
+inputs:
+  - "Target repo (deletion/export procedures covering AI memory and AI logs)"
+  - "Optional suite: aprf-assessment/imports/ai-deletion-export/*.{json}"
+collect:
+  - "Detect deletion/export procedures, AI memory/log scope, SLA/test signals"
+  - "Ingest timed SLA test; write ai-deletion-export-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/ai-deletion-export/*"
+  signals:
+    - ai-deletion-export
+    - pri-m2
+    - repo-ai-deletion-export
+mapsToChecks: [PRI-M2]
+whenUnavailable: >
+  Procedure signals alone are PARTIAL. PRI-M2 PASS needs imported
+  procedureCoversAiMemory + procedureCoversAiLogs + sampleTestCompleted +
+  completedWithinSla + measuredDurationPresent, measuredAt ≤90 days. No
+  AI memory/logs requiring deletion/export → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline deletion/export heuristics + optional imported SLA test JSON.

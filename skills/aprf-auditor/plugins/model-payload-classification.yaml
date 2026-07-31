@@ -1,0 +1,29 @@
+id: model-payload-classification
+title: AI/model payload classification (PRI-M1)
+version: "0.2.0"
+executor: collectors/model-payload-classification.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-model-payload-classification]
+inputs:
+  - "Target repo (classification scheme + sensitive handling for model-bound payloads)"
+  - "Optional suite: aprf-assessment/imports/model-payload-classification/*.{json}"
+collect:
+  - "Detect classification scheme, sensitive handling rules, tagging/audit signals"
+  - "Ingest audit; write model-payload-classification-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/model-payload-classification/*"
+  signals:
+    - model-payload-classification
+    - pri-m1
+    - repo-model-payload-classification
+mapsToChecks: [PRI-M1]
+whenUnavailable: >
+  Classification signals alone are PARTIAL. PRI-M1 PASS needs imported
+  classificationSchemeCoversAiPayloads, sensitiveHandlingRulesDocumented,
+  sampleTaggedPct=100, sensitiveHandlingMatchesPolicy, measuredAt ≤90 days.
+  No production model traffic → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline classification heuristics + optional imported audit JSON.

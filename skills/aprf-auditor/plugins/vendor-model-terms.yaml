@@ -1,0 +1,29 @@
+id: vendor-model-terms
+title: Third-party model provider terms review (PRI-R2)
+version: "0.2.0"
+executor: collectors/vendor-model-terms.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-vendor-model-terms]
+inputs:
+  - "Target repo (provider inventory + DPA/terms reviews for training use and retention)"
+  - "Optional suite: aprf-assessment/imports/vendor-model-terms/*.{json}"
+collect:
+  - "Detect vendor/provider terms and training/retention review signals"
+  - "Ingest inventory; write vendor-model-terms-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/vendor-model-terms/*"
+  signals:
+    - vendor-model-terms
+    - pri-r2
+    - repo-vendor-model-terms
+mapsToChecks: [PRI-R2]
+whenUnavailable: >
+  Terms signals alone are PARTIAL. PRI-R2 PASS needs imported
+  coversAllProductionProviders with unreviewed/stale/missing training|retention
+  counts = 0 (reviews ≤12 months), inventory measuredAt ≤90 days. No third-party
+  model providers → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline vendor-terms heuristics + optional imported inventory JSON.
