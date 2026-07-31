@@ -160,6 +160,7 @@ categoryDefaults:
       - "**/redis*"
       - "**/*session*"
       - "**/*conversation*"
+    plugins: [memory-isolation, memory-retention, memory-write-policy, memory-integrity, memory-poisoning-evals, memory-promotion-architecture, ai-deletion-export, cross-tenant-tests, repo-filesystem]
     signals: [TTL, tenant isolation, memory scope]
   model-governance:
     search:
@@ -882,6 +883,102 @@ checks:
       PASS if vendor-model-terms statusHint=pass (coversAllProductionProviders + unreviewed/stale/missing training|retention = 0 + measuredAt ≤90d).
       PARTIAL if vendor-terms signals without complete import.
       NOT_APPLICABLE when no third-party provider signals.
+  MEM-M1:
+    requiredEvidence:
+      - "In-scope AI memory API inventory + tenant (and user where required) isolation"
+      - "≥10 attack cases with 0 unauthorized successes under imports/memory-isolation/"
+    searchExtra:
+      - "**/*memory*"
+      - "**/*vector*"
+      - "**/*conversation*"
+      - "**/*cross*tenant*"
+      - "**/*isolat*"
+    plugins: [memory-isolation, cross-tenant-tests, ai-deletion-export, repo-filesystem]
+    naWhen: "No AI memory stores (conversation, durable, or vector/retrieval) for tenants/users"
+    evaluation: |
+      PASS if memory-isolation statusHint=pass (coversMemoryApis + attackCases≥10 + unauthorizedSuccesses=0 + cross-user covered when required + measuredAt ≤90d).
+      PARTIAL if memory isolation code/tests without complete import.
+      NOT_APPLICABLE when no AI memory signals.
+  MEM-M2:
+    requiredEvidence:
+      - "Retention periods per AI memory class + TTL/deletion job config"
+      - "Purge test showing older-than-retention samples absent under imports/memory-retention/"
+    searchExtra:
+      - "**/*retention*"
+      - "**/*ttl*"
+      - "**/*purge*"
+      - "**/*expire*"
+      - "**/*memory*delet*"
+    plugins: [memory-retention, ai-deletion-export, memory-isolation, repo-filesystem]
+    naWhen: "No retained AI memory classes"
+    evaluation: |
+      PASS if memory-retention statusHint=pass (retentionPeriodsPerMemoryClass + ttlOrDeletionJobConfigured + purgeTestSucceeded + olderThanRetentionAbsent + measuredAt ≤90d).
+      PARTIAL if retention/job signals without complete import.
+      NOT_APPLICABLE when no AI memory retention signals.
+  MEM-M3:
+    requiredEvidence:
+      - "Durable-memory write policy (allowed writers + content classes) + enforcement"
+      - "Deny tests at 100% unauthorized rejection under imports/memory-write-policy/"
+    searchExtra:
+      - "**/*write*polic*"
+      - "**/*memory*write*"
+      - "**/*durable*mem*"
+      - "**/*content*class*"
+      - "**/*deny*write*"
+    plugins: [memory-write-policy, feedback-promotion-governance, memory-isolation, repo-filesystem]
+    naWhen: "No durable/long-term AI memory write path"
+    evaluation: |
+      PASS if memory-write-policy statusHint=pass (policyEnumeratesWritersAndContentClasses + enforcementPresent + unauthorizedWritersDeniedPct=100 + measuredAt ≤90d).
+      PARTIAL if write-policy signals without complete import.
+      NOT_APPLICABLE when no durable-memory write-policy signals.
+  MEM-M4:
+    requiredEvidence:
+      - "Critical memory class inventory + cryptographic/signed integrity design"
+      - "Verification sample at 100% under imports/memory-integrity/"
+    searchExtra:
+      - "**/*integrity*"
+      - "**/*sign*"
+      - "**/*hmac*"
+      - "**/*critical*mem*"
+      - "**/*tamper*"
+    plugins: [memory-integrity, memory-write-policy, memory-isolation, repo-filesystem]
+    naWhen: "No critical AI memory classes designated"
+    evaluation: |
+      PASS if memory-integrity statusHint=pass (criticalClassesInventoried + integrityControlPresent + verificationSucceededPct=100 + coversAllCriticalClasses + measuredAt ≤90d).
+      PARTIAL if integrity signals without complete import.
+      NOT_APPLICABLE when no critical-memory integrity signals.
+  MEM-R1:
+    requiredEvidence:
+      - "≥5 memory-poisoning scenarios including cross-tenant write, prompt-in-memory, stale trusted fact"
+      - "Latest suite run with critical fails blocked or risk-accepted under imports/memory-poisoning-evals/"
+    searchExtra:
+      - "**/*poison*"
+      - "**/*adversarial*"
+      - "**/*redteam*"
+      - "**/*memory*eval*"
+      - "**/promptfoo*"
+    plugins: [memory-poisoning-evals, promptfoo, memory-isolation, injection-policy-gate, repo-filesystem]
+    naWhen: "No AI memory surface that could be poisoned"
+    evaluation: |
+      PASS if memory-poisoning-evals statusHint=pass (poisoningScenarioCount≥5 + required scenario types + criticalFailsBlockedOrRiskAccepted + measuredAt ≤90d).
+      PARTIAL if poisoning signals without complete import.
+      NOT_APPLICABLE when no memory-poisoning / memory-eval signals.
+  MEM-R3:
+    requiredEvidence:
+      - "Working vs durable memory separation + promotion rules + TTL-by-class"
+      - "≥10 promotion audits with rule ID and actor under imports/memory-promotion-architecture/"
+    searchExtra:
+      - "**/*working*mem*"
+      - "**/*durable*mem*"
+      - "**/*promot*"
+      - "**/*memory*arch*"
+      - "**/*ttl*"
+    plugins: [memory-promotion-architecture, memory-retention, memory-write-policy, feedback-promotion-governance, repo-filesystem]
+    naWhen: "No dual-class (working + durable) AI memory"
+    evaluation: |
+      PASS if memory-promotion-architecture statusHint=pass (workingDurableSeparated + promotionRulesPresent + silentPromotionDenied + lastPromotionsWithRuleAndActor≥10 + ttlDiffersByMemoryClass + measuredAt ≤90d).
+      PARTIAL if architecture signals without complete import.
+      NOT_APPLICABLE when no working/durable promotion signals.
   DEP-M1:
     requiredEvidence:
       - "Documented/tested rollback for model/prompt/tool promotion"
@@ -946,7 +1043,8 @@ aiSpecificStrategies:
       - "**/memory/**"
       - "**/vector*"
       - "**/*store*"
-    signals: [ttl, tenant-isolation, write-policy]
+    plugins: [memory-isolation, memory-retention, memory-write-policy, memory-integrity, memory-poisoning-evals, memory-promotion-architecture, cross-tenant-tests, repo-filesystem]
+    signals: [tenant-isolation, retention, poisoning-controls, ttl, write-policy]
   contextLeakage:
     relatedChecks: [CTX-M1, CTX-M2, SEC-M4]
     search:

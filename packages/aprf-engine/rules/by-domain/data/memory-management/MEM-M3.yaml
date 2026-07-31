@@ -1,36 +1,60 @@
 id: "MEM-M3"
 category: "memory-management"
 title: "Writes to long-term memory must be validated against policy (who/what may write)"
-description: "Writes to long-term memory shall be validated against policy (who/what may write)"
-whyItMatters: "Writes to long-term memory shall be validated against policy (who/what may write)
-  Failing this leaves a production gap against: Unauthorized writers denied at 100% in tests; policy
-  enumerates allowed writers and content classes for durable memory"
+description: >
+  Writes to durable/long-term AI memory shall be gated by a policy that
+  enumerates allowed writers and content classes; unauthorized writers shall be
+  denied at 100% in automated tests.
+whyItMatters: >
+  Unrestricted durable-memory writes let agents, tools, or tenants plant content
+  that later retrieval treats as ground truth. A policy that names who and what
+  may write—plus deny tests—turns memory ingestion into an enforceable control
+  rather than an open append API.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Unauthorized writers denied at 100% in tests; policy enumerates allowed writers and
-  content classes for durable memory"
+passCondition: >
+  Policy enumerates allowed writers and content classes for durable/long-term
+  memory; unauthorized writers are denied at 100% in automated tests (policy/test
+  evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Write-policy middleware config + deny tests"
+  - "Write policy for durable/long-term memory naming allowed writers and content classes"
+  - "Write-policy enforcement config (middleware, gateway, or store gate)"
+  - "Automated deny tests showing 100% rejection of unauthorized writers"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-memory-write-policy"
+      params:
+        hint: >
+          Discover durable-memory write policies (allowed writers/content
+          classes), enforcement gates, and unauthorized-writer deny tests.
     - id: "manual-attest"
       params:
-        hint: "Write-policy middleware config + deny tests"
-manualVerification: "For this Check (Be validated against policy (who/what may write)): inspect
-  current evidence for [Write-policy middleware config + deny tests] and confirm the pass condition
-  holds — Unauthorized writers denied at 100% in tests; policy enumerates allowed writers and
-  content classes for durable memory"
-falsePositiveGuidance: "(Memory Management): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove deny coverage, attest a durable-memory write
+          policy with allowed writers/content classes and tests showing 100%
+          unauthorized deny (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the system has durable/long-term AI memory (not only ephemeral
+  session context). If none, score NOT_APPLICABLE. 2) Open the write policy:
+  allowed writers (roles, agents, tools, services) and allowed content classes.
+  3) Confirm enforcement sits on the write path (middleware, gateway, or store
+  gate). 4) Review automated deny tests: unauthorized writers rejected at 100%.
+  5) PASS only if policy + enforcement + 100% deny tests hold with measuredAt
+  ≤90 days. Authz on primary app tables that never gate durable memory writes
+  does not satisfy. Allow-all agent memory tools without content-class limits
+  do not satisfy.
+falsePositiveGuidance: >
+  Do not pass a generic RBAC matrix that never names durable memory. Do not pass
+  read-isolation tests as write-policy proof. Do not pass suites with any
+  unauthorized write success. Do not pass policies older than 90 days without a
+  fresh deny-test run. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Writes to long-term memory must be validated against policy
-    (who/what may write)"
-  - "Retain evidence artifacts required by this Check, starting with: Write-policy middleware config
-    + deny tests"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish a durable-memory write policy listing allowed writers and content classes"
+  - "Enforce the policy on every durable-memory write path; fail closed when writer/class is unknown"
+  - "Add automated deny tests for unauthorized writers; assert 100% rejection"
+  - "Retain policy + deny results under imports/memory-write-policy/"
 references:
   - title: "NIST AI RMF — Govern and Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -42,10 +66,14 @@ relatedRules:
   - "MEM-M4"
   - "MEM-R1"
   - "MEM-R3"
+  - "DG-M3"
+  - "AUTHZ-M1"
 tags:
   - "memory-management"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "write-policy"
+  - "durable-memory"
 applicability:
   technologies:
     - "vector-databases"

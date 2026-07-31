@@ -1,35 +1,62 @@
 id: "MEM-M2"
 category: "memory-management"
-title: "Retention and deletion policies must exist and be executable"
-description: "Retention and deletion policies shall exist and be executable"
-whyItMatters: "Retention and deletion policies shall exist and be executable Failing this leaves a
-  production gap against: TTL/deletion job succeeds in test; sample records older than retention are
-  absent after job run; policy documents retention periods per memory class"
+title: "AI memory retention and deletion policies must exist and be executable"
+description: >
+  Every in-scope AI memory class shall have a documented retention period and an
+  executable TTL or deletion job; a test shall show sample records older than
+  retention are absent after the job runs.
+whyItMatters: >
+  Memory without enforced retention grows forever: stale embeddings, orphaned
+  conversation turns, and poisoned vectors stay queryable long after policy says
+  they should be gone. A written period without a working job is theater; a job
+  without a timed purge test is hope. Executable retention per memory class
+  keeps long-term stores from becoming an unbounded liability.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "TTL/deletion job succeeds in test; sample records older than retention are absent
-  after job run; policy documents retention periods per memory class"
+passCondition: >
+  Policy documents retention periods per memory class; a TTL/deletion job
+  succeeds in test and sample records older than retention are absent after the
+  job run (policy/job/test evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Retention policy + TTL job config + deletion test record"
+  - "Retention policy naming periods per AI memory class (conversation, durable, vector/retrieval, or equivalent)"
+  - "TTL or deletion job config covering those memory classes"
+  - "Successful deletion/TTL test record showing older-than-retention samples absent after job run"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-memory-retention"
+      params:
+        hint: >
+          Discover retention policies, TTL/deletion jobs for AI memory classes,
+          and purge-test evidence that over-retention samples are removed.
     - id: "manual-attest"
       params:
-        hint: "Retention policy + TTL job config + deletion test record"
-manualVerification: "For this Check (Retention and deletion policies must exist and be executable):
-  inspect current evidence for [Retention policy + TTL job config + deletion test record] and
-  confirm the pass condition holds — TTL/deletion job succeeds in test; sample records older than
-  retention are absent after job run; policy documents retention periods per memory class"
-falsePositiveGuidance: "(Memory Management): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove a recent purge test, attest per-class
+          retention periods, executable TTL/deletion jobs, and a test showing
+          older-than-retention samples absent (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the system retains AI memory classes (conversation, durable,
+  vector/retrieval, or equivalent). If none, score NOT_APPLICABLE. 2) Open the
+  retention policy; confirm each in-scope class has a documented period. 3) Open
+  TTL or deletion job config covering those classes. 4) Review a test run: job
+  succeeded and sample records older than retention are absent afterward. 5)
+  PASS only if policy + job + purge test hold with measuredAt ≤90 days.
+  Subject-rights erasure alone (on-demand delete) without class retention periods
+  and TTL jobs does not satisfy. Soft-delete flags without evidence of purge do
+  not satisfy.
+falsePositiveGuidance: >
+  Do not pass a company-wide data-retention PDF that never names AI memory
+  classes. Do not pass TTL on primary app tables that skip vector/conversation
+  stores. Do not pass jobs that only expire cache keys while durable memory
+  remains. Do not pass tests older than 90 days as current. Named exceptions
+  need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Retention and deletion policies must exist and be executable"
-  - "Retain evidence artifacts required by this Check, starting with: Retention policy + TTL job
-    config + deletion test record"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish retention periods per AI memory class and wire TTL/deletion jobs to those classes"
+  - "Add an automated purge test that asserts older-than-retention samples are absent after the job"
+  - "Fail closed when a new memory class is registered without a retention period and job"
+  - "Retain policy + job + test under imports/memory-retention/"
 references:
   - title: "NIST AI RMF — Govern and Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -41,10 +68,14 @@ relatedRules:
   - "MEM-M4"
   - "MEM-R1"
   - "MEM-R3"
+  - "PRI-M2"
 tags:
   - "memory-management"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "retention"
+  - "ttl"
+  - "deletion"
 applicability:
   technologies:
     - "vector-databases"

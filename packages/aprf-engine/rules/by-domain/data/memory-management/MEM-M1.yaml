@@ -1,36 +1,62 @@
 id: "MEM-M1"
 category: "memory-management"
 title: "Memory must be isolated by tenant (and user where required) with tested boundaries"
-description: "Memory shall be isolated by tenant (and user where required) with tested boundaries"
-whyItMatters: "Memory shall be isolated by tenant (and user where required) with tested boundaries
-  Failing this leaves a production gap against: 0 successful cross-tenant (and cross-user where
-  required) memory reads/writes across ≥10 automated attack cases"
+description: >
+  AI memory stores (conversation, durable, and retrieval/vector memory) shall
+  enforce tenant isolation—and user isolation where policy requires it—proven by
+  automated attack tests with zero successful unauthorized reads or writes.
+whyItMatters: >
+  Shared memory backends leak across tenants when filters are missing, copied
+  wrong, or bypassed by vector/search APIs. Untested boundaries turn multi-tenant
+  AI into a confidentiality incident waiting for the next retrieval path. Attack
+  suites that drive cross-tenant (and cross-user where required) memory
+  reads/writes prove isolation holds on the memory path—not only on primary app
+  tables.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "0 successful cross-tenant (and cross-user where required) memory reads/writes across
-  ≥10 automated attack cases"
+passCondition: >
+  0 successful cross-tenant (and cross-user where required) memory reads/writes
+  across ≥10 automated attack cases covering in-scope memory APIs (suite
+  evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Cross-tenant (and cross-user where required) isolation tests for memory store APIs"
+  - "Inventory or scope note of in-scope AI memory APIs (conversation, durable, vector/retrieval)"
+  - "Cross-tenant (and cross-user where required) isolation attack suite results for those memory APIs"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-memory-isolation"
+      params:
+        hint: >
+          Discover memory-store isolation (tenant/user filters on conversation,
+          durable, or vector memory) and automated cross-boundary attack tests.
     - id: "manual-attest"
       params:
-        hint: "Isolation tests for memory store APIs"
-manualVerification: "For this Check (Be isolated by tenant (and user where required) with tested
-  boundaries): inspect current evidence for [Isolation tests for memory store APIs] and confirm the
-  pass condition holds — 0 successful cross-tenant (and cross-user where required) memory
-  reads/writes across ≥10 automated attack cases"
-falsePositiveGuidance: "(Memory Management): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove ≥10 cases, attest a memory-API attack suite
+          with 0 unauthorized successes (and cross-user cases where required)
+          measuredAt ≤90 days.
+manualVerification: >
+  1) Confirm the system retains AI memory (conversation, durable, or
+  vector/retrieval) for tenants/users. If none, score NOT_APPLICABLE. 2) Inventory
+  in-scope memory APIs. 3) Confirm tenant isolation is enforced; if policy
+  requires user-level isolation, confirm that too. 4) Review ≥10 automated
+  attack cases attempting cross-tenant (and cross-user where required)
+  reads/writes: 0 successful unauthorized accesses. 5) PASS only if suite scope
+  covers those memory APIs and freshness holds (measuredAt ≤90 days). App-DB
+  tenant tests that never touch memory stores do not satisfy. Isolation helpers
+  in code without an attack suite do not satisfy.
+falsePositiveGuidance: >
+  Do not pass primary CRUD tenant filters without memory/vector coverage. Do not
+  pass suites with fewer than 10 cases or any unauthorized success. Do not pass
+  suites older than 90 days as current. Do not skip cross-user cases when product
+  policy requires user-scoped memory. Named exceptions need owner and expiry ≤90
+  days.
 recommendedFixes:
-  - "Implement and operationalize: Memory must be isolated by tenant (and user where required) with
-    tested boundaries"
-  - "Retain evidence artifacts required by this Check, starting with: Isolation tests for memory
-    store APIs"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Enforce tenant_id (and user_id where required) on every memory read/write/search path"
+  - "Add ≥10 automated cross-tenant (and cross-user) attack cases against memory APIs; assert deny"
+  - "Fail closed when memory queries omit isolation predicates"
+  - "Retain suite results under imports/memory-isolation/"
 references:
   - title: "NIST AI RMF — Govern and Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -42,10 +68,14 @@ relatedRules:
   - "MEM-M4"
   - "MEM-R1"
   - "MEM-R3"
+  - "AUTHZ-M2"
+  - "PRI-M2"
 tags:
   - "memory-management"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "tenant-isolation"
+  - "memory"
 applicability:
   technologies:
     - "vector-databases"

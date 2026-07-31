@@ -1,0 +1,29 @@
+id: memory-retention
+title: AI memory retention + TTL/deletion jobs (MEM-M2)
+version: "0.2.0"
+executor: collectors/memory-retention.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-memory-retention]
+inputs:
+  - "Target repo (retention policy + TTL/deletion for AI memory classes)"
+  - "Optional suite: aprf-assessment/imports/memory-retention/*.{json}"
+collect:
+  - "Detect retention policy, TTL/deletion jobs, and purge-test signals"
+  - "Ingest purge evidence; write memory-retention-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/memory-retention/*"
+  signals:
+    - memory-retention
+    - mem-m2
+    - repo-memory-retention
+mapsToChecks: [MEM-M2]
+whenUnavailable: >
+  Policy/job signals alone are PARTIAL. MEM-M2 PASS needs imported
+  retentionPeriodsPerMemoryClass, ttlOrDeletionJobConfigured,
+  purgeTestSucceeded, olderThanRetentionAbsent, measuredAt ≤90 days. No AI
+  memory classes → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline retention heuristics + optional imported purge-test JSON.

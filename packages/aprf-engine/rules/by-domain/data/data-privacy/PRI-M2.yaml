@@ -69,6 +69,7 @@ relatedRules:
   - "PRI-R1"
   - "PRI-R2"
   - "MEM-M1"
+  - "MEM-M2"
   - "MEM-R3"
 tags:
   - "data-privacy"

@@ -14,6 +14,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 - Rewrote former **PRI-M4** (residency-constrained routing) as hybrid **PRI-M3** + `ai-residency-routing` collector; renumbered ID; synced `aprf-spec.json`.
 - Rewrote former **PRI-M5** (DPIA/PIA before production) as hybrid recommended **PRI-R3** + `ai-dpia` collector (demoted from brief **PRI-M4** slot; process gate, not runtime floor); synced `aprf-spec.json` and Regulated profile.
 - Tightened data-privacy prose: rewrote stub **PRI-R1** (pre-model tokenization/redaction) to hybrid + `model-payload-redaction` collector; aligned severity/weight with other recommended privacy Checks; trimmed sibling-control listing from PRI-R3 `whyItMatters`.
+- Rewrote **MEM-M1** (memory tenant/user isolation with tested boundaries) from template stub to hybrid Check + `memory-isolation` collector; synced `aprf-spec.json`.
+- Rewrote **MEM-M2** (retention + executable TTL/deletion per memory class) from template stub to hybrid Check + `memory-retention` collector; synced `aprf-spec.json`.
+- Rewrote **MEM-M3** (durable-memory write policy + unauthorized deny tests) from template stub to hybrid Check + `memory-write-policy` collector; synced `aprf-spec.json`.
+- Rewrote **MEM-M4** (critical memory cryptographic/signed integrity) from template stub to hybrid Check + `memory-integrity` collector; synced `aprf-spec.json`.
+- Rewrote **MEM-R1** (memory poisoning eval scenarios) from template stub to hybrid Check + `memory-poisoning-evals` collector; synced `aprf-spec.json`.
+- Rewrote **MEM-R3** (working vs durable memory + promotion rules) from template stub to hybrid Check + `memory-promotion-architecture` collector; synced `aprf-spec.json`.
+- Tightened memory-management prose: standalone `whyItMatters` on MEM-M3/M4/R1/R3 (no sibling-control roll-ups); clarified MEM-M2 title for AI memory scope.
 - Tightened Agents domain prose: removed sibling Check IDs from AGN-R3/HUM-M4/HUM-R3 `whyItMatters`; aligned AGN-M4, AGN-R3, HUM-M1/M3/M4 `passCondition` with collector `measuredAt` ≤90d.
 - Tightened Cost domain prose: removed sibling Check IDs from COST-M2/M3 `whyItMatters`; aligned COST-M1–M3 `passCondition`/attest hints with collector `measuredAt` ≤90d.
 - `spec/aprf-spec.json` agent-governance mandatory Checks **AGN-M1–M4** aligned to catalog SoT: methods (M1 automated, M3/M4 hybrid), owner in M1, cancel-suite + operator authz in M3, forged-peer in M4.

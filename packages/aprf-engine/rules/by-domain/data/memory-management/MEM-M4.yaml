@@ -1,38 +1,63 @@
 id: "MEM-M4"
 category: "memory-management"
 title: "Critical memory records must have cryptographic or signed integrity protection"
-description: "Critical memory records shall have cryptographic or signed integrity protection"
-whyItMatters: "Critical memory records shall have cryptographic or signed integrity protection
-  Failing this leaves a production gap against: Critical memory classes are inventoried;
-  cryptographic verification or signature check succeeds for those classes in the latest check (≤90
-  days)"
+description: >
+  Critical AI memory classes shall be inventoried and protected with
+  cryptographic or signed integrity controls; the latest verification for those
+  classes shall succeed.
+whyItMatters: >
+  Critical durable memory—trusted facts, approvals, safety decisions—becomes an
+  attack surface if an adversary can silently alter records after write.
+  Access controls on who may write do not detect tampering of values already
+  stored. Cryptographic or signed integrity with a fresh verification sample
+  proves critical memory has not been rewritten unnoticed.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Critical memory classes are inventoried; cryptographic verification or signature
-  check succeeds for those classes in the latest check (≤90 days)"
+passCondition: >
+  Critical memory classes are inventoried; cryptographic verification or
+  signature checks succeed for 100% of those classes in the latest check
+  (inventory/verification evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Integrity/signing design + verification sample for critical memory stores"
+  - "Inventory of critical AI memory classes requiring integrity protection"
+  - "Integrity/signing design or config for those classes (MAC, signature, sealed object, or equivalent)"
+  - "Latest verification sample showing successful integrity/signature checks for inventoried classes"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-memory-integrity"
+      params:
+        hint: >
+          Discover critical-memory inventories, cryptographic/signing integrity
+          controls, and verification samples for durable memory stores.
     - id: "manual-attest"
       params:
-        hint: "Integrity/signing design + verification sample for critical memory stores"
-manualVerification: "For this Check (Critical memory records must have cryptographic or signed
-  integrity protection): inspect current evidence for [Integrity/signing design + verification
-  sample for critical memory stores] and confirm the pass condition holds — Critical memory classes
-  are inventoried; cryptographic verification or signature check succeeds for those classes in the
-  latest check (≤90 days)"
-falsePositiveGuidance: "(Memory Management): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest a critical-memory class
+          inventory with successful integrity/signature verification for 100% of
+          those classes (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm critical AI memory classes exist (trusted facts, approvals, safety
+  decisions, or equivalent). If none are designated critical, score
+  NOT_APPLICABLE with rationale—or FAIL if criticality is required by policy but
+  no inventory exists. 2) Open the inventory of critical memory classes. 3) Open
+  integrity/signing design or config covering those classes. 4) Review the latest
+  verification sample: checks succeed for 100% of inventoried classes. 5) PASS
+  only if inventory + integrity control + successful verification hold with
+  measuredAt ≤90 days. Transport TLS alone does not satisfy. Checksums without
+  a keyed/signed verifier do not satisfy unless policy explicitly accepts them
+  as the integrity control and verification still succeeds.
+falsePositiveGuidance: >
+  Do not pass application-DB row versioning without cryptographic/signed
+  integrity. Do not pass signing of model artifacts as memory-record integrity.
+  Do not pass an inventory that omits classes already treated as critical in
+  production. Do not pass verification older than 90 days as current. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Critical memory records must have cryptographic or signed
-    integrity protection"
-  - "Retain evidence artifacts required by this Check, starting with: Integrity/signing design +
-    verification sample for critical memory stores"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Inventory critical memory classes and require MAC/signature (or equivalent) on write"
+  - "Verify integrity on read or on a ≤90-day scheduled check; fail closed on mismatch"
+  - "Alert when verification fails or a critical class lacks integrity coverage"
+  - "Retain inventory + verification under imports/memory-integrity/"
 references:
   - title: "NIST AI RMF — Govern and Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -44,10 +69,14 @@ relatedRules:
   - "MEM-M3"
   - "MEM-R1"
   - "MEM-R3"
+  - "SCI-M1"
 tags:
   - "memory-management"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "integrity"
+  - "signing"
+  - "critical-memory"
 applicability:
   technologies:
     - "vector-databases"
