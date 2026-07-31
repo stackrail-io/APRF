@@ -8,11 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
-- Rewrote **PRI-M1** (AI/model payload classification + sensitive handling) from template stub to hybrid Check + `model-payload-classification` collector; synced `aprf-spec.json`.
-- Demoted former vendor-terms **PRI-M2** → **PRI-R2** (training use + retention): recommended gate, `requiredFromLevel` 4; `vendor-model-terms` collector.
-- Rewrote former **PRI-M3** (AI memory/log deletion/export) as hybrid **PRI-M2** + `ai-deletion-export` collector; renumbered ID; synced `aprf-spec.json`.
-- Rewrote former **PRI-M4** (residency-constrained routing) as hybrid **PRI-M3** + `ai-residency-routing` collector; renumbered ID; synced `aprf-spec.json`.
-- Rewrote former **PRI-M5** (DPIA/PIA before production) as hybrid recommended **PRI-R3** + `ai-dpia` collector (demoted from brief **PRI-M4** slot; process gate, not runtime floor); synced `aprf-spec.json` and Regulated profile.
+- Rewrote **data-privacy** from template stub to hybrid Check collector; synced `aprf-spec.json`.
 - Tightened data-privacy prose: rewrote stub **PRI-R1** (pre-model tokenization/redaction) to hybrid + `model-payload-redaction` collector; aligned severity/weight with other recommended privacy Checks; trimmed sibling-control listing from PRI-R3 `whyItMatters`.
 - Rewrote **memory-management** from template stub to hybrid Check + collectors; synced `aprf-spec.json`.
 - Tightened memory-management prose: standalone `whyItMatters` on MEM-M3/M4/R1/R3 (no sibling-control roll-ups); clarified MEM-M2 title for AI memory scope.
