@@ -1,38 +1,61 @@
 id: "CTX-R2"
 category: "context-engineering"
-title: "Production systems should have summarization or compaction strategies are tested for
-  information loss on critical facts"
-description: "Summarization or compaction strategies are tested for information loss on critical facts"
-whyItMatters: "Summarization or compaction strategies are tested for information loss on critical
-  facts Failing this leaves a production gap against: Critical-fact retention ≥ documented threshold
-  after compaction on the eval set; last run ≤90 days; regressions block context-pipeline releases"
+title: "Production systems should test summarization or compaction for critical-fact retention"
+description: >
+  When production context uses summarization or compaction, teams should run a
+  critical-fact eval set and retain facts at or above a documented threshold;
+  the last run should be ≤90 days old and regressions should block
+  context-pipeline releases.
+whyItMatters: >
+  Compaction that quietly drops constraints, IDs, or safety-critical facts
+  creates hallucinations and policy bypasses that look like model failures.
+  A dated critical-fact retention eval with a release gate makes information
+  loss a measurable control—not an invisible side effect of shrinking context.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Critical-fact retention ≥ documented threshold after compaction on the eval set;
-  last run ≤90 days; regressions block context-pipeline releases"
+passCondition: >
+  Critical-fact retention ≥ documented threshold after compaction on the eval
+  set; last run ≤90 days; regressions block context-pipeline releases (eval
+  evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Compaction/summarization eval set of critical facts + latest information-loss report"
+  - "Compaction/summarization eval set of critical facts with documented retention threshold"
+  - "Latest information-loss / retention report ≤90 days with release-blocking gate evidence"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-context-compaction-evals"
+      params:
+        hint: >
+          Discover compaction/summarization critical-fact eval suites,
+          retention thresholds, and CI/release gates that block on regression.
     - id: "manual-attest"
       params:
-        hint: "Compaction/summarization eval set of critical facts + latest information-loss report"
-manualVerification: "For this Check (Summarization or compaction strategies are tested for
-  information loss on critical facts): inspect current evidence for [Compaction/summarization eval
-  set of critical facts + latest information-loss report] and confirm the pass condition holds —
-  Critical-fact retention ≥ documented threshold after compaction on the eval set; last run ≤90
-  days; regressions block context-pipeline releases"
-falsePositiveGuidance: "(Context Engineering): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove retention, attest critical-fact retention
+          ≥ documented threshold on the eval set, last run ≤90 days, and
+          regressions block context-pipeline releases (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production context uses summarization or compaction (history
+  fold, RAG compress, memory summarize, etc.). If no compaction path exists,
+  score NOT_APPLICABLE. 2) Open the critical-fact eval set and documented
+  retention threshold. 3) Confirm latest run ≤90 days meets the threshold. 4)
+  Confirm regressions block context-pipeline releases (CI gate or equivalent).
+  5) PASS only if threshold + freshness + gate hold with measuredAt ≤90 days.
+  Ad-hoc manual spot-checks without a threshold do not satisfy. Generic LLM
+  quality evals that never measure fact retention after compaction do not
+  satisfy.
+falsePositiveGuidance: >
+  Do not pass CTX-M1 budget tests as compaction fact-retention evals. Do not
+  pass summarization demos without a critical-fact set and threshold. Do not
+  pass runs older than 90 days as current. Do not pass advisory dashboards that
+  never block release. Sibling Checks (EVL-M*, CTX-R1 monitoring) do not
+  substitute. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Summarization or compaction strategies are tested for
-    information loss on critical facts"
-  - "Retain evidence artifacts required by this Check, starting with: Compaction/summarization eval
-    set of critical facts + latest information-loss report"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Build a critical-fact eval set for each compaction/summarization path; document the retention threshold"
+  - "Run the suite on a ≤90-day cadence; fail the gate when retention drops below threshold"
+  - "Wire the gate into context-pipeline CI/CD; retain reports under imports/context-compaction-evals/"
+  - "Time-box waivers with owner and expiry ≤90 days"
 references:
   - title: "NIST AI RMF — Map and Measure functions"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -44,10 +67,14 @@ relatedRules:
   - "CTX-M3"
   - "CTX-R1"
   - "CTX-R3"
+  - "EVL-M1"
+  - "EVL-M2"
 tags:
   - "context-engineering"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "compaction"
+  - "critical-facts"
 applicability:
   technologies:
     - "rag-pipelines"

@@ -26,6 +26,12 @@ import {
   humanDualControlCollector,
 } from "./human-approval.ts";
 import { aiSpendLimitsCollector } from "./ai-spend-limits.ts";
+import { contextBudgetCollector } from "./context-budget.ts";
+import { contextSourceAclCollector } from "./context-source-acl.ts";
+import { contextSensitiveInclusionCollector } from "./context-sensitive-inclusion.ts";
+import { contextBudgetMonitoringCollector } from "./context-budget-monitoring.ts";
+import { contextCompactionEvalsCollector } from "./context-compaction-evals.ts";
+import { contextStructuredBlocksCollector } from "./context-structured-blocks.ts";
 import { aiCostAlertsCollector } from "./ai-cost-alerts.ts";
 import { aiRetryAmplificationCollector } from "./ai-retry-amplification.ts";
 import { aiPromptCacheCollector } from "./ai-prompt-cache.ts";
@@ -100,6 +106,12 @@ export const COLLECTORS: Collector[] = [
   humanApprovalUiCollector,
   humanApprovalSlaCollector,
   aiSpendLimitsCollector,
+  contextBudgetCollector,
+  contextSourceAclCollector,
+  contextSensitiveInclusionCollector,
+  contextBudgetMonitoringCollector,
+  contextCompactionEvalsCollector,
+  contextStructuredBlocksCollector,
   aiCostAlertsCollector,
   aiRetryAmplificationCollector,
   aiPromptCacheCollector,

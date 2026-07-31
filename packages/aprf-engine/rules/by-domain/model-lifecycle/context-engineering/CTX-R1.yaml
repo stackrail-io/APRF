@@ -1,56 +1,79 @@
 id: "CTX-R1"
 category: "context-engineering"
-title: "Production systems should have context budgets are monitored per request with alerts on
-  saturation"
-description: "Context budgets are monitored per request with alerts on saturation"
-whyItMatters: "Context budgets are monitored per request with alerts on saturation Failing this
-  leaves a production gap against: ≥99% of production requests in a 24h sample emit context-budget
-  usage; alert fires when usage exceeds the documented % of max context (or hard truncate rate
-  exceeds threshold)"
+title: "Production systems should monitor context budgets per request with alerts on saturation"
+description: >
+  Production AI requests should emit per-request context-budget usage metrics,
+  and operators should be alerted when usage saturates a documented share of
+  max context—or when hard-truncate rate exceeds a defined threshold.
+whyItMatters: >
+  CTX-M1 budgets only help if someone notices when builders run near the
+  ceiling. Without per-request usage telemetry and saturation (or truncate-rate)
+  alerts, overflow and silent instruction loss stay invisible until quality or
+  cost incidents. Monitoring turns the budget into an operable control.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "≥99% of production requests in a 24h sample emit context-budget usage; alert fires
-  when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold)"
+passCondition: >
+  ≥99% of production requests in a 24h sample emit context-budget usage; an
+  alert fires when usage exceeds the documented % of max context (or hard
+  truncate rate exceeds threshold) (metrics/alert evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Per-request context token/budget metrics dashboard + alert rule export for saturation
-    thresholds"
+  - "Per-request context token/budget usage metrics (dashboard or telemetry export)"
+  - "Alert rule for context saturation and/or hard-truncate rate with notify proof"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-context-budget-monitoring"
+      params:
+        hint: >
+          Discover per-request context-budget metrics, saturation thresholds,
+          and truncate-rate or budget-saturation alert rules.
     - id: "manual-attest"
       params:
-        hint: "Per-request context token/budget metrics dashboard + alert rule export for saturation
-          thresholds"
-manualVerification: "For this Check (Context budgets are monitored per request with alerts on
-  saturation): inspect current evidence for [Per-request context token/budget metrics dashboard +
-  alert rule export for saturation thresholds] and confirm the pass condition holds — ≥99% of
-  production requests in a 24h sample emit context-budget usage; alert fires when usage exceeds the
-  documented % of max context (or hard truncate rate exceeds threshold)"
-falsePositiveGuidance: "(Context Engineering): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest ≥99% of production
+          requests in a 24h sample emit context-budget usage and a saturation
+          or truncate-rate alert that notifies (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI requests assemble bounded context. If none, score
+  NOT_APPLICABLE. 2) Open per-request context-budget usage metrics for a 24h
+  sample; confirm ≥99% emit usage. 3) Confirm an alert on documented % of max
+  context (saturation) and/or hard-truncate rate with a notify channel. 4)
+  Review notify proof ≤90 days (synthetic fire or production page). 5) PASS
+  only if emit coverage + alert/notify hold with measuredAt ≤90 days. CTX-M1
+  budget config alone does not satisfy. Generic LLM latency alerts do not
+  satisfy.
+falsePositiveGuidance: >
+  Do not pass completion max_tokens metrics as context-assembly budget usage.
+  Do not pass dashboards without alert rules or unproven notify routing. Do
+  not pass samples below ≥99% emit coverage. Do not pass COST-M2 spend alerts
+  as context saturation. Do not pass evidence older than 90 days as current.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Context budgets are monitored per request with alerts
-    on saturation"
-  - "Retain evidence artifacts required by this Check, starting with: Per-request context
-    token/budget metrics dashboard + alert rule export for saturation thresholds"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Emit per-request context_budget_used / max (or equivalent) on production AI paths"
+  - "Alert when usage exceeds the documented % of max context, or when hard-truncate rate exceeds threshold"
+  - "Prove notify with a synthetic fire; retain under imports/context-budget-monitoring/"
+  - "Tune thresholds with owner and expiry ≤90 days when muting"
 references:
   - title: "NIST AI RMF — Map and Measure functions"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
-  - title: "OWASP LLM — Sensitive Information Disclosure"
-    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "OpenTelemetry — GenAI semantic conventions"
+    url: "https://opentelemetry.io/docs/specs/semconv/gen-ai/"
 relatedRules:
   - "CTX-M1"
   - "CTX-M2"
   - "CTX-M3"
   - "CTX-R2"
   - "CTX-R3"
+  - "OBS-M1"
+  - "OBS-M2"
+  - "COST-M2"
 tags:
   - "context-engineering"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "context-budget"
+  - "saturation-alert"
 applicability:
   technologies:
     - "rag-pipelines"

@@ -121,6 +121,30 @@ COST-M1 AI spend / rate limits:
   npm run aprf:spend-limits -- --target <app> --out <app>/aprf-assessment
   # PASS needs enforce-on-exceed under imports/ai-spend-limits/
 
+CTX-M1 context assembly max size / priority budgets:
+  npm run aprf:context-budget -- --target <app> --out <app>/aprf-assessment
+  # PASS needs buildersMissingBudget=0 + silentOverflowCount=0 under imports/context-budget/
+
+CTX-M2 source labels + ACL on retrieved/tool context:
+  npm run aprf:context-source-acl -- --target <app> --out <app>/aprf-assessment
+  # PASS needs unauthorizedChunksIncluded=0 + unlabeledIncludedCount=0 under imports/context-source-acl/
+
+CTX-M3 sensitive context-class inclusion policy:
+  npm run aprf:context-sensitive-inclusion -- --target <app> --out <app>/aprf-assessment
+  # PASS needs enumerated classes + allow/deny + blockOrStripRatePct≥95 under imports/context-sensitive-inclusion/
+
+CTX-R1 context budget monitoring + saturation alerts:
+  npm run aprf:context-budget-monitoring -- --target <app> --out <app>/aprf-assessment
+  # PASS needs emitCoveragePct≥99 + saturationAlertConfigured + alertNotifyProven under imports/context-budget-monitoring/
+
+CTX-R2 compaction critical-fact retention evals:
+  npm run aprf:context-compaction-evals -- --target <app> --out <app>/aprf-assessment
+  # PASS needs retentionMeetsThreshold + regressionsBlockRelease + lastRunAgeDays≤90 under imports/context-compaction-evals/
+
+CTX-R3 structured instruction vs data context blocks:
+  npm run aprf:context-structured-blocks -- --target <app> --out <app>/aprf-assessment
+  # PASS needs structuredSectionsEmitted + instructionOverwriteBlocked under imports/context-structured-blocks/
+
 COST-M2 AI cost budget-burn / anomaly alerts:
   npm run aprf:cost-alerts -- --target <app> --out <app>/aprf-assessment
   # PASS needs notify proof under imports/ai-cost-alerts/

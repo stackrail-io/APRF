@@ -1,0 +1,25 @@
+id: context-sensitive-inclusion
+title: Sensitive context-class inclusion policy (CTX-M3)
+version: "0.2.0"
+executor: collectors/context-sensitive-inclusion.ts
+evidenceClass: docs
+alsoEmits: []
+detectorIds: [repo-context-sensitive-inclusion]
+inputs:
+  - "Target repo (context inclusion policies / DLP hooks)"
+  - "Optional suite: aprf-assessment/imports/context-sensitive-inclusion/*.{json}"
+collect:
+  - "Detect sensitive-class inclusion policy and strip/block signals"
+  - "Ingest fixture rates; write context-sensitive-inclusion-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/context-sensitive-inclusion/*"
+  signals: [context-sensitive-inclusion, ctx-m3, repo-context-sensitive-inclusion]
+mapsToChecks: [CTX-M3]
+whenUnavailable: >
+  Policy signals alone are PARTIAL. CTX-M3 PASS needs
+  sensitiveClassesEnumerated, allowDenyRulesPresent, blockOrStripRatePct≥95,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline policy heuristics + optional imported JSON.

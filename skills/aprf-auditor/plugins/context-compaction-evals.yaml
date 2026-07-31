@@ -1,0 +1,25 @@
+id: context-compaction-evals
+title: Compaction/summarization critical-fact retention evals (CTX-R2)
+version: "0.2.0"
+executor: collectors/context-compaction-evals.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-context-compaction-evals]
+inputs:
+  - "Target repo (compaction/summarization eval suites)"
+  - "Optional suite: aprf-assessment/imports/context-compaction-evals/*.{json}"
+collect:
+  - "Detect compaction paths, critical-fact evals, and release gates"
+  - "Ingest retention results; write context-compaction-evals-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/context-compaction-evals/*"
+  signals: [context-compaction-evals, ctx-r2, repo-context-compaction-evals]
+mapsToChecks: [CTX-R2]
+whenUnavailable: >
+  Compaction/eval signals alone are PARTIAL. CTX-R2 PASS needs
+  retentionMeetsThreshold, regressionsBlockRelease, lastRunAgeDays≤90,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline eval heuristics + optional imported JSON.

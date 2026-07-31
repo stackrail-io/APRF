@@ -181,7 +181,10 @@ categoryDefaults:
       - "**/*context*"
       - "**/*chunk*"
       - "**/retriev*"
-    signals: [context budget, labeling, isolation]
+      - "**/*token*budget*"
+      - "**/*prompt*budget*"
+    plugins: [context-budget, context-source-acl, context-sensitive-inclusion, context-budget-monitoring, context-compaction-evals, context-structured-blocks, repo-filesystem]
+    signals: [context budget, max tokens, prioritization, truncate, overflow, source label, ACL, sensitive class, inclusion policy, saturation alert, compaction, critical facts, structured blocks, instruction-data separation]
   evaluation:
     search:
       - "**/eval/**"
@@ -361,6 +364,105 @@ checks:
     evaluation: |
       PASS if eval runs in CI and can block merge/release.
       PARTIAL if evals exist but are manual-only.
+  CTX-M1:
+    requiredEvidence:
+      - "Context-budget config (max tokens/bytes) for each production context builder"
+      - "Overflow truncate/reject suite under imports/context-budget/"
+    searchExtra:
+      - "**/*context*"
+      - "**/*token*budget*"
+      - "**/*prompt*budget*"
+      - "**/*assembl*"
+      - "**/rag/**"
+    plugins: [context-budget, repo-filesystem]
+    naWhen: "No production context builders"
+    evaluation: |
+      PASS if context-budget statusHint=pass (budget signals + buildersMissingBudget=0 + silentOverflowCount=0 + measuredAt ≤90d).
+      PARTIAL if budget/overflow-test signals without complete import.
+      NOT_APPLICABLE when no context-assembly signals.
+  CTX-M2:
+    requiredEvidence:
+      - "Context assembly source labels on retrieved and tool-sourced chunks"
+      - "ACL exclusion suite under imports/context-source-acl/"
+    searchExtra:
+      - "**/*retriev*"
+      - "**/*acl*"
+      - "**/*source*label*"
+      - "**/*chunk*"
+      - "**/rag/**"
+      - "**/*tool*result*"
+    plugins: [context-source-acl, repo-filesystem]
+    naWhen: "No retrieved or tool-sourced content in model context"
+    evaluation: |
+      PASS if context-source-acl statusHint=pass (label/ACL signals + unauthorizedChunksIncluded=0 + unlabeledIncludedCount=0 + measuredAt ≤90d).
+      PARTIAL if label/ACL signals without complete import.
+      NOT_APPLICABLE when no retrieval/tool-context signals.
+  CTX-M3:
+    requiredEvidence:
+      - "Sensitive-class inclusion policy with allow/deny rules"
+      - "Fixture suite ≥95% strip/block under imports/context-sensitive-inclusion/"
+    searchExtra:
+      - "**/*inclusion*polic*"
+      - "**/*sensitive*class*"
+      - "**/*data*class*"
+      - "**/*dlp*"
+      - "**/*context*polic*"
+    plugins: [context-sensitive-inclusion, repo-filesystem]
+    naWhen: "Context cannot carry secrets/regulated data"
+    evaluation: |
+      PASS if context-sensitive-inclusion statusHint=pass (policy signals + sensitiveClassesEnumerated + allowDenyRulesPresent + blockOrStripRatePct≥95 + measuredAt ≤90d).
+      PARTIAL if policy/enforcement signals without complete import.
+      NOT_APPLICABLE when no context/sensitive-inclusion signals.
+  CTX-R1:
+    requiredEvidence:
+      - "Per-request context-budget usage metrics"
+      - "Saturation/truncate-rate alert + notify under imports/context-budget-monitoring/"
+    searchExtra:
+      - "**/*context*budget*"
+      - "**/*context*token*"
+      - "**/*saturat*"
+      - "**/*truncat*rate*"
+      - "**/otel*"
+      - "**/grafana*"
+    plugins: [context-budget-monitoring, repo-filesystem, otel, prometheus, grafana]
+    naWhen: "No production context builders"
+    evaluation: |
+      PASS if context-budget-monitoring statusHint=pass (metric/alert signals + emitCoveragePct≥99 + saturationAlertConfigured + alertNotifyProven + measuredAt ≤90d).
+      PARTIAL if metric/alert signals without complete import.
+      NOT_APPLICABLE when no context-budget monitoring signals.
+  CTX-R2:
+    requiredEvidence:
+      - "Compaction/summarization critical-fact eval set with retention threshold"
+      - "Retention report + release gate under imports/context-compaction-evals/"
+    searchExtra:
+      - "**/*compact*"
+      - "**/*summar*"
+      - "**/*critical*fact*"
+      - "**/*information*loss*"
+      - "**/*retention*"
+      - "**/eval/**"
+    plugins: [context-compaction-evals, repo-filesystem, promptfoo, github-actions]
+    naWhen: "No summarization/compaction in production context"
+    evaluation: |
+      PASS if context-compaction-evals statusHint=pass (retentionMeetsThreshold + regressionsBlockRelease + lastRunAgeDays≤90 + measuredAt ≤90d).
+      PARTIAL if compaction/eval signals without complete import.
+      NOT_APPLICABLE when no compaction/summarization signals.
+  CTX-R3:
+    requiredEvidence:
+      - "Context assembly schema separating instruction vs data blocks"
+      - "Overwrite-protection suite under imports/context-structured-blocks/"
+    searchExtra:
+      - "**/*context*schema*"
+      - "**/*structured*context*"
+      - "**/*instruction*block*"
+      - "**/*content*block*"
+      - "**/*assembl*"
+    plugins: [context-structured-blocks, repo-filesystem]
+    naWhen: "No untrusted data sections in context"
+    evaluation: |
+      PASS if context-structured-blocks statusHint=pass (structuredSectionsEmitted + instructionOverwriteBlocked + measuredAt ≤90d).
+      PARTIAL if structure signals without complete import.
+      NOT_APPLICABLE when no structured-context signals.
   AGN-M1:
     requiredEvidence:
       - "Versioned agent inventory with owner + charter link per production agent"

@@ -3569,28 +3569,28 @@
       "mandatoryChecks": [
         {
           "id": "CTX-M1",
-          "requirement": "Context assembly shall enforce maximum sizes and prioritization rules",
-          "artifact": "Context-budget config + unit/integration tests for overflow behavior",
-          "passCondition": "100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows",
-          "method": "automated",
+          "requirement": "Every production context builder shall enforce a finite max token/byte budget and documented prioritization rules so oversized inputs are truncated or rejected\u2014never silently overflowing the model window.",
+          "artifact": "Context-budget config (max tokens/bytes) for each production context builder + Unit/integration tests showing truncate/reject per priority rules with 0 silent overflows",
+          "passCondition": "100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows (budget evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "CTX-M2",
-          "requirement": "Retrieved and tool-sourced content shall be labeled and access-checked before inclusion",
-          "artifact": "Context assembly code/tests showing source labels + ACL checks on retrieval/tool results",
-          "passCondition": "Automated tests: unauthorized retrieval chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts",
-          "method": "manual",
+          "requirement": "Retrieved and tool-sourced content shall receive a source label/type and an access check before inclusion in assembled model context\u2014unauthorized chunks must be excluded.",
+          "artifact": "Context assembly code enforcing source labels on retrieved and tool-sourced chunks + Automated tests showing ACL exclusion of unauthorized chunks at 100% and labels on included chunks",
+          "passCondition": "Automated tests: unauthorized retrieval/tool chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts (label/ACL evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "CTX-M3",
-          "requirement": "Sensitive context classes (secrets, regulated data) shall have explicit inclusion policies",
-          "artifact": "Data-class inclusion policy + enforcement tests or DLP hooks on context assembly",
-          "passCondition": "Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at \u226595% on the sensitive-class fixture suite",
-          "method": "manual",
+          "requirement": "Production context assembly shall apply a documented inclusion policy that enumerates sensitive classes\u2014including secrets and regulated data\u2014with allow/deny rules, and shall strip or block disallowed classes before they enter the model context.",
+          "artifact": "Data-class inclusion policy enumerating sensitive classes with allow/deny rules + Enforcement tests or DLP hooks showing \u226595% strip/block on the sensitive-class fixture suite",
+          "passCondition": "Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at \u226595% on the sensitive-class fixture suite (policy/suite evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -3598,28 +3598,28 @@
       "recommendedChecks": [
         {
           "id": "CTX-R1",
-          "requirement": "Context budgets are monitored per request with alerts on saturation",
-          "artifact": "Per-request context token/budget metrics dashboard + alert rule export for saturation thresholds",
-          "passCondition": "\u226599% of production requests in a 24h sample emit context-budget usage; alert fires when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold)",
-          "method": "manual",
+          "requirement": "Production AI requests should emit per-request context-budget usage metrics, and operators should be alerted when usage saturates a documented share of max context\u2014or when hard-truncate rate exceeds a defined threshold.",
+          "artifact": "Per-request context token/budget usage metrics (dashboard or telemetry export) + Alert rule for context saturation and/or hard-truncate rate with notify proof",
+          "passCondition": "\u226599% of production requests in a 24h sample emit context-budget usage; an alert fires when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold) (metrics/alert evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "CTX-R2",
-          "requirement": "Summarization or compaction strategies are tested for information loss on critical facts",
-          "artifact": "Compaction/summarization eval set of critical facts + latest information-loss report",
-          "passCondition": "Critical-fact retention \u2265 documented threshold after compaction on the eval set; last run \u226490 days; regressions block context-pipeline releases",
-          "method": "manual",
+          "requirement": "When production context uses summarization or compaction, teams should run a critical-fact eval set and retain facts at or above a documented threshold; the last run should be \u226490 days old and regressions should block context-pipeline releases.",
+          "artifact": "Compaction/summarization eval set of critical facts with documented retention threshold + Latest information-loss / retention report \u226490 days with release-blocking gate evidence",
+          "passCondition": "Critical-fact retention \u2265 documented threshold after compaction on the eval set; last run \u226490 days; regressions block context-pipeline releases (eval evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "CTX-R3",
-          "requirement": "Structured context blocks (JSON/XML sections) separate instructions from data",
-          "artifact": "Context assembly schema/spec separating instruction vs data blocks + sample rendered request",
-          "passCondition": "Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test",
-          "method": "manual",
+          "requirement": "Production context assemblers should emit labeled structured sections (for example JSON or XML blocks) that keep instructions distinct from untrusted data, and untrusted data should not be able to overwrite the instruction section.",
+          "artifact": "Context assembly schema/spec separating instruction vs data blocks + sample rendered request + Red-team or unit test showing untrusted data cannot overwrite the instruction section",
+          "passCondition": "Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test (structure/test evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }

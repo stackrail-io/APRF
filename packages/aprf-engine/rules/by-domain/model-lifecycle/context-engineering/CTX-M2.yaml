@@ -1,37 +1,61 @@
 id: "CTX-M2"
 category: "context-engineering"
 title: "Retrieved and tool-sourced content must be labeled and access-checked before inclusion"
-description: "Retrieved and tool-sourced content shall be labeled and access-checked before inclusion"
-whyItMatters: "Retrieved and tool-sourced content shall be labeled and access-checked before
-  inclusion Failing this leaves a production gap against: Automated tests: unauthorized retrieval
-  chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled
-  assembled contexts"
+description: >
+  Retrieved and tool-sourced content shall receive a source label/type and an
+  access check before inclusion in assembled model context—unauthorized chunks
+  must be excluded.
+whyItMatters: >
+  RAG and tool results often carry documents or rows the current user is not
+  allowed to see. Without ACL filtering at assembly time, the model becomes an
+  unintended data-exfiltration path. Without source labels, operators and
+  downstream policy cannot tell user text from retrieved policy or tool
+  output—and injection via retrieved content is harder to detect.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Automated tests: unauthorized retrieval chunks are excluded at 100%; included chunks
-  carry a source label/type field in 100% of sampled assembled contexts"
+passCondition: >
+  Automated tests: unauthorized retrieval/tool chunks are excluded at 100%;
+  included chunks carry a source label/type field in 100% of sampled assembled
+  contexts (label/ACL evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Context assembly code/tests showing source labels + ACL checks on retrieval/tool results"
+  - "Context assembly code enforcing source labels on retrieved and tool-sourced chunks"
+  - "Automated tests showing ACL exclusion of unauthorized chunks at 100% and labels on included chunks"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-context-source-acl"
+      params:
+        hint: >
+          Discover context-assembly source labeling and ACL/access checks on
+          retrieval and tool-result inclusion paths, plus exclusion tests.
     - id: "manual-attest"
       params:
-        hint: "Context assembly code/tests showing source labels + ACL checks on retrieval/tool results"
-manualVerification: "For this Check (Retrieved and tool-sourced content must be labeled and
-  access-checked before inclusion): inspect current evidence for [Context assembly code/tests
-  showing source labels + ACL checks on retrieval/tool results] and confirm the pass condition holds
-  — Automated tests: unauthorized retrieval chunks are excluded at 100%; included chunks carry a
-  source label/type field in 100% of sampled assembled contexts"
-falsePositiveGuidance: "(Context Engineering): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove rates, attest automated tests show 100%
+          unauthorized chunk exclusion and 100% source labels on included
+          chunks in sampled assembled contexts (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production paths include retrieved or tool-sourced content in
+  model context. If context is prompt-only with no retrieval/tools, score
+  NOT_APPLICABLE. 2) Open assembly code/tests for source labels (type/source
+  field) on retrieved and tool chunks. 3) Confirm ACL/access checks exclude
+  unauthorized chunks before inclusion. 4) Review automated test results: 100%
+  unauthorized exclusion and 100% labels on included chunks. 5) PASS only if
+  both hold with measuredAt ≤90 days. Post-hoc audit logs alone do not satisfy
+  without pre-inclusion checks. Prompt-only “do not reveal secrets” instructions
+  do not satisfy.
+falsePositiveGuidance: >
+  Do not pass vector-store ACLs that are never applied at query/assembly time.
+  Do not pass generic auth middleware that never filters retrieved chunks. Do
+  not pass labels only on user messages while retrieval/tool content is bare.
+  Do not pass suites older than 90 days as current. Sibling Checks (AUTHZ
+  route auth, CTX-M3 sensitive-class policy) do not substitute for labeled +
+  ACL-checked inclusion. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Retrieved and tool-sourced content must be labeled and
-    access-checked before inclusion"
-  - "Retain evidence artifacts required by this Check, starting with: Context assembly code/tests
-    showing source labels + ACL checks on retrieval/tool results"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Require source label/type on every retrieved and tool-sourced chunk before inclusion"
+  - "Enforce document/row ACL at retrieval or assembly; fail closed on missing ACL"
+  - "Add tests asserting 100% unauthorized exclusion and 100% labels; retain under imports/context-source-acl/"
   - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
 references:
   - title: "NIST AI RMF — Map and Measure functions"
@@ -44,10 +68,15 @@ relatedRules:
   - "CTX-R1"
   - "CTX-R2"
   - "CTX-R3"
+  - "AUTHZ-M1"
+  - "AUTHZ-M2"
+  - "SEC-M1"
 tags:
   - "context-engineering"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "source-label"
+  - "acl"
 applicability:
   technologies:
     - "rag-pipelines"

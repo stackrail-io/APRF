@@ -1,39 +1,61 @@
 id: "CTX-M1"
 category: "context-engineering"
 title: "Context assembly must enforce maximum sizes and prioritization rules"
-description: "Context assembly shall enforce maximum sizes and prioritization rules"
-whyItMatters: "Context assembly shall enforce maximum sizes and prioritization rules Failing this
-  leaves a production gap against: 100% of production context builders enforce a max token/byte
-  budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent
-  overflows"
+description: >
+  Every production context builder shall enforce a finite max token/byte
+  budget and documented prioritization rules so oversized inputs are truncated
+  or rejected—never silently overflowing the model window.
+whyItMatters: >
+  Unbounded context assembly dumps history, retrieval chunks, and tool results
+  until the window truncates in undefined order—or the provider errors mid-call.
+  That causes silent loss of system instructions, privacy leakage via overflow
+  into logs, and runaway token cost. Hard budgets with priority-ordered
+  truncate/reject make overflow a tested control, not a model quirk.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "100% of production context builders enforce a max token/byte budget; tests show
-  oversized inputs are truncated/rejected per priority rules with 0 silent overflows"
+passCondition: >
+  100% of production context builders enforce a max token/byte budget; tests
+  show oversized inputs are truncated/rejected per priority rules with 0 silent
+  overflows (budget evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Context-budget config + unit/integration tests for overflow behavior"
+  - "Context-budget config (max tokens/bytes) for each production context builder"
+  - "Unit/integration tests showing truncate/reject per priority rules with 0 silent overflows"
 detection:
-  capability: "automated"
+  capability: "hybrid"
   detectors:
-    - id: "prompt-budget-hint"
-      params: {}
+    - id: "repo-context-budget"
+      params:
+        hint: >
+          Discover context-assembly budget configs (max tokens/bytes) and
+          truncate/reject/priority overflow tests for production builders.
     - id: "manual-attest"
       params:
-        hint: "Context-budget config + unit/integration tests for overflow behavior"
-manualVerification: "For this Check (Context assembly must enforce maximum sizes and prioritization
-  rules): inspect current evidence for [Context-budget config + unit/integration tests for overflow
-  behavior] and confirm the pass condition holds — 100% of production context builders enforce a max
-  token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0
-  silent overflows"
-falsePositiveGuidance: "(Context Engineering): confirm the detector target matches the production
-  path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days."
+        hint: >
+          If automation cannot prove coverage, attest 100% of production
+          context builders enforce a max token/byte budget and overflow tests
+          show truncate/reject per priority with 0 silent overflows
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI paths assemble model context (RAG, chat history,
+  tool results, or prompt templates). If none, score NOT_APPLICABLE. 2) Inventory
+  production context builders. 3) Confirm each has a finite max token/byte
+  budget. 4) Review overflow tests: oversized inputs are truncated or rejected
+  per documented priority rules with 0 silent overflows. 5) PASS only if
+  coverage + tests hold with measuredAt ≤90 days. Soft “be concise” prompts
+  without enforced budgets do not satisfy. Provider default context windows
+  alone do not satisfy without application-level enforcement.
+falsePositiveGuidance: >
+  Do not pass provider max_tokens on the completion call as a context-assembly
+  budget. Do not pass docs that describe budgets without config or tests. Do
+  not pass builders that truncate without priority rules (undefined drop order).
+  Do not pass suites older than 90 days as current. Sibling Checks (CTX-R1
+  monitoring, COST-M1 spend limits) do not substitute for assembly budgets.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Context assembly must enforce maximum sizes and prioritization
-    rules"
-  - "Retain evidence artifacts required by this Check, starting with: Context-budget config +
-    unit/integration tests for overflow behavior"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
+  - "Set a finite max token/byte budget on every production context builder; fail closed when unset"
+  - "Document prioritization (system > tools > retrieval > history) and truncate/reject accordingly"
+  - "Add overflow tests asserting 0 silent overflows; retain under imports/context-budget/"
   - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
 references:
   - title: "NIST AI RMF — Map and Measure functions"
@@ -46,10 +68,14 @@ relatedRules:
   - "CTX-R1"
   - "CTX-R2"
   - "CTX-R3"
+  - "COST-M1"
+  - "AGN-M2"
 tags:
   - "context-engineering"
   - "mandatory"
-  - "automated"
+  - "hybrid"
+  - "context-budget"
+  - "overflow"
 applicability:
   technologies:
     - "rag-pipelines"

@@ -1,0 +1,24 @@
+id: context-budget-monitoring
+title: Context budget per-request monitoring + saturation alerts (CTX-R1)
+version: "0.2.0"
+executor: collectors/context-budget-monitoring.ts
+evidenceClass: runtime-config
+alsoEmits: []
+detectorIds: [repo-context-budget-monitoring]
+inputs:
+  - "Target repo (metrics/alert config for context budgets)"
+  - "Optional suite: aprf-assessment/imports/context-budget-monitoring/*.{json}"
+collect:
+  - "Detect context-budget metrics and saturation/truncate alerts"
+  - "Ingest coverage + notify proof; write context-budget-monitoring-report.json"
+emits:
+  nodeClass: runtime-config
+  refPattern: "aprf-assessment/imports/context-budget-monitoring/*"
+  signals: [context-budget-monitoring, ctx-r1, repo-context-budget-monitoring]
+mapsToChecks: [CTX-R1]
+whenUnavailable: >
+  Metric/alert signals alone are PARTIAL. CTX-R1 PASS needs emitCoveragePct≥99,
+  saturationAlertConfigured, alertNotifyProven, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline metric/alert heuristics + optional imported JSON.

@@ -1,42 +1,68 @@
 id: "CTX-R3"
 category: "context-engineering"
-title: "Production systems should have structured context blocks (JSON/XML sections) separate
-  instructions from data"
-description: "Structured context blocks (JSON/XML sections) separate instructions from data"
-whyItMatters: "Structured context blocks (JSON/XML sections) separate instructions from data Failing
-  this leaves a production gap against: Production assembler emits labeled structured sections (e.g.
-  JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test"
+title: "Production systems should separate instructions from data in structured context blocks"
+description: >
+  Production context assemblers should emit labeled structured sections (for
+  example JSON or XML blocks) that keep instructions distinct from untrusted
+  data, and untrusted data should not be able to overwrite the instruction
+  section.
+whyItMatters: >
+  Flat concatenated prompts let retrieved text and tool output blur into system
+  instructions—classic prompt-injection and policy-bypass paths. Labeled
+  instruction vs data sections, proven with a red-team or unit test that
+  untrusted content cannot overwrite instructions, keep the control surface
+  explicit.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted
-  data cannot overwrite the instruction section in a red-team or unit test"
+passCondition: >
+  Production assembler emits labeled structured sections (e.g. JSON/XML);
+  untrusted data cannot overwrite the instruction section in a red-team or unit
+  test (structure/test evidence measuredAt ≤90 days).
 evidenceRequired:
   - "Context assembly schema/spec separating instruction vs data blocks + sample rendered request"
+  - "Red-team or unit test showing untrusted data cannot overwrite the instruction section"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-context-structured-blocks"
+      params:
+        hint: >
+          Discover context-assembly schemas with labeled instruction vs data
+          sections (JSON/XML or equivalent) and overwrite-protection tests.
     - id: "manual-attest"
       params:
-        hint: "Context assembly schema/spec separating instruction vs data blocks + sample rendered request"
-manualVerification: "For this Check (CTX: Structured context blocks (JSON/XML sections) separate
-  instructions from data): inspect current evidence for [Context assembly schema/spec separating
-  instruction vs data blocks + sample rendered request] and confirm the pass condition holds —
-  Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot
-  overwrite the instruction section in a red-team or unit test"
-falsePositiveGuidance: "(Context Engineering): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove structure, attest the assembler emits
+          labeled instruction/data sections and a red-team or unit test shows
+          untrusted data cannot overwrite instructions (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production paths assemble multi-part context (system/instructions
+  plus user, retrieval, or tool data). If context is a single trusted static
+  template with no untrusted sections, score NOT_APPLICABLE. 2) Open the
+  assembly schema/spec and a sample rendered request; confirm labeled
+  structured sections separate instructions from data. 3) Review a red-team or
+  unit test proving untrusted data cannot overwrite the instruction section.
+  4) PASS only if structure + overwrite protection hold with measuredAt ≤90
+  days. Markdown headings alone without enforced section boundaries do not
+  satisfy. Prompt-only “ignore user attempts to change system rules” without
+  structural separation do not satisfy.
+falsePositiveGuidance: >
+  Do not pass chat-role arrays (system/user/assistant) alone unless instruction
+  vs untrusted data boundaries are enforced and tested against overwrite. Do
+  not pass schemas that label sections but allow data to mutate instructions.
+  Do not pass suites older than 90 days as current. Sibling Checks (SEC-M1
+  injection, CTX-M2 source labels) do not substitute for structured
+  instruction/data separation. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Structured context blocks (JSON/XML sections)
-    separate instructions from data"
-  - "Retain evidence artifacts required by this Check, starting with: Context assembly schema/spec
-    separating instruction vs data blocks + sample rendered request"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Define a context schema with labeled instruction and data sections (JSON/XML or equivalent)"
+  - "Fail closed if untrusted content targets the instruction section"
+  - "Add overwrite red-team/unit tests; retain under imports/context-structured-blocks/"
   - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
 references:
   - title: "NIST AI RMF — Map and Measure functions"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
-  - title: "OWASP LLM — Sensitive Information Disclosure"
+  - title: "OWASP LLM01 — Prompt Injection"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
   - "CTX-M1"
@@ -44,10 +70,14 @@ relatedRules:
   - "CTX-M3"
   - "CTX-R1"
   - "CTX-R2"
+  - "SEC-M1"
+  - "PRM-M1"
 tags:
   - "context-engineering"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "structured-blocks"
+  - "instruction-data-separation"
 applicability:
   technologies:
     - "rag-pipelines"

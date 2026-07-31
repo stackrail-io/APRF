@@ -1,0 +1,24 @@
+id: context-source-acl
+title: Context source labels + ACL inclusion (CTX-M2)
+version: "0.2.0"
+executor: collectors/context-source-acl.ts
+evidenceClass: code
+alsoEmits: []
+detectorIds: [repo-context-source-acl]
+inputs:
+  - "Target repo (RAG/tool context assembly)"
+  - "Optional suite: aprf-assessment/imports/context-source-acl/*.{json}"
+collect:
+  - "Detect source-label and ACL inclusion signals"
+  - "Ingest exclusion/label rates; write context-source-acl-report.json"
+emits:
+  nodeClass: code
+  refPattern: "aprf-assessment/imports/context-source-acl/*"
+  signals: [context-source-acl, ctx-m2, repo-context-source-acl]
+mapsToChecks: [CTX-M2]
+whenUnavailable: >
+  Label/ACL signals alone are PARTIAL. CTX-M2 PASS needs
+  unauthorizedChunksIncluded=0, unlabeledIncludedCount=0, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline label/ACL heuristics + optional imported JSON.

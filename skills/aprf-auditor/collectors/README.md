@@ -63,6 +63,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **agent-raci-ownership** | `agent-raci-ownership.ts` | agent RACI register | `imports/agent-raci-ownership/` | — |
 | **human-approval-*** | `human-approval.ts` | HITL gates/audit/bypass/dual/UI/SLA | `imports/human-approval-*/` | — |
 | **ai-spend-limits** | `ai-spend-limits.ts` | spend/rate hard limits | `imports/ai-spend-limits/` | — |
+| **context-budget** | `context-budget.ts` | context assembly budgets (CTX-M1) | `imports/context-budget/` | — |
+| **context-source-acl** | `context-source-acl.ts` | source labels + ACL inclusion (CTX-M2) | `imports/context-source-acl/` | — |
+| **context-sensitive-inclusion** | `context-sensitive-inclusion.ts` | sensitive-class inclusion (CTX-M3) | `imports/context-sensitive-inclusion/` | — |
+| **context-budget-monitoring** | `context-budget-monitoring.ts` | budget metrics + saturation alerts (CTX-R1) | `imports/context-budget-monitoring/` | — |
+| **context-compaction-evals** | `context-compaction-evals.ts` | compaction fact retention (CTX-R2) | `imports/context-compaction-evals/` | — |
+| **context-structured-blocks** | `context-structured-blocks.ts` | instruction vs data blocks (CTX-R3) | `imports/context-structured-blocks/` | — |
 | **ai-cost-alerts** | `ai-cost-alerts.ts` | budget-burn + anomaly alerts | `imports/ai-cost-alerts/` | — |
 | **ai-retry-amplification** | `ai-retry-amplification.ts` | retry/loop cost bounds | `imports/ai-retry-amplification/` | — |
 | **ai-prompt-cache** | `ai-prompt-cache.ts` | prompt cache + hit-rate | `imports/ai-prompt-cache/` | — |

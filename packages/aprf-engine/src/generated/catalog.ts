@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:afcd620332bca217f9765ec38f61dc92e700966b5d45bdba938fd7526249e322",
+  "generatedAt": "sha256:b34198ae74757c489aa3389d8756bee935c09fec4283269ddfdb4308bf7493ff",
   "ruleCount": 177,
   "domains": [
     {
@@ -3235,36 +3235,39 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "CTX-M1",
       "category": "context-engineering",
       "title": "Context assembly must enforce maximum sizes and prioritization rules",
-      "description": "Context assembly shall enforce maximum sizes and prioritization rules",
-      "whyItMatters": "Context assembly shall enforce maximum sizes and prioritization rules Failing this leaves a production gap against: 100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows",
+      "description": "Every production context builder shall enforce a finite max token/byte budget and documented prioritization rules so oversized inputs are truncated or rejected—never silently overflowing the model window.\n",
+      "whyItMatters": "Unbounded context assembly dumps history, retrieval chunks, and tool results until the window truncates in undefined order—or the provider errors mid-call. That causes silent loss of system instructions, privacy leakage via overflow into logs, and runaway token cost. Hard budgets with priority-ordered truncate/reject make overflow a tested control, not a model quirk.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows",
+      "passCondition": "100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows (budget evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Context-budget config + unit/integration tests for overflow behavior"
+        "Context-budget config (max tokens/bytes) for each production context builder",
+        "Unit/integration tests showing truncate/reject per priority rules with 0 silent overflows"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
-            "id": "prompt-budget-hint",
-            "params": {}
+            "id": "repo-context-budget",
+            "params": {
+              "hint": "Discover context-assembly budget configs (max tokens/bytes) and truncate/reject/priority overflow tests for production builders.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Context-budget config + unit/integration tests for overflow behavior"
+              "hint": "If automation cannot prove coverage, attest 100% of production context builders enforce a max token/byte budget and overflow tests show truncate/reject per priority with 0 silent overflows (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Context assembly must enforce maximum sizes and prioritization rules): inspect current evidence for [Context-budget config + unit/integration tests for overflow behavior] and confirm the pass condition holds — 100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows",
-      "falsePositiveGuidance": "(Context Engineering): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm production AI paths assemble model context (RAG, chat history, tool results, or prompt templates). If none, score NOT_APPLICABLE. 2) Inventory production context builders. 3) Confirm each has a finite max token/byte budget. 4) Review overflow tests: oversized inputs are truncated or rejected per documented priority rules with 0 silent overflows. 5) PASS only if coverage + tests hold with measuredAt ≤90 days. Soft “be concise” prompts without enforced budgets do not satisfy. Provider default context windows alone do not satisfy without application-level enforcement.\n",
+      "falsePositiveGuidance": "Do not pass provider max_tokens on the completion call as a context-assembly budget. Do not pass docs that describe budgets without config or tests. Do not pass builders that truncate without priority rules (undefined drop order). Do not pass suites older than 90 days as current. Sibling Checks (CTX-R1 monitoring, COST-M1 spend limits) do not substitute for assembly budgets. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Context assembly must enforce maximum sizes and prioritization rules",
-        "Retain evidence artifacts required by this Check, starting with: Context-budget config + unit/integration tests for overflow behavior",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Set a finite max token/byte budget on every production context builder; fail closed when unset",
+        "Document prioritization (system > tools > retrieval > history) and truncate/reject accordingly",
+        "Add overflow tests asserting 0 silent overflows; retain under imports/context-budget/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
@@ -3282,12 +3285,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "CTX-M3",
         "CTX-R1",
         "CTX-R2",
-        "CTX-R3"
+        "CTX-R3",
+        "COST-M1",
+        "AGN-M2"
       ],
       "tags": [
         "context-engineering",
         "mandatory",
-        "automated"
+        "hybrid",
+        "context-budget",
+        "overflow"
       ],
       "applicability": {
         "technologies": [
@@ -3304,32 +3311,39 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "CTX-M2",
       "category": "context-engineering",
       "title": "Retrieved and tool-sourced content must be labeled and access-checked before inclusion",
-      "description": "Retrieved and tool-sourced content shall be labeled and access-checked before inclusion",
-      "whyItMatters": "Retrieved and tool-sourced content shall be labeled and access-checked before inclusion Failing this leaves a production gap against: Automated tests: unauthorized retrieval chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts",
+      "description": "Retrieved and tool-sourced content shall receive a source label/type and an access check before inclusion in assembled model context—unauthorized chunks must be excluded.\n",
+      "whyItMatters": "RAG and tool results often carry documents or rows the current user is not allowed to see. Without ACL filtering at assembly time, the model becomes an unintended data-exfiltration path. Without source labels, operators and downstream policy cannot tell user text from retrieved policy or tool output—and injection via retrieved content is harder to detect.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Automated tests: unauthorized retrieval chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts",
+      "passCondition": "Automated tests: unauthorized retrieval/tool chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts (label/ACL evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Context assembly code/tests showing source labels + ACL checks on retrieval/tool results"
+        "Context assembly code enforcing source labels on retrieved and tool-sourced chunks",
+        "Automated tests showing ACL exclusion of unauthorized chunks at 100% and labels on included chunks"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-context-source-acl",
+            "params": {
+              "hint": "Discover context-assembly source labeling and ACL/access checks on retrieval and tool-result inclusion paths, plus exclusion tests.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Context assembly code/tests showing source labels + ACL checks on retrieval/tool results"
+              "hint": "If automation cannot prove rates, attest automated tests show 100% unauthorized chunk exclusion and 100% source labels on included chunks in sampled assembled contexts (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Retrieved and tool-sourced content must be labeled and access-checked before inclusion): inspect current evidence for [Context assembly code/tests showing source labels + ACL checks on retrieval/tool results] and confirm the pass condition holds — Automated tests: unauthorized retrieval chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts",
-      "falsePositiveGuidance": "(Context Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production paths include retrieved or tool-sourced content in model context. If context is prompt-only with no retrieval/tools, score NOT_APPLICABLE. 2) Open assembly code/tests for source labels (type/source field) on retrieved and tool chunks. 3) Confirm ACL/access checks exclude unauthorized chunks before inclusion. 4) Review automated test results: 100% unauthorized exclusion and 100% labels on included chunks. 5) PASS only if both hold with measuredAt ≤90 days. Post-hoc audit logs alone do not satisfy without pre-inclusion checks. Prompt-only “do not reveal secrets” instructions do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass vector-store ACLs that are never applied at query/assembly time. Do not pass generic auth middleware that never filters retrieved chunks. Do not pass labels only on user messages while retrieval/tool content is bare. Do not pass suites older than 90 days as current. Sibling Checks (AUTHZ route auth, CTX-M3 sensitive-class policy) do not substitute for labeled + ACL-checked inclusion. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Retrieved and tool-sourced content must be labeled and access-checked before inclusion",
-        "Retain evidence artifacts required by this Check, starting with: Context assembly code/tests showing source labels + ACL checks on retrieval/tool results",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Require source label/type on every retrieved and tool-sourced chunk before inclusion",
+        "Enforce document/row ACL at retrieval or assembly; fail closed on missing ACL",
+        "Add tests asserting 100% unauthorized exclusion and 100% labels; retain under imports/context-source-acl/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
@@ -3347,12 +3361,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "CTX-M3",
         "CTX-R1",
         "CTX-R2",
-        "CTX-R3"
+        "CTX-R3",
+        "AUTHZ-M1",
+        "AUTHZ-M2",
+        "SEC-M1"
       ],
       "tags": [
         "context-engineering",
         "mandatory",
-        "manual"
+        "hybrid",
+        "source-label",
+        "acl"
       ],
       "applicability": {
         "technologies": [
@@ -3369,32 +3388,39 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "CTX-M3",
       "category": "context-engineering",
       "title": "Sensitive context classes (secrets, regulated data) must have explicit inclusion policies",
-      "description": "Sensitive context classes (secrets, regulated data) shall have explicit inclusion policies",
-      "whyItMatters": "Sensitive context classes (secrets, regulated data) shall have explicit inclusion policies Failing this leaves a production gap against: Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at ≥95% on the sensitive-class fixture suite",
+      "description": "Production context assembly shall apply a documented inclusion policy that enumerates sensitive classes—including secrets and regulated data—with allow/deny rules, and shall strip or block disallowed classes before they enter the model context.\n",
+      "whyItMatters": "Without a written allow/deny policy for sensitive context classes, assembly code improvises: API keys, regulated fields, and credentials leak into prompts and tool-result dumps. Explicit classes plus enforcement tests make inclusion a fail-closed control—not a hope that the model “won’t repeat secrets.”\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at ≥95% on the sensitive-class fixture suite",
+      "passCondition": "Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at ≥95% on the sensitive-class fixture suite (policy/suite evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Data-class inclusion policy + enforcement tests or DLP hooks on context assembly"
+        "Data-class inclusion policy enumerating sensitive classes with allow/deny rules",
+        "Enforcement tests or DLP hooks showing ≥95% strip/block on the sensitive-class fixture suite"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-context-sensitive-inclusion",
+            "params": {
+              "hint": "Discover sensitive-context inclusion policies (secrets, regulated classes) with allow/deny rules and strip/block enforcement tests on context assembly.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Data-class inclusion policy + enforcement tests or DLP hooks on context assembly"
+              "hint": "If automation cannot prove rates, attest a policy enumerating sensitive classes with allow/deny rules and a fixture suite showing ≥95% strip/block of disallowed classes (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Sensitive context classes (secrets, regulated data) must have explicit inclusion policies): inspect current evidence for [Data-class inclusion policy + enforcement tests or DLP hooks on context assembly] and confirm the pass condition holds — Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at ≥95% on the sensitive-class fixture suite",
-      "falsePositiveGuidance": "(Context Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production context assembly can include user, retrieved, or tool content that might carry secrets or regulated data. If context is purely static non-sensitive templates with no such paths, score NOT_APPLICABLE. 2) Open the inclusion policy; confirm sensitive classes are enumerated with allow/deny (or equivalent) rules. 3) Review enforcement tests or DLP hooks on assembly: disallowed classes stripped/blocked at ≥95% on the fixture suite. 4) PASS only if policy + ≥95% enforcement hold with measuredAt ≤90 days. Generic secrets scanning of the git repo alone does not satisfy. Prompt-only “never include secrets” instructions without enforcement do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass PRI-M1 payload classification alone unless it also governs context-assembly inclusion with allow/deny and fixture tests. Do not pass suites below the ≥95% strip/block threshold. Do not pass policies that list classes without deny/strip actions. Do not pass suites older than 90 days as current. Sibling Checks (CTX-M2 ACL labels, SEC2 secrets hygiene) do not substitute for context-class inclusion policy. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Sensitive context classes (secrets, regulated data) must have explicit inclusion policies",
-        "Retain evidence artifacts required by this Check, starting with: Data-class inclusion policy + enforcement tests or DLP hooks on context assembly",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Publish a sensitive-context inclusion policy with enumerated classes and allow/deny rules",
+        "Wire strip/block (or DLP) on context assembly for disallowed classes",
+        "Add a sensitive-class fixture suite targeting ≥95% block/strip; retain under imports/context-sensitive-inclusion/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
@@ -3412,12 +3438,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "CTX-M2",
         "CTX-R1",
         "CTX-R2",
-        "CTX-R3"
+        "CTX-R3",
+        "PRI-M1",
+        "PRI-M2",
+        "SEC2-M1"
       ],
       "tags": [
         "context-engineering",
         "mandatory",
-        "manual"
+        "hybrid",
+        "sensitive-class",
+        "inclusion-policy"
       ],
       "applicability": {
         "technologies": [
@@ -3433,34 +3464,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CTX-R1",
       "category": "context-engineering",
-      "title": "Production systems should have context budgets are monitored per request with alerts on saturation",
-      "description": "Context budgets are monitored per request with alerts on saturation",
-      "whyItMatters": "Context budgets are monitored per request with alerts on saturation Failing this leaves a production gap against: ≥99% of production requests in a 24h sample emit context-budget usage; alert fires when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold)",
+      "title": "Production systems should monitor context budgets per request with alerts on saturation",
+      "description": "Production AI requests should emit per-request context-budget usage metrics, and operators should be alerted when usage saturates a documented share of max context—or when hard-truncate rate exceeds a defined threshold.\n",
+      "whyItMatters": "CTX-M1 budgets only help if someone notices when builders run near the ceiling. Without per-request usage telemetry and saturation (or truncate-rate) alerts, overflow and silent instruction loss stay invisible until quality or cost incidents. Monitoring turns the budget into an operable control.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "≥99% of production requests in a 24h sample emit context-budget usage; alert fires when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold)",
+      "passCondition": "≥99% of production requests in a 24h sample emit context-budget usage; an alert fires when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold) (metrics/alert evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Per-request context token/budget metrics dashboard + alert rule export for saturation thresholds"
+        "Per-request context token/budget usage metrics (dashboard or telemetry export)",
+        "Alert rule for context saturation and/or hard-truncate rate with notify proof"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-context-budget-monitoring",
+            "params": {
+              "hint": "Discover per-request context-budget metrics, saturation thresholds, and truncate-rate or budget-saturation alert rules.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Per-request context token/budget metrics dashboard + alert rule export for saturation thresholds"
+              "hint": "If automation cannot prove coverage, attest ≥99% of production requests in a 24h sample emit context-budget usage and a saturation or truncate-rate alert that notifies (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Context budgets are monitored per request with alerts on saturation): inspect current evidence for [Per-request context token/budget metrics dashboard + alert rule export for saturation thresholds] and confirm the pass condition holds — ≥99% of production requests in a 24h sample emit context-budget usage; alert fires when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold)",
-      "falsePositiveGuidance": "(Context Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI requests assemble bounded context. If none, score NOT_APPLICABLE. 2) Open per-request context-budget usage metrics for a 24h sample; confirm ≥99% emit usage. 3) Confirm an alert on documented % of max context (saturation) and/or hard-truncate rate with a notify channel. 4) Review notify proof ≤90 days (synthetic fire or production page). 5) PASS only if emit coverage + alert/notify hold with measuredAt ≤90 days. CTX-M1 budget config alone does not satisfy. Generic LLM latency alerts do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass completion max_tokens metrics as context-assembly budget usage. Do not pass dashboards without alert rules or unproven notify routing. Do not pass samples below ≥99% emit coverage. Do not pass COST-M2 spend alerts as context saturation. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Context budgets are monitored per request with alerts on saturation",
-        "Retain evidence artifacts required by this Check, starting with: Per-request context token/budget metrics dashboard + alert rule export for saturation thresholds",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Emit per-request context_budget_used / max (or equivalent) on production AI paths",
+        "Alert when usage exceeds the documented % of max context, or when hard-truncate rate exceeds threshold",
+        "Prove notify with a synthetic fire; retain under imports/context-budget-monitoring/",
+        "Tune thresholds with owner and expiry ≤90 days when muting"
       ],
       "references": [
         {
@@ -3468,8 +3506,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OpenTelemetry — GenAI semantic conventions",
+          "url": "https://opentelemetry.io/docs/specs/semconv/gen-ai/"
         }
       ],
       "relatedRules": [
@@ -3477,12 +3515,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "CTX-M2",
         "CTX-M3",
         "CTX-R2",
-        "CTX-R3"
+        "CTX-R3",
+        "OBS-M1",
+        "OBS-M2",
+        "COST-M2"
       ],
       "tags": [
         "context-engineering",
         "recommended",
-        "manual"
+        "hybrid",
+        "context-budget",
+        "saturation-alert"
       ],
       "applicability": {
         "technologies": [
@@ -3498,34 +3541,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CTX-R2",
       "category": "context-engineering",
-      "title": "Production systems should have summarization or compaction strategies are tested for information loss on critical facts",
-      "description": "Summarization or compaction strategies are tested for information loss on critical facts",
-      "whyItMatters": "Summarization or compaction strategies are tested for information loss on critical facts Failing this leaves a production gap against: Critical-fact retention ≥ documented threshold after compaction on the eval set; last run ≤90 days; regressions block context-pipeline releases",
+      "title": "Production systems should test summarization or compaction for critical-fact retention",
+      "description": "When production context uses summarization or compaction, teams should run a critical-fact eval set and retain facts at or above a documented threshold; the last run should be ≤90 days old and regressions should block context-pipeline releases.\n",
+      "whyItMatters": "Compaction that quietly drops constraints, IDs, or safety-critical facts creates hallucinations and policy bypasses that look like model failures. A dated critical-fact retention eval with a release gate makes information loss a measurable control—not an invisible side effect of shrinking context.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Critical-fact retention ≥ documented threshold after compaction on the eval set; last run ≤90 days; regressions block context-pipeline releases",
+      "passCondition": "Critical-fact retention ≥ documented threshold after compaction on the eval set; last run ≤90 days; regressions block context-pipeline releases (eval evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Compaction/summarization eval set of critical facts + latest information-loss report"
+        "Compaction/summarization eval set of critical facts with documented retention threshold",
+        "Latest information-loss / retention report ≤90 days with release-blocking gate evidence"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-context-compaction-evals",
+            "params": {
+              "hint": "Discover compaction/summarization critical-fact eval suites, retention thresholds, and CI/release gates that block on regression.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Compaction/summarization eval set of critical facts + latest information-loss report"
+              "hint": "If automation cannot prove retention, attest critical-fact retention ≥ documented threshold on the eval set, last run ≤90 days, and regressions block context-pipeline releases (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Summarization or compaction strategies are tested for information loss on critical facts): inspect current evidence for [Compaction/summarization eval set of critical facts + latest information-loss report] and confirm the pass condition holds — Critical-fact retention ≥ documented threshold after compaction on the eval set; last run ≤90 days; regressions block context-pipeline releases",
-      "falsePositiveGuidance": "(Context Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production context uses summarization or compaction (history fold, RAG compress, memory summarize, etc.). If no compaction path exists, score NOT_APPLICABLE. 2) Open the critical-fact eval set and documented retention threshold. 3) Confirm latest run ≤90 days meets the threshold. 4) Confirm regressions block context-pipeline releases (CI gate or equivalent). 5) PASS only if threshold + freshness + gate hold with measuredAt ≤90 days. Ad-hoc manual spot-checks without a threshold do not satisfy. Generic LLM quality evals that never measure fact retention after compaction do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass CTX-M1 budget tests as compaction fact-retention evals. Do not pass summarization demos without a critical-fact set and threshold. Do not pass runs older than 90 days as current. Do not pass advisory dashboards that never block release. Sibling Checks (EVL-M*, CTX-R1 monitoring) do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Summarization or compaction strategies are tested for information loss on critical facts",
-        "Retain evidence artifacts required by this Check, starting with: Compaction/summarization eval set of critical facts + latest information-loss report",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Build a critical-fact eval set for each compaction/summarization path; document the retention threshold",
+        "Run the suite on a ≤90-day cadence; fail the gate when retention drops below threshold",
+        "Wire the gate into context-pipeline CI/CD; retain reports under imports/context-compaction-evals/",
+        "Time-box waivers with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -3542,12 +3592,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "CTX-M2",
         "CTX-M3",
         "CTX-R1",
-        "CTX-R3"
+        "CTX-R3",
+        "EVL-M1",
+        "EVL-M2"
       ],
       "tags": [
         "context-engineering",
         "recommended",
-        "manual"
+        "hybrid",
+        "compaction",
+        "critical-facts"
       ],
       "applicability": {
         "technologies": [
@@ -3563,33 +3617,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CTX-R3",
       "category": "context-engineering",
-      "title": "Production systems should have structured context blocks (JSON/XML sections) separate instructions from data",
-      "description": "Structured context blocks (JSON/XML sections) separate instructions from data",
-      "whyItMatters": "Structured context blocks (JSON/XML sections) separate instructions from data Failing this leaves a production gap against: Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test",
+      "title": "Production systems should separate instructions from data in structured context blocks",
+      "description": "Production context assemblers should emit labeled structured sections (for example JSON or XML blocks) that keep instructions distinct from untrusted data, and untrusted data should not be able to overwrite the instruction section.\n",
+      "whyItMatters": "Flat concatenated prompts let retrieved text and tool output blur into system instructions—classic prompt-injection and policy-bypass paths. Labeled instruction vs data sections, proven with a red-team or unit test that untrusted content cannot overwrite instructions, keep the control surface explicit.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test",
+      "passCondition": "Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test (structure/test evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Context assembly schema/spec separating instruction vs data blocks + sample rendered request"
+        "Context assembly schema/spec separating instruction vs data blocks + sample rendered request",
+        "Red-team or unit test showing untrusted data cannot overwrite the instruction section"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-context-structured-blocks",
+            "params": {
+              "hint": "Discover context-assembly schemas with labeled instruction vs data sections (JSON/XML or equivalent) and overwrite-protection tests.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Context assembly schema/spec separating instruction vs data blocks + sample rendered request"
+              "hint": "If automation cannot prove structure, attest the assembler emits labeled instruction/data sections and a red-team or unit test shows untrusted data cannot overwrite instructions (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (CTX: Structured context blocks (JSON/XML sections) separate instructions from data): inspect current evidence for [Context assembly schema/spec separating instruction vs data blocks + sample rendered request] and confirm the pass condition holds — Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test",
-      "falsePositiveGuidance": "(Context Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production paths assemble multi-part context (system/instructions plus user, retrieval, or tool data). If context is a single trusted static template with no untrusted sections, score NOT_APPLICABLE. 2) Open the assembly schema/spec and a sample rendered request; confirm labeled structured sections separate instructions from data. 3) Review a red-team or unit test proving untrusted data cannot overwrite the instruction section. 4) PASS only if structure + overwrite protection hold with measuredAt ≤90 days. Markdown headings alone without enforced section boundaries do not satisfy. Prompt-only “ignore user attempts to change system rules” without structural separation do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass chat-role arrays (system/user/assistant) alone unless instruction vs untrusted data boundaries are enforced and tested against overwrite. Do not pass schemas that label sections but allow data to mutate instructions. Do not pass suites older than 90 days as current. Sibling Checks (SEC-M1 injection, CTX-M2 source labels) do not substitute for structured instruction/data separation. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Structured context blocks (JSON/XML sections) separate instructions from data",
-        "Retain evidence artifacts required by this Check, starting with: Context assembly schema/spec separating instruction vs data blocks + sample rendered request",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Define a context schema with labeled instruction and data sections (JSON/XML or equivalent)",
+        "Fail closed if untrusted content targets the instruction section",
+        "Add overwrite red-team/unit tests; retain under imports/context-structured-blocks/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
@@ -3598,7 +3659,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "title": "OWASP LLM01 — Prompt Injection",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -3607,12 +3668,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "CTX-M2",
         "CTX-M3",
         "CTX-R1",
-        "CTX-R2"
+        "CTX-R2",
+        "SEC-M1",
+        "PRM-M1"
       ],
       "tags": [
         "context-engineering",
         "recommended",
-        "manual"
+        "hybrid",
+        "structured-blocks",
+        "instruction-data-separation"
       ],
       "applicability": {
         "technologies": [

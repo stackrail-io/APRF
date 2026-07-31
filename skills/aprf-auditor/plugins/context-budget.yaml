@@ -1,0 +1,24 @@
+id: context-budget
+title: Context assembly max size / priority budgets (CTX-M1)
+version: "0.2.0"
+executor: collectors/context-budget.ts
+evidenceClass: runtime-config
+alsoEmits: []
+detectorIds: [repo-context-budget]
+inputs:
+  - "Target repo (context builders, prompt/RAG assemblers)"
+  - "Optional suite: aprf-assessment/imports/context-budget/*.{json}"
+collect:
+  - "Detect context budget and overflow-test signals"
+  - "Ingest coverage; write context-budget-report.json"
+emits:
+  nodeClass: runtime-config
+  refPattern: "aprf-assessment/imports/context-budget/*"
+  signals: [context-budget, ctx-m1, repo-context-budget]
+mapsToChecks: [CTX-M1]
+whenUnavailable: >
+  Budget signals alone are PARTIAL. CTX-M1 PASS needs buildersMissingBudget=0,
+  silentOverflowCount=0, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline budget heuristics + optional imported JSON.
