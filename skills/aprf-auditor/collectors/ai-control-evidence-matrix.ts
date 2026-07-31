@@ -438,9 +438,11 @@ export const aiControlEvidenceMatrixCollector: Collector = {
     ];
 
     for (const r of [
-      ...matrixRefs.slice(0, 2),
-      ...evidenceRefs.slice(0, 1),
-      ...orphanRefs.slice(0, 1),
+      ...new Set([
+        ...matrixRefs.slice(0, 2),
+        ...evidenceRefs.slice(0, 1),
+        ...orphanRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

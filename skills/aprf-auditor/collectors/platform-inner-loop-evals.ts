@@ -431,9 +431,11 @@ export const platformInnerLoopEvalsCollector: Collector = {
     ];
 
     for (const r of [
-      ...runnerRefs.slice(0, 2),
-      ...oneCmdRefs.slice(0, 2),
-      ...docsRefs.slice(0, 2),
+      ...new Set([
+        ...runnerRefs.slice(0, 2),
+        ...oneCmdRefs.slice(0, 2),
+        ...docsRefs.slice(0, 2),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

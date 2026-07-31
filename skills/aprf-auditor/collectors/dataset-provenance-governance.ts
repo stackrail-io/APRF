@@ -479,10 +479,12 @@ export const datasetProvenanceGovernanceCollector: Collector = {
     ];
 
     for (const r of [
-      ...cardRefs.slice(0, 2),
-      ...provenanceRefs.slice(0, 2),
-      ...qualityRefs.slice(0, 2),
-      ...promoteRefs.slice(0, 1),
+      ...new Set([
+        ...cardRefs.slice(0, 2),
+        ...provenanceRefs.slice(0, 2),
+        ...qualityRefs.slice(0, 2),
+        ...promoteRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

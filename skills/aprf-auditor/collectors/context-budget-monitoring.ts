@@ -393,8 +393,10 @@ export const contextBudgetMonitoringCollector: Collector = {
       },
     ];
     for (const r of [
-      ...report.signals.metrics.refs,
-      ...report.signals.alerts.refs,
+      ...new Set([
+        ...report.signals.metrics.refs,
+        ...report.signals.alerts.refs,
+      ]),
     ].slice(0, 6)) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

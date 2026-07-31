@@ -8,6 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
+- Rewrote **evaluation** from template stub to hybrid Check + collectors; synced `aprf-spec.json`.
 - Rewrote **context-engineering** from template stub to hybrid Check + collectors; synced `aprf-spec.json`.
 - Rewrote **data-privacy** from template stub to hybrid Check collector; synced `aprf-spec.json`.
 - Tightened data-privacy prose: rewrote stub **PRI-R1** (pre-model tokenization/redaction) to hybrid + `model-payload-redaction` collector; aligned severity/weight with other recommended privacy Checks; trimmed sibling-control listing from PRI-R3 `whyItMatters`.

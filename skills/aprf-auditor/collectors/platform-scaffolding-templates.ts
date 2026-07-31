@@ -547,9 +547,11 @@ export const platformScaffoldingTemplatesCollector: Collector = {
     ];
 
     for (const r of [
-      ...agentRefs.slice(0, 2),
-      ...ragRefs.slice(0, 2),
-      ...mcpRefs.slice(0, 2),
+      ...new Set([
+        ...agentRefs.slice(0, 2),
+        ...ragRefs.slice(0, 2),
+        ...mcpRefs.slice(0, 2),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

@@ -439,9 +439,11 @@ export const modelPayloadClassificationCollector: Collector = {
     ];
 
     for (const r of [
-      ...schemeRefs.slice(0, 2),
-      ...handlingRefs.slice(0, 1),
-      ...auditRefs.slice(0, 1),
+      ...new Set([
+        ...schemeRefs.slice(0, 2),
+        ...handlingRefs.slice(0, 1),
+        ...auditRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

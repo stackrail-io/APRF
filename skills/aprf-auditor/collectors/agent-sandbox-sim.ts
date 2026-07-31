@@ -421,9 +421,11 @@ export const agentSandboxSimCollector: Collector = {
     ];
 
     for (const r of [
-      ...sandboxRefs.slice(0, 4),
-      ...reportRefs.slice(0, 2),
-      ...gateRefs.slice(0, 2),
+      ...new Set([
+        ...sandboxRefs.slice(0, 4),
+        ...reportRefs.slice(0, 2),
+        ...gateRefs.slice(0, 2),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

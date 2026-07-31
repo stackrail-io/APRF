@@ -32,6 +32,12 @@ import { contextSensitiveInclusionCollector } from "./context-sensitive-inclusio
 import { contextBudgetMonitoringCollector } from "./context-budget-monitoring.ts";
 import { contextCompactionEvalsCollector } from "./context-compaction-evals.ts";
 import { contextStructuredBlocksCollector } from "./context-structured-blocks.ts";
+import { evalSuiteCiCollector } from "./eval-suite-ci.ts";
+import { evalReleaseGatesCollector } from "./eval-release-gates.ts";
+import { evalOnlineSignalsCollector } from "./eval-online-signals.ts";
+import { evalShadowCutoverCollector } from "./eval-shadow-cutover.ts";
+import { evalTrackCatalogCollector } from "./eval-track-catalog.ts";
+import { evalHumanReviewCollector } from "./eval-human-review.ts";
 import { aiCostAlertsCollector } from "./ai-cost-alerts.ts";
 import { aiRetryAmplificationCollector } from "./ai-retry-amplification.ts";
 import { aiPromptCacheCollector } from "./ai-prompt-cache.ts";
@@ -112,6 +118,12 @@ export const COLLECTORS: Collector[] = [
   contextBudgetMonitoringCollector,
   contextCompactionEvalsCollector,
   contextStructuredBlocksCollector,
+  evalSuiteCiCollector,
+  evalReleaseGatesCollector,
+  evalOnlineSignalsCollector,
+  evalShadowCutoverCollector,
+  evalTrackCatalogCollector,
+  evalHumanReviewCollector,
   aiCostAlertsCollector,
   aiRetryAmplificationCollector,
   aiPromptCacheCollector,

@@ -414,8 +414,10 @@ export const contextCompactionEvalsCollector: Collector = {
       },
     ];
     for (const r of [
-      ...report.signals.factEvals.refs,
-      ...report.signals.compaction.refs,
+      ...new Set([
+        ...report.signals.factEvals.refs,
+        ...report.signals.compaction.refs,
+      ]),
     ].slice(0, 6)) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

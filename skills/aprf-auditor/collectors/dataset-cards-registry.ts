@@ -534,10 +534,12 @@ export const datasetCardsRegistryCollector: Collector = {
     ];
 
     for (const r of [
-      ...cardRefs.slice(0, 2),
-      ...purposeRefs.slice(0, 1),
-      ...sourceRefs.slice(0, 1),
-      ...piiRefs.slice(0, 1),
+      ...new Set([
+        ...cardRefs.slice(0, 2),
+        ...purposeRefs.slice(0, 1),
+        ...sourceRefs.slice(0, 1),
+        ...piiRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

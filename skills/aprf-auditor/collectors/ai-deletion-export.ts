@@ -428,10 +428,12 @@ export const aiDeletionExportCollector: Collector = {
     ];
 
     for (const r of [
-      ...procedureRefs.slice(0, 2),
-      ...memoryRefs.slice(0, 1),
-      ...logRefs.slice(0, 1),
-      ...slaRefs.slice(0, 1),
+      ...new Set([
+        ...procedureRefs.slice(0, 2),
+        ...memoryRefs.slice(0, 1),
+        ...logRefs.slice(0, 1),
+        ...slaRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

@@ -460,9 +460,11 @@ export const aiObligationsRegisterCollector: Collector = {
     ];
 
     for (const r of [
-      ...registerRefs.slice(0, 2),
-      ...ownerRefs.slice(0, 1),
-      ...noneRefs.slice(0, 1),
+      ...new Set([
+        ...registerRefs.slice(0, 2),
+        ...ownerRefs.slice(0, 1),
+        ...noneRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

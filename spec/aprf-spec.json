@@ -3681,37 +3681,37 @@
       "mandatoryChecks": [
         {
           "id": "EVL-M1",
-          "requirement": "Critical customer journeys shall have automated offline eval suites on every relevant change",
-          "artifact": "Eval suite registry mapped to journeys + CI runs on prompt/model/tool changes",
-          "passCondition": "100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in last 30 days triggered the suite (or documented waiver \u2264 14 days)",
-          "method": "automated",
+          "requirement": "Every journey marked critical shall have a versioned offline eval suite, and every relevant production change in the last 30 days shall have triggered that suite\u2014or carry a documented waiver \u226414 days.",
+          "artifact": "Eval suite registry mapping critical journeys to versioned offline suites + CI (or equivalent) runs on prompt/model/tool changes for the last 30 days, or waivers \u226414 days",
+          "passCondition": "100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in the last 30 days triggered the suite (or documented waiver \u226414 days) (suite/CI evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "EVL-M2",
-          "requirement": "Release gates shall enforce numeric minimum thresholds for quality and safety metrics",
-          "artifact": "Gate config with metric names and thresholds + CI reports",
-          "passCondition": "Each critical journey has \u22651 quality and \u22651 safety metric with numeric threshold; failing gate blocks deploy in CI",
-          "method": "manual",
+          "requirement": "Production release gates shall require numeric minimum thresholds for at least one quality metric and one safety metric on every critical journey, and shall block deploy in CI when those thresholds are not met.",
+          "artifact": "Gate config listing metric names and numeric thresholds per critical journey (quality + safety) + CI evidence that a failing gate blocks deploy (or equivalent required check)",
+          "passCondition": "Each critical journey has \u22651 quality and \u22651 safety metric with numeric threshold; failing gate blocks deploy in CI (gate evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "EVL-M3",
-          "requirement": "Production shall have online signals for task success/failure and safety refusals",
-          "artifact": "Dashboard/metrics for task success and safety refusal rates",
-          "passCondition": "Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness \u2264 24 hours on the dashboard",
-          "method": "manual",
+          "requirement": "Production AI workloads shall emit live metrics for task success and failure and for safety refusals, with a defined alert or review cadence and dashboard freshness no older than 24 hours.",
+          "artifact": "Dashboard or metric exports for task success/failure rates on production AI workloads + Dashboard or metric exports for safety refusal rates + Alert rule or documented review cadence; proof dashboard freshness \u226424 hours",
+          "passCondition": "Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness \u226424 hours on the dashboard (metrics evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "EVL-M4",
-          "requirement": "Shadow deployment with eval comparison shall precede full cutover for high-risk AI changes",
-          "artifact": "Shadow/canary eval config + comparison report for the last high-risk cutover",
-          "passCondition": "PASS if the last high-risk AI cutover retained a shadow/canary comparison that met promotion criteria before 100% traffic",
-          "method": "manual",
+          "requirement": "High-risk AI production cutovers shall run a shadow or canary with a retained eval comparison against the incumbent, and shall promote to 100% traffic only after documented promotion criteria are met.",
+          "artifact": "Shadow/canary eval config for high-risk AI cutovers (promotion criteria documented) + Comparison report for the last high-risk cutover showing criteria met before full traffic",
+          "passCondition": "The last high-risk AI cutover retained a shadow/canary eval comparison that met promotion criteria before 100% traffic (cutover evidence measuredAt \u226490 days). If no high-risk AI cutover is in scope, score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -3719,19 +3719,19 @@
       "recommendedChecks": [
         {
           "id": "EVL-R1",
-          "requirement": "Separate eval tracks for regression, adversarial, and distribution-shift cases",
-          "artifact": "Eval catalog showing separate tracks for regression, adversarial, and distribution-shift + latest CI matrix",
-          "passCondition": "All three tracks exist with distinct corpora and owners; each track ran successfully on the last production model/prompt promotion (\u226490 days)",
-          "method": "manual",
+          "requirement": "Production AI systems should maintain three distinct offline eval tracks\u2014regression, adversarial, and distribution-shift\u2014each with its own corpus and named owner, and each should have run successfully on the last production model or prompt promotion.",
+          "artifact": "Eval catalog listing separate tracks for regression, adversarial, and distribution-shift with owners and corpora + Latest CI (or equivalent) matrix showing each track succeeded on the last production promotion",
+          "passCondition": "All three tracks (regression, adversarial, distribution-shift) exist with distinct corpora and named owners; each track ran successfully on the last production model/prompt promotion (catalog/CI evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "EVL-R2",
-          "requirement": "Human preference or expert review sampling on a defined cadence",
-          "artifact": "Human preference / expert-review sampling protocol + last scored sample set with inter-rater notes",
-          "passCondition": "Cadence and sample size are defined; last sample \u226490 days covers production-like prompts; disagreements have adjudication recorded",
-          "method": "manual",
+          "requirement": "Production AI systems should run human preference or expert-review sampling on a documented cadence and sample size, covering production-like prompts, with disagreements adjudicated and recorded.",
+          "artifact": "Human preference / expert-review sampling protocol (cadence + sample size) + Last scored sample set with production-like prompts and inter-rater / adjudication notes",
+          "passCondition": "Cadence and sample size are defined; last sample \u226490 days covers production-like prompts; disagreements have adjudication recorded (sampling evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }

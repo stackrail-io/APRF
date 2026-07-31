@@ -430,9 +430,11 @@ export const aiRetryAmplificationCollector: Collector = {
     ];
 
     for (const r of [
-      ...retryRefs.slice(0, 4),
-      ...loopRefs.slice(0, 2),
-      ...ampRefs.slice(0, 2),
+      ...new Set([
+        ...retryRefs.slice(0, 4),
+        ...loopRefs.slice(0, 2),
+        ...ampRefs.slice(0, 2),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

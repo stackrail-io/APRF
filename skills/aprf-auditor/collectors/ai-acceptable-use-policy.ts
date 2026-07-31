@@ -440,9 +440,11 @@ export const aiAcceptableUsePolicyCollector: Collector = {
     ];
 
     for (const r of [
-      ...policyRefs.slice(0, 2),
-      ...acceptableRefs.slice(0, 1),
-      ...prohibitedRefs.slice(0, 1),
+      ...new Set([
+        ...policyRefs.slice(0, 2),
+        ...acceptableRefs.slice(0, 1),
+        ...prohibitedRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

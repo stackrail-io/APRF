@@ -420,7 +420,9 @@ export const aiFinopsUnitEconomicsCollector: Collector = {
       },
     ];
 
-    for (const r of [...metricRefs.slice(0, 4), ...reviewRefs.slice(0, 2)]) {
+    for (const r of [
+      ...new Set([...metricRefs.slice(0, 4), ...reviewRefs.slice(0, 2)]),
+    ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,
         class: "code",

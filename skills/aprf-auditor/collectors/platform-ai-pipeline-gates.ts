@@ -461,10 +461,12 @@ export const platformAiPipelineGatesCollector: Collector = {
     ];
 
     for (const r of [
-      ...authRefs.slice(0, 2),
-      ...secretRefs.slice(0, 2),
-      ...evalRefs.slice(0, 2),
-      ...blockingRefs.slice(0, 2),
+      ...new Set([
+        ...authRefs.slice(0, 2),
+        ...secretRefs.slice(0, 2),
+        ...evalRefs.slice(0, 2),
+        ...blockingRefs.slice(0, 2),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

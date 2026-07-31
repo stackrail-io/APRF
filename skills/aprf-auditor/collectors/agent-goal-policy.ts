@@ -413,9 +413,11 @@ export const agentGoalPolicyCollector: Collector = {
     ];
 
     for (const r of [
-      ...policyRefs.slice(0, 4),
-      ...ownerRefs.slice(0, 2),
-      ...denyRefs.slice(0, 2),
+      ...new Set([
+        ...policyRefs.slice(0, 4),
+        ...ownerRefs.slice(0, 2),
+        ...denyRefs.slice(0, 2),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

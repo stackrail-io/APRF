@@ -432,9 +432,11 @@ export const memoryPoisoningEvalsCollector: Collector = {
     ];
 
     for (const r of [
-      ...poisonRefs.slice(0, 2),
-      ...suiteRefs.slice(0, 1),
-      ...gateRefs.slice(0, 1),
+      ...new Set([
+        ...poisonRefs.slice(0, 2),
+        ...suiteRefs.slice(0, 1),
+        ...gateRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

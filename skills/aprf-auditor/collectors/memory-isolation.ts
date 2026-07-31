@@ -451,8 +451,10 @@ export const memoryIsolationCollector: Collector = {
     ];
 
     for (const r of [
-      ...isolationRefs.slice(0, 2),
-      ...tests.refs.slice(0, 2),
+      ...new Set([
+        ...isolationRefs.slice(0, 2),
+        ...tests.refs.slice(0, 2),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

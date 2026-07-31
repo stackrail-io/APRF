@@ -475,9 +475,11 @@ export const platformOwnershipSupportCollector: Collector = {
     ];
 
     for (const r of [
-      ...ownershipRefs.slice(0, 2),
-      ...supportRefs.slice(0, 2),
-      ...onCallRefs.slice(0, 2),
+      ...new Set([
+        ...ownershipRefs.slice(0, 2),
+        ...supportRefs.slice(0, 2),
+        ...onCallRefs.slice(0, 2),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

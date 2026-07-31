@@ -460,9 +460,11 @@ export const trainServeSkewMonitorCollector: Collector = {
     ];
 
     for (const r of [
-      ...skewRefs.slice(0, 2),
-      ...thresholdRefs.slice(0, 2),
-      ...breachRefs.slice(0, 2),
+      ...new Set([
+        ...skewRefs.slice(0, 2),
+        ...thresholdRefs.slice(0, 2),
+        ...breachRefs.slice(0, 2),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

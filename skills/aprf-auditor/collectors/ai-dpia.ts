@@ -453,9 +453,11 @@ export const aiDpiaCollector: Collector = {
     ];
 
     for (const r of [
-      ...assessmentRefs.slice(0, 2),
-      ...signOffRefs.slice(0, 1),
-      ...featureRefs.slice(0, 1),
+      ...new Set([
+        ...assessmentRefs.slice(0, 2),
+        ...signOffRefs.slice(0, 1),
+        ...featureRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

@@ -1,40 +1,63 @@
 id: "EVL-R1"
 category: "evaluation"
-title: "Production systems should have separate eval tracks for regression, adversarial, and
-  distribution-shift cases"
-description: "Separate eval tracks for regression, adversarial, and distribution-shift cases"
-whyItMatters: "Separate eval tracks for regression, adversarial, and distribution-shift cases
-  Failing this leaves a production gap against: All three tracks exist with distinct corpora and
-  owners; each track ran successfully on the last production model/prompt promotion (≤90 days)"
-severity: "critical"
-weight: 4
+title: "Production systems should have separate eval tracks for regression, adversarial, and distribution-shift cases"
+description: >
+  Production AI systems should maintain three distinct offline eval
+  tracks—regression, adversarial, and distribution-shift—each with its own
+  corpus and named owner, and each should have run successfully on the last
+  production model or prompt promotion.
+whyItMatters: >
+  A single mixed eval suite hides which failure mode regressed. Separate
+  tracks with owned corpora force coverage of known regressions, adversarial
+  attacks, and distribution drift—and proving each ran on the last promotion
+  keeps those tracks from rotting into unread YAML.
+severity: "high"
+weight: 3
 gate: "recommended"
-passCondition: "All three tracks exist with distinct corpora and owners; each track ran successfully
-  on the last production model/prompt promotion (≤90 days)"
+passCondition: >
+  All three tracks (regression, adversarial, distribution-shift) exist with
+  distinct corpora and named owners; each track ran successfully on the last
+  production model/prompt promotion (catalog/CI evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Eval catalog showing separate tracks for regression, adversarial, and distribution-shift +
-    latest CI matrix"
+  - "Eval catalog listing separate tracks for regression, adversarial, and distribution-shift with owners and corpora"
+  - "Latest CI (or equivalent) matrix showing each track succeeded on the last production promotion"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-eval-track-catalog"
+      params:
+        hint: >
+          Discover an eval catalog (or suite layout) with distinct
+          regression, adversarial, and distribution-shift tracks, owners,
+          and recent promotion CI runs.
     - id: "manual-attest"
       params:
-        hint: "Eval catalog showing separate tracks for regression, adversarial, and distribution-shift +
-          latest CI matrix"
-manualVerification: "For this Check (Separate eval tracks for regression, adversarial, and
-  distribution-shift cases): inspect current evidence for [Eval catalog showing separate tracks for
-  regression, adversarial, and distribution-shift + latest CI matrix] and confirm the pass condition
-  holds — All three tracks exist with distinct corpora and owners; each track ran successfully on
-  the last production model/prompt promotion (≤90 days)"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove tracks, attest all three tracks exist
+          with distinct corpora and owners and each ran successfully on the
+          last production model/prompt promotion (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI model/prompt promotions exist. If none, score
+  NOT_APPLICABLE. 2) Open the eval catalog; confirm three named tracks—
+  regression, adversarial, and distribution-shift—each with a distinct
+  corpus (or corpus path) and named owner. 3) Open the latest promotion CI
+  matrix (or equivalent); confirm each track ran and succeeded on the last
+  production model/prompt promotion. 4) PASS only if three tracks + owners
+  + distinct corpora + successful last-promotion runs hold with measuredAt
+  ≤90 days. A single undifferentiated suite tagged with three labels does
+  not satisfy. EVL-M1 critical-journey coverage without these three tracks
+  does not satisfy.
+falsePositiveGuidance: >
+  Do not pass one mega-suite with three folders but a shared corpus and no
+  owners. Do not pass adversarial unit tests that never run on promotion.
+  Do not pass EVL-M2 threshold gates as proof of three tracks. Do not pass
+  evidence older than 90 days as current. Named exceptions need owner and
+  expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Separate eval tracks for regression, adversarial, and
-    distribution-shift cases"
-  - "Retain evidence artifacts required by this Check, starting with: Eval catalog showing separate
-    tracks for regression, adversarial, and distribution-shift + latest CI matrix"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Split offline evals into regression, adversarial, and distribution-shift tracks with distinct corpora"
+  - "Assign a named owner per track; list tracks in the eval catalog"
+  - "Run all three tracks on every production model/prompt promotion; retain matrix under imports/eval-track-catalog/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "NIST AI RMF — Measure"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -46,13 +69,16 @@ relatedRules:
   - "EVL-M3"
   - "EVL-M4"
   - "EVL-R2"
+  - "SAF-M2"
 tags:
   - "evaluation"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "regression"
+  - "adversarial"
+  - "distribution-shift"
 applicability:
-  technologies:
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

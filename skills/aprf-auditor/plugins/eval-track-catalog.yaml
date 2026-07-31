@@ -1,0 +1,24 @@
+id: eval-track-catalog
+title: Separate regression/adversarial/distribution-shift eval tracks (EVL-R1)
+version: "0.2.0"
+executor: collectors/eval-track-catalog.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-eval-track-catalog]
+inputs:
+  - "Target repo (eval catalog / suite layout / promotion CI)"
+  - "Optional suite: aprf-assessment/imports/eval-track-catalog/*.{json}"
+collect:
+  - "Detect regression, adversarial, and distribution-shift track signals"
+  - "Ingest coverage; write eval-track-catalog-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/eval-track-catalog/*"
+  signals: [eval-track-catalog, evl-r1, repo-eval-track-catalog]
+mapsToChecks: [EVL-R1]
+whenUnavailable: >
+  Track signals alone are PARTIAL. EVL-R1 PASS needs missingTracks=0,
+  missingOwners=0, tracksNotRunOnLastPromotion=0, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline track heuristics + optional imported JSON.

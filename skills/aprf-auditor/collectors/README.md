@@ -69,6 +69,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **context-budget-monitoring** | `context-budget-monitoring.ts` | budget metrics + saturation alerts (CTX-R1) | `imports/context-budget-monitoring/` | — |
 | **context-compaction-evals** | `context-compaction-evals.ts` | compaction fact retention (CTX-R2) | `imports/context-compaction-evals/` | — |
 | **context-structured-blocks** | `context-structured-blocks.ts` | instruction vs data blocks (CTX-R3) | `imports/context-structured-blocks/` | — |
+| **eval-suite-ci** | `eval-suite-ci.ts` | critical-journey offline evals on change (EVL-M1) | `imports/eval-suite-ci/` | — |
+| **eval-release-gates** | `eval-release-gates.ts` | quality/safety numeric release gates (EVL-M2) | `imports/eval-release-gates/` | — |
+| **eval-online-signals** | `eval-online-signals.ts` | online task-success + refusal metrics (EVL-M3) | `imports/eval-online-signals/` | — |
+| **eval-shadow-cutover** | `eval-shadow-cutover.ts` | shadow/canary before full cutover (EVL-M4) | `imports/eval-shadow-cutover/` | — |
+| **eval-track-catalog** | `eval-track-catalog.ts` | regression/adversarial/distribution-shift tracks (EVL-R1) | `imports/eval-track-catalog/` | — |
+| **eval-human-review** | `eval-human-review.ts` | human preference / expert-review sampling (EVL-R2) | `imports/eval-human-review/` | — |
 | **ai-cost-alerts** | `ai-cost-alerts.ts` | budget-burn + anomaly alerts | `imports/ai-cost-alerts/` | — |
 | **ai-retry-amplification** | `ai-retry-amplification.ts` | retry/loop cost bounds | `imports/ai-retry-amplification/` | — |
 | **ai-prompt-cache** | `ai-prompt-cache.ts` | prompt cache + hit-rate | `imports/ai-prompt-cache/` | — |

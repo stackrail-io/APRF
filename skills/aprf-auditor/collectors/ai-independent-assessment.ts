@@ -479,9 +479,11 @@ export const aiIndependentAssessmentCollector: Collector = {
     ];
 
     for (const r of [
-      ...assessmentRefs.slice(0, 2),
-      ...level5Refs.slice(0, 1),
-      ...findingsRefs.slice(0, 1),
+      ...new Set([
+        ...assessmentRefs.slice(0, 2),
+        ...level5Refs.slice(0, 1),
+        ...findingsRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

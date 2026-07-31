@@ -1,0 +1,24 @@
+id: eval-online-signals
+title: Online task-success and safety-refusal signals (EVL-M3)
+version: "0.2.0"
+executor: collectors/eval-online-signals.ts
+evidenceClass: runtime-config
+alsoEmits: []
+detectorIds: [repo-eval-online-signals]
+inputs:
+  - "Target repo (metrics/dashboard/alert config)"
+  - "Optional suite: aprf-assessment/imports/eval-online-signals/*.{json}"
+collect:
+  - "Detect task-success/failure and safety-refusal metric signals"
+  - "Ingest freshness + cadence; write eval-online-signals-report.json"
+emits:
+  nodeClass: runtime-config
+  refPattern: "aprf-assessment/imports/eval-online-signals/*"
+  signals: [eval-online-signals, evl-m3, repo-eval-online-signals]
+mapsToChecks: [EVL-M3]
+whenUnavailable: >
+  Metric signals alone are PARTIAL. EVL-M3 PASS needs both metric classes,
+  alertOrReviewCadenceDefined, dashboardFreshnessHours≤24, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline metric heuristics + optional imported JSON.

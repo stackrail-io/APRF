@@ -472,9 +472,11 @@ export const aiTrustDocumentationCollector: Collector = {
     ];
 
     for (const r of [
-      ...trustRefs.slice(0, 2),
-      ...mappingRefs.slice(0, 1),
-      ...topicRefs.slice(0, 1),
+      ...new Set([
+        ...trustRefs.slice(0, 2),
+        ...mappingRefs.slice(0, 1),
+        ...topicRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

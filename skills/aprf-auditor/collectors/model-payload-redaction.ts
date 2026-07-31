@@ -416,9 +416,11 @@ export const modelPayloadRedactionCollector: Collector = {
     ];
 
     for (const r of [
-      ...pipelineRefs.slice(0, 2),
-      ...fieldRefs.slice(0, 1),
-      ...failClosedRefs.slice(0, 1),
+      ...new Set([
+        ...pipelineRefs.slice(0, 2),
+        ...fieldRefs.slice(0, 1),
+        ...failClosedRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

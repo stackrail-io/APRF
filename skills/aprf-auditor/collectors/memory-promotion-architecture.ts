@@ -451,10 +451,12 @@ export const memoryPromotionArchitectureCollector: Collector = {
     ];
 
     for (const r of [
-      ...sepRefs.slice(0, 1),
-      ...promoRefs.slice(0, 2),
-      ...ttlRefs.slice(0, 1),
-      ...auditRefs.slice(0, 1),
+      ...new Set([
+        ...sepRefs.slice(0, 1),
+        ...promoRefs.slice(0, 2),
+        ...ttlRefs.slice(0, 1),
+        ...auditRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

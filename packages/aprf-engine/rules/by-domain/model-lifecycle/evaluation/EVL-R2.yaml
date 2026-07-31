@@ -1,35 +1,62 @@
 id: "EVL-R2"
 category: "evaluation"
 title: "Production systems should have human preference or expert review sampling on a defined cadence"
-description: "Human preference or expert review sampling on a defined cadence"
-whyItMatters: "Human preference or expert review sampling on a defined cadence Failing this leaves a
-  production gap against: Cadence and sample size are defined; last sample ≤90 days covers
-  production-like prompts; disagreements have adjudication recorded"
-severity: "critical"
-weight: 4
+description: >
+  Production AI systems should run human preference or expert-review
+  sampling on a documented cadence and sample size, covering
+  production-like prompts, with disagreements adjudicated and recorded.
+whyItMatters: >
+  Automated offline and online metrics miss taste, tone, and edge cases
+  experts catch. Without a defined sampling cadence—and adjudication when
+  raters disagree—teams either never look at real outputs or argue forever
+  without a recorded decision. Human review keeps eval grounded in what
+  customers experience.
+severity: "high"
+weight: 3
 gate: "recommended"
-passCondition: "Cadence and sample size are defined; last sample ≤90 days covers production-like
-  prompts; disagreements have adjudication recorded"
+passCondition: >
+  Cadence and sample size are defined; last sample ≤90 days covers
+  production-like prompts; disagreements have adjudication recorded
+  (sampling evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Human preference / expert-review sampling protocol + last scored sample set with inter-rater
-    notes"
+  - "Human preference / expert-review sampling protocol (cadence + sample size)"
+  - "Last scored sample set with production-like prompts and inter-rater / adjudication notes"
 detection:
-  capability: "manual"
-  detectors: []
-manualVerification: "For this Check (Human preference or expert review sampling on a defined
-  cadence): inspect current evidence for [Human preference / expert-review sampling protocol + last
-  scored sample set with inter-rater notes] and confirm the pass condition holds — Cadence and
-  sample size are defined; last sample ≤90 days covers production-like prompts; disagreements have
-  adjudication recorded"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+  capability: "hybrid"
+  detectors:
+    - id: "repo-eval-human-review"
+      params:
+        hint: >
+          Discover human preference or expert-review sampling protocols,
+          recent scored samples, and adjudication records.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove sampling, attest cadence and sample
+          size are defined, the last sample ≤90 days covers production-like
+          prompts, and disagreements have adjudication recorded
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI prompts/outputs exist for review. If none,
+  score NOT_APPLICABLE. 2) Open the sampling protocol; confirm cadence
+  and sample size are documented. 3) Open the last scored sample set;
+  confirm age ≤90 days and prompts are production-like (not only
+  synthetic demo cases). 4) Confirm disagreements between raters have
+  adjudication recorded (decision + owner). 5) PASS only if protocol +
+  fresh sample + adjudication hold with measuredAt ≤90 days. EVL-M1
+  automated suites alone do not satisfy. Spot checks without a cadence
+  or sample size do not satisfy.
+falsePositiveGuidance: >
+  Do not pass one-off founder reviews without a defined cadence. Do not
+  pass synthetic-only samples as production-like coverage. Do not pass
+  preference labels with no adjudication when raters conflict. Do not
+  pass evidence older than 90 days as current. Named exceptions need
+  owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Human preference or expert review sampling on a
-    defined cadence"
-  - "Retain evidence artifacts required by this Check, starting with: Human preference /
-    expert-review sampling protocol + last scored sample set with inter-rater notes"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Document cadence and sample size for human preference or expert review"
+  - "Sample production-like prompts on that cadence; retain scored sets"
+  - "Record adjudication for disagreements; store under imports/eval-human-review/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "NIST AI RMF — Measure"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -41,13 +68,16 @@ relatedRules:
   - "EVL-M3"
   - "EVL-M4"
   - "EVL-R1"
+  - "HUM-M1"
 tags:
   - "evaluation"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "human-review"
+  - "preference"
+  - "sampling"
 applicability:
-  technologies:
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

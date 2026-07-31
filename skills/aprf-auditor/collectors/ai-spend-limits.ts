@@ -362,7 +362,9 @@ export const aiSpendLimitsCollector: Collector = {
       },
     ];
 
-    for (const r of [...limitRefs.slice(0, 4), ...enforceRefs.slice(0, 2)]) {
+    for (const r of [
+      ...new Set([...limitRefs.slice(0, 4), ...enforceRefs.slice(0, 2)]),
+    ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,
         class: "code",

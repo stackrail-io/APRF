@@ -497,9 +497,11 @@ export const platformDxMetricsCollector: Collector = {
     ];
 
     for (const r of [
-      ...ttspRefs.slice(0, 2),
-      ...bypassRefs.slice(0, 2),
-      ...seriesRefs.slice(0, 2),
+      ...new Set([
+        ...ttspRefs.slice(0, 2),
+        ...bypassRefs.slice(0, 2),
+        ...seriesRefs.slice(0, 2),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

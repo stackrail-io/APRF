@@ -1,0 +1,26 @@
+id: eval-human-review
+title: Human preference / expert-review sampling cadence (EVL-R2)
+version: "0.2.0"
+executor: collectors/eval-human-review.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-eval-human-review]
+inputs:
+  - "Target repo (sampling protocol, scored samples, adjudication notes)"
+  - "Optional suite: aprf-assessment/imports/eval-human-review/*.{json}"
+collect:
+  - "Detect human preference / expert-review and adjudication signals"
+  - "Ingest sampling coverage; write eval-human-review-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/eval-human-review/*"
+  signals: [eval-human-review, evl-r2, repo-eval-human-review]
+mapsToChecks: [EVL-R2]
+whenUnavailable: >
+  Review signals alone are PARTIAL. EVL-R2 PASS needs
+  cadenceAndSampleSizeDefined, lastSampleAgeDays≤90,
+  productionLikeCoverage, disagreementsMissingAdjudication=0,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline human-review heuristics + optional imported JSON.

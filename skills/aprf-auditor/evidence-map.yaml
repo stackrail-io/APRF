@@ -191,7 +191,9 @@ categoryDefaults:
       - "**/evals/**"
       - "**/*golden*"
       - "**/.github/workflows/**"
-    signals: [eval CI gate, golden set, regression]
+      - "**/promptfoo*"
+    plugins: [eval-suite-ci, eval-release-gates, eval-online-signals, eval-shadow-cutover, eval-track-catalog, eval-human-review, promptfoo, github-actions, repo-filesystem, otel, prometheus, grafana]
+    signals: [eval CI gate, golden set, regression, adversarial, distribution-shift, critical journey, offline suite, quality threshold, safety threshold, task success, safety refusal, online metrics, shadow, canary, cutover, human preference, expert review, adjudication]
   agent-governance:
     search:
       - "**/*agent*"
@@ -357,13 +359,104 @@ checks:
       PARTIAL if only generic HTTP logs.
   EVL-M1:
     requiredEvidence:
-      - "Eval suite + CI gate or scheduled run evidence"
+      - "Eval suite registry mapping critical journeys to versioned offline suites"
+      - "CI trigger coverage or ≤14-day waivers under imports/eval-suite-ci/"
     searchExtra:
       - "**/eval/**"
+      - "**/evals/**"
+      - "**/promptfoo*"
       - "**/.github/workflows/*eval*"
+      - "**/*journey*"
+    plugins: [eval-suite-ci, promptfoo, github-actions, repo-filesystem]
+    naWhen: "No critical AI customer journeys"
     evaluation: |
-      PASS if eval runs in CI and can block merge/release.
-      PARTIAL if evals exist but are manual-only.
+      PASS if eval-suite-ci statusHint=pass (suite signals + criticalJourneysMissingSuite=0 + relevantChangesMissingTriggerOrWaiver=0 + measuredAt ≤90d).
+      PARTIAL if suite/CI signals without complete import.
+      NOT_APPLICABLE when no eval/AI signals.
+  EVL-M2:
+    requiredEvidence:
+      - "Gate config with numeric quality + safety thresholds per critical journey"
+      - "Blocking CI proof under imports/eval-release-gates/"
+    searchExtra:
+      - "**/*threshold*"
+      - "**/*release*gate*"
+      - "**/*eval*gate*"
+      - "**/*quality*"
+      - "**/*safety*"
+      - "**/.github/workflows/**"
+    plugins: [eval-release-gates, promptfoo, github-actions, repo-filesystem]
+    naWhen: "No critical AI customer journeys"
+    evaluation: |
+      PASS if eval-release-gates statusHint=pass (journeysMissingQualityMetric=0 + journeysMissingSafetyMetric=0 + failingGateBlocksDeploy + measuredAt ≤90d).
+      PARTIAL if gate/threshold signals without complete import.
+      NOT_APPLICABLE when no eval/gate signals.
+  EVL-M3:
+    requiredEvidence:
+      - "Live task success/failure and safety-refusal metrics"
+      - "Alert/review cadence + ≤24h freshness under imports/eval-online-signals/"
+    searchExtra:
+      - "**/*task*success*"
+      - "**/*refusal*"
+      - "**/*dashboard*"
+      - "**/grafana*"
+      - "**/prometheus*"
+      - "**/otel*"
+    plugins: [eval-online-signals, repo-filesystem, otel, prometheus, grafana, langsmith, helicone]
+    naWhen: "No production AI workloads"
+    evaluation: |
+      PASS if eval-online-signals statusHint=pass (taskSuccessFailureMetricPresent + safetyRefusalMetricPresent + alertOrReviewCadenceDefined + dashboardFreshnessHours≤24 + measuredAt ≤90d).
+      PARTIAL if metric/cadence signals without complete import.
+      NOT_APPLICABLE when no AI/online-signal evidence.
+  EVL-M4:
+    requiredEvidence:
+      - "Shadow/canary eval config with documented promotion criteria"
+      - "Last high-risk cutover comparison under imports/eval-shadow-cutover/"
+    searchExtra:
+      - "**/*shadow*"
+      - "**/*canary*"
+      - "**/*cutover*"
+      - "**/*promotion*"
+      - "**/*eval*compar*"
+    plugins: [eval-shadow-cutover, promptfoo, github-actions, repo-filesystem]
+    naWhen: "No high-risk AI production cutovers in scope"
+    evaluation: |
+      PASS if eval-shadow-cutover statusHint=pass (highRiskCutoversMissingShadowComparison=0 + promotionCriteriaMetBeforeFullTraffic + measuredAt ≤90d).
+      PARTIAL if shadow/canary signals without complete import.
+      NOT_APPLICABLE when highRiskCutoverCount=0 or no AI/cutover signals.
+  EVL-R1:
+    requiredEvidence:
+      - "Eval catalog with regression, adversarial, and distribution-shift tracks + owners"
+      - "Last-promotion CI matrix under imports/eval-track-catalog/"
+    searchExtra:
+      - "**/*regression*"
+      - "**/*adversarial*"
+      - "**/*distribution*shift*"
+      - "**/*dist*shift*"
+      - "**/eval*/**"
+      - "**/evals/**"
+    plugins: [eval-track-catalog, promptfoo, github-actions, repo-filesystem]
+    naWhen: "No production AI model/prompt promotions"
+    evaluation: |
+      PASS if eval-track-catalog statusHint=pass (missingTracks=0 + missingOwners=0 + tracksNotRunOnLastPromotion=0 + measuredAt ≤90d).
+      PARTIAL if track signals without complete import.
+      NOT_APPLICABLE when no eval/track signals.
+  EVL-R2:
+    requiredEvidence:
+      - "Human preference / expert-review sampling protocol (cadence + sample size)"
+      - "Last scored sample + adjudication under imports/eval-human-review/"
+    searchExtra:
+      - "**/*preference*"
+      - "**/*human*review*"
+      - "**/*expert*review*"
+      - "**/*annotat*"
+      - "**/*inter*rater*"
+      - "**/*adjudicat*"
+    plugins: [eval-human-review, repo-filesystem]
+    naWhen: "No production AI outputs to sample"
+    evaluation: |
+      PASS if eval-human-review statusHint=pass (cadenceAndSampleSizeDefined + lastSampleAgeDays≤90 + productionLikeCoverage + disagreementsMissingAdjudication=0 + measuredAt ≤90d).
+      PARTIAL if review signals without complete import.
+      NOT_APPLICABLE when no AI/human-review signals.
   CTX-M1:
     requiredEvidence:
       - "Context-budget config (max tokens/bytes) for each production context builder"

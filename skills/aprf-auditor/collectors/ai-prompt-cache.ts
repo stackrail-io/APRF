@@ -415,7 +415,9 @@ export const aiPromptCacheCollector: Collector = {
       },
     ];
 
-    for (const r of [...cacheRefs.slice(0, 4), ...exclusionRefs.slice(0, 2)]) {
+    for (const r of [
+      ...new Set([...cacheRefs.slice(0, 4), ...exclusionRefs.slice(0, 2)]),
+    ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,
         class: "code",

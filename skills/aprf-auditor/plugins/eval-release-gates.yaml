@@ -1,0 +1,25 @@
+id: eval-release-gates
+title: Numeric quality/safety release gates (EVL-M2)
+version: "0.2.0"
+executor: collectors/eval-release-gates.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-eval-release-gates]
+inputs:
+  - "Target repo (eval gate configs, CI required checks)"
+  - "Optional suite: aprf-assessment/imports/eval-release-gates/*.{json}"
+collect:
+  - "Detect quality/safety thresholds and blocking release gates"
+  - "Ingest coverage; write eval-release-gates-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/eval-release-gates/*"
+  signals: [eval-release-gates, evl-m2, repo-eval-release-gates]
+mapsToChecks: [EVL-M2]
+whenUnavailable: >
+  Gate signals alone are PARTIAL. EVL-M2 PASS needs
+  journeysMissingQualityMetric=0, journeysMissingSafetyMetric=0,
+  failingGateBlocksDeploy, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline gate heuristics + optional imported JSON.

@@ -411,7 +411,9 @@ export const aiModelRoutingCollector: Collector = {
       },
     ];
 
-    for (const r of [...routingRefs.slice(0, 4), ...evalRefs.slice(0, 2)]) {
+    for (const r of [
+      ...new Set([...routingRefs.slice(0, 4), ...evalRefs.slice(0, 2)]),
+    ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,
         class: "code",

@@ -145,6 +145,31 @@ CTX-R3 structured instruction vs data context blocks:
   npm run aprf:context-structured-blocks -- --target <app> --out <app>/aprf-assessment
   # PASS needs structuredSectionsEmitted + instructionOverwriteBlocked under imports/context-structured-blocks/
 
+EVL-M1 critical-journey offline eval suites on change:
+  npm run aprf:eval-suite-ci -- --target <app> --out <app>/aprf-assessment
+  # PASS needs criticalJourneysMissingSuite=0 + relevantChangesMissingTriggerOrWaiver=0 under imports/eval-suite-ci/
+
+EVL-M2 numeric quality/safety release gates:
+  npm run aprf:eval-release-gates -- --target <app> --out <app>/aprf-assessment
+  # PASS needs journeysMissingQualityMetric=0 + journeysMissingSafetyMetric=0 + failingGateBlocksDeploy under imports/eval-release-gates/
+
+EVL-M3 online task-success and safety-refusal signals:
+  npm run aprf:eval-online-signals -- --target <app> --out <app>/aprf-assessment
+  # PASS needs both metric classes + cadence + dashboardFreshnessHours≤24 under imports/eval-online-signals/
+
+EVL-M4 shadow/canary eval comparison before full cutover:
+  npm run aprf:eval-shadow-cutover -- --target <app> --out <app>/aprf-assessment
+  # PASS needs highRiskCutoversMissingShadowComparison=0 + promotionCriteriaMetBeforeFullTraffic under imports/eval-shadow-cutover/
+  # highRiskCutoverCount=0 → NOT_APPLICABLE
+
+EVL-R1 separate regression/adversarial/distribution-shift eval tracks:
+  npm run aprf:eval-track-catalog -- --target <app> --out <app>/aprf-assessment
+  # PASS needs missingTracks=0 + missingOwners=0 + tracksNotRunOnLastPromotion=0 under imports/eval-track-catalog/
+
+EVL-R2 human preference / expert-review sampling cadence:
+  npm run aprf:eval-human-review -- --target <app> --out <app>/aprf-assessment
+  # PASS needs cadenceAndSampleSizeDefined + lastSampleAgeDays≤90 + productionLikeCoverage + disagreementsMissingAdjudication=0 under imports/eval-human-review/
+
 COST-M2 AI cost budget-burn / anomaly alerts:
   npm run aprf:cost-alerts -- --target <app> --out <app>/aprf-assessment
   # PASS needs notify proof under imports/ai-cost-alerts/

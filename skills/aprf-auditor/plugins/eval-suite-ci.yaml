@@ -1,0 +1,25 @@
+id: eval-suite-ci
+title: Critical-journey offline eval suites on change (EVL-M1)
+version: "0.2.0"
+executor: collectors/eval-suite-ci.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-eval-suite-present]
+inputs:
+  - "Target repo (eval suites, promptfoo, CI workflows)"
+  - "Optional suite: aprf-assessment/imports/eval-suite-ci/*.{json}"
+collect:
+  - "Detect versioned offline eval suites and CI triggers"
+  - "Ingest journey/change coverage; write eval-suite-ci-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/eval-suite-ci/*"
+  signals: [eval-suite-ci, evl-m1, repo-eval-suite-present]
+mapsToChecks: [EVL-M1]
+whenUnavailable: >
+  Suite signals alone are PARTIAL. EVL-M1 PASS needs
+  criticalJourneysMissingSuite=0, relevantChangesMissingTriggerOrWaiver=0,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline suite/CI heuristics + optional imported JSON.

@@ -1,0 +1,26 @@
+id: eval-shadow-cutover
+title: Shadow/canary eval comparison before full cutover (EVL-M4)
+version: "0.2.0"
+executor: collectors/eval-shadow-cutover.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-eval-shadow-cutover]
+inputs:
+  - "Target repo (shadow/canary deploy + eval comparison configs)"
+  - "Optional suite: aprf-assessment/imports/eval-shadow-cutover/*.{json}"
+collect:
+  - "Detect shadow/canary and promotion-criteria signals"
+  - "Ingest last-cutover coverage; write eval-shadow-cutover-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/eval-shadow-cutover/*"
+  signals: [eval-shadow-cutover, evl-m4, repo-eval-shadow-cutover]
+mapsToChecks: [EVL-M4]
+whenUnavailable: >
+  Cutover signals alone are PARTIAL. EVL-M4 PASS needs
+  highRiskCutoversMissingShadowComparison=0,
+  promotionCriteriaMetBeforeFullTraffic, measuredAt ≤90 days.
+  highRiskCutoverCount=0 → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline shadow/canary heuristics + optional imported JSON.

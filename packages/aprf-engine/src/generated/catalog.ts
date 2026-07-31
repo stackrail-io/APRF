@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:b34198ae74757c489aa3389d8756bee935c09fec4283269ddfdb4308bf7493ff",
+  "generatedAt": "sha256:3c993766cf374a1b37c1981df4111e6600730e2f4955f733f1e7ae3e4e1f526a",
   "ruleCount": 177,
   "domains": [
     {
@@ -5035,36 +5035,39 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "EVL-M1",
       "category": "evaluation",
       "title": "Critical customer journeys must have automated offline eval suites on every relevant change",
-      "description": "Critical customer journeys shall have automated offline eval suites on every relevant change",
-      "whyItMatters": "Critical customer journeys shall have automated offline eval suites on every relevant change Failing this leaves a production gap against: 100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in last 30 days triggered the suite (or documented waiver ≤ 14 days)",
+      "description": "Every journey marked critical shall have a versioned offline eval suite, and every relevant production change in the last 30 days shall have triggered that suite—or carry a documented waiver ≤14 days.\n",
+      "whyItMatters": "Shipping prompt, model, or tool changes without offline evals on critical journeys turns production into the test environment. Silent quality and safety regressions land on customers first. Versioned suites wired to relevant changes—with short, owned waivers only—make eval a release control, not an optional homework assignment.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in last 30 days triggered the suite (or documented waiver ≤ 14 days)",
+      "passCondition": "100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in the last 30 days triggered the suite (or documented waiver ≤14 days) (suite/CI evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Eval suite registry mapped to journeys + CI runs on prompt/model/tool changes"
+        "Eval suite registry mapping critical journeys to versioned offline suites",
+        "CI (or equivalent) runs on prompt/model/tool changes for the last 30 days, or waivers ≤14 days"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
             "id": "repo-eval-suite-present",
-            "params": {}
+            "params": {
+              "hint": "Discover versioned offline eval suites mapped to critical journeys and CI/workflow triggers on prompt/model/tool changes.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Eval suite registry mapped to journeys + CI runs on prompt/model/tool changes"
+              "hint": "If automation cannot prove coverage, attest 100% of critical journeys have a versioned offline suite and 100% of relevant production changes in the last 30 days triggered the suite or have a waiver ≤14 days (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Critical customer journeys must have automated offline eval suites on every relevant change): inspect current evidence for [Eval suite registry mapped to journeys + CI runs on prompt/model/tool changes] and confirm the pass condition holds — 100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in last 30 days triggered the suite (or documented waiver ≤ 14 days)",
-      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm the system has customer (or partner) journeys marked critical. If none, score NOT_APPLICABLE. 2) Open the eval suite registry; confirm each critical journey maps to a versioned offline suite. 3) Review relevant production changes in the last 30 days (prompt/model/tool/config that affects those journeys). 4) Confirm each change triggered the suite in CI (or equivalent) or has a documented waiver ≤14 days with owner. 5) PASS only if registry coverage + change trigger/waiver hold with measuredAt ≤90 days. Ad-hoc notebooks without versioning do not satisfy. Suites that never run on change do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a single shared “smoke prompt” as coverage for every critical journey. Do not pass unit tests that never exercise model/prompt behavior. Do not pass DX-R2 local inner-loop evals as a substitute for CI-triggered suites on production-relevant changes. Do not pass waivers older than 14 days as current. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Critical customer journeys must have automated offline eval suites on every relevant change",
-        "Retain evidence artifacts required by this Check, starting with: Eval suite registry mapped to journeys + CI runs on prompt/model/tool changes",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Register every critical journey to a versioned offline eval suite (promptfoo or equivalent)",
+        "Trigger suites on prompt/model/tool changes in CI; fail closed when unset",
+        "Limit waivers to ≤14 days with named owner; retain under imports/eval-suite-ci/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
@@ -5082,17 +5085,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "EVL-M3",
         "EVL-M4",
         "EVL-R1",
-        "EVL-R2"
+        "EVL-R2",
+        "CHG-M1",
+        "DX-R2"
       ],
       "tags": [
         "evaluation",
         "mandatory",
-        "automated"
+        "hybrid",
+        "offline-eval",
+        "ci-gate"
       ],
       "applicability": {
-        "technologies": [
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -5103,33 +5108,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "EVL-M2",
       "category": "evaluation",
       "title": "Release gates must enforce numeric minimum thresholds for quality and safety metrics",
-      "description": "Release gates shall enforce numeric minimum thresholds for quality and safety metrics",
-      "whyItMatters": "Release gates shall enforce numeric minimum thresholds for quality and safety metrics Failing this leaves a production gap against: Each critical journey has ≥1 quality and ≥1 safety metric with numeric threshold; failing gate blocks deploy in CI",
+      "description": "Production release gates shall require numeric minimum thresholds for at least one quality metric and one safety metric on every critical journey, and shall block deploy in CI when those thresholds are not met.\n",
+      "whyItMatters": "Eval suites that only report scores without hard thresholds become theater: teams ship when “mostly fine.” Numeric quality and safety floors that block deploy turn offline measurement into a release control—and stop silent regressions from reaching customers.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Each critical journey has ≥1 quality and ≥1 safety metric with numeric threshold; failing gate blocks deploy in CI",
+      "passCondition": "Each critical journey has ≥1 quality and ≥1 safety metric with numeric threshold; failing gate blocks deploy in CI (gate evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Gate config with metric names and thresholds + CI reports"
+        "Gate config listing metric names and numeric thresholds per critical journey (quality + safety)",
+        "CI evidence that a failing gate blocks deploy (or equivalent required check)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-eval-release-gates",
+            "params": {
+              "hint": "Discover release-gate configs with numeric quality and safety thresholds per critical journey, and CI jobs that block deploy on failure.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Gate config with metric names and thresholds + CI reports"
+              "hint": "If automation cannot prove gates, attest each critical journey has ≥1 quality and ≥1 safety numeric threshold and that a failing gate blocks deploy in CI (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Release gates must enforce numeric minimum thresholds for quality and safety metrics): inspect current evidence for [Gate config with metric names and thresholds + CI reports] and confirm the pass condition holds — Each critical journey has ≥1 quality and ≥1 safety metric with numeric threshold; failing gate blocks deploy in CI",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm critical customer/partner journeys exist. If none, score NOT_APPLICABLE. 2) Open the release-gate config; for each critical journey confirm ≥1 quality metric and ≥1 safety metric with numeric thresholds. 3) Confirm CI (or equivalent) treats gate failure as blocking for deploy/merge. 4) PASS only if thresholds + block-on-fail hold with measuredAt ≤90 days. Dashboards without thresholds do not satisfy. Advisory “warn only” gates that never block deploy do not satisfy. EVL-M1 suite presence without numeric gates does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass latency/cost SLOs as quality/safety eval gates unless the gate config explicitly names them as journey quality/safety metrics. Do not pass a single org-wide threshold that is not mapped to each critical journey. Do not pass non-blocking notifications as deploy gates. Do not pass evidence older than 90 days as current. Sibling Checks (EVL-M1 suites, SAF-M* policy) do not substitute for numeric release thresholds. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Release gates must enforce numeric minimum thresholds for quality and safety metrics",
-        "Retain evidence artifacts required by this Check, starting with: Gate config with metric names and thresholds + CI reports",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Define ≥1 quality and ≥1 safety numeric threshold per critical journey in the release gate",
+        "Make the gate a required CI check that blocks deploy on failure",
+        "Retain gate config + blocking CI proof under imports/eval-release-gates/",
+        "Time-box threshold waivers with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -5146,17 +5158,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "EVL-M3",
         "EVL-M4",
         "EVL-R1",
-        "EVL-R2"
+        "EVL-R2",
+        "SAF-M2",
+        "CHG-M1"
       ],
       "tags": [
         "evaluation",
         "mandatory",
-        "manual"
+        "hybrid",
+        "release-gate",
+        "thresholds"
       ],
       "applicability": {
-        "technologies": [
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -5167,32 +5181,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "EVL-M3",
       "category": "evaluation",
       "title": "Production must have online signals for task success/failure and safety refusals",
-      "description": "Production shall have online signals for task success/failure and safety refusals",
-      "whyItMatters": "Production shall have online signals for task success/failure and safety refusals Failing this leaves a production gap against: Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness ≤ 24 hours on the dashboard",
+      "description": "Production AI workloads shall emit live metrics for task success and failure and for safety refusals, with a defined alert or review cadence and dashboard freshness no older than 24 hours.\n",
+      "whyItMatters": "Offline eval gates catch known regressions before ship; they miss what users hit after release. Without live task-success and safety-refusal signals, failures and silent policy bypasses stay invisible until tickets pile up. Fresh metrics plus a cadence turn production into a continuous measure loop.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness ≤ 24 hours on the dashboard",
+      "passCondition": "Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness ≤24 hours on the dashboard (metrics evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Dashboard/metrics for task success and safety refusal rates"
+        "Dashboard or metric exports for task success/failure rates on production AI workloads",
+        "Dashboard or metric exports for safety refusal rates",
+        "Alert rule or documented review cadence; proof dashboard freshness ≤24 hours"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-eval-online-signals",
+            "params": {
+              "hint": "Discover live task-success/failure and safety-refusal metrics, dashboards, and alert or review-cadence config for production AI.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Dashboard/metrics for task success and safety refusal rates"
+              "hint": "If automation cannot prove freshness, attest updating online metrics for task success/failure and safety refusals, with alert or review cadence and dashboard freshness ≤24 hours (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Production must have online signals for task success/failure and safety refusals): inspect current evidence for [Dashboard/metrics for task success and safety refusal rates] and confirm the pass condition holds — Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness ≤ 24 hours on the dashboard",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI workloads complete user-visible tasks or apply safety refusals. If none, score NOT_APPLICABLE. 2) Open metrics/dashboards for task success and failure. 3) Open metrics/dashboards for safety refusals. 4) Confirm an alert or documented review cadence exists. 5) Confirm dashboard freshness ≤24 hours. 6) PASS only if both metric classes, cadence, and freshness hold with measuredAt ≤90 days. Offline eval scores alone do not satisfy. Generic HTTP 5xx rates without task-level success or refusal semantics do not satisfy. OBS-M1 traces alone without these rates do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass provider token/cost dashboards as task-success or refusal signals. Do not pass stale panels (>24 hours) as current. Do not pass EVL-M1/M2 offline gates as a substitute for online production signals. Do not pass evidence older than 90 days as the attestation window. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Production must have online signals for task success/failure and safety refusals",
-        "Retain evidence artifacts required by this Check, starting with: Dashboard/metrics for task success and safety refusal rates",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Emit task_success / task_failure (or equivalent) on production AI paths",
+        "Emit safety_refusal (or equivalent) when policy blocks or the model refuses",
+        "Add alert or review cadence; keep dashboards ≤24h fresh; retain under imports/eval-online-signals/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
@@ -5210,17 +5232,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "EVL-M2",
         "EVL-M4",
         "EVL-R1",
-        "EVL-R2"
+        "EVL-R2",
+        "OBS-M1",
+        "OBS-M2",
+        "SAF-M2"
       ],
       "tags": [
         "evaluation",
         "mandatory",
-        "manual"
+        "hybrid",
+        "online-metrics",
+        "safety-refusals"
       ],
       "applicability": {
-        "technologies": [
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -5231,33 +5256,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "EVL-M4",
       "category": "evaluation",
       "title": "Shadow deployment with eval comparison must precede full cutover for high-risk AI changes",
-      "description": "Shadow deployment with eval comparison shall precede full cutover for high-risk AI changes",
-      "whyItMatters": "Shadow deployment with eval comparison shall precede full cutover for high-risk AI changes Failing this leaves a production gap against: PASS if the last high-risk AI cutover retained a shadow/canary comparison that met promotion criteria before 100% traffic",
+      "description": "High-risk AI production cutovers shall run a shadow or canary with a retained eval comparison against the incumbent, and shall promote to 100% traffic only after documented promotion criteria are met.\n",
+      "whyItMatters": "Shipping a high-risk model, prompt, or tool change straight to 100% traffic makes every customer the canary. A shadow or canary with retained quality/safety comparison—and promotion only after criteria pass—contains blast radius and turns cutover into a measured control, not a leap of faith.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "PASS if the last high-risk AI cutover retained a shadow/canary comparison that met promotion criteria before 100% traffic",
+      "passCondition": "The last high-risk AI cutover retained a shadow/canary eval comparison that met promotion criteria before 100% traffic (cutover evidence measuredAt ≤90 days). If no high-risk AI cutover is in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Shadow/canary eval config + comparison report for the last high-risk cutover"
+        "Shadow/canary eval config for high-risk AI cutovers (promotion criteria documented)",
+        "Comparison report for the last high-risk cutover showing criteria met before full traffic"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-eval-shadow-cutover",
+            "params": {
+              "hint": "Discover shadow/canary deploy configs and eval-comparison reports used before full cutover for high-risk AI changes.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Shadow/canary eval config + comparison report for the last high-risk cutover"
+              "hint": "If automation cannot prove the last cutover, attest the last high-risk AI cutover retained a shadow/canary eval comparison that met promotion criteria before 100% traffic (measuredAt ≤90 days). If none in scope, attest NOT_APPLICABLE.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Shadow deployment with eval comparison must precede full cutover for high-risk AI changes): inspect current evidence for [Shadow/canary eval config + comparison report for the last high-risk cutover] and confirm the pass condition holds — PASS if the last high-risk AI cutover retained a shadow/canary comparison that met promotion criteria before 100% traffic",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the system makes high-risk AI production cutovers (model, prompt, or tool changes that can materially change quality/safety). If none in the assessment window, score NOT_APPLICABLE. 2) Open the shadow/canary eval config; confirm promotion criteria are documented (numeric or explicit pass/fail). 3) Open the comparison report for the last high-risk cutover; confirm shadow/canary ran against the incumbent and criteria were met. 4) Confirm full (100%) traffic was gated on that pass—not a parallel “informational” canary after cutover. 5) PASS only if config + last-cutover comparison + criteria-before-full-traffic hold with measuredAt ≤90 days. Offline EVL-M1 suites alone do not satisfy. A/B experiments without a production shadow/canary path do not satisfy unless they are the cutover gate.\n",
+      "falsePositiveGuidance": "Do not pass infra canaries that never compare AI quality/safety metrics. Do not pass a shadow that never blocked full traffic. Do not pass EVL-M1/M2 offline gates as a substitute for a live cutover comparison. Do not pass PRM-R3 prompt A/B alone unless the last high-risk cutover used that path as the promotion gate. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Shadow deployment with eval comparison must precede full cutover for high-risk AI changes",
-        "Retain evidence artifacts required by this Check, starting with: Shadow/canary eval config + comparison report for the last high-risk cutover",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Require shadow or canary with eval comparison before 100% traffic on high-risk AI cutovers",
+        "Document numeric (or explicit) promotion criteria in the cutover config",
+        "Retain last-cutover comparison report under imports/eval-shadow-cutover/",
+        "Block full cutover (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
         {
@@ -5274,17 +5306,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "EVL-M2",
         "EVL-M3",
         "EVL-R1",
-        "EVL-R2"
+        "EVL-R2",
+        "CHG-M1",
+        "PRM-R3"
       ],
       "tags": [
         "evaluation",
         "mandatory",
-        "manual"
+        "hybrid",
+        "shadow",
+        "canary",
+        "cutover"
       ],
       "applicability": {
-        "technologies": [
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 3,
         "requiredFromLevel": 5
       },
@@ -5295,33 +5330,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "EVL-R1",
       "category": "evaluation",
       "title": "Production systems should have separate eval tracks for regression, adversarial, and distribution-shift cases",
-      "description": "Separate eval tracks for regression, adversarial, and distribution-shift cases",
-      "whyItMatters": "Separate eval tracks for regression, adversarial, and distribution-shift cases Failing this leaves a production gap against: All three tracks exist with distinct corpora and owners; each track ran successfully on the last production model/prompt promotion (≤90 days)",
-      "severity": "critical",
-      "weight": 4,
+      "description": "Production AI systems should maintain three distinct offline eval tracks—regression, adversarial, and distribution-shift—each with its own corpus and named owner, and each should have run successfully on the last production model or prompt promotion.\n",
+      "whyItMatters": "A single mixed eval suite hides which failure mode regressed. Separate tracks with owned corpora force coverage of known regressions, adversarial attacks, and distribution drift—and proving each ran on the last promotion keeps those tracks from rotting into unread YAML.\n",
+      "severity": "high",
+      "weight": 3,
       "gate": "recommended",
-      "passCondition": "All three tracks exist with distinct corpora and owners; each track ran successfully on the last production model/prompt promotion (≤90 days)",
+      "passCondition": "All three tracks (regression, adversarial, distribution-shift) exist with distinct corpora and named owners; each track ran successfully on the last production model/prompt promotion (catalog/CI evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Eval catalog showing separate tracks for regression, adversarial, and distribution-shift + latest CI matrix"
+        "Eval catalog listing separate tracks for regression, adversarial, and distribution-shift with owners and corpora",
+        "Latest CI (or equivalent) matrix showing each track succeeded on the last production promotion"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-eval-track-catalog",
+            "params": {
+              "hint": "Discover an eval catalog (or suite layout) with distinct regression, adversarial, and distribution-shift tracks, owners, and recent promotion CI runs.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Eval catalog showing separate tracks for regression, adversarial, and distribution-shift + latest CI matrix"
+              "hint": "If automation cannot prove tracks, attest all three tracks exist with distinct corpora and owners and each ran successfully on the last production model/prompt promotion (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Separate eval tracks for regression, adversarial, and distribution-shift cases): inspect current evidence for [Eval catalog showing separate tracks for regression, adversarial, and distribution-shift + latest CI matrix] and confirm the pass condition holds — All three tracks exist with distinct corpora and owners; each track ran successfully on the last production model/prompt promotion (≤90 days)",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI model/prompt promotions exist. If none, score NOT_APPLICABLE. 2) Open the eval catalog; confirm three named tracks— regression, adversarial, and distribution-shift—each with a distinct corpus (or corpus path) and named owner. 3) Open the latest promotion CI matrix (or equivalent); confirm each track ran and succeeded on the last production model/prompt promotion. 4) PASS only if three tracks + owners + distinct corpora + successful last-promotion runs hold with measuredAt ≤90 days. A single undifferentiated suite tagged with three labels does not satisfy. EVL-M1 critical-journey coverage without these three tracks does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass one mega-suite with three folders but a shared corpus and no owners. Do not pass adversarial unit tests that never run on promotion. Do not pass EVL-M2 threshold gates as proof of three tracks. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Separate eval tracks for regression, adversarial, and distribution-shift cases",
-        "Retain evidence artifacts required by this Check, starting with: Eval catalog showing separate tracks for regression, adversarial, and distribution-shift + latest CI matrix",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Split offline evals into regression, adversarial, and distribution-shift tracks with distinct corpora",
+        "Assign a named owner per track; list tracks in the eval catalog",
+        "Run all three tracks on every production model/prompt promotion; retain matrix under imports/eval-track-catalog/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -5338,17 +5380,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "EVL-M2",
         "EVL-M3",
         "EVL-M4",
-        "EVL-R2"
+        "EVL-R2",
+        "SAF-M2"
       ],
       "tags": [
         "evaluation",
         "recommended",
-        "manual"
+        "hybrid",
+        "regression",
+        "adversarial",
+        "distribution-shift"
       ],
       "applicability": {
-        "technologies": [
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -5359,26 +5403,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "EVL-R2",
       "category": "evaluation",
       "title": "Production systems should have human preference or expert review sampling on a defined cadence",
-      "description": "Human preference or expert review sampling on a defined cadence",
-      "whyItMatters": "Human preference or expert review sampling on a defined cadence Failing this leaves a production gap against: Cadence and sample size are defined; last sample ≤90 days covers production-like prompts; disagreements have adjudication recorded",
-      "severity": "critical",
-      "weight": 4,
+      "description": "Production AI systems should run human preference or expert-review sampling on a documented cadence and sample size, covering production-like prompts, with disagreements adjudicated and recorded.\n",
+      "whyItMatters": "Automated offline and online metrics miss taste, tone, and edge cases experts catch. Without a defined sampling cadence—and adjudication when raters disagree—teams either never look at real outputs or argue forever without a recorded decision. Human review keeps eval grounded in what customers experience.\n",
+      "severity": "high",
+      "weight": 3,
       "gate": "recommended",
-      "passCondition": "Cadence and sample size are defined; last sample ≤90 days covers production-like prompts; disagreements have adjudication recorded",
+      "passCondition": "Cadence and sample size are defined; last sample ≤90 days covers production-like prompts; disagreements have adjudication recorded (sampling evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Human preference / expert-review sampling protocol + last scored sample set with inter-rater notes"
+        "Human preference / expert-review sampling protocol (cadence + sample size)",
+        "Last scored sample set with production-like prompts and inter-rater / adjudication notes"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-eval-human-review",
+            "params": {
+              "hint": "Discover human preference or expert-review sampling protocols, recent scored samples, and adjudication records.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove sampling, attest cadence and sample size are defined, the last sample ≤90 days covers production-like prompts, and disagreements have adjudication recorded (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (Human preference or expert review sampling on a defined cadence): inspect current evidence for [Human preference / expert-review sampling protocol + last scored sample set with inter-rater notes] and confirm the pass condition holds — Cadence and sample size are defined; last sample ≤90 days covers production-like prompts; disagreements have adjudication recorded",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI prompts/outputs exist for review. If none, score NOT_APPLICABLE. 2) Open the sampling protocol; confirm cadence and sample size are documented. 3) Open the last scored sample set; confirm age ≤90 days and prompts are production-like (not only synthetic demo cases). 4) Confirm disagreements between raters have adjudication recorded (decision + owner). 5) PASS only if protocol + fresh sample + adjudication hold with measuredAt ≤90 days. EVL-M1 automated suites alone do not satisfy. Spot checks without a cadence or sample size do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass one-off founder reviews without a defined cadence. Do not pass synthetic-only samples as production-like coverage. Do not pass preference labels with no adjudication when raters conflict. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Human preference or expert review sampling on a defined cadence",
-        "Retain evidence artifacts required by this Check, starting with: Human preference / expert-review sampling protocol + last scored sample set with inter-rater notes",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Document cadence and sample size for human preference or expert review",
+        "Sample production-like prompts on that cadence; retain scored sets",
+        "Record adjudication for disagreements; store under imports/eval-human-review/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -5395,17 +5453,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "EVL-M2",
         "EVL-M3",
         "EVL-M4",
-        "EVL-R1"
+        "EVL-R1",
+        "HUM-M1"
       ],
       "tags": [
         "evaluation",
         "recommended",
-        "manual"
+        "hybrid",
+        "human-review",
+        "preference",
+        "sampling"
       ],
       "applicability": {
-        "technologies": [
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },

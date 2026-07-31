@@ -408,10 +408,12 @@ export const aiResidencyRoutingCollector: Collector = {
     ];
 
     for (const r of [
-      ...policyRefs.slice(0, 2),
-      ...labelRefs.slice(0, 1),
-      ...routingRefs.slice(0, 1),
-      ...sampleRefs.slice(0, 1),
+      ...new Set([
+        ...policyRefs.slice(0, 2),
+        ...labelRefs.slice(0, 1),
+        ...routingRefs.slice(0, 1),
+        ...sampleRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

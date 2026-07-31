@@ -499,9 +499,11 @@ export const corpusFreshnessMetricsCollector: Collector = {
     ];
 
     for (const r of [
-      ...freshnessRefs.slice(0, 2),
-      ...sloRefs.slice(0, 2),
-      ...alertRefs.slice(0, 2),
+      ...new Set([
+        ...freshnessRefs.slice(0, 2),
+        ...sloRefs.slice(0, 2),
+        ...alertRefs.slice(0, 2),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

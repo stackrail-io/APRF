@@ -409,8 +409,10 @@ export const contextSourceAclCollector: Collector = {
       },
     ];
     for (const r of [
-      ...report.signals.labels.refs,
-      ...report.signals.acl.refs,
+      ...new Set([
+        ...report.signals.labels.refs,
+        ...report.signals.acl.refs,
+      ]),
     ].slice(0, 6)) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

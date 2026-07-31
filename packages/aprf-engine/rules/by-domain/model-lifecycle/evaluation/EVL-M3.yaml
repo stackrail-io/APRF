@@ -1,37 +1,60 @@
 id: "EVL-M3"
 category: "evaluation"
 title: "Production must have online signals for task success/failure and safety refusals"
-description: "Production shall have online signals for task success/failure and safety refusals"
-whyItMatters: "Production shall have online signals for task success/failure and safety refusals
-  Failing this leaves a production gap against: Online metrics exist and are updating for task
-  success/failure and safety refusals; alert or review cadence defined; freshness ≤ 24 hours on the
-  dashboard"
+description: >
+  Production AI workloads shall emit live metrics for task success and failure
+  and for safety refusals, with a defined alert or review cadence and dashboard
+  freshness no older than 24 hours.
+whyItMatters: >
+  Offline eval gates catch known regressions before ship; they miss what users
+  hit after release. Without live task-success and safety-refusal signals,
+  failures and silent policy bypasses stay invisible until tickets pile up.
+  Fresh metrics plus a cadence turn production into a continuous measure loop.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "Online metrics exist and are updating for task success/failure and safety refusals;
-  alert or review cadence defined; freshness ≤ 24 hours on the dashboard"
+passCondition: >
+  Online metrics exist and are updating for task success/failure and safety
+  refusals; alert or review cadence defined; freshness ≤24 hours on the
+  dashboard (metrics evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Dashboard/metrics for task success and safety refusal rates"
+  - "Dashboard or metric exports for task success/failure rates on production AI workloads"
+  - "Dashboard or metric exports for safety refusal rates"
+  - "Alert rule or documented review cadence; proof dashboard freshness ≤24 hours"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-eval-online-signals"
+      params:
+        hint: >
+          Discover live task-success/failure and safety-refusal metrics,
+          dashboards, and alert or review-cadence config for production AI.
     - id: "manual-attest"
       params:
-        hint: "Dashboard/metrics for task success and safety refusal rates"
-manualVerification: "For this Check (Production must have online signals for task success/failure
-  and safety refusals): inspect current evidence for [Dashboard/metrics for task success and safety
-  refusal rates] and confirm the pass condition holds — Online metrics exist and are updating for
-  task success/failure and safety refusals; alert or review cadence defined; freshness ≤ 24 hours on
-  the dashboard"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove freshness, attest updating online metrics
+          for task success/failure and safety refusals, with alert or review
+          cadence and dashboard freshness ≤24 hours (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI workloads complete user-visible tasks or apply
+  safety refusals. If none, score NOT_APPLICABLE. 2) Open metrics/dashboards
+  for task success and failure. 3) Open metrics/dashboards for safety
+  refusals. 4) Confirm an alert or documented review cadence exists. 5)
+  Confirm dashboard freshness ≤24 hours. 6) PASS only if both metric classes,
+  cadence, and freshness hold with measuredAt ≤90 days. Offline eval scores
+  alone do not satisfy. Generic HTTP 5xx rates without task-level success or
+  refusal semantics do not satisfy. OBS-M1 traces alone without these rates do
+  not satisfy.
+falsePositiveGuidance: >
+  Do not pass provider token/cost dashboards as task-success or refusal
+  signals. Do not pass stale panels (>24 hours) as current. Do not pass
+  EVL-M1/M2 offline gates as a substitute for online production signals. Do
+  not pass evidence older than 90 days as the attestation window. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Production must have online signals for task success/failure and
-    safety refusals"
-  - "Retain evidence artifacts required by this Check, starting with: Dashboard/metrics for task
-    success and safety refusal rates"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Emit task_success / task_failure (or equivalent) on production AI paths"
+  - "Emit safety_refusal (or equivalent) when policy blocks or the model refuses"
+  - "Add alert or review cadence; keep dashboards ≤24h fresh; retain under imports/eval-online-signals/"
   - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
 references:
   - title: "NIST AI RMF — Measure"
@@ -44,13 +67,17 @@ relatedRules:
   - "EVL-M4"
   - "EVL-R1"
   - "EVL-R2"
+  - "OBS-M1"
+  - "OBS-M2"
+  - "SAF-M2"
 tags:
   - "evaluation"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "online-metrics"
+  - "safety-refusals"
 applicability:
-  technologies:
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

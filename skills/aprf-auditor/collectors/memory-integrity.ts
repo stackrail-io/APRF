@@ -401,9 +401,11 @@ export const memoryIntegrityCollector: Collector = {
     ];
 
     for (const r of [
-      ...integrityRefs.slice(0, 2),
-      ...inventoryRefs.slice(0, 1),
-      ...verifyRefs.slice(0, 1),
+      ...new Set([
+        ...integrityRefs.slice(0, 2),
+        ...inventoryRefs.slice(0, 1),
+        ...verifyRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

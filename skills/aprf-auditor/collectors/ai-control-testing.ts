@@ -447,9 +447,11 @@ export const aiControlTestingCollector: Collector = {
     ];
 
     for (const r of [
-      ...scheduleRefs.slice(0, 2),
-      ...resultsRefs.slice(0, 1),
-      ...exceptionRefs.slice(0, 1),
+      ...new Set([
+        ...scheduleRefs.slice(0, 2),
+        ...resultsRefs.slice(0, 1),
+        ...exceptionRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

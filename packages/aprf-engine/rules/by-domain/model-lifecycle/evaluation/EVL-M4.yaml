@@ -1,37 +1,69 @@
 id: "EVL-M4"
 category: "evaluation"
 title: "Shadow deployment with eval comparison must precede full cutover for high-risk AI changes"
-description: "Shadow deployment with eval comparison shall precede full cutover for high-risk AI changes"
-whyItMatters: "Shadow deployment with eval comparison shall precede full cutover for high-risk AI
-  changes Failing this leaves a production gap against: PASS if the last high-risk AI cutover
-  retained a shadow/canary comparison that met promotion criteria before 100% traffic"
+description: >
+  High-risk AI production cutovers shall run a shadow or canary with a
+  retained eval comparison against the incumbent, and shall promote to
+  100% traffic only after documented promotion criteria are met.
+whyItMatters: >
+  Shipping a high-risk model, prompt, or tool change straight to 100%
+  traffic makes every customer the canary. A shadow or canary with
+  retained quality/safety comparison—and promotion only after criteria
+  pass—contains blast radius and turns cutover into a measured control,
+  not a leap of faith.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "PASS if the last high-risk AI cutover retained a shadow/canary comparison that met
-  promotion criteria before 100% traffic"
+passCondition: >
+  The last high-risk AI cutover retained a shadow/canary eval comparison
+  that met promotion criteria before 100% traffic (cutover evidence
+  measuredAt ≤90 days). If no high-risk AI cutover is in scope, score
+  NOT_APPLICABLE.
 evidenceRequired:
-  - "Shadow/canary eval config + comparison report for the last high-risk cutover"
+  - "Shadow/canary eval config for high-risk AI cutovers (promotion criteria documented)"
+  - "Comparison report for the last high-risk cutover showing criteria met before full traffic"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-eval-shadow-cutover"
+      params:
+        hint: >
+          Discover shadow/canary deploy configs and eval-comparison
+          reports used before full cutover for high-risk AI changes.
     - id: "manual-attest"
       params:
-        hint: "Shadow/canary eval config + comparison report for the last high-risk cutover"
-manualVerification: "For this Check (Shadow deployment with eval comparison must precede full
-  cutover for high-risk AI changes): inspect current evidence for [Shadow/canary eval config +
-  comparison report for the last high-risk cutover] and confirm the pass condition holds — PASS if
-  the last high-risk AI cutover retained a shadow/canary comparison that met promotion criteria
-  before 100% traffic"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove the last cutover, attest the last
+          high-risk AI cutover retained a shadow/canary eval comparison
+          that met promotion criteria before 100% traffic (measuredAt
+          ≤90 days). If none in scope, attest NOT_APPLICABLE.
+manualVerification: >
+  1) Confirm the system makes high-risk AI production cutovers (model,
+  prompt, or tool changes that can materially change quality/safety).
+  If none in the assessment window, score NOT_APPLICABLE. 2) Open the
+  shadow/canary eval config; confirm promotion criteria are documented
+  (numeric or explicit pass/fail). 3) Open the comparison report for the
+  last high-risk cutover; confirm shadow/canary ran against the
+  incumbent and criteria were met. 4) Confirm full (100%) traffic was
+  gated on that pass—not a parallel “informational” canary after
+  cutover. 5) PASS only if config + last-cutover comparison +
+  criteria-before-full-traffic hold with measuredAt ≤90 days. Offline
+  EVL-M1 suites alone do not satisfy. A/B experiments without a
+  production shadow/canary path do not satisfy unless they are the
+  cutover gate.
+falsePositiveGuidance: >
+  Do not pass infra canaries that never compare AI quality/safety
+  metrics. Do not pass a shadow that never blocked full traffic. Do not
+  pass EVL-M1/M2 offline gates as a substitute for a live cutover
+  comparison. Do not pass PRM-R3 prompt A/B alone unless the last
+  high-risk cutover used that path as the promotion gate. Do not pass
+  evidence older than 90 days as current. Named exceptions need owner
+  and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Shadow deployment with eval comparison must precede full cutover
-    for high-risk AI changes"
-  - "Retain evidence artifacts required by this Check, starting with: Shadow/canary eval config +
-    comparison report for the last high-risk cutover"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Require shadow or canary with eval comparison before 100% traffic on high-risk AI cutovers"
+  - "Document numeric (or explicit) promotion criteria in the cutover config"
+  - "Retain last-cutover comparison report under imports/eval-shadow-cutover/"
+  - "Block full cutover (or open a time-boxed waiver with owner and expiry) until this Check passes"
 references:
   - title: "NIST AI RMF — Measure"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -43,13 +75,17 @@ relatedRules:
   - "EVL-M3"
   - "EVL-R1"
   - "EVL-R2"
+  - "CHG-M1"
+  - "PRM-R3"
 tags:
   - "evaluation"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "shadow"
+  - "canary"
+  - "cutover"
 applicability:
-  technologies:
-    - "cicd"
+  technologies: []
   minCriticality: 3
   requiredFromLevel: 5
 status: "active"

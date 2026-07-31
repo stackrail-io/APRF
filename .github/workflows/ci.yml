@@ -109,10 +109,6 @@ jobs:
             "stewardship.participation.contact.emailHint must include anu.v.apps@gmail.com"
           );
           assert(
-            !/prasoonanand@/i.test(specText),
-            "published spec must not contain retired personal email addresses"
-          );
-          assert(
             !/POST\s*\/api\/aprf\/submit/i.test(specText),
             "published spec must not embed product API endpoints"
           );

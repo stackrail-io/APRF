@@ -430,7 +430,9 @@ export const agentRaciOwnershipCollector: Collector = {
       },
     ];
 
-    for (const r of [...raciRefs.slice(0, 4), ...roleRefs.slice(0, 2)]) {
+    for (const r of [
+      ...new Set([...raciRefs.slice(0, 4), ...roleRefs.slice(0, 2)]),
+    ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,
         class: "docs",

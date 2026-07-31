@@ -532,10 +532,12 @@ export const ragCorpusGovernanceCollector: Collector = {
     ];
 
     for (const r of [
-      ...corpusRefs.slice(0, 2),
-      ...ownerRefs.slice(0, 2),
-      ...versionRefs.slice(0, 1),
-      ...cadenceRefs.slice(0, 1),
+      ...new Set([
+        ...corpusRefs.slice(0, 2),
+        ...ownerRefs.slice(0, 2),
+        ...versionRefs.slice(0, 1),
+        ...cadenceRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

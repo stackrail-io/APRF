@@ -430,9 +430,11 @@ export const aiCostAlertsCollector: Collector = {
     ];
 
     for (const r of [
-      ...budgetBurnRefs.slice(0, 3),
-      ...anomalyRefs.slice(0, 3),
-      ...dashboardRefs.slice(0, 2),
+      ...new Set([
+        ...budgetBurnRefs.slice(0, 3),
+        ...anomalyRefs.slice(0, 3),
+        ...dashboardRefs.slice(0, 2),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

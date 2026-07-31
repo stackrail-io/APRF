@@ -1,36 +1,62 @@
 id: "EVL-M2"
 category: "evaluation"
 title: "Release gates must enforce numeric minimum thresholds for quality and safety metrics"
-description: "Release gates shall enforce numeric minimum thresholds for quality and safety metrics"
-whyItMatters: "Release gates shall enforce numeric minimum thresholds for quality and safety metrics
-  Failing this leaves a production gap against: Each critical journey has ≥1 quality and ≥1 safety
-  metric with numeric threshold; failing gate blocks deploy in CI"
+description: >
+  Production release gates shall require numeric minimum thresholds for at
+  least one quality metric and one safety metric on every critical journey,
+  and shall block deploy in CI when those thresholds are not met.
+whyItMatters: >
+  Eval suites that only report scores without hard thresholds become theater:
+  teams ship when “mostly fine.” Numeric quality and safety floors that block
+  deploy turn offline measurement into a release control—and stop silent
+  regressions from reaching customers.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "Each critical journey has ≥1 quality and ≥1 safety metric with numeric threshold;
-  failing gate blocks deploy in CI"
+passCondition: >
+  Each critical journey has ≥1 quality and ≥1 safety metric with numeric
+  threshold; failing gate blocks deploy in CI (gate evidence measuredAt ≤90
+  days).
 evidenceRequired:
-  - "Gate config with metric names and thresholds + CI reports"
+  - "Gate config listing metric names and numeric thresholds per critical journey (quality + safety)"
+  - "CI evidence that a failing gate blocks deploy (or equivalent required check)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-eval-release-gates"
+      params:
+        hint: >
+          Discover release-gate configs with numeric quality and safety
+          thresholds per critical journey, and CI jobs that block deploy on
+          failure.
     - id: "manual-attest"
       params:
-        hint: "Gate config with metric names and thresholds + CI reports"
-manualVerification: "For this Check (Release gates must enforce numeric minimum thresholds for
-  quality and safety metrics): inspect current evidence for [Gate config with metric names and
-  thresholds + CI reports] and confirm the pass condition holds — Each critical journey has ≥1
-  quality and ≥1 safety metric with numeric threshold; failing gate blocks deploy in CI"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove gates, attest each critical journey has
+          ≥1 quality and ≥1 safety numeric threshold and that a failing gate
+          blocks deploy in CI (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm critical customer/partner journeys exist. If none, score
+  NOT_APPLICABLE. 2) Open the release-gate config; for each critical journey
+  confirm ≥1 quality metric and ≥1 safety metric with numeric thresholds. 3)
+  Confirm CI (or equivalent) treats gate failure as blocking for deploy/merge.
+  4) PASS only if thresholds + block-on-fail hold with measuredAt ≤90 days.
+  Dashboards without thresholds do not satisfy. Advisory “warn only” gates that
+  never block deploy do not satisfy. EVL-M1 suite presence without numeric
+  gates does not satisfy.
+falsePositiveGuidance: >
+  Do not pass latency/cost SLOs as quality/safety eval gates unless the gate
+  config explicitly names them as journey quality/safety metrics. Do not pass
+  a single org-wide threshold that is not mapped to each critical journey. Do
+  not pass non-blocking notifications as deploy gates. Do not pass evidence
+  older than 90 days as current. Sibling Checks (EVL-M1 suites, SAF-M* policy)
+  do not substitute for numeric release thresholds. Named exceptions need owner
+  and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Release gates must enforce numeric minimum thresholds for quality
-    and safety metrics"
-  - "Retain evidence artifacts required by this Check, starting with: Gate config with metric names
-    and thresholds + CI reports"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Define ≥1 quality and ≥1 safety numeric threshold per critical journey in the release gate"
+  - "Make the gate a required CI check that blocks deploy on failure"
+  - "Retain gate config + blocking CI proof under imports/eval-release-gates/"
+  - "Time-box threshold waivers with owner and expiry ≤90 days"
 references:
   - title: "NIST AI RMF — Measure"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -42,13 +68,16 @@ relatedRules:
   - "EVL-M4"
   - "EVL-R1"
   - "EVL-R2"
+  - "SAF-M2"
+  - "CHG-M1"
 tags:
   - "evaluation"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "release-gate"
+  - "thresholds"
 applicability:
-  technologies:
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

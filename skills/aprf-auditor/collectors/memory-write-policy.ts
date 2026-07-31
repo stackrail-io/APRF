@@ -394,9 +394,11 @@ export const memoryWritePolicyCollector: Collector = {
     ];
 
     for (const r of [
-      ...policyRefs.slice(0, 2),
-      ...enforceRefs.slice(0, 1),
-      ...denyRefs.slice(0, 1),
+      ...new Set([
+        ...policyRefs.slice(0, 2),
+        ...enforceRefs.slice(0, 1),
+        ...denyRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

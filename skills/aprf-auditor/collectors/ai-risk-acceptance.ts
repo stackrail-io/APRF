@@ -426,9 +426,11 @@ export const aiRiskAcceptanceCollector: Collector = {
     ];
 
     for (const r of [
-      ...registerRefs.slice(0, 2),
-      ...ownerExpiryRefs.slice(0, 1),
-      ...gapRefs.slice(0, 1),
+      ...new Set([
+        ...registerRefs.slice(0, 2),
+        ...ownerExpiryRefs.slice(0, 1),
+        ...gapRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

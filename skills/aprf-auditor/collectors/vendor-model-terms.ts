@@ -505,9 +505,11 @@ export const vendorModelTermsCollector: Collector = {
     ];
 
     for (const r of [
-      ...termsRefs.slice(0, 2),
-      ...trainingRefs.slice(0, 1),
-      ...retentionRefs.slice(0, 1),
+      ...new Set([
+        ...termsRefs.slice(0, 2),
+        ...trainingRefs.slice(0, 1),
+        ...retentionRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

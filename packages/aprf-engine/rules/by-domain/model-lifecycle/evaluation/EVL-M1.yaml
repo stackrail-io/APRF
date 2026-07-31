@@ -1,39 +1,62 @@
 id: "EVL-M1"
 category: "evaluation"
 title: "Critical customer journeys must have automated offline eval suites on every relevant change"
-description: "Critical customer journeys shall have automated offline eval suites on every relevant change"
-whyItMatters: "Critical customer journeys shall have automated offline eval suites on every relevant
-  change Failing this leaves a production gap against: 100% of journeys marked critical have a
-  versioned offline suite; 100% of relevant production changes in last 30 days triggered the suite
-  (or documented waiver ≤ 14 days)"
+description: >
+  Every journey marked critical shall have a versioned offline eval suite, and
+  every relevant production change in the last 30 days shall have triggered
+  that suite—or carry a documented waiver ≤14 days.
+whyItMatters: >
+  Shipping prompt, model, or tool changes without offline evals on critical
+  journeys turns production into the test environment. Silent quality and
+  safety regressions land on customers first. Versioned suites wired to
+  relevant changes—with short, owned waivers only—make eval a release
+  control, not an optional homework assignment.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "100% of journeys marked critical have a versioned offline suite; 100% of relevant
-  production changes in last 30 days triggered the suite (or documented waiver ≤ 14 days)"
+passCondition: >
+  100% of journeys marked critical have a versioned offline suite; 100% of
+  relevant production changes in the last 30 days triggered the suite (or
+  documented waiver ≤14 days) (suite/CI evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Eval suite registry mapped to journeys + CI runs on prompt/model/tool changes"
+  - "Eval suite registry mapping critical journeys to versioned offline suites"
+  - "CI (or equivalent) runs on prompt/model/tool changes for the last 30 days, or waivers ≤14 days"
 detection:
-  capability: "automated"
+  capability: "hybrid"
   detectors:
     - id: "repo-eval-suite-present"
-      params: {}
+      params:
+        hint: >
+          Discover versioned offline eval suites mapped to critical journeys
+          and CI/workflow triggers on prompt/model/tool changes.
     - id: "manual-attest"
       params:
-        hint: "Eval suite registry mapped to journeys + CI runs on prompt/model/tool changes"
-manualVerification: "For this Check (Critical customer journeys must have automated offline eval
-  suites on every relevant change): inspect current evidence for [Eval suite registry mapped to
-  journeys + CI runs on prompt/model/tool changes] and confirm the pass condition holds — 100% of
-  journeys marked critical have a versioned offline suite; 100% of relevant production changes in
-  last 30 days triggered the suite (or documented waiver ≤ 14 days)"
-falsePositiveGuidance: "confirm the detector target matches the production path for this Check
-  before waiving. Named exceptions need an owner and expiry ≤90 days."
+        hint: >
+          If automation cannot prove coverage, attest 100% of critical
+          journeys have a versioned offline suite and 100% of relevant
+          production changes in the last 30 days triggered the suite or have
+          a waiver ≤14 days (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the system has customer (or partner) journeys marked critical.
+  If none, score NOT_APPLICABLE. 2) Open the eval suite registry; confirm each
+  critical journey maps to a versioned offline suite. 3) Review relevant
+  production changes in the last 30 days (prompt/model/tool/config that affects
+  those journeys). 4) Confirm each change triggered the suite in CI (or
+  equivalent) or has a documented waiver ≤14 days with owner. 5) PASS only if
+  registry coverage + change trigger/waiver hold with measuredAt ≤90 days.
+  Ad-hoc notebooks without versioning do not satisfy. Suites that never run on
+  change do not satisfy.
+falsePositiveGuidance: >
+  Do not pass a single shared “smoke prompt” as coverage for every critical
+  journey. Do not pass unit tests that never exercise model/prompt behavior.
+  Do not pass DX-R2 local inner-loop evals as a substitute for CI-triggered
+  suites on production-relevant changes. Do not pass waivers older than 14
+  days as current. Do not pass evidence older than 90 days as current. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Critical customer journeys must have automated offline eval
-    suites on every relevant change"
-  - "Retain evidence artifacts required by this Check, starting with: Eval suite registry mapped to
-    journeys + CI runs on prompt/model/tool changes"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
+  - "Register every critical journey to a versioned offline eval suite (promptfoo or equivalent)"
+  - "Trigger suites on prompt/model/tool changes in CI; fail closed when unset"
+  - "Limit waivers to ≤14 days with named owner; retain under imports/eval-suite-ci/"
   - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
 references:
   - title: "NIST AI RMF — Measure"
@@ -46,13 +69,16 @@ relatedRules:
   - "EVL-M4"
   - "EVL-R1"
   - "EVL-R2"
+  - "CHG-M1"
+  - "DX-R2"
 tags:
   - "evaluation"
   - "mandatory"
-  - "automated"
+  - "hybrid"
+  - "offline-eval"
+  - "ci-gate"
 applicability:
-  technologies:
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

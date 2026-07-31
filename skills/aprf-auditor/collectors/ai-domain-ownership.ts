@@ -450,9 +450,11 @@ export const aiDomainOwnershipCollector: Collector = {
     ];
 
     for (const r of [
-      ...inventoryRefs.slice(0, 2),
-      ...domainRefs.slice(0, 1),
-      ...ownershipRefs.slice(0, 1),
+      ...new Set([
+        ...inventoryRefs.slice(0, 2),
+        ...domainRefs.slice(0, 1),
+        ...ownershipRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

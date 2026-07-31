@@ -419,9 +419,11 @@ export const aiControlPlaneAuditLogsCollector: Collector = {
     ];
 
     for (const r of [
-      ...retentionRefs.slice(0, 2),
-      ...auditRefs.slice(0, 1),
-      ...smokeRefs.slice(0, 1),
+      ...new Set([
+        ...retentionRefs.slice(0, 2),
+        ...auditRefs.slice(0, 1),
+        ...smokeRefs.slice(0, 1),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,

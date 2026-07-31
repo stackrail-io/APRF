@@ -438,9 +438,11 @@ export const feedbackPromotionGovernanceCollector: Collector = {
     ];
 
     for (const r of [
-      ...pathRefs.slice(0, 2),
-      ...gateRefs.slice(0, 2),
-      ...denyRefs.slice(0, 2),
+      ...new Set([
+        ...pathRefs.slice(0, 2),
+        ...gateRefs.slice(0, 2),
+        ...denyRefs.slice(0, 2),
+      ]),
     ]) {
       nodes.push({
         id: `${PLUGIN_ID}:ref:${r}`,
