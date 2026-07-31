@@ -170,6 +170,30 @@ EVL-R2 human preference / expert-review sampling cadence:
   npm run aprf:eval-human-review -- --target <app> --out <app>/aprf-assessment
   # PASS needs cadenceAndSampleSizeDefined + lastSampleAgeDays≤90 + productionLikeCoverage + disagreementsMissingAdjudication=0 under imports/eval-human-review/
 
+MOD-M1 pinned model IDs (no floating aliases):
+  npm run aprf:model-pin-config -- --target <app> --out <app>/aprf-assessment
+  # PASS needs floatingAliasCountOnCriticalPaths=0 + criticalPathsMissingPinnedModelId=0 + lintOrCiRejectsLatest under imports/model-pin-config/
+
+MOD-R4 model inventory (owner / residency / intended use):
+  npm run aprf:model-inventory -- --target <app> --out <app>/aprf-assessment
+  # PASS needs incompleteInventoryRows=0 under imports/model-inventory/
+
+MOD-M2 model promotion requires eval evidence:
+  npm run aprf:model-promotion-eval -- --target <app> --out <app>/aprf-assessment
+  # PASS needs promotionsMissingEvalArtifact=0 + promoteWithoutEvalBlocked under imports/model-promotion-eval/
+
+MOD-R1 model/embedding deprecation and sunset:
+  npm run aprf:model-deprecation-sunset -- --target <app> --out <app>/aprf-assessment
+  # PASS needs policyDefinesNoticeAndForcedSunset + supersededWithSunsetDateCount≥1 + undocumentedPinsPastSunset=0 under imports/model-deprecation-sunset/
+
+MOD-R2 per-workload model capability allowlists:
+  npm run aprf:model-capability-allowlist -- --target <app> --out <app>/aprf-assessment
+  # PASS needs workloadsMissingCapabilityAllowlist=0 + deniedCapabilityAttemptRecorded under imports/model-capability-allowlist/
+
+MOD-R3 license/provenance review for open-weight and fine-tuned models:
+  npm run aprf:model-license-provenance -- --target <app> --out <app>/aprf-assessment
+  # PASS needs openWeightOrFineTunedMissingReview=0 + reviewsOlderThan12Months=0 + blockedLicensesMissingException=0 under imports/model-license-provenance/
+
 COST-M2 AI cost budget-burn / anomaly alerts:
   npm run aprf:cost-alerts -- --target <app> --out <app>/aprf-assessment
   # PASS needs notify proof under imports/ai-cost-alerts/

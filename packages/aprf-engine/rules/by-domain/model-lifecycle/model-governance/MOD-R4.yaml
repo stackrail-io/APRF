@@ -1,0 +1,79 @@
+id: "MOD-R4"
+category: "model-governance"
+title: "Production systems should maintain a model inventory with owners, data residency, and intended use"
+description: >
+  Production AI systems should keep a queryable model inventory (or registry)
+  in which every production model records a named owner, data-residency
+  constraint, and intended use—with zero incomplete rows on those fields.
+whyItMatters: >
+  Without an inventory, pins and eval gates float over an unknown fleet:
+  nobody owns sunset, residency, or whether a model is still meant for that
+  workload. Completeness on owner, residency, and intended use turns the
+  registry into an operable control surface—not a stale spreadsheet.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  100% of production models have owner, residency, and intended-use fields;
+  inventory query returns 0 incomplete rows (inventory evidence measuredAt
+  ≤90 days).
+evidenceRequired:
+  - "Model inventory / registry export listing production models"
+  - "Query or attestation showing 0 incomplete owner/residency/intended-use rows"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-model-inventory"
+      params:
+        hint: >
+          Discover a model inventory or registry with owner, residency, and
+          intended-use fields for production models.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove completeness, attest 100% of production
+          models have owner, residency, and intended-use fields with 0
+          incomplete rows (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI paths call hosted or self-hosted models. If none,
+  score NOT_APPLICABLE. 2) Open the model inventory/registry; confirm it lists
+  production models (not only experimental). 3) Confirm each row has named
+  owner, data-residency (or explicit “none/global allowed”), and intended use.
+  4) Run (or review) a completeness query: 0 incomplete rows on those three
+  fields. 5) PASS only if inventory + 0 incomplete rows hold with measuredAt
+  ≤90 days. A pin list without owner/residency/use does not satisfy. MOD-M1
+  pins alone do not satisfy inventory completeness.
+falsePositiveGuidance: >
+  Do not pass a vendor console model list without owner/residency/use fields.
+  Do not pass MOD-M1 pin configs as an inventory. Do not pass incomplete rows
+  waived without owner and expiry ≤90 days. Do not pass evidence older than 90
+  days as current. Named exceptions need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Stand up a model inventory/registry with owner, residency, and intended-use columns"
+  - "Backfill production models; fix incomplete rows to 0"
+  - "Retain inventory export + completeness query under imports/model-inventory/"
+  - "Time-box gaps with owner and expiry ≤90 days"
+references:
+  - title: "NIST AI RMF — Map"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "AWS Well-Architected — Operational Excellence (change management parallels)"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+relatedRules:
+  - "MOD-M1"
+  - "MOD-M2"
+  - "MOD-R1"
+  - "MOD-R2"
+  - "MOD-R3"
+  - "PRI-M3"
+tags:
+  - "model-governance"
+  - "recommended"
+  - "hybrid"
+  - "model-inventory"
+  - "ownership"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

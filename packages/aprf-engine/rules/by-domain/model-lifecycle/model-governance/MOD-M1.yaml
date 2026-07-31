@@ -1,40 +1,58 @@
 id: "MOD-M1"
 category: "model-governance"
-title: "Production must use pinned model identifiers; aliases like “latest” are forbidden on
-  critical paths"
-description: "Production shall use pinned model identifiers; aliases like “latest” are forbidden on
-  critical paths"
-whyItMatters: "Production shall use pinned model identifiers; aliases like “latest” are forbidden on
-  critical paths Failing this leaves a production gap against: 0 “latest”/floating aliases on
-  critical production paths in config lint; 100% of critical paths reference immutable model IDs"
+title: "Production must use pinned model identifiers; aliases like “latest” are forbidden on critical paths"
+description: >
+  Critical production AI paths shall reference immutable, pinned model
+  identifiers, and shall not use floating aliases such as “latest” (or
+  equivalent provider defaults that can change without a deploy).
+whyItMatters: >
+  Floating aliases silently swap models under you: quality, safety, cost, and
+  latency move without a release. Pinning turns model identity into a deliberate
+  change—reviewable, revertible, and tied to eval gates—instead of a provider
+  surprise.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "0 “latest”/floating aliases on critical production paths in config lint; 100% of
-  critical paths reference immutable model IDs"
+passCondition: >
+  0 “latest”/floating aliases on critical production paths; 100% of those
+  paths reference immutable model IDs; lint or CI rejects floating aliases
+  (pin evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Production model pin config + lint/CI rule rejecting “latest” aliases"
+  - "Production model pin config (or registry) listing immutable model IDs on critical paths"
+  - "Lint or CI rule that rejects “latest”/floating aliases on those paths"
 detection:
-  capability: "automated"
+  capability: "hybrid"
   detectors:
     - id: "repo-model-pin-config"
-      params: {}
+      params:
+        hint: >
+          Discover pinned model IDs on critical paths and lint/CI rules that
+          reject “latest” or other floating aliases.
     - id: "manual-attest"
       params:
-        hint: "Production model pin config + lint/CI rule rejecting “latest” aliases"
-manualVerification: "For this Check (Production must use pinned model identifiers; aliases like
-  “latest” are forbidden on critical paths): inspect current evidence for [Production model pin
-  config + lint/CI rule rejecting “latest” aliases] and confirm the pass condition holds — 0
-  “latest”/floating aliases on critical production paths in config lint; 100% of critical paths
-  reference immutable model IDs"
-falsePositiveGuidance: "(Model Governance): confirm the detector target matches the production path
-  for this Check before waiving. Named exceptions need an owner and expiry ≤90 days."
+        hint: >
+          If automation cannot prove pins, attest 0 floating aliases on
+          critical production paths, 100% of those paths use immutable model
+          IDs, and lint/CI rejects floating aliases (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI paths call hosted or self-hosted models. If none,
+  score NOT_APPLICABLE. 2) Identify critical paths (customer-facing or
+  high-impact workloads). 3) Open model config/registry; confirm each critical
+  path uses an immutable ID (versioned snapshot, dated revision, or digest)—not
+  “latest”, “current”, or unversioned family aliases. 4) Confirm lint or CI
+  fails closed on floating aliases for those paths. 5) PASS only if pin coverage
+  + zero floating aliases + reject rule hold with measuredAt ≤90 days.
+  Dev-only configs with “latest” do not fail production paths. Documented
+  waivers need owner and expiry ≤90 days.
+falsePositiveGuidance: >
+  Do not pass a pin in docs while runtime still resolves “latest”. Do not pass
+  provider console defaults as pinned IDs. Do not pass MOD-R4 inventory alone
+  without pin enforcement. Do not pass evidence older than 90 days as current.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Production must use pinned model identifiers; aliases like
-    “latest” are forbidden on critical paths"
-  - "Retain evidence artifacts required by this Check, starting with: Production model pin config +
-    lint/CI rule rejecting “latest” aliases"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
+  - "Replace “latest”/floating aliases with immutable model IDs on every critical path"
+  - "Add lint or CI that rejects floating aliases on production model configs"
+  - "Retain pin config + reject-rule proof under imports/model-pin-config/"
   - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
 references:
   - title: "NIST AI RMF — Map"
@@ -43,19 +61,20 @@ references:
     url: "https://aws.amazon.com/architecture/well-architected/"
 relatedRules:
   - "MOD-M2"
-  - "MOD-M3"
+  - "MOD-R4"
   - "MOD-R1"
   - "MOD-R2"
   - "MOD-R3"
+  - "EVL-M1"
+  - "CHG-M1"
 tags:
   - "model-governance"
   - "mandatory"
-  - "automated"
+  - "hybrid"
+  - "model-pin"
+  - "immutable-id"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

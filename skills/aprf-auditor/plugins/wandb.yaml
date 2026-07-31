@@ -10,5 +10,5 @@ emits:
   nodeClass: runtime
   refPattern: "imports/wandb/*"
   signals: [experiment, eval, model-version]
-mapsToChecks: [MOD-M1, MOD-M2, EVL-M1]
+mapsToChecks: [MOD-M1, MOD-R4, EVL-M1]
 whenUnavailable: "Ask for export"

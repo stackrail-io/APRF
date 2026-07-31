@@ -1,0 +1,25 @@
+id: model-pin-config
+title: Pinned model IDs; no floating aliases (MOD-M1)
+version: "0.2.0"
+executor: collectors/model-pin-config.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-model-pin-config]
+inputs:
+  - "Target repo (model configs, provider IDs, lint/CI)"
+  - "Optional suite: aprf-assessment/imports/model-pin-config/*.{json}"
+collect:
+  - "Detect pinned model IDs, floating aliases, and reject rules"
+  - "Ingest coverage; write model-pin-config-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/model-pin-config/*"
+  signals: [model-pin-config, mod-m1, repo-model-pin-config]
+mapsToChecks: [MOD-M1]
+whenUnavailable: >
+  Pin signals alone are PARTIAL. MOD-M1 PASS needs
+  floatingAliasCountOnCriticalPaths=0, criticalPathsMissingPinnedModelId=0,
+  lintOrCiRejectsLatest, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline pin heuristics + optional imported JSON.

@@ -1,0 +1,24 @@
+id: model-inventory
+title: Model inventory with owners, residency, intended use (MOD-R4)
+version: "0.2.0"
+executor: collectors/model-inventory.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-model-inventory]
+inputs:
+  - "Target repo (model inventory/registry docs and configs)"
+  - "Optional suite: aprf-assessment/imports/model-inventory/*.{json}"
+collect:
+  - "Detect inventory, owner, residency, and intended-use signals"
+  - "Ingest completeness; write model-inventory-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/model-inventory/*"
+  signals: [model-inventory, mod-r4, repo-model-inventory]
+mapsToChecks: [MOD-R4]
+whenUnavailable: >
+  Inventory signals alone are PARTIAL. MOD-R4 PASS needs
+  incompleteInventoryRows=0, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline inventory heuristics + optional imported JSON.

@@ -75,6 +75,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **eval-shadow-cutover** | `eval-shadow-cutover.ts` | shadow/canary before full cutover (EVL-M4) | `imports/eval-shadow-cutover/` | — |
 | **eval-track-catalog** | `eval-track-catalog.ts` | regression/adversarial/distribution-shift tracks (EVL-R1) | `imports/eval-track-catalog/` | — |
 | **eval-human-review** | `eval-human-review.ts` | human preference / expert-review sampling (EVL-R2) | `imports/eval-human-review/` | — |
+| **model-pin-config** | `model-pin-config.ts` | pinned model IDs; no floating aliases (MOD-M1) | `imports/model-pin-config/` | — |
+| **model-inventory** | `model-inventory.ts` | model inventory with owner/residency/use (MOD-R4) | `imports/model-inventory/` | — |
+| **model-promotion-eval** | `model-promotion-eval.ts` | eval evidence required before model promotion (MOD-M2) | `imports/model-promotion-eval/` | — |
+| **model-deprecation-sunset** | `model-deprecation-sunset.ts` | deprecation/sunset policy for models+embeddings (MOD-R1) | `imports/model-deprecation-sunset/` | — |
+| **model-capability-allowlist** | `model-capability-allowlist.ts` | per-workload model capability allowlists (MOD-R2) | `imports/model-capability-allowlist/` | — |
+| **model-license-provenance** | `model-license-provenance.ts` | license+provenance review for open-weight/fine-tuned (MOD-R3) | `imports/model-license-provenance/` | — |
 | **ai-cost-alerts** | `ai-cost-alerts.ts` | budget-burn + anomaly alerts | `imports/ai-cost-alerts/` | — |
 | **ai-retry-amplification** | `ai-retry-amplification.ts` | retry/loop cost bounds | `imports/ai-retry-amplification/` | — |
 | **ai-prompt-cache** | `ai-prompt-cache.ts` | prompt cache + hit-rate | `imports/ai-prompt-cache/` | — |

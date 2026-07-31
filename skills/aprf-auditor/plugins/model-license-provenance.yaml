@@ -1,0 +1,25 @@
+id: model-license-provenance
+title: License and provenance review for open-weight/fine-tuned models (MOD-R3)
+version: "0.2.0"
+executor: collectors/model-license-provenance.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-model-license-provenance]
+inputs:
+  - "Target repo (model cards, license reviews, open-weight/fine-tune configs)"
+  - "Optional suite: aprf-assessment/imports/model-license-provenance/*.{json}"
+collect:
+  - "Detect open-weight/fine-tune, license, provenance, and review signals"
+  - "Ingest coverage; write model-license-provenance-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/model-license-provenance/*"
+  signals: [model-license-provenance, mod-r3, repo-model-license-provenance]
+mapsToChecks: [MOD-R3]
+whenUnavailable: >
+  Review signals alone are PARTIAL. MOD-R3 PASS needs
+  openWeightOrFineTunedMissingReview=0, reviewsOlderThan12Months=0,
+  blockedLicensesMissingException=0, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline license/provenance heuristics + optional imported JSON.

@@ -38,6 +38,12 @@ import { evalOnlineSignalsCollector } from "./eval-online-signals.ts";
 import { evalShadowCutoverCollector } from "./eval-shadow-cutover.ts";
 import { evalTrackCatalogCollector } from "./eval-track-catalog.ts";
 import { evalHumanReviewCollector } from "./eval-human-review.ts";
+import { modelPinConfigCollector } from "./model-pin-config.ts";
+import { modelInventoryCollector } from "./model-inventory.ts";
+import { modelPromotionEvalCollector } from "./model-promotion-eval.ts";
+import { modelDeprecationSunsetCollector } from "./model-deprecation-sunset.ts";
+import { modelCapabilityAllowlistCollector } from "./model-capability-allowlist.ts";
+import { modelLicenseProvenanceCollector } from "./model-license-provenance.ts";
 import { aiCostAlertsCollector } from "./ai-cost-alerts.ts";
 import { aiRetryAmplificationCollector } from "./ai-retry-amplification.ts";
 import { aiPromptCacheCollector } from "./ai-prompt-cache.ts";
@@ -124,6 +130,12 @@ export const COLLECTORS: Collector[] = [
   evalShadowCutoverCollector,
   evalTrackCatalogCollector,
   evalHumanReviewCollector,
+  modelPinConfigCollector,
+  modelInventoryCollector,
+  modelPromotionEvalCollector,
+  modelDeprecationSunsetCollector,
+  modelCapabilityAllowlistCollector,
+  modelLicenseProvenanceCollector,
   aiCostAlertsCollector,
   aiRetryAmplificationCollector,
   aiPromptCacheCollector,

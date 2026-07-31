@@ -1,38 +1,61 @@
 id: "MOD-R2"
 category: "model-governance"
 title: "Production systems should have capability allowlists (e.g., code execution, vision) per workload"
-description: "Capability allowlists (e.g., code execution, vision) per workload"
-whyItMatters: "Capability allowlists (e.g., code execution, vision) per workload Failing this leaves
-  a production gap against: Each production workload has an explicit capability allowlist; a denied
-  capability attempt is recorded in test or prod within 90 days"
+description: >
+  Each production AI workload should declare an explicit allowlist of model
+  capabilities it may use (for example code execution, vision, browsing, or
+  tool-calling modes), and denied capability attempts should be recorded in
+  test or production within 90 days.
+whyItMatters: >
+  Models ship with powerful defaults—code execution, vision, browsing—that
+  many workloads never need. Without per-workload allowlists, a pin change or
+  provider default can silently expand blast radius. Explicit allowlists plus
+  deny evidence prove capabilities are constrained and that enforcement is
+  actually exercised.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Each production workload has an explicit capability allowlist; a denied capability
-  attempt is recorded in test or prod within 90 days"
+passCondition: >
+  Each production workload has an explicit capability allowlist; ≥1 denied
+  capability attempt is recorded in test or prod within 90 days (allowlist
+  evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Per-workload capability allowlist config (code execution, vision, browsing, etc.) + deny logs"
+  - "Per-workload capability allowlist config (code execution, vision, browsing, etc.)"
+  - "Deny log or test fixture showing a denied capability attempt within 90 days"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-model-capability-allowlist"
+      params:
+        hint: >
+          Discover per-workload model capability allowlists (code execution,
+          vision, browsing, etc.) and deny logs or tests for blocked attempts.
     - id: "manual-attest"
       params:
-        hint: "Per-workload capability allowlist config (code execution, vision, browsing, etc.) + deny
-          logs"
-manualVerification: "For this Check (MOD: Capability allowlists (e.g., code execution, vision) per
-  workload): inspect current evidence for [Per-workload capability allowlist config (code execution,
-  vision, browsing, etc.) + deny logs] and confirm the pass condition holds — Each production
-  workload has an explicit capability allowlist; a denied capability attempt is recorded in test or
-  prod within 90 days"
-falsePositiveGuidance: "(Model Governance): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest every production workload
+          has an explicit capability allowlist and ≥1 denied capability attempt
+          was recorded in test or prod within 90 days (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI workloads invoke models with optional capabilities
+  (vision, code execution, browsing, tool modes, etc.). If models are text-only
+  with no optional capabilities, score NOT_APPLICABLE. 2) Open per-workload
+  allowlist config; confirm each production workload lists allowed capabilities
+  explicitly (deny-by-default). 3) Review deny logs or test fixtures; confirm
+  ≥1 denied capability attempt within 90 days. 4) PASS only if full workload
+  coverage + deny evidence hold with measuredAt ≤90 days. TOL tool allowlists
+  alone do not satisfy model capability allowlists. A global “all capabilities
+  on” default does not satisfy.
+falsePositiveGuidance: >
+  Do not pass provider feature flags without per-workload binding. Do not pass
+  prompt instructions (“do not use vision”) as an allowlist. Do not pass TOL-M*
+  tool permission boundaries as a substitute. Do not pass evidence older than
+  90 days as current. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Capability allowlists (e.g., code execution, vision)
-    per workload"
-  - "Retain evidence artifacts required by this Check, starting with: Per-workload capability
-    allowlist config (code execution, vision, browsing, etc.) + deny logs"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Define per-workload capability allowlists (code execution, vision, browsing, etc.) deny-by-default"
+  - "Record denied capability attempts in test or prod; retain under imports/model-capability-allowlist/"
+  - "Bind allowlists at the gateway or model client—not only in prompts"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "NIST AI RMF — Map"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -41,18 +64,19 @@ references:
 relatedRules:
   - "MOD-M1"
   - "MOD-M2"
-  - "MOD-M3"
   - "MOD-R1"
   - "MOD-R3"
+  - "MOD-R4"
+  - "TOL-M1"
+  - "TOL-M2"
 tags:
   - "model-governance"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "capability-allowlist"
+  - "least-privilege"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

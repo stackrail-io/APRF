@@ -1,37 +1,63 @@
 id: "MOD-R1"
 category: "model-governance"
 title: "Production systems should have deprecation and sunset policy for models and embeddings"
-description: "Deprecation and sunset policy for models and embeddings"
-whyItMatters: "Deprecation and sunset policy for models and embeddings Failing this leaves a
-  production gap against: Policy defines notice period and forced-sunset rules; ≥1 superseded
-  production model/embedding has a sunset date in the registry; no undocumented pins past sunset
-  without exception"
+description: >
+  Production systems should publish a deprecation and sunset policy for models
+  and embeddings that defines notice periods and forced-sunset rules, record
+  sunset dates for superseded production pins in the registry, and keep
+  undocumented pins past sunset at zero (exceptions time-boxed).
+whyItMatters: >
+  Providers retire models; embeddings drift; superseded pins linger until an
+  outage. Without notice periods, forced-sunset rules, and dated registry
+  entries, teams discover deprecation in production. Policy plus registry
+  sunset dates—and zero undocumented post-sunset pins—turn retirement into a
+  planned change, not an incident.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Policy defines notice period and forced-sunset rules; ≥1 superseded production
-  model/embedding has a sunset date in the registry; no undocumented pins past sunset without
-  exception"
+passCondition: >
+  Policy defines notice period and forced-sunset rules; ≥1 superseded
+  production model/embedding has a sunset date in the registry; undocumented
+  pins past sunset = 0 without exception (deprecation evidence measuredAt
+  ≤90 days).
 evidenceRequired:
-  - "Model/embedding deprecation and sunset policy + registry entries showing sunset dates for
-    superseded pins"
+  - "Model/embedding deprecation and sunset policy (notice period + forced-sunset rules)"
+  - "Registry export showing sunset dates for superseded pins; query of undocumented pins past sunset = 0"
 detection:
-  capability: "manual"
-  detectors: []
-manualVerification: "For this Check (Deprecation and sunset policy for models and embeddings):
-  inspect current evidence for [Model/embedding deprecation and sunset policy + registry entries
-  showing sunset dates for superseded pins] and confirm the pass condition holds — Policy defines
-  notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date
-  in the registry; no undocumented pins past sunset without exception"
-falsePositiveGuidance: "(Model Governance): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+  capability: "hybrid"
+  detectors:
+    - id: "repo-model-deprecation-sunset"
+      params:
+        hint: >
+          Discover deprecation/sunset policy for models and embeddings, registry
+          sunset dates for superseded pins, and enforcement against post-sunset
+          pins.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest policy with notice period
+          and forced-sunset rules, ≥1 superseded pin with a sunset date, and 0
+          undocumented pins past sunset (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production uses hosted or self-hosted models/embeddings that can
+  be superseded. If none, score NOT_APPLICABLE. 2) Open deprecation/sunset
+  policy; confirm notice period and forced-sunset (or equivalent hard-stop)
+  rules. 3) Open registry; confirm ≥1 superseded production model/embedding
+  has a sunset date. 4) Confirm undocumented pins past sunset = 0 (exceptions
+  need owner and expiry ≤90 days). 5) PASS only if policy + ≥1 dated
+  superseded pin + zero undocumented post-sunset pins hold with measuredAt
+  ≤90 days. A vendor blog bookmark is not a policy. MOD-M1 pins alone do not
+  satisfy sunset governance.
+falsePositiveGuidance: >
+  Do not pass a generic “follow vendor EOL” note without notice/forced-sunset
+  rules. Do not pass sunset dates only on unused experimental models. Do not
+  pass MOD-R4 inventory without sunset fields. Do not pass evidence older than
+  90 days as current. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Deprecation and sunset policy for models and
-    embeddings"
-  - "Retain evidence artifacts required by this Check, starting with: Model/embedding deprecation
-    and sunset policy + registry entries showing sunset dates for superseded pins"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish model/embedding deprecation policy with notice period and forced-sunset rules"
+  - "Add sunset_date (or equivalent) on superseded registry pins; clear undocumented post-sunset pins"
+  - "Retain policy + registry export under imports/model-deprecation-sunset/"
+  - "Time-box exceptions with owner and expiry ≤90 days"
 references:
   - title: "NIST AI RMF — Map"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -40,18 +66,18 @@ references:
 relatedRules:
   - "MOD-M1"
   - "MOD-M2"
-  - "MOD-M3"
+  - "MOD-R4"
   - "MOD-R2"
   - "MOD-R3"
+  - "CHG-M1"
 tags:
   - "model-governance"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "deprecation"
+  - "sunset"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

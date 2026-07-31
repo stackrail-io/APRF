@@ -137,7 +137,6 @@ export const LENS_CODING: AprfLens = {
     "SCI-M1",
     "SCI-M3",
     "PRM-M3",
-    "MOD-M2",
     "AUTHZ-M3",
     "DX-M1",
     "DX-M2",

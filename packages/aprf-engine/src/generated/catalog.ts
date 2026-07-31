@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:3c993766cf374a1b37c1981df4111e6600730e2f4955f733f1e7ae3e4e1f526a",
+  "generatedAt": "sha256:b74b195acf1c0ae10d7a62908c2d81ffd2b3bb9f09a5bc9d911d21500189d780",
   "ruleCount": 177,
   "domains": [
     {
@@ -7533,36 +7533,39 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "MOD-M1",
       "category": "model-governance",
       "title": "Production must use pinned model identifiers; aliases like “latest” are forbidden on critical paths",
-      "description": "Production shall use pinned model identifiers; aliases like “latest” are forbidden on critical paths",
-      "whyItMatters": "Production shall use pinned model identifiers; aliases like “latest” are forbidden on critical paths Failing this leaves a production gap against: 0 “latest”/floating aliases on critical production paths in config lint; 100% of critical paths reference immutable model IDs",
+      "description": "Critical production AI paths shall reference immutable, pinned model identifiers, and shall not use floating aliases such as “latest” (or equivalent provider defaults that can change without a deploy).\n",
+      "whyItMatters": "Floating aliases silently swap models under you: quality, safety, cost, and latency move without a release. Pinning turns model identity into a deliberate change—reviewable, revertible, and tied to eval gates—instead of a provider surprise.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "0 “latest”/floating aliases on critical production paths in config lint; 100% of critical paths reference immutable model IDs",
+      "passCondition": "0 “latest”/floating aliases on critical production paths; 100% of those paths reference immutable model IDs; lint or CI rejects floating aliases (pin evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Production model pin config + lint/CI rule rejecting “latest” aliases"
+        "Production model pin config (or registry) listing immutable model IDs on critical paths",
+        "Lint or CI rule that rejects “latest”/floating aliases on those paths"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
             "id": "repo-model-pin-config",
-            "params": {}
+            "params": {
+              "hint": "Discover pinned model IDs on critical paths and lint/CI rules that reject “latest” or other floating aliases.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Production model pin config + lint/CI rule rejecting “latest” aliases"
+              "hint": "If automation cannot prove pins, attest 0 floating aliases on critical production paths, 100% of those paths use immutable model IDs, and lint/CI rejects floating aliases (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Production must use pinned model identifiers; aliases like “latest” are forbidden on critical paths): inspect current evidence for [Production model pin config + lint/CI rule rejecting “latest” aliases] and confirm the pass condition holds — 0 “latest”/floating aliases on critical production paths in config lint; 100% of critical paths reference immutable model IDs",
-      "falsePositiveGuidance": "(Model Governance): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm production AI paths call hosted or self-hosted models. If none, score NOT_APPLICABLE. 2) Identify critical paths (customer-facing or high-impact workloads). 3) Open model config/registry; confirm each critical path uses an immutable ID (versioned snapshot, dated revision, or digest)—not “latest”, “current”, or unversioned family aliases. 4) Confirm lint or CI fails closed on floating aliases for those paths. 5) PASS only if pin coverage + zero floating aliases + reject rule hold with measuredAt ≤90 days. Dev-only configs with “latest” do not fail production paths. Documented waivers need owner and expiry ≤90 days.\n",
+      "falsePositiveGuidance": "Do not pass a pin in docs while runtime still resolves “latest”. Do not pass provider console defaults as pinned IDs. Do not pass MOD-R4 inventory alone without pin enforcement. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Production must use pinned model identifiers; aliases like “latest” are forbidden on critical paths",
-        "Retain evidence artifacts required by this Check, starting with: Production model pin config + lint/CI rule rejecting “latest” aliases",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
+        "Replace “latest”/floating aliases with immutable model IDs on every critical path",
+        "Add lint or CI that rejects floating aliases on production model configs",
+        "Retain pin config + reject-rule proof under imports/model-pin-config/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
@@ -7577,22 +7580,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "relatedRules": [
         "MOD-M2",
-        "MOD-M3",
+        "MOD-R4",
         "MOD-R1",
         "MOD-R2",
-        "MOD-R3"
+        "MOD-R3",
+        "EVL-M1",
+        "CHG-M1"
       ],
       "tags": [
         "model-governance",
         "mandatory",
-        "automated"
+        "hybrid",
+        "model-pin",
+        "immutable-id"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -7602,99 +7605,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "MOD-M2",
       "category": "model-governance",
-      "title": "Model inventory must exist with owners, data residency, and intended use",
-      "description": "Model inventory shall exist with owners, data residency, and intended use",
-      "whyItMatters": "Model inventory shall exist with owners, data residency, and intended use Failing this leaves a production gap against: 100% of production models have owner, residency, and intended-use fields; query returns 0 incomplete rows",
-      "severity": "high",
-      "weight": 3,
-      "gate": "mandatory",
-      "passCondition": "100% of production models have owner, residency, and intended-use fields; query returns 0 incomplete rows",
-      "evidenceRequired": [
-        "Model inventory registry export"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": [
-          {
-            "id": "manual-attest",
-            "params": {
-              "hint": "Model inventory registry export"
-            }
-          }
-        ]
-      },
-      "manualVerification": "For this Check (Model inventory must exist with owners, data residency, and intended use): inspect current evidence for [Model inventory registry export] and confirm the pass condition holds — 100% of production models have owner, residency, and intended-use fields; query returns 0 incomplete rows",
-      "falsePositiveGuidance": "(Model Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: Model inventory must exist with owners, data residency, and intended use",
-        "Retain evidence artifacts required by this Check, starting with: Model inventory registry export",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "NIST AI RMF — Map",
-          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
-        },
-        {
-          "title": "AWS Well-Architected — Operational Excellence (change management parallels)",
-          "url": "https://aws.amazon.com/architecture/well-architected/"
-        }
-      ],
-      "relatedRules": [
-        "MOD-M1",
-        "MOD-M3",
-        "MOD-R1",
-        "MOD-R2",
-        "MOD-R3"
-      ],
-      "tags": [
-        "model-governance",
-        "mandatory",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure"
-        ],
-        "minCriticality": 2,
-        "requiredFromLevel": 3
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "MOD-M3",
-      "category": "model-governance",
       "title": "Model changes must require evaluation evidence before promotion",
-      "description": "Model changes shall require evaluation evidence before promotion",
-      "whyItMatters": "Model changes shall require evaluation evidence before promotion Failing this leaves a production gap against: 100% of production model promotions in last 30 days have linked eval pass artifacts; promote without eval is blocked by gate",
+      "description": "Every production model promotion (version bump, pin change, or registry cutover) shall link a passing eval artifact, and the promotion path shall block promote-without-eval—not rely on informal review alone.\n",
+      "whyItMatters": "Swapping a model pin without linked eval evidence is a silent quality and safety change. Suites that exist on paper but do not gate promotion leave production exposed. Requiring a pass artifact on every promotion—and failing closed when it is missing—ties model identity changes to measured behavior.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production model promotions in last 30 days have linked eval pass artifacts; promote without eval is blocked by gate",
+      "passCondition": "100% of production model promotions in the last 30 days have linked eval pass artifacts; promote-without-eval is blocked by gate (promotion evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Promotion policy + CI/registry requiring eval artifact on model version bumps"
+        "Promotion policy or CI/registry rule requiring an eval pass artifact on model version bumps",
+        "Promotion log (or CI matrix) for the last 30 days showing linked eval pass artifacts; 0 promote-without-eval"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-model-promotion-eval",
+            "params": {
+              "hint": "Discover promotion/CI gates that require eval pass artifacts on model version bumps and evidence that promote-without-eval is blocked.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Promotion policy + CI/registry requiring eval artifact on model version bumps"
+              "hint": "If automation cannot prove coverage, attest 100% of production model promotions in the last 30 days have linked eval pass artifacts and promote-without-eval is blocked (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Model changes must require evaluation evidence before promotion): inspect current evidence for [Promotion policy + CI/registry requiring eval artifact on model version bumps] and confirm the pass condition holds — 100% of production model promotions in last 30 days have linked eval pass artifacts; promote without eval is blocked by gate",
-      "falsePositiveGuidance": "(Model Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production model promotions occur (pin changes, registry cutovers, or version bumps). If none, score NOT_APPLICABLE. 2) Open promotion policy or CI/registry rules; confirm model version bumps require a linked eval pass artifact. 3) Review promotions in the last 30 days; confirm each has a linked pass artifact. 4) Confirm promote-without-eval is blocked (failed/missing gate prevents promotion). 5) PASS only if 100% linkage + blocking gate hold with measuredAt ≤90 days. EVL-M1 journey suites without a model-promotion gate do not satisfy. EVL-M2 threshold configs without promotion linkage do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass ad-hoc notebook evals not linked to the promotion record. Do not pass EVL-M1/EVL-M2 alone without model-promotion gating. Do not pass “required check” labels that are optional or skippable. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Model changes must require evaluation evidence before promotion",
-        "Retain evidence artifacts required by this Check, starting with: Promotion policy + CI/registry requiring eval artifact on model version bumps",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
+        "Require an eval pass artifact on every production model pin/version promotion",
+        "Block promote-without-eval in CI or the model registry",
+        "Retain promotion log + gate proof under imports/model-promotion-eval/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
       ],
       "references": [
@@ -7709,22 +7653,23 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "relatedRules": [
         "MOD-M1",
-        "MOD-M2",
+        "MOD-R4",
         "MOD-R1",
         "MOD-R2",
-        "MOD-R3"
+        "MOD-R3",
+        "EVL-M1",
+        "EVL-M2",
+        "CHG-M1"
       ],
       "tags": [
         "model-governance",
         "mandatory",
-        "manual"
+        "hybrid",
+        "model-promotion",
+        "eval-gate"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -7735,26 +7680,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "MOD-R1",
       "category": "model-governance",
       "title": "Production systems should have deprecation and sunset policy for models and embeddings",
-      "description": "Deprecation and sunset policy for models and embeddings",
-      "whyItMatters": "Deprecation and sunset policy for models and embeddings Failing this leaves a production gap against: Policy defines notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date in the registry; no undocumented pins past sunset without exception",
+      "description": "Production systems should publish a deprecation and sunset policy for models and embeddings that defines notice periods and forced-sunset rules, record sunset dates for superseded production pins in the registry, and keep undocumented pins past sunset at zero (exceptions time-boxed).\n",
+      "whyItMatters": "Providers retire models; embeddings drift; superseded pins linger until an outage. Without notice periods, forced-sunset rules, and dated registry entries, teams discover deprecation in production. Policy plus registry sunset dates—and zero undocumented post-sunset pins—turn retirement into a planned change, not an incident.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Policy defines notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date in the registry; no undocumented pins past sunset without exception",
+      "passCondition": "Policy defines notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date in the registry; undocumented pins past sunset = 0 without exception (deprecation evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Model/embedding deprecation and sunset policy + registry entries showing sunset dates for superseded pins"
+        "Model/embedding deprecation and sunset policy (notice period + forced-sunset rules)",
+        "Registry export showing sunset dates for superseded pins; query of undocumented pins past sunset = 0"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-model-deprecation-sunset",
+            "params": {
+              "hint": "Discover deprecation/sunset policy for models and embeddings, registry sunset dates for superseded pins, and enforcement against post-sunset pins.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest policy with notice period and forced-sunset rules, ≥1 superseded pin with a sunset date, and 0 undocumented pins past sunset (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (Deprecation and sunset policy for models and embeddings): inspect current evidence for [Model/embedding deprecation and sunset policy + registry entries showing sunset dates for superseded pins] and confirm the pass condition holds — Policy defines notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date in the registry; no undocumented pins past sunset without exception",
-      "falsePositiveGuidance": "(Model Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production uses hosted or self-hosted models/embeddings that can be superseded. If none, score NOT_APPLICABLE. 2) Open deprecation/sunset policy; confirm notice period and forced-sunset (or equivalent hard-stop) rules. 3) Open registry; confirm ≥1 superseded production model/embedding has a sunset date. 4) Confirm undocumented pins past sunset = 0 (exceptions need owner and expiry ≤90 days). 5) PASS only if policy + ≥1 dated superseded pin + zero undocumented post-sunset pins hold with measuredAt ≤90 days. A vendor blog bookmark is not a policy. MOD-M1 pins alone do not satisfy sunset governance.\n",
+      "falsePositiveGuidance": "Do not pass a generic “follow vendor EOL” note without notice/forced-sunset rules. Do not pass sunset dates only on unused experimental models. Do not pass MOD-R4 inventory without sunset fields. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Deprecation and sunset policy for models and embeddings",
-        "Retain evidence artifacts required by this Check, starting with: Model/embedding deprecation and sunset policy + registry entries showing sunset dates for superseded pins",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish model/embedding deprecation policy with notice period and forced-sunset rules",
+        "Add sunset_date (or equivalent) on superseded registry pins; clear undocumented post-sunset pins",
+        "Retain policy + registry export under imports/model-deprecation-sunset/",
+        "Time-box exceptions with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -7769,21 +7728,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "MOD-M1",
         "MOD-M2",
-        "MOD-M3",
+        "MOD-R4",
         "MOD-R2",
-        "MOD-R3"
+        "MOD-R3",
+        "CHG-M1"
       ],
       "tags": [
         "model-governance",
         "recommended",
-        "manual"
+        "hybrid",
+        "deprecation",
+        "sunset"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -7794,33 +7752,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "MOD-R2",
       "category": "model-governance",
       "title": "Production systems should have capability allowlists (e.g., code execution, vision) per workload",
-      "description": "Capability allowlists (e.g., code execution, vision) per workload",
-      "whyItMatters": "Capability allowlists (e.g., code execution, vision) per workload Failing this leaves a production gap against: Each production workload has an explicit capability allowlist; a denied capability attempt is recorded in test or prod within 90 days",
+      "description": "Each production AI workload should declare an explicit allowlist of model capabilities it may use (for example code execution, vision, browsing, or tool-calling modes), and denied capability attempts should be recorded in test or production within 90 days.\n",
+      "whyItMatters": "Models ship with powerful defaults—code execution, vision, browsing—that many workloads never need. Without per-workload allowlists, a pin change or provider default can silently expand blast radius. Explicit allowlists plus deny evidence prove capabilities are constrained and that enforcement is actually exercised.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Each production workload has an explicit capability allowlist; a denied capability attempt is recorded in test or prod within 90 days",
+      "passCondition": "Each production workload has an explicit capability allowlist; ≥1 denied capability attempt is recorded in test or prod within 90 days (allowlist evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Per-workload capability allowlist config (code execution, vision, browsing, etc.) + deny logs"
+        "Per-workload capability allowlist config (code execution, vision, browsing, etc.)",
+        "Deny log or test fixture showing a denied capability attempt within 90 days"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-model-capability-allowlist",
+            "params": {
+              "hint": "Discover per-workload model capability allowlists (code execution, vision, browsing, etc.) and deny logs or tests for blocked attempts.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Per-workload capability allowlist config (code execution, vision, browsing, etc.) + deny logs"
+              "hint": "If automation cannot prove coverage, attest every production workload has an explicit capability allowlist and ≥1 denied capability attempt was recorded in test or prod within 90 days (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (MOD: Capability allowlists (e.g., code execution, vision) per workload): inspect current evidence for [Per-workload capability allowlist config (code execution, vision, browsing, etc.) + deny logs] and confirm the pass condition holds — Each production workload has an explicit capability allowlist; a denied capability attempt is recorded in test or prod within 90 days",
-      "falsePositiveGuidance": "(Model Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI workloads invoke models with optional capabilities (vision, code execution, browsing, tool modes, etc.). If models are text-only with no optional capabilities, score NOT_APPLICABLE. 2) Open per-workload allowlist config; confirm each production workload lists allowed capabilities explicitly (deny-by-default). 3) Review deny logs or test fixtures; confirm ≥1 denied capability attempt within 90 days. 4) PASS only if full workload coverage + deny evidence hold with measuredAt ≤90 days. TOL tool allowlists alone do not satisfy model capability allowlists. A global “all capabilities on” default does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass provider feature flags without per-workload binding. Do not pass prompt instructions (“do not use vision”) as an allowlist. Do not pass TOL-M* tool permission boundaries as a substitute. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Capability allowlists (e.g., code execution, vision) per workload",
-        "Retain evidence artifacts required by this Check, starting with: Per-workload capability allowlist config (code execution, vision, browsing, etc.) + deny logs",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Define per-workload capability allowlists (code execution, vision, browsing, etc.) deny-by-default",
+        "Record denied capability attempts in test or prod; retain under imports/model-capability-allowlist/",
+        "Bind allowlists at the gateway or model client—not only in prompts",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -7835,21 +7800,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "MOD-M1",
         "MOD-M2",
-        "MOD-M3",
         "MOD-R1",
-        "MOD-R3"
+        "MOD-R3",
+        "MOD-R4",
+        "TOL-M1",
+        "TOL-M2"
       ],
       "tags": [
         "model-governance",
         "recommended",
-        "manual"
+        "hybrid",
+        "capability-allowlist",
+        "least-privilege"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -7860,26 +7825,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "MOD-R3",
       "category": "model-governance",
       "title": "Production systems should have license and provenance review for open-weight and fine-tuned models",
-      "description": "License and provenance review for open-weight and fine-tuned models",
-      "whyItMatters": "License and provenance review for open-weight and fine-tuned models Failing this leaves a production gap against: 100% of open-weight/fine-tuned production models have a license+provenance review ≤12 months old; blocked licenses have documented exceptions with expiry",
+      "description": "Every open-weight or fine-tuned model in production should have a completed license and provenance review ≤12 months old, and any blocked or restricted licenses should carry a documented exception with owner and expiry.\n",
+      "whyItMatters": "Open-weight and fine-tuned models import license, attribution, and training- data risks that hosted SaaS APIs often abstract away. Without a dated review, teams ship weights under incompatible terms or unknown provenance—and blocked licenses without time-boxed exceptions become silent policy debt.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "100% of open-weight/fine-tuned production models have a license+provenance review ≤12 months old; blocked licenses have documented exceptions with expiry",
+      "passCondition": "100% of open-weight/fine-tuned production models have a license+provenance review ≤12 months old; blocked licenses have documented exceptions with expiry (review evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "License/provenance review checklist + completed reviews for each open-weight or fine-tuned production model"
+        "License/provenance review checklist (or registry fields) for open-weight and fine-tuned models",
+        "Completed reviews ≤12 months old for each such production model; exceptions for blocked licenses with expiry"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-model-license-provenance",
+            "params": {
+              "hint": "Discover license/provenance reviews for open-weight and fine-tuned production models, review freshness, and exceptions for blocked licenses.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest 100% of open-weight/ fine-tuned production models have license+provenance reviews ≤12 months old and blocked licenses have exceptions with expiry (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (License and provenance review for open-weight and fine-tuned models): inspect current evidence for [License/provenance review checklist + completed reviews for each open-weight or fine-tuned production model] and confirm the pass condition holds — 100% of open-weight/fine-tuned production models have a license+provenance review ≤12 months old; blocked licenses have documented exceptions with expiry",
-      "falsePositiveGuidance": "(Model Governance): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production uses open-weight and/or fine-tuned models. If all production models are proprietary hosted APIs with no local/fine-tuned weights, score NOT_APPLICABLE. 2) Open the review checklist or registry; confirm each such model has license and provenance fields reviewed. 3) Confirm every review is ≤12 months old. 4) Confirm blocked/restricted licenses have documented exceptions with owner and expiry. 5) PASS only if 100% coverage + freshness + exception hygiene hold with measuredAt ≤90 days. SCI artifact signature checks alone do not satisfy license review. DG dataset cards alone do not satisfy model license review.\n",
+      "falsePositiveGuidance": "Do not pass a LICENSE file in the app repo as a model-weight review. Do not pass vendor marketing “open” claims without a recorded review date. Do not pass SCI-M* integrity verify as a substitute for license/provenance. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days (or the exception’s stated expiry if shorter).\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: License and provenance review for open-weight and fine-tuned models",
-        "Retain evidence artifacts required by this Check, starting with: License/provenance review checklist + completed reviews for each open-weight or fine-tuned production model",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Add license+provenance review fields for every open-weight/fine-tuned production model",
+        "Re-review models older than 12 months; document exceptions for blocked licenses with expiry",
+        "Retain checklist/registry export under imports/model-license-provenance/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -7894,21 +7873,94 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "MOD-M1",
         "MOD-M2",
-        "MOD-M3",
         "MOD-R1",
-        "MOD-R2"
+        "MOD-R2",
+        "MOD-R4",
+        "SCI-M1",
+        "DG-M2"
       ],
       "tags": [
         "model-governance",
         "recommended",
-        "manual"
+        "hybrid",
+        "license",
+        "provenance",
+        "open-weight"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure"
-        ],
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 4
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "MOD-R4",
+      "category": "model-governance",
+      "title": "Production systems should maintain a model inventory with owners, data residency, and intended use",
+      "description": "Production AI systems should keep a queryable model inventory (or registry) in which every production model records a named owner, data-residency constraint, and intended use—with zero incomplete rows on those fields.\n",
+      "whyItMatters": "Without an inventory, pins and eval gates float over an unknown fleet: nobody owns sunset, residency, or whether a model is still meant for that workload. Completeness on owner, residency, and intended use turns the registry into an operable control surface—not a stale spreadsheet.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "recommended",
+      "passCondition": "100% of production models have owner, residency, and intended-use fields; inventory query returns 0 incomplete rows (inventory evidence measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Model inventory / registry export listing production models",
+        "Query or attestation showing 0 incomplete owner/residency/intended-use rows"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-model-inventory",
+            "params": {
+              "hint": "Discover a model inventory or registry with owner, residency, and intended-use fields for production models.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove completeness, attest 100% of production models have owner, residency, and intended-use fields with 0 incomplete rows (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm production AI paths call hosted or self-hosted models. If none, score NOT_APPLICABLE. 2) Open the model inventory/registry; confirm it lists production models (not only experimental). 3) Confirm each row has named owner, data-residency (or explicit “none/global allowed”), and intended use. 4) Run (or review) a completeness query: 0 incomplete rows on those three fields. 5) PASS only if inventory + 0 incomplete rows hold with measuredAt ≤90 days. A pin list without owner/residency/use does not satisfy. MOD-M1 pins alone do not satisfy inventory completeness.\n",
+      "falsePositiveGuidance": "Do not pass a vendor console model list without owner/residency/use fields. Do not pass MOD-M1 pin configs as an inventory. Do not pass incomplete rows waived without owner and expiry ≤90 days. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Stand up a model inventory/registry with owner, residency, and intended-use columns",
+        "Backfill production models; fix incomplete rows to 0",
+        "Retain inventory export + completeness query under imports/model-inventory/",
+        "Time-box gaps with owner and expiry ≤90 days"
+      ],
+      "references": [
+        {
+          "title": "NIST AI RMF — Map",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "title": "AWS Well-Architected — Operational Excellence (change management parallels)",
+          "url": "https://aws.amazon.com/architecture/well-architected/"
+        }
+      ],
+      "relatedRules": [
+        "MOD-M1",
+        "MOD-M2",
+        "MOD-R1",
+        "MOD-R2",
+        "MOD-R3",
+        "PRI-M3"
+      ],
+      "tags": [
+        "model-governance",
+        "recommended",
+        "hybrid",
+        "model-inventory",
+        "ownership"
+      ],
+      "applicability": {
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },

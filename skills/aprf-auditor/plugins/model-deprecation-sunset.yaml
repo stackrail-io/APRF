@@ -1,0 +1,25 @@
+id: model-deprecation-sunset
+title: Model/embedding deprecation and sunset (MOD-R1)
+version: "0.2.0"
+executor: collectors/model-deprecation-sunset.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-model-deprecation-sunset]
+inputs:
+  - "Target repo (deprecation policy, model registry sunset fields)"
+  - "Optional suite: aprf-assessment/imports/model-deprecation-sunset/*.{json}"
+collect:
+  - "Detect deprecation/sunset policy, notice, forced-sunset, and sunset dates"
+  - "Ingest coverage; write model-deprecation-sunset-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/model-deprecation-sunset/*"
+  signals: [model-deprecation-sunset, mod-r1, repo-model-deprecation-sunset]
+mapsToChecks: [MOD-R1]
+whenUnavailable: >
+  Deprecation signals alone are PARTIAL. MOD-R1 PASS needs
+  policyDefinesNoticeAndForcedSunset, supersededWithSunsetDateCount≥1,
+  undocumentedPinsPastSunset=0, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline deprecation heuristics + optional imported JSON.

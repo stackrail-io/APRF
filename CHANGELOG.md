@@ -8,6 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
+- Rewrote **model-governance** from template stub to hybrid Check + collector; cleared cloud-only `technologies`; synced `aprf-spec.json`.
 - Rewrote **evaluation** from template stub to hybrid Check + collectors; synced `aprf-spec.json`.
 - Rewrote **context-engineering** from template stub to hybrid Check + collectors; synced `aprf-spec.json`.
 - Rewrote **data-privacy** from template stub to hybrid Check collector; synced `aprf-spec.json`.

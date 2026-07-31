@@ -1,35 +1,59 @@
 id: "MOD-M2"
 category: "model-governance"
-title: "Model inventory must exist with owners, data residency, and intended use"
-description: "Model inventory shall exist with owners, data residency, and intended use"
-whyItMatters: "Model inventory shall exist with owners, data residency, and intended use Failing
-  this leaves a production gap against: 100% of production models have owner, residency, and
-  intended-use fields; query returns 0 incomplete rows"
+title: "Model changes must require evaluation evidence before promotion"
+description: >
+  Every production model promotion (version bump, pin change, or registry
+  cutover) shall link a passing eval artifact, and the promotion path shall
+  block promote-without-eval—not rely on informal review alone.
+whyItMatters: >
+  Swapping a model pin without linked eval evidence is a silent quality and
+  safety change. Suites that exist on paper but do not gate promotion leave
+  production exposed. Requiring a pass artifact on every promotion—and failing
+  closed when it is missing—ties model identity changes to measured behavior.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "100% of production models have owner, residency, and intended-use fields; query
-  returns 0 incomplete rows"
+passCondition: >
+  100% of production model promotions in the last 30 days have linked eval
+  pass artifacts; promote-without-eval is blocked by gate (promotion evidence
+  measuredAt ≤90 days).
 evidenceRequired:
-  - "Model inventory registry export"
+  - "Promotion policy or CI/registry rule requiring an eval pass artifact on model version bumps"
+  - "Promotion log (or CI matrix) for the last 30 days showing linked eval pass artifacts; 0 promote-without-eval"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-model-promotion-eval"
+      params:
+        hint: >
+          Discover promotion/CI gates that require eval pass artifacts on
+          model version bumps and evidence that promote-without-eval is blocked.
     - id: "manual-attest"
       params:
-        hint: "Model inventory registry export"
-manualVerification: "For this Check (Model inventory must exist with owners, data residency, and
-  intended use): inspect current evidence for [Model inventory registry export] and confirm the pass
-  condition holds — 100% of production models have owner, residency, and intended-use fields; query
-  returns 0 incomplete rows"
-falsePositiveGuidance: "(Model Governance): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest 100% of production model
+          promotions in the last 30 days have linked eval pass artifacts and
+          promote-without-eval is blocked (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production model promotions occur (pin changes, registry
+  cutovers, or version bumps). If none, score NOT_APPLICABLE. 2) Open
+  promotion policy or CI/registry rules; confirm model version bumps require a
+  linked eval pass artifact. 3) Review promotions in the last 30 days; confirm
+  each has a linked pass artifact. 4) Confirm promote-without-eval is blocked
+  (failed/missing gate prevents promotion). 5) PASS only if 100% linkage +
+  blocking gate hold with measuredAt ≤90 days. EVL-M1 journey suites without a
+  model-promotion gate do not satisfy. EVL-M2 threshold configs without
+  promotion linkage do not satisfy.
+falsePositiveGuidance: >
+  Do not pass ad-hoc notebook evals not linked to the promotion record. Do not
+  pass EVL-M1/EVL-M2 alone without model-promotion gating. Do not pass
+  “required check” labels that are optional or skippable. Do not pass evidence
+  older than 90 days as current. Named exceptions need owner and expiry ≤90
+  days.
 recommendedFixes:
-  - "Implement and operationalize: Model inventory must exist with owners, data residency, and
-    intended use"
-  - "Retain evidence artifacts required by this Check, starting with: Model inventory registry
-    export"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
+  - "Require an eval pass artifact on every production model pin/version promotion"
+  - "Block promote-without-eval in CI or the model registry"
+  - "Retain promotion log + gate proof under imports/model-promotion-eval/"
   - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
 references:
   - title: "NIST AI RMF — Map"
@@ -38,19 +62,21 @@ references:
     url: "https://aws.amazon.com/architecture/well-architected/"
 relatedRules:
   - "MOD-M1"
-  - "MOD-M3"
+  - "MOD-R4"
   - "MOD-R1"
   - "MOD-R2"
   - "MOD-R3"
+  - "EVL-M1"
+  - "EVL-M2"
+  - "CHG-M1"
 tags:
   - "model-governance"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "model-promotion"
+  - "eval-gate"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

@@ -1,36 +1,62 @@
 id: "MOD-R3"
 category: "model-governance"
-title: "Production systems should have license and provenance review for open-weight and fine-tuned
-  models"
-description: "License and provenance review for open-weight and fine-tuned models"
-whyItMatters: "License and provenance review for open-weight and fine-tuned models Failing this
-  leaves a production gap against: 100% of open-weight/fine-tuned production models have a
-  license+provenance review ≤12 months old; blocked licenses have documented exceptions with expiry"
+title: "Production systems should have license and provenance review for open-weight and fine-tuned models"
+description: >
+  Every open-weight or fine-tuned model in production should have a completed
+  license and provenance review ≤12 months old, and any blocked or restricted
+  licenses should carry a documented exception with owner and expiry.
+whyItMatters: >
+  Open-weight and fine-tuned models import license, attribution, and training-
+  data risks that hosted SaaS APIs often abstract away. Without a dated review,
+  teams ship weights under incompatible terms or unknown provenance—and blocked
+  licenses without time-boxed exceptions become silent policy debt.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "100% of open-weight/fine-tuned production models have a license+provenance review
-  ≤12 months old; blocked licenses have documented exceptions with expiry"
+passCondition: >
+  100% of open-weight/fine-tuned production models have a license+provenance
+  review ≤12 months old; blocked licenses have documented exceptions with
+  expiry (review evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "License/provenance review checklist + completed reviews for each open-weight or fine-tuned
-    production model"
+  - "License/provenance review checklist (or registry fields) for open-weight and fine-tuned models"
+  - "Completed reviews ≤12 months old for each such production model; exceptions for blocked licenses with expiry"
 detection:
-  capability: "manual"
-  detectors: []
-manualVerification: "For this Check (License and provenance review for open-weight and fine-tuned
-  models): inspect current evidence for [License/provenance review checklist + completed reviews for
-  each open-weight or fine-tuned production model] and confirm the pass condition holds — 100% of
-  open-weight/fine-tuned production models have a license+provenance review ≤12 months old; blocked
-  licenses have documented exceptions with expiry"
-falsePositiveGuidance: "(Model Governance): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+  capability: "hybrid"
+  detectors:
+    - id: "repo-model-license-provenance"
+      params:
+        hint: >
+          Discover license/provenance reviews for open-weight and fine-tuned
+          production models, review freshness, and exceptions for blocked
+          licenses.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest 100% of open-weight/
+          fine-tuned production models have license+provenance reviews ≤12
+          months old and blocked licenses have exceptions with expiry
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production uses open-weight and/or fine-tuned models. If all
+  production models are proprietary hosted APIs with no local/fine-tuned
+  weights, score NOT_APPLICABLE. 2) Open the review checklist or registry;
+  confirm each such model has license and provenance fields reviewed. 3)
+  Confirm every review is ≤12 months old. 4) Confirm blocked/restricted
+  licenses have documented exceptions with owner and expiry. 5) PASS only if
+  100% coverage + freshness + exception hygiene hold with measuredAt ≤90 days.
+  SCI artifact signature checks alone do not satisfy license review. DG dataset
+  cards alone do not satisfy model license review.
+falsePositiveGuidance: >
+  Do not pass a LICENSE file in the app repo as a model-weight review. Do not
+  pass vendor marketing “open” claims without a recorded review date. Do not
+  pass SCI-M* integrity verify as a substitute for license/provenance. Do not
+  pass evidence older than 90 days as current. Named exceptions need owner and
+  expiry ≤90 days (or the exception’s stated expiry if shorter).
 recommendedFixes:
-  - "Implement and operationalize: this Check: License and provenance review for open-weight and
-    fine-tuned models"
-  - "Retain evidence artifacts required by this Check, starting with: License/provenance review
-    checklist + completed reviews for each open-weight or fine-tuned production model"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Add license+provenance review fields for every open-weight/fine-tuned production model"
+  - "Re-review models older than 12 months; document exceptions for blocked licenses with expiry"
+  - "Retain checklist/registry export under imports/model-license-provenance/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "NIST AI RMF — Map"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -39,18 +65,20 @@ references:
 relatedRules:
   - "MOD-M1"
   - "MOD-M2"
-  - "MOD-M3"
   - "MOD-R1"
   - "MOD-R2"
+  - "MOD-R4"
+  - "SCI-M1"
+  - "DG-M2"
 tags:
   - "model-governance"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "license"
+  - "provenance"
+  - "open-weight"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

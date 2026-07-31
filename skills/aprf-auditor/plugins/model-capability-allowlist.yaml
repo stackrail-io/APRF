@@ -1,0 +1,25 @@
+id: model-capability-allowlist
+title: Per-workload model capability allowlists (MOD-R2)
+version: "0.2.0"
+executor: collectors/model-capability-allowlist.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-model-capability-allowlist]
+inputs:
+  - "Target repo (capability allowlists, gateway/client config, deny tests)"
+  - "Optional suite: aprf-assessment/imports/model-capability-allowlist/*.{json}"
+collect:
+  - "Detect capability allowlists, capability types, and deny evidence"
+  - "Ingest coverage; write model-capability-allowlist-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/model-capability-allowlist/*"
+  signals: [model-capability-allowlist, mod-r2, repo-model-capability-allowlist]
+mapsToChecks: [MOD-R2]
+whenUnavailable: >
+  Allowlist signals alone are PARTIAL. MOD-R2 PASS needs
+  workloadsMissingCapabilityAllowlist=0, deniedCapabilityAttemptRecorded,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline capability-allowlist heuristics + optional imported JSON.

@@ -168,7 +168,8 @@ categoryDefaults:
       - "**/providers/**"
       - "**/*llm*"
       - "**/config/**"
-    signals: [pinned model ID, deprecation, capability bound]
+    plugins: [model-pin-config, model-inventory, model-promotion-eval, model-deprecation-sunset, model-capability-allowlist, model-license-provenance, wandb, repo-filesystem, github-actions]
+    signals: [pinned model ID, latest alias, model inventory, owner, residency, intended use, model promotion, eval artifact, deprecation, sunset, capability allowlist, capability bound, license review, provenance]
   prompt-engineering:
     search:
       - "**/prompts/**"
@@ -373,6 +374,103 @@ checks:
       PASS if eval-suite-ci statusHint=pass (suite signals + criticalJourneysMissingSuite=0 + relevantChangesMissingTriggerOrWaiver=0 + measuredAt ≤90d).
       PARTIAL if suite/CI signals without complete import.
       NOT_APPLICABLE when no eval/AI signals.
+  MOD-M1:
+    requiredEvidence:
+      - "Production model pin config with immutable IDs on critical paths"
+      - "Lint/CI reject of floating aliases under imports/model-pin-config/"
+    searchExtra:
+      - "**/*model*"
+      - "**/*llm*"
+      - "**/*provider*"
+      - "**/*openai*"
+      - "**/*anthropic*"
+      - "**/*bedrock*"
+    plugins: [model-pin-config, repo-filesystem, github-actions]
+    naWhen: "No production model calls"
+    evaluation: |
+      PASS if model-pin-config statusHint=pass (floatingAliasCountOnCriticalPaths=0 + criticalPathsMissingPinnedModelId=0 + lintOrCiRejectsLatest + measuredAt ≤90d).
+      PARTIAL if pin/alias signals without complete import.
+      NOT_APPLICABLE when no model/pin signals.
+  MOD-M2:
+    requiredEvidence:
+      - "Promotion policy/CI requiring eval pass artifact on model version bumps"
+      - "30-day promotion log with 0 missing eval artifacts under imports/model-promotion-eval/"
+    searchExtra:
+      - "**/*promot*"
+      - "**/*model*version*"
+      - "**/*registry*"
+      - "**/*eval*"
+      - "**/.github/workflows/**"
+    plugins: [model-promotion-eval, eval-suite-ci, eval-release-gates, github-actions, repo-filesystem]
+    naWhen: "No production model promotions"
+    evaluation: |
+      PASS if model-promotion-eval statusHint=pass (promotionsMissingEvalArtifact=0 + promoteWithoutEvalBlocked + measuredAt ≤90d).
+      PARTIAL if promotion/eval-gate signals without complete import.
+      NOT_APPLICABLE when no model/promotion signals.
+  MOD-R4:
+    requiredEvidence:
+      - "Model inventory/registry with owner, residency, intended-use fields"
+      - "Completeness query (0 incomplete rows) under imports/model-inventory/"
+    searchExtra:
+      - "**/*model*inventory*"
+      - "**/*model*registry*"
+      - "**/*llm*"
+      - "**/*provider*"
+    plugins: [model-inventory, wandb, repo-filesystem]
+    naWhen: "No production model calls"
+    evaluation: |
+      PASS if model-inventory statusHint=pass (incompleteInventoryRows=0 + measuredAt ≤90d).
+      PARTIAL if inventory signals without complete import.
+      NOT_APPLICABLE when no model/inventory signals.
+  MOD-R1:
+    requiredEvidence:
+      - "Deprecation/sunset policy with notice period + forced-sunset rules"
+      - "Registry sunset dates + undocumentedPinsPastSunset=0 under imports/model-deprecation-sunset/"
+    searchExtra:
+      - "**/*deprecat*"
+      - "**/*sunset*"
+      - "**/*eol*"
+      - "**/*embedding*"
+      - "**/*model*registry*"
+    plugins: [model-deprecation-sunset, model-inventory, wandb, repo-filesystem]
+    naWhen: "No production models/embeddings"
+    evaluation: |
+      PASS if model-deprecation-sunset statusHint=pass (policyDefinesNoticeAndForcedSunset + supersededWithSunsetDateCount≥1 + undocumentedPinsPastSunset=0 + measuredAt ≤90d).
+      PARTIAL if deprecation/sunset signals without complete import.
+      NOT_APPLICABLE when no model/deprecation signals.
+  MOD-R2:
+    requiredEvidence:
+      - "Per-workload capability allowlist (vision, code execution, browsing, etc.)"
+      - "Denied capability attempt within 90d under imports/model-capability-allowlist/"
+    searchExtra:
+      - "**/*capabilit*"
+      - "**/*allowlist*"
+      - "**/*vision*"
+      - "**/*browsing*"
+      - "**/*code*exec*"
+    plugins: [model-capability-allowlist, repo-filesystem]
+    naWhen: "No optional model capabilities"
+    evaluation: |
+      PASS if model-capability-allowlist statusHint=pass (workloadsMissingCapabilityAllowlist=0 + deniedCapabilityAttemptRecorded + measuredAt ≤90d).
+      PARTIAL if allowlist/capability signals without complete import.
+      NOT_APPLICABLE when no model/capability signals.
+  MOD-R3:
+    requiredEvidence:
+      - "License/provenance reviews for open-weight and fine-tuned production models"
+      - "Freshness + blocked-license exceptions under imports/model-license-provenance/"
+    searchExtra:
+      - "**/*license*"
+      - "**/*provenance*"
+      - "**/*open*weight*"
+      - "**/*fine*tun*"
+      - "**/*model*card*"
+      - "**/*huggingface*"
+    plugins: [model-license-provenance, model-inventory, wandb, repo-filesystem]
+    naWhen: "No open-weight or fine-tuned production models"
+    evaluation: |
+      PASS if model-license-provenance statusHint=pass (openWeightOrFineTunedMissingReview=0 + reviewsOlderThan12Months=0 + blockedLicensesMissingException=0 + measuredAt ≤90d).
+      PARTIAL if license/provenance signals without complete import.
+      NOT_APPLICABLE when no open-weight/fine-tune signals.
   EVL-M2:
     requiredEvidence:
       - "Gate config with numeric quality + safety thresholds per critical journey"
@@ -1411,7 +1509,7 @@ aiSpecificStrategies:
       - "**/*permission*"
     signals: [tool-allowlist, least-privilege, side-effect-gate]
   modelVersionPinning:
-    relatedChecks: [MOD-M1, MOD-M2]
+    relatedChecks: [MOD-M1, MOD-R1, MOD-R4]
     search:
       - "**/*model*"
       - "**/providers/**"
@@ -1447,7 +1545,7 @@ aiSpecificStrategies:
       - "**/*.prompt*"
     signals: [prompt-semver, owners, changelog]
   modelRolloutFeatureFlags:
-    relatedChecks: [CHG-M1, CHG-M2, MOD-M3]
+    relatedChecks: [CHG-M1, CHG-M2, MOD-M2]
     search:
       - "**/*feature*flag*"
       - "**/launchdarkly*"

@@ -15,7 +15,7 @@
     },
     "intendedSteward": {
       "model": "neutral-working-group",
-      "description": "Multi-stakeholder technical oversight (vendors, practitioners, OWASP/CNCF-adjacent participants) with public RFCs \u2014 not a single commercial owner.",
+      "description": "Multi-stakeholder technical oversight (vendors, practitioners, OWASP/CNCF-adjacent participants) with public RFCs — not a single commercial owner.",
       "currentPhase": "working-draft",
       "processPath": "/aprf/rfc/"
     },
@@ -29,13 +29,13 @@
       "stableIdPolicy": "Pillar IDs (APRF-NN) and check IDs (e.g. AUTHN-M1) are immutable once published in a MINOR+. Deprecate; do not reuse."
     },
     "schemaVersioning": {
-      "frameworkSemVer": "APRF_GOVERNANCE.version \u2014 semantic version of the normative framework, check catalog, profiles, and scoring semantics.",
-      "specSchemaId": "https://stackrail.io/aprf/spec-schema/0.7 \u2014 JSON Schema for the machine-readable APRF document shape; may lag framework SemVer when only content changes.",
-      "attestationSchemaId": "https://stackrail.io/aprf/attestation-schema/0.6 \u2014 JSON Schema for aprf-self-attestation exports.",
+      "frameworkSemVer": "APRF_GOVERNANCE.version — semantic version of the normative framework, check catalog, profiles, and scoring semantics.",
+      "specSchemaId": "https://stackrail.io/aprf/spec-schema/0.7 — JSON Schema for the machine-readable APRF document shape; may lag framework SemVer when only content changes.",
+      "attestationSchemaId": "https://stackrail.io/aprf/attestation-schema/0.6 — JSON Schema for aprf-self-attestation exports.",
       "note": "Do not equate schema path versions (0.7 / 0.6) with APRF framework SemVer (e.g. 0.10.0). Validators and conformance claims should cite both."
     },
     "deprecation": {
-      "policy": "Deprecated checks and pillars remain in the spec for at least one MINOR cycle (N\u22121), marked deprecated, with a replacement ID.",
+      "policy": "Deprecated checks and pillars remain in the spec for at least one MINOR cycle (N−1), marked deprecated, with a replacement ID.",
       "supportWindow": "N-1 minor versions"
     },
     "extension": {
@@ -72,7 +72,7 @@
         "AWS Well-Architected (conceptual)",
         "SLSA / supply-chain"
       ],
-      "note": "Machine-readable maps for NIST AI RMF, ISO/IEC 42001, OWASP LLM Top 10, SOC 2, AWS Well-Architected, and SLSA ship in the APRF spec under crosswalks[]. Informative alignment only \u2014 not certification."
+      "note": "Machine-readable maps for NIST AI RMF, ISO/IEC 42001, OWASP LLM Top 10, SOC 2, AWS Well-Architected, and SLSA ship in the APRF spec under crosswalks[]. Informative alignment only — not certification."
     },
     "stewardshipRef": "aprf-stewardship",
     "draftCapabilityFloor": 3
@@ -80,7 +80,7 @@
   "stewardship": {
     "id": "aprf-stewardship",
     "charter": {
-      "purpose": "Evolve APRF into a ratifiable, vendor-neutral production-readiness standard for AI systems through open technical consensus\u2014not through a single commercial owner.",
+      "purpose": "Evolve APRF into a ratifiable, vendor-neutral production-readiness standard for AI systems through open technical consensus—not through a single commercial owner.",
       "principles": [
         "Neutrality: no single vendor or publisher holds permanent veto over normative content.",
         "Open process: substantive changes go through public RFCs with recorded decisions.",
@@ -142,7 +142,7 @@
           "category": "Researcher or academic"
         }
       ],
-      "openCall": "StackRail is recruiting an interim advisory board (\u22653 independent organizations) before MAJOR/MINOR releases require advisory consensus. Volunteer via the interim contact; a seat does not grant commercial preference or veto over peer RFCs.",
+      "openCall": "StackRail is recruiting an interim advisory board (≥3 independent organizations) before MAJOR/MINOR releases require advisory consensus. Volunteer via the interim contact; a seat does not grant commercial preference or veto over peer RFCs.",
       "decisionLog": "RFC decisions and rationales are published on /aprf/rfc/ and in the machine-readable `rfcs` index in /aprf/spec/. Until seats are filled, working-draft quorum applies: publisher decides after the review window with public rationale.",
       "credibilityNote": "Single-vendor publication is temporary and explicit. Normative text and the machine-readable catalog remain freely available; transfer triggers and requirements are published; certification programs (if any) stay separate from normative stewardship."
     },
@@ -150,7 +150,7 @@
       "triggers": [
         "At least three independent organizations actively reviewing RFCs for two consecutive MINOR cycles.",
         "Published interim charter signed by advisory participants.",
-        "Public RFC backlog with decisions recorded for \u226590 days.",
+        "Public RFC backlog with decisions recorded for ≥90 days.",
         "Willingness of a neutral host (foundation, consortium, or multi-party WG) to accept stewardship."
       ],
       "requirements": [
@@ -269,7 +269,7 @@
       "status": "in-review",
       "created": "2026-07-24",
       "semverImpact": "MINOR",
-      "summary": "Editorial RFC that ratifies the stewardship RFC stages on the site, publishes this index, and records the first open review window\u2014no taxonomy changes.",
+      "summary": "Editorial RFC that ratifies the stewardship RFC stages on the site, publishes this index, and records the first open review window—no taxonomy changes.",
       "slug": "0001-working-draft-rfc-process",
       "href": "/aprf/rfc/0001-working-draft-rfc-process/",
       "markdownPath": "/aprf/rfc/0001-working-draft-rfc-process.md"
@@ -324,7 +324,7 @@
       {
         "id": "safety",
         "name": "Safety & Responsible AI",
-        "summary": "Harm prevention, content safety, fairness, and transparency\u2014NIST trustworthiness characteristics distinct from adversarial security.",
+        "summary": "Harm prevention, content safety, fairness, and transparency—NIST trustworthiness characteristics distinct from adversarial security.",
         "pillarSlugs": [
           "safety-responsible-ai",
           "explainability"
@@ -383,7 +383,7 @@
       {
         "id": "governance",
         "name": "Governance & Compliance",
-        "summary": "Organizational AI policy, ownership, risk acceptance, and auditable evidence of controls\u2014without equating compliance with readiness.",
+        "summary": "Organizational AI policy, ownership, risk acceptance, and auditable evidence of controls—without equating compliance with readiness.",
         "pillarSlugs": [
           "organizational-governance",
           "compliance"
@@ -430,7 +430,7 @@
         "entryCriteria": [
           "Promotion path and rollback for prompts, models, and tools",
           "Server-side authz, tool mediation, and eval gates on releases",
-          "Traces reconstruct model \u2192 tool \u2192 outcome paths",
+          "Traces reconstruct model → tool → outcome paths",
           "AI-specific incident playbooks and named owners exist"
         ]
       },
@@ -461,7 +461,7 @@
       {
         "tier": 0,
         "name": "Sandbox",
-        "summary": "Non-customer experiments. Failures are contained to the builder\u2019s environment.",
+        "summary": "Non-customer experiments. Failures are contained to the builder’s environment.",
         "requiredCapability": 1,
         "examples": [
           "Hackathon prototype",
@@ -626,10 +626,10 @@
         "INC-M4"
       ],
       "rationale": [
-        "Includes every Core gate \u2014 regulated systems must still clear production minimums.",
+        "Includes every Core gate — regulated systems must still clear production minimums.",
         "Adds residency, fairness, dual control, and signed admission for regulated blast radius.",
         "Requires chaos/continuity drills, independent assessment sampling, and automated quality rollback triggers.",
-        "Target capability Level 5 \u2014 Tier 3 is not Core with a different label."
+        "Target capability Level 5 — Tier 3 is not Core with a different label."
       ]
     }
   ],
@@ -766,7 +766,6 @@
         "SCI-M1",
         "SCI-M3",
         "PRM-M3",
-        "MOD-M2",
         "AUTHZ-M3",
         "DX-M1",
         "DX-M2",
@@ -816,7 +815,7 @@
           "id": "nist-ai-rmf:safe",
           "ref": "Safe",
           "title": "Safe",
-          "summary": "Trustworthiness characteristic \u2014 avoid harmful outcomes under intended use."
+          "summary": "Trustworthiness characteristic — avoid harmful outcomes under intended use."
         },
         {
           "id": "nist-ai-rmf:secure-resilient",
@@ -836,7 +835,7 @@
         {
           "id": "nist-ai-rmf:fair",
           "ref": "Fair",
-          "title": "Fair \u2014 Harmful Bias Managed"
+          "title": "Fair — Harmful Bias Managed"
         },
         {
           "id": "nist-ai-rmf:accountable",
@@ -1012,44 +1011,44 @@
       "controls": [
         {
           "id": "iso-42001:4",
-          "ref": "\u00a74",
+          "ref": "§4",
           "title": "Context of the organization"
         },
         {
           "id": "iso-42001:5",
-          "ref": "\u00a75",
+          "ref": "§5",
           "title": "Leadership"
         },
         {
           "id": "iso-42001:6",
-          "ref": "\u00a76",
+          "ref": "§6",
           "title": "Planning"
         },
         {
           "id": "iso-42001:7",
-          "ref": "\u00a77",
+          "ref": "§7",
           "title": "Support"
         },
         {
           "id": "iso-42001:8",
-          "ref": "\u00a78",
+          "ref": "§8",
           "title": "Operation"
         },
         {
           "id": "iso-42001:9",
-          "ref": "\u00a79",
+          "ref": "§9",
           "title": "Performance evaluation"
         },
         {
           "id": "iso-42001:10",
-          "ref": "\u00a710",
+          "ref": "§10",
           "title": "Improvement"
         },
         {
           "id": "iso-42001:a",
           "ref": "Annex A",
           "title": "AI system controls (selected themes)",
-          "summary": "Mapped thematically to APRF domains \u2014 not clause-by-clause Annex A enumeration."
+          "summary": "Mapped thematically to APRF domains — not clause-by-clause Annex A enumeration."
         }
       ],
       "mappings": [
@@ -1166,7 +1165,7 @@
             "supply-chain"
           ],
           "relation": "partial",
-          "note": "Annex A themes \u2192 APRF security, safety, data, model, human oversight, supply chain."
+          "note": "Annex A themes → APRF security, safety, data, model, human oversight, supply chain."
         }
       ]
     },
@@ -1285,7 +1284,7 @@
           "aprfCheckIds": [
             "DG-M2",
             "MEM-M2",
-            "MOD-M2",
+            "MOD-R4",
             "EVL-M1"
           ],
           "relation": "supports"
@@ -1379,14 +1378,14 @@
             "PERF-M1"
           ],
           "relation": "supports",
-          "note": "Denial-of-wallet and resource exhaustion \u2014 spend ceilings + timeouts."
+          "note": "Denial-of-wallet and resource exhaustion — spend ceilings + timeouts."
         }
       ]
     },
     {
       "id": "soc2-tsc",
       "name": "SOC 2 Trust Services Criteria",
-      "peerVersion": "2017 (with 2022 revisions) \u2014 evidence reuse",
+      "peerVersion": "2017 (with 2022 revisions) — evidence reuse",
       "url": "https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2",
       "disclaimer": "Informative alignment only. Does not constitute certification, accreditation, or official endorsement. Passing APRF does not imply SOC 2 compliance.",
       "controls": [
@@ -1783,7 +1782,7 @@
     {
       "id": "slsa",
       "name": "SLSA (Supply-chain Levels for Software Artifacts)",
-      "peerVersion": "v1.0 \u2014 conceptual levels / provenance",
+      "peerVersion": "v1.0 — conceptual levels / provenance",
       "url": "https://slsa.dev/",
       "disclaimer": "Informative alignment only. Does not constitute certification, accreditation, or official endorsement. APRF alignment does not confer a SLSA level attestation.",
       "controls": [
@@ -1898,7 +1897,7 @@
     "methodology": {
       "name": "APRF gated evaluation",
       "forbids": [
-        "A single averaged \u201creadiness score\u201d across all pillars",
+        "A single averaged “readiness score” across all pillars",
         "Trading a failed mandatory check against strong recommended scores",
         "Conformance badges that omit open blockers or APRF version",
         "Claiming Tier 3 / regulated readiness from Core Profile alone"
@@ -1907,7 +1906,7 @@
         {
           "id": "classify",
           "title": "Classify criticality",
-          "detail": "Assign Tier 0\u20133. This sets the required capability floor."
+          "detail": "Assign Tier 0–3. This sets the required capability floor."
         },
         {
           "id": "profile",
@@ -1922,17 +1921,17 @@
         {
           "id": "gate",
           "title": "Evaluate the gate",
-          "detail": "All in-scope mandatory checks must pass or be formally marked notApplicable (N/A) with rationale. Failures and unanswered checks are blockers. Profile\u222alens assessments only gate on the union of those check IDs. N/A is intended for agent, human-approval, tool-safety, and memory gates when those system types do not apply \u2014 not as a substitute for incomplete evidence."
+          "detail": "All in-scope mandatory checks must pass or be formally marked notApplicable (N/A) with rationale. Failures and unanswered checks are blockers. Profile∪lens assessments only gate on the union of those check IDs. N/A is intended for agent, human-approval, tool-safety, and memory gates when those system types do not apply — not as a substitute for incomplete evidence."
         },
         {
           "id": "attainment",
           "title": "Compute capability attainment",
-          "detail": "Per pillar: highest level L where all mandatory checks \u2264 L pass. System attainment = minimum across pillars."
+          "detail": "Per pillar: highest level L where all mandatory checks ≤ L pass. System attainment = minimum across pillars."
         },
         {
           "id": "recommended",
           "title": "Score recommended controls per domain",
-          "detail": "Optional 0\u2013100 domain scores from recommended checks, weighted by pillar severity. Never folded into the gate."
+          "detail": "Optional 0–100 domain scores from recommended checks, weighted by pillar severity. Never folded into the gate."
         },
         {
           "id": "report",
@@ -1958,14 +1957,14 @@
       "crossCutting": false,
       "severity": "critical",
       "riskLevel": "critical",
-      "purpose": "Establish controls that prevent adversarial misuse of models, prompts, tools, and outputs from compromising confidentiality, integrity, or availability\u2014distinct from content-safety and responsible-AI harms covered in the Safety domain.",
-      "engineeringPhilosophy": "Treat the model as an untrusted co-processor inside a zero-trust boundary. Security controls belong in the application and platform layers\u2014never solely in prompt wording. Defense in depth spans input validation, output filtering, tool mediation, identity, and runtime isolation.",
+      "purpose": "Establish controls that prevent adversarial misuse of models, prompts, tools, and outputs from compromising confidentiality, integrity, or availability—distinct from content-safety and responsible-AI harms covered in the Safety domain.",
+      "engineeringPhilosophy": "Treat the model as an untrusted co-processor inside a zero-trust boundary. Security controls belong in the application and platform layers—never solely in prompt wording. Defense in depth spans input validation, output filtering, tool mediation, identity, and runtime isolation.",
       "whyItMatters": "AI surfaces expand the attack surface: prompt injection, data exfiltration via tools, jailbreaks, model theft, and poisoned retrieval. A chatbot that 'mostly works' can still become an incident response event when an attacker turns natural language into a privileged API.",
       "commonFailures": [
         "Relying on system prompts alone to enforce security policy",
         "Passing untrusted retrieval or user content into privileged tool contexts",
         "Logging full prompts/completions that contain secrets or PII",
-        "No output schema enforcement\u2014free-form text executes downstream logic",
+        "No output schema enforcement—free-form text executes downstream logic",
         "Missing abuse rate limits distinct from normal product quotas"
       ],
       "mandatoryChecks": [
@@ -1973,7 +1972,7 @@
           "id": "SEC-M1",
           "requirement": "Untrusted input shall never authorize privileged actions without server-side policy",
           "artifact": "Injection/privilege-escalation corpus (versioned) + CI gate report + policy-engine deny sample logs",
-          "passCondition": "\u226595% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the suite",
+          "passCondition": "≥95% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the suite",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -1991,7 +1990,7 @@
           "id": "SEC-M3",
           "requirement": "Abuse, jailbreak, and injection testing shall gate customer-facing releases",
           "artifact": "CI gate configuration + last 30 days of release reports",
-          "passCondition": "100% of production releases in the last 30 days show security-suite gate = pass, or a time-boxed waiver with owner and expiry \u2264 30 days",
+          "passCondition": "100% of production releases in the last 30 days show security-suite gate = pass, or a time-boxed waiver with owner and expiry ≤ 30 days",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -2009,7 +2008,7 @@
           "id": "SEC-M5",
           "requirement": "Canary tokens or tripwires shall detect exfiltration attempts in sensitive AI contexts",
           "artifact": "Canary/tripwire design + detection test report with sample alerts for sensitive contexts",
-          "passCondition": "PASS if canaries/tripwires are deployed in production-sensitive paths and the latest detection test (\u226490 days) shows expected alerts with 0 silent misses in the suite",
+          "passCondition": "PASS if canaries/tripwires are deployed in production-sensitive paths and the latest detection test (≤90 days) shows expected alerts with 0 silent misses in the suite",
           "method": "manual",
           "requiredFromLevel": 5,
           "minCriticality": 3
@@ -2020,7 +2019,7 @@
           "id": "SEC-R1",
           "requirement": "Red-team exercises cover multi-turn and indirect injection via RAG/MCP",
           "artifact": "Versioned red-team suite covering multi-turn and indirect injection via RAG/MCP + latest scored run report",
-          "passCondition": "Suite includes \u226510 multi-turn and \u226510 indirect RAG/MCP injection cases; latest run \u226490 days meets documented pass thresholds; report retained \u226590 days",
+          "passCondition": "Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases; latest run ≤90 days meets documented pass thresholds; report retained ≥90 days",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -2029,7 +2028,7 @@
           "id": "SEC-R2",
           "requirement": "Content safety and malware scanning on multimodal inputs where applicable",
           "artifact": "Multimodal input safety/malware scanner config + latest CI or batch scan report for production-bound media",
-          "passCondition": "Where multimodal inputs are accepted, scanner runs before model ingest; last report \u226490 days shows coverage of image/file types in use and 0 unscanned production paths",
+          "passCondition": "Where multimodal inputs are accepted, scanner runs before model ingest; last report ≤90 days shows coverage of image/file types in use and 0 unscanned production paths",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -2088,7 +2087,7 @@
       "crossCutting": false,
       "severity": "critical",
       "riskLevel": "critical",
-      "purpose": "Ensure every actor that can invoke AI capabilities\u2014humans, services, agents, MCP clients\u2014is authenticated with appropriate assurance.",
+      "purpose": "Ensure every actor that can invoke AI capabilities—humans, services, agents, MCP clients—is authenticated with appropriate assurance.",
       "engineeringPhilosophy": "AI endpoints are privileged application surfaces. Anonymous or shared credentials for agents and MCP are incompatible with production readiness beyond Level 1.",
       "whyItMatters": "Unauthenticated model and tool endpoints become public compute and data exfiltration oracles. Agent impersonation enables privilege abuse across systems.",
       "commonFailures": [
@@ -2120,7 +2119,7 @@
           "id": "AUTHN-M3",
           "requirement": "Administrative access to AI control planes shall require strong authentication including MFA",
           "artifact": "IdP policy export for AI admin roles + break-glass account inventory",
-          "passCondition": "100% of AI control-plane admin roles enforce MFA; break-glass accounts \u2264 documented maximum and have monitoring enabled",
+          "passCondition": "100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -2140,7 +2139,7 @@
           "id": "AUTHN-R1",
           "requirement": "Short-lived tokens for agents and tools; no long-lived static keys in prompts",
           "artifact": "IdP/token TTL policy export + inventory of agent/tool credentials used in production prompts/config",
-          "passCondition": "100% of inventoried agent/tool credentials have TTL \u22641h (or a named exception \u226430 days); secret scan of prompts/config finds 0 long-lived static API keys",
+          "passCondition": "100% of inventoried agent/tool credentials have TTL ≤1h (or a named exception ≤30 days); secret scan of prompts/config finds 0 long-lived static API keys",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -2185,7 +2184,7 @@
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
         },
         {
-          "title": "CIS Benchmarks \u2014 Identity controls",
+          "title": "CIS Benchmarks — Identity controls",
           "url": "https://www.cisecurity.org/cis-benchmarks"
         }
       ],
@@ -2223,7 +2222,7 @@
           "id": "AUTHZ-M2",
           "requirement": "Multi-tenant isolation shall be tested for AI data and memory paths",
           "artifact": "Cross-tenant attack test suite results for AI data stores and memory APIs",
-          "passCondition": "0 successful unauthorized cross-tenant reads/writes across \u226510 automated attack cases on AI data and memory paths",
+          "passCondition": "0 successful unauthorized cross-tenant reads/writes across ≥10 automated attack cases on AI data and memory paths",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -2232,7 +2231,7 @@
           "id": "AUTHZ-M3",
           "requirement": "Least-privilege roles shall be defined for agents and automation identities",
           "artifact": "Role matrix for every production agent/automation identity + IAM/policy export",
-          "passCondition": "100% of production agent/automation identities appear in the role matrix with non-admin default roles; quarterly (or \u226490-day) access review recorded with 0 unexplained privilege escalations",
+          "passCondition": "100% of production agent/automation identities appear in the role matrix with non-admin default roles; quarterly (or ≤90-day) access review recorded with 0 unexplained privilege escalations",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -2252,7 +2251,7 @@
           "id": "AUTHZ-R1",
           "requirement": "Policy-as-code for tool and model access",
           "artifact": "Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent) + latest CI policy-check report",
-          "passCondition": "Tool and model access rules are expressed as code and enforced in CI or admission; last failing-to-passing policy change \u226490 days shows a deny for unauthorized tool/model",
+          "passCondition": "Tool and model access rules are expressed as code and enforced in CI or admission; last failing-to-passing policy change ≤90 days shows a deny for unauthorized tool/model",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -2261,7 +2260,7 @@
           "id": "AUTHZ-R2",
           "requirement": "Continuous access reviews for high-privilege agents",
           "artifact": "High-privilege agent inventory + last access-review spreadsheet/report with decisions (keep/revoke/modify)",
-          "passCondition": "Every high-privilege agent identity was reviewed \u226490 days ago; \u22651 revoke or scope-reduction appears in the last two cycles (or attestation that none were warranted with reviewer sign-off)",
+          "passCondition": "Every high-privilege agent identity was reviewed ≤90 days ago; ≥1 revoke or scope-reduction appears in the last two cycles (or attestation that none were warranted with reviewer sign-off)",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -2297,7 +2296,7 @@
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
         },
         {
-          "title": "NIST AI RMF \u2014 Manage",
+          "title": "NIST AI RMF — Manage",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
@@ -2344,7 +2343,7 @@
           "id": "SEC2-M3",
           "requirement": "Provider and cloud keys shall be rotatable and scoped; client apps shall not hold privileged keys",
           "artifact": "Key inventory with rotation dates + client bundle/scan report",
-          "passCondition": "0 privileged provider/cloud keys embedded in client apps; every production key has a rotation date within policy (\u226490 days or provider-managed short-lived credentials)",
+          "passCondition": "0 privileged provider/cloud keys embedded in client apps; every production key has a rotation date within policy (≤90 days or provider-managed short-lived credentials)",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -2355,7 +2354,7 @@
           "id": "SEC2-R1",
           "requirement": "Pre-commit and CI secret scanning including prompt/fixture files",
           "artifact": "Pre-commit + CI secret-scan config including prompt/fixture globs + latest scan report with findings disposition",
-          "passCondition": "Secret scanning covers application code, prompts, and fixtures; blocking on high-confidence secrets; last green main-branch scan \u22647 days (or last PR merge evidence)",
+          "passCondition": "Secret scanning covers application code, prompts, and fixtures; blocking on high-confidence secrets; last green main-branch scan ≤7 days (or last PR merge evidence)",
           "method": "automated",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -2364,7 +2363,7 @@
           "id": "SEC2-R2",
           "requirement": "Egress controls limiting where runtime credentials can be used",
           "artifact": "Egress allowlist/policy config for runtimes that hold credentials + sample deny/allow logs (24h)",
-          "passCondition": "Runtime credentials can only call documented destinations; \u22651 deny event is observed in test or production logs proving enforcement in the last 90 days",
+          "passCondition": "Runtime credentials can only call documented destinations; ≥1 deny event is observed in test or production logs proving enforcement in the last 90 days",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -2409,7 +2408,7 @@
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
         },
         {
-          "title": "CIS Benchmarks \u2014 credential hygiene",
+          "title": "CIS Benchmarks — credential hygiene",
           "url": "https://www.cisecurity.org/cis-benchmarks"
         }
       ],
@@ -2426,7 +2425,7 @@
       "riskLevel": "critical",
       "purpose": "Ensure every tool, function call, MCP server, and external action invoked by a model is authorized, scoped, observable, and reversible or gated when impact is high.",
       "engineeringPhilosophy": "The model proposes; the platform disposes. Tools are privileged APIs. Never let natural language become an unrestricted remote control over production systems.",
-      "whyItMatters": "Tool misuse converts language model errors into real-world damage\u2014deleted data, fraudulent transactions, leaked secrets, or lateral movement through MCP and A2A bridges.",
+      "whyItMatters": "Tool misuse converts language model errors into real-world damage—deleted data, fraudulent transactions, leaked secrets, or lateral movement through MCP and A2A bridges.",
       "commonFailures": [
         "Tools run with service-wide credentials instead of user-scoped tokens",
         "No allowlist of tools per agent or environment",
@@ -2474,7 +2473,7 @@
           "id": "TOL-M5",
           "requirement": "MCP tool catalogs shall be signed and supply-chain reviewed before production use",
           "artifact": "Signed tool catalog + supply-chain review record + verify-on-load config",
-          "passCondition": "PASS if production MCP runtimes reject unsigned/unapproved tool catalogs; last review \u226490 days or since last catalog change",
+          "passCondition": "PASS if production MCP runtimes reject unsigned/unapproved tool catalogs; last review ≤90 days or since last catalog change",
           "method": "manual",
           "requiredFromLevel": 5,
           "minCriticality": 3
@@ -2485,7 +2484,7 @@
           "id": "TOL-R1",
           "requirement": "Dry-run or simulation mode for destructive tools in lower environments",
           "artifact": "Destructive-tool catalog marking dry-run/simulation support + sample lower-env dry-run logs",
-          "passCondition": "100% of tools classified destructive expose dry-run or simulation in non-prod; last promotion of a destructive tool includes a dry-run evidence link \u226490 days old",
+          "passCondition": "100% of tools classified destructive expose dry-run or simulation in non-prod; last promotion of a destructive tool includes a dry-run evidence link ≤90 days old",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -2494,7 +2493,7 @@
           "id": "TOL-R2",
           "requirement": "Per-tool rate limits and blast-radius budgets",
           "artifact": "Per-tool rate-limit and blast-radius policy config + sample enforcement metrics (7 days)",
-          "passCondition": "Each high-impact tool has a documented QPS/daily cap and max-affected-entities budget; \u22651 limit hit or synthetic test proves enforcement in the last 30 days",
+          "passCondition": "Each high-impact tool has a documented QPS/daily cap and max-affected-entities budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -2530,7 +2529,7 @@
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM \u2014 Excessive Agency",
+          "title": "OWASP LLM — Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -2545,7 +2544,7 @@
       "crossCutting": false,
       "severity": "critical",
       "riskLevel": "high",
-      "purpose": "Ensure model artifacts, inference images, tools, MCP servers, and third-party AI dependencies are authenticated, reviewed, and verifiable\u2014applying SLSA-style integrity to the AI stack.",
+      "purpose": "Ensure model artifacts, inference images, tools, MCP servers, and third-party AI dependencies are authenticated, reviewed, and verifiable—applying SLSA-style integrity to the AI stack.",
       "engineeringPhilosophy": "An AI system is only as trustworthy as the artifacts it loads. Unsigned weights, unverified MCP hosts, and opaque tool catalogs are supply-chain defects, not product features.",
       "whyItMatters": "Poisoned models, compromised MCP servers, and tampered tool plugins bypass application-layer controls and can exfiltrate data or execute attacker-chosen actions at scale.",
       "commonFailures": [
@@ -2568,7 +2567,7 @@
           "id": "SCI-M2",
           "requirement": "MCP servers and high-impact tools shall be inventoried, version-pinned, and reviewed before production use",
           "artifact": "MCP/tool inventory with version pins, owners, and review dates",
-          "passCondition": "100% of production MCP servers and high-impact tools have pin + owner + review date \u2264 180 days; 0 unpinned \u201clatest\u201d entries in production",
+          "passCondition": "100% of production MCP servers and high-impact tools have pin + owner + review date ≤ 180 days; 0 unpinned “latest” entries in production",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -2577,7 +2576,7 @@
           "id": "SCI-M3",
           "requirement": "Dependency and image vulnerability scanning gates shall apply to AI runtimes",
           "artifact": "Scanner config + CI gate reports for AI runtime images/deps",
-          "passCondition": "100% of AI runtime image builds in the last 30 days ran vulnerability scan; critical CVEs (CVSS \u2265 9.0 or org policy equivalent) block promote unless waived with expiry \u2264 14 days",
+          "passCondition": "100% of AI runtime image builds in the last 30 days ran vulnerability scan; critical CVEs (CVSS ≥ 9.0 or org policy equivalent) block promote unless waived with expiry ≤ 14 days",
           "method": "automated",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -2606,7 +2605,7 @@
           "id": "SCI-R2",
           "requirement": "Machine-readable model bill of materials (MBOM) for production models",
           "artifact": "Machine-readable MBOM (or SBOM+model metadata) for each production model pin + retention location",
-          "passCondition": "100% of production model pins have an MBOM/SBOM artifact retained \u226590 days and linked from the model registry entry",
+          "passCondition": "100% of production model pins have an MBOM/SBOM artifact retained ≥90 days and linked from the model registry entry",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -2638,7 +2637,7 @@
       ],
       "references": [
         {
-          "title": "SLSA \u2014 Supply-chain Levels for Software Artifacts",
+          "title": "SLSA — Supply-chain Levels for Software Artifacts",
           "url": "https://slsa.dev/"
         },
         {
@@ -2646,7 +2645,7 @@
           "url": "https://www.cncf.io/"
         },
         {
-          "title": "OWASP LLM \u2014 Supply Chain Vulnerabilities",
+          "title": "OWASP LLM — Supply Chain Vulnerabilities",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -2661,7 +2660,7 @@
       "crossCutting": false,
       "severity": "high",
       "riskLevel": "high",
-      "purpose": "Provide secure, reliable runtime and network infrastructure for model serving, gateways, vector stores, agents, and MCP\u2014including supply-chain integrity.",
+      "purpose": "Provide secure, reliable runtime and network infrastructure for model serving, gateways, vector stores, agents, and MCP—including supply-chain integrity.",
       "engineeringPhilosophy": "AI workloads inherit cloud security and SRE fundamentals, then add GPU/runtime and model-artifact supply-chain concerns. There is no AI exception to patching, isolation, or least privilege.",
       "whyItMatters": "Compromised gateways, exposed vector DBs, or poisoned model artifacts undermine every application-layer control.",
       "commonFailures": [
@@ -2675,7 +2674,7 @@
           "id": "INF-M1",
           "requirement": "AI data stores and control planes shall not be publicly exposed without authenticated edge controls",
           "artifact": "CSPM/network scan of AI data stores and control planes + edge auth config",
-          "passCondition": "0 AI data stores or control-plane endpoints publicly reachable without authentication in the latest scan; findings severity \u2265 high closed or waived with expiry",
+          "passCondition": "0 AI data stores or control-plane endpoints publicly reachable without authentication in the latest scan; findings severity ≥ high closed or waived with expiry",
           "method": "automated",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -2684,7 +2683,7 @@
           "id": "INF-M2",
           "requirement": "Base images and runtimes shall follow documented patching SLAs",
           "artifact": "Patching SLA policy + image age/CVE backlog report for AI runtimes",
-          "passCondition": "100% of production AI runtime images are within patching SLA (e.g. critical fixes \u2264 14 days); report shows 0 SLA breaches or open waivers with expiry",
+          "passCondition": "100% of production AI runtime images are within patching SLA (e.g. critical fixes ≤ 14 days); report shows 0 SLA breaches or open waivers with expiry",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -2702,7 +2701,7 @@
           "id": "INF-M4",
           "requirement": "GPU/accelerator isolation and noisy-neighbor controls shall protect multi-tenant inference",
           "artifact": "Isolation design + capacity/isolation test report for shared accelerators",
-          "passCondition": "PASS if isolation controls are documented and the latest isolation/capacity test (\u226490 days) meets stated limits",
+          "passCondition": "PASS if isolation controls are documented and the latest isolation/capacity test (≤90 days) meets stated limits",
           "method": "manual",
           "requiredFromLevel": 5,
           "minCriticality": 3
@@ -2719,13 +2718,13 @@
           "minCriticality": 2,
           "deprecated": true,
           "replacedBy": "SCI-R1",
-          "deprecationNote": "Superseded by SCI-R1 (SLSA-aligned signed model/container verify-on-deploy). Retained for N\u22121 readers; new assessments should use SCI-R1."
+          "deprecationNote": "Superseded by SCI-R1 (SLSA-aligned signed model/container verify-on-deploy). Retained for N−1 readers; new assessments should use SCI-R1."
         },
         {
           "id": "INF-R3",
           "requirement": "Infrastructure-as-code with policy checks (CIS-aligned)",
           "artifact": "IaC modules for AI infra + CIS-aligned policy scan config + latest scan report for production stacks",
-          "passCondition": "Production AI infra is declared in IaC; CIS (or equivalent) policy checks run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions \u226490 days",
+          "passCondition": "Production AI infra is declared in IaC; CIS (or equivalent) policy checks run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions ≤90 days",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -2765,7 +2764,7 @@
           "url": "https://www.cncf.io/"
         },
         {
-          "title": "AWS Well-Architected \u2014 Security",
+          "title": "AWS Well-Architected — Security",
           "url": "https://aws.amazon.com/architecture/well-architected/"
         }
       ],
@@ -2775,14 +2774,14 @@
       "id": "APRF-25",
       "slug": "safety-responsible-ai",
       "name": "Safety & Responsible AI",
-      "summary": "Prevent harmful content and unfair outcomes\u2014NIST trustworthiness beyond adversarial security.",
+      "summary": "Prevent harmful content and unfair outcomes—NIST trustworthiness beyond adversarial security.",
       "domain": "safety",
       "crossCutting": false,
       "severity": "critical",
       "riskLevel": "high",
       "purpose": "Define and enforce content-safety, harm-prevention, fairness/bias, and user-facing AI disclosure requirements appropriate to the product domain and risk tier.",
       "engineeringPhilosophy": "Safety is not a synonym for security. Adversarial controls stop attackers; safety controls stop harmful or unfair outcomes for users and society. Both are required for production readiness.",
-      "whyItMatters": "Systems can be \u201csecure\u201d yet produce toxic, discriminatory, or undisclosed AI-generated content that creates regulatory, brand, and user harm.",
+      "whyItMatters": "Systems can be “secure” yet produce toxic, discriminatory, or undisclosed AI-generated content that creates regulatory, brand, and user harm.",
       "commonFailures": [
         "No domain-specific harm taxonomy or refusal policy",
         "Safety filters only on output, not on tool-mediated side effects",
@@ -2794,7 +2793,7 @@
           "id": "SAF-M1",
           "requirement": "A documented harm taxonomy and refusal/escalation policy shall exist for the product domain",
           "artifact": "Approved harm taxonomy + refusal/escalation policy (versioned, owned)",
-          "passCondition": "Policy document has version, owner, and review date \u2264 12 months; maps \u2265 domain-minimum harm categories with explicit refuse vs escalate actions for each",
+          "passCondition": "Policy document has version, owner, and review date ≤ 12 months; maps ≥ domain-minimum harm categories with explicit refuse vs escalate actions for each",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -2803,7 +2802,7 @@
           "id": "SAF-M2",
           "requirement": "Automated safety evaluation gates shall run on relevant releases",
           "artifact": "Safety suite definition with numeric thresholds + CI gate reports",
-          "passCondition": "Safety gate executed on 100% of in-scope releases in last 30 days; fail blocks promote unless time-boxed waiver (expiry \u2264 14 days) with owner",
+          "passCondition": "Safety gate executed on 100% of in-scope releases in last 30 days; fail blocks promote unless time-boxed waiver (expiry ≤ 14 days) with owner",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -2821,7 +2820,7 @@
           "id": "SAF-M4",
           "requirement": "Fairness/disparity evaluation shall cover high-stakes decision paths",
           "artifact": "Fairness/disparity eval methodology + latest run report for in-scope high-stakes paths",
-          "passCondition": "PASS if in-scope high-stakes paths are inventoried and the latest eval (\u226490 days) is retained with thresholds and owners",
+          "passCondition": "PASS if in-scope high-stakes paths are inventoried and the latest eval (≤90 days) is retained with thresholds and owners",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 3
@@ -2832,7 +2831,7 @@
           "id": "SAF-R2",
           "requirement": "Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)",
           "artifact": "Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run report",
-          "passCondition": "Suite covers documented harm categories; latest run \u226490 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
+          "passCondition": "Suite covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -2841,7 +2840,7 @@
           "id": "SAF-R3",
           "requirement": "Human review sampling of safety edge cases on a defined cadence",
           "artifact": "Safety edge-case sampling plan + last review packet (sample size, labels, actions) with reviewer names",
-          "passCondition": "Defined sample size and cadence (\u2265 monthly or per release); last packet \u226490 days includes disposition for each fail/edge case and links to backlog items when needed",
+          "passCondition": "Defined sample size and cadence (≥ monthly or per release); last packet ≤90 days includes disposition for each fail/edge case and links to backlog items when needed",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -2873,11 +2872,11 @@
       ],
       "references": [
         {
-          "title": "NIST AI RMF \u2014 Trustworthiness characteristics",
+          "title": "NIST AI RMF — Trustworthiness characteristics",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "ISO/IEC 42001 \u2014 AI management systems",
+          "title": "ISO/IEC 42001 — AI management systems",
           "url": "https://www.iso.org/standard/81230.html"
         }
       ],
@@ -2887,14 +2886,14 @@
       "id": "APRF-26",
       "slug": "explainability",
       "name": "Explainability & Transparency",
-      "summary": "Make AI decisions reconstructable for operators, users, and auditors\u2014not only for debugging.",
+      "summary": "Make AI decisions reconstructable for operators, users, and auditors—not only for debugging.",
       "domain": "safety",
       "crossCutting": false,
       "severity": "high",
       "riskLevel": "medium",
       "purpose": "Provide appropriate explanations, citations, and decision traces so users, operators, and auditors can understand why the system produced an outcome.",
       "engineeringPhilosophy": "Observability serves operators; explainability serves people affected by decisions and those who govern them. Production AI must support both audiences.",
-      "whyItMatters": "Opaque decisions block dispute resolution, regulatory review, and user trust\u2014especially in high-stakes or regulated contexts.",
+      "whyItMatters": "Opaque decisions block dispute resolution, regulatory review, and user trust—especially in high-stakes or regulated contexts.",
       "commonFailures": [
         "No citations for RAG answers that claim factual authority",
         "Tool-driven actions with no human-readable rationale",
@@ -2906,7 +2905,7 @@
           "id": "EXP-M1",
           "requirement": "High-stakes or factual RAG outputs shall include provenance (citations or source IDs)",
           "artifact": "RAG eval suite measuring citation presence/accuracy + sample production traces",
-          "passCondition": "On the factual/high-stakes RAG eval set, \u226590% of answers include \u22651 valid source ID/citation that resolves to an authorized corpus document",
+          "passCondition": "On the factual/high-stakes RAG eval set, ≥90% of answers include ≥1 valid source ID/citation that resolves to an authorized corpus document",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -2914,8 +2913,8 @@
         {
           "id": "EXP-M2",
           "requirement": "Operators shall reconstruct the decision path for a sampled production outcome",
-          "artifact": "Operator reconstruction procedure + timed drill record on \u22653 sampled traces",
-          "passCondition": "On-call or operator successfully reconstructs model\u2192retrieval/tools\u2192outcome for 3/3 sampled production traces within documented time budget (e.g. \u226415 minutes each)",
+          "artifact": "Operator reconstruction procedure + timed drill record on ≥3 sampled traces",
+          "passCondition": "On-call or operator successfully reconstructs model→retrieval/tools→outcome for 3/3 sampled production traces within documented time budget (e.g. ≤15 minutes each)",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -2952,8 +2951,8 @@
         {
           "id": "EXP-R3",
           "requirement": "Formal explainability requirements mapped for regulated features",
-          "artifact": "Explainability requirements matrix (feature \u00d7 regulation/obligation) + last compliance review record",
-          "passCondition": "Every regulated AI feature lists required explanation type and evidence; matrix reviewed \u226412 months ago with named owner",
+          "artifact": "Explainability requirements matrix (feature × regulation/obligation) + last compliance review record",
+          "passCondition": "Every regulated AI feature lists required explanation type and evidence; matrix reviewed ≤12 months ago with named owner",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -2983,7 +2982,7 @@
       ],
       "references": [
         {
-          "title": "NIST AI RMF \u2014 Explainability and Interpretability",
+          "title": "NIST AI RMF — Explainability and Interpretability",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
@@ -2999,7 +2998,7 @@
       "severity": "critical",
       "riskLevel": "high",
       "purpose": "Minimize collection and exposure of personal and sensitive data across prompts, retrieval, memory, logs, and third-party model providers.",
-      "engineeringPhilosophy": "Privacy by design for AI means data minimization, purpose limitation, residency awareness, and contractual/technical controls on processors\u2014not only a privacy policy page.",
+      "engineeringPhilosophy": "Privacy by design for AI means data minimization, purpose limitation, residency awareness, and contractual/technical controls on processors—not only a privacy policy page.",
       "whyItMatters": "AI pipelines concentrate sensitive data. Over-collection and uncontrolled provider sharing create regulatory, contractual, and trust failures even when 'security' looks fine.",
       "commonFailures": [
         "Sending full customer records to external models when aggregates would do",
@@ -3012,7 +3011,7 @@
           "id": "PRI-M1",
           "requirement": "Every production path that sends data to models shall apply a documented classification scheme covering AI payload classes, and every sensitive class shall have written handling rules (allow, redact, block, or equivalent).",
           "artifact": "Data classification scheme covering AI/model-bound payload classes + Handling rules for each sensitive class (allow / redact / block or equivalent) + Automated or sampled audit showing 100% of sampled production model requests tagged, with sensitive handling matching policy",
-          "passCondition": "A classification scheme covers AI payload classes; \u22651 automated or sampled audit shows 100% of sampled production model requests tagged with a class; sensitive-class handling matches documented policy (audit/scheme measuredAt \u226490 days).",
+          "passCondition": "A classification scheme covers AI payload classes; ≥1 automated or sampled audit shows 100% of sampled production model requests tagged with a class; sensitive-class handling matches documented policy (audit/scheme measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3021,16 +3020,16 @@
           "id": "PRI-M2",
           "requirement": "Where regulation or policy requires it, users or tenants shall have documented deletion and/or export paths that cover AI memory (conversation, durable, or retrieval-augmented stores) and in-scope AI logs, with a tested completion within a published SLA.",
           "artifact": "Deletion/export procedure or API covering AI memory and in-scope AI logs + Successful test execution record for a sample tenant/user with measured duration vs SLA",
-          "passCondition": "Documented API/runbook covers AI memory and in-scope logs; a test shows deletion/export completes within SLA for a sample tenant/user with measured duration recorded (test evidence measuredAt \u226490 days).",
+          "passCondition": "Documented API/runbook covers AI memory and in-scope logs; a test shows deletion/export completes within SLA for a sample tenant/user with measured duration recorded (test evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "PRI-M3",
-          "requirement": "Regulated workloads shall be labeled, and model/tool routing shall keep 100% of sampled regulated requests in approved regions\u2014enforced by policy or gateway controls, not prompt instructions alone.",
+          "requirement": "Regulated workloads shall be labeled, and model/tool routing shall keep 100% of sampled regulated requests in approved regions—enforced by policy or gateway controls, not prompt instructions alone.",
           "artifact": "Routing policy config naming approved regions for regulated tenants/workloads + Sample routing decisions (or deny logs) showing 100% of sampled regulated requests stayed in approved regions",
-          "passCondition": "Regulated workloads are labeled; 100% of sampled regulated requests stay in approved regions (routing sample/policy evidence measuredAt \u226490 days).",
+          "passCondition": "Regulated workloads are labeled; 100% of sampled regulated requests stay in approved regions (routing sample/policy evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 3
@@ -3040,8 +3039,8 @@
         {
           "id": "PRI-R1",
           "requirement": "Production paths that send data to models should tokenize or redact documented high-sensitivity fields before the model call, with fail-closed behavior when redaction errors.",
-          "artifact": "Inventory or policy listing high-sensitivity fields subject to pre-model tokenization/redaction + Pre-model tokenization/redaction pipeline config with fail-closed on redaction errors + Sample of \u226550 production model requests showing 0 cleartext hits for those fields",
-          "passCondition": "Documented high-sensitivity fields never appear in cleartext in \u226550 sampled production model requests; the pre-model tokenization/redaction pipeline fails closed on errors (sample/pipeline evidence measuredAt \u226490 days).",
+          "artifact": "Inventory or policy listing high-sensitivity fields subject to pre-model tokenization/redaction + Pre-model tokenization/redaction pipeline config with fail-closed on redaction errors + Sample of ≥50 production model requests showing 0 cleartext hits for those fields",
+          "passCondition": "Documented high-sensitivity fields never appear in cleartext in ≥50 sampled production model requests; the pre-model tokenization/redaction pipeline fails closed on errors (sample/pipeline evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3050,7 +3049,7 @@
           "id": "PRI-R2",
           "requirement": "Every production third-party model provider should have a dated review of processing terms covering training use and retention, with a named owner; reviews older than 12 months should be treated as missing.",
           "artifact": "Inventory of production model providers + Vendor terms review records (DPA/training/retention) with date and owner per provider",
-          "passCondition": "100% of production model providers have a review record \u226412 months covering training use and retention; 0 unreviewed providers in the inventory (inventory measuredAt \u226490 days; each review dated \u2264365 days).",
+          "passCondition": "100% of production model providers have a review record ≤12 months covering training use and retention; 0 unreviewed providers in the inventory (inventory measuredAt ≤90 days; each review dated ≤365 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3059,7 +3058,7 @@
           "id": "PRI-R3",
           "requirement": "Every major in-scope AI feature should have a completed DPIA/PIA (or equivalent privacy assessment) with owner sign-off before production traffic.",
           "artifact": "Inventory of major in-scope AI features in or entering production + Completed DPIA/PIA (or equivalent) with owner sign-off per feature, dated before production traffic",
-          "passCondition": "100% of major in-scope AI features have a completed DPIA/PIA (or equivalent) with owner sign-off dated before production traffic (inventory/assessment evidence measuredAt \u226490 days).",
+          "passCondition": "100% of major in-scope AI features have a completed DPIA/PIA (or equivalent) with owner sign-off dated before production traffic (inventory/assessment evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3091,11 +3090,11 @@
       ],
       "references": [
         {
-          "title": "NIST AI RMF \u2014 privacy considerations",
+          "title": "NIST AI RMF — privacy considerations",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM \u2014 Sensitive Information Disclosure",
+          "title": "OWASP LLM — Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -3105,14 +3104,14 @@
       "id": "APRF-27",
       "slug": "data-governance",
       "name": "Data Governance & Quality",
-      "summary": "Govern corpora, indexes, labels, and feedback loops\u2014distinct from privacy controls.",
+      "summary": "Govern corpora, indexes, labels, and feedback loops—distinct from privacy controls.",
       "domain": "data",
       "crossCutting": false,
       "severity": "high",
       "riskLevel": "high",
       "purpose": "Own lineage, quality, labeling, retrieval-index governance, and train/serve consistency for data that shapes AI behavior.",
       "engineeringPhilosophy": "Privacy asks who may see data; governance asks whether the data is fit for purpose. Bad corpora and poisoned indexes create silent production failures.",
-      "whyItMatters": "Hallucinations, biased outcomes, and retrieval failures often originate in unmanaged data\u2014not in the model alone.",
+      "whyItMatters": "Hallucinations, biased outcomes, and retrieval failures often originate in unmanaged data—not in the model alone.",
       "commonFailures": [
         "RAG indexes with no freshness or ownership",
         "Eval and fine-tune sets without label quality review",
@@ -3124,7 +3123,7 @@
           "id": "DG-M1",
           "requirement": "Every production retrieval corpus and index shall have a named owner, a version ID, and a refresh cadence; indexes stale beyond cadence shall be flagged or rebuilt.",
           "artifact": "Corpus/index inventory listing production indexes with owner, version ID, and refresh schedule + Evidence stale-beyond-cadence indexes are flagged or rebuilt",
-          "passCondition": "100% of production indexes have owner + version ID + refresh cadence; 0 indexes missing any field; stale beyond cadence are flagged or rebuilt (inventory measuredAt \u226490 days).",
+          "passCondition": "100% of production indexes have owner + version ID + refresh cadence; 0 indexes missing any field; stale beyond cadence are flagged or rebuilt (inventory measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3133,7 +3132,7 @@
           "id": "DG-M2",
           "requirement": "Every dataset used in production eval gates or fine-tunes shall have documented provenance and quality criteria, and promotion shall be blocked when those are missing.",
           "artifact": "Dataset cards or registry entries for eval/fine-tune sets covering provenance and quality criteria + CI or review-checklist evidence that promotion is blocked when cards are missing",
-          "passCondition": "100% of datasets used in production gates or fine-tunes have provenance + quality criteria documented; promotion is blocked if missing (CI or review checklist evidence; inventory measuredAt \u226490 days).",
+          "passCondition": "100% of datasets used in production gates or fine-tunes have provenance + quality criteria documented; promotion is blocked if missing (CI or review checklist evidence; inventory measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3141,8 +3140,8 @@
         {
           "id": "DG-M3",
           "requirement": "Every path that promotes user feedback or working memory into durable memory or training data shall require a policy check or human approval, and ungated promotion shall be denied by test.",
-          "artifact": "Promotion policy listing feedback/memory\u2192durable/training write paths + Write-path controls (policy engine or human approval) on those paths + Automated tests showing ungated promotion is denied",
-          "passCondition": "100% of feedback\u2192durable-memory/training promotion paths require a policy check or human approval; automated tests show ungated promotion is denied (deny evidence measuredAt \u226490 days).",
+          "artifact": "Promotion policy listing feedback/memory→durable/training write paths + Write-path controls (policy engine or human approval) on those paths + Automated tests showing ungated promotion is denied",
+          "passCondition": "100% of feedback→durable-memory/training promotion paths require a policy check or human approval; automated tests show ungated promotion is denied (deny evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3151,9 +3150,9 @@
       "recommendedChecks": [
         {
           "id": "DG-R1",
-          "requirement": "Each critical corpus shall have a documented freshness SLO, \u226595% of sampled docs shall meet that SLO in the last 7 days, and an alert shall fire on freshness breach.",
-          "artifact": "Freshness SLO definitions for each critical corpus ID + Dashboard or job report showing \u226595% SLO compliance over the last 7 days + Alert config (or firing proof) covering freshness breaches",
-          "passCondition": "Each critical corpus has a documented freshness SLO (e.g. max age hours); \u226595% of sampled docs meet the SLO in the last 7 days; an alert fires on freshness breach (sample/alert evidence measuredAt \u22647 days).",
+          "requirement": "Each critical corpus shall have a documented freshness SLO, ≥95% of sampled docs shall meet that SLO in the last 7 days, and an alert shall fire on freshness breach.",
+          "artifact": "Freshness SLO definitions for each critical corpus ID + Dashboard or job report showing ≥95% SLO compliance over the last 7 days + Alert config (or firing proof) covering freshness breaches",
+          "passCondition": "Each critical corpus has a documented freshness SLO (e.g. max age hours); ≥95% of sampled docs meet the SLO in the last 7 days; an alert fires on freshness breach (sample/alert evidence measuredAt ≤7 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3161,8 +3160,8 @@
         {
           "id": "DG-R2",
           "requirement": "Every production embedding or feature pipeline shall run a train/serve skew job within the last 7 days, document at least one skew threshold, and open a tracked ticket or page on breach.",
-          "artifact": "Skew monitor config covering each production embedding/feature pipeline + Last weekly (or \u22647-day) skew report comparing train vs serve distributions + Threshold definition plus ticket/page routing on breach",
-          "passCondition": "A skew job ran within the last 7 days for every production embedding/feature pipeline; at least one documented threshold exists; breach creates a tracked ticket or page (job/alert evidence measuredAt \u22647 days).",
+          "artifact": "Skew monitor config covering each production embedding/feature pipeline + Last weekly (or ≤7-day) skew report comparing train vs serve distributions + Threshold definition plus ticket/page routing on breach",
+          "passCondition": "A skew job ran within the last 7 days for every production embedding/feature pipeline; at least one documented threshold exists; breach creates a tracked ticket or page (job/alert evidence measuredAt ≤7 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3171,7 +3170,7 @@
           "id": "DG-R3",
           "requirement": "Every major eval or fine-tune set used in production promotion shall have a dataset card covering purpose, source, PII handling, and a last-updated date within 12 months.",
           "artifact": "Dataset cards (or registry metadata) for each major eval and fine-tune corpus + Fields covering purpose, source, PII handling, and last-updated date",
-          "passCondition": "100% of major eval/fine-tune sets used in production promotion have a dataset card with purpose, source, PII handling, and last-updated date \u226412 months (inventory measuredAt \u226490 days; card last-updated \u2264365 days).",
+          "passCondition": "100% of major eval/fine-tune sets used in production promotion have a dataset card with purpose, source, PII handling, and last-updated date ≤12 months (inventory measuredAt ≤90 days; card last-updated ≤365 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3202,11 +3201,11 @@
       ],
       "references": [
         {
-          "title": "NIST AI RMF \u2014 Map and Measure (data)",
+          "title": "NIST AI RMF — Map and Measure (data)",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "ML systems engineering \u2014 data quality practices",
+          "title": "ML systems engineering — data quality practices",
           "url": "https://ml-ops.org/"
         }
       ],
@@ -3221,7 +3220,7 @@
       "crossCutting": false,
       "severity": "high",
       "riskLevel": "high",
-      "purpose": "Govern what the system remembers across turns and sessions\u2014including user memory, agent state, and shared multi-agent memory\u2014with retention, isolation, and integrity controls.",
+      "purpose": "Govern what the system remembers across turns and sessions—including user memory, agent state, and shared multi-agent memory—with retention, isolation, and integrity controls.",
       "engineeringPhilosophy": "Memory is persistent attack surface and privacy liability. Default to minimal retention, strict tenancy isolation, and verifiable write paths. Memory that cannot be deleted or audited is not production-ready.",
       "whyItMatters": "Poisoned or leaked memory causes lasting incorrect behavior, cross-tenant data exposure, and compliance failures. Autonomous agents amplify memory risk by writing their own state.",
       "commonFailures": [
@@ -3233,9 +3232,9 @@
       "mandatoryChecks": [
         {
           "id": "MEM-M1",
-          "requirement": "AI memory stores (conversation, durable, and retrieval/vector memory) shall enforce tenant isolation\u2014and user isolation where policy requires it\u2014proven by automated attack tests with zero successful unauthorized reads or writes.",
+          "requirement": "AI memory stores (conversation, durable, and retrieval/vector memory) shall enforce tenant isolation—and user isolation where policy requires it—proven by automated attack tests with zero successful unauthorized reads or writes.",
           "artifact": "Inventory or scope note of in-scope AI memory APIs (conversation, durable, vector/retrieval) + Cross-tenant (and cross-user where required) isolation attack suite results for those memory APIs",
-          "passCondition": "0 successful cross-tenant (and cross-user where required) memory reads/writes across \u226510 automated attack cases covering in-scope memory APIs (suite evidence measuredAt \u226490 days).",
+          "passCondition": "0 successful cross-tenant (and cross-user where required) memory reads/writes across ≥10 automated attack cases covering in-scope memory APIs (suite evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3244,7 +3243,7 @@
           "id": "MEM-M2",
           "requirement": "Every in-scope AI memory class shall have a documented retention period and an executable TTL or deletion job; a test shall show sample records older than retention are absent after the job runs.",
           "artifact": "Retention policy naming periods per AI memory class (conversation, durable, vector/retrieval, or equivalent) + TTL or deletion job config covering those memory classes + Successful deletion/TTL test record showing older-than-retention samples absent after job run",
-          "passCondition": "Policy documents retention periods per memory class; a TTL/deletion job succeeds in test and sample records older than retention are absent after the job run (policy/job/test evidence measuredAt \u226490 days).",
+          "passCondition": "Policy documents retention periods per memory class; a TTL/deletion job succeeds in test and sample records older than retention are absent after the job run (policy/job/test evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3253,7 +3252,7 @@
           "id": "MEM-M3",
           "requirement": "Writes to durable/long-term AI memory shall be gated by a policy that enumerates allowed writers and content classes; unauthorized writers shall be denied at 100% in automated tests.",
           "artifact": "Write policy for durable/long-term memory naming allowed writers and content classes + Write-policy enforcement config (middleware, gateway, or store gate) + Automated deny tests showing 100% rejection of unauthorized writers",
-          "passCondition": "Policy enumerates allowed writers and content classes for durable/long-term memory; unauthorized writers are denied at 100% in automated tests (policy/test evidence measuredAt \u226490 days).",
+          "passCondition": "Policy enumerates allowed writers and content classes for durable/long-term memory; unauthorized writers are denied at 100% in automated tests (policy/test evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3262,7 +3261,7 @@
           "id": "MEM-M4",
           "requirement": "Critical AI memory classes shall be inventoried and protected with cryptographic or signed integrity controls; the latest verification for those classes shall succeed.",
           "artifact": "Inventory of critical AI memory classes requiring integrity protection + Integrity/signing design or config for those classes (MAC, signature, sealed object, or equivalent) + Latest verification sample showing successful integrity/signature checks for inventoried classes",
-          "passCondition": "Critical memory classes are inventoried; cryptographic verification or signature checks succeed for 100% of those classes in the latest check (inventory/verification evidence measuredAt \u226490 days).",
+          "passCondition": "Critical memory classes are inventoried; cryptographic verification or signature checks succeed for 100% of those classes in the latest check (inventory/verification evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
@@ -3271,9 +3270,9 @@
       "recommendedChecks": [
         {
           "id": "MEM-R1",
-          "requirement": "The adversarial or memory eval suite should include at least five memory poisoning scenarios\u2014including cross-tenant write, prompt-in-memory, and stale trusted fact\u2014executed within 90 days, with critical fails blocking promotion or requiring documented risk acceptance.",
+          "requirement": "The adversarial or memory eval suite should include at least five memory poisoning scenarios—including cross-tenant write, prompt-in-memory, and stale trusted fact—executed within 90 days, with critical fails blocking promotion or requiring documented risk acceptance.",
           "artifact": "Memory-poisoning cases in the adversarial/eval suite covering the required scenario types + Latest suite run report with pass/fail per case and gate or risk-acceptance disposition for critical fails",
-          "passCondition": "\u22655 memory-poisoning scenarios are executed (including cross-tenant write, prompt-in-memory, and stale trusted fact); critical fails block promotion or have documented risk acceptance (suite evidence measuredAt \u226490 days).",
+          "passCondition": "≥5 memory-poisoning scenarios are executed (including cross-tenant write, prompt-in-memory, and stale trusted fact); critical fails block promotion or have documented risk acceptance (suite evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3281,8 +3280,8 @@
         {
           "id": "MEM-R3",
           "requirement": "Working (short-lived) memory should be separated from durable memory; promotion into durable stores should require an explicit rule; recent promotions should record rule ID and actor; and TTL should differ by memory class.",
-          "artifact": "Memory architecture doc or config showing distinct working vs durable stores + Promotion rules that gate working\u2192durable writes + Sample promotion audit (\u226510 recent promotions with rule ID and actor) and TTL config differing by memory class",
-          "passCondition": "Working memory cannot silently become durable without a promotion rule; the last 10 promotions show rule ID and actor; TTL differs by memory class (architecture/audit evidence measuredAt \u226490 days).",
+          "artifact": "Memory architecture doc or config showing distinct working vs durable stores + Promotion rules that gate working→durable writes + Sample promotion audit (≥10 recent promotions with rule ID and actor) and TTL config differing by memory class",
+          "passCondition": "Working memory cannot silently become durable without a promotion rule; the last 10 promotions show rule ID and actor; TTL differs by memory class (architecture/audit evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3314,11 +3313,11 @@
       ],
       "references": [
         {
-          "title": "NIST AI RMF \u2014 Govern and Manage",
+          "title": "NIST AI RMF — Govern and Manage",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM \u2014 Training Data Poisoning / Vector and Embedding Weaknesses",
+          "title": "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -3345,28 +3344,19 @@
       "mandatoryChecks": [
         {
           "id": "MOD-M1",
-          "requirement": "Production shall use pinned model identifiers; aliases like \u201clatest\u201d are forbidden on critical paths",
-          "artifact": "Production model pin config + lint/CI rule rejecting \u201clatest\u201d aliases",
-          "passCondition": "0 \u201clatest\u201d/floating aliases on critical production paths in config lint; 100% of critical paths reference immutable model IDs",
-          "method": "automated",
+          "requirement": "Critical production AI paths shall reference immutable, pinned model identifiers, and shall not use floating aliases such as “latest” (or equivalent provider defaults that can change without a deploy).",
+          "artifact": "Production model pin config (or registry) listing immutable model IDs on critical paths + Lint or CI rule that rejects “latest”/floating aliases on those paths",
+          "passCondition": "0 “latest”/floating aliases on critical production paths; 100% of those paths reference immutable model IDs; lint or CI rejects floating aliases (pin evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "MOD-M2",
-          "requirement": "Model inventory shall exist with owners, data residency, and intended use",
-          "artifact": "Model inventory registry export",
-          "passCondition": "100% of production models have owner, residency, and intended-use fields; query returns 0 incomplete rows",
-          "method": "manual",
-          "requiredFromLevel": 3,
-          "minCriticality": 2
-        },
-        {
-          "id": "MOD-M3",
-          "requirement": "Model changes shall require evaluation evidence before promotion",
-          "artifact": "Promotion policy + CI/registry requiring eval artifact on model version bumps",
-          "passCondition": "100% of production model promotions in last 30 days have linked eval pass artifacts; promote without eval is blocked by gate",
-          "method": "manual",
+          "requirement": "Every production model promotion (version bump, pin change, or registry cutover) shall link a passing eval artifact, and the promotion path shall block promote-without-eval—not rely on informal review alone.",
+          "artifact": "Promotion policy or CI/registry rule requiring an eval pass artifact on model version bumps + Promotion log (or CI matrix) for the last 30 days showing linked eval pass artifacts; 0 promote-without-eval",
+          "passCondition": "100% of production model promotions in the last 30 days have linked eval pass artifacts; promote-without-eval is blocked by gate (promotion evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -3374,28 +3364,37 @@
       "recommendedChecks": [
         {
           "id": "MOD-R1",
-          "requirement": "Deprecation and sunset policy for models and embeddings",
-          "artifact": "Model/embedding deprecation and sunset policy + registry entries showing sunset dates for superseded pins",
-          "passCondition": "Policy defines notice period and forced-sunset rules; \u22651 superseded production model/embedding has a sunset date in the registry; no undocumented pins past sunset without exception",
-          "method": "manual",
+          "requirement": "Production systems should publish a deprecation and sunset policy for models and embeddings that defines notice periods and forced-sunset rules, record sunset dates for superseded production pins in the registry, and keep undocumented pins past sunset at zero (exceptions time-boxed).",
+          "artifact": "Model/embedding deprecation and sunset policy (notice period + forced-sunset rules) + Registry export showing sunset dates for superseded pins; query of undocumented pins past sunset = 0",
+          "passCondition": "Policy defines notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date in the registry; undocumented pins past sunset = 0 without exception (deprecation evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "MOD-R2",
-          "requirement": "Capability allowlists (e.g., code execution, vision) per workload",
-          "artifact": "Per-workload capability allowlist config (code execution, vision, browsing, etc.) + deny logs",
-          "passCondition": "Each production workload has an explicit capability allowlist; a denied capability attempt is recorded in test or prod within 90 days",
-          "method": "manual",
+          "requirement": "Each production AI workload should declare an explicit allowlist of model capabilities it may use (for example code execution, vision, browsing, or tool-calling modes), and denied capability attempts should be recorded in test or production within 90 days.",
+          "artifact": "Per-workload capability allowlist config (code execution, vision, browsing, etc.) + Deny log or test fixture showing a denied capability attempt within 90 days",
+          "passCondition": "Each production workload has an explicit capability allowlist; ≥1 denied capability attempt is recorded in test or prod within 90 days (allowlist evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "MOD-R3",
-          "requirement": "License and provenance review for open-weight and fine-tuned models",
-          "artifact": "License/provenance review checklist + completed reviews for each open-weight or fine-tuned production model",
-          "passCondition": "100% of open-weight/fine-tuned production models have a license+provenance review \u226412 months old; blocked licenses have documented exceptions with expiry",
-          "method": "manual",
+          "requirement": "Every open-weight or fine-tuned model in production should have a completed license and provenance review ≤12 months old, and any blocked or restricted licenses should carry a documented exception with owner and expiry.",
+          "artifact": "License/provenance review checklist (or registry fields) for open-weight and fine-tuned models + Completed reviews ≤12 months old for each such production model; exceptions for blocked licenses with expiry",
+          "passCondition": "100% of open-weight/fine-tuned production models have a license+provenance review ≤12 months old; blocked licenses have documented exceptions with expiry (review evidence measuredAt ≤90 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 4,
+          "minCriticality": 2
+        },
+        {
+          "id": "MOD-R4",
+          "requirement": "Production AI systems should keep a queryable model inventory (or registry) in which every production model records a named owner, data-residency constraint, and intended use—with zero incomplete rows on those fields.",
+          "artifact": "Model inventory / registry export listing production models + Query or attestation showing 0 incomplete owner/residency/intended-use rows",
+          "passCondition": "100% of production models have owner, residency, and intended-use fields; inventory query returns 0 incomplete rows (inventory evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -3407,7 +3406,7 @@
       ],
       "engineeringBestPractices": [
         "Abstract provider SDKs behind an internal model gateway with policy",
-        "Track embedding model versions separately\u2014index rebuilds are part of change",
+        "Track embedding model versions separately—index rebuilds are part of change",
         "Document fallback models and degraded modes",
         "Separate experimental models into non-production projects"
       ],
@@ -3426,11 +3425,11 @@
       ],
       "references": [
         {
-          "title": "NIST AI RMF \u2014 Map",
+          "title": "NIST AI RMF — Map",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "AWS Well-Architected \u2014 Operational Excellence (change management parallels)",
+          "title": "AWS Well-Architected — Operational Excellence (change management parallels)",
           "url": "https://aws.amazon.com/architecture/well-architected/"
         }
       ],
@@ -3445,7 +3444,7 @@
       "crossCutting": false,
       "severity": "high",
       "riskLevel": "high",
-      "purpose": "Manage system, developer, and tool prompts as first-class production artifacts\u2014versioned, reviewed, tested, and rolled back like application code.",
+      "purpose": "Manage system, developer, and tool prompts as first-class production artifacts—versioned, reviewed, tested, and rolled back like application code.",
       "engineeringPhilosophy": "Prompts are code. They change behavior, create regressions, and carry security and cost implications. Informal edits in dashboards without lineage are an anti-pattern for production AI.",
       "whyItMatters": "Silent prompt drift is a leading cause of quality and safety regressions. Without versioning and eval gates, teams cannot answer what changed when production behavior breaks.",
       "commonFailures": [
@@ -3477,7 +3476,7 @@
           "id": "PRM-M3",
           "requirement": "Rollback to a prior prompt version shall be possible without redeploying unrelated services",
           "artifact": "Prompt rollback procedure + timed restore test",
-          "passCondition": "Prior prompt version restored in \u2264 documented RTO without full app redeploy; demonstrated in last 90 days",
+          "passCondition": "Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in last 90 days",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3538,7 +3537,7 @@
       ],
       "references": [
         {
-          "title": "Google SRE Workbook \u2014 Managing Risk (change management parallels)",
+          "title": "Google SRE Workbook — Managing Risk (change management parallels)",
           "url": "https://sre.google/workbook/"
         },
         {
@@ -3557,7 +3556,7 @@
       "crossCutting": false,
       "severity": "high",
       "riskLevel": "high",
-      "purpose": "Design how context windows are filled\u2014retrieval, history, tool results, and system state\u2014so the model receives necessary, authorized, and bounded information.",
+      "purpose": "Design how context windows are filled—retrieval, history, tool results, and system state—so the model receives necessary, authorized, and bounded information.",
       "engineeringPhilosophy": "Context is a scarce, trusted resource. Overstuffing, under-filtering, and leaking privileged context are engineering defects, not model quirks. Structure beats volume.",
       "whyItMatters": "Poor context design causes hallucinations, privacy leaks, prompt injection via retrieved content, and unbounded cost. Agents fail when context is noisy or when critical constraints are buried.",
       "commonFailures": [
@@ -3569,27 +3568,27 @@
       "mandatoryChecks": [
         {
           "id": "CTX-M1",
-          "requirement": "Every production context builder shall enforce a finite max token/byte budget and documented prioritization rules so oversized inputs are truncated or rejected\u2014never silently overflowing the model window.",
+          "requirement": "Every production context builder shall enforce a finite max token/byte budget and documented prioritization rules so oversized inputs are truncated or rejected—never silently overflowing the model window.",
           "artifact": "Context-budget config (max tokens/bytes) for each production context builder + Unit/integration tests showing truncate/reject per priority rules with 0 silent overflows",
-          "passCondition": "100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows (budget evidence measuredAt \u226490 days).",
+          "passCondition": "100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows (budget evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "CTX-M2",
-          "requirement": "Retrieved and tool-sourced content shall receive a source label/type and an access check before inclusion in assembled model context\u2014unauthorized chunks must be excluded.",
+          "requirement": "Retrieved and tool-sourced content shall receive a source label/type and an access check before inclusion in assembled model context—unauthorized chunks must be excluded.",
           "artifact": "Context assembly code enforcing source labels on retrieved and tool-sourced chunks + Automated tests showing ACL exclusion of unauthorized chunks at 100% and labels on included chunks",
-          "passCondition": "Automated tests: unauthorized retrieval/tool chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts (label/ACL evidence measuredAt \u226490 days).",
+          "passCondition": "Automated tests: unauthorized retrieval/tool chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts (label/ACL evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "CTX-M3",
-          "requirement": "Production context assembly shall apply a documented inclusion policy that enumerates sensitive classes\u2014including secrets and regulated data\u2014with allow/deny rules, and shall strip or block disallowed classes before they enter the model context.",
-          "artifact": "Data-class inclusion policy enumerating sensitive classes with allow/deny rules + Enforcement tests or DLP hooks showing \u226595% strip/block on the sensitive-class fixture suite",
-          "passCondition": "Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at \u226595% on the sensitive-class fixture suite (policy/suite evidence measuredAt \u226490 days).",
+          "requirement": "Production context assembly shall apply a documented inclusion policy that enumerates sensitive classes—including secrets and regulated data—with allow/deny rules, and shall strip or block disallowed classes before they enter the model context.",
+          "artifact": "Data-class inclusion policy enumerating sensitive classes with allow/deny rules + Enforcement tests or DLP hooks showing ≥95% strip/block on the sensitive-class fixture suite",
+          "passCondition": "Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at ≥95% on the sensitive-class fixture suite (policy/suite evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3598,18 +3597,18 @@
       "recommendedChecks": [
         {
           "id": "CTX-R1",
-          "requirement": "Production AI requests should emit per-request context-budget usage metrics, and operators should be alerted when usage saturates a documented share of max context\u2014or when hard-truncate rate exceeds a defined threshold.",
+          "requirement": "Production AI requests should emit per-request context-budget usage metrics, and operators should be alerted when usage saturates a documented share of max context—or when hard-truncate rate exceeds a defined threshold.",
           "artifact": "Per-request context token/budget usage metrics (dashboard or telemetry export) + Alert rule for context saturation and/or hard-truncate rate with notify proof",
-          "passCondition": "\u226599% of production requests in a 24h sample emit context-budget usage; an alert fires when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold) (metrics/alert evidence measuredAt \u226490 days).",
+          "passCondition": "≥99% of production requests in a 24h sample emit context-budget usage; an alert fires when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold) (metrics/alert evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "CTX-R2",
-          "requirement": "When production context uses summarization or compaction, teams should run a critical-fact eval set and retain facts at or above a documented threshold; the last run should be \u226490 days old and regressions should block context-pipeline releases.",
-          "artifact": "Compaction/summarization eval set of critical facts with documented retention threshold + Latest information-loss / retention report \u226490 days with release-blocking gate evidence",
-          "passCondition": "Critical-fact retention \u2265 documented threshold after compaction on the eval set; last run \u226490 days; regressions block context-pipeline releases (eval evidence measuredAt \u226490 days).",
+          "requirement": "When production context uses summarization or compaction, teams should run a critical-fact eval set and retain facts at or above a documented threshold; the last run should be ≤90 days old and regressions should block context-pipeline releases.",
+          "artifact": "Compaction/summarization eval set of critical facts with documented retention threshold + Latest information-loss / retention report ≤90 days with release-blocking gate evidence",
+          "passCondition": "Critical-fact retention ≥ documented threshold after compaction on the eval set; last run ≤90 days; regressions block context-pipeline releases (eval evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3618,7 +3617,7 @@
           "id": "CTX-R3",
           "requirement": "Production context assemblers should emit labeled structured sections (for example JSON or XML blocks) that keep instructions distinct from untrusted data, and untrusted data should not be able to overwrite the instruction section.",
           "artifact": "Context assembly schema/spec separating instruction vs data blocks + sample rendered request + Red-team or unit test showing untrusted data cannot overwrite the instruction section",
-          "passCondition": "Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test (structure/test evidence measuredAt \u226490 days).",
+          "passCondition": "Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test (structure/test evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3650,11 +3649,11 @@
       ],
       "references": [
         {
-          "title": "NIST AI RMF \u2014 Map and Measure functions",
+          "title": "NIST AI RMF — Map and Measure functions",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM \u2014 Sensitive Information Disclosure",
+          "title": "OWASP LLM — Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -3669,7 +3668,7 @@
       "crossCutting": false,
       "severity": "critical",
       "riskLevel": "high",
-      "purpose": "Institutionalize offline and online evaluation so releases are gated on measured quality, safety, and task success\u2014not intuition or demo success.",
+      "purpose": "Institutionalize offline and online evaluation so releases are gated on measured quality, safety, and task success—not intuition or demo success.",
       "engineeringPhilosophy": "If you cannot measure it, you cannot claim production readiness. Evaluation is a product dependency equal to tests in traditional software, extended for stochastic systems.",
       "whyItMatters": "LLMs regress silently. Without evals, teams ship prompt or model changes that increase hallucination, toxicity, tool errors, or task failure rates under real traffic.",
       "commonFailures": [
@@ -3681,9 +3680,9 @@
       "mandatoryChecks": [
         {
           "id": "EVL-M1",
-          "requirement": "Every journey marked critical shall have a versioned offline eval suite, and every relevant production change in the last 30 days shall have triggered that suite\u2014or carry a documented waiver \u226414 days.",
-          "artifact": "Eval suite registry mapping critical journeys to versioned offline suites + CI (or equivalent) runs on prompt/model/tool changes for the last 30 days, or waivers \u226414 days",
-          "passCondition": "100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in the last 30 days triggered the suite (or documented waiver \u226414 days) (suite/CI evidence measuredAt \u226490 days).",
+          "requirement": "Every journey marked critical shall have a versioned offline eval suite, and every relevant production change in the last 30 days shall have triggered that suite—or carry a documented waiver ≤14 days.",
+          "artifact": "Eval suite registry mapping critical journeys to versioned offline suites + CI (or equivalent) runs on prompt/model/tool changes for the last 30 days, or waivers ≤14 days",
+          "passCondition": "100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in the last 30 days triggered the suite (or documented waiver ≤14 days) (suite/CI evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3692,7 +3691,7 @@
           "id": "EVL-M2",
           "requirement": "Production release gates shall require numeric minimum thresholds for at least one quality metric and one safety metric on every critical journey, and shall block deploy in CI when those thresholds are not met.",
           "artifact": "Gate config listing metric names and numeric thresholds per critical journey (quality + safety) + CI evidence that a failing gate blocks deploy (or equivalent required check)",
-          "passCondition": "Each critical journey has \u22651 quality and \u22651 safety metric with numeric threshold; failing gate blocks deploy in CI (gate evidence measuredAt \u226490 days).",
+          "passCondition": "Each critical journey has ≥1 quality and ≥1 safety metric with numeric threshold; failing gate blocks deploy in CI (gate evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3700,8 +3699,8 @@
         {
           "id": "EVL-M3",
           "requirement": "Production AI workloads shall emit live metrics for task success and failure and for safety refusals, with a defined alert or review cadence and dashboard freshness no older than 24 hours.",
-          "artifact": "Dashboard or metric exports for task success/failure rates on production AI workloads + Dashboard or metric exports for safety refusal rates + Alert rule or documented review cadence; proof dashboard freshness \u226424 hours",
-          "passCondition": "Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness \u226424 hours on the dashboard (metrics evidence measuredAt \u226490 days).",
+          "artifact": "Dashboard or metric exports for task success/failure rates on production AI workloads + Dashboard or metric exports for safety refusal rates + Alert rule or documented review cadence; proof dashboard freshness ≤24 hours",
+          "passCondition": "Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness ≤24 hours on the dashboard (metrics evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3710,7 +3709,7 @@
           "id": "EVL-M4",
           "requirement": "High-risk AI production cutovers shall run a shadow or canary with a retained eval comparison against the incumbent, and shall promote to 100% traffic only after documented promotion criteria are met.",
           "artifact": "Shadow/canary eval config for high-risk AI cutovers (promotion criteria documented) + Comparison report for the last high-risk cutover showing criteria met before full traffic",
-          "passCondition": "The last high-risk AI cutover retained a shadow/canary eval comparison that met promotion criteria before 100% traffic (cutover evidence measuredAt \u226490 days). If no high-risk AI cutover is in scope, score NOT_APPLICABLE.",
+          "passCondition": "The last high-risk AI cutover retained a shadow/canary eval comparison that met promotion criteria before 100% traffic (cutover evidence measuredAt ≤90 days). If no high-risk AI cutover is in scope, score NOT_APPLICABLE.",
           "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
@@ -3719,9 +3718,9 @@
       "recommendedChecks": [
         {
           "id": "EVL-R1",
-          "requirement": "Production AI systems should maintain three distinct offline eval tracks\u2014regression, adversarial, and distribution-shift\u2014each with its own corpus and named owner, and each should have run successfully on the last production model or prompt promotion.",
+          "requirement": "Production AI systems should maintain three distinct offline eval tracks—regression, adversarial, and distribution-shift—each with its own corpus and named owner, and each should have run successfully on the last production model or prompt promotion.",
           "artifact": "Eval catalog listing separate tracks for regression, adversarial, and distribution-shift with owners and corpora + Latest CI (or equivalent) matrix showing each track succeeded on the last production promotion",
-          "passCondition": "All three tracks (regression, adversarial, distribution-shift) exist with distinct corpora and named owners; each track ran successfully on the last production model/prompt promotion (catalog/CI evidence measuredAt \u226490 days).",
+          "passCondition": "All three tracks (regression, adversarial, distribution-shift) exist with distinct corpora and named owners; each track ran successfully on the last production model/prompt promotion (catalog/CI evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3730,7 +3729,7 @@
           "id": "EVL-R2",
           "requirement": "Production AI systems should run human preference or expert-review sampling on a documented cadence and sample size, covering production-like prompts, with disagreements adjudicated and recorded.",
           "artifact": "Human preference / expert-review sampling protocol (cadence + sample size) + Last scored sample set with production-like prompts and inter-rater / adjudication notes",
-          "passCondition": "Cadence and sample size are defined; last sample \u226490 days covers production-like prompts; disagreements have adjudication recorded (sampling evidence measuredAt \u226490 days).",
+          "passCondition": "Cadence and sample size are defined; last sample ≤90 days covers production-like prompts; disagreements have adjudication recorded (sampling evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3762,11 +3761,11 @@
       ],
       "references": [
         {
-          "title": "NIST AI RMF \u2014 Measure",
+          "title": "NIST AI RMF — Measure",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "Google SRE \u2014 Monitoring Distributed Systems (measurement culture)",
+          "title": "Google SRE — Monitoring Distributed Systems (measurement culture)",
           "url": "https://sre.google/sre-book/monitoring-distributed-systems/"
         }
       ],
@@ -3795,7 +3794,7 @@
       "mandatoryChecks": [
         {
           "id": "AGN-M1",
-          "requirement": "Each production agent (any autonomous or semi-autonomous runtime that plans, loops, or invokes tools on behalf of a product capability\u2014including in-process agents, MCP clients/servers acting as agents, and A2A participants) shall have a versioned charter covering purpose, allowed tools, data scope, autonomy limits, and a named owner.",
+          "requirement": "Each production agent (any autonomous or semi-autonomous runtime that plans, loops, or invokes tools on behalf of a product capability—including in-process agents, MCP clients/servers acting as agents, and A2A participants) shall have a versioned charter covering purpose, allowed tools, data scope, autonomy limits, and a named owner.",
           "artifact": "Versioned agent inventory listing every production agent with owner and charter URI/id + Per-agent charter documents (or equivalent structured records) covering purpose, tool allowlist reference, data scope, and autonomy limits",
           "passCondition": "100% of production agents appear in an inventory with a charter that includes purpose, tool allowlist reference, data scope, autonomy limits, and named owner; inventory query returns 0 agents missing any required field.",
           "method": "automated",
@@ -3804,9 +3803,9 @@
         },
         {
           "id": "AGN-M2",
-          "requirement": "Every production agent runtime shall enforce finite hard limits on plan/tool steps, wall-clock execution time, and recursive agent spawning (child/sub-agent depth). Limits must be enforced by the platform or runtime\u2014not by prompt wording alone\u2014and exceeding a limit must abort or fail closed the run.",
+          "requirement": "Every production agent runtime shall enforce finite hard limits on plan/tool steps, wall-clock execution time, and recursive agent spawning (child/sub-agent depth). Limits must be enforced by the platform or runtime—not by prompt wording alone—and exceeding a limit must abort or fail closed the run.",
           "artifact": "Runtime/platform configuration declaring max steps, wall-clock timeout, and spawn depth for each production agent (or shared policy bound) + Enforcement test results showing abort/fail-closed when each limit is exceeded (steps, time, spawn depth)",
-          "passCondition": "100% of production agents have finite max-steps, wall-clock timeout, and spawn-depth \u2264 configured bound; enforcement tests show the run aborts (or otherwise fails closed) when any limit is exceeded; 0 production agents rely solely on prompt text for these limits.",
+          "passCondition": "100% of production agents have finite max-steps, wall-clock timeout, and spawn-depth ≤ configured bound; enforcement tests show the run aborts (or otherwise fails closed) when any limit is exceeded; 0 production agents rely solely on prompt text for these limits.",
           "method": "automated",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3814,17 +3813,17 @@
         {
           "id": "AGN-M3",
           "requirement": "Authorized operators shall be able to pause or terminate production agent runs through a control-plane action that stops further planning and in-flight or queued tool/MCP/A2A side effects within a documented time-to-effect SLO. The control must not depend on the model cooperating and must not be disableable by the agent runtime itself.",
-          "artifact": "Kill-switch/pause runbook: who may invoke, scope (run / agent type / fleet), expected effect, and numeric time-to-effect SLO + Successful drill or production use record (\u226490 days) with timestamps for invoke \u2192 effect, covering at least one production agent path + Cancellation suite or import proving queued work, running tasks, and child agents stop without new dispatch",
-          "passCondition": "Documented pause/terminate control exists for production agents; control is restricted to authorized operators (not end-user-only and not model-invoked); \u22651 successful pause or terminate action in drill or production in the last 90 days shows recorded time-to-effect \u2264 documented numeric SLO; evidence shows further tool/MCP/A2A side effects for that run (and its spawned children, if any) were stopped or drained without requiring the model to refuse.",
+          "artifact": "Kill-switch/pause runbook: who may invoke, scope (run / agent type / fleet), expected effect, and numeric time-to-effect SLO + Successful drill or production use record (≤90 days) with timestamps for invoke → effect, covering at least one production agent path + Cancellation suite or import proving queued work, running tasks, and child agents stop without new dispatch",
+          "passCondition": "Documented pause/terminate control exists for production agents; control is restricted to authorized operators (not end-user-only and not model-invoked); ≥1 successful pause or terminate action in drill or production in the last 90 days shows recorded time-to-effect ≤ documented numeric SLO; evidence shows further tool/MCP/A2A side effects for that run (and its spawned children, if any) were stopped or drained without requiring the model to refuse.",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "AGN-M4",
-          "requirement": "Every production agent-to-agent (A2A) or multi-agent handoff path shall authenticate the peer identity and authorize a scoped capability set (tools, data, actions) independent of network presence. Unauthenticated, spoofed, or over-scoped handoffs shall be denied by the platform\u2014not by prompt instructions alone.",
+          "requirement": "Every production agent-to-agent (A2A) or multi-agent handoff path shall authenticate the peer identity and authorize a scoped capability set (tools, data, actions) independent of network presence. Unauthenticated, spoofed, or over-scoped handoffs shall be denied by the platform—not by prompt instructions alone.",
           "artifact": "Inventory of production A2A/multi-agent handoff paths with authn/authz mechanism per path + Capability token/schema (or equivalent) examples showing scoped grants for handoffs + Negative test results: unauthenticated, forged identity, and over-scoped capability cases denied at 100%",
-          "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers and scoped capabilities; negative tests show unauthenticated, forged-peer, and over-scoped handoffs denied at 100%; 0 production handoff paths that accept anonymous or network-presence-only trust (deny evidence measuredAt \u226490 days).",
+          "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers and scoped capabilities; negative tests show unauthenticated, forged-peer, and over-scoped handoffs denied at 100%; 0 production handoff paths that accept anonymous or network-presence-only trust (deny evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3833,9 +3832,9 @@
       "recommendedChecks": [
         {
           "id": "AGN-R1",
-          "requirement": "Production agent planners should run policy checks for goal conflicts and disallowed goals before invoking side-effecting tools. Checks must be enforced by the platform or planner runtime\u2014not by prompt wording alone\u2014 and denied plans must leave an observable deny/allow trace.",
-          "artifact": "Versioned pre-execution policy rules (goal-conflict / disallowed-goal) with named owner + Sample deny/allow traces showing the planner gated side-effecting tools + \u22651 synthetic conflict deny record (test or prod) \u226490 days",
-          "passCondition": "Agent planner runs policy checks for goal conflicts / disallowed goals before side-effecting tools; \u22651 synthetic conflict is denied in test or production logs within the last 90 days with retained deny/allow traces; the policy rule set has a named owner.",
+          "requirement": "Production agent planners should run policy checks for goal conflicts and disallowed goals before invoking side-effecting tools. Checks must be enforced by the platform or planner runtime—not by prompt wording alone— and denied plans must leave an observable deny/allow trace.",
+          "artifact": "Versioned pre-execution policy rules (goal-conflict / disallowed-goal) with named owner + Sample deny/allow traces showing the planner gated side-effecting tools + ≥1 synthetic conflict deny record (test or prod) ≤90 days",
+          "passCondition": "Agent planner runs policy checks for goal conflicts / disallowed goals before side-effecting tools; ≥1 synthetic conflict is denied in test or production logs within the last 90 days with retained deny/allow traces; the policy rule set has a named owner.",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3843,8 +3842,8 @@
         {
           "id": "AGN-R2",
           "requirement": "New or materially changed production agent behaviors should be exercised in a sandbox or simulation environment before promotion, with recorded pass/fail criteria. The last such promotion should link to a sandbox run completed within 30 days before release.",
-          "artifact": "Sandbox/simulation environment config (or equivalent) for agent behaviors + Last pre-prod simulation/sandbox report for a behavior change, linked to the production promotion + Recorded pass/fail criteria and outcome for that run (\u226430 days before release)",
-          "passCondition": "Last new agent behavior promoted to production has a linked sandbox or simulation run completed \u226430 days before release with pass/fail criteria recorded; the sandbox/simulation environment used for agent behaviors is documented or configured.",
+          "artifact": "Sandbox/simulation environment config (or equivalent) for agent behaviors + Last pre-prod simulation/sandbox report for a behavior change, linked to the production promotion + Recorded pass/fail criteria and outcome for that run (≤30 days before release)",
+          "passCondition": "Last new agent behavior promoted to production has a linked sandbox or simulation run completed ≤30 days before release with pass/fail criteria recorded; the sandbox/simulation environment used for agent behaviors is documented or configured.",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3853,7 +3852,7 @@
           "id": "AGN-R3",
           "requirement": "Every production AI system and production agent should appear in a versioned RACI or ownership register that names Responsible and Accountable parties (and Consulted/Informed where used) across the teams that operate the agent fleet. Inventory queries should return 0 orphan system or agent IDs missing required ownership fields.",
           "artifact": "Versioned RACI or ownership register covering production AI systems / agents + Required ownership fields defined (at minimum Responsible + Accountable) + Inventory export or query result showing 0 orphans for those fields",
-          "passCondition": "Every production AI system ID (and production agent ID in scope) has non-empty Responsible and Accountable owner fields for the organization\u2019s required domains/roles; inventory query returns 0 orphans (register/export measuredAt \u226490 days).",
+          "passCondition": "Every production AI system ID (and production agent ID in scope) has non-empty Responsible and Accountable owner fields for the organization’s required domains/roles; inventory query returns 0 orphans (register/export measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3862,10 +3861,10 @@
       "evidenceRequired": [
         "Versioned agent inventory with charters and owners (AGN-M1)",
         "Runtime max-steps / wall-clock / spawn-depth config + abort-on-exceed evidence (AGN-M2)",
-        "Kill-switch/pause runbook, cancellation suite, and \u226490-day drill record (AGN-M3)",
+        "Kill-switch/pause runbook, cancellation suite, and ≤90-day drill record (AGN-M3)",
         "A2A/multi-agent handoff inventory with peer auth, scoped capabilities, and deny tests (AGN-M4)",
         "Goal-conflict / disallowed-goal plan policy with named owner and synthetic deny traces (AGN-R1)",
-        "Agent sandbox/simulation environment config and linked \u226430-day pre-release sim reports (AGN-R2)",
+        "Agent sandbox/simulation environment config and linked ≤30-day pre-release sim reports (AGN-R2)",
         "Agent/AI-system RACI register with Responsible + Accountable and 0 orphans (AGN-R3)"
       ],
       "engineeringBestPractices": [
@@ -3873,7 +3872,7 @@
         "Log plans and intermediate decisions for reconstructability",
         "Escalate to humans on ambiguity or high-impact branches",
         "Treat agent-to-agent messages as untrusted until verified",
-        "Gate agent-behavior promotions on a linked sandbox/sim report \u226430 days before release",
+        "Gate agent-behavior promotions on a linked sandbox/sim report ≤30 days before release",
         "Keep a versioned RACI with Responsible and Accountable for every production agent ID"
       ],
       "automaticValidations": [
@@ -3897,11 +3896,11 @@
       ],
       "references": [
         {
-          "title": "OWASP LLM \u2014 Excessive Agency",
+          "title": "OWASP LLM — Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
-          "title": "NIST AI RMF \u2014 Govern",
+          "title": "NIST AI RMF — Govern",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
@@ -3917,7 +3916,7 @@
       "severity": "critical",
       "riskLevel": "high",
       "purpose": "Insert human approval and oversight where AI-proposed actions have high impact, irreversibility, or regulatory sensitivity.",
-      "engineeringPhilosophy": "Human-in-the-loop is not a product apology\u2014it is a control. The goal is calibrated oversight: humans approve what machines should not decide alone.",
+      "engineeringPhilosophy": "Human-in-the-loop is not a product apology—it is a control. The goal is calibrated oversight: humans approve what machines should not decide alone.",
       "whyItMatters": "Autonomous execution of irreversible actions (money movement, data deletion, external communications, code deploy) without approval creates unacceptable blast radius.",
       "commonFailures": [
         "Rubber-stamp UIs that hide tool args, diffs, or confidence",
@@ -3932,7 +3931,7 @@
           "id": "HUM-M1",
           "requirement": "Every high-impact action class an AI system or agent can invoke in production (write/irreversible/financial/external-comms/privileged side effects) shall be listed in a versioned inventory and blocked until a human approval gate succeeds. Ungated execution of inventoried classes shall fail closed.",
           "artifact": "Versioned high-impact action inventory (class, risk tier, gate id/owner) + Gate wiring evidence (policy/config) mapping each class to an approval control + Ungated execution test results showing 100% deny/fail-closed for inventoried classes",
-          "passCondition": "100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests for those classes fail at 100% (inventory/deny evidence measuredAt \u226490 days).",
+          "passCondition": "100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests for those classes fail at 100% (inventory/deny evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3948,9 +3947,9 @@
         },
         {
           "id": "HUM-M3",
-          "requirement": "Human approval gates for high-impact actions shall apply on every entry path (UI, API, agent/tool, batch/job)\u2014not only the primary console. Alternate-path bypass tests shall show 0 successful ungated high-impact executions.",
+          "requirement": "Human approval gates for high-impact actions shall apply on every entry path (UI, API, agent/tool, batch/job)—not only the primary console. Alternate-path bypass tests shall show 0 successful ungated high-impact executions.",
           "artifact": "Bypass-path threat model or test matrix across UI, API, and agent/job entry points + Test results showing 0 successful ungated high-impact executions",
-          "passCondition": "Automated or reviewed bypass tests cover alternate UI, API, and agent/job entry points for inventoried high-impact actions; 0 successful ungated high-impact executions in those tests (bypass evidence measuredAt \u226490 days).",
+          "passCondition": "Automated or reviewed bypass tests cover alternate UI, API, and agent/job entry points for inventoried high-impact actions; 0 successful ungated high-impact executions in those tests (bypass evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3959,7 +3958,7 @@
           "id": "HUM-M4",
           "requirement": "Irreversible actions in Level 5 (regulated / highest capability) systems shall require dual control: two distinct authorized humans must approve before execution. Sampled executions shall show dual approval with 0 single-approver completes.",
           "artifact": "Inventory of Level 5 irreversible action classes requiring dual control + Dual-control workflow configuration (two distinct approvers) + Sample approval records showing dual approval and 0 single-approver completes",
-          "passCondition": "Level 5 irreversible action classes are inventoried; 100% of sampled executions of those classes show dual approval by two distinct actors; 0 single-approver completes in the sample (sample/config measuredAt \u226490 days).",
+          "passCondition": "Level 5 irreversible action classes are inventoried; 100% of sampled executions of those classes show dual approval by two distinct actors; 0 single-approver completes in the sample (sample/config measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
@@ -3968,18 +3967,18 @@
       "recommendedChecks": [
         {
           "id": "HUM-R1",
-          "requirement": "High-impact approval experiences should present tool arguments, a change diff (or equivalent preview), and confidence/risk context before the human approves or denies\u2014so decisions are informed, not rubber-stamped.",
-          "artifact": "Approval UI/spec showing tool args, diff/preview, and confidence/risk fields + \u226510 sampled approval records (\u226490 days) with those fields populated",
-          "passCondition": "High-impact approvals display tool args, change diff (or equivalent), and confidence/risk; \u226510 sampled approvals in the last 90 days show those fields populated.",
+          "requirement": "High-impact approval experiences should present tool arguments, a change diff (or equivalent preview), and confidence/risk context before the human approves or denies—so decisions are informed, not rubber-stamped.",
+          "artifact": "Approval UI/spec showing tool args, diff/preview, and confidence/risk fields + ≥10 sampled approval records (≤90 days) with those fields populated",
+          "passCondition": "High-impact approvals display tool args, change diff (or equivalent), and confidence/risk; ≥10 sampled approvals in the last 90 days show those fields populated.",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "HUM-R3",
-          "requirement": "Approval queues for high-impact actions should have a documented service level (for example p95 queue age) and measured performance for the last 30 days within that SLA\u2014or open exceptions with named owners and expiry\u2014so operators do not bypass gates under backlog pressure.",
+          "requirement": "Approval queues for high-impact actions should have a documented service level (for example p95 queue age) and measured performance for the last 30 days within that SLA—or open exceptions with named owners and expiry—so operators do not bypass gates under backlog pressure.",
           "artifact": "Documented approval-queue SLA (metric, threshold, owner) + Queue age/metrics evidence for the last 30 days (dashboard export or report) + Open exception register with owners and expiry when SLA is breached",
-          "passCondition": "A documented approval-queue SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is within SLA, or every open exception has a named owner and expiry \u226490 days.",
+          "passCondition": "A documented approval-queue SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is within SLA, or every open exception has a named owner and expiry ≤90 days.",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3987,11 +3986,11 @@
       ],
       "evidenceRequired": [
         "Versioned high-impact action inventory + gate wiring + ungated deny suite (HUM-M1)",
-        "Approval audit log schema and \u226430-day samples with actor/context/outcome (HUM-M2)",
+        "Approval audit log schema and ≤30-day samples with actor/context/outcome (HUM-M2)",
         "Bypass-path tests across UI/API/agent with 0 ungated successes (HUM-M3)",
         "Dual-control workflow and samples for Level 5 irreversible actions (HUM-M4)",
-        "Approval UI/spec showing tool args, diffs, and confidence + \u226510 samples (HUM-R1)",
-        "Approval-queue SLA definition + \u226430-day queue metrics (HUM-R3)"
+        "Approval UI/spec showing tool args, diffs, and confidence + ≥10 samples (HUM-R1)",
+        "Approval-queue SLA definition + ≤30-day queue metrics (HUM-R3)"
       ],
       "engineeringBestPractices": [
         "Classify actions by impact tier with default gates",
@@ -4021,11 +4020,11 @@
       ],
       "references": [
         {
-          "title": "NIST AI RMF \u2014 Govern and Manage (human oversight)",
+          "title": "NIST AI RMF — Govern and Manage (human oversight)",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM \u2014 Excessive Agency",
+          "title": "OWASP LLM — Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -4041,7 +4040,7 @@
       "severity": "high",
       "riskLevel": "high",
       "purpose": "Provide end-to-end observability across prompts, model calls, retrieval, tools, agents, costs, and outcomes so incidents and regressions are diagnosable.",
-      "engineeringPhilosophy": "AI systems without reconstructable traces are not operable. Observability must cover the cognitive path, not only HTTP latency\u2014while respecting privacy redaction.",
+      "engineeringPhilosophy": "AI systems without reconstructable traces are not operable. Observability must cover the cognitive path, not only HTTP latency—while respecting privacy redaction.",
       "whyItMatters": "When quality drops or a tool fires incorrectly, teams need to replay what the model saw and did. Blind production AI creates unresolvable incidents and slow learning loops.",
       "commonFailures": [
         "Logging only final user-visible answers",
@@ -4052,9 +4051,9 @@
       "mandatoryChecks": [
         {
           "id": "OBS-M1",
-          "requirement": "Distributed traces shall link user request \u2192 model calls \u2192 tools \u2192 outcome",
+          "requirement": "Distributed traces shall link user request → model calls → tools → outcome",
           "artifact": "Sample production traces (redacted) + tracing config",
-          "passCondition": "Canary or sampled traces show parent request ID linking model spans, tool spans, and outcome in \u226595% of canary requests over 24 hours",
+          "passCondition": "Canary or sampled traces show parent request ID linking model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours",
           "method": "automated",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -4063,7 +4062,7 @@
           "id": "OBS-M2",
           "requirement": "Token usage and cost shall be attributable per request/feature/tenant",
           "artifact": "Cost/token metrics with request, feature, and tenant labels",
-          "passCondition": "\u226595% of billed model calls in a 24h sample carry request ID + feature + tenant (or equivalent) attribution labels",
+          "passCondition": "≥95% of billed model calls in a 24h sample carry request ID + feature + tenant (or equivalent) attribution labels",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -4083,7 +4082,7 @@
           "id": "OBS-R1",
           "requirement": "Replay tooling for failed traces in a secure environment",
           "artifact": "Secure replay tooling config + sample replay session for a failed production trace (redacted)",
-          "passCondition": "On-call can replay a failed AI trace in a restricted environment within the documented RTO; last drill or real replay \u226490 days old",
+          "passCondition": "On-call can replay a failed AI trace in a restricted environment within the documented RTO; last drill or real replay ≤90 days old",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -4092,7 +4091,7 @@
           "id": "OBS-R2",
           "requirement": "Quality annotations attachable to traces for closed-loop eval",
           "artifact": "Trace annotation schema + tooling config allowing quality labels on spans + sample annotated traces",
-          "passCondition": "Annotators can attach quality labels to production traces in a secure tool; \u226550 annotations in the last 90 days feed an eval or review loop",
+          "passCondition": "Annotators can attach quality labels to production traces in a secure tool; ≥50 annotations in the last 90 days feed an eval or review loop",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -4133,7 +4132,7 @@
       ],
       "references": [
         {
-          "title": "Google SRE Workbook \u2014 Observability",
+          "title": "Google SRE Workbook — Observability",
           "url": "https://sre.google/workbook/observability/"
         },
         {
@@ -4147,14 +4146,14 @@
       "id": "APRF-28",
       "slug": "performance-slo",
       "name": "Performance & SLO Engineering",
-      "summary": "Latency, throughput, and error budgets for AI features\u2014SRE discipline applied to GenAI.",
+      "summary": "Latency, throughput, and error budgets for AI features—SRE discipline applied to GenAI.",
       "domain": "reliability",
       "crossCutting": false,
       "severity": "high",
       "riskLevel": "medium",
       "purpose": "Define SLIs/SLOs for AI latency, availability, and quality signals; manage error budgets so AI features meet user experience and capacity targets.",
       "engineeringPhilosophy": "If it is not measured with an SLO, it is not operationally owned. Stochastic systems still need latency and quality budgets.",
-      "whyItMatters": "Unbounded TTFT, streaming stalls, and silent quality burn destroy UX and hide regressions that \u201cavailability\u201d alone will not catch.",
+      "whyItMatters": "Unbounded TTFT, streaming stalls, and silent quality burn destroy UX and hide regressions that “availability” alone will not catch.",
       "commonFailures": [
         "No p95/p99 latency targets for model calls",
         "Quality treated as a one-time eval, not an online SLO",
@@ -4175,7 +4174,7 @@
           "id": "PERF-M2",
           "requirement": "Online dashboards shall track AI latency, error, and at least one quality or task-success signal",
           "artifact": "Dashboard URLs/config showing latency, error, and quality/task-success panels",
-          "passCondition": "Dashboard panels for latency, error rate, and \u22651 quality/task-success signal are live with freshness \u2264 15 minutes",
+          "passCondition": "Dashboard panels for latency, error rate, and ≥1 quality/task-success signal are live with freshness ≤ 15 minutes",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -4195,7 +4194,7 @@
           "id": "PERF-R1",
           "requirement": "Error budgets formally gate release velocity for AI features",
           "artifact": "Error-budget policy linking AI SLOs to release freezes + last budget burn report that gated a release",
-          "passCondition": "When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; \u22651 gated event or drill in 90 days",
+          "passCondition": "When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -4204,7 +4203,7 @@
           "id": "PERF-R2",
           "requirement": "Capacity and load tests include adversarial long-prompt and agent-loop scenarios",
           "artifact": "Load-test plan including long-prompt and agent-loop scenarios + latest capacity test report",
-          "passCondition": "Last capacity test \u226490 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurrency",
+          "passCondition": "Last capacity test ≤90 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurrency",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -4213,7 +4212,7 @@
           "id": "PERF-R3",
           "requirement": "Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs",
           "artifact": "Streaming SLI dashboard for TTFT and inter-token latency + alert config for streaming UIs",
-          "passCondition": "TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained \u226530 days",
+          "passCondition": "TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained ≥30 days",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -4244,11 +4243,11 @@
       ],
       "references": [
         {
-          "title": "Google SRE \u2014 Service Level Objectives",
+          "title": "Google SRE — Service Level Objectives",
           "url": "https://sre.google/sre-book/service-level-objectives/"
         },
         {
-          "title": "AWS Well-Architected \u2014 Performance Efficiency",
+          "title": "AWS Well-Architected — Performance Efficiency",
           "url": "https://aws.amazon.com/architecture/well-architected/"
         }
       ],
@@ -4263,7 +4262,7 @@
       "crossCutting": false,
       "severity": "high",
       "riskLevel": "high",
-      "purpose": "Design graceful degradation for short failures and documented continuity options for sustained disruption\u2014so AI-dependent journeys fail safely and recover within defined RTO/RPO.",
+      "purpose": "Design graceful degradation for short failures and documented continuity options for sustained disruption—so AI-dependent journeys fail safely and recover within defined RTO/RPO.",
       "engineeringPhilosophy": "Assume providers fail. Timeouts, circuit breakers, and degraded modes handle minutes; backups, failover, and human procedures handle hours and days. Safety properties must hold in every degraded mode.",
       "whyItMatters": "Naive retries and single-provider dependency turn rate limits into outages; automation without continuity plans leaves the business stranded when AI is unavailable.",
       "commonFailures": [
@@ -4281,7 +4280,7 @@
           "id": "REL-M1",
           "requirement": "All model and tool calls shall have timeouts and bounded retries",
           "artifact": "Client config / static analysis report for timeouts and max retries",
-          "passCondition": "100% of model/tool client call sites have finite timeout and max-retry \u2264 bound; verified by static check or integration test",
+          "passCondition": "100% of model/tool client call sites have finite timeout and max-retry ≤ bound; verified by static check or integration test",
           "method": "automated",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -4308,7 +4307,7 @@
           "id": "REL-M4",
           "requirement": "Critical AI-dependent processes shall have documented continuity options",
           "artifact": "Continuity options doc per critical process (failover, manual, alternate provider)",
-          "passCondition": "100% of processes marked critical-AI-dependent have \u22651 documented continuity option with owner",
+          "passCondition": "100% of processes marked critical-AI-dependent have ≥1 documented continuity option with owner",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -4344,7 +4343,7 @@
           "id": "REL-M8",
           "requirement": "Contractual and technical multi-provider options shall exist for Level 5 continuity",
           "artifact": "Provider contract summary + technical failover design and test evidence",
-          "passCondition": "PASS if Level 5 workloads have a documented alternate provider/path and a successful failover test \u2264180 days",
+          "passCondition": "PASS if Level 5 workloads have a documented alternate provider/path and a successful failover test ≤180 days",
           "method": "manual",
           "requiredFromLevel": 5,
           "minCriticality": 3
@@ -4364,7 +4363,7 @@
           "id": "REL-R2",
           "requirement": "Multi-provider or multi-region fallback with eval coverage",
           "artifact": "Multi-provider or multi-region fallback config + eval report comparing primary vs fallback quality/safety",
-          "passCondition": "Fallback path is configured and was exercised \u226490 days; fallback eval meets minimum quality/safety bars (not only connectivity)",
+          "passCondition": "Fallback path is configured and was exercised ≤90 days; fallback eval meets minimum quality/safety bars (not only connectivity)",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -4373,7 +4372,7 @@
           "id": "REL-R4",
           "requirement": "Periodic continuity drills including provider loss",
           "artifact": "Continuity drill calendar + last provider-loss drill report with RTO/RPO results",
-          "passCondition": "Provider-loss (or equivalent) continuity drill completed \u226490 days; RTO/RPO met or exceptions have named owners and expiry",
+          "passCondition": "Provider-loss (or equivalent) continuity drill completed ≤90 days; RTO/RPO met or exceptions have named owners and expiry",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -4382,7 +4381,7 @@
           "id": "REL-R6",
           "requirement": "Warm standby for self-hosted inference where required",
           "artifact": "Warm-standby inference architecture + last failover test report with RTO result",
-          "passCondition": "Failover to warm standby completes within documented RTO in the last test (\u226490 days); standby capacity covers declared peak for critical workloads",
+          "passCondition": "Failover to warm standby completes within documented RTO in the last test (≤90 days); standby capacity covers declared peak for critical workloads",
           "method": "manual",
           "requiredFromLevel": 5,
           "minCriticality": 3
@@ -4428,15 +4427,15 @@
       ],
       "references": [
         {
-          "title": "Google SRE Book \u2014 Addressing Cascading Failures",
+          "title": "Google SRE Book — Addressing Cascading Failures",
           "url": "https://sre.google/sre-book/addressing-cascading-failures/"
         },
         {
-          "title": "AWS Well-Architected \u2014 Reliability",
+          "title": "AWS Well-Architected — Reliability",
           "url": "https://aws.amazon.com/architecture/well-architected/"
         },
         {
-          "title": "Google SRE \u2014 Disaster Recovery",
+          "title": "Google SRE — Disaster Recovery",
           "url": "https://sre.google/sre-book/disaster-recovery/"
         }
       ],
@@ -4446,7 +4445,7 @@
       "id": "APRF-15",
       "slug": "change-management",
       "name": "Change Management & Release",
-      "summary": "Repeatable promotion of models, prompts, tools, and agents\u2014with tested, fast rollback.",
+      "summary": "Repeatable promotion of models, prompts, tools, and agents—with tested, fast rollback.",
       "domain": "reliability",
       "crossCutting": false,
       "severity": "critical",
@@ -4469,7 +4468,7 @@
           "id": "CHG-M1",
           "requirement": "Prior production versions of prompts and model pins shall be retained and restorable",
           "artifact": "Version retention policy + registry listing of prior production versions",
-          "passCondition": "\u2265N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env",
+          "passCondition": "≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -4478,7 +4477,7 @@
           "id": "CHG-M2",
           "requirement": "Rollback procedure shall be documented and operable by on-call",
           "artifact": "Rollback runbook + on-call acknowledgment or drill checklist",
-          "passCondition": "Runbook lists exact commands/UI steps and owners; \u22651 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute",
+          "passCondition": "Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -4487,7 +4486,7 @@
           "id": "CHG-M3",
           "requirement": "Rollback shall be tested in a drill or real event on a defined cadence",
           "artifact": "Drill or incident record with timestamps and outcome",
-          "passCondition": "\u22651 successful rollback (drill or real) in the last 90 days with measured time-to-restore \u2264 documented RTO",
+          "passCondition": "≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -4496,7 +4495,7 @@
           "id": "CHG-M4",
           "requirement": "Automated rollback shall trigger on quality SLO burn for AI releases",
           "artifact": "Rollback automation config + sample trigger/test evidence tied to quality SLOs",
-          "passCondition": "PASS if quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred \u226490 days",
+          "passCondition": "PASS if quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred ≤90 days",
           "method": "manual",
           "requiredFromLevel": 5,
           "minCriticality": 3
@@ -4504,7 +4503,7 @@
         {
           "id": "DEP-M1",
           "requirement": "A promotion path shall exist from non-prod to prod for prompts, models, and tools",
-          "artifact": "Pipeline/runbook documenting non-prod\u2192prod promotion for prompts, models, and tools",
+          "artifact": "Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools",
           "passCondition": "100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record",
           "method": "manual",
           "requiredFromLevel": 3,
@@ -4534,7 +4533,7 @@
           "id": "CHG-R1",
           "requirement": "One-click or single-command rollback for AI release units",
           "artifact": "Rollback runbook or one-command script for AI release units + last rollback exercise log",
-          "passCondition": "AI release unit can be rolled back with a single documented command/action; exercise or real rollback \u226490 days completed within documented RTO",
+          "passCondition": "AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -4543,7 +4542,7 @@
           "id": "CHG-R2",
           "requirement": "Feature flags for new agent behaviors",
           "artifact": "Feature-flag config covering new agent behaviors + sample flag change audit trail",
-          "passCondition": "New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested \u226490 days ago",
+          "passCondition": "New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -4552,7 +4551,7 @@
           "id": "DEP-R1",
           "requirement": "Canary or progressive delivery for high-traffic AI changes",
           "artifact": "Progressive delivery/canary config for high-traffic AI changes + last canary promotion log",
-          "passCondition": "High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release \u226490 days includes canary metrics link",
+          "passCondition": "High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release ≤90 days includes canary metrics link",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -4561,7 +4560,7 @@
           "id": "DEP-R2",
           "requirement": "Environment parity checks for model pins and tool catalogs",
           "artifact": "Environment parity checklist for model pins and tool catalogs + last parity scan across envs",
-          "passCondition": "Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan \u226430 days with 0 unexplained drifts",
+          "passCondition": "Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan ≤30 days with 0 unexplained drifts",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -4570,7 +4569,7 @@
           "id": "DEP-R3",
           "requirement": "Automated migration for embedding/index version upgrades",
           "artifact": "Embedding/index migration runbook + last automated migration job log and validation",
-          "passCondition": "Index/embedding version upgrades run via automated migration with validation gates; last upgrade \u226412 months (or N/A attestation if no upgrade) succeeded without dual-write gaps",
+          "passCondition": "Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -4616,19 +4615,19 @@
       ],
       "references": [
         {
-          "title": "Google SRE Workbook \u2014 Configuration Management",
+          "title": "Google SRE Workbook — Configuration Management",
           "url": "https://sre.google/workbook/"
         },
         {
-          "title": "AWS Well-Architected \u2014 Operational Excellence",
+          "title": "AWS Well-Architected — Operational Excellence",
           "url": "https://aws.amazon.com/architecture/well-architected/"
         },
         {
-          "title": "Google SRE \u2014 Emergency Response",
+          "title": "Google SRE — Emergency Response",
           "url": "https://sre.google/sre-book/emergency-response/"
         },
         {
-          "title": "AWS Well-Architected \u2014 Reliability",
+          "title": "AWS Well-Architected — Reliability",
           "url": "https://aws.amazon.com/architecture/well-architected/"
         }
       ],
@@ -4643,7 +4642,7 @@
       "crossCutting": false,
       "severity": "high",
       "riskLevel": "high",
-      "purpose": "Prepare people, playbooks, and tooling to detect, contain, communicate, and learn from AI-specific incidents\u2014including abuse, quality collapse, and unsafe tool actions.",
+      "purpose": "Prepare people, playbooks, and tooling to detect, contain, communicate, and learn from AI-specific incidents—including abuse, quality collapse, and unsafe tool actions.",
       "engineeringPhilosophy": "Incidents will happen. Readiness means AI-aware detection, clear ownership, containment that includes pausing agents, and blameless learning that improves pillars.",
       "whyItMatters": "Traditional SEV playbooks miss prompt injection campaigns, model outages, and agentic damage. Without AI-specific readiness, mean time to contain balloons.",
       "commonFailures": [
@@ -4657,7 +4656,7 @@
           "id": "INC-M1",
           "requirement": "AI-specific incident playbooks shall exist for abuse, leakage, bad actions, and provider outage",
           "artifact": "Playbook set covering the four scenarios with owners",
-          "passCondition": "Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date \u2264 12 months",
+          "passCondition": "Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date ≤ 12 months",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -4675,7 +4674,7 @@
           "id": "INC-M3",
           "requirement": "Post-incident reviews shall produce tracked actions against APRF pillars",
           "artifact": "Post-incident review template + sample reviews with linked actions",
-          "passCondition": "100% of SEV-eligible AI incidents in last 90 days have a review with \u22651 tracked action mapped to an APRF pillar or explicit \u201cno action\u201d rationale",
+          "passCondition": "100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale",
           "method": "manual",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -4684,7 +4683,7 @@
           "id": "INC-M4",
           "requirement": "Regular tabletop exercises shall cover AI-specific incidents",
           "artifact": "Tabletop plan + dated after-action report for an AI incident scenario",
-          "passCondition": "PASS if an AI-focused tabletop completed \u2264180 days with retained actions and owners",
+          "passCondition": "PASS if an AI-focused tabletop completed ≤180 days with retained actions and owners",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 3
@@ -4695,7 +4694,7 @@
           "id": "INC-R1",
           "requirement": "Page-worthy alerts for safety and quality signals, not only infra",
           "artifact": "On-call alert policy export listing safety/quality pages + last 90 days of triggered incidents (or drill tickets)",
-          "passCondition": "At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and owner; policy reviewed \u226490 days ago",
+          "passCondition": "At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and owner; policy reviewed ≤90 days ago",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -4704,7 +4703,7 @@
           "id": "INC-R3",
           "requirement": "Customer notification criteria for AI-related events",
           "artifact": "Customer notification criteria for AI-related events + last drill or real notification sample",
-          "passCondition": "Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident \u226412 months followed the criteria with timestamps",
+          "passCondition": "Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -4736,11 +4735,11 @@
       ],
       "references": [
         {
-          "title": "Google SRE \u2014 Managing Incidents",
+          "title": "Google SRE — Managing Incidents",
           "url": "https://sre.google/sre-book/managing-incidents/"
         },
         {
-          "title": "NIST AI RMF \u2014 Manage",
+          "title": "NIST AI RMF — Manage",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
@@ -4770,7 +4769,7 @@
         "Unbounded maxRetries or missing backoff on AI/model clients",
         "Relying on AGN-M2 alone while non-agent clients retry without bound",
         "Cache library present without enabled idempotent paths or safety exclusions",
-        "No hit-rate/savings report for \u226530 days",
+        "No hit-rate/savings report for ≥30 days",
         "All traffic on frontier models with no low-risk task-class routing",
         "Cheap routing without eval coverage or misroute monitoring",
         "Aggregate spend dashboards without per-product unit-cost metrics",
@@ -4779,27 +4778,27 @@
       "mandatoryChecks": [
         {
           "id": "COST-M1",
-          "requirement": "Production AI workloads shall enforce finite hard spend ceilings and/or request rate limits (provider, gateway, or application) that deny or throttle when exceeded\u2014not soft dashboards or prompt-only budgets alone.",
-          "artifact": "Gateway/provider/application config declaring finite spend ceiling and/or rate limit (TPM/RPM/$, tokens) + Enforcement evidence: automated exceed test or \u226490-day production deny/throttle event log",
-          "passCondition": "A finite hard spend ceiling and/or rate limit is configured for production AI workloads; enforcement demonstrably denies or throttles when the limit is exceeded (automated test or production event log measuredAt \u226490 days).",
+          "requirement": "Production AI workloads shall enforce finite hard spend ceilings and/or request rate limits (provider, gateway, or application) that deny or throttle when exceeded—not soft dashboards or prompt-only budgets alone.",
+          "artifact": "Gateway/provider/application config declaring finite spend ceiling and/or rate limit (TPM/RPM/$, tokens) + Enforcement evidence: automated exceed test or ≤90-day production deny/throttle event log",
+          "passCondition": "A finite hard spend ceiling and/or rate limit is configured for production AI workloads; enforcement demonstrably denies or throttles when the limit is exceeded (automated test or production event log measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 2,
           "minCriticality": 1
         },
         {
           "id": "COST-M2",
-          "requirement": "Production AI spend shall be monitored with alert policies for budget burn and spend anomaly that notify operators per runbook\u2014not dashboards alone.",
-          "artifact": "Cost/spend dashboard or telemetry views covering production AI workloads + Alert policies for budget burn and spend anomaly (IaC, provider, or gateway) + Notify proof: alert test or documented fire \u226490 days with page/notify outcome",
-          "passCondition": "Alerts exist for both budget burn and spend anomaly covering production AI spend; a synthetic or historical burn/anomaly event would page/notify per runbook (alert test or documented fire measuredAt \u226490 days).",
+          "requirement": "Production AI spend shall be monitored with alert policies for budget burn and spend anomaly that notify operators per runbook—not dashboards alone.",
+          "artifact": "Cost/spend dashboard or telemetry views covering production AI workloads + Alert policies for budget burn and spend anomaly (IaC, provider, or gateway) + Notify proof: alert test or documented fire ≤90 days with page/notify outcome",
+          "passCondition": "Alerts exist for both budget burn and spend anomaly covering production AI spend; a synthetic or historical burn/anomaly event would page/notify per runbook (alert test or documented fire measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "COST-M3",
-          "requirement": "Production AI clients shall enforce finite retry/backoff and loop budgets so forced failures cannot amplify completions without bound\u2014covering HTTP/SDK clients and agent loops, not prompt-only \u201ctry again\u201d guidance.",
-          "artifact": "Retry/backoff config (finite maxRetries + backoff) for production AI/model clients + Agent or client loop budget config where applicable (finite iterations/steps) + Amplification test results: forced failure/retry hits a bounded token or $ ceiling (\u226490 days)",
-          "passCondition": "Max retries and max agent/client loops are finite for 100% of production AI clients; amplification tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling; test measuredAt \u226490 days).",
+          "requirement": "Production AI clients shall enforce finite retry/backoff and loop budgets so forced failures cannot amplify completions without bound—covering HTTP/SDK clients and agent loops, not prompt-only “try again” guidance.",
+          "artifact": "Retry/backoff config (finite maxRetries + backoff) for production AI/model clients + Agent or client loop budget config where applicable (finite iterations/steps) + Amplification test results: forced failure/retry hits a bounded token or $ ceiling (≤90 days)",
+          "passCondition": "Max retries and max agent/client loops are finite for 100% of production AI clients; amplification tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling; test measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -4808,34 +4807,34 @@
       "recommendedChecks": [
         {
           "id": "COST-R1",
-          "requirement": "Production AI systems should cache prompt/response results for documented idempotent or repeated paths, with explicit exclusions for sensitive or personalized prompts, and report hit-rate and savings for \u226530 days.",
-          "artifact": "Prompt/response cache config naming idempotent paths and safety exclusions + Hit-rate and savings report covering \u226530 days (import or dashboard export)",
-          "passCondition": "Cache is enabled for documented idempotent/repeated prompt paths; sensitive/personalized prompts are excluded; hit-rate and savings are reported for a window of \u226530 days (report measuredAt within the last 90 days).",
+          "requirement": "Production AI systems should cache prompt/response results for documented idempotent or repeated paths, with explicit exclusions for sensitive or personalized prompts, and report hit-rate and savings for ≥30 days.",
+          "artifact": "Prompt/response cache config naming idempotent paths and safety exclusions + Hit-rate and savings report covering ≥30 days (import or dashboard export)",
+          "passCondition": "Cache is enabled for documented idempotent/repeated prompt paths; sensitive/personalized prompts are excluded; hit-rate and savings are reported for a window of ≥30 days (report measuredAt within the last 90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "COST-R2",
-          "requirement": "Production AI systems should route documented low-risk task classes to cheaper models by default, with eval coverage proving quality within tolerance of a premium baseline and misroute rate monitored \u226430 days.",
-          "artifact": "Model-routing policy mapping low-risk task classes to cheap vs premium models + Eval coverage report for low-risk routed tasks vs premium baseline + Misroute-rate monitoring evidence covering \u226430 days",
-          "passCondition": "Documented low-risk task classes route to cheaper models by default; eval shows quality within tolerance versus a premium baseline; misroute rate is monitored for a window of \u226430 days (report measuredAt within the last 90 days).",
+          "requirement": "Production AI systems should route documented low-risk task classes to cheaper models by default, with eval coverage proving quality within tolerance of a premium baseline and misroute rate monitored ≤30 days.",
+          "artifact": "Model-routing policy mapping low-risk task classes to cheap vs premium models + Eval coverage report for low-risk routed tasks vs premium baseline + Misroute-rate monitoring evidence covering ≤30 days",
+          "passCondition": "Documented low-risk task classes route to cheaper models by default; eval shows quality within tolerance versus a premium baseline; misroute rate is monitored for a window of ≤30 days (report measuredAt within the last 90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "COST-R3",
-          "requirement": "Each customer-facing AI product should publish unit-cost metrics (e.g. cost per successful task or journey) for the last quarter and undergo a FinOps review \u226490 days with named owners for outliers above documented thresholds.",
-          "artifact": "Per-product AI unit-economics report (cost per successful task / journey) for the last quarter + FinOps review minutes \u226490 days with outlier owners and thresholds",
-          "passCondition": "Each customer-facing AI product has unit-cost metrics for the last quarter; a FinOps review occurred within the last 90 days with named owners for outliers above documented thresholds (review measuredAt \u226490 days).",
+          "requirement": "Each customer-facing AI product should publish unit-cost metrics (e.g. cost per successful task or journey) for the last quarter and undergo a FinOps review ≤90 days with named owners for outliers above documented thresholds.",
+          "artifact": "Per-product AI unit-economics report (cost per successful task / journey) for the last quarter + FinOps review minutes ≤90 days with outlier owners and thresholds",
+          "passCondition": "Each customer-facing AI product has unit-cost metrics for the last quarter; a FinOps review occurred within the last 90 days with named owners for outliers above documented thresholds (review measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
       ],
       "evidenceRequired": [
-        "Enforce-on-exceed deny/throttle evidence (\u226490 days)",
+        "Enforce-on-exceed deny/throttle evidence (≤90 days)",
         "Hard spend/rate limit config for production AI workloads",
         "Budget and quota configuration",
         "Cost dashboards and alert policies",
@@ -4858,7 +4857,7 @@
         "Repo retry/loop budget heuristics (ai-retry-amplification collector)",
         "Imported amplification suite under imports/ai-retry-amplification/",
         "Repo prompt-cache heuristics (ai-prompt-cache collector)",
-        "Imported \u226530-day hit-rate/savings under imports/ai-prompt-cache/",
+        "Imported ≥30-day hit-rate/savings under imports/ai-prompt-cache/",
         "Repo model-routing heuristics (ai-model-routing collector)",
         "Imported eval + misroute suite under imports/ai-model-routing/",
         "Repo FinOps/unit-economics heuristics (ai-finops-unit-economics collector)",
@@ -4874,7 +4873,7 @@
       ],
       "references": [
         {
-          "title": "AWS Well-Architected \u2014 Cost Optimization",
+          "title": "AWS Well-Architected — Cost Optimization",
           "url": "https://aws.amazon.com/architecture/well-architected/"
         },
         {
@@ -4888,7 +4887,7 @@
       "id": "APRF-29",
       "slug": "organizational-governance",
       "name": "Organizational Governance",
-      "summary": "AI policy, ownership, risk acceptance, and continual improvement\u2014ISO 42001-style management system.",
+      "summary": "AI policy, ownership, risk acceptance, and continual improvement—ISO 42001-style management system.",
       "domain": "governance",
       "crossCutting": false,
       "severity": "high",
@@ -4905,9 +4904,9 @@
       "mandatoryChecks": [
         {
           "id": "ORG-M1",
-          "requirement": "An approved AI policy shall exist with version, named owner, and review date \u226412 months, and shall include both acceptable-use and prohibited-application sections.",
+          "requirement": "An approved AI policy shall exist with version, named owner, and review date ≤12 months, and shall include both acceptable-use and prohibited-application sections.",
           "artifact": "Approved AI acceptable-use / prohibited-applications policy with version, owner, and review date + Confirmation that both acceptable-use and prohibited-application sections are present",
-          "passCondition": "Policy has version, owner, and review date \u226412 months; includes both acceptable-use and prohibited-application sections (policy evidence measuredAt \u226490 days).",
+          "passCondition": "Policy has version, owner, and review date ≤12 months; includes both acceptable-use and prohibited-application sections (policy evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -4918,7 +4917,7 @@
           "id": "ORG-R1",
           "requirement": "Leadership should review AI risk posture and APRF capability attained within the last 90 days; every open action from that review should have an owner and due date.",
           "artifact": "Leadership AI risk / APRF maturity review minutes (or board pack excerpt) with review date + Action log showing owners and due dates for open items",
-          "passCondition": "Leadership reviewed AI risk posture and APRF capability attained \u226490 days ago; open actions have owners and due dates (review evidence measuredAt \u226490 days).",
+          "passCondition": "Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago; open actions have owners and due dates (review evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -4927,34 +4926,34 @@
           "id": "ORG-R2",
           "requirement": "Every production AI system should name owners for each org-declared required critical APRF domain (commonly security, safety, data, reliability, and model/governance) in a system inventory, with zero systems missing a required domain owner.",
           "artifact": "Production AI system inventory listing the org-declared required critical-domain owner fields + Query/report showing 0 systems missing required domain owners",
-          "passCondition": "0 production AI systems missing any required critical-domain owner in the inventory; inventory covers all production AI system IDs; required domain set is declared (inventory evidence measuredAt \u226490 days).",
+          "passCondition": "0 production AI systems missing any required critical-domain owner in the inventory; inventory covers all production AI system IDs; required domain set is declared (inventory evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "ORG-R3",
-          "requirement": "Sev-1/2 AI incidents and critical eval failures in the last quarter should produce improvement backlog items (\u226580%); \u226550% of those items should be closed or have a dated plan.",
-          "artifact": "Improvement backlog (tickets) linked from Sev-1/2 AI incidents and critical eval failures + Quarterly sample showing linkage rate \u226580% and closed-or-planned rate \u226550%",
-          "passCondition": "\u226580% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; \u226550% of those items closed or have a dated plan (backlog evidence measuredAt \u226490 days).",
+          "requirement": "Sev-1/2 AI incidents and critical eval failures in the last quarter should produce improvement backlog items (≥80%); ≥50% of those items should be closed or have a dated plan.",
+          "artifact": "Improvement backlog (tickets) linked from Sev-1/2 AI incidents and critical eval failures + Quarterly sample showing linkage rate ≥80% and closed-or-planned rate ≥50%",
+          "passCondition": "≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; ≥50% of those items closed or have a dated plan (backlog evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "ORG-R4",
-          "requirement": "Every open control-gap waiver (risk acceptance) shall record a named owner and expiry date; every expired waiver shall have an escalation record\u2014or be closed\u2014before it remains unowned.",
+          "requirement": "Every open control-gap waiver (risk acceptance) shall record a named owner and expiry date; every expired waiver shall have an escalation record—or be closed—before it remains unowned.",
           "artifact": "Risk-acceptance / control-gap waiver register for in-scope AI systems + Confirmation that open waivers have owner+expiry and expired waivers have escalation (or are closed)",
-          "passCondition": "100% of open control-gap waivers have owner + expiry; 0 expired waivers without an escalation record (register evidence measuredAt \u226490 days).",
+          "passCondition": "100% of open control-gap waivers have owner + expiry; 0 expired waivers without an escalation record (register evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 3
         },
         {
           "id": "ORG-R5",
-          "requirement": "On an org-wide cadence, internal audit or independent assessment should sample APRF evidence; the last sampling report shall be \u226412 months old and list sampled Check IDs and findings. This is organizational sampling\u2014not the same as CMP-R3 coverage of every capability Level 5 system.",
-          "artifact": "Independent assessment or internal-audit sampling report against APRF evidence (org cadence) + Sampled Check IDs and findings from the last \u226412 month cycle",
-          "passCondition": "Last org sampling report age \u226412 months; lists sampled Check IDs and findings (report evidence measuredAt \u226490 days).",
+          "requirement": "On an org-wide cadence, internal audit or independent assessment should sample APRF evidence; the last sampling report shall be ≤12 months old and list sampled Check IDs and findings. This is organizational sampling—not the same as CMP-R3 coverage of every capability Level 5 system.",
+          "artifact": "Independent assessment or internal-audit sampling report against APRF evidence (org cadence) + Sampled Check IDs and findings from the last ≤12 month cycle",
+          "passCondition": "Last org sampling report age ≤12 months; lists sampled Check IDs and findings (report evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
@@ -4984,11 +4983,11 @@
       ],
       "references": [
         {
-          "title": "ISO/IEC 42001 \u2014 AI management systems",
+          "title": "ISO/IEC 42001 — AI management systems",
           "url": "https://www.iso.org/standard/81230.html"
         },
         {
-          "title": "NIST AI RMF \u2014 Govern",
+          "title": "NIST AI RMF — Govern",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
@@ -5003,7 +5002,7 @@
       "crossCutting": false,
       "severity": "high",
       "riskLevel": "medium",
-      "purpose": "Map regulatory and contractual obligations to concrete AI controls and produce auditable evidence\u2014while recognizing compliance alone does not prove production readiness.",
+      "purpose": "Map regulatory and contractual obligations to concrete AI controls and produce auditable evidence—while recognizing compliance alone does not prove production readiness.",
       "engineeringPhilosophy": "Compliance is necessary evidence, not sufficient engineering. APRF treats compliance as a pillar that packages proof of other pillars for auditors and customers.",
       "whyItMatters": "Enterprises cannot buy or deploy AI systems that cannot demonstrate control evidence. Conversely, checkbox compliance without engineering depth still fails in production.",
       "commonFailures": [
@@ -5015,27 +5014,27 @@
       "mandatoryChecks": [
         {
           "id": "CMP-M1",
-          "requirement": "Every production AI system shall have applicable legal/regulatory/contractual obligations identified in a register with a named owner, or an explicit \u201cnone in scope\u201d attestation with owner and review date within 12 months.",
+          "requirement": "Every production AI system shall have applicable legal/regulatory/contractual obligations identified in a register with a named owner, or an explicit “none in scope” attestation with owner and review date within 12 months.",
           "artifact": "Inventory of production AI system IDs in scope + Obligations register mapping each system to obligations (or none-in-scope) with owner and review date",
-          "passCondition": "Every production AI system ID has \u22651 mapped obligation entry or an explicit \u201cnone in scope\u201d attestation with owner and review date \u226412 months (register evidence measuredAt \u226490 days).",
+          "passCondition": "Every production AI system ID has ≥1 mapped obligation entry or an explicit “none in scope” attestation with owner and review date ≤12 months (register evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "CMP-M2",
-          "requirement": "Every in-scope obligation shall map to at least one evidence artifact ID (APRF Check or internal control ID) in a control\u2192evidence matrix reviewed within 12 months, with zero orphan obligations lacking an evidence pointer.",
-          "artifact": "Control\u2192evidence matrix linking in-scope obligations to APRF Checks or internal control/evidence IDs + Matrix review date (\u226412 months) and confirmation of zero orphan obligation rows",
-          "passCondition": "100% of in-scope obligations map to \u22651 evidence artifact ID; matrix review date \u226412 months; 0 orphan obligations without an evidence pointer (matrix evidence measuredAt \u226490 days).",
+          "requirement": "Every in-scope obligation shall map to at least one evidence artifact ID (APRF Check or internal control ID) in a control→evidence matrix reviewed within 12 months, with zero orphan obligations lacking an evidence pointer.",
+          "artifact": "Control→evidence matrix linking in-scope obligations to APRF Checks or internal control/evidence IDs + Matrix review date (≤12 months) and confirmation of zero orphan obligation rows",
+          "passCondition": "100% of in-scope obligations map to ≥1 evidence artifact ID; matrix review date ≤12 months; 0 orphan obligations without an evidence pointer (matrix evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 3
         },
         {
           "id": "CMP-M3",
-          "requirement": "Critical AI control-plane changes shall be written to an audit log retained at least as long as policy requires (for example \u2265365 days); a synthetic change shall appear in the log within \u22645 minutes and remain queryable after a retention smoke check.",
-          "artifact": "Audit log retention config for critical AI control-plane change events (policy minimum documented) + Synthetic control-plane change test showing \u22645 minute appearance and queryability after retention smoke check",
-          "passCondition": "Retention is configured \u2265 policy minimum (e.g. \u2265365 days); a synthetic control-plane change appears in the audit log within \u22645 minutes and remains queryable after a retention smoke check (config/smoke evidence measuredAt \u226490 days).",
+          "requirement": "Critical AI control-plane changes shall be written to an audit log retained at least as long as policy requires (for example ≥365 days); a synthetic change shall appear in the log within ≤5 minutes and remain queryable after a retention smoke check.",
+          "artifact": "Audit log retention config for critical AI control-plane change events (policy minimum documented) + Synthetic control-plane change test showing ≤5 minute appearance and queryability after retention smoke check",
+          "passCondition": "Retention is configured ≥ policy minimum (e.g. ≥365 days); a synthetic control-plane change appears in the audit log within ≤5 minutes and remains queryable after a retention smoke check (config/smoke evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -5044,9 +5043,9 @@
       "recommendedChecks": [
         {
           "id": "CMP-R1",
-          "requirement": "Documented AI/compliance controls for production systems shall be tested on the published schedule within the last cycle (\u226490 days default); every open exception shall name an owner, expiry, and compensating control.",
+          "requirement": "Documented AI/compliance controls for production systems shall be tested on the published schedule within the last cycle (≤90 days default); every open exception shall name an owner, expiry, and compensating control.",
           "artifact": "Control-testing schedule + latest test results pack for in-scope AI/compliance controls + Exceptions register with owner, expiry, and compensating control for every open exception",
-          "passCondition": "Documented controls due in the last cycle were tested on schedule (cycle age \u226490 days default); every open exception has owner, expiry, and compensating control (testing/exceptions evidence measuredAt \u226490 days).",
+          "passCondition": "Documented controls due in the last cycle were tested on schedule (cycle age ≤90 days default); every open exception has owner, expiry, and compensating control (testing/exceptions evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -5055,16 +5054,16 @@
           "id": "CMP-R2",
           "requirement": "Customer-facing trust/security documentation for production AI systems shall cover identity, safety/eval, data handling, and incident contact at minimum; include an explicit APRF pillar or Core Profile mapping table; and show a last-updated date within 12 months.",
           "artifact": "Customer-facing trust/security doc with published URL and last-updated date + Explicit APRF pillar or Core Profile mapping table covering identity, safety/eval, data handling, and incident contact",
-          "passCondition": "Public trust doc covers identity, safety/eval, data handling, and incident contact; pillar/Core mapping table is explicit; last-updated \u226412 months (trust-doc evidence measuredAt \u226490 days).",
+          "passCondition": "Public trust doc covers identity, safety/eval, data handling, and incident contact; pillar/Core mapping table is explicit; last-updated ≤12 months (trust-doc evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "CMP-R3",
-          "requirement": "Every AI system that claims or attains APRF capability maturity Level 5 (Optimizing\u2014typically Regulated / highest-discipline production) shall be covered by an independent assessment or internal-audit report \u226412 months old that samples APRF gates and lists sampled Check IDs, findings, and remediation owners. Level 5 is capability maturity, not criticality tier (tiers are 0\u20133).",
+          "requirement": "Every AI system that claims or attains APRF capability maturity Level 5 (Optimizing—typically Regulated / highest-discipline production) shall be covered by an independent assessment or internal-audit report ≤12 months old that samples APRF gates and lists sampled Check IDs, findings, and remediation owners. Level 5 is capability maturity, not criticality tier (tiers are 0–3).",
           "artifact": "Independent assessment or internal-audit report sampling capability Level-5 AI systems against APRF gates + Coverage proof that every capability Level-5 system ID was in scope, with findings and remediation owners",
-          "passCondition": "Last assessment age \u226412 months; covers every system that claims or attains capability Level 5; lists sampled Check IDs, findings, and remediation owners (assessment evidence measuredAt \u226490 days).",
+          "passCondition": "Last assessment age ≤12 months; covers every system that claims or attains capability Level 5; lists sampled Check IDs, findings, and remediation owners (assessment evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
@@ -5078,7 +5077,7 @@
       "engineeringBestPractices": [
         "Derive technical tickets from obligations; avoid orphan policies",
         "Reuse APRF pillar evidence for multiple frameworks where mappings exist",
-        "Keep compliance language accurate: readiness \u2260 certification",
+        "Keep compliance language accurate: readiness ≠ certification",
         "Version compliance artifacts with product releases"
       ],
       "automaticValidations": [
@@ -5100,7 +5099,7 @@
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "ISO/IEC 42001 (AI management systems) \u2014 conceptual alignment",
+          "title": "ISO/IEC 42001 (AI management systems) — conceptual alignment",
           "url": "https://www.iso.org/standard/81230.html"
         }
       ],
@@ -5110,12 +5109,12 @@
       "id": "APRF-23",
       "slug": "platform-engineering",
       "name": "Platform Engineering",
-      "summary": "Make the safe path the easy path\u2014paved roads that apply across every APRF domain.",
+      "summary": "Make the safe path the easy path—paved roads that apply across every APRF domain.",
       "domain": null,
       "crossCutting": true,
       "severity": "medium",
       "riskLevel": "medium",
-      "purpose": "Provide builders with paved roads\u2014SDKs, templates, local evals, guardrails, and documentation\u2014so secure and operable defaults are the path of least resistance across all domains.",
+      "purpose": "Provide builders with paved roads—SDKs, templates, local evals, guardrails, and documentation—so secure and operable defaults are the path of least resistance across all domains.",
       "engineeringPhilosophy": "Platform engineering is a cross-cutting control, not a peer readiness domain. Friction on unsafe paths and speed on safe ones determine whether other pillars are actually followed.",
       "whyItMatters": "If the approved gateway is hard and the raw provider key is easy, builders will bypass controls. DX debt becomes security and reliability debt.",
       "commonFailures": [
@@ -5131,7 +5130,7 @@
           "id": "DX-M1",
           "requirement": "Builders shall have a versioned, owned golden-path document for deploying AI features to production that covers authentication, secrets, evals, and promote steps, reviewed within the last 12 months.",
           "artifact": "Golden-path documentation from scaffold to production with version and owner + Evidence the doc covers auth, secrets, evals, and promote steps + Review attestation or changelog showing review within 12 months",
-          "passCondition": "A golden-path document exists with version and owner; it covers authentication, secrets, evals, and promote steps for AI features; last review is within 12 months (review measuredAt \u2264365 days).",
+          "passCondition": "A golden-path document exists with version and owner; it covers authentication, secrets, evals, and promote steps for AI features; last review is within 12 months (review measuredAt ≤365 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -5140,7 +5139,7 @@
           "id": "DX-M2",
           "requirement": "The default AI golden-path pipeline (local and/or CI) shall run authentication, secret-scan, and basic eval checks, and failing any of them shall block merge or promote.",
           "artifact": "CI and/or local check config covering auth, secret-scan, and basic evals + Evidence those checks are required (blocking) on merge/promote for the AI golden-path template",
-          "passCondition": "The default AI pipeline runs auth, secret-scan, and basic eval checks; failing any blocks merge or promote in the golden-path template (blocking evidence measuredAt \u226490 days).",
+          "passCondition": "The default AI pipeline runs auth, secret-scan, and basic eval checks; failing any blocks merge or promote in the golden-path template (blocking evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -5149,27 +5148,27 @@
       "recommendedChecks": [
         {
           "id": "DX-R1",
-          "requirement": "Scaffolding templates shall exist for agents, RAG, and MCP with authentication, secrets, and logging defaults enabled, and either \u22651 new service used a template in the last 90 days or an adoption target is documented.",
-          "artifact": "Scaffolding template repo/catalog covering agents, RAG, and MCP + Evidence auth, secrets, and logging defaults are enabled in those templates + Adoption metrics (\u22651 use in 90 days) or documented adoption target",
-          "passCondition": "Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults on; \u22651 new service used a template in the last 90 days or an adoption target is documented (adoption proof measuredAt \u226490 days).",
+          "requirement": "Scaffolding templates shall exist for agents, RAG, and MCP with authentication, secrets, and logging defaults enabled, and either ≥1 new service used a template in the last 90 days or an adoption target is documented.",
+          "artifact": "Scaffolding template repo/catalog covering agents, RAG, and MCP + Evidence auth, secrets, and logging defaults are enabled in those templates + Adoption metrics (≥1 use in 90 days) or documented adoption target",
+          "passCondition": "Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults on; ≥1 new service used a template in the last 90 days or an adoption target is documented (adoption proof measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "DX-R2",
-          "requirement": "Developers shall be able to run the core AI eval subset locally or via a one-command inner loop before opening a PR, and the last sampled AI PR (\u226430 days) shall show pre-PR eval evidence or a documented waiver.",
-          "artifact": "Local/inner-loop eval runner docs and package or script entrypoint + Evidence the core eval subset runs in one command (or documented equivalent) + Sample AI PR (\u226430 days) with pre-PR eval evidence or documented waiver",
-          "passCondition": "A local or one-command inner-loop runner exists for the core AI eval subset; the last sampled AI PR (\u226430 days) shows pre-PR eval evidence or a documented waiver (sample/waiver measuredAt \u226430 days).",
+          "requirement": "Developers shall be able to run the core AI eval subset locally or via a one-command inner loop before opening a PR, and the last sampled AI PR (≤30 days) shall show pre-PR eval evidence or a documented waiver.",
+          "artifact": "Local/inner-loop eval runner docs and package or script entrypoint + Evidence the core eval subset runs in one command (or documented equivalent) + Sample AI PR (≤30 days) with pre-PR eval evidence or documented waiver",
+          "passCondition": "A local or one-command inner-loop runner exists for the core AI eval subset; the last sampled AI PR (≤30 days) shows pre-PR eval evidence or a documented waiver (sample/waiver measuredAt ≤30 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "DX-R3",
-          "requirement": "Time-to-safe-production and policy-bypass rate shall be defined with formulas, published for \u226530 consecutive days, and bypass rate shall have an alert or review threshold with a named owner.",
-          "artifact": "Definitions/formulas for time-to-safe-production and policy-bypass rate + Dashboard or weekly report with \u226530 consecutive days of series + Bypass-rate alert or review threshold with named owner",
-          "passCondition": "Both metrics are defined with formulas; published for \u226530 consecutive days; bypass rate has an alert or review threshold with a named owner (series / ownership proof measuredAt \u226490 days).",
+          "requirement": "Time-to-safe-production and policy-bypass rate shall be defined with formulas, published for ≥30 consecutive days, and bypass rate shall have an alert or review threshold with a named owner.",
+          "artifact": "Definitions/formulas for time-to-safe-production and policy-bypass rate + Dashboard or weekly report with ≥30 consecutive days of series + Bypass-rate alert or review threshold with named owner",
+          "passCondition": "Both metrics are defined with formulas; published for ≥30 consecutive days; bypass rate has an alert or review threshold with a named owner (series / ownership proof measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
@@ -5177,8 +5176,8 @@
         {
           "id": "DX-R4",
           "requirement": "A named owner team and a support channel shall exist for the AI platform / paved road, with either a published response SLA proven by a recent test ping or a listed on-call rotation.",
-          "artifact": "Platform ownership record naming the owner team for the AI paved road + Support channel (Slack, ticket queue, or equivalent) documented + Test-ping within published SLA (\u226490 days) or listed on-call rotation",
-          "passCondition": "Named owner team and support channel are documented for the AI platform / paved road; either a test ping met the published SLA within 90 days, or an on-call rotation is listed (support proof measuredAt \u226490 days).",
+          "artifact": "Platform ownership record naming the owner team for the AI paved road + Support channel (Slack, ticket queue, or equivalent) documented + Test-ping within published SLA (≤90 days) or listed on-call rotation",
+          "passCondition": "Named owner team and support channel are documented for the AI platform / paved road; either a test ping met the published SLA within 90 days, or an on-call rotation is listed (support proof measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -5214,11 +5213,11 @@
       ],
       "references": [
         {
-          "title": "Google SRE Workbook \u2014 Soft skills / platform thinking parallels",
+          "title": "Google SRE Workbook — Soft skills / platform thinking parallels",
           "url": "https://sre.google/workbook/"
         },
         {
-          "title": "CNCF platforms white papers \u2014 paved roads concept",
+          "title": "CNCF platforms white papers — paved roads concept",
           "url": "https://www.cncf.io/"
         }
       ],

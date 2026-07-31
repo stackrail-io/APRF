@@ -1,0 +1,24 @@
+id: model-promotion-eval
+title: Model promotion requires eval evidence (MOD-M2)
+version: "0.2.0"
+executor: collectors/model-promotion-eval.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-model-promotion-eval]
+inputs:
+  - "Target repo (model promotion/CI/registry gates)"
+  - "Optional suite: aprf-assessment/imports/model-promotion-eval/*.{json}"
+collect:
+  - "Detect promotion gates requiring eval pass artifacts"
+  - "Ingest coverage; write model-promotion-eval-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/model-promotion-eval/*"
+  signals: [model-promotion-eval, mod-m2, repo-model-promotion-eval]
+mapsToChecks: [MOD-M2]
+whenUnavailable: >
+  Promotion signals alone are PARTIAL. MOD-M2 PASS needs
+  promotionsMissingEvalArtifact=0, promoteWithoutEvalBlocked, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline promotion-gate heuristics + optional imported JSON.
