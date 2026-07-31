@@ -1,0 +1,30 @@
+id: train-serve-skew-monitor
+title: Train/serve skew monitoring for embeddings/features (DG-R2)
+version: "0.2.0"
+executor: collectors/train-serve-skew-monitor.ts
+evidenceClass: runtime-config
+alsoEmits: [code]
+detectorIds: [repo-train-serve-skew]
+inputs:
+  - "Target repo (skew monitor configs, thresholds, paging hooks)"
+  - "Optional suite: aprf-assessment/imports/train-serve-skew-monitor/*.{json}"
+collect:
+  - "Detect train/serve skew monitors for embedding/feature pipelines"
+  - "Detect thresholds and breach ticket/page routing"
+  - "Ingest recent job proof; write train-serve-skew-monitor-report.json"
+emits:
+  nodeClass: runtime-config
+  refPattern: "aprf-assessment/imports/train-serve-skew-monitor/*"
+  signals:
+    - train-serve-skew-monitor
+    - dg-r2
+    - repo-train-serve-skew
+mapsToChecks: [DG-R2]
+whenUnavailable: >
+  Skew config alone is PARTIAL. DG-R2 PASS needs imported
+  coversAllProductionPipelines + skewJobWithin7Days + thresholdDocumented +
+  breachCreatesTicketOrPage with measuredAt ≤7 days. No production
+  embedding/feature pipeline → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline skew-config heuristics + optional imported job/alert JSON.

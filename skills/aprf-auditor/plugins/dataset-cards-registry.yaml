@@ -1,0 +1,29 @@
+id: dataset-cards-registry
+title: Major eval/fine-tune dataset cards (DG-R3)
+version: "0.2.0"
+executor: collectors/dataset-cards-registry.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-dataset-cards]
+inputs:
+  - "Target repo (dataset cards/datasheets for major eval and fine-tune sets)"
+  - "Optional suite: aprf-assessment/imports/dataset-cards-registry/*.{json}"
+collect:
+  - "Detect dataset cards with purpose, source, PII handling, last-updated"
+  - "Ingest inventory; write dataset-cards-registry-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/dataset-cards-registry/*"
+  signals:
+    - dataset-cards-registry
+    - dg-r3
+    - repo-dataset-cards
+mapsToChecks: [DG-R3]
+whenUnavailable: >
+  Card signals alone are PARTIAL. DG-R3 PASS needs imported
+  coversAllMajorEvalFinetuneSets with missing purpose/source/PII counts = 0 and
+  staleCardCount=0 (≤12 months), inventory measuredAt ≤90 days. No major
+  eval/fine-tune sets → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline dataset-card heuristics + optional imported inventory JSON.

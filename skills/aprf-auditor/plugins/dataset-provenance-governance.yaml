@@ -1,0 +1,30 @@
+id: dataset-provenance-governance
+title: Eval/fine-tune dataset provenance + quality criteria (DG-M2)
+version: "0.2.0"
+executor: collectors/dataset-provenance-governance.ts
+evidenceClass: docs
+alsoEmits: [code, ci]
+detectorIds: [repo-dataset-provenance]
+inputs:
+  - "Target repo (dataset cards, datasheets, eval/fine-tune registries)"
+  - "Optional suite: aprf-assessment/imports/dataset-provenance-governance/*.{json}"
+collect:
+  - "Detect dataset cards with provenance and quality criteria"
+  - "Detect promotion-block signals when cards are missing"
+  - "Ingest inventory; write dataset-provenance-governance-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/dataset-provenance-governance/*"
+  signals:
+    - dataset-provenance-governance
+    - dg-m2
+    - repo-dataset-provenance
+mapsToChecks: [DG-M2]
+whenUnavailable: >
+  Card signals alone are PARTIAL. DG-M2 PASS needs imported inventory with
+  coversAllEvalAndFinetuneDatasets, missing provenance/quality counts = 0, and
+  promotionBlockedIfMissing with measuredAt ≤90 days. No eval/fine-tune data
+  surface → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline dataset-card heuristics + optional imported inventory JSON.

@@ -1,38 +1,59 @@
 id: "DG-M2"
 category: "data-governance"
 title: "Data used for evals or fine-tuning must have documented provenance and quality criteria"
-description: "Data used for evals or fine-tuning shall have documented provenance and quality criteria"
-whyItMatters: "Data used for evals or fine-tuning shall have documented provenance and quality
-  criteria Failing this leaves a production gap against: 100% of datasets used in production gates
-  or fine-tunes have provenance + quality criteria documented; promotion blocked if missing (CI or
-  review checklist evidence)"
+description: >
+  Every dataset used in production eval gates or fine-tunes shall have
+  documented provenance and quality criteria, and promotion shall be blocked
+  when those are missing.
+whyItMatters: >
+  Eval and fine-tune sets without provenance or quality bars silently bake in
+  bias, leakage, or unlicensed content. Gates that pass on undocumented data
+  give false confidence; fine-tunes on mystery corpora are hard to recall or
+  remediate. Documented cards plus a promotion brake make training and eval
+  data first-class production artifacts.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "100% of datasets used in production gates or fine-tunes have provenance + quality
-  criteria documented; promotion blocked if missing (CI or review checklist evidence)"
+passCondition: >
+  100% of datasets used in production gates or fine-tunes have provenance +
+  quality criteria documented; promotion is blocked if missing (CI or review
+  checklist evidence; inventory measuredAt ≤90 days).
 evidenceRequired:
-  - "Dataset cards or registry entries for eval/fine-tune sets"
+  - "Dataset cards or registry entries for eval/fine-tune sets covering provenance and quality criteria"
+  - "CI or review-checklist evidence that promotion is blocked when cards are missing"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-dataset-provenance"
+      params:
+        hint: >
+          Discover dataset cards, datasheets, or registry entries for
+          eval/fine-tune sets with provenance and quality criteria, plus
+          promotion-gate signals.
     - id: "manual-attest"
       params:
-        hint: "Dataset cards or registry entries for eval/fine-tune sets"
-manualVerification: "For this Check (Data used for evals or fine-tuning must have documented
-  provenance and quality criteria): inspect current evidence for [Dataset cards or registry entries
-  for eval/fine-tune sets] and confirm the pass condition holds — 100% of datasets used in
-  production gates or fine-tunes have provenance + quality criteria documented; promotion blocked if
-  missing (CI or review checklist evidence)"
-falsePositiveGuidance: "(Data Governance & Quality): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove 100% coverage or promotion blocking,
+          attest inventory with zero missing provenance/quality fields and
+          promotionBlockedIfMissing (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the system uses datasets for production eval gates or fine-tunes.
+  If neither, score NOT_APPLICABLE. 2) Inventory those datasets. 3) Confirm
+  each has documented provenance and quality criteria (dataset card or
+  registry). 4) Confirm promotion/release is blocked when cards are missing
+  (CI check or review checklist). 5) PASS only if coverage is 100% and the
+  promotion brake holds. Retrieval-index inventories (DG-M1) do not satisfy.
+  Informal README lists without provenance/quality fields do not satisfy.
+falsePositiveGuidance: >
+  Do not pass empty Hugging Face card stubs. Do not pass provenance without
+  quality criteria (or the reverse). Do not pass cards for unused sample
+  datasets as covering production gates. Do not pass advisory linters that
+  never block promote. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Data used for evals or fine-tuning must have documented
-    provenance and quality criteria"
-  - "Retain evidence artifacts required by this Check, starting with: Dataset cards or registry
-    entries for eval/fine-tune sets"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish dataset cards with provenance and quality criteria for every eval/fine-tune set"
+  - "Add a CI or review checklist gate that blocks promote when cards are missing"
+  - "Retain inventory under imports/dataset-provenance-governance/"
+  - "Refuse fine-tune or gate promotion jobs that reference undocumented datasets"
 references:
   - title: "NIST AI RMF — Map and Measure (data)"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -41,13 +62,16 @@ references:
 relatedRules:
   - "DG-M1"
   - "DG-M3"
-  - "DG-R1"
-  - "DG-R2"
   - "DG-R3"
+  - "EVL-M1"
+  - "MOD-M1"
+  - "SCI-M2"
 tags:
   - "data-governance"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "dataset-cards"
+  - "provenance"
 applicability:
   technologies:
     - "vector-databases"

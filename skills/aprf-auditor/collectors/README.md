@@ -74,6 +74,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **platform-scaffolding-templates** | `platform-scaffolding-templates.ts` | agent/RAG/MCP scaffolds (DX-R1) | `imports/platform-scaffolding-templates/` | — |
 | **platform-inner-loop-evals** | `platform-inner-loop-evals.ts` | pre-PR local eval runners (DX-R2) | `imports/platform-inner-loop-evals/` | — |
 | **platform-dx-metrics** | `platform-dx-metrics.ts` | TTSP + bypass DX metrics (DX-R3) | `imports/platform-dx-metrics/` | — |
+| **rag-corpus-governance** | `rag-corpus-governance.ts` | RAG corpus owner/version/cadence (DG-M1) | `imports/rag-corpus-governance/` | — |
+| **dataset-provenance-governance** | `dataset-provenance-governance.ts` | eval/fine-tune dataset cards (DG-M2) | `imports/dataset-provenance-governance/` | — |
+| **feedback-promotion-governance** | `feedback-promotion-governance.ts` | feedback→durable promotion gates (DG-M3) | `imports/feedback-promotion-governance/` | — |
+| **corpus-freshness-metrics** | `corpus-freshness-metrics.ts` | corpus freshness SLO + alerts (DG-R1) | `imports/corpus-freshness-metrics/` | — |
+| **train-serve-skew-monitor** | `train-serve-skew-monitor.ts` | train/serve skew monitors (DG-R2) | `imports/train-serve-skew-monitor/` | — |
+| **dataset-cards-registry** | `dataset-cards-registry.ts` | major dataset cards (DG-R3) | `imports/dataset-cards-registry/` | — |
 
 ### AGN-M1 — agent charters
 

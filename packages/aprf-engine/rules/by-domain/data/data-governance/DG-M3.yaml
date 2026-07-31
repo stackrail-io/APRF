@@ -1,36 +1,59 @@
 id: "DG-M3"
 category: "data-governance"
 title: "Feedback or memory promotion paths that affect future answers must be governed"
-description: "Feedback or memory promotion paths that affect future answers shall be governed"
-whyItMatters: "Feedback or memory promotion paths that affect future answers shall be governed
-  Failing this leaves a production gap against: 100% of promotion paths require policy check or
-  human approval; tests show ungated promotion to durable memory/training is denied"
+description: >
+  Every path that promotes user feedback or working memory into durable memory
+  or training data shall require a policy check or human approval, and ungated
+  promotion shall be denied by test.
+whyItMatters: >
+  Ungated thumbs-up loops and silent memory writes turn one bad answer into
+  tomorrow’s training or retrieval signal. Unlike static corpus ownership or
+  offline dataset cards, this write path actively reshapes future behavior.
+  Policy or human gates plus deny tests keep feedback from poisoning durable
+  stores.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "100% of promotion paths require policy check or human approval; tests show ungated
-  promotion to durable memory/training is denied"
+passCondition: >
+  100% of feedback→durable-memory/training promotion paths require a policy
+  check or human approval; automated tests show ungated promotion is denied
+  (deny evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Promotion policy + write-path controls for feedback→memory/training"
+  - "Promotion policy listing feedback/memory→durable/training write paths"
+  - "Write-path controls (policy engine or human approval) on those paths"
+  - "Automated tests showing ungated promotion is denied"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-feedback-promotion"
+      params:
+        hint: >
+          Discover feedback→memory/training promotion configs, policy/approval
+          gates, and deny/bypass tests for ungated writes.
     - id: "manual-attest"
       params:
-        hint: "Promotion policy + write-path controls for feedback→memory/training"
-manualVerification: "For this Check (Feedback or memory promotion paths that affect future answers
-  must be governed): inspect current evidence for [Promotion policy + write-path controls for
-  feedback→memory/training] and confirm the pass condition holds — 100% of promotion paths require
-  policy check or human approval; tests show ungated promotion to durable memory/training is denied"
-falsePositiveGuidance: "(Data Governance & Quality): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove all paths are gated, attest promotion
+          inventory plus ungatedPromotionDenied tests (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the system promotes feedback or working memory into durable
+  memory or training. If no such write path exists, score NOT_APPLICABLE.
+  2) Inventory those promotion paths. 3) Confirm each requires a policy check
+  or human approval. 4) Confirm tests deny ungated promotion. 5) PASS only if
+  coverage is 100% and deny tests hold. MEM architecture docs without deny
+  tests do not satisfy. HUM gates on unrelated tools do not satisfy this
+  feedback→durable path.
+falsePositiveGuidance: >
+  Do not pass logging of feedback without a promotion gate. Do not pass
+  “reviewed eventually” without a blocking policy or approval step. Do not
+  pass unit tests that never exercise an ungated write. Do not pass working-
+  memory TTL alone as promotion governance. Named exceptions need owner and
+  expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Feedback or memory promotion paths that affect future answers
-    must be governed"
-  - "Retain evidence artifacts required by this Check, starting with: Promotion policy + write-path
-    controls for feedback→memory/training"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Require policy check or human approval on every feedback→durable/training path"
+  - "Add automated deny tests for ungated promotion"
+  - "Retain inventory + deny proof under imports/feedback-promotion-governance/"
+  - "Fail closed when a new promotion path is registered without a gate"
 references:
   - title: "NIST AI RMF — Map and Measure (data)"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -39,13 +62,16 @@ references:
 relatedRules:
   - "DG-M1"
   - "DG-M2"
-  - "DG-R1"
-  - "DG-R2"
-  - "DG-R3"
+  - "MEM-M1"
+  - "MEM-R3"
+  - "HUM-M1"
+  - "HUM-M2"
 tags:
   - "data-governance"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "feedback-loops"
+  - "memory-promotion"
 applicability:
   technologies:
     - "vector-databases"
