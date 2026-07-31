@@ -17,10 +17,6 @@ These recommended (or historical) slots are unused in the current YAML catalog:
 | `REL-R3` | Skipped; use nearby `REL-R*` |
 | `REL-R5` | Skipped; use nearby `REL-R*` |
 | `SAF-R1` | Skipped; recommended safety Checks start at `SAF-R2` |
-| `PRI-M2` (historic vendor-terms) | Demoted → `PRI-R2`; ID reused unreleased for former `PRI-M3` (AI deletion/export) |
-| `PRI-M3` | Renumbered → `PRI-M2` (AI memory/log deletion/export) in unreleased privacy reshuffle |
-| `PRI-M4` | Historic residency ID → `PRI-M3`; brief DPIA slot demoted → `PRI-R3` (unreleased) |
-| `PRI-M5` | Renumbered → DPIA then demoted → `PRI-R3` in unreleased privacy reshuffle |
 
 ## Namespace notes
 
