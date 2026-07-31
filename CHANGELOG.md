@@ -8,6 +8,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
+- Tightened Agents domain prose: removed sibling Check IDs from AGN-R3/HUM-M4/HUM-R3 `whyItMatters`; aligned AGN-M4, AGN-R3, HUM-M1/M3/M4 `passCondition` with collector `measuredAt` ≤90d.
+- Tightened Cost domain prose: removed sibling Check IDs from COST-M2/M3 `whyItMatters`; aligned COST-M1–M3 `passCondition`/attest hints with collector `measuredAt` ≤90d.
 - `spec/aprf-spec.json` agent-governance mandatory Checks **AGN-M1–M4** aligned to catalog SoT: methods (M1 automated, M3/M4 hybrid), owner in M1, cancel-suite + operator authz in M3, forged-peer in M4.
 - AGN auditor collectors harden PASS unlocks: `measuredAt` ≤90d (M1–M4), `coversAllProductionAgents` (M1), operator authz + numeric SLO + `architectureReviewOk` (M3), all three deny cases (M4).
 - Rewrote **agent-governance** pillar (goal-conflict plan policy) from template stub to hybrid Check + collector; synced `aprf-spec.json` method to hybrid.

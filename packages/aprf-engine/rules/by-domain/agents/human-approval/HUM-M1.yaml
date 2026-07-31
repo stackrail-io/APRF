@@ -17,7 +17,8 @@ weight: 4
 gate: "mandatory"
 passCondition: >
   100% of inventoried high-impact action classes have an approval gate in
-  production; ungated execution tests for those classes fail at 100%.
+  production; ungated execution tests for those classes fail at 100%
+  (inventory/deny evidence measuredAt ≤90 days).
 evidenceRequired:
   - "Versioned high-impact action inventory (class, risk tier, gate id/owner)"
   - "Gate wiring evidence (policy/config) mapping each class to an approval control"
@@ -34,14 +35,16 @@ detection:
       params:
         hint: >
           If automation cannot prove ungated denies, attest the inventory plus
-          ungated execution results at 100% fail-closed for every inventoried class.
+          ungated execution results at 100% fail-closed for every inventoried
+          class (measuredAt ≤90 days).
 manualVerification: >
   1) Define high-impact for this system (writes, irreversible, financial,
   external communications, privileged admin). If none apply, score NOT_APPLICABLE
   with rationale. 2) Build/open the inventory of action classes and confirm each
   maps to a production approval gate. 3) Review ungated execution tests (or
   imports): attempts without approval must fail at 100%. 4) PASS only if
-  inventory coverage + gate wiring + ungated deny evidence all hold.
+  inventory coverage + gate wiring + ungated deny evidence all hold with
+  measuredAt ≤90 days.
 falsePositiveGuidance: >
   Do not pass on a UI confirm dialog that agents/APIs can bypass. Do not pass
   because HUM-M2 logs exist without gates. Do not pass a partial inventory that

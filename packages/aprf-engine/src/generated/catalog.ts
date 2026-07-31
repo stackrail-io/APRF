@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:036046517c2c427f5471541b26b009b36e996740f1ed2bc6c3f1996105aa26d5",
+  "generatedAt": "sha256:d5eb5490ff6e4adb227b902096302356fec0254cc2ac895bb9908dbe42ebce3c",
   "ruleCount": 177,
   "domains": [
     {
@@ -809,7 +809,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers and scoped capabilities; negative tests show unauthenticated, forged-peer, and over-scoped handoffs denied at 100%; 0 production handoff paths that accept anonymous or network-presence-only trust.\n",
+      "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers and scoped capabilities; negative tests show unauthenticated, forged-peer, and over-scoped handoffs denied at 100%; 0 production handoff paths that accept anonymous or network-presence-only trust (deny evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
         "Inventory of production A2A/multi-agent handoff paths with authn/authz mechanism per path",
         "Capability token/schema (or equivalent) examples showing scoped grants for handoffs",
@@ -825,12 +825,12 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Config presence is not enough—confirm negative tests deny unauthenticated, forged-peer, and over-scoped handoffs on every production multi-agent path (or document N/A if none exist).\n"
+              "hint": "Config presence is not enough—confirm negative tests deny unauthenticated, forged-peer, and over-scoped handoffs on every production multi-agent path (measuredAt ≤90 days), or document N/A if none exist.\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Determine whether the system has production A2A or multi-agent handoffs (including in-process supervisor/worker agents that exchange goals/tools). If none, score NOT_APPLICABLE with inventory evidence. If present, list every production handoff path. 2) For each path, identify how peer identity is authenticated (mTLS, signed tokens, workload identity, etc.) and how capabilities are scoped (token claims, allowlists, policy). Network ACLs alone without peer auth fail. 3) Review negative tests: unauthenticated caller, wrong/forged peer identity, and capability exceeding grant—all must be denied. Prompt-only “don’t trust other agents” does not pass. 4) PASS only if every production handoff path has authn + scoped capabilities and deny tests cover the three abuse cases at 100%.\n",
+      "manualVerification": "1) Determine whether the system has production A2A or multi-agent handoffs (including in-process supervisor/worker agents that exchange goals/tools). If none, score NOT_APPLICABLE with inventory evidence. If present, list every production handoff path. 2) For each path, identify how peer identity is authenticated (mTLS, signed tokens, workload identity, etc.) and how capabilities are scoped (token claims, allowlists, policy). Network ACLs alone without peer auth fail. 3) Review negative tests: unauthenticated caller, wrong/forged peer identity, and capability exceeding grant—all must be denied. Prompt-only “don’t trust other agents” does not pass. 4) PASS only if every production handoff path has authn + scoped capabilities and deny tests cover the three abuse cases at 100% with evidence measuredAt ≤90 days.\n",
       "falsePositiveGuidance": "Do not pass on open mesh / shared API keys / “agents on the same VPC.” Do not pass because A2A config files exist without deny tests. Do not treat user→agent authentication (login) as peer authentication between agents. MCP tool auth to a single server does not cover agent-to-agent handoffs unless those handoffs are in scope and tested. Capability tokens that encode “admin” or unbounded tool sets fail scoped-capability intent. Sibling Checks (charters, loop limits, kill switch) do not prove mesh authn/authz. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Require mutual authentication on every A2A/multi-agent handoff; reject anonymous and network-presence-only peers",
@@ -1028,11 +1028,11 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "agent-governance",
       "title": "Production systems should have formal RACI for agent ownership across teams",
       "description": "Every production AI system and production agent should appear in a versioned RACI or ownership register that names Responsible and Accountable parties (and Consulted/Informed where used) across the teams that operate the agent fleet. Inventory queries should return 0 orphan system or agent IDs missing required ownership fields.\n",
-      "whyItMatters": "Agents cut across product, platform, security, and on-call teams. A single charter owner (AGN-M1) does not resolve who is Responsible vs Accountable when tools fail, spend spikes, or a peer agent misbehaves. Without a formal RACI, incidents stall on “whose agent is this?” and changes ship without a clear accountable steward. Cross-team ownership converts agent fleet risk into assignable duty.\n",
+      "whyItMatters": "Agents cut across product, platform, security, and on-call teams. A single charter owner does not resolve who is Responsible vs Accountable when tools fail, spend spikes, or a peer agent misbehaves. Without a formal RACI, incidents stall on “whose agent is this?” and changes ship without a clear accountable steward. Cross-team ownership converts agent fleet risk into assignable duty.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Every production AI system ID (and production agent ID in scope) has non-empty Responsible and Accountable owner fields for the organization’s required domains/roles; inventory query returns 0 orphans.\n",
+      "passCondition": "Every production AI system ID (and production agent ID in scope) has non-empty Responsible and Accountable owner fields for the organization’s required domains/roles; inventory query returns 0 orphans (register/export measuredAt ≤90 days).\n",
       "evidenceRequired": [
         "Versioned RACI or ownership register covering production AI systems / agents",
         "Required ownership fields defined (at minimum Responsible + Accountable)",
@@ -1050,12 +1050,12 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove zero orphans, attest a versioned RACI register export with Responsible+Accountable filled for every production AI system/agent ID in scope.\n"
+              "hint": "If automation cannot prove zero orphans, attest a versioned RACI register export with Responsible+Accountable filled for every production AI system/agent ID in scope (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Define the production AI system and agent ID scope (align with AGN-M1 inventory where present). If no production agents/systems, score NOT_APPLICABLE. 2) Open the RACI or ownership register; confirm required fields include at least Responsible and Accountable (document any additional required domains). 3) Query for orphans (empty/missing R or A). 4) PASS only if the query returns 0 orphans. A CODEOWNERS file alone or a single charter owner without RACI roles does not satisfy this Check unless it encodes R and A for every in-scope ID.\n",
+      "manualVerification": "1) Define the production AI system and agent ID scope (align with AGN-M1 inventory where present). If no production agents/systems, score NOT_APPLICABLE. 2) Open the RACI or ownership register; confirm required fields include at least Responsible and Accountable (document any additional required domains). 3) Query for orphans (empty/missing R or A). 4) PASS only if the query returns 0 orphans. A CODEOWNERS file alone or a single charter owner without RACI roles does not satisfy this Check unless it encodes R and A for every in-scope ID. Register/export measuredAt must be ≤90 days.\n",
       "falsePositiveGuidance": "Do not pass on AGN-M1 charters that list one owner without Responsible vs Accountable across teams. Do not pass ORG-M2 system-domain owners as a substitute unless the same register explicitly covers agent IDs with RACI roles. Do not pass a stale register (>90 days) or a template with blank rows. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Create a versioned agent/AI-system RACI register with Responsible and Accountable columns (add C/I as needed)",
@@ -2725,7 +2725,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "A finite hard spend ceiling and/or rate limit is configured for production AI workloads; enforcement demonstrably denies or throttles when the limit is exceeded (automated test or production event log within the last 90 days).\n",
+      "passCondition": "A finite hard spend ceiling and/or rate limit is configured for production AI workloads; enforcement demonstrably denies or throttles when the limit is exceeded (automated test or production event log measuredAt ≤90 days).\n",
       "evidenceRequired": [
         "Gateway/provider/application config declaring finite spend ceiling and/or rate limit (TPM/RPM/$, tokens)",
         "Enforcement evidence: automated exceed test or ≤90-day production deny/throttle event log"
@@ -2742,7 +2742,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove enforce-on-exceed, attest finite limit config plus a ≤90-day deny/throttle test or production event.\n"
+              "hint": "If automation cannot prove enforce-on-exceed, attest finite limit config plus deny/throttle test or production event (measuredAt ≤90 days).\n"
             }
           }
         ]
@@ -2792,11 +2792,11 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "cost-optimization",
       "title": "Cost must be monitored with alerts on anomaly and budget burn",
       "description": "Production AI spend shall be monitored with alert policies for budget burn and spend anomaly that notify operators per runbook—not dashboards alone.\n",
-      "whyItMatters": "Hard spend ceilings (COST-M1) stop unbounded burn, but without budget-burn and anomaly alerts operators learn too late that quotas are being hit, tenants are runaway, or unit economics have drifted. A dashboard nobody pages on is not a control. Proven notify (synthetic test or ≤90-day fire) turns FinOps telemetry into an operational signal.\n",
+      "whyItMatters": "Hard spend ceilings stop unbounded burn, but without budget-burn and anomaly alerts operators learn too late that quotas are being hit, tenants are runaway, or unit economics have drifted. A dashboard nobody pages on is not a control. Proven notify (synthetic test or ≤90-day fire) turns FinOps telemetry into an operational signal.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Alerts exist for both budget burn and spend anomaly covering production AI spend; a synthetic or historical burn/anomaly event would page/notify per runbook (alert test or documented fire within the last 90 days).\n",
+      "passCondition": "Alerts exist for both budget burn and spend anomaly covering production AI spend; a synthetic or historical burn/anomaly event would page/notify per runbook (alert test or documented fire measuredAt ≤90 days).\n",
       "evidenceRequired": [
         "Cost/spend dashboard or telemetry views covering production AI workloads",
         "Alert policies for budget burn and spend anomaly (IaC, provider, or gateway)",
@@ -2814,7 +2814,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove notify, attest both alert types plus a ≤90-day alert test or documented fire that paged/notified.\n"
+              "hint": "If automation cannot prove notify, attest both alert types plus an alert test or documented fire that paged/notified (measuredAt ≤90 days).\n"
             }
           }
         ]
@@ -2864,11 +2864,11 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "cost-optimization",
       "title": "Retry and loop policies must prevent unbounded cost amplification",
       "description": "Production AI clients shall enforce finite retry/backoff and loop budgets so forced failures cannot amplify completions without bound—covering HTTP/SDK clients and agent loops, not prompt-only “try again” guidance.\n",
-      "whyItMatters": "Provider blips, tool timeouts, and flaky dependencies trigger retry storms that multiply token spend far beyond the original request. Unbounded maxRetries, missing backoff, or open agent loops turn a transient error into denial-of-wallet even when hard spend ceilings (COST-M1) eventually trip. Finite retry and loop policies with amplification tests keep cost growth bounded under failure.\n",
+      "whyItMatters": "Provider blips, tool timeouts, and flaky dependencies trigger retry storms that multiply token spend far beyond the original request. Unbounded maxRetries, missing backoff, or open agent loops turn a transient error into denial-of-wallet even when hard spend ceilings eventually trip. Finite retry and loop policies with amplification tests keep cost growth bounded under failure.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Max retries and max agent/client loops are finite for 100% of production AI clients; amplification tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling hit within the last 90 days).\n",
+      "passCondition": "Max retries and max agent/client loops are finite for 100% of production AI clients; amplification tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling; test measuredAt ≤90 days).\n",
       "evidenceRequired": [
         "Retry/backoff config (finite maxRetries + backoff) for production AI/model clients",
         "Agent or client loop budget config where applicable (finite iterations/steps)",
@@ -2886,7 +2886,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove amplification bounds, attest finite retry and loop config plus a ≤90-day amplification test hitting a token/$ ceiling.\n"
+              "hint": "If automation cannot prove amplification bounds, attest finite retry and loop config plus an amplification test hitting a token/$ ceiling (measuredAt ≤90 days).\n"
             }
           }
         ]
@@ -3100,7 +3100,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove the quarterly review, attest per-product unit-cost metrics plus FinOps minutes ≤90 days with outlier owners.\n"
+              "hint": "If automation cannot prove the quarterly review, attest per-product unit-cost metrics plus FinOps minutes with outlier owners (measuredAt ≤90 days).\n"
             }
           }
         ]
@@ -5619,7 +5619,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests for those classes fail at 100%.\n",
+      "passCondition": "100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests for those classes fail at 100% (inventory/deny evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
         "Versioned high-impact action inventory (class, risk tier, gate id/owner)",
         "Gate wiring evidence (policy/config) mapping each class to an approval control",
@@ -5637,12 +5637,12 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove ungated denies, attest the inventory plus ungated execution results at 100% fail-closed for every inventoried class.\n"
+              "hint": "If automation cannot prove ungated denies, attest the inventory plus ungated execution results at 100% fail-closed for every inventoried class (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Define high-impact for this system (writes, irreversible, financial, external communications, privileged admin). If none apply, score NOT_APPLICABLE with rationale. 2) Build/open the inventory of action classes and confirm each maps to a production approval gate. 3) Review ungated execution tests (or imports): attempts without approval must fail at 100%. 4) PASS only if inventory coverage + gate wiring + ungated deny evidence all hold.\n",
+      "manualVerification": "1) Define high-impact for this system (writes, irreversible, financial, external communications, privileged admin). If none apply, score NOT_APPLICABLE with rationale. 2) Build/open the inventory of action classes and confirm each maps to a production approval gate. 3) Review ungated execution tests (or imports): attempts without approval must fail at 100%. 4) PASS only if inventory coverage + gate wiring + ungated deny evidence all hold with measuredAt ≤90 days.\n",
       "falsePositiveGuidance": "Do not pass on a UI confirm dialog that agents/APIs can bypass. Do not pass because HUM-M2 logs exist without gates. Do not pass a partial inventory that omits agent/tool paths. Prompt-only “ask a human” without a runtime gate fails. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Publish a versioned high-impact action inventory with risk tier and gate owner per class",
@@ -5762,7 +5762,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Automated or reviewed bypass tests cover alternate UI, API, and agent/job entry points for inventoried high-impact actions; 0 successful ungated high-impact executions in those tests.\n",
+      "passCondition": "Automated or reviewed bypass tests cover alternate UI, API, and agent/job entry points for inventoried high-impact actions; 0 successful ungated high-impact executions in those tests (bypass evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
         "Bypass-path threat model or test matrix across UI, API, and agent/job entry points",
         "Test results showing 0 successful ungated high-impact executions"
@@ -5779,12 +5779,12 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove coverage, attest a reviewed bypass suite across UI/API/agent paths with 0 successful ungated executions.\n"
+              "hint": "If automation cannot prove coverage, attest a reviewed bypass suite across UI/API/agent paths with 0 successful ungated executions (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Confirm high-impact gates exist (HUM-M1 scope). 2) List entry paths that can invoke those actions (UI, public/private API, agent tools, batch). 3) Review bypass tests that omit approval tokens/sessions on each path. 4) PASS only if tests (or imports) show 0 successful ungated high-impact executions. A single gated UI with open APIs fails.\n",
+      "manualVerification": "1) Confirm high-impact gates exist (HUM-M1 scope). 2) List entry paths that can invoke those actions (UI, public/private API, agent tools, batch). 3) Review bypass tests that omit approval tokens/sessions on each path. 4) PASS only if tests (or imports) show 0 successful ungated high-impact executions with measuredAt ≤90 days. A single gated UI with open APIs fails.\n",
       "falsePositiveGuidance": "Do not pass unit tests of the approval service alone without path coverage. Do not pass network ACLs as a substitute for approval on privileged APIs. Do not pass because HUM-M1 inventory exists without bypass evidence. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Enforce approval checks in the shared authorization/execution layer shared by UI, API, and agents",
@@ -5828,11 +5828,11 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "human-approval",
       "title": "Dual control must be required for Level 5 irreversible actions",
       "description": "Irreversible actions in Level 5 (regulated / highest capability) systems shall require dual control: two distinct authorized humans must approve before execution. Sampled executions shall show dual approval with 0 single-approver completes.\n",
-      "whyItMatters": "At Level 5 blast radius, a single fatigued or compromised approver can authorize irreversible harm. Dual control separates intent from execution and raises the cost of insider or session abuse. Without it, HUM-M1 gates remain single-point-of-failure approvals for the highest stakes.\n",
+      "whyItMatters": "At Level 5 blast radius, a single fatigued or compromised approver can authorize irreversible harm. Dual control separates intent from execution and raises the cost of insider or session abuse. Without it, single-gate approvals remain a single point of failure for the highest stakes.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Level 5 irreversible action classes are inventoried; 100% of sampled executions of those classes show dual approval by two distinct actors; 0 single-approver completes in the sample.\n",
+      "passCondition": "Level 5 irreversible action classes are inventoried; 100% of sampled executions of those classes show dual approval by two distinct actors; 0 single-approver completes in the sample (sample/config measuredAt ≤90 days).\n",
       "evidenceRequired": [
         "Inventory of Level 5 irreversible action classes requiring dual control",
         "Dual-control workflow configuration (two distinct approvers)",
@@ -5850,12 +5850,12 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove samples, attest dual-control config plus sampled records with 100% dual approval and 0 single-approver completes.\n"
+              "hint": "If automation cannot prove samples, attest dual-control config plus sampled records with 100% dual approval and 0 single-approver completes (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Confirm the system is assessed at requiredFromLevel ≥5 / Level 5 scope; if not in Level 5 scope, score NOT_APPLICABLE. 2) Inventory irreversible action classes requiring dual control. 3) Verify workflow config requires two distinct approvers. 4) Sample recent executions: 100% dual approval, 0 single-approver. 5) PASS only if inventory + config + sample all hold.\n",
+      "manualVerification": "1) Confirm the system is assessed at requiredFromLevel ≥5 / Level 5 scope; if not in Level 5 scope, score NOT_APPLICABLE. 2) Inventory irreversible action classes requiring dual control. 3) Verify workflow config requires two distinct approvers. 4) Sample recent executions: 100% dual approval, 0 single-approver. 5) PASS only if inventory + config + sample all hold with measuredAt ≤90 days.\n",
       "falsePositiveGuidance": "Do not pass two clicks by the same user/session as dual control. Do not pass maker-checker that allows the same principal both roles. Do not apply this Check as a Level 3 substitute—use HUM-M1/M3 for single-gate systems. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Mark irreversible Level 5 actions and require two distinct approver identities in workflow config",
@@ -5969,7 +5969,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "human-approval",
       "title": "Production systems should have an SLA for approval queues to avoid unsafe workarounds",
       "description": "Approval queues for high-impact actions should have a documented service level (for example p95 queue age) and measured performance for the last 30 days within that SLA—or open exceptions with named owners and expiry—so operators do not bypass gates under backlog pressure.\n",
-      "whyItMatters": "Slow approval queues create shadow paths: engineers disable gates, share break-glass tokens, or move work to ungated APIs. An SLA with measured queue age makes fatigue and backlog visible before HUM-M3 bypasses become culture. Exceptions without owners and expiry become permanent holes.\n",
+      "whyItMatters": "Slow approval queues create shadow paths: engineers disable gates, share break-glass tokens, or move work to ungated APIs. An SLA with measured queue age makes fatigue and backlog visible before bypass workarounds become culture. Exceptions without owners and expiry become permanent holes.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",

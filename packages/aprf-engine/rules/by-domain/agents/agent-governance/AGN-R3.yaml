@@ -9,8 +9,8 @@ description: >
   required ownership fields.
 whyItMatters: >
   Agents cut across product, platform, security, and on-call teams. A single
-  charter owner (AGN-M1) does not resolve who is Responsible vs Accountable when
-  tools fail, spend spikes, or a peer agent misbehaves. Without a formal RACI,
+  charter owner does not resolve who is Responsible vs Accountable when tools
+  fail, spend spikes, or a peer agent misbehaves. Without a formal RACI,
   incidents stall on “whose agent is this?” and changes ship without a clear
   accountable steward. Cross-team ownership converts agent fleet risk into
   assignable duty.
@@ -20,7 +20,8 @@ gate: "recommended"
 passCondition: >
   Every production AI system ID (and production agent ID in scope) has non-empty
   Responsible and Accountable owner fields for the organization’s required
-  domains/roles; inventory query returns 0 orphans.
+  domains/roles; inventory query returns 0 orphans (register/export measuredAt
+  ≤90 days).
 evidenceRequired:
   - "Versioned RACI or ownership register covering production AI systems / agents"
   - "Required ownership fields defined (at minimum Responsible + Accountable)"
@@ -38,7 +39,7 @@ detection:
         hint: >
           If automation cannot prove zero orphans, attest a versioned RACI
           register export with Responsible+Accountable filled for every
-          production AI system/agent ID in scope.
+          production AI system/agent ID in scope (measuredAt ≤90 days).
 manualVerification: >
   1) Define the production AI system and agent ID scope (align with AGN-M1
   inventory where present). If no production agents/systems, score
@@ -47,7 +48,7 @@ manualVerification: >
   required domains). 3) Query for orphans (empty/missing R or A). 4) PASS only
   if the query returns 0 orphans. A CODEOWNERS file alone or a single charter
   owner without RACI roles does not satisfy this Check unless it encodes R and A
-  for every in-scope ID.
+  for every in-scope ID. Register/export measuredAt must be ≤90 days.
 falsePositiveGuidance: >
   Do not pass on AGN-M1 charters that list one owner without Responsible vs
   Accountable across teams. Do not pass ORG-M2 system-domain owners as a

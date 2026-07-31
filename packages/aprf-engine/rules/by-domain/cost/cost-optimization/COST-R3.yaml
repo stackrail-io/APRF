@@ -33,7 +33,8 @@ detection:
       params:
         hint: >
           If automation cannot prove the quarterly review, attest per-product
-          unit-cost metrics plus FinOps minutes ≤90 days with outlier owners.
+          unit-cost metrics plus FinOps minutes with outlier owners
+          (measuredAt ≤90 days).
 manualVerification: >
   1) Confirm customer-facing AI products exist. If none, score NOT_APPLICABLE.
   2) Locate unit-cost metrics per product for the last quarter (cost per

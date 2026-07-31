@@ -3830,7 +3830,7 @@
           "id": "AGN-M4",
           "requirement": "Every production agent-to-agent (A2A) or multi-agent handoff path shall authenticate the peer identity and authorize a scoped capability set (tools, data, actions) independent of network presence. Unauthenticated, spoofed, or over-scoped handoffs shall be denied by the platform\u2014not by prompt instructions alone.",
           "artifact": "Inventory of production A2A/multi-agent handoff paths with authn/authz mechanism per path + Capability token/schema (or equivalent) examples showing scoped grants for handoffs + Negative test results: unauthenticated, forged identity, and over-scoped capability cases denied at 100%",
-          "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers and scoped capabilities; negative tests show unauthenticated, forged-peer, and over-scoped handoffs denied at 100%; 0 production handoff paths that accept anonymous or network-presence-only trust.",
+          "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers and scoped capabilities; negative tests show unauthenticated, forged-peer, and over-scoped handoffs denied at 100%; 0 production handoff paths that accept anonymous or network-presence-only trust (deny evidence measuredAt \u226490 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3859,7 +3859,7 @@
           "id": "AGN-R3",
           "requirement": "Every production AI system and production agent should appear in a versioned RACI or ownership register that names Responsible and Accountable parties (and Consulted/Informed where used) across the teams that operate the agent fleet. Inventory queries should return 0 orphan system or agent IDs missing required ownership fields.",
           "artifact": "Versioned RACI or ownership register covering production AI systems / agents + Required ownership fields defined (at minimum Responsible + Accountable) + Inventory export or query result showing 0 orphans for those fields",
-          "passCondition": "Every production AI system ID (and production agent ID in scope) has non-empty Responsible and Accountable owner fields for the organization\u2019s required domains/roles; inventory query returns 0 orphans.",
+          "passCondition": "Every production AI system ID (and production agent ID in scope) has non-empty Responsible and Accountable owner fields for the organization\u2019s required domains/roles; inventory query returns 0 orphans (register/export measuredAt \u226490 days).",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
@@ -3938,7 +3938,7 @@
           "id": "HUM-M1",
           "requirement": "Every high-impact action class an AI system or agent can invoke in production (write/irreversible/financial/external-comms/privileged side effects) shall be listed in a versioned inventory and blocked until a human approval gate succeeds. Ungated execution of inventoried classes shall fail closed.",
           "artifact": "Versioned high-impact action inventory (class, risk tier, gate id/owner) + Gate wiring evidence (policy/config) mapping each class to an approval control + Ungated execution test results showing 100% deny/fail-closed for inventoried classes",
-          "passCondition": "100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests for those classes fail at 100%.",
+          "passCondition": "100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests for those classes fail at 100% (inventory/deny evidence measuredAt \u226490 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3956,7 +3956,7 @@
           "id": "HUM-M3",
           "requirement": "Human approval gates for high-impact actions shall apply on every entry path (UI, API, agent/tool, batch/job)\u2014not only the primary console. Alternate-path bypass tests shall show 0 successful ungated high-impact executions.",
           "artifact": "Bypass-path threat model or test matrix across UI, API, and agent/job entry points + Test results showing 0 successful ungated high-impact executions",
-          "passCondition": "Automated or reviewed bypass tests cover alternate UI, API, and agent/job entry points for inventoried high-impact actions; 0 successful ungated high-impact executions in those tests.",
+          "passCondition": "Automated or reviewed bypass tests cover alternate UI, API, and agent/job entry points for inventoried high-impact actions; 0 successful ungated high-impact executions in those tests (bypass evidence measuredAt \u226490 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -3965,7 +3965,7 @@
           "id": "HUM-M4",
           "requirement": "Irreversible actions in Level 5 (regulated / highest capability) systems shall require dual control: two distinct authorized humans must approve before execution. Sampled executions shall show dual approval with 0 single-approver completes.",
           "artifact": "Inventory of Level 5 irreversible action classes requiring dual control + Dual-control workflow configuration (two distinct approvers) + Sample approval records showing dual approval and 0 single-approver completes",
-          "passCondition": "Level 5 irreversible action classes are inventoried; 100% of sampled executions of those classes show dual approval by two distinct actors; 0 single-approver completes in the sample.",
+          "passCondition": "Level 5 irreversible action classes are inventoried; 100% of sampled executions of those classes show dual approval by two distinct actors; 0 single-approver completes in the sample (sample/config measuredAt \u226490 days).",
           "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
@@ -4787,7 +4787,7 @@
           "id": "COST-M1",
           "requirement": "Production AI workloads shall enforce finite hard spend ceilings and/or request rate limits (provider, gateway, or application) that deny or throttle when exceeded\u2014not soft dashboards or prompt-only budgets alone.",
           "artifact": "Gateway/provider/application config declaring finite spend ceiling and/or rate limit (TPM/RPM/$, tokens) + Enforcement evidence: automated exceed test or \u226490-day production deny/throttle event log",
-          "passCondition": "A finite hard spend ceiling and/or rate limit is configured for production AI workloads; enforcement demonstrably denies or throttles when the limit is exceeded (automated test or production event log within the last 90 days).",
+          "passCondition": "A finite hard spend ceiling and/or rate limit is configured for production AI workloads; enforcement demonstrably denies or throttles when the limit is exceeded (automated test or production event log measuredAt \u226490 days).",
           "method": "hybrid",
           "requiredFromLevel": 2,
           "minCriticality": 1
@@ -4796,7 +4796,7 @@
           "id": "COST-M2",
           "requirement": "Production AI spend shall be monitored with alert policies for budget burn and spend anomaly that notify operators per runbook\u2014not dashboards alone.",
           "artifact": "Cost/spend dashboard or telemetry views covering production AI workloads + Alert policies for budget burn and spend anomaly (IaC, provider, or gateway) + Notify proof: alert test or documented fire \u226490 days with page/notify outcome",
-          "passCondition": "Alerts exist for both budget burn and spend anomaly covering production AI spend; a synthetic or historical burn/anomaly event would page/notify per runbook (alert test or documented fire within the last 90 days).",
+          "passCondition": "Alerts exist for both budget burn and spend anomaly covering production AI spend; a synthetic or historical burn/anomaly event would page/notify per runbook (alert test or documented fire measuredAt \u226490 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
@@ -4805,7 +4805,7 @@
           "id": "COST-M3",
           "requirement": "Production AI clients shall enforce finite retry/backoff and loop budgets so forced failures cannot amplify completions without bound\u2014covering HTTP/SDK clients and agent loops, not prompt-only \u201ctry again\u201d guidance.",
           "artifact": "Retry/backoff config (finite maxRetries + backoff) for production AI/model clients + Agent or client loop budget config where applicable (finite iterations/steps) + Amplification test results: forced failure/retry hits a bounded token or $ ceiling (\u226490 days)",
-          "passCondition": "Max retries and max agent/client loops are finite for 100% of production AI clients; amplification tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling hit within the last 90 days).",
+          "passCondition": "Max retries and max agent/client loops are finite for 100% of production AI clients; amplification tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling; test measuredAt \u226490 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2

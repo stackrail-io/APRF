@@ -9,16 +9,16 @@ whyItMatters: >
   Provider blips, tool timeouts, and flaky dependencies trigger retry storms
   that multiply token spend far beyond the original request. Unbounded
   maxRetries, missing backoff, or open agent loops turn a transient error into
-  denial-of-wallet even when hard spend ceilings (COST-M1) eventually trip.
-  Finite retry and loop policies with amplification tests keep cost growth
-  bounded under failure.
+  denial-of-wallet even when hard spend ceilings eventually trip. Finite retry
+  and loop policies with amplification tests keep cost growth bounded under
+  failure.
 severity: "high"
 weight: 3
 gate: "mandatory"
 passCondition: >
   Max retries and max agent/client loops are finite for 100% of production AI
   clients; amplification tests show cost cannot grow without bound under forced
-  failure/retry (bounded token or $ ceiling hit within the last 90 days).
+  failure/retry (bounded token or $ ceiling; test measuredAt ≤90 days).
 evidenceRequired:
   - "Retry/backoff config (finite maxRetries + backoff) for production AI/model clients"
   - "Agent or client loop budget config where applicable (finite iterations/steps)"
@@ -35,7 +35,8 @@ detection:
       params:
         hint: >
           If automation cannot prove amplification bounds, attest finite retry
-          and loop config plus a ≤90-day amplification test hitting a token/$ ceiling.
+          and loop config plus an amplification test hitting a token/$ ceiling
+          (measuredAt ≤90 days).
 manualVerification: >
   1) Confirm production AI/model clients exist. If none, score NOT_APPLICABLE.
   2) For each client path (SDK, gateway, agent runtime), locate finite
