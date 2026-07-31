@@ -55,6 +55,12 @@ import { memoryWritePolicyCollector } from "./memory-write-policy.ts";
 import { memoryIntegrityCollector } from "./memory-integrity.ts";
 import { memoryPoisoningEvalsCollector } from "./memory-poisoning-evals.ts";
 import { memoryPromotionArchitectureCollector } from "./memory-promotion-architecture.ts";
+import { aiObligationsRegisterCollector } from "./ai-obligations-register.ts";
+import { aiControlEvidenceMatrixCollector } from "./ai-control-evidence-matrix.ts";
+import { aiControlPlaneAuditLogsCollector } from "./ai-control-plane-audit-logs.ts";
+import { aiControlTestingCollector } from "./ai-control-testing.ts";
+import { aiTrustDocumentationCollector } from "./ai-trust-documentation.ts";
+import { aiIndependentAssessmentCollector } from "./ai-independent-assessment.ts";
 import {
   awsCollector,
   azureCollector,
@@ -117,6 +123,12 @@ export const COLLECTORS: Collector[] = [
   memoryIntegrityCollector,
   memoryPoisoningEvalsCollector,
   memoryPromotionArchitectureCollector,
+  aiObligationsRegisterCollector,
+  aiControlEvidenceMatrixCollector,
+  aiControlPlaneAuditLogsCollector,
+  aiControlTestingCollector,
+  aiTrustDocumentationCollector,
+  aiIndependentAssessmentCollector,
   a2aPeerAuthCollector,
   awsCollector,
   azureCollector,

@@ -237,6 +237,30 @@ MEM-R3 working vs durable + promotion:
   npm run aprf:memory-promotion-architecture -- --target <app> --out <app>/aprf-assessment
   # PASS needs separation + rules + ≥10 audits + TTL-by-class under imports/memory-promotion-architecture/
 
+CMP-M1 AI obligations register:
+  npm run aprf:ai-obligations-register -- --target <app> --out <app>/aprf-assessment
+  # PASS needs per-system obligations/none-in-scope with owners + reviews ≤12 months under imports/ai-obligations-register/
+
+CMP-M2 control→evidence matrix:
+  npm run aprf:ai-control-evidence-matrix -- --target <app> --out <app>/aprf-assessment
+  # PASS needs 100% obligation→evidence coverage, 0 orphans, review ≤12 months under imports/ai-control-evidence-matrix/
+
+CMP-M3 AI control-plane audit retention:
+  npm run aprf:ai-control-plane-audit-logs -- --target <app> --out <app>/aprf-assessment
+  # PASS needs retention ≥ policy min + ≤5 min synthetic appearance + queryable smoke under imports/ai-control-plane-audit-logs/
+
+CMP-R1 control testing + exceptions:
+  npm run aprf:ai-control-testing -- --target <app> --out <app>/aprf-assessment
+  # PASS needs on-schedule cycle (≤90d) + openExceptionsIncomplete=0 under imports/ai-control-testing/
+
+CMP-R2 customer-facing trust documentation:
+  npm run aprf:ai-trust-documentation -- --target <app> --out <app>/aprf-assessment
+  # PASS needs published URL + identity/safety/data/incident + pillar map + last-updated ≤12m under imports/ai-trust-documentation/
+
+CMP-R3 Level-5 independent assessment:
+  npm run aprf:ai-independent-assessment -- --target <app> --out <app>/aprf-assessment
+  # PASS needs coversAllLevel5Systems + sampled Check IDs + remediation owners + assessment ≤12m under imports/ai-independent-assessment/
+
 Import runtime evidence without live APIs:
   mkdir -p <out>/imports/langsmith && cp traces.json <out>/imports/langsmith/
 `);

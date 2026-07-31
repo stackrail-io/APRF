@@ -5020,28 +5020,28 @@
       "mandatoryChecks": [
         {
           "id": "CMP-M1",
-          "requirement": "Applicable obligations for the AI system shall be identified and owned",
-          "artifact": "Obligations register with owner per obligation for each production AI system",
-          "passCondition": "Every production AI system ID has \u22651 mapped obligation entry or an explicit \u201cnone in scope\u201d attestation with owner and review date \u2264 12 months",
-          "method": "manual",
+          "requirement": "Every production AI system shall have applicable legal/regulatory/contractual obligations identified in a register with a named owner, or an explicit \u201cnone in scope\u201d attestation with owner and review date within 12 months.",
+          "artifact": "Inventory of production AI system IDs in scope + Obligations register mapping each system to obligations (or none-in-scope) with owner and review date",
+          "passCondition": "Every production AI system ID has \u22651 mapped obligation entry or an explicit \u201cnone in scope\u201d attestation with owner and review date \u226412 months (register evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "CMP-M2",
-          "requirement": "Control-to-evidence mapping shall exist for in-scope requirements",
-          "artifact": "Control\u2192evidence matrix linking obligations to APRF checks or internal control IDs",
-          "passCondition": "100% of in-scope obligations map to \u22651 evidence artifact ID; matrix review date \u2264 12 months; 0 orphan obligations without evidence pointer",
-          "method": "manual",
+          "requirement": "Every in-scope obligation shall map to at least one evidence artifact ID (APRF Check or internal control ID) in a control\u2192evidence matrix reviewed within 12 months, with zero orphan obligations lacking an evidence pointer.",
+          "artifact": "Control\u2192evidence matrix linking in-scope obligations to APRF Checks or internal control/evidence IDs + Matrix review date (\u226412 months) and confirmation of zero orphan obligation rows",
+          "passCondition": "100% of in-scope obligations map to \u22651 evidence artifact ID; matrix review date \u226412 months; 0 orphan obligations without an evidence pointer (matrix evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 3
         },
         {
           "id": "CMP-M3",
-          "requirement": "Audit logs for critical AI control-plane changes shall be retained per policy",
-          "artifact": "Audit log retention config + sample of control-plane change events",
-          "passCondition": "Retention configured \u2265 policy minimum (e.g. \u2265 365 days); synthetic control-plane change appears in audit log within \u2264 5 minutes and remains queryable after retention smoke check",
-          "method": "manual",
+          "requirement": "Critical AI control-plane changes shall be written to an audit log retained at least as long as policy requires (for example \u2265365 days); a synthetic change shall appear in the log within \u22645 minutes and remain queryable after a retention smoke check.",
+          "artifact": "Audit log retention config for critical AI control-plane change events (policy minimum documented) + Synthetic control-plane change test showing \u22645 minute appearance and queryability after retention smoke check",
+          "passCondition": "Retention is configured \u2265 policy minimum (e.g. \u2265365 days); a synthetic control-plane change appears in the audit log within \u22645 minutes and remains queryable after a retention smoke check (config/smoke evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -5049,28 +5049,28 @@
       "recommendedChecks": [
         {
           "id": "CMP-R1",
-          "requirement": "Regular control testing with documented exceptions",
-          "artifact": "Control-testing schedule + latest test results pack with exceptions register",
-          "passCondition": "Documented controls were tested on schedule in the last cycle (\u226490 days default); open exceptions have owner, expiry, and compensating control",
-          "method": "manual",
+          "requirement": "Documented AI/compliance controls for production systems shall be tested on the published schedule within the last cycle (\u226490 days default); every open exception shall name an owner, expiry, and compensating control.",
+          "artifact": "Control-testing schedule + latest test results pack for in-scope AI/compliance controls + Exceptions register with owner, expiry, and compensating control for every open exception",
+          "passCondition": "Documented controls due in the last cycle were tested on schedule (cycle age \u226490 days default); every open exception has owner, expiry, and compensating control (testing/exceptions evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "CMP-R2",
-          "requirement": "Customer-facing trust documentation aligned to APRF pillars",
-          "artifact": "Customer-facing trust/security doc mapped to APRF pillars (or Core Profile) + published URL and last-updated date",
-          "passCondition": "Public trust doc covers identity, safety/eval, data handling, and incident contact at minimum; last-updated \u226412 months; pillar/Core mapping table is explicit",
-          "method": "manual",
+          "requirement": "Customer-facing trust/security documentation for production AI systems shall cover identity, safety/eval, data handling, and incident contact at minimum; include an explicit APRF pillar or Core Profile mapping table; and show a last-updated date within 12 months.",
+          "artifact": "Customer-facing trust/security doc with published URL and last-updated date + Explicit APRF pillar or Core Profile mapping table covering identity, safety/eval, data handling, and incident contact",
+          "passCondition": "Public trust doc covers identity, safety/eval, data handling, and incident contact; pillar/Core mapping table is explicit; last-updated \u226412 months (trust-doc evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "CMP-R3",
-          "requirement": "Independent assessment for Level 5 systems",
-          "artifact": "Independent assessment or internal-audit report sampling Level-5 AI systems against APRF gates",
-          "passCondition": "Last assessment \u226412 months old lists sampled check IDs, findings, and remediation owners; covers every system rated Level 5",
-          "method": "manual",
+          "requirement": "Every AI system that claims or attains APRF capability maturity Level 5 (Optimizing\u2014typically Regulated / highest-discipline production) shall be covered by an independent assessment or internal-audit report \u226412 months old that samples APRF gates and lists sampled Check IDs, findings, and remediation owners. Level 5 is capability maturity, not criticality tier (tiers are 0\u20133).",
+          "artifact": "Independent assessment or internal-audit report sampling capability Level-5 AI systems against APRF gates + Coverage proof that every capability Level-5 system ID was in scope, with findings and remediation owners",
+          "passCondition": "Last assessment age \u226412 months; covers every system that claims or attains capability Level 5; lists sampled Check IDs, findings, and remediation owners (assessment evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }

@@ -1,33 +1,59 @@
 id: "CMP-M2"
 category: "compliance"
-title: "Control-to-evidence mapping must exist for in-scope requirements"
-description: "Control-to-evidence mapping shall exist for in-scope requirements"
-whyItMatters: "Control-to-evidence mapping shall exist for in-scope requirements Failing this leaves
-  a production gap against: 100% of in-scope obligations map to ≥1 evidence artifact ID; matrix
-  review date ≤ 12 months; 0 orphan obligations without evidence pointer"
+title: "In-scope AI obligations must map to evidence artifacts"
+description: >
+  Every in-scope obligation shall map to at least one evidence artifact ID
+  (APRF Check or internal control ID) in a control→evidence matrix reviewed
+  within 12 months, with zero orphan obligations lacking an evidence pointer.
+whyItMatters: >
+  Named AI obligations without inspectable evidence leave auditors and
+  operators guessing whether a requirement is met. A living control→evidence
+  matrix closes that gap—every in-scope obligation points to something
+  concrete, and orphan rows are treated as gaps until fixed.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "100% of in-scope obligations map to ≥1 evidence artifact ID; matrix review date ≤ 12
-  months; 0 orphan obligations without evidence pointer"
+passCondition: >
+  100% of in-scope obligations map to ≥1 evidence artifact ID; matrix review
+  date ≤12 months; 0 orphan obligations without an evidence pointer (matrix
+  evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Control→evidence matrix linking obligations to APRF checks or internal control IDs"
+  - "Control→evidence matrix linking in-scope obligations to APRF Checks or internal control/evidence IDs"
+  - "Matrix review date (≤12 months) and confirmation of zero orphan obligation rows"
 detection:
-  capability: "manual"
-  detectors: []
-manualVerification: "For this Check (Control-to-evidence mapping must exist for in-scope
-  requirements): inspect current evidence for [Control→evidence matrix linking obligations to APRF
-  checks or internal control IDs] and confirm the pass condition holds — 100% of in-scope
-  obligations map to ≥1 evidence artifact ID; matrix review date ≤ 12 months; 0 orphan obligations
-  without evidence pointer"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-control-evidence-matrix"
+      params:
+        hint: >
+          Discover control→evidence matrices linking obligations to APRF Checks
+          or internal evidence IDs, plus review-date and orphan-coverage signals.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest 100% of in-scope
+          obligations map to ≥1 evidence ID with 0 orphans and matrix review
+          ≤12 months (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm in-scope obligations exist (from the obligations register or
+  equivalent). If no obligations are in scope (all none-in-scope), score
+  NOT_APPLICABLE. 2) Open the control→evidence matrix. 3) Confirm every
+  in-scope obligation maps to ≥1 evidence artifact ID (APRF Check or internal
+  ID). 4) Confirm 0 orphan obligation rows without an evidence pointer. 5)
+  Confirm matrix review date ≤12 months. 6) PASS only if coverage + orphans +
+  review freshness hold with measuredAt ≤90 days. A matrix that lists controls
+  without evidence IDs does not satisfy. Mapping only a sample of obligations
+  does not satisfy.
+falsePositiveGuidance: >
+  Do not pass an obligations register as a control→evidence matrix. Do not pass
+  matrices with blank evidence columns. Do not pass reviews older than 12
+  months. Do not pass matrices that omit obligations known to be in scope. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Control-to-evidence mapping must exist for in-scope requirements"
-  - "Retain evidence artifacts required by this Check, starting with: Control→evidence matrix
-    linking obligations to APRF checks or internal control IDs"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Build a control→evidence matrix for every in-scope obligation with ≥1 evidence artifact ID"
+  - "Eliminate orphan obligation rows; fail closed when new obligations lack a pointer"
+  - "Review the matrix at least annually; record the review date"
+  - "Retain the matrix under imports/ai-control-evidence-matrix/"
 references:
   - title: "NIST AI RMF"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -42,7 +68,9 @@ relatedRules:
 tags:
   - "compliance"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "control-evidence"
+  - "matrix"
 applicability:
   technologies: []
   minCriticality: 3

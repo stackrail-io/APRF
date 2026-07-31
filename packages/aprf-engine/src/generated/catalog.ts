@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:9f7249750b24a9854adc77b14ab4717f80049e3198e28da182c12b34e93a84a8",
+  "generatedAt": "sha256:cdb96c1d31b349f4c4400b447b5dcd5489d103f2ae34499deadb1a52168c12c8",
   "ruleCount": 177,
   "domains": [
     {
@@ -2368,27 +2368,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CMP-M1",
       "category": "compliance",
-      "title": "Applicable obligations for the AI system must be identified and owned",
-      "description": "Applicable obligations for the AI system shall be identified and owned",
-      "whyItMatters": "Applicable obligations for the AI system shall be identified and owned Failing this leaves a production gap against: Every production AI system ID has ≥1 mapped obligation entry or an explicit “none in scope” attestation with owner and review date ≤ 12 months",
+      "title": "Applicable obligations for production AI systems must be identified and owned",
+      "description": "Every production AI system shall have applicable legal/regulatory/contractual obligations identified in a register with a named owner, or an explicit “none in scope” attestation with owner and review date within 12 months.\n",
+      "whyItMatters": "Unowned AI systems drift outside known compliance scope: teams cannot tell which rules apply, who renews them, or whether “none in scope” was a conscious decision. An obligations register with owners and fresh reviews turns compliance from tribal knowledge into an operable inventory for every production AI system ID.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Every production AI system ID has ≥1 mapped obligation entry or an explicit “none in scope” attestation with owner and review date ≤ 12 months",
+      "passCondition": "Every production AI system ID has ≥1 mapped obligation entry or an explicit “none in scope” attestation with owner and review date ≤12 months (register evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Obligations register with owner per obligation for each production AI system"
+        "Inventory of production AI system IDs in scope",
+        "Obligations register mapping each system to obligations (or none-in-scope) with owner and review date"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-obligations-register",
+            "params": {
+              "hint": "Discover AI obligations registers, system inventories, and none-in-scope attestations with owners and review dates.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest every production AI system ID has ≥1 obligation or none-in-scope with owner and review ≤12 months (register measuredAt ≤90 days).\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (Applicable obligations for the AI system must be identified and owned): inspect current evidence for [Obligations register with owner per obligation for each production AI system] and confirm the pass condition holds — Every production AI system ID has ≥1 mapped obligation entry or an explicit “none in scope” attestation with owner and review date ≤ 12 months",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI systems exist. If none, score NOT_APPLICABLE. 2) Inventory production AI system IDs. 3) Open the obligations register: each system has ≥1 obligation entry or an explicit none-in-scope attestation. 4) Confirm every entry/attest has a named owner and review date ≤12 months. 5) PASS only if coverage is 100% and register freshness holds (measuredAt ≤90 days). A company-wide legal memo that never names system IDs does not satisfy. Registers without owners or with reviews older than 12 months do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a generic compliance policy without per-system mappings. Do not pass “none in scope” without owner and review date. Do not pass incomplete inventories that omit shadow AI systems in production. Do not pass registers older than 90 days as current without a fresh measuredAt. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Applicable obligations for the AI system must be identified and owned",
-        "Retain evidence artifacts required by this Check, starting with: Obligations register with owner per obligation for each production AI system",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish a production AI system inventory and obligations register with owner per entry",
+        "Require none-in-scope attestations (owner + review date) when no obligations apply",
+        "Review obligations at least annually; treat reviews >12 months as missing",
+        "Retain register under imports/ai-obligations-register/"
       ],
       "references": [
         {
@@ -2405,12 +2419,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "CMP-M3",
         "CMP-R1",
         "CMP-R2",
-        "CMP-R3"
+        "CMP-R3",
+        "ORG-M1"
       ],
       "tags": [
         "compliance",
         "mandatory",
-        "manual"
+        "hybrid",
+        "obligations",
+        "register"
       ],
       "applicability": {
         "technologies": [],
@@ -2423,27 +2440,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CMP-M2",
       "category": "compliance",
-      "title": "Control-to-evidence mapping must exist for in-scope requirements",
-      "description": "Control-to-evidence mapping shall exist for in-scope requirements",
-      "whyItMatters": "Control-to-evidence mapping shall exist for in-scope requirements Failing this leaves a production gap against: 100% of in-scope obligations map to ≥1 evidence artifact ID; matrix review date ≤ 12 months; 0 orphan obligations without evidence pointer",
+      "title": "In-scope AI obligations must map to evidence artifacts",
+      "description": "Every in-scope obligation shall map to at least one evidence artifact ID (APRF Check or internal control ID) in a control→evidence matrix reviewed within 12 months, with zero orphan obligations lacking an evidence pointer.\n",
+      "whyItMatters": "Named AI obligations without inspectable evidence leave auditors and operators guessing whether a requirement is met. A living control→evidence matrix closes that gap—every in-scope obligation points to something concrete, and orphan rows are treated as gaps until fixed.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of in-scope obligations map to ≥1 evidence artifact ID; matrix review date ≤ 12 months; 0 orphan obligations without evidence pointer",
+      "passCondition": "100% of in-scope obligations map to ≥1 evidence artifact ID; matrix review date ≤12 months; 0 orphan obligations without an evidence pointer (matrix evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Control→evidence matrix linking obligations to APRF checks or internal control IDs"
+        "Control→evidence matrix linking in-scope obligations to APRF Checks or internal control/evidence IDs",
+        "Matrix review date (≤12 months) and confirmation of zero orphan obligation rows"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-control-evidence-matrix",
+            "params": {
+              "hint": "Discover control→evidence matrices linking obligations to APRF Checks or internal evidence IDs, plus review-date and orphan-coverage signals.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest 100% of in-scope obligations map to ≥1 evidence ID with 0 orphans and matrix review ≤12 months (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (Control-to-evidence mapping must exist for in-scope requirements): inspect current evidence for [Control→evidence matrix linking obligations to APRF checks or internal control IDs] and confirm the pass condition holds — 100% of in-scope obligations map to ≥1 evidence artifact ID; matrix review date ≤ 12 months; 0 orphan obligations without evidence pointer",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm in-scope obligations exist (from the obligations register or equivalent). If no obligations are in scope (all none-in-scope), score NOT_APPLICABLE. 2) Open the control→evidence matrix. 3) Confirm every in-scope obligation maps to ≥1 evidence artifact ID (APRF Check or internal ID). 4) Confirm 0 orphan obligation rows without an evidence pointer. 5) Confirm matrix review date ≤12 months. 6) PASS only if coverage + orphans + review freshness hold with measuredAt ≤90 days. A matrix that lists controls without evidence IDs does not satisfy. Mapping only a sample of obligations does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass an obligations register as a control→evidence matrix. Do not pass matrices with blank evidence columns. Do not pass reviews older than 12 months. Do not pass matrices that omit obligations known to be in scope. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Control-to-evidence mapping must exist for in-scope requirements",
-        "Retain evidence artifacts required by this Check, starting with: Control→evidence matrix linking obligations to APRF checks or internal control IDs",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Build a control→evidence matrix for every in-scope obligation with ≥1 evidence artifact ID",
+        "Eliminate orphan obligation rows; fail closed when new obligations lack a pointer",
+        "Review the matrix at least annually; record the review date",
+        "Retain the matrix under imports/ai-control-evidence-matrix/"
       ],
       "references": [
         {
@@ -2465,7 +2496,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "compliance",
         "mandatory",
-        "manual"
+        "hybrid",
+        "control-evidence",
+        "matrix"
       ],
       "applicability": {
         "technologies": [],
@@ -2479,33 +2512,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "CMP-M3",
       "category": "compliance",
       "title": "Audit logs for critical AI control-plane changes must be retained per policy",
-      "description": "Audit logs for critical AI control-plane changes shall be retained per policy",
-      "whyItMatters": "Audit logs for critical AI control-plane changes shall be retained per policy Failing this leaves a production gap against: Retention configured ≥ policy minimum (e.g. ≥ 365 days); synthetic control-plane change appears in audit log within ≤ 5 minutes and remains queryable after retention smoke check",
+      "description": "Critical AI control-plane changes shall be written to an audit log retained at least as long as policy requires (for example ≥365 days); a synthetic change shall appear in the log within ≤5 minutes and remain queryable after a retention smoke check.\n",
+      "whyItMatters": "Model/prompt/tool promotions, policy flips, and kill-switch actions without durable audit history cannot be reconstructed after an incident or regulator request. Retention that exists only on paper fails; a timed synthetic change that lands and stays queryable proves the control-plane trail works under production-like conditions.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Retention configured ≥ policy minimum (e.g. ≥ 365 days); synthetic control-plane change appears in audit log within ≤ 5 minutes and remains queryable after retention smoke check",
+      "passCondition": "Retention is configured ≥ policy minimum (e.g. ≥365 days); a synthetic control-plane change appears in the audit log within ≤5 minutes and remains queryable after a retention smoke check (config/smoke evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Audit log retention config + sample of control-plane change events"
+        "Audit log retention config for critical AI control-plane change events (policy minimum documented)",
+        "Synthetic control-plane change test showing ≤5 minute appearance and queryability after retention smoke check"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-control-plane-audit-logs",
+            "params": {
+              "hint": "Discover audit/retention config for AI control-plane changes and synthetic change / retention-smoke evidence.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Audit log retention config + sample of control-plane change events"
+              "hint": "If automation cannot prove a recent smoke, attest retention ≥ policy minimum plus a synthetic control-plane change that appeared ≤5 minutes and stayed queryable (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Audit logs for critical AI control-plane changes must be retained per policy): inspect current evidence for [Audit log retention config + sample of control-plane change events] and confirm the pass condition holds — Retention configured ≥ policy minimum (e.g. ≥ 365 days); synthetic control-plane change appears in audit log within ≤ 5 minutes and remains queryable after retention smoke check",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm critical AI control-plane changes exist (model/prompt/tool promotion, policy, kill-switch, or equivalent). If none, score NOT_APPLICABLE. 2) Open audit retention config; confirm configured retention ≥ documented policy minimum (e.g. ≥365 days). 3) Review a synthetic control-plane change test: event appears in the audit log within ≤5 minutes. 4) Confirm the event remains queryable after the retention smoke check. 5) PASS only if retention + appearance + queryability hold with measuredAt ≤90 days. App access logs that never cover control-plane AI changes do not satisfy. Retention config without a synthetic appearance/queryability test does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass generic CloudTrail/SIEM retention that never names AI control-plane event types. Do not pass appearance SLAs longer than 5 minutes as meeting this Check. Do not pass smoke tests older than 90 days as current. Do not pass immutable storage claims without a queryability demonstration. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Audit logs for critical AI control-plane changes must be retained per policy",
-        "Retain evidence artifacts required by this Check, starting with: Audit log retention config + sample of control-plane change events",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Define critical AI control-plane event types and ship them to an audit sink",
+        "Set retention ≥ policy minimum; document the minimum next to the config",
+        "Add a synthetic change + retention smoke (≤5 min appear; still queryable)",
+        "Retain results under imports/ai-control-plane-audit-logs/"
       ],
       "references": [
         {
@@ -2522,12 +2562,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "CMP-M2",
         "CMP-R1",
         "CMP-R2",
-        "CMP-R3"
+        "CMP-R3",
+        "CHG-M1",
+        "OBS-M1"
       ],
       "tags": [
         "compliance",
         "mandatory",
-        "manual"
+        "hybrid",
+        "audit-log",
+        "control-plane",
+        "retention"
       ],
       "applicability": {
         "technologies": [],
@@ -2541,33 +2586,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "CMP-R1",
       "category": "compliance",
       "title": "Production systems should have regular control testing with documented exceptions",
-      "description": "Regular control testing with documented exceptions",
-      "whyItMatters": "Regular control testing with documented exceptions Failing this leaves a production gap against: Documented controls were tested on schedule in the last cycle (≤90 days default); open exceptions have owner, expiry, and compensating control",
+      "description": "Documented AI/compliance controls for production systems shall be tested on the published schedule within the last cycle (≤90 days default); every open exception shall name an owner, expiry, and compensating control.\n",
+      "whyItMatters": "Untested controls on production AI systems create a false sense of compliance while operating reality drifts. Scheduled testing with a living exceptions register—owner, expiry, compensating control—turns paper controls into verified ones and keeps waivers from becoming permanent shadow gaps.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Documented controls were tested on schedule in the last cycle (≤90 days default); open exceptions have owner, expiry, and compensating control",
+      "passCondition": "Documented controls due in the last cycle were tested on schedule (cycle age ≤90 days default); every open exception has owner, expiry, and compensating control (testing/exceptions evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Control-testing schedule + latest test results pack with exceptions register"
+        "Control-testing schedule + latest test results pack for in-scope AI/compliance controls",
+        "Exceptions register with owner, expiry, and compensating control for every open exception"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-control-testing",
+            "params": {
+              "hint": "Discover control-testing schedules, latest cycle results, and exceptions registers with owner/expiry/compensating fields.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Control-testing schedule + latest test results pack with exceptions register"
+              "hint": "If automation cannot prove the last cycle, attest controls due were tested on schedule (≤90 days) and every open exception has owner, expiry, and compensating control (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Regular control testing with documented exceptions): inspect current evidence for [Control-testing schedule + latest test results pack with exceptions register] and confirm the pass condition holds — Documented controls were tested on schedule in the last cycle (≤90 days default); open exceptions have owner, expiry, and compensating control",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI/compliance controls exist on a testing schedule. If none are in scope, score NOT_APPLICABLE. 2) Open the control-testing schedule and latest results pack. 3) Confirm controls due in the last cycle were tested on schedule (cycle age ≤90 days default). 4) Open the exceptions register: every open exception has owner, expiry, and compensating control. 5) PASS only if on-schedule testing + complete exceptions hold with measuredAt ≤90 days. A schedule without results for the current cycle does not satisfy. Open exceptions missing owner, expiry, or compensating control do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a one-time audit as recurring control testing. Do not pass schedules older than 90 days without a completed current cycle. Do not pass exception lists that omit compensating controls. Do not pass SOC/ISO reports that never sample the AI controls in scope. Named exceptions need owner and expiry ≤90 days unless a longer policy expiry is explicitly documented.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Regular control testing with documented exceptions",
-        "Retain evidence artifacts required by this Check, starting with: Control-testing schedule + latest test results pack with exceptions register",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish a control-testing schedule for in-scope AI/compliance controls",
+        "Run the cycle on schedule; retain a results pack under imports/ai-control-testing/",
+        "Require owner, expiry, and compensating control on every open exception",
+        "Close or renew exceptions before expiry; treat overdue cycles as fail"
       ],
       "references": [
         {
@@ -2589,7 +2641,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "compliance",
         "recommended",
-        "manual"
+        "hybrid",
+        "control-testing",
+        "exceptions"
       ],
       "applicability": {
         "technologies": [],
@@ -2603,33 +2657,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "CMP-R2",
       "category": "compliance",
       "title": "Production systems should have customer-facing trust documentation aligned to APRF pillars",
-      "description": "Customer-facing trust documentation aligned to APRF pillars",
-      "whyItMatters": "Customer-facing trust documentation aligned to APRF pillars Failing this leaves a production gap against: Public trust doc covers identity, safety/eval, data handling, and incident contact at minimum; last-updated ≤12 months; pillar/Core mapping table is explicit",
+      "description": "Customer-facing trust/security documentation for production AI systems shall cover identity, safety/eval, data handling, and incident contact at minimum; include an explicit APRF pillar or Core Profile mapping table; and show a last-updated date within 12 months.\n",
+      "whyItMatters": "Customers and partners cannot verify how an AI system is governed without a current public trust surface. A doc that names identity, safety/eval, data handling, and incident contact—and maps those claims to APRF pillars or the Core Profile—turns marketing promises into inspectable commitments and keeps stale trust pages from outliving the controls they describe.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Public trust doc covers identity, safety/eval, data handling, and incident contact at minimum; last-updated ≤12 months; pillar/Core mapping table is explicit",
+      "passCondition": "Public trust doc covers identity, safety/eval, data handling, and incident contact; pillar/Core mapping table is explicit; last-updated ≤12 months (trust-doc evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Customer-facing trust/security doc mapped to APRF pillars (or Core Profile) + published URL and last-updated date"
+        "Customer-facing trust/security doc with published URL and last-updated date",
+        "Explicit APRF pillar or Core Profile mapping table covering identity, safety/eval, data handling, and incident contact"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-trust-documentation",
+            "params": {
+              "hint": "Discover customer-facing trust/security docs, published URLs, last-updated dates, and APRF pillar/Core mapping tables.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Customer-facing trust/security doc mapped to APRF pillars (or Core Profile) + published URL and last-updated date"
+              "hint": "If automation cannot prove coverage, attest a public trust doc covers identity, safety/eval, data handling, and incident contact with an explicit pillar/Core map and last-updated ≤12 months (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Customer-facing trust documentation aligned to APRF pillars): inspect current evidence for [Customer-facing trust/security doc mapped to APRF pillars (or Core Profile) + published URL and last-updated date] and confirm the pass condition holds — Public trust doc covers identity, safety/eval, data handling, and incident contact at minimum; last-updated ≤12 months; pillar/Core mapping table is explicit",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the system is customer-facing (or otherwise publishes a trust surface). If no customer-facing production AI surface, score NOT_APPLICABLE. 2) Open the public trust/security doc via published URL. 3) Confirm coverage of identity, safety/eval, data handling, and incident contact. 4) Confirm an explicit APRF pillar or Core Profile mapping table. 5) Confirm last-updated ≤12 months. 6) PASS only if coverage + mapping + freshness hold with measuredAt ≤90 days. An internal-only security wiki does not satisfy. A trust page without a pillar/Core map or older than 12 months does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a generic company privacy policy that never mentions AI controls. Do not pass marketing pages without identity/safety/data/incident sections. Do not pass pillar maps that only list Check IDs with no public narrative. Do not pass last-updated stamps older than 12 months. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Customer-facing trust documentation aligned to APRF pillars",
-        "Retain evidence artifacts required by this Check, starting with: Customer-facing trust/security doc mapped to APRF pillars (or Core Profile) + published URL and last-updated date",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish a customer-facing trust/security doc with a durable URL",
+        "Cover identity, safety/eval, data handling, and incident contact at minimum",
+        "Add an explicit APRF pillar or Core Profile mapping table",
+        "Refresh last-updated ≤12 months; retain attestation under imports/ai-trust-documentation/"
       ],
       "references": [
         {
@@ -2651,7 +2712,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "compliance",
         "recommended",
-        "manual"
+        "hybrid",
+        "trust-documentation",
+        "transparency"
       ],
       "applicability": {
         "technologies": [],
@@ -2664,27 +2727,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CMP-R3",
       "category": "compliance",
-      "title": "Production systems should have independent assessment for Level 5 systems",
-      "description": "Independent assessment for Level 5 systems",
-      "whyItMatters": "Independent assessment for Level 5 systems Failing this leaves a production gap against: Last assessment ≤12 months old lists sampled check IDs, findings, and remediation owners; covers every system rated Level 5",
+      "title": "Capability Level 5 systems should have independent assessment",
+      "description": "Every AI system that claims or attains APRF capability maturity Level 5 (Optimizing—typically Regulated / highest-discipline production) shall be covered by an independent assessment or internal-audit report ≤12 months old that samples APRF gates and lists sampled Check IDs, findings, and remediation owners. Level 5 is capability maturity, not criticality tier (tiers are 0–3).\n",
+      "whyItMatters": "Capability Level 5 means the system is held to the Optimizing bar: automated gates, dual-control for irreversible actions, continuity drills, and enforced blast-radius limits. Self-attestation alone cannot catch control drift or optimistic scoring at that height. An independent (or internal-audit) sample of APRF gates with named findings and remediation owners is the external check that Level 5 claims still match production reality.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Last assessment ≤12 months old lists sampled check IDs, findings, and remediation owners; covers every system rated Level 5",
+      "passCondition": "Last assessment age ≤12 months; covers every system that claims or attains capability Level 5; lists sampled Check IDs, findings, and remediation owners (assessment evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Independent assessment or internal-audit report sampling Level-5 AI systems against APRF gates"
+        "Independent assessment or internal-audit report sampling capability Level-5 AI systems against APRF gates",
+        "Coverage proof that every capability Level-5 system ID was in scope, with findings and remediation owners"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-independent-assessment",
+            "params": {
+              "hint": "Discover independent/internal-audit assessment reports for AI systems at APRF capability Level 5 (Optimizing), sampled Check IDs, findings, and remediation owners.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest every system that claims or attains capability Level 5 was assessed ≤12 months ago with sampled Check IDs, findings, and remediation owners (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (Independent assessment for Level 5 systems): inspect current evidence for [Independent assessment or internal-audit report sampling Level-5 AI systems against APRF gates] and confirm the pass condition holds — Last assessment ≤12 months old lists sampled check IDs, findings, and remediation owners; covers every system rated Level 5",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Identify AI systems that claim or attain APRF capability maturity Level 5 (Optimizing)—not criticality Tier 3 alone, and not “Tier 5” (tiers only go to 3). If none, score NOT_APPLICABLE. 2) Inventory those Level-5 system IDs. 3) Open the latest independent or internal-audit assessment report. 4) Confirm assessment age ≤12 months. 5) Confirm every Level-5 system ID is in scope. 6) Confirm sampled Check IDs, findings, and remediation owners are listed. 7) PASS only if coverage + freshness + findings ownership hold with measuredAt ≤90 days. A product-team self-assessment alone does not satisfy. An assessment that omits any Level-5 system or lacks remediation owners does not satisfy.\n",
+      "falsePositiveGuidance": "Do not treat criticality Tier 3 alone as capability Level 5 (Tier 3’s required floor is Level 4; Level 5 is Optimizing attainment or claim). Do not pass product-team self-attestations as independent assessment. Do not pass SOC2/ISO reports that never sample APRF Check IDs. Do not pass assessments older than 12 months. Do not pass sampling that covers only a subset of Level-5 systems. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Independent assessment for Level 5 systems",
-        "Retain evidence artifacts required by this Check, starting with: Independent assessment or internal-audit report sampling Level-5 AI systems against APRF gates",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Inventory every AI system that claims or attains capability Level 5 (Optimizing)",
+        "Schedule independent or internal-audit assessment; sample APRF gates with Check IDs, findings, and remediation owners",
+        "Reassess at least annually; treat reports >12 months as missing",
+        "Retain the report under imports/ai-independent-assessment/"
       ],
       "references": [
         {
@@ -2694,6 +2771,10 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "ISO/IEC 42001 (AI management systems) — conceptual alignment",
           "url": "https://www.iso.org/standard/81230.html"
+        },
+        {
+          "title": "APRF maturity (capability Level 5 · Optimizing)",
+          "url": "https://stackrail.io/aprf/how/#maturity"
         }
       ],
       "relatedRules": [
@@ -2701,12 +2782,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "CMP-M2",
         "CMP-M3",
         "CMP-R1",
-        "CMP-R2"
+        "CMP-R2",
+        "HUM-M4"
       ],
       "tags": [
         "compliance",
         "recommended",
-        "manual"
+        "hybrid",
+        "independent-assessment",
+        "level-5",
+        "capability-maturity"
       ],
       "applicability": {
         "technologies": [],

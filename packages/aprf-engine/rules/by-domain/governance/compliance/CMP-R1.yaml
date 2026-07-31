@@ -1,35 +1,60 @@
 id: "CMP-R1"
 category: "compliance"
 title: "Production systems should have regular control testing with documented exceptions"
-description: "Regular control testing with documented exceptions"
-whyItMatters: "Regular control testing with documented exceptions Failing this leaves a production
-  gap against: Documented controls were tested on schedule in the last cycle (≤90 days default);
-  open exceptions have owner, expiry, and compensating control"
+description: >
+  Documented AI/compliance controls for production systems shall be tested on
+  the published schedule within the last cycle (≤90 days default); every open
+  exception shall name an owner, expiry, and compensating control.
+whyItMatters: >
+  Untested controls on production AI systems create a false sense of
+  compliance while operating reality drifts. Scheduled testing with a living
+  exceptions register—owner, expiry, compensating control—turns paper
+  controls into verified ones and keeps waivers from becoming permanent
+  shadow gaps.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Documented controls were tested on schedule in the last cycle (≤90 days default);
-  open exceptions have owner, expiry, and compensating control"
+passCondition: >
+  Documented controls due in the last cycle were tested on schedule (cycle age
+  ≤90 days default); every open exception has owner, expiry, and compensating
+  control (testing/exceptions evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Control-testing schedule + latest test results pack with exceptions register"
+  - "Control-testing schedule + latest test results pack for in-scope AI/compliance controls"
+  - "Exceptions register with owner, expiry, and compensating control for every open exception"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-control-testing"
+      params:
+        hint: >
+          Discover control-testing schedules, latest cycle results, and
+          exceptions registers with owner/expiry/compensating fields.
     - id: "manual-attest"
       params:
-        hint: "Control-testing schedule + latest test results pack with exceptions register"
-manualVerification: "For this Check (Regular control testing with documented exceptions): inspect
-  current evidence for [Control-testing schedule + latest test results pack with exceptions
-  register] and confirm the pass condition holds — Documented controls were tested on schedule in
-  the last cycle (≤90 days default); open exceptions have owner, expiry, and compensating control"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove the last cycle, attest controls due were
+          tested on schedule (≤90 days) and every open exception has owner,
+          expiry, and compensating control (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI/compliance controls exist on a testing schedule. If
+  none are in scope, score NOT_APPLICABLE. 2) Open the control-testing schedule
+  and latest results pack. 3) Confirm controls due in the last cycle were tested
+  on schedule (cycle age ≤90 days default). 4) Open the exceptions register:
+  every open exception has owner, expiry, and compensating control. 5) PASS only
+  if on-schedule testing + complete exceptions hold with measuredAt ≤90 days. A
+  schedule without results for the current cycle does not satisfy. Open
+  exceptions missing owner, expiry, or compensating control do not satisfy.
+falsePositiveGuidance: >
+  Do not pass a one-time audit as recurring control testing. Do not pass
+  schedules older than 90 days without a completed current cycle. Do not pass
+  exception lists that omit compensating controls. Do not pass SOC/ISO reports
+  that never sample the AI controls in scope. Named exceptions need owner and
+  expiry ≤90 days unless a longer policy expiry is explicitly documented.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Regular control testing with documented exceptions"
-  - "Retain evidence artifacts required by this Check, starting with: Control-testing schedule +
-    latest test results pack with exceptions register"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish a control-testing schedule for in-scope AI/compliance controls"
+  - "Run the cycle on schedule; retain a results pack under imports/ai-control-testing/"
+  - "Require owner, expiry, and compensating control on every open exception"
+  - "Close or renew exceptions before expiry; treat overdue cycles as fail"
 references:
   - title: "NIST AI RMF"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -44,7 +69,9 @@ relatedRules:
 tags:
   - "compliance"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "control-testing"
+  - "exceptions"
 applicability:
   technologies: []
   minCriticality: 2

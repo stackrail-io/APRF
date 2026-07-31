@@ -1,0 +1,29 @@
+id: ai-obligations-register
+title: AI obligations register with owners (CMP-M1)
+version: "0.2.0"
+executor: collectors/ai-obligations-register.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-ai-obligations-register]
+inputs:
+  - "Target repo (AI obligations register / system inventory)"
+  - "Optional suite: aprf-assessment/imports/ai-obligations-register/*.{json}"
+collect:
+  - "Detect obligations registers, owners, and none-in-scope attestations"
+  - "Ingest register coverage; write ai-obligations-register-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/ai-obligations-register/*"
+  signals:
+    - ai-obligations-register
+    - cmp-m1
+    - repo-ai-obligations-register
+mapsToChecks: [CMP-M1]
+whenUnavailable: >
+  Register signals alone are PARTIAL. CMP-M1 PASS needs imported
+  coversAllProductionAiSystems, systemsMissingObligationOrNoneAttest=0,
+  systemsMissingOwner=0, systemsWithStaleReview=0, measuredAt ≤90 days. No
+  production AI systems → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline obligations-register heuristics + optional imported JSON.

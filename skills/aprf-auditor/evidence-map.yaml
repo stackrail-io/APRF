@@ -267,7 +267,9 @@ categoryDefaults:
       - "**/audit*"
       - "**/soc2*"
       - "**/iso*"
-    signals: [control mapping, evidence pack]
+      - "**/*obligation*"
+    plugins: [ai-obligations-register, ai-control-evidence-matrix, ai-control-plane-audit-logs, ai-control-testing, ai-trust-documentation, ai-independent-assessment, repo-filesystem]
+    signals: [control mapping, evidence pack, obligations register, audit retention, control testing, trust documentation, independent assessment]
   platform-engineering:
     search:
       - "**/template*"
@@ -979,6 +981,100 @@ checks:
       PASS if memory-promotion-architecture statusHint=pass (workingDurableSeparated + promotionRulesPresent + silentPromotionDenied + lastPromotionsWithRuleAndActor≥10 + ttlDiffersByMemoryClass + measuredAt ≤90d).
       PARTIAL if architecture signals without complete import.
       NOT_APPLICABLE when no working/durable promotion signals.
+  CMP-M1:
+    requiredEvidence:
+      - "Production AI system inventory + obligations register (or none-in-scope) with owners"
+      - "Reviews ≤12 months under imports/ai-obligations-register/"
+    searchExtra:
+      - "**/*obligation*"
+      - "**/*compliance*"
+      - "**/*regulatory*"
+      - "**/*ai*system*inventory*"
+    plugins: [ai-obligations-register, repo-filesystem]
+    naWhen: "No production AI systems"
+    evaluation: |
+      PASS if ai-obligations-register statusHint=pass (coversAllProductionAiSystems + missing obligation/owner/stale = 0 + measuredAt ≤90d).
+      PARTIAL if register signals without complete import.
+      NOT_APPLICABLE when no obligations/compliance signals.
+  CMP-M2:
+    requiredEvidence:
+      - "Control→evidence matrix linking in-scope obligations to evidence artifact IDs"
+      - "0 orphans + matrix review ≤12 months under imports/ai-control-evidence-matrix/"
+    searchExtra:
+      - "**/*control*evidence*"
+      - "**/*evidence*matrix*"
+      - "**/*obligation*map*"
+      - "**/*control*matrix*"
+    plugins: [ai-control-evidence-matrix, ai-obligations-register, repo-filesystem]
+    naWhen: "No in-scope obligations requiring evidence mapping"
+    evaluation: |
+      PASS if ai-control-evidence-matrix statusHint=pass (coversAllInScopeObligations + orphanObligationCount=0 + matrixReviewAgeDays≤365 + measuredAt ≤90d).
+      PARTIAL if matrix signals without complete import.
+      NOT_APPLICABLE when no control→evidence / compliance signals.
+  CMP-M3:
+    requiredEvidence:
+      - "Audit retention config for critical AI control-plane changes (≥ policy minimum)"
+      - "Synthetic change ≤5 min appear + queryable smoke under imports/ai-control-plane-audit-logs/"
+    searchExtra:
+      - "**/*audit*"
+      - "**/*retention*"
+      - "**/*control*plane*"
+      - "**/*cloudtrail*"
+      - "**/*siem*"
+    plugins: [ai-control-plane-audit-logs, otel, github-actions, repo-filesystem]
+    naWhen: "No critical AI control-plane change surface"
+    evaluation: |
+      PASS if ai-control-plane-audit-logs statusHint=pass (retentionConfiguredDays≥policyMinimumDays + syntheticAppearMinutes≤5 + remainsQueryableAfterSmoke + measuredAt ≤90d).
+      PARTIAL if audit/retention signals without complete import.
+      NOT_APPLICABLE when no control-plane audit signals.
+  CMP-R1:
+    requiredEvidence:
+      - "Control-testing schedule + latest cycle results for in-scope AI/compliance controls"
+      - "Exceptions register (owner, expiry, compensating control) under imports/ai-control-testing/"
+    searchExtra:
+      - "**/*control*test*"
+      - "**/*test*schedule*"
+      - "**/*exception*"
+      - "**/*waiver*"
+      - "**/*assurance*"
+    plugins: [ai-control-testing, repo-filesystem]
+    naWhen: "No production AI/compliance controls on a testing schedule"
+    evaluation: |
+      PASS if ai-control-testing statusHint=pass (testedOnSchedule + openExceptionsIncomplete=0 + cycleAgeDays≤90 + measuredAt ≤90d).
+      PARTIAL if schedule/exceptions signals without complete import.
+      NOT_APPLICABLE when no control-testing signals.
+  CMP-R2:
+    requiredEvidence:
+      - "Customer-facing trust/security doc with published URL and last-updated date"
+      - "APRF pillar/Core mapping + identity/safety/data/incident coverage under imports/ai-trust-documentation/"
+    searchExtra:
+      - "**/*trust*"
+      - "**/*security*whitepaper*"
+      - "**/*transparency*"
+      - "**/*pillar*map*"
+      - "**/*core*profile*"
+    plugins: [ai-trust-documentation, repo-filesystem]
+    naWhen: "No customer-facing production AI trust surface"
+    evaluation: |
+      PASS if ai-trust-documentation statusHint=pass (publishedUrl + four topics + pillarMappingExplicit + lastUpdatedAgeDays≤365 + measuredAt ≤90d).
+      PARTIAL if trust-doc signals without complete import.
+      NOT_APPLICABLE when no trust-documentation signals.
+  CMP-R3:
+    requiredEvidence:
+      - "Independent/internal-audit assessment of Level-5 AI systems against APRF gates"
+      - "Coverage of every Level-5 system + sampled Check IDs + remediation owners under imports/ai-independent-assessment/"
+    searchExtra:
+      - "**/*independent*assess*"
+      - "**/*internal*audit*"
+      - "**/*level*5*"
+      - "**/*assurance*"
+      - "**/*external*audit*"
+    plugins: [ai-independent-assessment, repo-filesystem]
+    naWhen: "No AI systems rated Level 5"
+    evaluation: |
+      PASS if ai-independent-assessment statusHint=pass (coversAllLevel5Systems + sampledCheckIdCount>0 + findingsHaveRemediationOwners + assessmentAgeDays≤365 + measuredAt ≤90d).
+      PARTIAL if assessment signals without complete import.
+      NOT_APPLICABLE when no Level-5 / assessment signals.
   DEP-M1:
     requiredEvidence:
       - "Documented/tested rollback for model/prompt/tool promotion"

@@ -1,38 +1,63 @@
 id: "CMP-M3"
 category: "compliance"
 title: "Audit logs for critical AI control-plane changes must be retained per policy"
-description: "Audit logs for critical AI control-plane changes shall be retained per policy"
-whyItMatters: "Audit logs for critical AI control-plane changes shall be retained per policy Failing
-  this leaves a production gap against: Retention configured ≥ policy minimum (e.g. ≥ 365 days);
-  synthetic control-plane change appears in audit log within ≤ 5 minutes and remains queryable after
-  retention smoke check"
+description: >
+  Critical AI control-plane changes shall be written to an audit log retained at
+  least as long as policy requires (for example ≥365 days); a synthetic change
+  shall appear in the log within ≤5 minutes and remain queryable after a
+  retention smoke check.
+whyItMatters: >
+  Model/prompt/tool promotions, policy flips, and kill-switch actions without
+  durable audit history cannot be reconstructed after an incident or regulator
+  request. Retention that exists only on paper fails; a timed synthetic change
+  that lands and stays queryable proves the control-plane trail works under
+  production-like conditions.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Retention configured ≥ policy minimum (e.g. ≥ 365 days); synthetic control-plane
-  change appears in audit log within ≤ 5 minutes and remains queryable after retention smoke check"
+passCondition: >
+  Retention is configured ≥ policy minimum (e.g. ≥365 days); a synthetic
+  control-plane change appears in the audit log within ≤5 minutes and remains
+  queryable after a retention smoke check (config/smoke evidence measuredAt ≤90
+  days).
 evidenceRequired:
-  - "Audit log retention config + sample of control-plane change events"
+  - "Audit log retention config for critical AI control-plane change events (policy minimum documented)"
+  - "Synthetic control-plane change test showing ≤5 minute appearance and queryability after retention smoke check"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-control-plane-audit-logs"
+      params:
+        hint: >
+          Discover audit/retention config for AI control-plane changes and
+          synthetic change / retention-smoke evidence.
     - id: "manual-attest"
       params:
-        hint: "Audit log retention config + sample of control-plane change events"
-manualVerification: "For this Check (Audit logs for critical AI control-plane changes must be
-  retained per policy): inspect current evidence for [Audit log retention config + sample of
-  control-plane change events] and confirm the pass condition holds — Retention configured ≥ policy
-  minimum (e.g. ≥ 365 days); synthetic control-plane change appears in audit log within ≤ 5 minutes
-  and remains queryable after retention smoke check"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove a recent smoke, attest retention ≥ policy
+          minimum plus a synthetic control-plane change that appeared ≤5 minutes
+          and stayed queryable (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm critical AI control-plane changes exist (model/prompt/tool
+  promotion, policy, kill-switch, or equivalent). If none, score NOT_APPLICABLE.
+  2) Open audit retention config; confirm configured retention ≥ documented
+  policy minimum (e.g. ≥365 days). 3) Review a synthetic control-plane change
+  test: event appears in the audit log within ≤5 minutes. 4) Confirm the event
+  remains queryable after the retention smoke check. 5) PASS only if retention +
+  appearance + queryability hold with measuredAt ≤90 days. App access logs that
+  never cover control-plane AI changes do not satisfy. Retention config without
+  a synthetic appearance/queryability test does not satisfy.
+falsePositiveGuidance: >
+  Do not pass generic CloudTrail/SIEM retention that never names AI control-plane
+  event types. Do not pass appearance SLAs longer than 5 minutes as meeting this
+  Check. Do not pass smoke tests older than 90 days as current. Do not pass
+  immutable storage claims without a queryability demonstration. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Audit logs for critical AI control-plane changes must be retained
-    per policy"
-  - "Retain evidence artifacts required by this Check, starting with: Audit log retention config +
-    sample of control-plane change events"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Define critical AI control-plane event types and ship them to an audit sink"
+  - "Set retention ≥ policy minimum; document the minimum next to the config"
+  - "Add a synthetic change + retention smoke (≤5 min appear; still queryable)"
+  - "Retain results under imports/ai-control-plane-audit-logs/"
 references:
   - title: "NIST AI RMF"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -44,10 +69,15 @@ relatedRules:
   - "CMP-R1"
   - "CMP-R2"
   - "CMP-R3"
+  - "CHG-M1"
+  - "OBS-M1"
 tags:
   - "compliance"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "audit-log"
+  - "control-plane"
+  - "retention"
 applicability:
   technologies: []
   minCriticality: 2
