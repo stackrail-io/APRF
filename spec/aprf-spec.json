@@ -3238,37 +3238,37 @@
       "mandatoryChecks": [
         {
           "id": "MEM-M1",
-          "requirement": "Memory shall be isolated by tenant (and user where required) with tested boundaries",
-          "artifact": "Isolation tests for memory store APIs",
-          "passCondition": "0 successful cross-tenant (and cross-user where required) memory reads/writes across \u226510 automated attack cases",
-          "method": "manual",
+          "requirement": "AI memory stores (conversation, durable, and retrieval/vector memory) shall enforce tenant isolation\u2014and user isolation where policy requires it\u2014proven by automated attack tests with zero successful unauthorized reads or writes.",
+          "artifact": "Inventory or scope note of in-scope AI memory APIs (conversation, durable, vector/retrieval) + Cross-tenant (and cross-user where required) isolation attack suite results for those memory APIs",
+          "passCondition": "0 successful cross-tenant (and cross-user where required) memory reads/writes across \u226510 automated attack cases covering in-scope memory APIs (suite evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "MEM-M2",
-          "requirement": "Retention and deletion policies shall exist and be executable",
-          "artifact": "Retention policy + TTL job config + deletion test record",
-          "passCondition": "TTL/deletion job succeeds in test; sample records older than retention are absent after job run; policy documents retention periods per memory class",
-          "method": "manual",
+          "requirement": "Every in-scope AI memory class shall have a documented retention period and an executable TTL or deletion job; a test shall show sample records older than retention are absent after the job runs.",
+          "artifact": "Retention policy naming periods per AI memory class (conversation, durable, vector/retrieval, or equivalent) + TTL or deletion job config covering those memory classes + Successful deletion/TTL test record showing older-than-retention samples absent after job run",
+          "passCondition": "Policy documents retention periods per memory class; a TTL/deletion job succeeds in test and sample records older than retention are absent after the job run (policy/job/test evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "MEM-M3",
-          "requirement": "Writes to long-term memory shall be validated against policy (who/what may write)",
-          "artifact": "Write-policy middleware config + deny tests",
-          "passCondition": "Unauthorized writers denied at 100% in tests; policy enumerates allowed writers and content classes for durable memory",
-          "method": "manual",
+          "requirement": "Writes to durable/long-term AI memory shall be gated by a policy that enumerates allowed writers and content classes; unauthorized writers shall be denied at 100% in automated tests.",
+          "artifact": "Write policy for durable/long-term memory naming allowed writers and content classes + Write-policy enforcement config (middleware, gateway, or store gate) + Automated deny tests showing 100% rejection of unauthorized writers",
+          "passCondition": "Policy enumerates allowed writers and content classes for durable/long-term memory; unauthorized writers are denied at 100% in automated tests (policy/test evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "MEM-M4",
-          "requirement": "Critical memory records shall have cryptographic or signed integrity protection",
-          "artifact": "Integrity/signing design + verification sample for critical memory stores",
-          "passCondition": "PASS if critical memory classes are inventoried and integrity verification succeeds in the latest check (\u226490 days)",
-          "method": "manual",
+          "requirement": "Critical AI memory classes shall be inventoried and protected with cryptographic or signed integrity controls; the latest verification for those classes shall succeed.",
+          "artifact": "Inventory of critical AI memory classes requiring integrity protection + Integrity/signing design or config for those classes (MAC, signature, sealed object, or equivalent) + Latest verification sample showing successful integrity/signature checks for inventoried classes",
+          "passCondition": "Critical memory classes are inventoried; cryptographic verification or signature checks succeed for 100% of those classes in the latest check (inventory/verification evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -3276,19 +3276,19 @@
       "recommendedChecks": [
         {
           "id": "MEM-R1",
-          "requirement": "Memory poisoning tests in the eval suite",
-          "artifact": "Memory-poisoning cases in the adversarial eval suite + latest run report with pass/fail per case",
-          "passCondition": "\u22655 poisoning scenarios (cross-tenant write, prompt-in-memory, stale trusted fact) are executed \u226490 days; critical fails block or require risk acceptance",
-          "method": "manual",
+          "requirement": "The adversarial or memory eval suite should include at least five memory poisoning scenarios\u2014including cross-tenant write, prompt-in-memory, and stale trusted fact\u2014executed within 90 days, with critical fails blocking promotion or requiring documented risk acceptance.",
+          "artifact": "Memory-poisoning cases in the adversarial/eval suite covering the required scenario types + Latest suite run report with pass/fail per case and gate or risk-acceptance disposition for critical fails",
+          "passCondition": "\u22655 memory-poisoning scenarios are executed (including cross-tenant write, prompt-in-memory, and stale trusted fact); critical fails block promotion or have documented risk acceptance (suite evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "MEM-R3",
-          "requirement": "Separate working memory from durable memory with promotion rules",
-          "artifact": "Memory architecture doc + config showing working vs durable stores and promotion rules + sample promotion audit",
-          "passCondition": "Working memory cannot silently become durable without a promotion rule; last 10 promotions show rule ID and actor; TTL differs by memory class",
-          "method": "manual",
+          "requirement": "Working (short-lived) memory should be separated from durable memory; promotion into durable stores should require an explicit rule; recent promotions should record rule ID and actor; and TTL should differ by memory class.",
+          "artifact": "Memory architecture doc or config showing distinct working vs durable stores + Promotion rules that gate working\u2192durable writes + Sample promotion audit (\u226510 recent promotions with rule ID and actor) and TTL config differing by memory class",
+          "passCondition": "Working memory cannot silently become durable without a promotion rule; the last 10 promotions show rule ID and actor; TTL differs by memory class (architecture/audit evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }

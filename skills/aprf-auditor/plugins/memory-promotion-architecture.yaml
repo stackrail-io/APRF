@@ -1,0 +1,29 @@
+id: memory-promotion-architecture
+title: Working vs durable memory + promotion rules (MEM-R3)
+version: "0.2.0"
+executor: collectors/memory-promotion-architecture.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-memory-promotion-architecture]
+inputs:
+  - "Target repo (working vs durable memory architecture)"
+  - "Optional suite: aprf-assessment/imports/memory-promotion-architecture/*.{json}"
+collect:
+  - "Detect store separation, promotion rules, TTL-by-class, promotion audits"
+  - "Ingest audit evidence; write memory-promotion-architecture-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/memory-promotion-architecture/*"
+  signals:
+    - memory-promotion-architecture
+    - mem-r3
+    - repo-memory-promotion-architecture
+mapsToChecks: [MEM-R3]
+whenUnavailable: >
+  Architecture signals alone are PARTIAL. MEM-R3 PASS needs imported
+  workingDurableSeparated, promotionRulesPresent, silentPromotionDenied,
+  lastPromotionsWithRuleAndActor≥10, ttlDiffersByMemoryClass, measuredAt ≤90
+  days. No dual-class AI memory → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline architecture heuristics + optional imported audit JSON.

@@ -1,0 +1,29 @@
+id: memory-isolation
+title: AI memory tenant/user isolation tests (MEM-M1)
+version: "0.2.0"
+executor: collectors/memory-isolation.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-memory-isolation]
+inputs:
+  - "Target repo (AI memory stores with tenant/user isolation)"
+  - "Optional suite: aprf-assessment/imports/memory-isolation/*.{json}"
+collect:
+  - "Detect memory isolation filters and memory-scoped attack tests"
+  - "Ingest suite results; write memory-isolation-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/memory-isolation/*"
+  signals:
+    - memory-isolation
+    - mem-m1
+    - repo-memory-isolation
+mapsToChecks: [MEM-M1]
+whenUnavailable: >
+  Isolation helpers on memory code are PARTIAL. MEM-M1 PASS needs imported
+  coversMemoryApis=true, attackCases≥10, unauthorizedSuccesses=0, cross-user
+  coverage when required, measuredAt ≤90 days. No AI memory stores →
+  NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline memory-isolation heuristics + optional imported suite JSON.

@@ -1,39 +1,62 @@
 id: "MEM-R3"
 category: "memory-management"
 title: "Production systems should have separate working memory from durable memory with promotion rules"
-description: "Separate working memory from durable memory with promotion rules"
-whyItMatters: "Separate working memory from durable memory with promotion rules Failing this leaves
-  a production gap against: Working memory cannot silently become durable without a promotion rule;
-  last 10 promotions show rule ID and actor; TTL differs by memory class"
+description: >
+  Working (short-lived) memory should be separated from durable memory; promotion
+  into durable stores should require an explicit rule; recent promotions should
+  record rule ID and actor; and TTL should differ by memory class.
+whyItMatters: >
+  When session scratch and long-term memory share one store, every turn can
+  silently harden into durable context. Explicit separation plus promotion rules
+  make that transition visible and owned. Audit of recent promotions (rule ID and
+  actor) proves the gate ran; different TTLs per class keep short-lived scratch
+  from living as long as trusted durable facts. Without this, every control
+  fights an undifferentiated blob.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Working memory cannot silently become durable without a promotion rule; last 10
-  promotions show rule ID and actor; TTL differs by memory class"
+passCondition: >
+  Working memory cannot silently become durable without a promotion rule; the
+  last 10 promotions show rule ID and actor; TTL differs by memory class
+  (architecture/audit evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Memory architecture doc + config showing working vs durable stores and promotion rules + sample
-    promotion audit"
+  - "Memory architecture doc or config showing distinct working vs durable stores"
+  - "Promotion rules that gate working→durable writes"
+  - "Sample promotion audit (≥10 recent promotions with rule ID and actor) and TTL config differing by memory class"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-memory-promotion-architecture"
+      params:
+        hint: >
+          Discover working vs durable memory separation, promotion rules, TTL
+          differences by class, and promotion audit samples.
     - id: "manual-attest"
       params:
-        hint: "Memory architecture doc + config showing working vs durable stores and promotion rules +
-          sample promotion audit"
-manualVerification: "For this Check (Separate working memory from durable memory with promotion
-  rules): inspect current evidence for [Memory architecture doc + config showing working vs durable
-  stores and promotion rules + sample promotion audit] and confirm the pass condition holds —
-  Working memory cannot silently become durable without a promotion rule; last 10 promotions show
-  rule ID and actor; TTL differs by memory class"
-falsePositiveGuidance: "(Memory Management): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove audits, attest separated stores, promotion
+          rules, TTL-by-class, and last 10 promotions with rule ID and actor
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the system has both working/short-lived and durable AI memory. If
+  only one class exists with no promotion path, score NOT_APPLICABLE. 2) Open
+  architecture/config: distinct working vs durable stores (or equivalent
+  namespaces). 3) Confirm promotion rules gate working→durable writes (no silent
+  copy). 4) Review ≥10 recent promotions: each shows rule ID and actor. 5)
+  Confirm TTL differs by memory class. 6) PASS only if separation + rules +
+  audit + TTL-by-class hold with measuredAt ≤90 days. A single Redis keyspace
+  used for both without promotion rules does not satisfy. Feedback→training
+  gates alone (without working/durable memory separation) do not satisfy.
+falsePositiveGuidance: >
+  Do not pass cache TTL as working-vs-durable architecture. Do not pass
+  promotion rules that never emit rule ID/actor on audits. Do not pass identical
+  TTLs across classes when policy claims separation. Do not pass audits older
+  than 90 days as current. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Separate working memory from durable memory with
-    promotion rules"
-  - "Retain evidence artifacts required by this Check, starting with: Memory architecture doc +
-    config showing working vs durable stores and promotion rules + sample promotion audit"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Split working and durable memory stores (or hard namespaces) with different TTLs"
+  - "Require a named promotion rule before durable writes; log rule ID and actor"
+  - "Export ≤90-day promotion audits under imports/memory-promotion-architecture/"
+  - "Deny silent copy or upsert from working into durable without a rule"
 references:
   - title: "NIST AI RMF — Govern and Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -45,10 +68,14 @@ relatedRules:
   - "MEM-M3"
   - "MEM-M4"
   - "MEM-R1"
+  - "DG-M3"
 tags:
   - "memory-management"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "working-memory"
+  - "durable-memory"
+  - "promotion"
 applicability:
   technologies:
     - "vector-databases"

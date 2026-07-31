@@ -213,6 +213,30 @@ PRI-R3 DPIA/PIA before production:
   npm run aprf:ai-dpia -- --target <app> --out <app>/aprf-assessment
   # PASS needs major-feature inventory + signed pre-prod DPIAs under imports/ai-dpia/
 
+MEM-M1 memory tenant/user isolation:
+  npm run aprf:memory-isolation -- --target <app> --out <app>/aprf-assessment
+  # PASS needs ≥10 memory attack cases with 0 unauthorized successes under imports/memory-isolation/
+
+MEM-M2 memory retention + TTL/deletion:
+  npm run aprf:memory-retention -- --target <app> --out <app>/aprf-assessment
+  # PASS needs per-class retention + job + purge test under imports/memory-retention/
+
+MEM-M3 durable memory write policy:
+  npm run aprf:memory-write-policy -- --target <app> --out <app>/aprf-assessment
+  # PASS needs writers/content-class policy + 100% unauthorized deny under imports/memory-write-policy/
+
+MEM-M4 critical memory integrity:
+  npm run aprf:memory-integrity -- --target <app> --out <app>/aprf-assessment
+  # PASS needs critical-class inventory + 100% verification under imports/memory-integrity/
+
+MEM-R1 memory poisoning evals:
+  npm run aprf:memory-poisoning-evals -- --target <app> --out <app>/aprf-assessment
+  # PASS needs ≥5 typed scenarios + gated critical fails under imports/memory-poisoning-evals/
+
+MEM-R3 working vs durable + promotion:
+  npm run aprf:memory-promotion-architecture -- --target <app> --out <app>/aprf-assessment
+  # PASS needs separation + rules + ≥10 audits + TTL-by-class under imports/memory-promotion-architecture/
+
 Import runtime evidence without live APIs:
   mkdir -p <out>/imports/langsmith && cp traces.json <out>/imports/langsmith/
 `);

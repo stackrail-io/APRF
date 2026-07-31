@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:9fb669967db6dfcdd433a5c14a53baa474207df7fe8554ef264b865c3c0b6cbb",
+  "generatedAt": "sha256:9f7249750b24a9854adc77b14ab4717f80049e3198e28da182c12b34e93a84a8",
   "ruleCount": 177,
   "domains": [
     {
@@ -6863,33 +6863,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "MEM-M1",
       "category": "memory-management",
       "title": "Memory must be isolated by tenant (and user where required) with tested boundaries",
-      "description": "Memory shall be isolated by tenant (and user where required) with tested boundaries",
-      "whyItMatters": "Memory shall be isolated by tenant (and user where required) with tested boundaries Failing this leaves a production gap against: 0 successful cross-tenant (and cross-user where required) memory reads/writes across ≥10 automated attack cases",
+      "description": "AI memory stores (conversation, durable, and retrieval/vector memory) shall enforce tenant isolation—and user isolation where policy requires it—proven by automated attack tests with zero successful unauthorized reads or writes.\n",
+      "whyItMatters": "Shared memory backends leak across tenants when filters are missing, copied wrong, or bypassed by vector/search APIs. Untested boundaries turn multi-tenant AI into a confidentiality incident waiting for the next retrieval path. Attack suites that drive cross-tenant (and cross-user where required) memory reads/writes prove isolation holds on the memory path—not only on primary app tables.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "0 successful cross-tenant (and cross-user where required) memory reads/writes across ≥10 automated attack cases",
+      "passCondition": "0 successful cross-tenant (and cross-user where required) memory reads/writes across ≥10 automated attack cases covering in-scope memory APIs (suite evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Cross-tenant (and cross-user where required) isolation tests for memory store APIs"
+        "Inventory or scope note of in-scope AI memory APIs (conversation, durable, vector/retrieval)",
+        "Cross-tenant (and cross-user where required) isolation attack suite results for those memory APIs"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-memory-isolation",
+            "params": {
+              "hint": "Discover memory-store isolation (tenant/user filters on conversation, durable, or vector memory) and automated cross-boundary attack tests.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Isolation tests for memory store APIs"
+              "hint": "If automation cannot prove ≥10 cases, attest a memory-API attack suite with 0 unauthorized successes (and cross-user cases where required) measuredAt ≤90 days.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Be isolated by tenant (and user where required) with tested boundaries): inspect current evidence for [Isolation tests for memory store APIs] and confirm the pass condition holds — 0 successful cross-tenant (and cross-user where required) memory reads/writes across ≥10 automated attack cases",
-      "falsePositiveGuidance": "(Memory Management): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the system retains AI memory (conversation, durable, or vector/retrieval) for tenants/users. If none, score NOT_APPLICABLE. 2) Inventory in-scope memory APIs. 3) Confirm tenant isolation is enforced; if policy requires user-level isolation, confirm that too. 4) Review ≥10 automated attack cases attempting cross-tenant (and cross-user where required) reads/writes: 0 successful unauthorized accesses. 5) PASS only if suite scope covers those memory APIs and freshness holds (measuredAt ≤90 days). App-DB tenant tests that never touch memory stores do not satisfy. Isolation helpers in code without an attack suite do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass primary CRUD tenant filters without memory/vector coverage. Do not pass suites with fewer than 10 cases or any unauthorized success. Do not pass suites older than 90 days as current. Do not skip cross-user cases when product policy requires user-scoped memory. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Memory must be isolated by tenant (and user where required) with tested boundaries",
-        "Retain evidence artifacts required by this Check, starting with: Isolation tests for memory store APIs",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Enforce tenant_id (and user_id where required) on every memory read/write/search path",
+        "Add ≥10 automated cross-tenant (and cross-user) attack cases against memory APIs; assert deny",
+        "Fail closed when memory queries omit isolation predicates",
+        "Retain suite results under imports/memory-isolation/"
       ],
       "references": [
         {
@@ -6906,12 +6913,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "MEM-M3",
         "MEM-M4",
         "MEM-R1",
-        "MEM-R3"
+        "MEM-R3",
+        "AUTHZ-M2",
+        "PRI-M2"
       ],
       "tags": [
         "memory-management",
         "mandatory",
-        "manual"
+        "hybrid",
+        "tenant-isolation",
+        "memory"
       ],
       "applicability": {
         "technologies": [
@@ -6927,34 +6938,42 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "MEM-M2",
       "category": "memory-management",
-      "title": "Retention and deletion policies must exist and be executable",
-      "description": "Retention and deletion policies shall exist and be executable",
-      "whyItMatters": "Retention and deletion policies shall exist and be executable Failing this leaves a production gap against: TTL/deletion job succeeds in test; sample records older than retention are absent after job run; policy documents retention periods per memory class",
+      "title": "AI memory retention and deletion policies must exist and be executable",
+      "description": "Every in-scope AI memory class shall have a documented retention period and an executable TTL or deletion job; a test shall show sample records older than retention are absent after the job runs.\n",
+      "whyItMatters": "Memory without enforced retention grows forever: stale embeddings, orphaned conversation turns, and poisoned vectors stay queryable long after policy says they should be gone. A written period without a working job is theater; a job without a timed purge test is hope. Executable retention per memory class keeps long-term stores from becoming an unbounded liability.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "TTL/deletion job succeeds in test; sample records older than retention are absent after job run; policy documents retention periods per memory class",
+      "passCondition": "Policy documents retention periods per memory class; a TTL/deletion job succeeds in test and sample records older than retention are absent after the job run (policy/job/test evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Retention policy + TTL job config + deletion test record"
+        "Retention policy naming periods per AI memory class (conversation, durable, vector/retrieval, or equivalent)",
+        "TTL or deletion job config covering those memory classes",
+        "Successful deletion/TTL test record showing older-than-retention samples absent after job run"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-memory-retention",
+            "params": {
+              "hint": "Discover retention policies, TTL/deletion jobs for AI memory classes, and purge-test evidence that over-retention samples are removed.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Retention policy + TTL job config + deletion test record"
+              "hint": "If automation cannot prove a recent purge test, attest per-class retention periods, executable TTL/deletion jobs, and a test showing older-than-retention samples absent (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Retention and deletion policies must exist and be executable): inspect current evidence for [Retention policy + TTL job config + deletion test record] and confirm the pass condition holds — TTL/deletion job succeeds in test; sample records older than retention are absent after job run; policy documents retention periods per memory class",
-      "falsePositiveGuidance": "(Memory Management): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the system retains AI memory classes (conversation, durable, vector/retrieval, or equivalent). If none, score NOT_APPLICABLE. 2) Open the retention policy; confirm each in-scope class has a documented period. 3) Open TTL or deletion job config covering those classes. 4) Review a test run: job succeeded and sample records older than retention are absent afterward. 5) PASS only if policy + job + purge test hold with measuredAt ≤90 days. Subject-rights erasure alone (on-demand delete) without class retention periods and TTL jobs does not satisfy. Soft-delete flags without evidence of purge do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a company-wide data-retention PDF that never names AI memory classes. Do not pass TTL on primary app tables that skip vector/conversation stores. Do not pass jobs that only expire cache keys while durable memory remains. Do not pass tests older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Retention and deletion policies must exist and be executable",
-        "Retain evidence artifacts required by this Check, starting with: Retention policy + TTL job config + deletion test record",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish retention periods per AI memory class and wire TTL/deletion jobs to those classes",
+        "Add an automated purge test that asserts older-than-retention samples are absent after the job",
+        "Fail closed when a new memory class is registered without a retention period and job",
+        "Retain policy + job + test under imports/memory-retention/"
       ],
       "references": [
         {
@@ -6971,12 +6990,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "MEM-M3",
         "MEM-M4",
         "MEM-R1",
-        "MEM-R3"
+        "MEM-R3",
+        "PRI-M2"
       ],
       "tags": [
         "memory-management",
         "mandatory",
-        "manual"
+        "hybrid",
+        "retention",
+        "ttl",
+        "deletion"
       ],
       "applicability": {
         "technologies": [
@@ -6993,33 +7016,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "MEM-M3",
       "category": "memory-management",
       "title": "Writes to long-term memory must be validated against policy (who/what may write)",
-      "description": "Writes to long-term memory shall be validated against policy (who/what may write)",
-      "whyItMatters": "Writes to long-term memory shall be validated against policy (who/what may write) Failing this leaves a production gap against: Unauthorized writers denied at 100% in tests; policy enumerates allowed writers and content classes for durable memory",
+      "description": "Writes to durable/long-term AI memory shall be gated by a policy that enumerates allowed writers and content classes; unauthorized writers shall be denied at 100% in automated tests.\n",
+      "whyItMatters": "Unrestricted durable-memory writes let agents, tools, or tenants plant content that later retrieval treats as ground truth. A policy that names who and what may write—plus deny tests—turns memory ingestion into an enforceable control rather than an open append API.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Unauthorized writers denied at 100% in tests; policy enumerates allowed writers and content classes for durable memory",
+      "passCondition": "Policy enumerates allowed writers and content classes for durable/long-term memory; unauthorized writers are denied at 100% in automated tests (policy/test evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Write-policy middleware config + deny tests"
+        "Write policy for durable/long-term memory naming allowed writers and content classes",
+        "Write-policy enforcement config (middleware, gateway, or store gate)",
+        "Automated deny tests showing 100% rejection of unauthorized writers"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-memory-write-policy",
+            "params": {
+              "hint": "Discover durable-memory write policies (allowed writers/content classes), enforcement gates, and unauthorized-writer deny tests.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Write-policy middleware config + deny tests"
+              "hint": "If automation cannot prove deny coverage, attest a durable-memory write policy with allowed writers/content classes and tests showing 100% unauthorized deny (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Be validated against policy (who/what may write)): inspect current evidence for [Write-policy middleware config + deny tests] and confirm the pass condition holds — Unauthorized writers denied at 100% in tests; policy enumerates allowed writers and content classes for durable memory",
-      "falsePositiveGuidance": "(Memory Management): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the system has durable/long-term AI memory (not only ephemeral session context). If none, score NOT_APPLICABLE. 2) Open the write policy: allowed writers (roles, agents, tools, services) and allowed content classes. 3) Confirm enforcement sits on the write path (middleware, gateway, or store gate). 4) Review automated deny tests: unauthorized writers rejected at 100%. 5) PASS only if policy + enforcement + 100% deny tests hold with measuredAt ≤90 days. Authz on primary app tables that never gate durable memory writes does not satisfy. Allow-all agent memory tools without content-class limits do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a generic RBAC matrix that never names durable memory. Do not pass read-isolation tests as write-policy proof. Do not pass suites with any unauthorized write success. Do not pass policies older than 90 days without a fresh deny-test run. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Writes to long-term memory must be validated against policy (who/what may write)",
-        "Retain evidence artifacts required by this Check, starting with: Write-policy middleware config + deny tests",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish a durable-memory write policy listing allowed writers and content classes",
+        "Enforce the policy on every durable-memory write path; fail closed when writer/class is unknown",
+        "Add automated deny tests for unauthorized writers; assert 100% rejection",
+        "Retain policy + deny results under imports/memory-write-policy/"
       ],
       "references": [
         {
@@ -7036,12 +7067,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "MEM-M2",
         "MEM-M4",
         "MEM-R1",
-        "MEM-R3"
+        "MEM-R3",
+        "DG-M3",
+        "AUTHZ-M1"
       ],
       "tags": [
         "memory-management",
         "mandatory",
-        "manual"
+        "hybrid",
+        "write-policy",
+        "durable-memory"
       ],
       "applicability": {
         "technologies": [
@@ -7058,33 +7093,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "MEM-M4",
       "category": "memory-management",
       "title": "Critical memory records must have cryptographic or signed integrity protection",
-      "description": "Critical memory records shall have cryptographic or signed integrity protection",
-      "whyItMatters": "Critical memory records shall have cryptographic or signed integrity protection Failing this leaves a production gap against: Critical memory classes are inventoried; cryptographic verification or signature check succeeds for those classes in the latest check (≤90 days)",
+      "description": "Critical AI memory classes shall be inventoried and protected with cryptographic or signed integrity controls; the latest verification for those classes shall succeed.\n",
+      "whyItMatters": "Critical durable memory—trusted facts, approvals, safety decisions—becomes an attack surface if an adversary can silently alter records after write. Access controls on who may write do not detect tampering of values already stored. Cryptographic or signed integrity with a fresh verification sample proves critical memory has not been rewritten unnoticed.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Critical memory classes are inventoried; cryptographic verification or signature check succeeds for those classes in the latest check (≤90 days)",
+      "passCondition": "Critical memory classes are inventoried; cryptographic verification or signature checks succeed for 100% of those classes in the latest check (inventory/verification evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Integrity/signing design + verification sample for critical memory stores"
+        "Inventory of critical AI memory classes requiring integrity protection",
+        "Integrity/signing design or config for those classes (MAC, signature, sealed object, or equivalent)",
+        "Latest verification sample showing successful integrity/signature checks for inventoried classes"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-memory-integrity",
+            "params": {
+              "hint": "Discover critical-memory inventories, cryptographic/signing integrity controls, and verification samples for durable memory stores.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Integrity/signing design + verification sample for critical memory stores"
+              "hint": "If automation cannot prove coverage, attest a critical-memory class inventory with successful integrity/signature verification for 100% of those classes (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Critical memory records must have cryptographic or signed integrity protection): inspect current evidence for [Integrity/signing design + verification sample for critical memory stores] and confirm the pass condition holds — Critical memory classes are inventoried; cryptographic verification or signature check succeeds for those classes in the latest check (≤90 days)",
-      "falsePositiveGuidance": "(Memory Management): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm critical AI memory classes exist (trusted facts, approvals, safety decisions, or equivalent). If none are designated critical, score NOT_APPLICABLE with rationale—or FAIL if criticality is required by policy but no inventory exists. 2) Open the inventory of critical memory classes. 3) Open integrity/signing design or config covering those classes. 4) Review the latest verification sample: checks succeed for 100% of inventoried classes. 5) PASS only if inventory + integrity control + successful verification hold with measuredAt ≤90 days. Transport TLS alone does not satisfy. Checksums without a keyed/signed verifier do not satisfy unless policy explicitly accepts them as the integrity control and verification still succeeds.\n",
+      "falsePositiveGuidance": "Do not pass application-DB row versioning without cryptographic/signed integrity. Do not pass signing of model artifacts as memory-record integrity. Do not pass an inventory that omits classes already treated as critical in production. Do not pass verification older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Critical memory records must have cryptographic or signed integrity protection",
-        "Retain evidence artifacts required by this Check, starting with: Integrity/signing design + verification sample for critical memory stores",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Inventory critical memory classes and require MAC/signature (or equivalent) on write",
+        "Verify integrity on read or on a ≤90-day scheduled check; fail closed on mismatch",
+        "Alert when verification fails or a critical class lacks integrity coverage",
+        "Retain inventory + verification under imports/memory-integrity/"
       ],
       "references": [
         {
@@ -7101,12 +7144,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "MEM-M2",
         "MEM-M3",
         "MEM-R1",
-        "MEM-R3"
+        "MEM-R3",
+        "SCI-M1"
       ],
       "tags": [
         "memory-management",
         "mandatory",
-        "manual"
+        "hybrid",
+        "integrity",
+        "signing",
+        "critical-memory"
       ],
       "applicability": {
         "technologies": [
@@ -7123,33 +7170,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "MEM-R1",
       "category": "memory-management",
       "title": "Production systems should have memory poisoning tests in the eval suite",
-      "description": "Memory poisoning tests in the eval suite",
-      "whyItMatters": "Memory poisoning tests in the eval suite Failing this leaves a production gap against: ≥5 poisoning scenarios (cross-tenant write, prompt-in-memory, stale trusted fact) are executed ≤90 days; critical fails block or require risk acceptance",
+      "description": "The adversarial or memory eval suite should include at least five memory poisoning scenarios—including cross-tenant write, prompt-in-memory, and stale trusted fact—executed within 90 days, with critical fails blocking promotion or requiring documented risk acceptance.\n",
+      "whyItMatters": "Realistic poisoning chains still slip past static controls: a tenant plants content another retrieves, a prompt lands in durable memory as trusted fact, or stale approved memory outranks fresh truth. Dedicated poisoning cases in the eval suite exercise those failures before production. Critical fails that do not block or accept risk leave known memory attacks unowned.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "≥5 poisoning scenarios (cross-tenant write, prompt-in-memory, stale trusted fact) are executed ≤90 days; critical fails block or require risk acceptance",
+      "passCondition": "≥5 memory-poisoning scenarios are executed (including cross-tenant write, prompt-in-memory, and stale trusted fact); critical fails block promotion or have documented risk acceptance (suite evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Memory-poisoning cases in the adversarial eval suite + latest run report with pass/fail per case"
+        "Memory-poisoning cases in the adversarial/eval suite covering the required scenario types",
+        "Latest suite run report with pass/fail per case and gate or risk-acceptance disposition for critical fails"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-memory-poisoning-evals",
+            "params": {
+              "hint": "Discover memory-poisoning eval cases (cross-tenant write, prompt-in-memory, stale trusted fact) and recent run/gate evidence.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Memory-poisoning cases in the adversarial eval suite + latest run report with pass/fail per case"
+              "hint": "If automation cannot prove ≥5 cases, attest a suite run covering the required scenario types with critical fails blocked or risk-accepted (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Memory poisoning tests in the eval suite): inspect current evidence for [Memory-poisoning cases in the adversarial eval suite + latest run report with pass/fail per case] and confirm the pass condition holds — ≥5 poisoning scenarios (cross-tenant write, prompt-in-memory, stale trusted fact) are executed ≤90 days; critical fails block or require risk acceptance",
-      "falsePositiveGuidance": "(Memory Management): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the system uses AI memory that could be poisoned (conversation, durable, or vector/retrieval). If none, score NOT_APPLICABLE. 2) Open the adversarial/eval suite; confirm ≥5 memory-poisoning scenarios. 3) Confirm coverage includes cross-tenant write, prompt-in-memory, and stale trusted fact. 4) Review the latest run (≤90 days): pass/fail per case; critical fails either block promotion or show documented risk acceptance. 5) PASS only if count, required types, and gate/acceptance hold with measuredAt ≤90 days. Generic prompt-injection suites that never touch memory stores do not satisfy. Unit tests of filters without scenario runs do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass tenant-isolation unit tests as poisoning evals. Do not pass suites missing any of the three required scenario types. Do not pass runs older than 90 days as current. Do not pass critical fails that neither block nor carry owner/expiry risk acceptance. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Memory poisoning tests in the eval suite",
-        "Retain evidence artifacts required by this Check, starting with: Memory-poisoning cases in the adversarial eval suite + latest run report with pass/fail per case",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Add ≥5 memory-poisoning cases including cross-tenant write, prompt-in-memory, and stale trusted fact",
+        "Wire the suite into promotion gates; require risk acceptance for waived critical fails",
+        "Re-run ≤90 days and retain reports under imports/memory-poisoning-evals/",
+        "Expand cases when new memory classes or retrieval paths ship"
       ],
       "references": [
         {
@@ -7166,12 +7220,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "MEM-M2",
         "MEM-M3",
         "MEM-M4",
-        "MEM-R3"
+        "MEM-R3",
+        "SEC-M1",
+        "EVL-M1"
       ],
       "tags": [
         "memory-management",
         "recommended",
-        "manual"
+        "hybrid",
+        "poisoning",
+        "eval"
       ],
       "applicability": {
         "technologies": [
@@ -7188,33 +7246,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "MEM-R3",
       "category": "memory-management",
       "title": "Production systems should have separate working memory from durable memory with promotion rules",
-      "description": "Separate working memory from durable memory with promotion rules",
-      "whyItMatters": "Separate working memory from durable memory with promotion rules Failing this leaves a production gap against: Working memory cannot silently become durable without a promotion rule; last 10 promotions show rule ID and actor; TTL differs by memory class",
+      "description": "Working (short-lived) memory should be separated from durable memory; promotion into durable stores should require an explicit rule; recent promotions should record rule ID and actor; and TTL should differ by memory class.\n",
+      "whyItMatters": "When session scratch and long-term memory share one store, every turn can silently harden into durable context. Explicit separation plus promotion rules make that transition visible and owned. Audit of recent promotions (rule ID and actor) proves the gate ran; different TTLs per class keep short-lived scratch from living as long as trusted durable facts. Without this, every control fights an undifferentiated blob.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Working memory cannot silently become durable without a promotion rule; last 10 promotions show rule ID and actor; TTL differs by memory class",
+      "passCondition": "Working memory cannot silently become durable without a promotion rule; the last 10 promotions show rule ID and actor; TTL differs by memory class (architecture/audit evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Memory architecture doc + config showing working vs durable stores and promotion rules + sample promotion audit"
+        "Memory architecture doc or config showing distinct working vs durable stores",
+        "Promotion rules that gate working→durable writes",
+        "Sample promotion audit (≥10 recent promotions with rule ID and actor) and TTL config differing by memory class"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-memory-promotion-architecture",
+            "params": {
+              "hint": "Discover working vs durable memory separation, promotion rules, TTL differences by class, and promotion audit samples.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Memory architecture doc + config showing working vs durable stores and promotion rules + sample promotion audit"
+              "hint": "If automation cannot prove audits, attest separated stores, promotion rules, TTL-by-class, and last 10 promotions with rule ID and actor (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Separate working memory from durable memory with promotion rules): inspect current evidence for [Memory architecture doc + config showing working vs durable stores and promotion rules + sample promotion audit] and confirm the pass condition holds — Working memory cannot silently become durable without a promotion rule; last 10 promotions show rule ID and actor; TTL differs by memory class",
-      "falsePositiveGuidance": "(Memory Management): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the system has both working/short-lived and durable AI memory. If only one class exists with no promotion path, score NOT_APPLICABLE. 2) Open architecture/config: distinct working vs durable stores (or equivalent namespaces). 3) Confirm promotion rules gate working→durable writes (no silent copy). 4) Review ≥10 recent promotions: each shows rule ID and actor. 5) Confirm TTL differs by memory class. 6) PASS only if separation + rules + audit + TTL-by-class hold with measuredAt ≤90 days. A single Redis keyspace used for both without promotion rules does not satisfy. Feedback→training gates alone (without working/durable memory separation) do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass cache TTL as working-vs-durable architecture. Do not pass promotion rules that never emit rule ID/actor on audits. Do not pass identical TTLs across classes when policy claims separation. Do not pass audits older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Separate working memory from durable memory with promotion rules",
-        "Retain evidence artifacts required by this Check, starting with: Memory architecture doc + config showing working vs durable stores and promotion rules + sample promotion audit",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Split working and durable memory stores (or hard namespaces) with different TTLs",
+        "Require a named promotion rule before durable writes; log rule ID and actor",
+        "Export ≤90-day promotion audits under imports/memory-promotion-architecture/",
+        "Deny silent copy or upsert from working into durable without a rule"
       ],
       "references": [
         {
@@ -7231,12 +7297,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "MEM-M2",
         "MEM-M3",
         "MEM-M4",
-        "MEM-R1"
+        "MEM-R1",
+        "DG-M3"
       ],
       "tags": [
         "memory-management",
         "recommended",
-        "manual"
+        "hybrid",
+        "working-memory",
+        "durable-memory",
+        "promotion"
       ],
       "applicability": {
         "technologies": [
@@ -8931,6 +9001,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "PRI-R1",
         "PRI-R2",
         "MEM-M1",
+        "MEM-M2",
         "MEM-R3"
       ],
       "tags": [

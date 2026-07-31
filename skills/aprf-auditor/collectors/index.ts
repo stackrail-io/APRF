@@ -49,6 +49,12 @@ import { vendorModelTermsCollector } from "./vendor-model-terms.ts";
 import { aiDeletionExportCollector } from "./ai-deletion-export.ts";
 import { aiResidencyRoutingCollector } from "./ai-residency-routing.ts";
 import { aiDpiaCollector } from "./ai-dpia.ts";
+import { memoryIsolationCollector } from "./memory-isolation.ts";
+import { memoryRetentionCollector } from "./memory-retention.ts";
+import { memoryWritePolicyCollector } from "./memory-write-policy.ts";
+import { memoryIntegrityCollector } from "./memory-integrity.ts";
+import { memoryPoisoningEvalsCollector } from "./memory-poisoning-evals.ts";
+import { memoryPromotionArchitectureCollector } from "./memory-promotion-architecture.ts";
 import {
   awsCollector,
   azureCollector,
@@ -105,6 +111,12 @@ export const COLLECTORS: Collector[] = [
   aiDeletionExportCollector,
   aiResidencyRoutingCollector,
   aiDpiaCollector,
+  memoryIsolationCollector,
+  memoryRetentionCollector,
+  memoryWritePolicyCollector,
+  memoryIntegrityCollector,
+  memoryPoisoningEvalsCollector,
+  memoryPromotionArchitectureCollector,
   a2aPeerAuthCollector,
   awsCollector,
   azureCollector,

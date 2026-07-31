@@ -1,0 +1,29 @@
+id: memory-integrity
+title: Critical memory cryptographic/signed integrity (MEM-M4)
+version: "0.2.0"
+executor: collectors/memory-integrity.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-memory-integrity]
+inputs:
+  - "Target repo (critical memory integrity/signing)"
+  - "Optional suite: aprf-assessment/imports/memory-integrity/*.{json}"
+collect:
+  - "Detect critical-class inventory, integrity/signing controls, verification samples"
+  - "Ingest verification; write memory-integrity-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/memory-integrity/*"
+  signals:
+    - memory-integrity
+    - mem-m4
+    - repo-memory-integrity
+mapsToChecks: [MEM-M4]
+whenUnavailable: >
+  Integrity signals alone are PARTIAL. MEM-M4 PASS needs imported
+  criticalClassesInventoried, integrityControlPresent,
+  verificationSucceededPct=100, coversAllCriticalClasses, measuredAt ≤90 days.
+  No critical AI memory classes → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline integrity heuristics + optional imported verification JSON.

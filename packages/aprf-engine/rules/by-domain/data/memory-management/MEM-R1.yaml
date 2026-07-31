@@ -1,38 +1,61 @@
 id: "MEM-R1"
 category: "memory-management"
 title: "Production systems should have memory poisoning tests in the eval suite"
-description: "Memory poisoning tests in the eval suite"
-whyItMatters: "Memory poisoning tests in the eval suite Failing this leaves a production gap
-  against: ≥5 poisoning scenarios (cross-tenant write, prompt-in-memory, stale trusted fact) are
-  executed ≤90 days; critical fails block or require risk acceptance"
+description: >
+  The adversarial or memory eval suite should include at least five memory
+  poisoning scenarios—including cross-tenant write, prompt-in-memory, and stale
+  trusted fact—executed within 90 days, with critical fails blocking promotion
+  or requiring documented risk acceptance.
+whyItMatters: >
+  Realistic poisoning chains still slip past static controls: a tenant plants
+  content another retrieves, a prompt lands in durable memory as trusted fact,
+  or stale approved memory outranks fresh truth. Dedicated poisoning cases in
+  the eval suite exercise those failures before production. Critical fails that
+  do not block or accept risk leave known memory attacks unowned.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "≥5 poisoning scenarios (cross-tenant write, prompt-in-memory, stale trusted fact)
-  are executed ≤90 days; critical fails block or require risk acceptance"
+passCondition: >
+  ≥5 memory-poisoning scenarios are executed (including cross-tenant write,
+  prompt-in-memory, and stale trusted fact); critical fails block promotion or
+  have documented risk acceptance (suite evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Memory-poisoning cases in the adversarial eval suite + latest run report with pass/fail per
-    case"
+  - "Memory-poisoning cases in the adversarial/eval suite covering the required scenario types"
+  - "Latest suite run report with pass/fail per case and gate or risk-acceptance disposition for critical fails"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-memory-poisoning-evals"
+      params:
+        hint: >
+          Discover memory-poisoning eval cases (cross-tenant write,
+          prompt-in-memory, stale trusted fact) and recent run/gate evidence.
     - id: "manual-attest"
       params:
-        hint: "Memory-poisoning cases in the adversarial eval suite + latest run report with pass/fail per
-          case"
-manualVerification: "For this Check (Memory poisoning tests in the eval suite): inspect current
-  evidence for [Memory-poisoning cases in the adversarial eval suite + latest run report with
-  pass/fail per case] and confirm the pass condition holds — ≥5 poisoning scenarios (cross-tenant
-  write, prompt-in-memory, stale trusted fact) are executed ≤90 days; critical fails block or
-  require risk acceptance"
-falsePositiveGuidance: "(Memory Management): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove ≥5 cases, attest a suite run covering the
+          required scenario types with critical fails blocked or risk-accepted
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the system uses AI memory that could be poisoned (conversation,
+  durable, or vector/retrieval). If none, score NOT_APPLICABLE. 2) Open the
+  adversarial/eval suite; confirm ≥5 memory-poisoning scenarios. 3) Confirm
+  coverage includes cross-tenant write, prompt-in-memory, and stale trusted
+  fact. 4) Review the latest run (≤90 days): pass/fail per case; critical fails
+  either block promotion or show documented risk acceptance. 5) PASS only if
+  count, required types, and gate/acceptance hold with measuredAt ≤90 days.
+  Generic prompt-injection suites that never touch memory stores do not
+  satisfy. Unit tests of filters without scenario runs do not satisfy.
+falsePositiveGuidance: >
+  Do not pass tenant-isolation unit tests as poisoning evals. Do not pass suites
+  missing any of the three required scenario types. Do not pass runs older than
+  90 days as current. Do not pass critical fails that neither block nor carry
+  owner/expiry risk acceptance. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Memory poisoning tests in the eval suite"
-  - "Retain evidence artifacts required by this Check, starting with: Memory-poisoning cases in the
-    adversarial eval suite + latest run report with pass/fail per case"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Add ≥5 memory-poisoning cases including cross-tenant write, prompt-in-memory, and stale trusted fact"
+  - "Wire the suite into promotion gates; require risk acceptance for waived critical fails"
+  - "Re-run ≤90 days and retain reports under imports/memory-poisoning-evals/"
+  - "Expand cases when new memory classes or retrieval paths ship"
 references:
   - title: "NIST AI RMF — Govern and Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -44,10 +67,14 @@ relatedRules:
   - "MEM-M3"
   - "MEM-M4"
   - "MEM-R3"
+  - "SEC-M1"
+  - "EVL-M1"
 tags:
   - "memory-management"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "poisoning"
+  - "eval"
 applicability:
   technologies:
     - "vector-databases"

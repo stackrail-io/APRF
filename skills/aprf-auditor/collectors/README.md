@@ -86,6 +86,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **ai-deletion-export** | `ai-deletion-export.ts` | AI memory/log deletion+export (PRI-M2) | `imports/ai-deletion-export/` | — |
 | **ai-residency-routing** | `ai-residency-routing.ts` | residency routing (PRI-M3) | `imports/ai-residency-routing/` | — |
 | **ai-dpia** | `ai-dpia.ts` | DPIA/PIA before production (PRI-R3) | `imports/ai-dpia/` | — |
+| **memory-isolation** | `memory-isolation.ts` | memory tenant/user isolation (MEM-M1) | `imports/memory-isolation/` | — |
+| **memory-retention** | `memory-retention.ts` | memory retention + TTL/deletion (MEM-M2) | `imports/memory-retention/` | — |
+| **memory-write-policy** | `memory-write-policy.ts` | durable memory write policy (MEM-M3) | `imports/memory-write-policy/` | — |
+| **memory-integrity** | `memory-integrity.ts` | critical memory integrity/signing (MEM-M4) | `imports/memory-integrity/` | — |
+| **memory-poisoning-evals** | `memory-poisoning-evals.ts` | memory poisoning evals (MEM-R1) | `imports/memory-poisoning-evals/` | — |
+| **memory-promotion-architecture** | `memory-promotion-architecture.ts` | working vs durable + promotion (MEM-R3) | `imports/memory-promotion-architecture/` | — |
 
 ### AGN-M1 — agent charters
 
