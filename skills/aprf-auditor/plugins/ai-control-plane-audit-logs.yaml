@@ -1,0 +1,29 @@
+id: ai-control-plane-audit-logs
+title: AI control-plane audit log retention (CMP-M3)
+version: "0.2.0"
+executor: collectors/ai-control-plane-audit-logs.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-ai-control-plane-audit-logs]
+inputs:
+  - "Target repo (audit retention for AI control-plane changes)"
+  - "Optional suite: aprf-assessment/imports/ai-control-plane-audit-logs/*.{json}"
+collect:
+  - "Detect control-plane audit wiring, retention config, and smoke tests"
+  - "Ingest smoke evidence; write ai-control-plane-audit-logs-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/ai-control-plane-audit-logs/*"
+  signals:
+    - ai-control-plane-audit-logs
+    - cmp-m3
+    - repo-ai-control-plane-audit-logs
+mapsToChecks: [CMP-M3]
+whenUnavailable: >
+  Audit signals alone are PARTIAL. CMP-M3 PASS needs imported
+  retentionConfiguredDays≥policyMinimumDays, syntheticAppearMinutes≤5,
+  remainsQueryableAfterSmoke, measuredAt ≤90 days. No critical AI control-plane
+  changes → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline audit/retention heuristics + optional imported smoke JSON.

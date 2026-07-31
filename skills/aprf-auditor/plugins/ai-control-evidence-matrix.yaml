@@ -1,0 +1,28 @@
+id: ai-control-evidence-matrix
+title: Control→evidence matrix for obligations (CMP-M2)
+version: "0.2.0"
+executor: collectors/ai-control-evidence-matrix.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-ai-control-evidence-matrix]
+inputs:
+  - "Target repo (control→evidence matrix)"
+  - "Optional suite: aprf-assessment/imports/ai-control-evidence-matrix/*.{json}"
+collect:
+  - "Detect matrices linking obligations to evidence IDs"
+  - "Ingest coverage; write ai-control-evidence-matrix-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/ai-control-evidence-matrix/*"
+  signals:
+    - ai-control-evidence-matrix
+    - cmp-m2
+    - repo-ai-control-evidence-matrix
+mapsToChecks: [CMP-M2]
+whenUnavailable: >
+  Matrix signals alone are PARTIAL. CMP-M2 PASS needs imported
+  coversAllInScopeObligations, orphanObligationCount=0, matrixReviewAgeDays≤365,
+  measuredAt ≤90 days. No in-scope obligations → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline matrix heuristics + optional imported JSON.

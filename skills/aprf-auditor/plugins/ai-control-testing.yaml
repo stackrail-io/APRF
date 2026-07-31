@@ -1,0 +1,28 @@
+id: ai-control-testing
+title: AI/compliance control testing with exceptions (CMP-R1)
+version: "0.2.0"
+executor: collectors/ai-control-testing.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-ai-control-testing]
+inputs:
+  - "Target repo (control-testing schedule / exceptions register)"
+  - "Optional suite: aprf-assessment/imports/ai-control-testing/*.{json}"
+collect:
+  - "Detect schedules, results packs, and exceptions registers"
+  - "Ingest cycle evidence; write ai-control-testing-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/ai-control-testing/*"
+  signals:
+    - ai-control-testing
+    - cmp-r1
+    - repo-ai-control-testing
+mapsToChecks: [CMP-R1]
+whenUnavailable: >
+  Testing signals alone are PARTIAL. CMP-R1 PASS needs imported
+  testedOnSchedule=true, openExceptionsIncomplete=0, cycleAgeDays≤90,
+  measuredAt ≤90 days. No scheduled AI/compliance controls → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline schedule/exceptions heuristics + optional imported cycle JSON.

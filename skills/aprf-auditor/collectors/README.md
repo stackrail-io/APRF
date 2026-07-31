@@ -92,6 +92,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **memory-integrity** | `memory-integrity.ts` | critical memory integrity/signing (MEM-M4) | `imports/memory-integrity/` | — |
 | **memory-poisoning-evals** | `memory-poisoning-evals.ts` | memory poisoning evals (MEM-R1) | `imports/memory-poisoning-evals/` | — |
 | **memory-promotion-architecture** | `memory-promotion-architecture.ts` | working vs durable + promotion (MEM-R3) | `imports/memory-promotion-architecture/` | — |
+| **ai-obligations-register** | `ai-obligations-register.ts` | AI obligations register (CMP-M1) | `imports/ai-obligations-register/` | — |
+| **ai-control-evidence-matrix** | `ai-control-evidence-matrix.ts` | control→evidence matrix (CMP-M2) | `imports/ai-control-evidence-matrix/` | — |
+| **ai-control-plane-audit-logs** | `ai-control-plane-audit-logs.ts` | control-plane audit retention (CMP-M3) | `imports/ai-control-plane-audit-logs/` | — |
+| **ai-control-testing** | `ai-control-testing.ts` | control testing + exceptions (CMP-R1) | `imports/ai-control-testing/` | — |
+| **ai-trust-documentation** | `ai-trust-documentation.ts` | customer trust doc (CMP-R2) | `imports/ai-trust-documentation/` | — |
+| **ai-independent-assessment** | `ai-independent-assessment.ts` | Level-5 independent assessment (CMP-R3) | `imports/ai-independent-assessment/` | — |
 
 ### AGN-M1 — agent charters
 

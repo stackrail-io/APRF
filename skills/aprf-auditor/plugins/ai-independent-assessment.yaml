@@ -1,0 +1,28 @@
+id: ai-independent-assessment
+title: Independent assessment for Level-5 systems (CMP-R3)
+version: "0.2.0"
+executor: collectors/ai-independent-assessment.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-ai-independent-assessment]
+inputs:
+  - "Target repo (independent/internal-audit assessment reports)"
+  - "Optional suite: aprf-assessment/imports/ai-independent-assessment/*.{json}"
+collect:
+  - "Detect assessment reports, Level-5 scope, findings/owners"
+  - "Ingest coverage evidence; write ai-independent-assessment-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/ai-independent-assessment/*"
+  signals:
+    - ai-independent-assessment
+    - cmp-r3
+    - repo-ai-independent-assessment
+mapsToChecks: [CMP-R3]
+whenUnavailable: >
+  Assessment signals alone are PARTIAL. CMP-R3 PASS needs imported
+  coversAllLevel5Systems, sampledCheckIdCount>0, findingsHaveRemediationOwners,
+  assessmentAgeDays≤365, measuredAt ≤90 days. No Level-5 systems → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline assessment heuristics + optional imported coverage JSON.

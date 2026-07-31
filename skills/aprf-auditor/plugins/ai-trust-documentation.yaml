@@ -1,0 +1,28 @@
+id: ai-trust-documentation
+title: Customer-facing trust documentation (CMP-R2)
+version: "0.2.0"
+executor: collectors/ai-trust-documentation.ts
+evidenceClass: docs
+alsoEmits: [code]
+detectorIds: [repo-ai-trust-documentation]
+inputs:
+  - "Target repo (trust center / security docs / pillar maps)"
+  - "Optional suite: aprf-assessment/imports/ai-trust-documentation/*.{json}"
+collect:
+  - "Detect trust docs, pillar/Core maps, and topic coverage signals"
+  - "Ingest attestation; write ai-trust-documentation-report.json"
+emits:
+  nodeClass: docs
+  refPattern: "aprf-assessment/imports/ai-trust-documentation/*"
+  signals:
+    - ai-trust-documentation
+    - cmp-r2
+    - repo-ai-trust-documentation
+mapsToChecks: [CMP-R2]
+whenUnavailable: >
+  Trust signals alone are PARTIAL. CMP-R2 PASS needs imported publishedUrl,
+  identity/safety/data/incident coverage, pillarMappingExplicit, lastUpdatedAgeDays≤365,
+  measuredAt ≤90 days. No customer-facing AI trust surface → NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline trust-doc heuristics + optional imported attestation JSON.

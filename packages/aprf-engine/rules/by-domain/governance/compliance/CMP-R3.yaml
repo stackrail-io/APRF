@@ -1,47 +1,87 @@
 id: "CMP-R3"
 category: "compliance"
-title: "Production systems should have independent assessment for Level 5 systems"
-description: "Independent assessment for Level 5 systems"
-whyItMatters: "Independent assessment for Level 5 systems Failing this leaves a production gap
-  against: Last assessment ≤12 months old lists sampled check IDs, findings, and remediation owners;
-  covers every system rated Level 5"
+title: "Capability Level 5 systems should have independent assessment"
+description: >
+  Every AI system that claims or attains APRF capability maturity Level 5
+  (Optimizing—typically Regulated / highest-discipline production) shall be
+  covered by an independent assessment or internal-audit report ≤12 months old
+  that samples APRF gates and lists sampled Check IDs, findings, and remediation
+  owners. Level 5 is capability maturity, not criticality tier (tiers are 0–3).
+whyItMatters: >
+  Capability Level 5 means the system is held to the Optimizing bar: automated
+  gates, dual-control for irreversible actions, continuity drills, and enforced
+  blast-radius limits. Self-attestation alone cannot catch control drift or
+  optimistic scoring at that height. An independent (or internal-audit) sample
+  of APRF gates with named findings and remediation owners is the external check
+  that Level 5 claims still match production reality.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Last assessment ≤12 months old lists sampled check IDs, findings, and remediation
-  owners; covers every system rated Level 5"
+passCondition: >
+  Last assessment age ≤12 months; covers every system that claims or attains
+  capability Level 5; lists sampled Check IDs, findings, and remediation owners
+  (assessment evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Independent assessment or internal-audit report sampling Level-5 AI systems against APRF gates"
+  - "Independent assessment or internal-audit report sampling capability Level-5 AI systems against APRF gates"
+  - "Coverage proof that every capability Level-5 system ID was in scope, with findings and remediation owners"
 detection:
-  capability: "manual"
-  detectors: []
-manualVerification: "For this Check (Independent assessment for Level 5 systems): inspect current
-  evidence for [Independent assessment or internal-audit report sampling Level-5 AI systems against
-  APRF gates] and confirm the pass condition holds — Last assessment ≤12 months old lists sampled
-  check IDs, findings, and remediation owners; covers every system rated Level 5"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-independent-assessment"
+      params:
+        hint: >
+          Discover independent/internal-audit assessment reports for AI systems
+          at APRF capability Level 5 (Optimizing), sampled Check IDs, findings,
+          and remediation owners.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest every system that claims
+          or attains capability Level 5 was assessed ≤12 months ago with sampled
+          Check IDs, findings, and remediation owners (measuredAt ≤90 days).
+manualVerification: >
+  1) Identify AI systems that claim or attain APRF capability maturity Level 5
+  (Optimizing)—not criticality Tier 3 alone, and not “Tier 5” (tiers only go to
+  3). If none, score NOT_APPLICABLE. 2) Inventory those Level-5 system IDs. 3)
+  Open the latest independent or internal-audit assessment report. 4) Confirm
+  assessment age ≤12 months. 5) Confirm every Level-5 system ID is in scope. 6)
+  Confirm sampled Check IDs, findings, and remediation owners are listed. 7)
+  PASS only if coverage + freshness + findings ownership hold with measuredAt
+  ≤90 days. A product-team self-assessment alone does not satisfy. An assessment
+  that omits any Level-5 system or lacks remediation owners does not satisfy.
+falsePositiveGuidance: >
+  Do not treat criticality Tier 3 alone as capability Level 5 (Tier 3’s required
+  floor is Level 4; Level 5 is Optimizing attainment or claim). Do not pass
+  product-team self-attestations as independent assessment. Do not pass SOC2/ISO
+  reports that never sample APRF Check IDs. Do not pass assessments older than
+  12 months. Do not pass sampling that covers only a subset of Level-5 systems.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Independent assessment for Level 5 systems"
-  - "Retain evidence artifacts required by this Check, starting with: Independent assessment or
-    internal-audit report sampling Level-5 AI systems against APRF gates"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Inventory every AI system that claims or attains capability Level 5 (Optimizing)"
+  - "Schedule independent or internal-audit assessment; sample APRF gates with Check IDs, findings, and remediation owners"
+  - "Reassess at least annually; treat reports >12 months as missing"
+  - "Retain the report under imports/ai-independent-assessment/"
 references:
   - title: "NIST AI RMF"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
   - title: "ISO/IEC 42001 (AI management systems) — conceptual alignment"
     url: "https://www.iso.org/standard/81230.html"
+  - title: "APRF maturity (capability Level 5 · Optimizing)"
+    url: "https://stackrail.io/aprf/how/#maturity"
 relatedRules:
   - "CMP-M1"
   - "CMP-M2"
   - "CMP-M3"
   - "CMP-R1"
   - "CMP-R2"
+  - "HUM-M4"
 tags:
   - "compliance"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "independent-assessment"
+  - "level-5"
+  - "capability-maturity"
 applicability:
   technologies: []
   minCriticality: 3
