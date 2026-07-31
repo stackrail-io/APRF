@@ -5,18 +5,18 @@ description: >
   Production AI spend shall be monitored with alert policies for budget burn
   and spend anomaly that notify operators per runbook—not dashboards alone.
 whyItMatters: >
-  Hard spend ceilings (COST-M1) stop unbounded burn, but without budget-burn
-  and anomaly alerts operators learn too late that quotas are being hit,
-  tenants are runaway, or unit economics have drifted. A dashboard nobody
-  pages on is not a control. Proven notify (synthetic test or ≤90-day fire)
-  turns FinOps telemetry into an operational signal.
+  Hard spend ceilings stop unbounded burn, but without budget-burn and anomaly
+  alerts operators learn too late that quotas are being hit, tenants are
+  runaway, or unit economics have drifted. A dashboard nobody pages on is not
+  a control. Proven notify (synthetic test or ≤90-day fire) turns FinOps
+  telemetry into an operational signal.
 severity: "high"
 weight: 3
 gate: "mandatory"
 passCondition: >
   Alerts exist for both budget burn and spend anomaly covering production AI
   spend; a synthetic or historical burn/anomaly event would page/notify per
-  runbook (alert test or documented fire within the last 90 days).
+  runbook (alert test or documented fire measuredAt ≤90 days).
 evidenceRequired:
   - "Cost/spend dashboard or telemetry views covering production AI workloads"
   - "Alert policies for budget burn and spend anomaly (IaC, provider, or gateway)"
@@ -32,8 +32,8 @@ detection:
     - id: "manual-attest"
       params:
         hint: >
-          If automation cannot prove notify, attest both alert types plus a
-          ≤90-day alert test or documented fire that paged/notified.
+          If automation cannot prove notify, attest both alert types plus an
+          alert test or documented fire that paged/notified (measuredAt ≤90 days).
 manualVerification: >
   1) Confirm production AI spend exists. If none, score NOT_APPLICABLE.
   2) Locate monitoring for AI/model/agent cost (tokens, $, RPM). Generic infra

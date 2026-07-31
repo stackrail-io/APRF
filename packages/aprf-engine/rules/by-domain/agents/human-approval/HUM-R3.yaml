@@ -9,8 +9,8 @@ description: >
 whyItMatters: >
   Slow approval queues create shadow paths: engineers disable gates, share
   break-glass tokens, or move work to ungated APIs. An SLA with measured queue
-  age makes fatigue and backlog visible before HUM-M3 bypasses become culture.
-  Exceptions without owners and expiry become permanent holes.
+  age makes fatigue and backlog visible before bypass workarounds become
+  culture. Exceptions without owners and expiry become permanent holes.
 severity: "critical"
 weight: 4
 gate: "recommended"

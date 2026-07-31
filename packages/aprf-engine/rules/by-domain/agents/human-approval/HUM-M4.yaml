@@ -9,15 +9,15 @@ description: >
 whyItMatters: >
   At Level 5 blast radius, a single fatigued or compromised approver can
   authorize irreversible harm. Dual control separates intent from execution and
-  raises the cost of insider or session abuse. Without it, HUM-M1 gates remain
-  single-point-of-failure approvals for the highest stakes.
+  raises the cost of insider or session abuse. Without it, single-gate approvals
+  remain a single point of failure for the highest stakes.
 severity: "critical"
 weight: 4
 gate: "mandatory"
 passCondition: >
   Level 5 irreversible action classes are inventoried; 100% of sampled
   executions of those classes show dual approval by two distinct actors; 0
-  single-approver completes in the sample.
+  single-approver completes in the sample (sample/config measuredAt ≤90 days).
 evidenceRequired:
   - "Inventory of Level 5 irreversible action classes requiring dual control"
   - "Dual-control workflow configuration (two distinct approvers)"
@@ -34,13 +34,14 @@ detection:
       params:
         hint: >
           If automation cannot prove samples, attest dual-control config plus
-          sampled records with 100% dual approval and 0 single-approver completes.
+          sampled records with 100% dual approval and 0 single-approver completes
+          (measuredAt ≤90 days).
 manualVerification: >
   1) Confirm the system is assessed at requiredFromLevel ≥5 / Level 5 scope; if
   not in Level 5 scope, score NOT_APPLICABLE. 2) Inventory irreversible action
   classes requiring dual control. 3) Verify workflow config requires two distinct
   approvers. 4) Sample recent executions: 100% dual approval, 0 single-approver.
-  5) PASS only if inventory + config + sample all hold.
+  5) PASS only if inventory + config + sample all hold with measuredAt ≤90 days.
 falsePositiveGuidance: >
   Do not pass two clicks by the same user/session as dual control. Do not pass
   maker-checker that allows the same principal both roles. Do not apply this

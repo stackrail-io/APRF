@@ -22,7 +22,8 @@ passCondition: >
   100% of production A2A/multi-agent handoff paths require authenticated peers
   and scoped capabilities; negative tests show unauthenticated, forged-peer,
   and over-scoped handoffs denied at 100%; 0 production handoff paths that
-  accept anonymous or network-presence-only trust.
+  accept anonymous or network-presence-only trust (deny evidence measuredAt
+  ≤90 days).
 evidenceRequired:
   - "Inventory of production A2A/multi-agent handoff paths with authn/authz mechanism per path"
   - "Capability token/schema (or equivalent) examples showing scoped grants for handoffs"
@@ -37,7 +38,8 @@ detection:
         hint: >
           Config presence is not enough—confirm negative tests deny
           unauthenticated, forged-peer, and over-scoped handoffs on every
-          production multi-agent path (or document N/A if none exist).
+          production multi-agent path (measuredAt ≤90 days), or document N/A
+          if none exist.
 manualVerification: >
   1) Determine whether the system has production A2A or multi-agent handoffs
   (including in-process supervisor/worker agents that exchange goals/tools). If
@@ -50,7 +52,8 @@ manualVerification: >
   and capability exceeding grant—all must be denied. Prompt-only “don’t trust
   other agents” does not pass.
   4) PASS only if every production handoff path has authn + scoped capabilities
-  and deny tests cover the three abuse cases at 100%.
+  and deny tests cover the three abuse cases at 100% with evidence measuredAt
+  ≤90 days.
 falsePositiveGuidance: >
   Do not pass on open mesh / shared API keys / “agents on the same VPC.” Do not
   pass because A2A config files exist without deny tests. Do not treat user→agent

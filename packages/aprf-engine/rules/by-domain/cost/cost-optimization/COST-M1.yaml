@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   A finite hard spend ceiling and/or rate limit is configured for production AI
   workloads; enforcement demonstrably denies or throttles when the limit is
-  exceeded (automated test or production event log within the last 90 days).
+  exceeded (automated test or production event log measuredAt ≤90 days).
 evidenceRequired:
   - "Gateway/provider/application config declaring finite spend ceiling and/or rate limit (TPM/RPM/$, tokens)"
   - "Enforcement evidence: automated exceed test or ≤90-day production deny/throttle event log"
@@ -33,7 +33,7 @@ detection:
       params:
         hint: >
           If automation cannot prove enforce-on-exceed, attest finite limit
-          config plus a ≤90-day deny/throttle test or production event.
+          config plus deny/throttle test or production event (measuredAt ≤90 days).
 manualVerification: >
   1) Confirm production AI/model/agent traffic exists. If none, score
   NOT_APPLICABLE. 2) Locate the hard spend ceiling and/or rate limit (provider

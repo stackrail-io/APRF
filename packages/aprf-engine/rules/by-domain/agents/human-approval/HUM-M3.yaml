@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   Automated or reviewed bypass tests cover alternate UI, API, and agent/job
   entry points for inventoried high-impact actions; 0 successful ungated
-  high-impact executions in those tests.
+  high-impact executions in those tests (bypass evidence measuredAt ≤90 days).
 evidenceRequired:
   - "Bypass-path threat model or test matrix across UI, API, and agent/job entry points"
   - "Test results showing 0 successful ungated high-impact executions"
@@ -32,13 +32,14 @@ detection:
       params:
         hint: >
           If automation cannot prove coverage, attest a reviewed bypass suite
-          across UI/API/agent paths with 0 successful ungated executions.
+          across UI/API/agent paths with 0 successful ungated executions
+          (measuredAt ≤90 days).
 manualVerification: >
   1) Confirm high-impact gates exist (HUM-M1 scope). 2) List entry paths that
   can invoke those actions (UI, public/private API, agent tools, batch). 3)
   Review bypass tests that omit approval tokens/sessions on each path. 4) PASS
-  only if tests (or imports) show 0 successful ungated high-impact executions.
-  A single gated UI with open APIs fails.
+  only if tests (or imports) show 0 successful ungated high-impact executions
+  with measuredAt ≤90 days. A single gated UI with open APIs fails.
 falsePositiveGuidance: >
   Do not pass unit tests of the approval service alone without path coverage.
   Do not pass network ACLs as a substitute for approval on privileged APIs.
