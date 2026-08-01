@@ -298,6 +298,7 @@ export function buildShortLivedAgentTokensReport(opts: {
         100) ||
       (opts.imported.longLivedStaticApiKeysInPromptsOrConfig !== null &&
         opts.imported.longLivedStaticApiKeysInPromptsOrConfig > 0) ||
+      opts.imported.ownedExceptionsWithin30Days === false ||
       (opts.imported.ageDays !== null &&
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
@@ -314,7 +315,9 @@ export function buildShortLivedAgentTokensReport(opts: {
     statusHint = "fail";
     authnR1Satisfied = false;
     notes.push(
-      "Imported evidence shows TTL coverage <100%, long-lived static keys in prompts/config, or attest older than 90 days — AUTHN-R1 fail.",
+      opts.imported.ownedExceptionsWithin30Days === false
+        ? "Imported ownedExceptionsWithin30Days=false — named TTL exceptions must have owner and expiry ≤30 days (AUTHN-R1 fail)."
+        : "Imported evidence shows TTL coverage <100%, long-lived static keys in prompts/config, or attest older than 90 days — AUTHN-R1 fail.",
     );
   } else if (
     (gateSignalsPresent || opts.imported.found) &&
@@ -322,6 +325,7 @@ export function buildShortLivedAgentTokensReport(opts: {
     scanOk &&
     ageOk &&
     importFresh &&
+    opts.imported.ownedExceptionsWithin30Days !== false &&
     opts.imported.found
   ) {
     statusHint = "pass";

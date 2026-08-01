@@ -147,6 +147,64 @@ async def signin():
     if (ingested.status !== "ran") {
       throw new Error(`ingest prior report expected ran, got ${ingested.status}`);
     }
+    const ingestedReport = JSON.parse(
+      readFileSync(
+        join(out2, "imports", "http-auth-probe", "auth-probe-report.json"),
+        "utf8",
+      ),
+    ) as AuthProbeReport;
+    if (
+      ingestedReport.summary.authnM1Satisfied !== true ||
+      ingestedReport.summary.statusHint !== "pass"
+    ) {
+      throw new Error(
+        `prior report with catalog match should stay pass: ${JSON.stringify(ingestedReport.summary)}`,
+      );
+    }
+
+    const outNoCatalog = mkdtempSync(join(tmpdir(), "aprf-auth-nocat-"));
+    mkdirSync(join(outNoCatalog, "imports", "http-auth-probe"), {
+      recursive: true,
+    });
+    const incomplete = {
+      ...report,
+      summary: {
+        ...report.summary,
+        probeInventoryMatchesRouteCatalog: false,
+        authnM1Satisfied: true,
+        statusHint: "pass" as const,
+      },
+    };
+    writeFileSync(
+      join(outNoCatalog, "imports", "http-auth-probe", "auth-probe-report.json"),
+      JSON.stringify(incomplete, null, 2),
+    );
+    const downgraded = await httpAuthProbeCollector.collect({
+      targetPath: targetDir,
+      outputDir: outNoCatalog,
+      assessedAt,
+      live: false,
+    });
+    if (downgraded.status !== "ran") {
+      throw new Error(
+        `incomplete catalog prior report expected ran, got ${downgraded.status}`,
+      );
+    }
+    const downReport = JSON.parse(
+      readFileSync(
+        join(outNoCatalog, "imports", "http-auth-probe", "auth-probe-report.json"),
+        "utf8",
+      ),
+    ) as AuthProbeReport;
+    if (
+      downReport.summary.authnM1Satisfied !== false ||
+      downReport.summary.statusHint !== "partial"
+    ) {
+      throw new Error(
+        `prior PASS without catalog match must downgrade: ${JSON.stringify(downReport.summary)}`,
+      );
+    }
+    rmSync(outNoCatalog, { recursive: true, force: true });
     rmSync(out2, { recursive: true, force: true });
 
     const emptyTarget = mkdtempSync(join(tmpdir(), "aprf-auth-empty-"));

@@ -105,6 +105,32 @@ async function main() {
       throw new Error(`fail expected: ${JSON.stringify(rFail.summary)}`);
     }
 
+    const outSvc = join(root, "o-svc");
+    mkdirSync(join(outSvc, "imports", "identity-propagation"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outSvc, "imports", "identity-propagation", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        identityPropagationDesignDocumented: true,
+        samples: [
+          { hasDocumentedServiceSubject: true },
+          { hasDocumentedServiceSubject: true, subject: "svc:batch" },
+        ],
+      }),
+    );
+    const rSvc = await run(t2, outSvc);
+    if (
+      rSvc.summary.statusHint !== "pass" ||
+      rSvc.summary.authnM4Satisfied !== true ||
+      (rSvc.importedResults.anonymousPrivilegedHops ?? 0) !== 0
+    ) {
+      throw new Error(
+        `documented-service samples should pass with 0 anon hops: ${JSON.stringify(rSvc.summary)} anon=${rSvc.importedResults.anonymousPrivilegedHops}`,
+      );
+    }
+
     const tEmpty = join(root, "t-empty");
     mkdirSync(tEmpty, { recursive: true });
     const outNa = join(root, "ona");

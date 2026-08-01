@@ -201,7 +201,11 @@ function loadImported(
           (s) =>
             s.anonymous === true ||
             s.anonymousPrivilegedHop === true ||
-            (!s.subject && !s.userId && !s.actor && !s.hasEndUserSubject),
+            (!s.subject &&
+              !s.userId &&
+              !s.actor &&
+              s.hasEndUserSubject !== true &&
+              s.hasDocumentedServiceSubject !== true),
         ).length;
         const pct = (withSubject / samples.length) * 100;
         privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct =

@@ -101,6 +101,29 @@ async function main() {
       throw new Error(`fail expected: ${JSON.stringify(rFail.summary)}`);
     }
 
+    const outExc = join(root, "o-exc");
+    mkdirSync(join(outExc, "imports", "short-lived-agent-tokens"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outExc, "imports", "short-lived-agent-tokens", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct: 100,
+        longLivedStaticApiKeysInPromptsOrConfig: 0,
+        ownedExceptionsWithin30Days: false,
+      }),
+    );
+    const rExc = await run(t2, outExc);
+    if (
+      rExc.summary.statusHint !== "fail" ||
+      rExc.summary.authnR1Satisfied !== false
+    ) {
+      throw new Error(
+        `ownedExceptionsWithin30Days=false should fail: ${JSON.stringify(rExc.summary)}`,
+      );
+    }
+
     const tEmpty = join(root, "t-empty");
     mkdirSync(tEmpty, { recursive: true });
     const outNa = join(root, "ona");

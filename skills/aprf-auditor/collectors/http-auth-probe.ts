@@ -276,7 +276,14 @@ function parseRouterDecorators(
  * Falls back to GET+POST on prefix when decorators are not found.
  * Adds advisory GET when a path has declared non-GET methods only.
  */
-function discoverFastapiRoutes(targetPath: string, maxFiles: number): ProbeRoute[] {
+function discoverFastapiRoutes(
+  targetPath: string,
+  maxFiles: number,
+): {
+  routes: ProbeRoute[];
+  declaredAiRoutesTruncated: boolean;
+  declaredAiRouteTotal: number;
+} {
   const routes: ProbeRoute[] = [];
   const includeRe =
     /include_router\s*\(\s*([A-Za-z_][\w.]*)\.router\s*,\s*prefix\s*=\s*['"]([^'"]+)['"]/g;
@@ -343,12 +350,18 @@ function discoverFastapiRoutes(targetPath: string, maxFiles: number): ProbeRoute
     }
   }
 
-  // Cap declared AI routes for probe runtime
+  // Cap declared AI routes for probe runtime — truncated catalogs cannot PASS AUTHN-M1
   const aiDeclared = routes.filter((r) => r.aiSurface && r.declaredInCode);
   const rest = routes.filter((r) => !(r.aiSurface && r.declaredInCode));
-  const capped =
-    aiDeclared.length > maxDeclared ? aiDeclared.slice(0, maxDeclared) : aiDeclared;
-  return [...capped, ...rest];
+  const declaredAiRoutesTruncated = aiDeclared.length > maxDeclared;
+  const capped = declaredAiRoutesTruncated
+    ? aiDeclared.slice(0, maxDeclared)
+    : aiDeclared;
+  return {
+    routes: [...capped, ...rest],
+    declaredAiRoutesTruncated,
+    declaredAiRouteTotal: aiDeclared.length,
+  };
 }
 
 /** Load OpenAPI/Swagger path+method pairs from repo files. */
@@ -445,9 +458,13 @@ function addAdvisoryGets(routes: ProbeRoute[]): ProbeRoute[] {
 export function discoverRoutes(ctx: CollectorContext): {
   routes: ProbeRoute[];
   sources: string[];
+  declaredAiRoutesTruncated: boolean;
+  declaredAiRouteTotal: number;
 } {
   const sources: string[] = [];
   let routes: ProbeRoute[] = [];
+  let declaredAiRoutesTruncated = false;
+  let declaredAiRouteTotal = 0;
 
   const override = loadRoutesOverride(ctx);
   if (override.length) {
@@ -455,9 +472,11 @@ export function discoverRoutes(ctx: CollectorContext): {
     sources.push("imports/http-auth-probe/routes.json");
   } else {
     const fastapi = discoverFastapiRoutes(ctx.targetPath, ctx.maxFiles ?? 4000);
-    if (fastapi.length) {
-      routes.push(...fastapi);
+    if (fastapi.routes.length) {
+      routes.push(...fastapi.routes);
       sources.push("fastapi-router-methods");
+      declaredAiRoutesTruncated = fastapi.declaredAiRoutesTruncated;
+      declaredAiRouteTotal = fastapi.declaredAiRouteTotal;
     }
     const openapi = discoverOpenApiFiles(ctx.targetPath, ctx.maxFiles ?? 4000);
     if (openapi.length) {
@@ -474,7 +493,12 @@ export function discoverRoutes(ctx: CollectorContext): {
   routes = dedupeRoutes(routes);
   const ai = routes.filter((r) => r.aiSurface);
   const publicSample = routes.filter((r) => !r.aiSurface).slice(0, 5);
-  return { routes: [...ai, ...publicSample], sources };
+  return {
+    routes: [...ai, ...publicSample],
+    sources,
+    declaredAiRoutesTruncated,
+    declaredAiRouteTotal,
+  };
 }
 
 async function probeOne(
@@ -606,6 +630,10 @@ export async function runAuthProbe(
   scope: { customerFacingAiHttpApisPresent: boolean | null } = {
     customerFacingAiHttpApisPresent: null,
   },
+  opts: {
+    declaredAiRoutesTruncated?: boolean;
+    declaredAiRouteTotal?: number;
+  } = {},
 ): Promise<AuthProbeReport> {
   const timeoutMs = Number(process.env.APRF_AUTH_PROBE_TIMEOUT_MS ?? 8000);
   const concurrency = Math.max(
@@ -652,15 +680,22 @@ export async function runAuthProbe(
   const probedAt = ctx.assessedAt.toISOString();
   const fresh = measuredAtFresh(probedAt, ctx.assessedAt, IMPORT_MAX_AGE_DAYS);
   const aiDeclared = routes.filter((r) => r.aiSurface && !r.advisoryGet);
-  const catalogMatch =
-    aiDeclared.length === 0
+  const truncated = opts.declaredAiRoutesTruncated === true;
+  if (truncated) {
+    notes.push(
+      `Declared AI route catalog truncated for probe runtime (${opts.declaredAiRouteTotal ?? "?"} > APRF_AUTH_PROBE_MAX_ROUTES) — raise the cap or supply routes.json; truncated catalogs cannot PASS AUTHN-M1.`,
+    );
+  }
+  const catalogMatch = truncated
+    ? false
+    : aiDeclared.length === 0
       ? null
       : scored.filter((r) => !r.advisoryGet).length >= aiDeclared.length;
   if (catalogMatch === true) {
     notes.push(
       "Probe inventory covers declared AI routes from the discovered production route catalog.",
     );
-  } else if (catalogMatch === false) {
+  } else if (catalogMatch === false && !truncated) {
     notes.push(
       "Probe inventory does not fully cover declared AI routes in the production route catalog.",
     );
@@ -787,6 +822,9 @@ function evaluatePriorReport(
           ? "fail"
           : "partial");
 
+    const catalogMatch =
+      data.summary.probeInventoryMatchesRouteCatalog === true;
+
     if (scopeAbsent) {
       statusHint = "not_applicable";
       authnM1Satisfied = null;
@@ -798,6 +836,12 @@ function evaluatePriorReport(
       authnM1Satisfied = false;
       notes.push(
         "Prior auth-probe-report measuredAt/probedAt older than 90 days — re-probe to unlock AUTHN-M1 PASS.",
+      );
+    } else if (authnM1Satisfied === true && !catalogMatch) {
+      statusHint = "partial";
+      authnM1Satisfied = false;
+      notes.push(
+        "Prior auth-probe-report missing probeInventoryMatchesRouteCatalog=true — re-probe with full catalog coverage to unlock AUTHN-M1 PASS.",
       );
     }
 
@@ -855,7 +899,12 @@ export const httpAuthProbeCollector: Collector = {
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
     const scope = loadScopeImport(ctx);
     const prior = ingestPriorReports(ctx);
-    const { routes, sources } = discoverRoutes(ctx);
+    const {
+      routes,
+      sources,
+      declaredAiRoutesTruncated,
+      declaredAiRouteTotal,
+    } = discoverRoutes(ctx);
     const baseUrl = resolveBaseUrl(ctx);
     const nodes: EvidenceNode[] = [...prior];
 
@@ -998,7 +1047,10 @@ export const httpAuthProbeCollector: Collector = {
       };
     }
 
-    const report = await runAuthProbe(ctx, baseUrl, routes, sources, scope);
+    const report = await runAuthProbe(ctx, baseUrl, routes, sources, scope, {
+      declaredAiRoutesTruncated,
+      declaredAiRouteTotal,
+    });
     ensureDir(importDir(ctx));
     const reportPath = join(importDir(ctx), "auth-probe-report.json");
     writeFileSync(reportPath, JSON.stringify(report, null, 2), "utf8");
