@@ -59,6 +59,8 @@ export interface InjectionPolicyReport {
   importedResults: {
     found: boolean;
     productionAiToolsOrPrivilegedSideEffectsPresent: boolean | null;
+    versionedCorpusPresent: boolean | null;
+    ciGateConfigured: boolean | null;
     denyRatePct: number | null;
     modelTextPrivilegeGrants: number | null;
     caseCount: number | null;
@@ -185,6 +187,8 @@ function detectCiGate(targetPath: string, maxFiles: number) {
 function loadImported(ctx: CollectorContext): InjectionPolicyReport["importedResults"] {
   const sources: string[] = [];
   let productionAiToolsOrPrivilegedSideEffectsPresent: boolean | null = null;
+  let versionedCorpusPresent: boolean | null = null;
+  let ciGateConfigured: boolean | null = null;
   let denyRatePct: number | null = null;
   let modelTextPrivilegeGrants: number | null = null;
   let caseCount: number | null = null;
@@ -204,6 +208,18 @@ function loadImported(ctx: CollectorContext): InjectionPolicyReport["importedRes
         asBool(data.production_ai_tools_or_privileged_side_effects_present) ??
         asBool(data.hasProductionAiToolsOrPrivilegedSideEffects) ??
         productionAiToolsOrPrivilegedSideEffectsPresent;
+      versionedCorpusPresent =
+        asBool(data.versionedCorpusPresent) ??
+        asBool(data.versioned_corpus_present) ??
+        asBool(data.versionedInjectionPrivilegeEscalationCorpusPresent) ??
+        asBool(data.injectionPrivilegeEscalationCorpusPresent) ??
+        versionedCorpusPresent;
+      ciGateConfigured =
+        asBool(data.ciGateConfigured) ??
+        asBool(data.ci_gate_configured) ??
+        asBool(data.injectionPrivilegeEscalationCiGateConfigured) ??
+        asBool(data.injectionPrivilegeEscalationCiGatePresent) ??
+        ciGateConfigured;
 
       if (typeof data.denyRatePct === "number") denyRatePct = data.denyRatePct;
       else if (typeof data.deny_rate === "number") {
@@ -257,6 +273,8 @@ function loadImported(ctx: CollectorContext): InjectionPolicyReport["importedRes
   return {
     found: sources.length > 0,
     productionAiToolsOrPrivilegedSideEffectsPresent,
+    versionedCorpusPresent,
+    ciGateConfigured,
     denyRatePct,
     modelTextPrivilegeGrants,
     caseCount,
@@ -274,8 +292,11 @@ export function buildInjectionPolicyReport(opts: {
 }): InjectionPolicyReport {
   const notes: string[] = [];
   const policyPresent = opts.policy.found;
-  const corpusPresent = opts.corpus.found || opts.imported.found;
-  const ciGatePresent = opts.ciGate.found || opts.imported.found;
+  // Metrics-only imports do not prove a versioned corpus or CI gate wiring.
+  const corpusPresent =
+    opts.corpus.found || opts.imported.versionedCorpusPresent === true;
+  const ciGatePresent =
+    opts.ciGate.found || opts.imported.ciGateConfigured === true;
   const denyRatePct = opts.imported.denyRatePct;
   const grants = opts.imported.modelTextPrivilegeGrants;
 
@@ -291,21 +312,29 @@ export function buildInjectionPolicyReport(opts: {
 
   if (opts.corpus.found) {
     notes.push(`Injection/escalation corpus refs: ${opts.corpus.refs.slice(0, 3).join(", ")}`);
-  } else if (!opts.imported.found) {
+  } else if (opts.imported.versionedCorpusPresent === true) {
     notes.push(
-      "No versioned injection/privilege-escalation corpus found.",
+      "Imported versionedCorpusPresent=true — versioned injection/privilege-escalation corpus attested.",
+    );
+  } else {
+    notes.push(
+      "No versioned injection/privilege-escalation corpus found (repo scan or versionedCorpusPresent=true import).",
     );
   }
 
   if (opts.ciGate.found) {
     notes.push(`CI/eval gate refs: ${opts.ciGate.refs.slice(0, 3).join(", ")}`);
-  } else if (!opts.imported.found) {
-    notes.push("No CI gate wiring for injection/privilege-escalation corpus found.");
+  } else if (opts.imported.ciGateConfigured === true) {
+    notes.push("Imported ciGateConfigured=true — CI gate wiring attested.");
+  } else {
+    notes.push(
+      "No CI gate wiring for injection/privilege-escalation corpus found (repo scan or ciGateConfigured=true import).",
+    );
   }
 
   if (opts.imported.found) {
     notes.push(
-      `Imported results: ${opts.imported.sources.join(", ")} (scopePresent=${opts.imported.productionAiToolsOrPrivilegedSideEffectsPresent}, denyRatePct=${denyRatePct}, modelTextPrivilegeGrants=${grants}, cases=${opts.imported.caseCount}, measuredAt=${opts.imported.measuredAt})`,
+      `Imported results: ${opts.imported.sources.join(", ")} (scopePresent=${opts.imported.productionAiToolsOrPrivilegedSideEffectsPresent}, versionedCorpus=${opts.imported.versionedCorpusPresent}, ciGate=${opts.imported.ciGateConfigured}, denyRatePct=${denyRatePct}, modelTextPrivilegeGrants=${grants}, cases=${opts.imported.caseCount}, measuredAt=${opts.imported.measuredAt})`,
     );
   }
 
@@ -355,6 +384,16 @@ export function buildInjectionPolicyReport(opts: {
   } else if (policyPresent || corpusPresent || ciGatePresent || opts.imported.found) {
     statusHint = "partial";
     secM1Satisfied = false;
+    if (!corpusPresent) {
+      notes.push(
+        "Import deny-rate metrics alone do not prove a versioned corpus — discover one in-repo or set versionedCorpusPresent=true.",
+      );
+    }
+    if (!ciGatePresent) {
+      notes.push(
+        "Import deny-rate metrics alone do not prove CI gate wiring — discover it in-repo or set ciGateConfigured=true.",
+      );
+    }
     if (corpusPresent && denyRatePct === null) {
       notes.push(
         `Corpus/gate evidence present but no measured denyRatePct (≥${MIN_DENY_RATE}) — import harness JSON to PASS.`,
@@ -444,9 +483,7 @@ export const injectionPolicyGateCollector: Collector = {
           "sec-m1",
           DETECTOR_ID,
           ...(report.policyEngine.found ? ["policy-engine"] : []),
-          ...(report.corpus.found || report.importedResults.found
-            ? ["injection-corpus"]
-            : []),
+          ...(report.summary.corpusPresent ? ["injection-corpus"] : []),
           ...(report.summary.secM1Satisfied ? ["sec-m1-satisfied"] : []),
         ],
         relatedCheckIds: [...RELATED],

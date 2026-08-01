@@ -74,12 +74,114 @@ async function main() {
         measuredAt: new Date().toISOString(),
         abuseJailbreakInjectionSuiteConfigured: true,
         productionReleasesWithSecuritySuiteGatePassPct: 100,
+        coverageWindowDays: 30,
         failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d: true,
       }),
     );
     const r2 = await run(t2, out2);
     if (r2.summary.statusHint !== "pass" || r2.summary.secM3Satisfied !== true) {
       throw new Error(`pass expected: ${JSON.stringify(r2.summary)}`);
+    }
+
+    // Aggregate 100% without a 30-day window stays partial
+    const outNoWindow = join(root, "o-no-window");
+    mkdirSync(join(outNoWindow, "imports", "abuse-injection-release-gate"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(
+        outNoWindow,
+        "imports",
+        "abuse-injection-release-gate",
+        "coverage.json",
+      ),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        abuseJailbreakInjectionSuiteConfigured: true,
+        productionReleasesWithSecuritySuiteGatePassPct: 100,
+        failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d: true,
+      }),
+    );
+    const rNoWindow = await run(t2, outNoWindow);
+    if (rNoWindow.summary.statusHint !== "partial") {
+      throw new Error(
+        `partial expected without window: ${JSON.stringify(rNoWindow.summary)}`,
+      );
+    }
+
+    // releases[] in last 30 days unlocks PASS (and sets window)
+    const outReleases = join(root, "o-releases");
+    mkdirSync(join(outReleases, "imports", "abuse-injection-release-gate"), {
+      recursive: true,
+    });
+    const now = Date.now();
+    writeFileSync(
+      join(
+        outReleases,
+        "imports",
+        "abuse-injection-release-gate",
+        "coverage.json",
+      ),
+      JSON.stringify({
+        measuredAt: new Date(now).toISOString(),
+        abuseJailbreakInjectionSuiteConfigured: true,
+        failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d: true,
+        releases: [
+          {
+            releasedAt: new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            gate: "pass",
+          },
+          {
+            releasedAt: new Date(now - 10 * 24 * 60 * 60 * 1000).toISOString(),
+            gatePass: false,
+            waiver: { owner: "sec-oncall", expiryDays: 14 },
+          },
+        ],
+      }),
+    );
+    const rReleases = await run(t2, outReleases);
+    if (
+      rReleases.summary.statusHint !== "pass" ||
+      rReleases.summary.secM3Satisfied !== true
+    ) {
+      throw new Error(
+        `pass expected from releases[]: ${JSON.stringify(rReleases.summary)}`,
+      );
+    }
+
+    // Invalid waiver expiry >30d → fail
+    const outBadWaiver = join(root, "o-bad-waiver");
+    mkdirSync(join(outBadWaiver, "imports", "abuse-injection-release-gate"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(
+        outBadWaiver,
+        "imports",
+        "abuse-injection-release-gate",
+        "coverage.json",
+      ),
+      JSON.stringify({
+        measuredAt: new Date(now).toISOString(),
+        abuseJailbreakInjectionSuiteConfigured: true,
+        failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d: true,
+        releases: [
+          {
+            releasedAt: new Date(now - 3 * 24 * 60 * 60 * 1000).toISOString(),
+            gate: "fail",
+            waiver: { owner: "sec-oncall", expiryDays: 90 },
+          },
+        ],
+      }),
+    );
+    const rBadWaiver = await run(t2, outBadWaiver);
+    if (
+      rBadWaiver.summary.statusHint !== "fail" ||
+      rBadWaiver.summary.secM3Satisfied !== false
+    ) {
+      throw new Error(
+        `fail expected for bad waiver: ${JSON.stringify(rBadWaiver.summary)}`,
+      );
     }
 
     const t3 = join(root, "t3");

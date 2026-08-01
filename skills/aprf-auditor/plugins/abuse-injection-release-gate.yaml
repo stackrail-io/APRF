@@ -20,6 +20,7 @@ whenUnavailable: >
   Gate signals alone are PARTIAL. SEC-M3 PASS needs
   abuseJailbreakInjectionSuiteConfigured,
   productionReleasesWithSecuritySuiteGatePassPct=100,
+  coverageWindowDays=30 (or releases[] in the last 30 days),
   failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d, measuredAt ≤90 days.
   Set customerFacingAiReleasesPresent=false for NOT_APPLICABLE.
 live:

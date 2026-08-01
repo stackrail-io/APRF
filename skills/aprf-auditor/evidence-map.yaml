@@ -317,7 +317,7 @@ checks:
   SEC-M1:
     requiredEvidence:
       - "Server-side policy mediating privileged tool/actions (not prompt-only)"
-      - "denyRatePct≥95 + modelTextPrivilegeGrants=0 + measuredAt≤90d under imports/injection-policy-gate/"
+      - "denyRatePct≥95 + modelTextPrivilegeGrants=0 + versionedCorpusPresent + ciGateConfigured + measuredAt≤90d under imports/injection-policy-gate/"
     searchExtra:
       - "**/*injection*"
       - "**/*privilege*escalat*"
@@ -330,7 +330,7 @@ checks:
     evaluation: |
       PASS if injection-policy-gate statusHint=pass (server-side policy + corpus/CI + denyRatePct≥95 + 0 model-text privilege grants + measuredAt ≤90d).
       NOT_APPLICABLE if productionAiToolsOrPrivilegedSideEffectsPresent=false.
-      PARTIAL if policy/corpus signals without measured import.
+      PARTIAL if policy/corpus signals without measured import, or metrics-only import without versionedCorpusPresent/ciGateConfigured.
       FAIL if denyRatePct<95 or any model-text privilege grant.
       Distinct from SAF-M2 content-safety gates and SAF-R2 jailbreak-to-harm red teams.
   SEC-M2:
@@ -354,7 +354,7 @@ checks:
   SEC-M3:
     requiredEvidence:
       - "Abuse/jailbreak/injection suite covering those case classes"
-      - "abuseJailbreakInjectionSuiteConfigured + productionReleasesWithSecuritySuiteGatePassPct=100 + failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d + measuredAt≤90d under imports/abuse-injection-release-gate/"
+      - "abuseJailbreakInjectionSuiteConfigured + productionReleasesWithSecuritySuiteGatePassPct=100 + coverageWindowDays=30 + failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d + measuredAt≤90d under imports/abuse-injection-release-gate/"
     searchExtra:
       - "**/*injection*"
       - "**/*jailbreak*"
@@ -365,9 +365,9 @@ checks:
     plugins: [abuse-injection-release-gate, promptfoo, github-actions, repo-filesystem]
     naWhen: "No customer-facing / production AI releases"
     evaluation: |
-      PASS if abuse-injection-release-gate statusHint=pass (suite configured + 100% releases last 30d gate=pass/waiver + blocking ≤30d waivers + measuredAt ≤90d).
-      PARTIAL if suite/gate signals without complete import.
-      FAIL if coverage <100% or non-blocking without owned ≤30d waivers.
+      PASS if abuse-injection-release-gate statusHint=pass (suite configured + 100% releases last 30d gate=pass/waiver + coverageWindowDays=30 + blocking ≤30d waivers + measuredAt ≤90d).
+      PARTIAL if suite/gate signals without complete import (including missing 30-day window).
+      FAIL if coverage <100%, wrong window, or non-blocking without owned ≤30d waivers.
       Distinct from SEC-M1 deny rates, SAF-M2 content-safety gates, SAF-R2 harm red teams, and SEC-R1 multi-turn/RAG depth.
   SEC-M4:
     requiredEvidence:
