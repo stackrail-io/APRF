@@ -567,6 +567,143 @@ checks:
       PARTIAL if runtime/WI signals without complete import.
       FAIL if WI coverage <100% or static shared keys >0.
       Distinct from AUTHN-M2 MCP/S2S identity, AUTHN-R1 prompt-token TTL, and REL-R6 warm standby.
+  AUTHZ-M1:
+    requiredEvidence:
+      - "Inventory of privileged AI feature, tool, and retrieval entry points"
+      - "Server-side authz middleware/policy on those entry points"
+      - "Authz suite results showing authenticated-but-unauthorized callers denied (measuredAt ≤90d under imports/authz-entry-tests/)"
+    plugins: [authz-entry-tests]
+    searchExtra:
+      - "**/*authz*"
+      - "**/*permission*"
+      - "**/tests/**/*auth*"
+      - "**/access_control/**"
+    naWhen: "No privileged AI feature, tool, or retrieval entry points"
+    evaluation: |
+      Prefer collectors/authz-entry-tests (discovers AI entry points + guards + denial-test coverage)
+      or imports/authz-entry-tests/*.json coverage with measuredAt ≤90d.
+      PASS if authz-entry-report statusHint=pass / authzM1Satisfied === true (100% server-side
+      guards + denial coverage on privileged AI entry points + measuredAt ≤90d).
+      NOT_APPLICABLE if privilegedAiFeatureToolOrRetrievalEntryPointsPresent=false.
+      Empty inventory without N/A attest is NOT_DEMONSTRATED (not a vacuous PASS).
+      FAIL if any privileged entry point lacks guard and/or denial coverage.
+      PARTIAL if guards exist in code but no authz suite, or measuredAt stale/missing on import-backed coverage.
+      Do not PASS from code review alone. AUTHN-M1, AUTHZ-M2, AUTHN-M4, and TOL-M1 do not substitute.
+  AUTHZ-M2:
+    requiredEvidence:
+      - "Inventory or scope note of multi-tenant AI data and memory paths (chats, knowledge, files, vectors, memory, or equivalent)"
+      - "Cross-tenant attack test suite results (≥10 cases) covering those paths"
+      - "Scoring report showing 0 successful unauthorized cross-tenant reads/writes (measuredAt ≤90d under imports/cross-tenant-tests/)"
+    plugins: [cross-tenant-tests]
+    searchExtra:
+      - "**/*cross*tenant*"
+      - "**/*tenant*isolat*"
+      - "**/*access_grant*"
+      - "**/tests/**/*tenant*"
+      - "**/memory/**"
+    naWhen: "No multi-tenant AI data or memory paths"
+    evaluation: |
+      Prefer collectors/cross-tenant-tests (isolation code + AI data/memory hints + attack cases)
+      or imports/cross-tenant-tests/*.json suite with measuredAt ≤90d.
+      PASS if cross-tenant-report statusHint=pass / authzM2Satisfied === true (≥10 cases, 0 unauthorized
+      successes, measuredAt ≤90d).
+      NOT_APPLICABLE if multiTenantAiDataOrMemoryPathsPresent=false.
+      Empty inventory without N/A attest is NOT_DEMONSTRATED (isolation code alone is PARTIAL).
+      FAIL if any unauthorized cross-tenant success.
+      PARTIAL if isolation/suite signals without ≥10 cases or measuredAt stale/missing on imports.
+      Do not PASS from code review alone. AUTHZ-M1, AUTHN-M1, and memory-only MEM-M1 do not fully substitute
+      when non-memory AI data paths are in scope.
+  AUTHZ-M3:
+    requiredEvidence:
+      - "Inventory of production agent/automation identities"
+      - "Role matrix / IAM-policy export covering those identities with non-admin defaults"
+      - "Access-review record ≤90 days with unexplainedPrivilegeEscalations=0 (measuredAt ≤90d under imports/agent-role-matrix/)"
+    plugins: [agent-role-matrix]
+    searchExtra:
+      - "**/*role*matrix*"
+      - "**/*agent*role*"
+      - "**/*access*review*"
+      - "**/*least*privilege*"
+      - "**/iam/**"
+    naWhen: "No production agent or automation identities"
+    evaluation: |
+      Prefer collectors/agent-role-matrix or imports/agent-role-matrix/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / authzM3Satisfied === true
+      (identitiesInRoleMatrixWithNonAdminDefaultPct=100 + accessReviewWithin90Days=true +
+      unexplainedPrivilegeEscalations=0 + measuredAt ≤90d).
+      NOT_APPLICABLE if productionAgentOrAutomationIdentitiesPresent=false.
+      PARTIAL if role-matrix/access-review signals without complete import.
+      FAIL if matrix coverage <100%, review stale, or unexplained escalations >0.
+      AUTHZ-M1, AUTHZ-R2, AGN-R3, and AUTHN-M2 do not substitute.
+  AUTHZ-M4:
+    requiredEvidence:
+      - "Inventory of sensitive document classes used by AI retrieval/grounding"
+      - "ABAC/policy config binding subject/resource attributes to those classes"
+      - "Test results showing unauthorized class access denied; inventory matches production (measuredAt ≤90d under imports/sensitive-doc-abac/)"
+    plugins: [sensitive-doc-abac]
+    searchExtra:
+      - "**/*abac*"
+      - "**/*cedar*"
+      - "**/*.rego"
+      - "**/*document*class*"
+      - "**/*classification*"
+      - "**/*sensitive*corpus*"
+    naWhen: "No sensitive document classes in scope for AI retrieval or grounding"
+    evaluation: |
+      Prefer collectors/sensitive-doc-abac or imports/sensitive-doc-abac/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / authzM4Satisfied === true
+      (sensitiveDocumentClassesEnumerated=true + inventoryMatchesProductionClasses=true +
+      unauthorizedClassAccessDeniedInTests=true + measuredAt ≤90d).
+      NOT_APPLICABLE if sensitiveDocumentClassesPresent=false.
+      PARTIAL if class/ABAC/deny-test signals without complete import.
+      FAIL if enumeration, inventory match, or deny tests are attested false.
+      AUTHZ-M1, AUTHZ-M2, AUTHZ-R1, and CTX-M2 do not substitute.
+  AUTHZ-R1:
+    requiredEvidence:
+      - "Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent)"
+      - "CI or admission policy-check wiring covering those rules"
+      - "Latest failing-to-passing policy change ≤90 days showing deny for unauthorized tool/model (measuredAt ≤90d under imports/policy-as-code/)"
+    plugins: [policy-as-code]
+    searchExtra:
+      - "**/*.rego"
+      - "**/*.cedar"
+      - "**/*opa*"
+      - "**/*conftest*"
+      - "**/*policy*check*"
+      - "**/*tool*access*"
+      - "**/*model*access*"
+    naWhen: "No production tools or models subject to access control"
+    evaluation: |
+      Prefer collectors/policy-as-code or imports/policy-as-code/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / authzR1Satisfied === true
+      (toolAndModelAccessRulesAsCode=true + ciOrAdmissionEnforcementPresent=true +
+      lastFailingToPassingPolicyChangeShowsDenyWithin90Days=true + measuredAt ≤90d).
+      NOT_APPLICABLE if toolOrModelAccessControlPresent=false.
+      PARTIAL if OPA/Cedar/CI signals without complete import.
+      FAIL if rules-as-code, CI/admission, or deny evidence are attested false.
+      AUTHZ-M1, AUTHZ-M4, TOL-M1, and AUTHZ-R2 do not substitute.
+  AUTHZ-R2:
+    requiredEvidence:
+      - "Inventory of high-privilege agent identities"
+      - "Last access-review report with keep/revoke/modify decisions (≤90 days)"
+      - "Evidence of ≥1 revoke/scope-reduction in last two cycles, or signed none-warranted attestation (measuredAt ≤90d under imports/high-priv-agent-review/)"
+    plugins: [high-priv-agent-review]
+    searchExtra:
+      - "**/*high*priv*"
+      - "**/*access*review*"
+      - "**/*privilege*review*"
+      - "**/*revoke*"
+      - "**/*agent*inventory*"
+    naWhen: "No high-privilege agent identities"
+    evaluation: |
+      Prefer collectors/high-priv-agent-review or imports/high-priv-agent-review/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / authzR2Satisfied === true
+      (everyHighPrivilegeAgentReviewedWithin90Days=true +
+      revokeOrScopeReductionInLastTwoCyclesOrAttestedNoneWarranted=true + measuredAt ≤90d).
+      NOT_APPLICABLE if highPrivilegeAgentIdentitiesPresent=false.
+      PARTIAL if inventory/review signals without complete import.
+      FAIL if review coverage or revoke/none-warranted are attested false.
+      AUTHZ-M3, AUTHZ-R1, and AGN-R3 do not substitute.
   SEC2-M1:
     requiredEvidence:
       - "Secrets manager / sealed-secrets / cloud secret refs in runtime config"

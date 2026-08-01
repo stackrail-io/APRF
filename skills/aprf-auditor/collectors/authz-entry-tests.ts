@@ -23,9 +23,17 @@ import {
   walkFiles,
 } from "./lib/fs.ts";
 import { discoverRoutes, type ProbeRoute } from "./http-auth-probe.ts";
+import {
+  asBool,
+  measuredAtFresh,
+  mergeOldestMeasuredAt,
+  mergeOrBool,
+  parseMeasuredAt,
+} from "./lib/import-attest.ts";
 
 const PLUGIN_ID = "authz-entry-tests";
 const RELATED = ["AUTHZ-M1"] as const;
+const IMPORT_MAX_AGE_DAYS = 90;
 
 const GUARD_RE =
   /\b(get_verified_user|get_admin_user|get_current_user|get_current_user_by_api_key|has_permission|has_access|has_connection_access|has_folder_access|has_access_to_file|require_permission|Depends\s*\(\s*get_)/;
@@ -53,9 +61,11 @@ export interface AuthzEntryReport {
   pluginId: typeof PLUGIN_ID;
   relatedCheckIds: string[];
   assessedAt: string;
+  measuredAt: string | null;
   catalogSource: string[];
   codeGuardsFound: boolean;
   guardSampleRefs: string[];
+  privilegedAiFeatureToolOrRetrievalEntryPointsPresent: boolean | null;
   entryPoints: AuthzEntryPoint[];
   summary: {
     total: number;
@@ -63,9 +73,15 @@ export interface AuthzEntryReport {
     withDenialTest: number;
     pass: number;
     fail: number;
-    /** true iff every AI entry point has a denial test (and suite is non-empty). */
+    /** true iff every AI entry point has guard+denial coverage, suite non-empty, measuredAt fresh. */
     authzM1Satisfied: boolean | null;
     coveragePct: number;
+    statusHint:
+      | "pass"
+      | "partial"
+      | "fail"
+      | "not_demonstrated"
+      | "not_applicable";
   };
   notes: string[];
 }
@@ -84,9 +100,14 @@ function pathTokens(path: string): string[] {
 function loadImportedCoverage(ctx: CollectorContext): {
   coveredPaths: string[];
   sources: string[];
+  measuredAt: string | null;
+  privilegedAiFeatureToolOrRetrievalEntryPointsPresent: boolean | null;
 } {
   const coveredPaths: string[] = [];
   const sources: string[] = [];
+  let measuredAt: string | null = null;
+  let privilegedAiFeatureToolOrRetrievalEntryPointsPresent: boolean | null =
+    null;
   for (const file of listImportFiles(ctx.outputDir, PLUGIN_ID)) {
     if (!/\.json$/i.test(file)) continue;
     if (/authz-entry-report\.json$/i.test(file)) continue;
@@ -94,6 +115,15 @@ function loadImportedCoverage(ctx: CollectorContext): {
     if (!text) continue;
     try {
       const data = JSON.parse(text) as Record<string, unknown>;
+      measuredAt = mergeOldestMeasuredAt(measuredAt, parseMeasuredAt(data));
+      privilegedAiFeatureToolOrRetrievalEntryPointsPresent = mergeOrBool(
+        privilegedAiFeatureToolOrRetrievalEntryPointsPresent,
+        asBool(data.privilegedAiFeatureToolOrRetrievalEntryPointsPresent) ??
+          asBool(
+            data.privileged_ai_feature_tool_or_retrieval_entry_points_present,
+          ) ??
+          asBool(data.privilegedAiEntryPointsPresent),
+      );
       const paths = [
         ...((data.coveredPaths as string[]) || []),
         ...((data.covered_paths as string[]) || []),
@@ -110,12 +140,26 @@ function loadImportedCoverage(ctx: CollectorContext): {
       for (const p of paths) {
         if (typeof p === "string" && p.trim()) coveredPaths.push(p.trim());
       }
-      if (paths.length) sources.push(rel(ctx.outputDir, file));
+      const hasPresentAttest =
+        asBool(data.privilegedAiFeatureToolOrRetrievalEntryPointsPresent) !==
+          null ||
+        asBool(
+          data.privileged_ai_feature_tool_or_retrieval_entry_points_present,
+        ) !== null ||
+        asBool(data.privilegedAiEntryPointsPresent) !== null;
+      if (paths.length || hasPresentAttest || parseMeasuredAt(data)) {
+        sources.push(rel(ctx.outputDir, file));
+      }
     } catch {
       /* skip */
     }
   }
-  return { coveredPaths, sources };
+  return {
+    coveredPaths,
+    sources,
+    measuredAt,
+    privilegedAiFeatureToolOrRetrievalEntryPointsPresent,
+  };
 }
 
 function collectTestFiles(targetPath: string, maxFiles: number): string[] {
@@ -237,16 +281,19 @@ export function buildAuthzReport(
     testFiles: string[];
     importedCovered: string[];
     importedSources: string[];
+    importedMeasuredAt: string | null;
+    privilegedAiFeatureToolOrRetrievalEntryPointsPresent: boolean | null;
   },
 ): AuthzEntryReport {
   const fileGuardCache = new Map<string, boolean>();
   const contentCache = new Map<string, string>();
   const notes: string[] = [];
 
-  // Prefer declared AI routes when present (ignore seed hints / OpenAPI noise).
-  let ai = opts.routes.filter((r) => r.aiSurface && !r.advisoryGet);
-  const declared = ai.filter((r) => r.declaredInCode);
-  if (declared.length > 0) ai = declared;
+  // Prefer declared AI routes only — seed/OpenAPI hints must not invent entry
+  // points (vacuous FAIL) or block explicit N/A attests.
+  let ai = opts.routes.filter(
+    (r) => r.aiSurface && !r.advisoryGet && r.declaredInCode,
+  );
 
   // Dedupe by METHOD+path for scoring
   const seen = new Set<string>();
@@ -267,14 +314,15 @@ export function buildAuthzReport(
     const hasDenialTest =
       testRefs.length > 0 || importedCoversPath(r.path, opts.importedCovered);
 
-    // AUTHZ-M1: server-side guard + unauthorized-caller denial coverage
-    const ok = (guard.has || opts.codeGuards.found) && hasDenialTest;
+    // AUTHZ-M1: per-route server-side guard + unauthorized-caller denial coverage.
+    // Global codeGuards.found is supporting evidence only — do not launder onto every route.
+    const ok = guard.has && hasDenialTest;
     entryPoints.push({
       method: r.method,
       path: r.path,
       source: r.source,
       declaredInCode: Boolean(r.declaredInCode),
-      hasServerGuard: guard.has || opts.codeGuards.found,
+      hasServerGuard: guard.has,
       guardRefs: guard.refs,
       hasDenialTest,
       testRefs: hasDenialTest
@@ -319,21 +367,85 @@ export function buildAuthzReport(
     notes.push(`Imported coverage from: ${opts.importedSources.join(", ")}`);
   }
 
-  const authzM1Satisfied =
-    entryPoints.length === 0
-      ? null
-      : fail === 0 &&
-        withDenialTest === entryPoints.length &&
-        withServerGuard === entryPoints.length;
+  // Live code/test scan is measured at assessment time. Import-backed denial
+  // coverage requires an import measuredAt ≤90d (do not launder undated imports).
+  const importBackedDenial = entryPoints.some(
+    (e) =>
+      e.hasDenialTest &&
+      e.testRefs.length > 0 &&
+      e.testRefs.every((t) => /(^|[/\\])imports[/\\]/.test(t)),
+  );
+  let measuredAt: string | null = ctx.assessedAt.toISOString();
+  if (importBackedDenial) {
+    measuredAt = opts.importedMeasuredAt;
+    if (!opts.importedMeasuredAt) {
+      notes.push(
+        "Imported denial coverage lacks measuredAt — required to unlock AUTHZ-M1 PASS.",
+      );
+    }
+  }
+
+  const fresh = measuredAtFresh(
+    measuredAt,
+    ctx.assessedAt,
+    IMPORT_MAX_AGE_DAYS,
+  );
+
+  let presentAttest = opts.privilegedAiFeatureToolOrRetrievalEntryPointsPresent;
+  if (entryPoints.length > 0 && presentAttest === false) {
+    notes.push(
+      "Imported privilegedAiFeatureToolOrRetrievalEntryPointsPresent=false ignored — declared AI entry points prove the surface exists.",
+    );
+    presentAttest = true;
+  }
+
+  let statusHint: AuthzEntryReport["summary"]["statusHint"] =
+    "not_demonstrated";
+  let authzM1Satisfied: boolean | null = null;
+
+  if (entryPoints.length === 0 && presentAttest === false) {
+    statusHint = "not_applicable";
+    authzM1Satisfied = null;
+    notes.push(
+      "Imported privilegedAiFeatureToolOrRetrievalEntryPointsPresent=false — AUTHZ-M1 NOT_APPLICABLE.",
+    );
+  } else if (entryPoints.length === 0) {
+    statusHint = "not_demonstrated";
+    authzM1Satisfied = null;
+    notes.push(
+      "No privileged AI feature/tool/retrieval entry points discovered — AUTHZ-M1 remains not demonstrated until entry points are found or an explicit N/A attest (privilegedAiFeatureToolOrRetrievalEntryPointsPresent=false) is imported.",
+    );
+  } else if (fail > 0) {
+    statusHint = "fail";
+    authzM1Satisfied = false;
+  } else if (
+    fail === 0 &&
+    withDenialTest === entryPoints.length &&
+    withServerGuard === entryPoints.length &&
+    fresh
+  ) {
+    statusHint = "pass";
+    authzM1Satisfied = true;
+  } else {
+    statusHint = "partial";
+    authzM1Satisfied = false;
+    if (!fresh) {
+      notes.push(
+        "Authz evidence measuredAt older than 90 days (or missing) — required to unlock AUTHZ-M1 PASS.",
+      );
+    }
+  }
 
   return {
     schemaVersion: "0.2.0",
     pluginId: PLUGIN_ID,
     relatedCheckIds: [...RELATED],
     assessedAt: ctx.assessedAt.toISOString(),
+    measuredAt,
     catalogSource: opts.catalogSource,
     codeGuardsFound: opts.codeGuards.found,
     guardSampleRefs: opts.codeGuards.refs,
+    privilegedAiFeatureToolOrRetrievalEntryPointsPresent: presentAttest,
     entryPoints,
     summary: {
       total: entryPoints.length,
@@ -343,6 +455,7 @@ export function buildAuthzReport(
       fail,
       authzM1Satisfied,
       coveragePct,
+      statusHint,
     },
     notes,
   };
@@ -363,6 +476,9 @@ export const authzEntryTestsCollector: Collector = {
       testFiles,
       importedCovered: imported.coveredPaths,
       importedSources: imported.sources,
+      importedMeasuredAt: imported.measuredAt,
+      privilegedAiFeatureToolOrRetrievalEntryPointsPresent:
+        imported.privilegedAiFeatureToolOrRetrievalEntryPointsPresent,
     });
 
     ensureDir(importDir(ctx));
@@ -394,6 +510,7 @@ export const authzEntryTestsCollector: Collector = {
         signals: [
           "authz-entry-tests",
           "authz-m1",
+          `authz-m1-${report.summary.statusHint}`,
           ...(report.summary.authzM1Satisfied
             ? ["authz-m1-satisfied"]
             : ["authz-m1-fail-or-incomplete"]),
@@ -423,7 +540,7 @@ export const authzEntryTestsCollector: Collector = {
       });
     }
 
-    const detail = `AUTHZ-M1 entry points total=${report.summary.total} denialTests=${report.summary.withDenialTest} coverage=${report.summary.coveragePct}% satisfied=${report.summary.authzM1Satisfied}; report=imports/${PLUGIN_ID}/authz-entry-report.json`;
+    const detail = `AUTHZ-M1 status=${report.summary.statusHint} entryPoints=${report.summary.total} denialTests=${report.summary.withDenialTest} coverage=${report.summary.coveragePct}% satisfied=${report.summary.authzM1Satisfied}; report=imports/${PLUGIN_ID}/authz-entry-report.json`;
 
     return {
       pluginId: PLUGIN_ID,

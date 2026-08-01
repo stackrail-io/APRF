@@ -23,8 +23,10 @@ emits:
 mapsToChecks: [AUTHZ-M2]
 whenUnavailable: >
   Tenant filters / access_grants in code are supporting evidence only. AUTHZ-M2 PASS requires
-  a cross-tenant attack test suite (≥10 cases, 0 successful unauthorized reads/writes) — drop
-  results under imports/cross-tenant-tests/ if the suite lives in CI elsewhere.
+  a cross-tenant attack test suite (≥10 cases, 0 successful unauthorized reads/writes,
+  measuredAt ≤90 days). Empty inventories without multiTenantAiDataOrMemoryPathsPresent=false
+  are not N/A. Do not score AUTHZ-M1 entry-point suites as a substitute. Drop results under
+  imports/cross-tenant-tests/ if the suite lives in CI elsewhere.
 live:
   required: false
   note: Offline collector; optional imports for CI suite results.

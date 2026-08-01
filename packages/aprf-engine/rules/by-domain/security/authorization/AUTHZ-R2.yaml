@@ -1,40 +1,70 @@
 id: "AUTHZ-R2"
 category: "authorization"
 title: "Production systems should have continuous access reviews for high-privilege agents"
-description: "Continuous access reviews for high-privilege agents"
-whyItMatters: "Continuous access reviews for high-privilege agents Failing this leaves a production
-  gap against: Every high-privilege agent identity was reviewed ≤90 days ago; ≥1 revoke or
-  scope-reduction appears in the last two cycles (or attestation that none were warranted with
-  reviewer sign-off)"
+description: >
+  Every high-privilege agent identity shall be reviewed ≤90 days ago, with
+  ≥1 revoke or scope-reduction in the last two cycles—or a signed
+  attestation that none were warranted.
+whyItMatters: >
+  High-privilege agents accumulate standing power; without recurring
+  reviews that actually revoke or shrink scope, least-privilege erodes
+  into permanent admin bots. A fresh inventory plus review decisions
+  (keep/revoke/modify) with revoke evidence—or signed “none warranted”—
+  makes continuous access review measurable. Distinct from AUTHZ-M3
+  (complete role matrix + unexplained-escalation count for all
+  agent/automation identities), AUTHZ-R1 (tool/model policy-as-code),
+  and AGN-R3 (RACI ownership).
 severity: "critical"
 weight: 4
 gate: "recommended"
-passCondition: "Every high-privilege agent identity was reviewed ≤90 days ago; ≥1 revoke or
-  scope-reduction appears in the last two cycles (or attestation that none were warranted with
-  reviewer sign-off)"
+passCondition: >
+  Every high-privilege agent identity was reviewed ≤90 days ago; ≥1 revoke
+  or scope-reduction appears in the last two cycles (or attestation that
+  none were warranted with reviewer sign-off) (measuredAt ≤90 days). If no
+  high-privilege agent identities exist, score NOT_APPLICABLE.
 evidenceRequired:
-  - "High-privilege agent inventory + last access-review spreadsheet/report with decisions
-    (keep/revoke/modify)"
+  - "Inventory of high-privilege agent identities"
+  - "Last access-review report with keep/revoke/modify decisions (≤90 days)"
+  - "Evidence of ≥1 revoke/scope-reduction in last two cycles, or signed none-warranted attestation"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "high-priv-agent-review"
+      params:
+        hint: >
+          Discover high-privilege agent inventory and access-review
+          signals; ingest coverage under imports/high-priv-agent-review/
+          requiring everyHighPrivilegeAgentReviewedWithin90Days=true and
+          revokeOrScopeReductionInLastTwoCyclesOrAttestedNoneWarranted=true,
+          measuredAt ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "High-privilege agent inventory + last access-review spreadsheet/report with decisions
-          (keep/revoke/modify)"
-manualVerification: "For this Check (Continuous access reviews for high-privilege agents): inspect
-  current evidence for [High-privilege agent inventory + last access-review spreadsheet/report with
-  decisions (keep/revoke/modify)] and confirm the pass condition holds — Every high-privilege agent
-  identity was reviewed ≤90 days ago; ≥1 revoke or scope-reduction appears in the last two cycles
-  (or attestation that none were warranted with reviewer sign-off)"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest every high-privilege
+          agent reviewed ≤90 days with ≥1 revoke/scope-reduction in the
+          last two cycles (or signed none-warranted) (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm high-privilege agent identities exist. If none, score
+  NOT_APPLICABLE. 2) Obtain the high-privilege agent inventory. 3) Review
+  the latest access-review report (≤90 days): every in-scope identity has
+  a keep/revoke/modify decision. 4) Confirm ≥1 revoke or scope-reduction
+  in the last two cycles, or a reviewer-signed attestation that none were
+  warranted. 5) PASS only if inventory + full review + revoke/attestation
+  hold with measuredAt ≤90 days. AUTHZ-M3 role-matrix coverage alone does
+  not prove recurring high-privilege reviews with revoke evidence.
+  AUTHZ-R1 policy-as-code alone does not prove agent access reviews.
+  AGN-R3 RACI ownership alone does not prove privilege revoke cycles.
+falsePositiveGuidance: >
+  Do not pass a one-time role matrix without a ≤90-day review cycle. Do
+  not pass “all keep” reviews without revoke evidence or a signed
+  none-warranted attestation. Do not pass empty inventories without an
+  explicit N/A attest. Do not score AUTHZ-M3, AUTHZ-R1, or AGN-R3 as
+  substitutes. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Continuous access reviews for high-privilege agents"
-  - "Retain evidence artifacts required by this Check, starting with: High-privilege agent inventory
-    + last access-review spreadsheet/report with decisions (keep/revoke/modify)"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Maintain an inventory of high-privilege agent identities"
+  - "Run ≤90-day access reviews with keep/revoke/modify decisions"
+  - "Record ≥1 revoke/scope-reduction per two cycles (or signed none-warranted) under imports/high-priv-agent-review/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "OWASP Access Control Cheat Sheet"
     url: "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
@@ -46,15 +76,16 @@ relatedRules:
   - "AUTHZ-M3"
   - "AUTHZ-M4"
   - "AUTHZ-R1"
+  - "AGN-R3"
 tags:
   - "authorization"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "access-review"
+  - "high-privilege"
+  - "agent-identity"
 applicability:
-  technologies:
-    - "openapi"
-    - "mcp"
-    - "a2a"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

@@ -1,6 +1,6 @@
 /**
- * Smoke: cross-tenant-tests requires ≥10 attack cases with 0 leaks;
- * isolation code alone does not satisfy AUTHZ-M2.
+ * Smoke: cross-tenant-tests requires ≥10 attack cases with 0 leaks + measuredAt;
+ * isolation code alone does not satisfy AUTHZ-M2; N/A attest works.
  */
 import {
   mkdtempSync,
@@ -57,26 +57,64 @@ def get_chat(chat_id, user_id):
       `without cases expected satisfied=null, got ${report1.summary.authzM2Satisfied}`,
     );
   }
+  if (report1.summary.statusHint !== "partial") {
+    throw new Error(
+      `isolation without suite expected partial, got ${report1.summary.statusHint}`,
+    );
+  }
   if (!report1.isolationCodeFound) {
     throw new Error("expected isolation code detected");
   }
 
-  // Import a passing suite (≥10 cases)
-  const imp = join(outDir, "imports", "cross-tenant-tests");
+  // Import without measuredAt → partial, not PASS
+  const outStale = mkdtempSync(join(tmpdir(), "aprf-xtenant-stale-"));
+  mkdirSync(join(outStale, "imports", "cross-tenant-tests"), {
+    recursive: true,
+  });
   writeFileSync(
-    join(imp, "suite.json"),
+    join(outStale, "imports", "cross-tenant-tests", "suite.json"),
     JSON.stringify({
-      attackCases: 12,
-      unauthorizedSuccesses: 0,
+      cases: Array.from({ length: 12 }, (_, i) => ({
+        id: `case-${i + 1}`,
+        result: "pass",
+        aiDataPathHint: i % 2 ? "memories" : "chats",
+      })),
     }),
     "utf8",
   );
+  await crossTenantTestsCollector.collect({
+    ...baseCtx,
+    outputDir: outStale,
+  });
+  const reportStale = JSON.parse(
+    readFileSync(
+      join(
+        outStale,
+        "imports",
+        "cross-tenant-tests",
+        "cross-tenant-report.json",
+      ),
+      "utf8",
+    ),
+  ) as CrossTenantReport;
+  if (reportStale.summary.statusHint !== "partial") {
+    throw new Error(
+      `undated import expected partial, got ${reportStale.summary.statusHint}`,
+    );
+  }
+  if (reportStale.summary.authzM2Satisfied !== false) {
+    throw new Error(
+      `undated import expected satisfied=false, got ${reportStale.summary.authzM2Satisfied}`,
+    );
+  }
 
+  // Import a passing suite (≥10 cases + measuredAt)
   const out2 = mkdtempSync(join(tmpdir(), "aprf-xtenant2-"));
   mkdirSync(join(out2, "imports", "cross-tenant-tests"), { recursive: true });
   writeFileSync(
     join(out2, "imports", "cross-tenant-tests", "suite.json"),
     JSON.stringify({
+      measuredAt: new Date().toISOString(),
       cases: Array.from({ length: 12 }, (_, i) => ({
         id: `case-${i + 1}`,
         result: "pass",
@@ -104,14 +142,136 @@ def get_chat(chat_id, user_id):
       `with suite expected satisfied=true, got ${JSON.stringify(report2.summary)}`,
     );
   }
+  if (report2.summary.statusHint !== "pass") {
+    throw new Error(
+      `expected statusHint=pass, got ${report2.summary.statusHint}`,
+    );
+  }
   if (report2.summary.attackCases < 10) {
     throw new Error(`expected ≥10 cases, got ${report2.summary.attackCases}`);
   }
 
+  // Compact summary form + measuredAt
+  const outCompact = mkdtempSync(join(tmpdir(), "aprf-xtenant-compact-"));
+  mkdirSync(join(outCompact, "imports", "cross-tenant-tests"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(outCompact, "imports", "cross-tenant-tests", "suite.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      attackCases: 12,
+      unauthorizedSuccesses: 0,
+    }),
+    "utf8",
+  );
+  await crossTenantTestsCollector.collect({
+    ...baseCtx,
+    outputDir: outCompact,
+  });
+  const reportCompact = JSON.parse(
+    readFileSync(
+      join(
+        outCompact,
+        "imports",
+        "cross-tenant-tests",
+        "cross-tenant-report.json",
+      ),
+      "utf8",
+    ),
+  ) as CrossTenantReport;
+  if (reportCompact.summary.statusHint !== "pass") {
+    throw new Error(
+      `compact suite expected pass, got ${reportCompact.summary.statusHint}`,
+    );
+  }
+
+  // N/A: empty target + explicit attest
+  const emptyTarget = mkdtempSync(join(tmpdir(), "aprf-xtenant-empty-"));
+  const outNa = mkdtempSync(join(tmpdir(), "aprf-xtenant-na-"));
+  mkdirSync(join(outNa, "imports", "cross-tenant-tests"), { recursive: true });
+  writeFileSync(
+    join(outNa, "imports", "cross-tenant-tests", "na.json"),
+    JSON.stringify({
+      multiTenantAiDataOrMemoryPathsPresent: false,
+      measuredAt: new Date().toISOString(),
+    }),
+    "utf8",
+  );
+  await crossTenantTestsCollector.collect({
+    targetPath: emptyTarget,
+    outputDir: outNa,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 50,
+  });
+  const reportNa = JSON.parse(
+    readFileSync(
+      join(outNa, "imports", "cross-tenant-tests", "cross-tenant-report.json"),
+      "utf8",
+    ),
+  ) as CrossTenantReport;
+  if (reportNa.summary.statusHint !== "not_applicable") {
+    throw new Error(
+      `expected not_applicable, got ${reportNa.summary.statusHint} notes=${reportNa.notes.join("; ")}`,
+    );
+  }
+
+  // ≥10 cases without denial assertions must not PASS.
+  const outNoDenial = mkdtempSync(join(tmpdir(), "aprf-xtenant-nodenial-"));
+  mkdirSync(join(outNoDenial, "imports", "cross-tenant-tests"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(outNoDenial, "imports", "cross-tenant-tests", "suite.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      cases: Array.from({ length: 12 }, (_, i) => ({
+        id: `case-${i + 1}`,
+        expectsDenial: false,
+        unauthorizedSuccess: false,
+        aiDataPathHint: "chats",
+      })),
+    }),
+    "utf8",
+  );
+  await crossTenantTestsCollector.collect({
+    ...baseCtx,
+    outputDir: outNoDenial,
+  });
+  const reportNoDenial = JSON.parse(
+    readFileSync(
+      join(
+        outNoDenial,
+        "imports",
+        "cross-tenant-tests",
+        "cross-tenant-report.json",
+      ),
+      "utf8",
+    ),
+  ) as CrossTenantReport;
+  if (reportNoDenial.summary.statusHint === "pass") {
+    throw new Error(
+      "cases with expectsDenial=false must not PASS AUTHZ-M2",
+    );
+  }
+  if (reportNoDenial.summary.authzM2Satisfied === true) {
+    throw new Error("expectsDenial=false suite expected satisfied≠true");
+  }
+
   console.log("aprf-auditor cross-tenant-tests smoke OK");
-  rmSync(outDir, { recursive: true, force: true });
-  rmSync(out2, { recursive: true, force: true });
-  rmSync(targetDir, { recursive: true, force: true });
+  for (const d of [
+    outDir,
+    out2,
+    outStale,
+    outCompact,
+    outNa,
+    emptyTarget,
+    targetDir,
+    outNoDenial,
+  ]) {
+    rmSync(d, { recursive: true, force: true });
+  }
 }
 
 main().catch((e) => {

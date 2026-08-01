@@ -24,9 +24,11 @@ mapsToChecks: [AUTHZ-M1]
 whenUnavailable: >
   Code that calls has_permission / Depends(get_verified_user) is supporting evidence only.
   AUTHZ-M1 PASS requires server-side authorization on privileged AI feature/tool/retrieval
-  entry points AND an authz suite showing authenticated-but-unauthorized callers denied —
-  do not score AUTHN-M1 (unauthenticated rejection) as satisfying this Check. Drop suite
-  results under imports/authz-entry-tests/ if tests live elsewhere.
+  entry points AND an authz suite showing authenticated-but-unauthorized callers denied
+  (measuredAt ≤90 days). Empty inventories without
+  privilegedAiFeatureToolOrRetrievalEntryPointsPresent=false are not N/A. Do not score
+  AUTHN-M1 (unauthenticated rejection) as satisfying this Check. Drop suite results under
+  imports/authz-entry-tests/ if tests live elsewhere.
 live:
   required: false
   note: Offline collector; optional imports for CI test reports.

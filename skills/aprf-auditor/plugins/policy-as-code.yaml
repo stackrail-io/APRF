@@ -1,0 +1,27 @@
+id: policy-as-code
+title: Tool/model access policy-as-code (AUTHZ-R1)
+version: "0.2.0"
+executor: collectors/policy-as-code.ts
+evidenceClass: code
+alsoEmits: [ci]
+detectorIds: [repo-policy-as-code]
+inputs:
+  - "Target repo (OPA/Cedar/IAM-as-code, tool/model access rules, CI/admission checks)"
+  - "Optional coverage: aprf-assessment/imports/policy-as-code/*.{json}"
+collect:
+  - "Detect policy-as-code, tool/model access, and CI/admission policy-check signals"
+  - "Ingest rules-as-code + enforcement + deny evidence; write policy-as-code-report.json"
+emits:
+  nodeClass: code
+  refPattern: "aprf-assessment/imports/policy-as-code/*"
+  signals: [policy-as-code, authz-r1, repo-policy-as-code, ci-policy-check]
+mapsToChecks: [AUTHZ-R1]
+whenUnavailable: >
+  OPA/Cedar files alone are PARTIAL. AUTHZ-R1 PASS needs
+  toolAndModelAccessRulesAsCode=true, ciOrAdmissionEnforcementPresent=true,
+  lastFailingToPassingPolicyChangeShowsDenyWithin90Days=true, measuredAt ≤90 days.
+  Set toolOrModelAccessControlPresent=false for NOT_APPLICABLE.
+  Do not score AUTHZ-M1, AUTHZ-M4, TOL-M1, or AUTHZ-R2 as substitutes.
+live:
+  required: false
+  note: Offline heuristics + optional imported JSON.

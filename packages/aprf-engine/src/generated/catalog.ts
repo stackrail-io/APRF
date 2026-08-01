@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:42c4f1ec57af41698d8fed41e0e372f47510aaff99010aa408ea06c6e5de19e2",
+  "generatedAt": "sha256:f99df3e1fb365947e7da5344de6b5767c5e131853fb07bcc40435e7f26ed338c",
   "ruleCount": 178,
   "domains": [
     {
@@ -1577,39 +1577,50 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "AUTHZ-M1",
       "category": "authorization",
       "title": "Authorization must be enforced server-side for AI features, tools, and retrieval",
-      "description": "Authorization shall be enforced server-side for AI features, tools, and retrieval",
-      "whyItMatters": "Authorization shall be enforced server-side for AI features, tools, and retrieval Failing this leaves a production gap against: 100% of privileged AI feature, tool, and retrieval entry points enforce authorization server-side; 0 successful requests from authenticated callers lacking required permission or scope in the authz suite",
+      "description": "Privileged AI feature, tool, and retrieval entry points shall enforce authorization server-side—so authenticated callers lacking required permission or scope cannot invoke those surfaces.\n",
+      "whyItMatters": "Authn alone is not authz: a valid login still lets an under-privileged caller abuse tools, retrieval, and AI features unless the server denies them. A fresh inventory of privileged entry points plus an authz suite showing authenticated-but-unauthorized callers denied makes the control measurable. Distinct from AUTHN-M1 (unauthenticated rejection), AUTHZ-M2 (cross-tenant isolation), and AUTHN-M4 (subject propagation through agent/tool hops).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of privileged AI feature, tool, and retrieval entry points enforce authorization server-side; 0 successful requests from authenticated callers lacking required permission or scope in the authz suite",
+      "passCondition": "100% of privileged AI feature, tool, and retrieval entry points enforce authorization server-side; 0 successful requests from authenticated callers lacking required permission or scope in the authz suite (measuredAt ≤90 days). If no privileged AI feature, tool, or retrieval entry points exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Server-side authz middleware/policy for AI feature, tool, and retrieval entry points",
-        "Authz suite results showing authenticated-but-unauthorized callers denied on those entry points"
+        "Inventory of privileged AI feature, tool, and retrieval entry points",
+        "Server-side authz middleware/policy on those entry points",
+        "Authz suite results showing authenticated-but-unauthorized callers denied (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "authz-entry-tests",
+            "params": {
+              "hint": "Discover privileged AI HTTP entry points; detect server-side authz guards; score denial-test coverage (or ingest coverage under imports/authz-entry-tests/); require measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Server-side authz middleware/policy + unauthorized-caller suite for AI feature/tool/retrieval entry points"
+              "hint": "If automation cannot prove coverage, attest 100% of privileged AI feature/tool/retrieval entry points enforce server-side authz and the authz suite denies authenticated-but-unauthorized callers (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Authorization must be enforced server-side for AI features, tools, and retrieval): inspect current evidence for [Server-side authz middleware/policy for AI feature, tool, and retrieval entry points; Authz suite results showing authenticated-but-unauthorized callers denied on those entry points] and confirm the pass condition holds — 100% of privileged AI feature, tool, and retrieval entry points enforce authorization server-side; 0 successful requests from authenticated callers lacking required permission or scope in the authz suite",
-      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days. Do not score AUTHN-M1 (unauthenticated rejection) as satisfying this Check — require authenticated but unauthorized callers.",
+      "manualVerification": "1) Confirm privileged AI feature, tool, or retrieval entry points exist. If none, score NOT_APPLICABLE. 2) Inventory those entry points (route catalog, tool handlers, or equivalent). 3) Confirm each enforces authorization server-side (middleware/policy/Depends)—not prompt text or client-only checks. 4) Review an authz suite: authenticated callers lacking required permission/scope are denied (401/403); 0 successful unauthorized accesses. 5) PASS only if inventory + server-side enforcement + suite hold with measuredAt ≤90 days. AUTHN-M1 unauthenticated probes alone do not prove unauthorized-caller denial. AUTHZ-M2 cross-tenant suites alone do not prove least-privilege on feature/tool/retrieval entry points. AUTHN-M4 subject-propagation samples alone do not prove entry-point permission checks. TOL-M1 tool allowlists alone do not prove authenticated-but-unauthorized denial tests.\n",
+      "falsePositiveGuidance": "Do not pass auth middleware presence without an authz suite that denies authenticated-but-unauthorized callers. Do not pass unauthenticated (AUTHN-M1) rejection as this Check. Do not pass empty inventories without an explicit N/A attest. Do not score AUTHZ-M2, AUTHN-M4, or TOL-M1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Authorization must be enforced server-side for AI features, tools, and retrieval",
-        "Retain evidence artifacts required by this Check, starting with: Server-side authz middleware/policy for AI feature, tool, and retrieval entry points",
-        "Add or extend an authz suite that denies authenticated callers lacking required permission or scope on AI feature, tool, and retrieval entry points",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Enforce server-side authorization on every privileged AI feature, tool, and retrieval entry point",
+        "Add authz suite cases that deny authenticated callers lacking required permission or scope",
+        "Retain scored report under imports/authz-entry-tests/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "OWASP Access Control Cheat Sheet",
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
+        },
+        {
+          "title": "OWASP API Security Top 10 — API5 Broken Function Level Authorization",
+          "url": "https://owasp.org/API-Security/"
         },
         {
           "title": "NIST AI RMF — Manage",
@@ -1622,19 +1633,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AUTHZ-M4",
         "AUTHZ-R1",
         "AUTHZ-R2",
-        "AUTHN-M1"
+        "AUTHN-M1",
+        "AUTHN-M4",
+        "TOL-M1"
       ],
       "tags": [
         "authorization",
         "mandatory",
-        "manual"
+        "hybrid",
+        "server-side",
+        "authz-suite",
+        "least-privilege"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "mcp",
-          "a2a"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -1645,38 +1657,50 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "AUTHZ-M2",
       "category": "authorization",
       "title": "Multi-tenant isolation must be tested for AI data and memory paths",
-      "description": "Multi-tenant isolation shall be tested for AI data and memory paths",
-      "whyItMatters": "Multi-tenant isolation shall be tested for AI data and memory paths Failing this leaves a production gap against: 0 successful unauthorized cross-tenant reads/writes across ≥10 automated attack cases on AI data and memory paths",
+      "description": "Multi-tenant AI data and memory paths shall deny unauthorized cross-tenant reads and writes—proven by an automated attack suite, not by tenant filters in code alone.\n",
+      "whyItMatters": "Missing or bypassed tenant boundaries on chats, knowledge, files, vectors, and memory turn shared AI backends into cross-tenant confidentiality failures. A fresh attack suite (≥10 cases, 0 successful unauthorized accesses) makes isolation measurable. Distinct from AUTHZ-M1 (authenticated-but-unauthorized on feature/tool/retrieval entry points), MEM-M1 (memory-store isolation specifically), and AUTHN-M1 (unauthenticated rejection).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "0 successful unauthorized cross-tenant reads/writes across ≥10 automated attack cases on AI data and memory paths",
+      "passCondition": "0 successful unauthorized cross-tenant reads/writes across ≥10 automated attack cases on AI data and memory paths (measuredAt ≤90 days). If no multi-tenant AI data or memory paths exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Cross-tenant attack test suite results for AI data stores and memory APIs"
+        "Inventory or scope note of multi-tenant AI data and memory paths (chats, knowledge, files, vectors, memory, or equivalent)",
+        "Cross-tenant attack test suite results (≥10 cases) covering those paths",
+        "Scoring report showing 0 successful unauthorized cross-tenant reads/writes (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "cross-tenant-tests",
+            "params": {
+              "hint": "Discover tenant-isolation helpers and AI data/memory path hints; score cross-tenant attack cases in-repo or ingest suite results under imports/cross-tenant-tests/; require ≥10 cases, 0 leaks, measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Cross-tenant attack test suite results for AI data stores and memory APIs"
+              "hint": "If automation cannot prove coverage, attest ≥10 automated cross-tenant attack cases on AI data/memory paths with 0 successful unauthorized reads/writes (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Multi-tenant isolation must be tested for AI data and memory paths): inspect current evidence for [Cross-tenant attack test suite results for AI data stores and memory APIs] and confirm the pass condition holds — 0 successful unauthorized cross-tenant reads/writes across ≥10 automated attack cases on AI data and memory paths",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm multi-tenant AI data or memory paths exist (chats, knowledge, files, vectors, memory, or equivalent). If none, score NOT_APPLICABLE. 2) Inventory in-scope paths. 3) Confirm tenant isolation is enforced server-side on those paths. 4) Review ≥10 automated attack cases attempting unauthorized cross-tenant reads/writes: 0 successes. 5) PASS only if suite scope covers those AI data/memory paths and freshness holds (measuredAt ≤90 days). AUTHZ-M1 entry-point permission suites alone do not prove cross-tenant isolation. MEM-M1 memory-only suites alone do not prove broader AI data-path coverage required here when non-memory AI data paths are in scope. Isolation helpers in code without an attack suite do not satisfy. AUTHN-M1 unauthenticated probes alone do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass tenant filters in code without a ≥10-case attack suite. Do not pass empty inventories without an explicit N/A attest. Do not score AUTHZ-M1, AUTHN-M1, or a memory-only MEM-M1 suite as a full substitute when non-memory AI data paths are in scope. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Multi-tenant isolation must be tested for AI data and memory paths",
-        "Retain evidence artifacts required by this Check, starting with: Cross-tenant attack test suite results for AI data stores and memory APIs",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Enforce tenant isolation on every multi-tenant AI data and memory path",
+        "Add ≥10 automated cross-tenant attack cases asserting deny on unauthorized reads/writes",
+        "Retain scored report under imports/cross-tenant-tests/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "OWASP Access Control Cheat Sheet",
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
+        },
+        {
+          "title": "OWASP API Security Top 10 — API1 Broken Object Level Authorization",
+          "url": "https://owasp.org/API-Security/"
         },
         {
           "title": "NIST AI RMF — Manage",
@@ -1688,19 +1712,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AUTHZ-M3",
         "AUTHZ-M4",
         "AUTHZ-R1",
-        "AUTHZ-R2"
+        "AUTHZ-R2",
+        "MEM-M1",
+        "AUTHN-M1"
       ],
       "tags": [
         "authorization",
         "mandatory",
-        "manual"
+        "hybrid",
+        "multi-tenant",
+        "cross-tenant",
+        "isolation"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "mcp",
-          "a2a"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -1711,38 +1736,50 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "AUTHZ-M3",
       "category": "authorization",
       "title": "Least-privilege roles must be defined for agents and automation identities",
-      "description": "Least-privilege roles shall be defined for agents and automation identities",
-      "whyItMatters": "Least-privilege roles shall be defined for agents and automation identities Failing this leaves a production gap against: 100% of production agent/automation identities appear in the role matrix with non-admin default roles; quarterly (or ≤90-day) access review recorded with 0 unexplained privilege escalations",
+      "description": "Production agent and automation identities shall appear in a role matrix with non-admin default roles—and a ≤90-day access review shall record 0 unexplained privilege escalations.\n",
+      "whyItMatters": "Over-privileged agent/service identities become lasting blast-radius amplifiers once a tool chain or automation is compromised. A complete role matrix with non-admin defaults, plus a fresh access review with no unexplained escalations, makes least privilege measurable. Distinct from AUTHZ-M1 (entry-point permission checks), AUTHZ-R2 (continuous high-privilege agent reviews with revoke evidence), AGN-R3 (RACI ownership), and AUTHN-M2 (MCP/S2S machine identity).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production agent/automation identities appear in the role matrix with non-admin default roles; quarterly (or ≤90-day) access review recorded with 0 unexplained privilege escalations",
+      "passCondition": "100% of production agent/automation identities appear in the role matrix with non-admin default roles; quarterly (or ≤90-day) access review recorded with 0 unexplained privilege escalations (measuredAt ≤90 days). If no production agent or automation identities exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Role matrix for every production agent/automation identity + IAM/policy export"
+        "Inventory of production agent/automation identities",
+        "Role matrix / IAM-policy export covering those identities with non-admin defaults",
+        "Access-review record ≤90 days with unexplainedPrivilegeEscalations=0"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "agent-role-matrix",
+            "params": {
+              "hint": "Discover role-matrix / least-privilege / access-review signals; ingest coverage under imports/agent-role-matrix/ requiring identitiesInRoleMatrixWithNonAdminDefaultPct=100, accessReviewWithin90Days=true, unexplainedPrivilegeEscalations=0, measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Role matrix for every production agent/automation identity + IAM/policy export"
+              "hint": "If automation cannot prove coverage, attest 100% of production agent/automation identities in a role matrix with non-admin defaults and a ≤90-day access review with 0 unexplained privilege escalations (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Least-privilege roles must be defined for agents and automation identities): inspect current evidence for [Role matrix for every production agent/automation identity + IAM/policy export] and confirm the pass condition holds — 100% of production agent/automation identities appear in the role matrix with non-admin default roles; quarterly (or ≤90-day) access review recorded with 0 unexplained privilege escalations",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production agent or automation identities exist. If none, score NOT_APPLICABLE. 2) Obtain the role matrix / IAM-policy export for those identities. 3) Confirm every identity appears with a non-admin default role (no standing admin/owner by default). 4) Review the latest access review (≤90 days): unexplained privilege escalations = 0. 5) PASS only if matrix coverage + non-admin defaults + review hold with measuredAt ≤90 days. AUTHZ-M1 entry-point suites alone do not prove agent identity roles. AUTHZ-R2 high-privilege continuous reviews alone do not prove a complete matrix for all production agent/automation identities. AGN-R3 RACI ownership alone does not prove IAM least privilege. AUTHN-M2 MCP connection identity alone does not prove per-agent role defaults.\n",
+      "falsePositiveGuidance": "Do not pass CODEOWNERS or RACI registers as a role matrix. Do not pass admin-by-default service accounts with a waiver note alone. Do not pass empty inventories without an explicit N/A attest. Do not score AUTHZ-M1, AUTHZ-R2, AGN-R3, or AUTHN-M2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Least-privilege roles must be defined for agents and automation identities",
-        "Retain evidence artifacts required by this Check, starting with: Role matrix for every production agent/automation identity + IAM/policy export",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Enumerate every production agent/automation identity in a role matrix with non-admin defaults",
+        "Export IAM/policy bindings proving defaults are least-privilege",
+        "Run and retain a ≤90-day access review with 0 unexplained privilege escalations under imports/agent-role-matrix/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "OWASP Access Control Cheat Sheet",
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
+        },
+        {
+          "title": "OWASP API Security Top 10 — API5 Broken Function Level Authorization",
+          "url": "https://owasp.org/API-Security/"
         },
         {
           "title": "NIST AI RMF — Manage",
@@ -1754,19 +1791,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AUTHZ-M2",
         "AUTHZ-M4",
         "AUTHZ-R1",
-        "AUTHZ-R2"
+        "AUTHZ-R2",
+        "AGN-R3",
+        "AUTHN-M2"
       ],
       "tags": [
         "authorization",
         "mandatory",
-        "manual"
+        "hybrid",
+        "least-privilege",
+        "agent-identity",
+        "access-review"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "mcp",
-          "a2a"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -1777,38 +1815,50 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "AUTHZ-M4",
       "category": "authorization",
       "title": "Attribute-based controls must govern access to sensitive document classes",
-      "description": "Attribute-based controls shall govern access to sensitive document classes",
-      "whyItMatters": "Attribute-based controls shall govern access to sensitive document classes Failing this leaves a production gap against: Sensitive document classes are enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class access in tests; inventory matches production classes",
+      "description": "Sensitive document classes used by AI retrieval or grounding shall be enumerated and governed by attribute-based policy (subject/resource attributes)—with tests proving unauthorized class access is denied and the inventory matching production classes.\n",
+      "whyItMatters": "RAG and document-grounded agents that ignore classification attributes leak regulated or confidential corpora to callers who only cleared a coarse role check. Enumerating classes, binding ABAC policy to subject/resource attributes, and proving deny-in-tests makes that control measurable. Distinct from AUTHZ-M1 (entry-point permission checks), AUTHZ-M2 (cross-tenant isolation), AUTHZ-R1 (policy-as-code for tools/models), and CTX-M2 (context source ACLs without class ABAC).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Sensitive document classes are enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class access in tests; inventory matches production classes",
+      "passCondition": "Sensitive document classes are enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class access in tests; inventory matches production classes (measuredAt ≤90 days). If no sensitive document classes are in scope for AI retrieval or grounding, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "ABAC/policy config + sample allow/deny decisions for sensitive classes"
+        "Inventory of sensitive document classes used by AI retrieval/grounding",
+        "ABAC/policy config binding subject/resource attributes to those classes",
+        "Test results showing unauthorized class access denied; inventory matches production (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "sensitive-doc-abac",
+            "params": {
+              "hint": "Discover sensitive-class / ABAC / Cedar/OPA policy signals; ingest coverage under imports/sensitive-doc-abac/ requiring sensitiveDocumentClassesEnumerated=true, inventoryMatchesProductionClasses=true, unauthorizedClassAccessDeniedInTests=true, measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "ABAC/policy config + sample allow/deny decisions for sensitive classes"
+              "hint": "If automation cannot prove coverage, attest enumerated sensitive document classes, ABAC policy deny of unauthorized class access in tests, and inventory matching production (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Attribute-based controls must govern access to sensitive document classes): inspect current evidence for [ABAC/policy config + sample allow/deny decisions for sensitive classes] and confirm the pass condition holds — Sensitive document classes are enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class access in tests; inventory matches production classes",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm sensitive document classes are in scope for AI retrieval or grounding. If none, score NOT_APPLICABLE. 2) Obtain the class inventory and confirm it matches production classes. 3) Confirm ABAC (or equivalent attribute-based) policy uses subject/resource attributes—not role-only checks alone—to gate those classes. 4) Review tests: unauthorized class access is denied. 5) PASS only if enumeration + inventory match + deny tests hold with measuredAt ≤90 days. AUTHZ-M1 entry-point suites alone do not prove class-attribute policy. AUTHZ-M2 cross-tenant suites alone do not prove sensitive-class ABAC. AUTHZ-R1 tool/model policy-as-code alone does not prove document-class ABAC. CTX-M2 context-source ACLs alone do not prove enumerated sensitive-class attribute policy.\n",
+      "falsePositiveGuidance": "Do not pass RBAC role checks without subject/resource class attributes. Do not pass an incomplete class list that omits production sensitive corpora. Do not pass empty inventories without an explicit N/A attest. Do not score AUTHZ-M1, AUTHZ-M2, AUTHZ-R1, or CTX-M2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Attribute-based controls must govern access to sensitive document classes",
-        "Retain evidence artifacts required by this Check, starting with: ABAC/policy config + sample allow/deny decisions for sensitive classes",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Enumerate every sensitive document class used by AI retrieval/grounding",
+        "Enforce ABAC (subject/resource attributes) denying unauthorized class access",
+        "Retain deny-test results + inventory match under imports/sensitive-doc-abac/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "OWASP Access Control Cheat Sheet",
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
+        },
+        {
+          "title": "NIST ABAC — Guide to Attribute Based Access Control",
+          "url": "https://csrc.nist.gov/pubs/sp/800/162/final"
         },
         {
           "title": "NIST AI RMF — Manage",
@@ -1820,19 +1870,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AUTHZ-M2",
         "AUTHZ-M3",
         "AUTHZ-R1",
-        "AUTHZ-R2"
+        "AUTHZ-R2",
+        "CTX-M2"
       ],
       "tags": [
         "authorization",
         "mandatory",
-        "manual"
+        "hybrid",
+        "abac",
+        "document-classification",
+        "rag"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "mcp",
-          "a2a"
-        ],
+        "technologies": [],
         "minCriticality": 3,
         "requiredFromLevel": 5
       },
@@ -1843,42 +1893,50 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "AUTHZ-R1",
       "category": "authorization",
       "title": "Production systems should have policy-as-code for tool and model access",
-      "description": "Policy-as-code for tool and model access",
-      "whyItMatters": "Policy-as-code for tool and model access Failing this leaves a production gap against: Tool and model access rules are expressed as code and enforced in CI or admission; last failing-to-passing policy change ≤90 days shows a deny for unauthorized tool/model",
+      "description": "Tool and model access rules shall be expressed as code (OPA, Cedar, IAM-as-code, or equivalent) and enforced in CI or admission—with a ≤90-day failing-to-passing policy change that shows a deny for an unauthorized tool or model.\n",
+      "whyItMatters": "Prompt-only or console-clicked tool/model permissions drift silently and cannot be regression-tested. Policy-as-code plus CI/admission enforcement, proven by a recent deny-then-pass change, makes tool/model authorization reviewable. Distinct from AUTHZ-M1 (entry-point permission suites), AUTHZ-M4 (document-class ABAC), TOL-M1 (tool allowlists without policy-as-code CI), and AUTHZ-R2 (high-privilege agent access reviews).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Tool and model access rules are expressed as code and enforced in CI or admission; last failing-to-passing policy change ≤90 days shows a deny for unauthorized tool/model",
+      "passCondition": "Tool and model access rules are expressed as code and enforced in CI or admission; last failing-to-passing policy change ≤90 days shows a deny for unauthorized tool/model (measuredAt ≤90 days). If no production tools or models subject to access control exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent) + latest CI policy-check report"
+        "Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent)",
+        "CI or admission policy-check wiring covering those rules",
+        "Latest failing-to-passing policy change ≤90 days showing deny for unauthorized tool/model"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
             "id": "repo-policy-as-code",
-            "params": {}
+            "params": {
+              "hint": "Discover OPA/Cedar/IAM-as-code and CI/admission policy-check signals; ingest coverage under imports/policy-as-code/ requiring toolAndModelAccessRulesAsCode=true, ciOrAdmissionEnforcementPresent=true, lastFailingToPassingPolicyChangeShowsDenyWithin90Days=true, measuredAt ≤90 days.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent) + latest CI policy-check report"
+              "hint": "If automation cannot prove coverage, attest tool/model access rules as code, CI or admission enforcement, and a ≤90-day failing-to-passing change showing deny for unauthorized tool/model (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Policy-as-code for tool and model access): inspect current evidence for [Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent) + latest CI policy-check report] and confirm the pass condition holds — Tool and model access rules are expressed as code and enforced in CI or admission; last failing-to-passing policy change ≤90 days shows a deny for unauthorized tool/model",
-      "falsePositiveGuidance": "when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm production tools or models subject to access control exist. If none, score NOT_APPLICABLE. 2) Locate policy-as-code for tool and model access (OPA/Cedar/IAM-as-code or equivalent)—not prompt text. 3) Confirm enforcement in CI or admission (gate that fails closed on policy deny). 4) Review the last failing-to-passing policy change ≤90 days: it must demonstrate a deny for an unauthorized tool or model. 5) PASS only if rules-as-code + enforcement + deny evidence hold with measuredAt ≤90 days. AUTHZ-M1 entry-point suites alone do not prove policy-as-code. AUTHZ-M4 document-class ABAC alone does not prove tool/model access policy-as-code. TOL-M1 allowlists alone do not prove CI/admission policy-as-code. AUTHZ-R2 access reviews alone do not prove encoded tool/model rules.\n",
+      "falsePositiveGuidance": "Do not pass OPA/Cedar presence without tool/model access rules. Do not pass CI that only lints YAML without a deny for unauthorized tool/model. Do not pass empty inventories without an explicit N/A attest. Do not score AUTHZ-M1, AUTHZ-M4, TOL-M1, or AUTHZ-R2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Policy-as-code for tool and model access",
-        "Retain evidence artifacts required by this Check, starting with: Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent) + latest CI policy-check report",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Express tool and model access rules as code (OPA/Cedar/IAM-as-code or equivalent)",
+        "Enforce those rules in CI or admission with fail-closed denies",
+        "Retain a ≤90-day failing-to-passing deny evidence under imports/policy-as-code/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "OWASP Access Control Cheat Sheet",
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
+        },
+        {
+          "title": "Open Policy Agent",
+          "url": "https://www.openpolicyagent.org/"
         },
         {
           "title": "NIST AI RMF — Manage",
@@ -1890,19 +1948,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AUTHZ-M2",
         "AUTHZ-M3",
         "AUTHZ-M4",
-        "AUTHZ-R2"
+        "AUTHZ-R2",
+        "TOL-M1"
       ],
       "tags": [
         "authorization",
         "recommended",
-        "hybrid"
+        "hybrid",
+        "policy-as-code",
+        "tool-access",
+        "model-access"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "mcp",
-          "a2a"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -1913,33 +1971,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "AUTHZ-R2",
       "category": "authorization",
       "title": "Production systems should have continuous access reviews for high-privilege agents",
-      "description": "Continuous access reviews for high-privilege agents",
-      "whyItMatters": "Continuous access reviews for high-privilege agents Failing this leaves a production gap against: Every high-privilege agent identity was reviewed ≤90 days ago; ≥1 revoke or scope-reduction appears in the last two cycles (or attestation that none were warranted with reviewer sign-off)",
+      "description": "Every high-privilege agent identity shall be reviewed ≤90 days ago, with ≥1 revoke or scope-reduction in the last two cycles—or a signed attestation that none were warranted.\n",
+      "whyItMatters": "High-privilege agents accumulate standing power; without recurring reviews that actually revoke or shrink scope, least-privilege erodes into permanent admin bots. A fresh inventory plus review decisions (keep/revoke/modify) with revoke evidence—or signed “none warranted”— makes continuous access review measurable. Distinct from AUTHZ-M3 (complete role matrix + unexplained-escalation count for all agent/automation identities), AUTHZ-R1 (tool/model policy-as-code), and AGN-R3 (RACI ownership).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Every high-privilege agent identity was reviewed ≤90 days ago; ≥1 revoke or scope-reduction appears in the last two cycles (or attestation that none were warranted with reviewer sign-off)",
+      "passCondition": "Every high-privilege agent identity was reviewed ≤90 days ago; ≥1 revoke or scope-reduction appears in the last two cycles (or attestation that none were warranted with reviewer sign-off) (measuredAt ≤90 days). If no high-privilege agent identities exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "High-privilege agent inventory + last access-review spreadsheet/report with decisions (keep/revoke/modify)"
+        "Inventory of high-privilege agent identities",
+        "Last access-review report with keep/revoke/modify decisions (≤90 days)",
+        "Evidence of ≥1 revoke/scope-reduction in last two cycles, or signed none-warranted attestation"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "high-priv-agent-review",
+            "params": {
+              "hint": "Discover high-privilege agent inventory and access-review signals; ingest coverage under imports/high-priv-agent-review/ requiring everyHighPrivilegeAgentReviewedWithin90Days=true and revokeOrScopeReductionInLastTwoCyclesOrAttestedNoneWarranted=true, measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "High-privilege agent inventory + last access-review spreadsheet/report with decisions (keep/revoke/modify)"
+              "hint": "If automation cannot prove coverage, attest every high-privilege agent reviewed ≤90 days with ≥1 revoke/scope-reduction in the last two cycles (or signed none-warranted) (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Continuous access reviews for high-privilege agents): inspect current evidence for [High-privilege agent inventory + last access-review spreadsheet/report with decisions (keep/revoke/modify)] and confirm the pass condition holds — Every high-privilege agent identity was reviewed ≤90 days ago; ≥1 revoke or scope-reduction appears in the last two cycles (or attestation that none were warranted with reviewer sign-off)",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm high-privilege agent identities exist. If none, score NOT_APPLICABLE. 2) Obtain the high-privilege agent inventory. 3) Review the latest access-review report (≤90 days): every in-scope identity has a keep/revoke/modify decision. 4) Confirm ≥1 revoke or scope-reduction in the last two cycles, or a reviewer-signed attestation that none were warranted. 5) PASS only if inventory + full review + revoke/attestation hold with measuredAt ≤90 days. AUTHZ-M3 role-matrix coverage alone does not prove recurring high-privilege reviews with revoke evidence. AUTHZ-R1 policy-as-code alone does not prove agent access reviews. AGN-R3 RACI ownership alone does not prove privilege revoke cycles.\n",
+      "falsePositiveGuidance": "Do not pass a one-time role matrix without a ≤90-day review cycle. Do not pass “all keep” reviews without revoke evidence or a signed none-warranted attestation. Do not pass empty inventories without an explicit N/A attest. Do not score AUTHZ-M3, AUTHZ-R1, or AGN-R3 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Continuous access reviews for high-privilege agents",
-        "Retain evidence artifacts required by this Check, starting with: High-privilege agent inventory + last access-review spreadsheet/report with decisions (keep/revoke/modify)",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Maintain an inventory of high-privilege agent identities",
+        "Run ≤90-day access reviews with keep/revoke/modify decisions",
+        "Record ≥1 revoke/scope-reduction per two cycles (or signed none-warranted) under imports/high-priv-agent-review/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -1956,19 +2022,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AUTHZ-M2",
         "AUTHZ-M3",
         "AUTHZ-M4",
-        "AUTHZ-R1"
+        "AUTHZ-R1",
+        "AGN-R3"
       ],
       "tags": [
         "authorization",
         "recommended",
-        "manual"
+        "hybrid",
+        "access-review",
+        "high-privilege",
+        "agent-identity"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "mcp",
-          "a2a"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },

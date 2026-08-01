@@ -48,6 +48,10 @@ import { shortLivedAgentTokensCollector } from "./short-lived-agent-tokens.ts";
 import { workloadIdentityRuntimesCollector } from "./workload-identity-runtimes.ts";
 import { authzEntryTestsCollector } from "./authz-entry-tests.ts";
 import { crossTenantTestsCollector } from "./cross-tenant-tests.ts";
+import { agentRoleMatrixCollector } from "./agent-role-matrix.ts";
+import { sensitiveDocAbacCollector } from "./sensitive-doc-abac.ts";
+import { policyAsCodeCollector } from "./policy-as-code.ts";
+import { highPrivAgentReviewCollector } from "./high-priv-agent-review.ts";
 import { secretsHygieneCollector } from "./secrets-hygiene.ts";
 import { secretRedactionCollector } from "./secret-redaction.ts";
 import { injectionPolicyGateCollector } from "./injection-policy-gate.ts";
@@ -214,6 +218,10 @@ export const COLLECTORS: Collector[] = [
   workloadIdentityRuntimesCollector,
   authzEntryTestsCollector,
   crossTenantTestsCollector,
+  agentRoleMatrixCollector,
+  sensitiveDocAbacCollector,
+  policyAsCodeCollector,
+  highPrivAgentReviewCollector,
   secretsHygieneCollector,
   secretRedactionCollector,
   injectionPolicyGateCollector,

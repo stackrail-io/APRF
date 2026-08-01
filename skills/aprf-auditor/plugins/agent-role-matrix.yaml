@@ -1,0 +1,28 @@
+id: agent-role-matrix
+title: Agent/automation role matrix + access review (AUTHZ-M3)
+version: "0.2.0"
+executor: collectors/agent-role-matrix.ts
+evidenceClass: code
+alsoEmits: []
+detectorIds: [agent-role-matrix]
+inputs:
+  - "Target repo (agent/automation identities, role matrix, access-review artifacts)"
+  - "Optional coverage: aprf-assessment/imports/agent-role-matrix/*.{json}"
+collect:
+  - "Detect agent/automation identity, role-matrix/least-privilege, and access-review signals"
+  - "Ingest matrix coverage + access-review + unexplained escalations; write agent-role-matrix-report.json"
+emits:
+  nodeClass: code
+  refPattern: "aprf-assessment/imports/agent-role-matrix/*"
+  signals: [agent-role-matrix, authz-m3, role-matrix, access-review]
+mapsToChecks: [AUTHZ-M3]
+whenUnavailable: >
+  Role-matrix docs alone are PARTIAL. AUTHZ-M3 PASS needs
+  identitiesInRoleMatrixWithNonAdminDefaultPct=100,
+  accessReviewWithin90Days=true, unexplainedPrivilegeEscalations=0,
+  measuredAt ≤90 days. Set productionAgentOrAutomationIdentitiesPresent=false
+  for NOT_APPLICABLE. Do not score AGN-R3 RACI or AUTHZ-R2 high-privilege
+  reviews as substitutes.
+live:
+  required: false
+  note: Offline heuristics + optional imported JSON.
