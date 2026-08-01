@@ -255,8 +255,7 @@ export function buildPromptChangeReviewEvalReport(opts: {
   const blockOk = opts.imported.promoteWithoutReviewAndEvalBlocked === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: PromptChangeReviewEvalReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: PromptChangeReviewEvalReport["summary"]["statusHint"];
   let prmM2Satisfied: boolean | null = null;
 
   const measuredFail =

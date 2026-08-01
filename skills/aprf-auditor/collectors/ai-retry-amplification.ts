@@ -267,8 +267,7 @@ export function buildAiRetryAmplificationReport(opts: {
   const ampOk = opts.imported.amplificationBounded === true && ageOk;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AiRetryAmplificationReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiRetryAmplificationReport["summary"]["statusHint"];
   let costM3Satisfied: boolean | null = null;
 
   const measuredFail =

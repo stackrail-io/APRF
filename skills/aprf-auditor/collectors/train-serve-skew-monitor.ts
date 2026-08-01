@@ -292,8 +292,7 @@ export function buildTrainServeSkewMonitorReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: TrainServeSkewMonitorReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: TrainServeSkewMonitorReport["summary"]["statusHint"];
   let dgR2Satisfied: boolean | null = null;
 
   const measuredFail =

@@ -333,8 +333,7 @@ export function buildPlatformScaffoldingTemplatesReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: PlatformScaffoldingTemplatesReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: PlatformScaffoldingTemplatesReport["summary"]["statusHint"];
   let dxR1Satisfied: boolean | null = null;
 
   const measuredFail =

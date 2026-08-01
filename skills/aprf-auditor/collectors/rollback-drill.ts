@@ -259,8 +259,7 @@ export function buildRollbackDrillReport(opts: {
     (opts.imported.documentedRtoPresent === null && withinRtoOk);
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: RollbackDrillReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: RollbackDrillReport["summary"]["statusHint"];
   let chgM3Satisfied: boolean | null = null;
 
   const measuredFail =

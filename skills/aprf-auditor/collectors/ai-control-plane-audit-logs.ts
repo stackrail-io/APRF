@@ -252,8 +252,7 @@ export function buildAiControlPlaneAuditLogsReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: AiControlPlaneAuditLogsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiControlPlaneAuditLogsReport["summary"]["statusHint"];
   let cmpM3Satisfied: boolean | null = null;
 
   const measuredFail =

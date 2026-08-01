@@ -266,8 +266,7 @@ export function buildAiCostAlertsReport(opts: {
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
   const alertsOk = bothAlertClassesPresent;
 
-  let statusHint: AiCostAlertsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiCostAlertsReport["summary"]["statusHint"];
   let costM2Satisfied: boolean | null = null;
 
   const measuredFail =

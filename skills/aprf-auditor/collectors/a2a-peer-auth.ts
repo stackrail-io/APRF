@@ -258,8 +258,7 @@ export function buildA2aPeerAuthReport(opts: {
     );
   }
 
-  let statusHint: A2aPeerAuthReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: A2aPeerAuthReport["summary"]["statusHint"];
   let agnM4Satisfied: boolean | null = null;
 
   const denyOk =

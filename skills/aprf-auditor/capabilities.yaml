@@ -83,6 +83,10 @@ plugins:
     - workload-identity-runtimes
     - authz-entry-tests
     - cross-tenant-tests
+    - agent-role-matrix
+    - sensitive-doc-abac
+    - policy-as-code
+    - high-priv-agent-review
     - secrets-hygiene
     - secret-redaction
     - injection-policy-gate
@@ -123,8 +127,12 @@ userInputRequiredWhen:
   - AUTHN-M4: no identity-propagation design/sample under imports/identity-propagation/ (N/A if no tools/agents/workflows)
   - AUTHN-R1: no short-lived agent/tool credential inventory + prompt/config secret scan under imports/short-lived-agent-tokens/
   - AUTHN-R2: no self-hosted runtime workload-identity coverage under imports/workload-identity-runtimes/ (N/A if no self-hosted runtimes)
-  - AUTHZ-M1: no authz denial tests covering AI feature/tool/retrieval entry points (run authz-entry-tests or import coverage JSON)
-  - AUTHZ-M2: no cross-tenant attack suite (≥10 cases) for AI data/memory paths (run cross-tenant-tests or import results)
+  - AUTHZ-M1: no authz denial tests covering AI feature/tool/retrieval entry points (run authz-entry-tests or import coverage JSON with measuredAt; N/A via privilegedAiFeatureToolOrRetrievalEntryPointsPresent=false)
+  - AUTHZ-M2: no cross-tenant attack suite (≥10 cases) for AI data/memory paths (run cross-tenant-tests or import results with measuredAt; N/A via multiTenantAiDataOrMemoryPathsPresent=false)
+  - AUTHZ-M3: no agent/automation role matrix + ≤90d access review (run agent-role-matrix or import coverage; N/A via productionAgentOrAutomationIdentitiesPresent=false)
+  - AUTHZ-M4: no sensitive document-class ABAC inventory + deny tests (run sensitive-doc-abac or import coverage; N/A via sensitiveDocumentClassesPresent=false)
+  - AUTHZ-R1: no tool/model policy-as-code + CI/admission deny evidence (run policy-as-code or import coverage; N/A via toolOrModelAccessControlPresent=false)
+  - AUTHZ-R2: no high-privilege agent ≤90d access review + revoke/none-warranted (run high-priv-agent-review or import coverage; N/A via highPrivilegeAgentIdentitiesPresent=false)
   - SEC2-M1: no secrets-manager wiring and/or CI secret-scan report (run secrets-hygiene or import SARIF)
   - SEC2-M2: no log/trace redaction config + 100% canary harness (run secret-redaction or import results)
   - SEC-M1: no injection/privilege-escalation corpus + CI gate at ≥95% deny (run injection-policy-gate or import results)
@@ -142,8 +150,12 @@ limitations:
   - identity-propagation needs design + 100% subject-bound privileged sample with 0 anonymous hops (or N/A if non-agentic); outer HTTP auth alone is not a PASS
   - short-lived-agent-tokens needs TTL≤1h (or owned ≤30d exception) coverage + 0 static keys in prompts/config (or N/A attest); MCP env scanners alone are not a PASS
   - workload-identity-runtimes needs 100% WI coverage + 0 static shared keys + sample calls (or N/A if no self-hosted runtimes); MCP inventories alone are not a PASS
-  - authz-entry-tests scores automated denial-test coverage of AI entry points; server-side guards alone are not a PASS
-  - cross-tenant-tests needs ≥10 automated cross-tenant attack cases with 0 unauthorized successes; isolation code alone is not a PASS
+  - authz-entry-tests scores automated denial-test coverage of AI entry points; server-side guards alone are not a PASS; requires measuredAt ≤90d; empty inventory without N/A attest is not a PASS
+  - cross-tenant-tests needs ≥10 automated cross-tenant attack cases with 0 unauthorized successes + measuredAt ≤90d; isolation code alone is not a PASS; empty inventory without N/A attest is not a PASS
+  - agent-role-matrix needs identitiesInRoleMatrixWithNonAdminDefaultPct=100 + accessReviewWithin90Days + unexplainedPrivilegeEscalations=0 + measuredAt ≤90d; role docs alone are not a PASS
+  - sensitive-doc-abac needs sensitiveDocumentClassesEnumerated + inventoryMatchesProductionClasses + unauthorizedClassAccessDeniedInTests + measuredAt ≤90d; ABAC docs alone are not a PASS
+  - policy-as-code needs toolAndModelAccessRulesAsCode + ciOrAdmissionEnforcementPresent + lastFailingToPassingPolicyChangeShowsDenyWithin90Days + measuredAt ≤90d; OPA files alone are not a PASS
+  - high-priv-agent-review needs everyHighPrivilegeAgentReviewedWithin90Days + revokeOrScopeReductionInLastTwoCyclesOrAttestedNoneWarranted + measuredAt ≤90d; inventory docs alone are not a PASS
   - secrets-hygiene needs secrets-manager refs + clean secret-scan evidence; GitHub Actions secrets alone are not a production secrets manager
   - secret-redaction needs redaction config + canary harness at 100% detection; config alone is not a PASS
   - injection-policy-gate needs versioned corpus + CI gate with ≥95% deny and 0 model-text privilege grants; filters alone are not a PASS

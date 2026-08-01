@@ -8,6 +8,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
+- Added CI gate `npm run aprf:collectors:unused` (TypeScript `noUnusedLocals`/`noUnusedParameters` + path-sensitive useless non-nullish initializers) so collector dead defaults like `statusHint = "not_demonstrated"` fail the build; removed those dead initializers across collectors.
+- Rewrote **authorization** + collectors; synced `aprf-spec.json`.
 - Added **AUTHN-M3** to Core and Regulated profiles (core 38→39, regulated 50→51); aligned AUTHN-M1/M2/M3 `passCondition` N/A clauses and AUTHN-R2 sample-call requirement with collectors; tightened AUTHN-M2 sibling distinction vs M4/R2; reduced AUTHN-R1↔SEC2-M1 substitute risk in evidence-map + SEC2-M1 FP guidance; minor consistency (http-auth-probe `detectorIds`, M1 advisory-GET wording, R1 30d vs 90d exception windows, relatedRules / M3–M4 sibling prose).
 - Fixed Bugbot findings on authentication collectors: documented-service subjects no longer counted as anonymous hops (AUTHN-M4); FastAPI route-cap truncation blocks catalog PASS; prior auth-probe ingest requires `probeInventoryMatchesRouteCatalog`; AUTHN-R1 honors `ownedExceptionsWithin30Days=false`.
 - Fixed follow-up Bugbot findings: conservative multi-file import merges for AUTHN-M3/M4/R1/R2; AUTHN-R2 requires imported `sampleAuthenticatedCallsPresent`; evaluate alternate `probe*.json` reports; pass `assessedAt` into `measuredAtFresh`.

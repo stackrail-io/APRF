@@ -256,8 +256,7 @@ export function buildContextCompactionEvalsReport(opts: {
   const gateOk = opts.imported.regressionsBlockRelease === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: ContextCompactionEvalsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: ContextCompactionEvalsReport["summary"]["statusHint"];
   let ctxR2Satisfied: boolean | null = null;
 
   const measuredFail =

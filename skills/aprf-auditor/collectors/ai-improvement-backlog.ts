@@ -7,7 +7,6 @@ import type {
   Collector,
   CollectorContext,
   CollectorResult,
-  EvidenceNode,
 } from "./types.ts";
 import {
   ensureDir,
@@ -187,8 +186,7 @@ export function buildAiImprovementBacklogReport(opts: {
     opts.imported.closedOrPlannedRatePct !== null &&
     opts.imported.closedOrPlannedRatePct >= MIN_CLOSED_OR_PLANNED_PCT;
   const passOk = linkageOk && closedOk && ageOk && importFresh;
-  let statusHint: AiImprovementBacklogReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiImprovementBacklogReport["summary"]["statusHint"];
   let orgR3Satisfied: boolean | null = null;
   const measuredFail =
     opts.imported.found &&

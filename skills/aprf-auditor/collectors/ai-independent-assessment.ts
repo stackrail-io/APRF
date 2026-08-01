@@ -308,8 +308,7 @@ export function buildAiIndependentAssessmentReport(opts: {
   const passOk =
     coverageOk && sampledOk && ownersOk && assessmentFresh && ageOk && importFresh;
 
-  let statusHint: AiIndependentAssessmentReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiIndependentAssessmentReport["summary"]["statusHint"];
   let cmpR3Satisfied: boolean | null = null;
 
   const measuredFail =

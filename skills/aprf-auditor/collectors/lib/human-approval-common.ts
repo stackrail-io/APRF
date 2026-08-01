@@ -4,7 +4,6 @@
 import { join, basename } from "node:path";
 import { writeFileSync } from "node:fs";
 import type {
-  Collector,
   CollectorContext,
   CollectorResult,
   EvidenceClass,

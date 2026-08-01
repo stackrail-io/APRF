@@ -254,8 +254,7 @@ export function buildEvalReleaseGatesReport(opts: {
   const blocksOk = opts.imported.failingGateBlocksDeploy === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: EvalReleaseGatesReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: EvalReleaseGatesReport["summary"]["statusHint"];
   let evlM2Satisfied: boolean | null = null;
 
   const measuredFail =

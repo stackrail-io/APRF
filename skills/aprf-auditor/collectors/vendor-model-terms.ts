@@ -321,8 +321,7 @@ export function buildVendorModelTermsReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: VendorModelTermsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: VendorModelTermsReport["summary"]["statusHint"];
   let priR2Satisfied: boolean | null = null;
 
   const measuredFail =

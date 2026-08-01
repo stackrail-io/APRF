@@ -1,0 +1,27 @@
+id: high-priv-agent-review
+title: High-privilege agent continuous access review (AUTHZ-R2)
+version: "0.2.0"
+executor: collectors/high-priv-agent-review.ts
+evidenceClass: code
+alsoEmits: []
+detectorIds: [high-priv-agent-review]
+inputs:
+  - "Target repo (high-privilege agent inventory, access-review, revoke evidence)"
+  - "Optional coverage: aprf-assessment/imports/high-priv-agent-review/*.{json}"
+collect:
+  - "Detect high-privilege agent inventory, access-review, and revoke/none-warranted signals"
+  - "Ingest review coverage + revoke evidence; write high-priv-agent-review-report.json"
+emits:
+  nodeClass: code
+  refPattern: "aprf-assessment/imports/high-priv-agent-review/*"
+  signals: [high-priv-agent-review, authz-r2, access-review]
+mapsToChecks: [AUTHZ-R2]
+whenUnavailable: >
+  Inventory/docs alone are PARTIAL. AUTHZ-R2 PASS needs
+  everyHighPrivilegeAgentReviewedWithin90Days=true and
+  revokeOrScopeReductionInLastTwoCyclesOrAttestedNoneWarranted=true,
+  measuredAt ≤90 days. Set highPrivilegeAgentIdentitiesPresent=false for
+  NOT_APPLICABLE. Do not score AUTHZ-M3, AUTHZ-R1, or AGN-R3 as substitutes.
+live:
+  required: false
+  note: Offline heuristics + optional imported JSON.

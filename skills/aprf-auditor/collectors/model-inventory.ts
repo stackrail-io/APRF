@@ -255,8 +255,7 @@ export function buildModelInventoryReport(opts: {
     opts.imported.incompleteInventoryRows === 0;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: ModelInventoryReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: ModelInventoryReport["summary"]["statusHint"];
   let modR4Satisfied: boolean | null = null;
 
   const measuredFail =

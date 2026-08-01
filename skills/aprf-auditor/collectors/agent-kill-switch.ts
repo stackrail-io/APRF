@@ -331,8 +331,7 @@ export function buildAgentKillSwitchReport(opts: {
   const architectureReviewOk = opts.imported.architectureReviewOk === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AgentKillSwitchReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AgentKillSwitchReport["summary"]["statusHint"];
   let agnM3Satisfied: boolean | null = null;
 
   const measuredFail =

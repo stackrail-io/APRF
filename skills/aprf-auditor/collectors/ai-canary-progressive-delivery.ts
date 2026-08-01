@@ -245,8 +245,7 @@ export function buildAiCanaryProgressiveDeliveryReport(opts: {
   const noHighTraffic =
     opts.imported.found && opts.imported.highTrafficAiChangeCount === 0;
 
-  let statusHint: AiCanaryProgressiveDeliveryReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiCanaryProgressiveDeliveryReport["summary"]["statusHint"];
   let depR1Satisfied: boolean | null = null;
 
   const explicitFail =

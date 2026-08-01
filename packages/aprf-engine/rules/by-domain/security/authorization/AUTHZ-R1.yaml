@@ -1,43 +1,78 @@
 id: "AUTHZ-R1"
 category: "authorization"
 title: "Production systems should have policy-as-code for tool and model access"
-description: "Policy-as-code for tool and model access"
-whyItMatters: "Policy-as-code for tool and model access Failing this leaves a production gap
-  against: Tool and model access rules are expressed as code and enforced in CI or admission; last
-  failing-to-passing policy change ≤90 days shows a deny for unauthorized tool/model"
+description: >
+  Tool and model access rules shall be expressed as code (OPA, Cedar,
+  IAM-as-code, or equivalent) and enforced in CI or admission—with a
+  ≤90-day failing-to-passing policy change that shows a deny for an
+  unauthorized tool or model.
+whyItMatters: >
+  Prompt-only or console-clicked tool/model permissions drift silently and
+  cannot be regression-tested. Policy-as-code plus CI/admission enforcement,
+  proven by a recent deny-then-pass change, makes tool/model authorization
+  reviewable. Distinct from AUTHZ-M1 (entry-point permission suites),
+  AUTHZ-M4 (document-class ABAC), TOL-M1 (tool allowlists without
+  policy-as-code CI), and AUTHZ-R2 (high-privilege agent access reviews).
 severity: "critical"
 weight: 4
 gate: "recommended"
-passCondition: "Tool and model access rules are expressed as code and enforced in CI or admission;
-  last failing-to-passing policy change ≤90 days shows a deny for unauthorized tool/model"
+passCondition: >
+  Tool and model access rules are expressed as code and enforced in CI or
+  admission; last failing-to-passing policy change ≤90 days shows a deny
+  for unauthorized tool/model (measuredAt ≤90 days). If no production tools
+  or models subject to access control exist, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent) +
-    latest CI policy-check report"
+  - "Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent)"
+  - "CI or admission policy-check wiring covering those rules"
+  - "Latest failing-to-passing policy change ≤90 days showing deny for unauthorized tool/model"
 detection:
   capability: "hybrid"
   detectors:
     - id: "repo-policy-as-code"
-      params: {}
+      params:
+        hint: >
+          Discover OPA/Cedar/IAM-as-code and CI/admission policy-check
+          signals; ingest coverage under imports/policy-as-code/ requiring
+          toolAndModelAccessRulesAsCode=true,
+          ciOrAdmissionEnforcementPresent=true,
+          lastFailingToPassingPolicyChangeShowsDenyWithin90Days=true,
+          measuredAt ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent) +
-          latest CI policy-check report"
-manualVerification: "For this Check (Policy-as-code for tool and model access): inspect current
-  evidence for [Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or
-  equivalent) + latest CI policy-check report] and confirm the pass condition holds — Tool and model
-  access rules are expressed as code and enforced in CI or admission; last failing-to-passing policy
-  change ≤90 days shows a deny for unauthorized tool/model"
-falsePositiveGuidance: "when automation and attestation disagree, prefer the stricter outcome until
-  reconciled. Waive only with owner, expiry, and which signal covers the gap."
+        hint: >
+          If automation cannot prove coverage, attest tool/model access
+          rules as code, CI or admission enforcement, and a ≤90-day
+          failing-to-passing change showing deny for unauthorized
+          tool/model (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production tools or models subject to access control exist.
+  If none, score NOT_APPLICABLE. 2) Locate policy-as-code for tool and
+  model access (OPA/Cedar/IAM-as-code or equivalent)—not prompt text.
+  3) Confirm enforcement in CI or admission (gate that fails closed on
+  policy deny). 4) Review the last failing-to-passing policy change ≤90
+  days: it must demonstrate a deny for an unauthorized tool or model.
+  5) PASS only if rules-as-code + enforcement + deny evidence hold with
+  measuredAt ≤90 days. AUTHZ-M1 entry-point suites alone do not prove
+  policy-as-code. AUTHZ-M4 document-class ABAC alone does not prove
+  tool/model access policy-as-code. TOL-M1 allowlists alone do not prove
+  CI/admission policy-as-code. AUTHZ-R2 access reviews alone do not prove
+  encoded tool/model rules.
+falsePositiveGuidance: >
+  Do not pass OPA/Cedar presence without tool/model access rules. Do not
+  pass CI that only lints YAML without a deny for unauthorized tool/model.
+  Do not pass empty inventories without an explicit N/A attest. Do not
+  score AUTHZ-M1, AUTHZ-M4, TOL-M1, or AUTHZ-R2 as substitutes. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Policy-as-code for tool and model access"
-  - "Retain evidence artifacts required by this Check, starting with: Policy-as-code repo/config for
-    tool and model access (OPA/Cedar/IAM-as-code or equivalent) + latest CI policy-check report"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Express tool and model access rules as code (OPA/Cedar/IAM-as-code or equivalent)"
+  - "Enforce those rules in CI or admission with fail-closed denies"
+  - "Retain a ≤90-day failing-to-passing deny evidence under imports/policy-as-code/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "OWASP Access Control Cheat Sheet"
     url: "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
+  - title: "Open Policy Agent"
+    url: "https://www.openpolicyagent.org/"
   - title: "NIST AI RMF — Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
@@ -46,15 +81,16 @@ relatedRules:
   - "AUTHZ-M3"
   - "AUTHZ-M4"
   - "AUTHZ-R2"
+  - "TOL-M1"
 tags:
   - "authorization"
   - "recommended"
   - "hybrid"
+  - "policy-as-code"
+  - "tool-access"
+  - "model-access"
 applicability:
-  technologies:
-    - "openapi"
-    - "mcp"
-    - "a2a"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

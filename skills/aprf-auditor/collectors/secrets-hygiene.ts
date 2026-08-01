@@ -342,8 +342,7 @@ export function buildSecretsReport(
     );
   }
 
-  let statusHint: SecretsHygieneReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: SecretsHygieneReport["summary"]["statusHint"];
   let sec2M1Satisfied: boolean | null = null;
 
   const scanClean =

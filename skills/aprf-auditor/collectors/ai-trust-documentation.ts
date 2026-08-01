@@ -303,8 +303,7 @@ export function buildAiTrustDocumentationReport(opts: {
   const mapOk = opts.imported.pillarMappingExplicit === true;
   const passOk = urlOk && topicsOk && mapOk && docFresh && ageOk && importFresh;
 
-  let statusHint: AiTrustDocumentationReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiTrustDocumentationReport["summary"]["statusHint"];
   let cmpR2Satisfied: boolean | null = null;
 
   const measuredFail =

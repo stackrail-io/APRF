@@ -268,8 +268,7 @@ export function buildMemoryPoisoningEvalsReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: MemoryPoisoningEvalsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: MemoryPoisoningEvalsReport["summary"]["statusHint"];
   let memR1Satisfied: boolean | null = null;
 
   const measuredFail =

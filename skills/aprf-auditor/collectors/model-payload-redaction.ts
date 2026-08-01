@@ -245,8 +245,7 @@ export function buildModelPayloadRedactionReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: ModelPayloadRedactionReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: ModelPayloadRedactionReport["summary"]["statusHint"];
   let priR1Satisfied: boolean | null = null;
 
   const measuredFail =

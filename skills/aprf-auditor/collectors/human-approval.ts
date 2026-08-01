@@ -111,7 +111,7 @@ export const humanApprovalGatesCollector: Collector = {
     const completeOk = inventoryComplete === true;
     const fresh = measuredAtFresh(measuredAt);
 
-    let statusHint: StatusHint = "not_demonstrated";
+    let statusHint: StatusHint;
     let satisfied: boolean | null = null;
     const notes: string[] = [];
     if (!signals && !inventoryPresent && !gatesPresent && !imported) {
@@ -246,7 +246,7 @@ export const humanApprovalAuditCollector: Collector = {
     const fieldsOk = completePct !== null && completePct >= 100;
     const fresh = measuredAtFresh(measuredAt);
 
-    let statusHint: StatusHint = "not_demonstrated";
+    let statusHint: StatusHint;
     let satisfied: boolean | null = null;
     const notes: string[] = [];
     if (!signals && !schemaPresent && !imported) {
@@ -364,7 +364,7 @@ export const humanApprovalBypassCollector: Collector = {
     const zeroBypass = ungatedSuccesses === 0;
     const fresh = measuredAtFresh(measuredAt);
 
-    let statusHint: StatusHint = "not_demonstrated";
+    let statusHint: StatusHint;
     let satisfied: boolean | null = null;
     const notes: string[] = [];
     if (!signals && !testsPresent && !imported) statusHint = "not_applicable";
@@ -476,7 +476,7 @@ export const humanDualControlCollector: Collector = {
     const noSingle = singleApproverCount === 0;
     const fresh = measuredAtFresh(measuredAt);
 
-    let statusHint: StatusHint = "not_demonstrated";
+    let statusHint: StatusHint;
     let satisfied: boolean | null = null;
     const notes: string[] = [];
     // Level 5 check — still emit N/A only when no dual-control / approval signals
@@ -599,7 +599,7 @@ export const humanApprovalUiCollector: Collector = {
     const fieldsOk = fieldsCompletePct !== null && fieldsCompletePct >= 100;
     const fresh = measuredAtFresh(measuredAt);
 
-    let statusHint: StatusHint = "not_demonstrated";
+    let statusHint: StatusHint;
     let satisfied: boolean | null = null;
     const notes: string[] = [];
     if (!signals && !uiPresent && !imported) statusHint = "not_applicable";
@@ -701,7 +701,7 @@ export const humanApprovalSlaCollector: Collector = {
       (withinSla === false && exceptionsOk === true);
     const fresh = measuredAtFresh(measuredAt);
 
-    let statusHint: StatusHint = "not_demonstrated";
+    let statusHint: StatusHint;
     let satisfied: boolean | null = null;
     const notes: string[] = [];
     if (!signals && !slaPresent && !imported) statusHint = "not_applicable";

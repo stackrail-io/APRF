@@ -229,8 +229,7 @@ export function buildAiConfigAsCodeReport(opts: {
   const liveMatchOk = opts.imported.livePinsMatchDeclaredPct === 100;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AiConfigAsCodeReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiConfigAsCodeReport["summary"]["statusHint"];
   let depM3Satisfied: boolean | null = null;
 
   const explicitFail =

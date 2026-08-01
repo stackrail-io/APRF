@@ -255,8 +255,7 @@ export function buildPromptLintCiReport(opts: {
   const failOk = opts.imported.lastFailingLintExampleRetained === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: PromptLintCiReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: PromptLintCiReport["summary"]["statusHint"];
   let prmR2Satisfied: boolean | null = null;
 
   const measuredFail =

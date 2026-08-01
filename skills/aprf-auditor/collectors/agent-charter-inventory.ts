@@ -288,8 +288,7 @@ export function buildAgentCharterInventoryReport(opts: {
     );
   }
 
-  let statusHint: AgentCharterInventoryReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AgentCharterInventoryReport["summary"]["statusHint"];
   let agnM1Satisfied: boolean | null = null;
 
   const measuredFail =

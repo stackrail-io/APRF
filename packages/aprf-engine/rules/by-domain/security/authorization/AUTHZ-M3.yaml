@@ -1,42 +1,78 @@
 id: "AUTHZ-M3"
 category: "authorization"
 title: "Least-privilege roles must be defined for agents and automation identities"
-description: "Least-privilege roles shall be defined for agents and automation identities"
-whyItMatters: "Least-privilege roles shall be defined for agents and automation identities Failing
-  this leaves a production gap against: 100% of production agent/automation identities appear in the
-  role matrix with non-admin default roles; quarterly (or ≤90-day) access review recorded with 0
-  unexplained privilege escalations"
+description: >
+  Production agent and automation identities shall appear in a role matrix
+  with non-admin default roles—and a ≤90-day access review shall record 0
+  unexplained privilege escalations.
+whyItMatters: >
+  Over-privileged agent/service identities become lasting blast-radius
+  amplifiers once a tool chain or automation is compromised. A complete
+  role matrix with non-admin defaults, plus a fresh access review with no
+  unexplained escalations, makes least privilege measurable. Distinct from
+  AUTHZ-M1 (entry-point permission checks), AUTHZ-R2 (continuous
+  high-privilege agent reviews with revoke evidence), AGN-R3 (RACI
+  ownership), and AUTHN-M2 (MCP/S2S machine identity).
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "100% of production agent/automation identities appear in the role matrix with
-  non-admin default roles; quarterly (or ≤90-day) access review recorded with 0 unexplained
-  privilege escalations"
+passCondition: >
+  100% of production agent/automation identities appear in the role matrix
+  with non-admin default roles; quarterly (or ≤90-day) access review
+  recorded with 0 unexplained privilege escalations (measuredAt ≤90 days).
+  If no production agent or automation identities exist, score
+  NOT_APPLICABLE.
 evidenceRequired:
-  - "Role matrix for every production agent/automation identity + IAM/policy export"
+  - "Inventory of production agent/automation identities"
+  - "Role matrix / IAM-policy export covering those identities with non-admin defaults"
+  - "Access-review record ≤90 days with unexplainedPrivilegeEscalations=0"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "agent-role-matrix"
+      params:
+        hint: >
+          Discover role-matrix / least-privilege / access-review signals;
+          ingest coverage under imports/agent-role-matrix/ requiring
+          identitiesInRoleMatrixWithNonAdminDefaultPct=100,
+          accessReviewWithin90Days=true,
+          unexplainedPrivilegeEscalations=0, measuredAt ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "Role matrix for every production agent/automation identity + IAM/policy export"
-manualVerification: "For this Check (Least-privilege roles must be defined for agents and automation
-  identities): inspect current evidence for [Role matrix for every production agent/automation
-  identity + IAM/policy export] and confirm the pass condition holds — 100% of production
-  agent/automation identities appear in the role matrix with non-admin default roles; quarterly (or
-  ≤90-day) access review recorded with 0 unexplained privilege escalations"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest 100% of production
+          agent/automation identities in a role matrix with non-admin
+          defaults and a ≤90-day access review with 0 unexplained
+          privilege escalations (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production agent or automation identities exist. If none,
+  score NOT_APPLICABLE. 2) Obtain the role matrix / IAM-policy export for
+  those identities. 3) Confirm every identity appears with a non-admin
+  default role (no standing admin/owner by default). 4) Review the latest
+  access review (≤90 days): unexplained privilege escalations = 0.
+  5) PASS only if matrix coverage + non-admin defaults + review hold with
+  measuredAt ≤90 days. AUTHZ-M1 entry-point suites alone do not prove
+  agent identity roles. AUTHZ-R2 high-privilege continuous reviews alone
+  do not prove a complete matrix for all production agent/automation
+  identities. AGN-R3 RACI ownership alone does not prove IAM least
+  privilege. AUTHN-M2 MCP connection identity alone does not prove
+  per-agent role defaults.
+falsePositiveGuidance: >
+  Do not pass CODEOWNERS or RACI registers as a role matrix. Do not pass
+  admin-by-default service accounts with a waiver note alone. Do not pass
+  empty inventories without an explicit N/A attest. Do not score AUTHZ-M1,
+  AUTHZ-R2, AGN-R3, or AUTHN-M2 as substitutes. Named exceptions need
+  owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Least-privilege roles must be defined for agents and automation
-    identities"
-  - "Retain evidence artifacts required by this Check, starting with: Role matrix for every
-    production agent/automation identity + IAM/policy export"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Enumerate every production agent/automation identity in a role matrix with non-admin defaults"
+  - "Export IAM/policy bindings proving defaults are least-privilege"
+  - "Run and retain a ≤90-day access review with 0 unexplained privilege escalations under imports/agent-role-matrix/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "OWASP Access Control Cheat Sheet"
     url: "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
+  - title: "OWASP API Security Top 10 — API5 Broken Function Level Authorization"
+    url: "https://owasp.org/API-Security/"
   - title: "NIST AI RMF — Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
@@ -45,15 +81,17 @@ relatedRules:
   - "AUTHZ-M4"
   - "AUTHZ-R1"
   - "AUTHZ-R2"
+  - "AGN-R3"
+  - "AUTHN-M2"
 tags:
   - "authorization"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "least-privilege"
+  - "agent-identity"
+  - "access-review"
 applicability:
-  technologies:
-    - "openapi"
-    - "mcp"
-    - "a2a"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

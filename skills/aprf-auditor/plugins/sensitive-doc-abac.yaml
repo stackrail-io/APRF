@@ -1,0 +1,28 @@
+id: sensitive-doc-abac
+title: Sensitive document-class ABAC (AUTHZ-M4)
+version: "0.2.0"
+executor: collectors/sensitive-doc-abac.ts
+evidenceClass: code
+alsoEmits: []
+detectorIds: [sensitive-doc-abac]
+inputs:
+  - "Target repo (sensitive document classes, ABAC/Cedar/OPA policy, deny tests)"
+  - "Optional coverage: aprf-assessment/imports/sensitive-doc-abac/*.{json}"
+collect:
+  - "Detect sensitive-class inventory, ABAC/policy, and deny-test signals"
+  - "Ingest enumeration + inventory match + deny-test results; write sensitive-doc-abac-report.json"
+emits:
+  nodeClass: code
+  refPattern: "aprf-assessment/imports/sensitive-doc-abac/*"
+  signals: [sensitive-doc-abac, authz-m4, abac, document-classification]
+mapsToChecks: [AUTHZ-M4]
+whenUnavailable: >
+  ABAC/policy docs alone are PARTIAL. AUTHZ-M4 PASS needs
+  sensitiveDocumentClassesEnumerated=true,
+  inventoryMatchesProductionClasses=true,
+  unauthorizedClassAccessDeniedInTests=true, measuredAt ≤90 days.
+  Set sensitiveDocumentClassesPresent=false for NOT_APPLICABLE.
+  Do not score AUTHZ-M1, AUTHZ-M2, AUTHZ-R1, or CTX-M2 as substitutes.
+live:
+  required: false
+  note: Offline heuristics + optional imported JSON.

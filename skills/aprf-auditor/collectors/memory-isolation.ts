@@ -303,8 +303,7 @@ export function buildMemoryIsolationReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: MemoryIsolationReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: MemoryIsolationReport["summary"]["statusHint"];
   let memM1Satisfied: boolean | null = null;
 
   const measuredFail =

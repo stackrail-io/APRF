@@ -248,8 +248,7 @@ export function buildContextSensitiveInclusionReport(opts: {
     opts.imported.blockOrStripRatePct >= MIN_BLOCK_RATE_PCT;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: ContextSensitiveInclusionReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: ContextSensitiveInclusionReport["summary"]["statusHint"];
   let ctxM3Satisfied: boolean | null = null;
 
   const measuredFail =

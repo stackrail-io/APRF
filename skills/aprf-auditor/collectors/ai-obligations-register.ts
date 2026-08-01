@@ -295,8 +295,7 @@ export function buildAiObligationsRegisterReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: AiObligationsRegisterReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiObligationsRegisterReport["summary"]["statusHint"];
   let cmpM1Satisfied: boolean | null = null;
 
   const measuredFail =

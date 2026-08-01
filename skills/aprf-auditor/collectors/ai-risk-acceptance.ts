@@ -265,8 +265,7 @@ export function buildAiRiskAcceptanceReport(opts: {
   const expiredOk = opts.imported.expiredWaiversWithoutEscalation === 0;
   const passOk = openOk && expiredOk && ageOk && importFresh;
 
-  let statusHint: AiRiskAcceptanceReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiRiskAcceptanceReport["summary"]["statusHint"];
   let orgR4Satisfied: boolean | null = null;
 
   const measuredFail =

@@ -290,8 +290,7 @@ export function buildPlatformOwnershipSupportReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: PlatformOwnershipSupportReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: PlatformOwnershipSupportReport["summary"]["statusHint"];
   let dxR4Satisfied: boolean | null = null;
 
   const measuredFail =

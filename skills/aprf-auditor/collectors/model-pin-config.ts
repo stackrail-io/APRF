@@ -253,8 +253,7 @@ export function buildModelPinConfigReport(opts: {
   const rejectOk = opts.imported.lintOrCiRejectsLatest === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: ModelPinConfigReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: ModelPinConfigReport["summary"]["statusHint"];
   let modM1Satisfied: boolean | null = null;
 
   const measuredFail =

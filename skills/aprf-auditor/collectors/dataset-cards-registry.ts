@@ -338,8 +338,7 @@ export function buildDatasetCardsRegistryReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: DatasetCardsRegistryReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: DatasetCardsRegistryReport["summary"]["statusHint"];
   let dgR3Satisfied: boolean | null = null;
 
   const measuredFail =

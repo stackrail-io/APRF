@@ -235,8 +235,7 @@ export function buildOneClickAiRollbackReport(opts: {
     opts.imported.exerciseOrRealRollbackWithinRtoLast90Days === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: OneClickAiRollbackReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: OneClickAiRollbackReport["summary"]["statusHint"];
   let chgR1Satisfied: boolean | null = null;
 
   const measuredFail =

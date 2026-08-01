@@ -235,8 +235,7 @@ export function buildPromptVersionRegistryReport(opts: {
     opts.imported.productionPromptsMissingOwner === 0;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: PromptVersionRegistryReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: PromptVersionRegistryReport["summary"]["statusHint"];
   let prmM1Satisfied: boolean | null = null;
 
   const measuredFail =

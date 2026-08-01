@@ -2229,37 +2229,37 @@
       "mandatoryChecks": [
         {
           "id": "AUTHZ-M1",
-          "requirement": "Authorization shall be enforced server-side for AI features, tools, and retrieval",
-          "artifact": "Authz middleware/policy tests for AI feature, tool, and retrieval entry points",
-          "passCondition": "Automated tests cover 100% of production AI feature, tool, and retrieval entry points; unauthenticated or unauthorized callers are denied at 100% in the suite",
-          "method": "automated",
+          "requirement": "Privileged AI feature, tool, and retrieval entry points shall enforce authorization server-side\u2014so authenticated callers lacking required permission or scope cannot invoke those surfaces.",
+          "artifact": "Inventory of privileged AI feature/tool/retrieval entry points + server-side authz policy + authz suite (authenticated-but-unauthorized denied)",
+          "passCondition": "100% of privileged AI feature, tool, and retrieval entry points enforce authorization server-side; 0 successful requests from authenticated callers lacking required permission or scope in the authz suite (measuredAt \u226490 days). NOT_APPLICABLE if no privileged AI feature, tool, or retrieval entry points.",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "AUTHZ-M2",
-          "requirement": "Multi-tenant isolation shall be tested for AI data and memory paths",
-          "artifact": "Cross-tenant attack test suite results for AI data stores and memory APIs",
-          "passCondition": "0 successful unauthorized cross-tenant reads/writes across \u226510 automated attack cases on AI data and memory paths",
-          "method": "manual",
+          "requirement": "Multi-tenant AI data and memory paths shall deny unauthorized cross-tenant reads and writes\u2014proven by an automated attack suite, not by tenant filters in code alone.",
+          "artifact": "Inventory of multi-tenant AI data/memory paths + cross-tenant attack suite (\u226510 cases) + scored report",
+          "passCondition": "0 successful unauthorized cross-tenant reads/writes across \u226510 automated attack cases on AI data and memory paths (measuredAt \u226490 days). NOT_APPLICABLE if no multi-tenant AI data or memory paths.",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "AUTHZ-M3",
-          "requirement": "Least-privilege roles shall be defined for agents and automation identities",
-          "artifact": "Role matrix for every production agent/automation identity + IAM/policy export",
-          "passCondition": "100% of production agent/automation identities appear in the role matrix with non-admin default roles; quarterly (or \u226490-day) access review recorded with 0 unexplained privilege escalations",
-          "method": "manual",
+          "requirement": "Production agent and automation identities shall appear in a role matrix with non-admin default roles\u2014and a \u226490-day access review shall record 0 unexplained privilege escalations.",
+          "artifact": "Inventory of production agent/automation identities + role matrix/IAM export + \u226490-day access-review record",
+          "passCondition": "100% of production agent/automation identities appear in the role matrix with non-admin default roles; quarterly (or \u226490-day) access review recorded with 0 unexplained privilege escalations (measuredAt \u226490 days). NOT_APPLICABLE if no production agent or automation identities.",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "AUTHZ-M4",
-          "requirement": "Attribute-based controls shall govern access to sensitive document classes",
-          "artifact": "ABAC/policy config + sample allow/deny decisions for sensitive classes",
-          "passCondition": "PASS if sensitive document classes are enumerated and policy denies unauthorized class access in tests; inventory matches production classes",
-          "method": "manual",
+          "requirement": "Sensitive document classes used by AI retrieval or grounding shall be enumerated and governed by attribute-based policy (subject/resource attributes)\u2014with tests proving unauthorized class access is denied and the inventory matching production classes.",
+          "artifact": "Sensitive document-class inventory + ABAC/policy config + deny-test results matching production",
+          "passCondition": "Sensitive document classes are enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class access in tests; inventory matches production classes (measuredAt \u226490 days). NOT_APPLICABLE if no sensitive document classes are in scope for AI retrieval or grounding.",
+          "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -2267,19 +2267,19 @@
       "recommendedChecks": [
         {
           "id": "AUTHZ-R1",
-          "requirement": "Policy-as-code for tool and model access",
-          "artifact": "Policy-as-code repo/config for tool and model access (OPA/Cedar/IAM-as-code or equivalent) + latest CI policy-check report",
-          "passCondition": "Tool and model access rules are expressed as code and enforced in CI or admission; last failing-to-passing policy change \u226490 days shows a deny for unauthorized tool/model",
+          "requirement": "Tool and model access rules shall be expressed as code (OPA, Cedar, IAM-as-code, or equivalent) and enforced in CI or admission\u2014with a \u226490-day failing-to-passing policy change that shows a deny for an unauthorized tool or model.",
+          "artifact": "Policy-as-code for tool/model access + CI/admission policy-check + \u226490-day deny evidence",
+          "passCondition": "Tool and model access rules are expressed as code and enforced in CI or admission; last failing-to-passing policy change \u226490 days shows a deny for unauthorized tool/model (measuredAt \u226490 days). NOT_APPLICABLE if no production tools or models subject to access control.",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "AUTHZ-R2",
-          "requirement": "Continuous access reviews for high-privilege agents",
-          "artifact": "High-privilege agent inventory + last access-review spreadsheet/report with decisions (keep/revoke/modify)",
-          "passCondition": "Every high-privilege agent identity was reviewed \u226490 days ago; \u22651 revoke or scope-reduction appears in the last two cycles (or attestation that none were warranted with reviewer sign-off)",
-          "method": "manual",
+          "requirement": "Every high-privilege agent identity shall be reviewed \u226490 days ago, with \u22651 revoke or scope-reduction in the last two cycles\u2014or a signed attestation that none were warranted.",
+          "artifact": "High-privilege agent inventory + \u226490-day access-review report with keep/revoke/modify + revoke or none-warranted evidence",
+          "passCondition": "Every high-privilege agent identity was reviewed \u226490 days ago; \u22651 revoke or scope-reduction appears in the last two cycles (or attestation that none were warranted with reviewer sign-off) (measuredAt \u226490 days). NOT_APPLICABLE if no high-privilege agent identities.",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }

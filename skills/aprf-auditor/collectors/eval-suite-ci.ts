@@ -242,8 +242,7 @@ export function buildEvalSuiteCiReport(opts: {
     opts.imported.relevantChangesMissingTriggerOrWaiver === 0;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: EvalSuiteCiReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: EvalSuiteCiReport["summary"]["statusHint"];
   let evlM1Satisfied: boolean | null = null;
 
   const measuredFail =

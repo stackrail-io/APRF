@@ -279,8 +279,7 @@ export function buildAiControlTestingReport(opts: {
   const passOk =
     scheduleOk && exceptionsOk && cycleOk && ageOk && importFresh;
 
-  let statusHint: AiControlTestingReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiControlTestingReport["summary"]["statusHint"];
   let cmpR1Satisfied: boolean | null = null;
 
   const measuredFail =

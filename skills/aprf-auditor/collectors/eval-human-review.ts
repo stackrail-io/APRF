@@ -264,8 +264,7 @@ export function buildEvalHumanReviewReport(opts: {
     opts.imported.disagreementsMissingAdjudication === 0;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: EvalHumanReviewReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: EvalHumanReviewReport["summary"]["statusHint"];
   let evlR2Satisfied: boolean | null = null;
 
   const measuredFail =

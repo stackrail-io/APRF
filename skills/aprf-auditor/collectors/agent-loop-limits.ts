@@ -5,7 +5,7 @@
  * plus enforcement-test signals. Import measured abort results under
  * imports/agent-loop-limits/ to unlock PASS.
  */
-import { writeFileSync, existsSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
 import type {
   Collector,
@@ -280,8 +280,7 @@ export function buildAgentLoopLimitsReport(opts: {
     );
   }
 
-  let statusHint: AgentLoopLimitsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AgentLoopLimitsReport["summary"]["statusHint"];
   let agnM2Satisfied: boolean | null = null;
 
   const measuredFail =

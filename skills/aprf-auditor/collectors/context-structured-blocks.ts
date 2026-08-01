@@ -238,8 +238,7 @@ export function buildContextStructuredBlocksReport(opts: {
   const overwriteOk = opts.imported.instructionOverwriteBlocked === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: ContextStructuredBlocksReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: ContextStructuredBlocksReport["summary"]["statusHint"];
   let ctxR3Satisfied: boolean | null = null;
 
   const measuredFail =

@@ -276,8 +276,7 @@ export function buildQualitySloAutoRollbackReport(opts: {
       wiredOk);
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: QualitySloAutoRollbackReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: QualitySloAutoRollbackReport["summary"]["statusHint"];
   let chgR3Satisfied: boolean | null = null;
 
   const measuredFail =

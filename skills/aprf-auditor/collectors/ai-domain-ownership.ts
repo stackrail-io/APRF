@@ -286,8 +286,7 @@ export function buildAiDomainOwnershipReport(opts: {
     opts.imported.requiredDomainOwnerFieldCount > 0;
   const passOk = coverageOk && missingOk && fieldsOk && ageOk && importFresh;
 
-  let statusHint: AiDomainOwnershipReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiDomainOwnershipReport["summary"]["statusHint"];
   let orgR2Satisfied: boolean | null = null;
 
   const measuredFail =

@@ -21,10 +21,18 @@ import {
   rel,
   walkFiles,
 } from "./lib/fs.ts";
+import {
+  asBool,
+  measuredAtFresh,
+  mergeOldestMeasuredAt,
+  mergeOrBool,
+  parseMeasuredAt,
+} from "./lib/import-attest.ts";
 
 const PLUGIN_ID = "cross-tenant-tests";
 const RELATED = ["AUTHZ-M2"] as const;
 const MIN_ATTACK_CASES = 10;
+const IMPORT_MAX_AGE_DAYS = 90;
 
 const ISOLATION_CODE_RE =
   /\b(access_grants|has_access|has_connection_access|has_access_to_file|user_id\s*==|filter.*user_id|tenant_id|org_id|workspace_id|cross[_-]?tenant|multi[_-]?tenant)/i;
@@ -77,9 +85,11 @@ export interface CrossTenantReport {
   pluginId: typeof PLUGIN_ID;
   relatedCheckIds: string[];
   assessedAt: string;
+  measuredAt: string | null;
   isolationCodeFound: boolean;
   isolationRefs: string[];
   aiDataPathRefs: string[];
+  multiTenantAiDataOrMemoryPathsPresent: boolean | null;
   cases: CrossTenantCase[];
   summary: {
     attackCases: number;
@@ -87,8 +97,14 @@ export interface CrossTenantReport {
     pass: number;
     fail: number;
     minRequired: number;
-    /** true iff ≥10 cases and 0 unauthorized successes */
+    /** true iff ≥10 cases, 0 unauthorized successes, measuredAt fresh */
     authzM2Satisfied: boolean | null;
+    statusHint:
+      | "pass"
+      | "partial"
+      | "fail"
+      | "not_demonstrated"
+      | "not_applicable";
   };
   notes: string[];
 }
@@ -206,9 +222,13 @@ function extractCasesFromTestFile(
 function loadImportedSuite(ctx: CollectorContext): {
   cases: CrossTenantCase[];
   sources: string[];
+  measuredAt: string | null;
+  multiTenantAiDataOrMemoryPathsPresent: boolean | null;
 } {
   const cases: CrossTenantCase[] = [];
   const sources: string[] = [];
+  let measuredAt: string | null = null;
+  let multiTenantAiDataOrMemoryPathsPresent: boolean | null = null;
   for (const file of listImportFiles(ctx.outputDir, PLUGIN_ID)) {
     if (!/\.json$/i.test(file)) continue;
     if (/cross-tenant-report\.json$/i.test(file)) continue;
@@ -216,31 +236,46 @@ function loadImportedSuite(ctx: CollectorContext): {
     if (!text) continue;
     try {
       const data = JSON.parse(text) as Record<string, unknown>;
+      measuredAt = mergeOldestMeasuredAt(measuredAt, parseMeasuredAt(data));
+      multiTenantAiDataOrMemoryPathsPresent = mergeOrBool(
+        multiTenantAiDataOrMemoryPathsPresent,
+        asBool(data.multiTenantAiDataOrMemoryPathsPresent) ??
+          asBool(data.multi_tenant_ai_data_or_memory_paths_present) ??
+          asBool(data.multiTenantAiDataPathsPresent),
+      );
       const src = rel(ctx.outputDir, file);
-      const rawCases =
-        (data.cases as Array<Record<string, unknown>>) ||
-        (data.attackCases as Array<Record<string, unknown>>) ||
-        [];
-      for (let i = 0; i < rawCases.length; i++) {
-        const c = rawCases[i];
+      const before = cases.length;
+      const caseList: Array<Record<string, unknown>> = Array.isArray(data.cases)
+        ? (data.cases as Array<Record<string, unknown>>)
+        : Array.isArray(data.attackCases)
+          ? (data.attackCases as Array<Record<string, unknown>>)
+          : [];
+
+      for (let i = 0; i < caseList.length; i++) {
+        const c = caseList[i];
+        if (!c || typeof c !== "object") continue;
         const result = String(c.result || c.status || "").toLowerCase();
         const unauthorizedSuccess =
           c.unauthorizedSuccess === true ||
           result === "leak" ||
           result === "fail" ||
           result === "breach";
+        // Explicit denial evidence required — empty result/status is not enough,
+        // and ok:false must not be treated as a passing denial assertion.
         const expectsDenial =
-          c.expectsDenial !== false &&
           !unauthorizedSuccess &&
-          (result === "pass" ||
-            result === "denied" ||
-            result === "ok" ||
+          c.expectsDenial !== false &&
+          c.ok !== false &&
+          (c.expectsDenial === true ||
             c.ok === true ||
-            result === "");
+            result === "pass" ||
+            result === "denied" ||
+            result === "ok");
         cases.push({
           id: String(c.id || c.name || `import-${i + 1}`),
           source: src,
-          aiDataPathHint: (c.aiDataPathHint as string) || (c.path as string) || null,
+          aiDataPathHint:
+            (c.aiDataPathHint as string) || (c.path as string) || null,
           expectsDenial,
           unauthorizedSuccess,
           ok: expectsDenial && !unauthorizedSuccess,
@@ -248,7 +283,7 @@ function loadImportedSuite(ctx: CollectorContext): {
       }
       // Compact summary form: { attackCases: 12, unauthorizedSuccesses: 0 }
       if (
-        rawCases.length === 0 &&
+        caseList.length === 0 &&
         typeof data.attackCases === "number" &&
         data.attackCases > 0
       ) {
@@ -266,12 +301,23 @@ function loadImportedSuite(ctx: CollectorContext): {
           });
         }
       }
-      if (cases.some((c) => c.source === src)) sources.push(src);
+      const hasPresentAttest =
+        asBool(data.multiTenantAiDataOrMemoryPathsPresent) !== null ||
+        asBool(data.multi_tenant_ai_data_or_memory_paths_present) !== null ||
+        asBool(data.multiTenantAiDataPathsPresent) !== null;
+      if (cases.length > before || hasPresentAttest || parseMeasuredAt(data)) {
+        sources.push(src);
+      }
     } catch {
       /* skip */
     }
   }
-  return { cases, sources };
+  return {
+    cases,
+    sources,
+    measuredAt,
+    multiTenantAiDataOrMemoryPathsPresent,
+  };
 }
 
 export function buildCrossTenantReport(
@@ -281,14 +327,23 @@ export function buildCrossTenantReport(
     repoCases: CrossTenantCase[];
     importedCases: CrossTenantCase[];
     importedSources: string[];
+    importedMeasuredAt: string | null;
+    multiTenantAiDataOrMemoryPathsPresent: boolean | null;
   },
 ): CrossTenantReport {
   const notes: string[] = [];
-  // Prefer explicit imported suite; else repo-discovered cases
+  const usedImport = opts.importedCases.length > 0;
+  // Merge import + repo cases so a vacuous/passing import cannot mask in-repo
+  // leak or missing-denial evidence.
   const cases =
-    opts.importedCases.length > 0 ? opts.importedCases : opts.repoCases;
+    opts.importedCases.length > 0 && opts.repoCases.length > 0
+      ? [...opts.importedCases, ...opts.repoCases]
+      : opts.importedCases.length > 0
+        ? opts.importedCases
+        : opts.repoCases;
 
-  const unauthorizedSuccesses = cases.filter((c) => c.unauthorizedSuccess).length;
+  const unauthorizedSuccesses = cases.filter((c) => c.unauthorizedSuccess)
+    .length;
   const pass = cases.filter((c) => c.ok).length;
   const fail = cases.length - pass;
 
@@ -320,19 +375,91 @@ export function buildCrossTenantReport(
     notes.push(`Imported suite from: ${opts.importedSources.join(", ")}`);
   }
 
-  const authzM2Satisfied =
-    cases.length === 0
-      ? null
-      : cases.length >= MIN_ATTACK_CASES && unauthorizedSuccesses === 0;
+  // Repo-discovered cases are measured at assessment time; import suites need dated measuredAt.
+  let measuredAt: string | null = usedImport
+    ? opts.importedMeasuredAt
+    : ctx.assessedAt.toISOString();
+  if (usedImport && !opts.importedMeasuredAt) {
+    notes.push(
+      "Imported suite lacks measuredAt — required to unlock AUTHZ-M2 PASS.",
+    );
+  }
+
+  const fresh = measuredAtFresh(
+    measuredAt,
+    ctx.assessedAt,
+    IMPORT_MAX_AGE_DAYS,
+  );
+
+  const surfaceEvidence =
+    opts.isolation.aiDataRefs.length > 0 ||
+    cases.length > 0 ||
+    cases.some((c) => c.aiDataPathHint);
+
+  let presentAttest = opts.multiTenantAiDataOrMemoryPathsPresent;
+  if (surfaceEvidence && presentAttest === false) {
+    notes.push(
+      "Imported multiTenantAiDataOrMemoryPathsPresent=false ignored — AI data/memory path or suite evidence proves the surface exists.",
+    );
+    presentAttest = true;
+  }
+
+  let statusHint: CrossTenantReport["summary"]["statusHint"];
+  let authzM2Satisfied: boolean | null = null;
+
+  if (cases.length === 0 && presentAttest === false) {
+    statusHint = "not_applicable";
+    authzM2Satisfied = null;
+    notes.push(
+      "Imported multiTenantAiDataOrMemoryPathsPresent=false — AUTHZ-M2 NOT_APPLICABLE.",
+    );
+  } else if (unauthorizedSuccesses > 0) {
+    statusHint = "fail";
+    authzM2Satisfied = false;
+  } else if (
+    cases.length >= MIN_ATTACK_CASES &&
+    unauthorizedSuccesses === 0 &&
+    fail === 0 &&
+    fresh
+  ) {
+    statusHint = "pass";
+    authzM2Satisfied = true;
+  } else if (
+    cases.length > 0 ||
+    opts.isolation.found ||
+    opts.isolation.aiDataRefs.length > 0 ||
+    opts.importedSources.length > 0
+  ) {
+    statusHint = "partial";
+    authzM2Satisfied = cases.length === 0 ? null : false;
+    if (cases.length >= MIN_ATTACK_CASES && fail > 0) {
+      notes.push(
+        `${fail} attack case(s) lack denial assertions — AUTHZ-M2 requires expectsDenial on each case.`,
+      );
+    }
+    if (cases.length >= MIN_ATTACK_CASES && fail === 0 && !fresh) {
+      notes.push(
+        "Suite measuredAt older than 90 days (or missing) — required to unlock AUTHZ-M2 PASS.",
+      );
+    }
+  } else {
+    statusHint = "not_demonstrated";
+    authzM2Satisfied = null;
+    notes.push(
+      "No multi-tenant AI data/memory paths demonstrated — AUTHZ-M2 remains not demonstrated until paths/suite evidence exists or an explicit N/A attest (multiTenantAiDataOrMemoryPathsPresent=false) is imported.",
+    );
+  }
 
   return {
     schemaVersion: "0.2.0",
     pluginId: PLUGIN_ID,
     relatedCheckIds: [...RELATED],
     assessedAt: ctx.assessedAt.toISOString(),
+    measuredAt,
     isolationCodeFound: opts.isolation.found,
     isolationRefs: opts.isolation.refs,
     aiDataPathRefs: opts.isolation.aiDataRefs,
+    multiTenantAiDataOrMemoryPathsPresent: presentAttest,
     cases: cases.slice(0, 200),
     summary: {
       attackCases: cases.length,
@@ -341,6 +468,7 @@ export function buildCrossTenantReport(
       fail,
       minRequired: MIN_ATTACK_CASES,
       authzM2Satisfied,
+      statusHint,
     },
     notes,
   };
@@ -364,6 +492,9 @@ export const crossTenantTestsCollector: Collector = {
       repoCases,
       importedCases: imported.cases,
       importedSources: imported.sources,
+      importedMeasuredAt: imported.measuredAt,
+      multiTenantAiDataOrMemoryPathsPresent:
+        imported.multiTenantAiDataOrMemoryPathsPresent,
     });
 
     ensureDir(importDir(ctx));
@@ -396,6 +527,7 @@ export const crossTenantTestsCollector: Collector = {
         signals: [
           "cross-tenant-tests",
           "authz-m2",
+          `authz-m2-${report.summary.statusHint}`,
           ...(report.summary.authzM2Satisfied
             ? ["authz-m2-satisfied"]
             : ["authz-m2-fail-or-incomplete"]),
@@ -430,7 +562,7 @@ export const crossTenantTestsCollector: Collector = {
     return {
       pluginId: PLUGIN_ID,
       status: "ran",
-      detail: `AUTHZ-M2 attackCases=${report.summary.attackCases} unauthorizedSuccesses=${report.summary.unauthorizedSuccesses} satisfied=${report.summary.authzM2Satisfied}; report=imports/${PLUGIN_ID}/cross-tenant-report.json`,
+      detail: `AUTHZ-M2 status=${report.summary.statusHint} attackCases=${report.summary.attackCases} unauthorizedSuccesses=${report.summary.unauthorizedSuccesses} satisfied=${report.summary.authzM2Satisfied}; report=imports/${PLUGIN_ID}/cross-tenant-report.json`,
       nodes,
     };
   },

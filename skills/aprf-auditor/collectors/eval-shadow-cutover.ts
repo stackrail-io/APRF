@@ -250,8 +250,7 @@ export function buildEvalShadowCutoverReport(opts: {
     opts.imported.promotionCriteriaMetBeforeFullTraffic === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: EvalShadowCutoverReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: EvalShadowCutoverReport["summary"]["statusHint"];
   let evlM4Satisfied: boolean | null = null;
 
   const measuredFail =

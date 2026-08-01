@@ -1,41 +1,77 @@
 id: "AUTHZ-M4"
 category: "authorization"
 title: "Attribute-based controls must govern access to sensitive document classes"
-description: "Attribute-based controls shall govern access to sensitive document classes"
-whyItMatters: "Attribute-based controls shall govern access to sensitive document classes Failing
-  this leaves a production gap against: Sensitive document classes are enumerated; attribute-based
-  policy (subject/resource attributes) denies unauthorized class access in tests; inventory matches
-  production classes"
+description: >
+  Sensitive document classes used by AI retrieval or grounding shall be
+  enumerated and governed by attribute-based policy (subject/resource
+  attributes)—with tests proving unauthorized class access is denied and
+  the inventory matching production classes.
+whyItMatters: >
+  RAG and document-grounded agents that ignore classification attributes
+  leak regulated or confidential corpora to callers who only cleared a
+  coarse role check. Enumerating classes, binding ABAC policy to
+  subject/resource attributes, and proving deny-in-tests makes that
+  control measurable. Distinct from AUTHZ-M1 (entry-point permission
+  checks), AUTHZ-M2 (cross-tenant isolation), AUTHZ-R1 (policy-as-code for
+  tools/models), and CTX-M2 (context source ACLs without class ABAC).
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "Sensitive document classes are enumerated; attribute-based policy (subject/resource
-  attributes) denies unauthorized class access in tests; inventory matches production classes"
+passCondition: >
+  Sensitive document classes are enumerated; attribute-based policy
+  (subject/resource attributes) denies unauthorized class access in tests;
+  inventory matches production classes (measuredAt ≤90 days). If no
+  sensitive document classes are in scope for AI retrieval or grounding,
+  score NOT_APPLICABLE.
 evidenceRequired:
-  - "ABAC/policy config + sample allow/deny decisions for sensitive classes"
+  - "Inventory of sensitive document classes used by AI retrieval/grounding"
+  - "ABAC/policy config binding subject/resource attributes to those classes"
+  - "Test results showing unauthorized class access denied; inventory matches production (measuredAt ≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "sensitive-doc-abac"
+      params:
+        hint: >
+          Discover sensitive-class / ABAC / Cedar/OPA policy signals; ingest
+          coverage under imports/sensitive-doc-abac/ requiring
+          sensitiveDocumentClassesEnumerated=true,
+          inventoryMatchesProductionClasses=true,
+          unauthorizedClassAccessDeniedInTests=true, measuredAt ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "ABAC/policy config + sample allow/deny decisions for sensitive classes"
-manualVerification: "For this Check (Attribute-based controls must govern access to sensitive
-  document classes): inspect current evidence for [ABAC/policy config + sample allow/deny decisions
-  for sensitive classes] and confirm the pass condition holds — Sensitive document classes are
-  enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class access
-  in tests; inventory matches production classes"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest enumerated sensitive
+          document classes, ABAC policy deny of unauthorized class access in
+          tests, and inventory matching production (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm sensitive document classes are in scope for AI retrieval or
+  grounding. If none, score NOT_APPLICABLE. 2) Obtain the class inventory
+  and confirm it matches production classes. 3) Confirm ABAC (or equivalent
+  attribute-based) policy uses subject/resource attributes—not role-only
+  checks alone—to gate those classes. 4) Review tests: unauthorized class
+  access is denied. 5) PASS only if enumeration + inventory match + deny
+  tests hold with measuredAt ≤90 days. AUTHZ-M1 entry-point suites alone
+  do not prove class-attribute policy. AUTHZ-M2 cross-tenant suites alone
+  do not prove sensitive-class ABAC. AUTHZ-R1 tool/model policy-as-code
+  alone does not prove document-class ABAC. CTX-M2 context-source ACLs
+  alone do not prove enumerated sensitive-class attribute policy.
+falsePositiveGuidance: >
+  Do not pass RBAC role checks without subject/resource class attributes.
+  Do not pass an incomplete class list that omits production sensitive
+  corpora. Do not pass empty inventories without an explicit N/A attest.
+  Do not score AUTHZ-M1, AUTHZ-M2, AUTHZ-R1, or CTX-M2 as substitutes.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Attribute-based controls must govern access to sensitive document
-    classes"
-  - "Retain evidence artifacts required by this Check, starting with: ABAC/policy config + sample
-    allow/deny decisions for sensitive classes"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Enumerate every sensitive document class used by AI retrieval/grounding"
+  - "Enforce ABAC (subject/resource attributes) denying unauthorized class access"
+  - "Retain deny-test results + inventory match under imports/sensitive-doc-abac/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "OWASP Access Control Cheat Sheet"
     url: "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
+  - title: "NIST ABAC — Guide to Attribute Based Access Control"
+    url: "https://csrc.nist.gov/pubs/sp/800/162/final"
   - title: "NIST AI RMF — Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
@@ -44,15 +80,16 @@ relatedRules:
   - "AUTHZ-M3"
   - "AUTHZ-R1"
   - "AUTHZ-R2"
+  - "CTX-M2"
 tags:
   - "authorization"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "abac"
+  - "document-classification"
+  - "rag"
 applicability:
-  technologies:
-    - "openapi"
-    - "mcp"
-    - "a2a"
+  technologies: []
   minCriticality: 3
   requiredFromLevel: 5
 status: "active"

@@ -300,8 +300,7 @@ export function buildPlatformDxMetricsReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: PlatformDxMetricsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: PlatformDxMetricsReport["summary"]["statusHint"];
   let dxR3Satisfied: boolean | null = null;
 
   const measuredFail =

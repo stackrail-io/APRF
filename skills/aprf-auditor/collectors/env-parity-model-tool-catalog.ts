@@ -232,8 +232,7 @@ export function buildEnvParityModelToolCatalogReport(opts: {
       opts.imported.coversModelPinsAndToolCatalogs === null);
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: EnvParityModelToolCatalogReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: EnvParityModelToolCatalogReport["summary"]["statusHint"];
   let depR2Satisfied: boolean | null = null;
 
   const explicitFail =

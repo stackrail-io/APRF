@@ -237,8 +237,7 @@ export function buildModelPromotionEvalReport(opts: {
   const blockOk = opts.imported.promoteWithoutEvalBlocked === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: ModelPromotionEvalReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: ModelPromotionEvalReport["summary"]["statusHint"];
   let modM2Satisfied: boolean | null = null;
 
   const measuredFail =

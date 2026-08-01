@@ -1,49 +1,77 @@
 id: "AUTHZ-M1"
 category: "authorization"
 title: "Authorization must be enforced server-side for AI features, tools, and retrieval"
-description: "Authorization shall be enforced server-side for AI features, tools, and retrieval"
-whyItMatters: "Authorization shall be enforced server-side for AI features, tools, and retrieval
-  Failing this leaves a production gap against: 100% of privileged AI feature, tool, and retrieval
-  entry points enforce authorization server-side; 0 successful requests from authenticated callers
-  lacking required permission or scope in the authz suite"
+description: >
+  Privileged AI feature, tool, and retrieval entry points shall enforce
+  authorization server-side—so authenticated callers lacking required
+  permission or scope cannot invoke those surfaces.
+whyItMatters: >
+  Authn alone is not authz: a valid login still lets an under-privileged
+  caller abuse tools, retrieval, and AI features unless the server denies
+  them. A fresh inventory of privileged entry points plus an authz suite
+  showing authenticated-but-unauthorized callers denied makes the control
+  measurable. Distinct from AUTHN-M1 (unauthenticated rejection), AUTHZ-M2
+  (cross-tenant isolation), and AUTHN-M4 (subject propagation through
+  agent/tool hops).
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "100% of privileged AI feature, tool, and retrieval entry points enforce
-  authorization server-side; 0 successful requests from authenticated callers lacking required
-  permission or scope in the authz suite"
+passCondition: >
+  100% of privileged AI feature, tool, and retrieval entry points enforce
+  authorization server-side; 0 successful requests from authenticated
+  callers lacking required permission or scope in the authz suite
+  (measuredAt ≤90 days). If no privileged AI feature, tool, or retrieval
+  entry points exist, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Server-side authz middleware/policy for AI feature, tool, and retrieval entry points"
-  - "Authz suite results showing authenticated-but-unauthorized callers denied on those entry points"
+  - "Inventory of privileged AI feature, tool, and retrieval entry points"
+  - "Server-side authz middleware/policy on those entry points"
+  - "Authz suite results showing authenticated-but-unauthorized callers denied (measuredAt ≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "authz-entry-tests"
+      params:
+        hint: >
+          Discover privileged AI HTTP entry points; detect server-side authz
+          guards; score denial-test coverage (or ingest coverage under
+          imports/authz-entry-tests/); require measuredAt ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "Server-side authz middleware/policy + unauthorized-caller suite for AI feature/tool/retrieval
-          entry points"
-manualVerification: "For this Check (Authorization must be enforced server-side for AI features,
-  tools, and retrieval): inspect current evidence for [Server-side authz middleware/policy for AI
-  feature, tool, and retrieval entry points; Authz suite results showing
-  authenticated-but-unauthorized callers denied on those entry points] and confirm the pass
-  condition holds — 100% of privileged AI feature, tool, and retrieval entry points enforce
-  authorization server-side; 0 successful requests from authenticated callers lacking required
-  permission or scope in the authz suite"
-falsePositiveGuidance: "confirm the detector target matches the production path for this Check
-  before waiving. Named exceptions need an owner and expiry ≤90 days. Do not score AUTHN-M1
-  (unauthenticated rejection) as satisfying this Check — require authenticated but unauthorized
-  callers."
+        hint: >
+          If automation cannot prove coverage, attest 100% of privileged AI
+          feature/tool/retrieval entry points enforce server-side authz and
+          the authz suite denies authenticated-but-unauthorized callers
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm privileged AI feature, tool, or retrieval entry points exist.
+  If none, score NOT_APPLICABLE. 2) Inventory those entry points (route
+  catalog, tool handlers, or equivalent). 3) Confirm each enforces
+  authorization server-side (middleware/policy/Depends)—not prompt text or
+  client-only checks. 4) Review an authz suite: authenticated callers
+  lacking required permission/scope are denied (401/403); 0 successful
+  unauthorized accesses. 5) PASS only if inventory + server-side
+  enforcement + suite hold with measuredAt ≤90 days. AUTHN-M1
+  unauthenticated probes alone do not prove unauthorized-caller denial.
+  AUTHZ-M2 cross-tenant suites alone do not prove least-privilege on
+  feature/tool/retrieval entry points. AUTHN-M4 subject-propagation
+  samples alone do not prove entry-point permission checks. TOL-M1 tool
+  allowlists alone do not prove authenticated-but-unauthorized denial tests.
+falsePositiveGuidance: >
+  Do not pass auth middleware presence without an authz suite that denies
+  authenticated-but-unauthorized callers. Do not pass unauthenticated
+  (AUTHN-M1) rejection as this Check. Do not pass empty inventories without
+  an explicit N/A attest. Do not score AUTHZ-M2, AUTHN-M4, or TOL-M1 as
+  substitutes. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Authorization must be enforced server-side for AI features,
-    tools, and retrieval"
-  - "Retain evidence artifacts required by this Check, starting with: Server-side authz
-    middleware/policy for AI feature, tool, and retrieval entry points"
-  - "Add or extend an authz suite that denies authenticated callers lacking required permission or
-    scope on AI feature, tool, and retrieval entry points"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Enforce server-side authorization on every privileged AI feature, tool, and retrieval entry point"
+  - "Add authz suite cases that deny authenticated callers lacking required permission or scope"
+  - "Retain scored report under imports/authz-entry-tests/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "OWASP Access Control Cheat Sheet"
     url: "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
+  - title: "OWASP API Security Top 10 — API5 Broken Function Level Authorization"
+    url: "https://owasp.org/API-Security/"
   - title: "NIST AI RMF — Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
@@ -53,15 +81,17 @@ relatedRules:
   - "AUTHZ-R1"
   - "AUTHZ-R2"
   - "AUTHN-M1"
+  - "AUTHN-M4"
+  - "TOL-M1"
 tags:
   - "authorization"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "server-side"
+  - "authz-suite"
+  - "least-privilege"
 applicability:
-  technologies:
-    - "openapi"
-    - "mcp"
-    - "a2a"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

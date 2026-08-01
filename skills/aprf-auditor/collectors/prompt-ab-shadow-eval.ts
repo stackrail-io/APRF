@@ -273,8 +273,7 @@ export function buildPromptAbShadowEvalReport(opts: {
     opts.imported.highTrafficPromptChangeCount !== null &&
     opts.imported.highTrafficPromptChangeCount === 0;
 
-  let statusHint: PromptAbShadowEvalReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: PromptAbShadowEvalReport["summary"]["statusHint"];
   let prmR3Satisfied: boolean | null = null;
 
   const measuredFail =

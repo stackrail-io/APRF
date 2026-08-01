@@ -275,8 +275,7 @@ export function buildEvalTrackCatalogReport(opts: {
     opts.imported.tracksNotRunOnLastPromotion === 0;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: EvalTrackCatalogReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: EvalTrackCatalogReport["summary"]["statusHint"];
   let evlR1Satisfied: boolean | null = null;
 
   const measuredFail =

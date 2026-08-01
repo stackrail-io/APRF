@@ -240,8 +240,7 @@ export function buildMemoryRetentionReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: MemoryRetentionReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: MemoryRetentionReport["summary"]["statusHint"];
   let memM2Satisfied: boolean | null = null;
 
   const measuredFail =

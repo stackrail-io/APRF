@@ -278,8 +278,7 @@ export function buildPlatformGoldenPathReport(opts: {
     reviewOk &&
     importFresh;
 
-  let statusHint: PlatformGoldenPathReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: PlatformGoldenPathReport["summary"]["statusHint"];
   let dxM1Satisfied: boolean | null = null;
 
   const measuredFail =
