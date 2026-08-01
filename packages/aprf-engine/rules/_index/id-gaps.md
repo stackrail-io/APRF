@@ -21,5 +21,7 @@ APRF `0.10.x` is a working draft; **no release versions have been tagged yet**. 
 | `REL-M7` | `REL-R5` | [APRF-RFC-0006](../../../rfcs/0006-reliability-continuity-rel-m7-to-recommended.md) | AI-dependency chaos; removed from Regulated mandatories |
 | `REL-M8` | `REL-R7` | [APRF-RFC-0007](../../../rfcs/0007-reliability-continuity-rel-m8-to-recommended.md) | Multi-provider Level-5 continuity; removed from Regulated mandatories |
 | Former `REL-M6` (business-critical RTO/RPO) | `REL-M5` | Pre-release renumber into vacated mandatory slot | RTO/RPO catalog; fills ID vacated when backups moved to REL-M4 |
+| `EXP-R3` (regulated explainability matrix) | `EXP-R2` | Pre-release renumber to close recommended ID gap | Formal explainability requirements matrix; vacated `EXP-R3` |
+| `EXP-M4` (change/counterfactual summaries) | `EXP-R3` | [APRF-RFC-0008](../../../rfcs/0008-explainability-exp-m4-to-recommended.md) | Promotion change summaries; removed from Regulated; fills ID vacated when matrix moved to EXP-R2 |
 
 **After the first tagged release**, this exception closes. New demotions must keep deprecated stubs (pattern: `INF-R1` → `SCI-R1`).

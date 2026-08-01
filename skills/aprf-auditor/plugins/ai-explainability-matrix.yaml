@@ -1,0 +1,26 @@
+id: ai-explainability-matrix
+title: Regulated-feature explainability requirements matrix (EXP-R2)
+version: "0.2.0"
+executor: collectors/ai-explainability-matrix.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-explainability-matrix]
+inputs:
+  - "Target repo (explainability matrix + compliance review)"
+  - "Optional suite: aprf-assessment/imports/ai-explainability-matrix/*.{json}"
+collect:
+  - "Detect matrix / regulated-feature / review signals"
+  - "Ingest coverage; write ai-explainability-matrix-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-explainability-matrix/*"
+  signals: [ai-explainability-matrix, exp-r2, repo-ai-explainability-matrix]
+mapsToChecks: [EXP-R2]
+whenUnavailable: >
+  Matrix signals alone are PARTIAL. EXP-R2 PASS needs
+  explainabilityMatrixConfigured,
+  regulatedFeaturesWithExplanationRequirementPct=100,
+  matrixReviewedWithin12MonthsWithNamedOwner, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline explainability-matrix heuristics + optional imported JSON.

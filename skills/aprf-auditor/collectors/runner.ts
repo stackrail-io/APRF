@@ -435,6 +435,30 @@ DX-R3 DX metrics (TTSP + bypass rate):
   npm run aprf:dx-metrics -- --target <app> --out <app>/aprf-assessment
   # PASS needs formulas + ≥30d series + bypass alert/owner under imports/platform-dx-metrics/
 
+EXP-M1 factual/high-stakes RAG provenance (citations + resolvable source IDs):
+  npm run aprf:ai-rag-provenance -- --target <app> --out <app>/aprf-assessment
+  # PASS needs factualOrHighStakesRagEvalConfigured + answersWithValidCitationPct≥90 + citationsResolveToAuthorizedCorpus under imports/ai-rag-provenance/
+
+EXP-M2 operator decision-path reconstruction (procedure + timed drill ≥3 traces):
+  npm run aprf:ai-decision-path-recon -- --target <app> --out <app>/aprf-assessment
+  # PASS needs reconstructionProcedureDocumented + reconstructedSampleCount≥3 + allSamplesWithinDocumentedTimeBudget under imports/ai-decision-path-recon/
+
+EXP-M3 explanation payload secret/PII hygiene (policy + synthetic tests + sample scan):
+  npm run aprf:ai-explanation-hygiene -- --target <app> --out <app>/aprf-assessment
+  # PASS needs explanationRedactionPolicyConfigured + syntheticSecretPiiRedactedOrBlockedPct=100 + productionExplanationSampleSecretHits=0 under imports/ai-explanation-hygiene/
+
+EXP-R3 change/counterfactual summaries for material model/prompt promotions:
+  npm run aprf:ai-change-summary -- --target <app> --out <app>/aprf-assessment
+  # PASS needs changeOrCounterfactualSummaryToolingConfigured + lastMaterialPromotionHasRetainedSummary under imports/ai-change-summary/
+
+EXP-R1 user-facing rationale for material automated decisions (catalog + ≥20-case sample):
+  npm run aprf:ai-user-rationale -- --target <app> --out <app>/aprf-assessment
+  # PASS needs materialDecisionCatalogConfigured + sampleCaseCount≥20 + materialTypesWithUserRationalePct=100 + rationaleGapsTrackedWithOwners under imports/ai-user-rationale/
+
+EXP-R2 regulated-feature explainability requirements matrix (coverage + owned review ≤12 months):
+  npm run aprf:ai-explainability-matrix -- --target <app> --out <app>/aprf-assessment
+  # PASS needs explainabilityMatrixConfigured + regulatedFeaturesWithExplanationRequirementPct=100 + matrixReviewedWithin12MonthsWithNamedOwner under imports/ai-explainability-matrix/
+
 DG-M1 production RAG corpus/index ownership + cadence:
   npm run aprf:rag-corpus -- --target <app> --out <app>/aprf-assessment
   # PASS needs complete inventory under imports/rag-corpus-governance/

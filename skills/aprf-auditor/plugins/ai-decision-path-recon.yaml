@@ -1,0 +1,25 @@
+id: ai-decision-path-recon
+title: Operator decision-path reconstruction drills (EXP-M2)
+version: "0.2.0"
+executor: collectors/ai-decision-path-recon.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-decision-path-recon]
+inputs:
+  - "Target repo (reconstruction procedure + timed drill on sampled traces)"
+  - "Optional suite: aprf-assessment/imports/ai-decision-path-recon/*.{json}"
+collect:
+  - "Detect procedure / drill / sample signals"
+  - "Ingest coverage; write ai-decision-path-recon-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-decision-path-recon/*"
+  signals: [ai-decision-path-recon, exp-m2, repo-ai-decision-path-recon]
+mapsToChecks: [EXP-M2]
+whenUnavailable: >
+  Reconstruction signals alone are PARTIAL. EXP-M2 PASS needs
+  reconstructionProcedureDocumented, reconstructedSampleCount≥3,
+  allSamplesWithinDocumentedTimeBudget, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline decision-path reconstruction heuristics + optional imported JSON.

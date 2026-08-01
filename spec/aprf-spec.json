@@ -637,7 +637,6 @@
         "SCI-M4",
         "INF-M4",
         "SAF-M4",
-        "EXP-M4",
         "PRI-M3",
         "MEM-M4",
         "EVL-M4",
@@ -2921,59 +2920,59 @@
       "mandatoryChecks": [
         {
           "id": "EXP-M1",
-          "requirement": "High-stakes or factual RAG outputs shall include provenance (citations or source IDs)",
-          "artifact": "RAG eval suite measuring citation presence/accuracy + sample production traces",
-          "passCondition": "On the factual/high-stakes RAG eval set, \u226590% of answers include \u22651 valid source ID/citation that resolves to an authorized corpus document",
-          "method": "manual",
+          "requirement": "High-stakes or factual RAG answers shall include \u22651 valid source ID or citation that resolves to an authorized corpus document\u2014so operators and users can verify where the claim came from.",
+          "artifact": "Factual/high-stakes RAG eval suite measuring citation presence + Eval report showing \u226590% answers with \u22651 resolvable citation/source ID + Sample production traces with citations (supporting evidence)",
+          "passCondition": "On the factual/high-stakes RAG eval set, \u226590% of answers include \u22651 valid source ID/citation that resolves to an authorized corpus document (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "EXP-M2",
-          "requirement": "Operators shall reconstruct the decision path for a sampled production outcome",
-          "artifact": "Operator reconstruction procedure + timed drill record on \u22653 sampled traces",
-          "passCondition": "On-call or operator successfully reconstructs model\u2192retrieval/tools\u2192outcome for 3/3 sampled production traces within documented time budget (e.g. \u226415 minutes each)",
-          "method": "manual",
+          "requirement": "Operators shall reconstruct the production decision path (model\u2192retrieval/tools\u2192outcome) for sampled traces within a documented time budget\u2014so incidents and disputes can be explained from retained evidence, not guesswork.",
+          "artifact": "Operator reconstruction procedure with documented time budget + Timed drill record covering \u22653 sampled production traces (\u226490 days) + Evidence each sample reconstructed model\u2192retrieval/tools\u2192outcome within budget",
+          "passCondition": "On-call or operator successfully reconstructs model\u2192retrieval/tools\u2192outcome for 3/3 sampled production traces within the documented time budget (e.g. \u226415 minutes each; measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "EXP-M3",
-          "requirement": "Explanation content shall not disclose secrets or unauthorized data",
-          "artifact": "Explanation redaction policy + automated secret/PII scan on explanation payloads",
-          "passCondition": "Synthetic secret/PII fixtures in explanation paths are redacted or blocked at 100% in tests; latest production explanation sample scan shows 0 privileged secret pattern hits",
-          "method": "manual",
+          "requirement": "Explanation payloads (user-facing rationales, operator reconstructions, citation snippets) shall redact or block secrets and unauthorized data\u2014so explainability does not become a leak path.",
+          "artifact": "Explanation redaction/blocking policy covering explanation payloads + Automated test showing 100% redaction/block of synthetic secret/PII fixtures + Production explanation sample scan with 0 privileged secret pattern hits (\u226490 days)",
+          "passCondition": "Synthetic secret/PII fixtures in explanation paths are redacted or blocked at 100% in tests; latest production explanation sample scan shows 0 privileged secret pattern hits (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
-        },
-        {
-          "id": "EXP-M4",
-          "requirement": "Counterfactual or change summaries shall be available for material model/prompt version diffs",
-          "artifact": "Change-summary tooling/config + sample summaries for recent promotions",
-          "passCondition": "PASS if the last material model/prompt promotion includes a retained change/counterfactual summary",
-          "method": "manual",
-          "requiredFromLevel": 5,
-          "minCriticality": 3
         }
       ],
       "recommendedChecks": [
         {
           "id": "EXP-R1",
-          "requirement": "User-facing rationale for material automated decisions",
-          "artifact": "Product UI/API screenshots or traces showing user-facing rationale for material automated decisions + decision catalog",
-          "passCondition": "100% of decision types marked material in the catalog return a rationale field or UI explanation in a 20-case sample; gaps tracked with owners",
-          "method": "manual",
+          "requirement": "Material automated decisions should return a user-facing rationale (API field or UI explanation) so affected people can understand why the system acted\u2014not only operators reconstructing traces after the fact.",
+          "artifact": "Material automated-decision catalog (decision types marked material) + \u226520-case sample showing user-facing rationale for each material type (100% coverage) + Gap list with named owners for any missing rationale",
+          "passCondition": "100% of decision types marked material in the catalog return a rationale field or UI explanation in a \u226520-case sample; gaps are tracked with named owners (measuredAt \u226490 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 4,
+          "minCriticality": 2
+        },
+        {
+          "id": "EXP-R2",
+          "requirement": "Every regulated AI feature should list the required explanation type and evidence in a maintained matrix\u2014so compliance obligations are explicit, owned, and reviewable rather than implied by adjacent controls.",
+          "artifact": "Explainability requirements matrix (feature \u00d7 regulation/obligation) + Last compliance review record \u226412 months with named owner",
+          "passCondition": "Every regulated AI feature lists required explanation type and evidence; the matrix was reviewed \u226412 months ago with a named owner (attest measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "EXP-R3",
-          "requirement": "Formal explainability requirements mapped for regulated features",
-          "artifact": "Explainability requirements matrix (feature \u00d7 regulation/obligation) + last compliance review record",
-          "passCondition": "Every regulated AI feature lists required explanation type and evidence; matrix reviewed \u226412 months ago with named owner",
-          "method": "manual",
-          "requiredFromLevel": 4,
-          "minCriticality": 2
+          "requirement": "Material model or prompt promotions should retain a change or counterfactual summary describing what differed and expected impact\u2014so operators can explain version-to-version behavior without archaeology.",
+          "artifact": "Change/counterfactual summary tooling or template for model/prompt promotions + Retained summary for the last material model or prompt promotion (\u226490 days)",
+          "passCondition": "The last material model or prompt promotion includes a retained change or counterfactual summary (measuredAt \u226490 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 5,
+          "minCriticality": 3
         }
       ],
       "evidenceRequired": [

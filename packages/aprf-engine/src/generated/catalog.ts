@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:71c7f09ac24274a2770c7628a5608e9acb4fe437774c634eb0905bf99bda891c",
+  "generatedAt": "sha256:1f1d1c980b2bf5912f73b362e3238a2d83b37f572cd0bef6cec53891dbf9fa79",
   "ruleCount": 178,
   "domains": [
     {
@@ -5550,51 +5550,67 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "EXP-M1",
       "category": "explainability",
       "title": "High-stakes or factual RAG outputs must include provenance (citations or source IDs)",
-      "description": "High-stakes or factual RAG outputs shall include provenance (citations or source IDs)",
-      "whyItMatters": "High-stakes or factual RAG outputs shall include provenance (citations or source IDs) Failing this leaves a production gap against: On the factual/high-stakes RAG eval set, ≥90% of answers include ≥1 valid source ID/citation that resolves to an authorized corpus document",
+      "description": "High-stakes or factual RAG answers shall include ≥1 valid source ID or citation that resolves to an authorized corpus document—so operators and users can verify where the claim came from.\n",
+      "whyItMatters": "Ungrounded factual or high-stakes answers are hard to audit and easy to over-trust. Requiring resolvable provenance on the eval set catches missing citations and hallucinated source IDs before they ship. Distinct from DG-M1 corpus ownership and EXP-M2 operator path reconstruction.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "On the factual/high-stakes RAG eval set, ≥90% of answers include ≥1 valid source ID/citation that resolves to an authorized corpus document",
+      "passCondition": "On the factual/high-stakes RAG eval set, ≥90% of answers include ≥1 valid source ID/citation that resolves to an authorized corpus document (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "RAG eval suite measuring citation presence/accuracy + sample production traces"
+        "Factual/high-stakes RAG eval suite measuring citation presence",
+        "Eval report showing ≥90% answers with ≥1 resolvable citation/source ID",
+        "Sample production traces with citations (supporting evidence)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-rag-provenance",
+            "params": {
+              "hint": "Discover RAG citation/provenance config, factual/high-stakes eval suites, and reports that citations resolve to authorized corpus docs.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "RAG eval suite measuring citation presence/accuracy + sample production traces"
+              "hint": "If automation cannot prove coverage, attest factual/high-stakes RAG eval ≥90% answers with resolvable citations (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Include provenance (citations or source IDs)): inspect current evidence for [RAG eval suite measuring citation presence/accuracy + sample production traces] and confirm the pass condition holds — On the factual/high-stakes RAG eval set, ≥90% of answers include ≥1 valid source ID/citation that resolves to an authorized corpus document",
-      "falsePositiveGuidance": "(Explainability & Transparency): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm factual or high-stakes RAG outputs exist. If none, score NOT_APPLICABLE. 2) Locate an eval suite for those outputs that measures citation/source-ID presence. 3) Confirm ≥90% of answers include ≥1 citation that resolves to an authorized corpus document (not a dangling ID). 4) PASS only if eval + coverage + resolveability hold with measuredAt ≤90 days. DG-M1 corpus owner/version/cadence alone does not prove answer-level citations. EXP-M2 operator reconstruction alone does not prove citation coverage. Promptfoo connectivity smoke without citation resolveability does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass citation-format prompts without eval coverage ≥90%. Do not pass source IDs that do not resolve to authorized corpus documents. Do not pass generic RAG evals that omit provenance metrics. Sibling DG-M1 and EXP-M2 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: High-stakes or factual RAG outputs must include provenance (citations or source IDs)",
-        "Retain evidence artifacts required by this Check, starting with: RAG eval suite measuring citation presence/accuracy + sample production traces",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Require citations/source IDs on factual and high-stakes RAG answer paths",
+        "Add an eval measuring ≥90% answers with resolvable authorized-corpus citations",
+        "Retain evidence under imports/ai-rag-provenance/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "NIST AI RMF — Explainability and Interpretability",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "title": "OWASP LLM Top 10 — LLM09 Overreliance",
+          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
       "relatedRules": [
         "EXP-M2",
         "EXP-M3",
-        "EXP-M4",
+        "EXP-R3",
         "EXP-R1",
-        "EXP-R3"
+        "DG-M1",
+        "OBS-M1"
       ],
       "tags": [
         "explainability",
         "mandatory",
-        "manual"
+        "hybrid",
+        "rag",
+        "citation",
+        "provenance"
       ],
       "applicability": {
         "technologies": [],
@@ -5608,51 +5624,67 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "EXP-M2",
       "category": "explainability",
       "title": "Operators must reconstruct the decision path for a sampled production outcome",
-      "description": "Operators shall reconstruct the decision path for a sampled production outcome",
-      "whyItMatters": "Operators shall reconstruct the decision path for a sampled production outcome Failing this leaves a production gap against: On-call or operator successfully reconstructs model→retrieval/tools→outcome for 3/3 sampled production traces within documented time budget (e.g. ≤15 minutes each)",
+      "description": "Operators shall reconstruct the production decision path (model→retrieval/tools→outcome) for sampled traces within a documented time budget—so incidents and disputes can be explained from retained evidence, not guesswork.\n",
+      "whyItMatters": "When customers challenge an AI outcome, on-call needs a repeatable way to walk model choice, retrieval/tool calls, and final outcome from production traces. Untimed or untested reconstruction fails under pressure. Distinct from EXP-M1 answer citations and OBS-M1 distributed trace linkage alone.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "On-call or operator successfully reconstructs model→retrieval/tools→outcome for 3/3 sampled production traces within documented time budget (e.g. ≤15 minutes each)",
+      "passCondition": "On-call or operator successfully reconstructs model→retrieval/tools→outcome for 3/3 sampled production traces within the documented time budget (e.g. ≤15 minutes each; measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Operator reconstruction procedure + timed drill record on ≥3 sampled traces"
+        "Operator reconstruction procedure with documented time budget",
+        "Timed drill record covering ≥3 sampled production traces (≤90 days)",
+        "Evidence each sample reconstructed model→retrieval/tools→outcome within budget"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-decision-path-recon",
+            "params": {
+              "hint": "Discover operator reconstruction procedures, decision-path runbooks, and timed drill records on sampled production traces.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Operator reconstruction procedure + timed drill record on ≥3 sampled traces"
+              "hint": "If automation cannot prove coverage, attest 3/3 sampled production traces reconstructed within documented time budget (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Operators must reconstruct the decision path for a sampled production outcome): inspect current evidence for [Operator reconstruction procedure + timed drill record on ≥3 sampled traces] and confirm the pass condition holds — On-call or operator successfully reconstructs model→retrieval/tools→outcome for 3/3 sampled production traces within documented time budget (e.g. ≤15 minutes each)",
-      "falsePositiveGuidance": "(Explainability & Transparency): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI outcomes with reconstructable paths exist. If none, score NOT_APPLICABLE. 2) Locate an operator reconstruction procedure that documents the time budget. 3) Review a timed drill ≤90 days covering ≥3 sampled production traces. 4) Confirm each sample reconstructs model→retrieval/tools→outcome within budget. 5) PASS only if procedure + 3/3 within-budget reconstructions hold with measuredAt ≤90 days. EXP-M1 citation evals alone do not prove operator path reconstruction. OBS-M1 trace linkage alone does not prove a timed operator drill. EXP-R1 user-facing rationale alone does not prove operator reconstruction.\n",
+      "falsePositiveGuidance": "Do not pass generic observability docs without a reconstruction procedure and time budget. Do not pass drills with fewer than 3 samples or without timed results. Do not pass tabletop discussion without reconstructing real production traces. Sibling EXP-M1, OBS-M1, and EXP-R1 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Operators must reconstruct the decision path for a sampled production outcome",
-        "Retain evidence artifacts required by this Check, starting with: Operator reconstruction procedure + timed drill record on ≥3 sampled traces",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Document an operator decision-path reconstruction procedure with a time budget",
+        "Run a timed drill on ≥3 production traces ≤90 days; retain results",
+        "Retain evidence under imports/ai-decision-path-recon/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "NIST AI RMF — Explainability and Interpretability",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "title": "Google SRE Book — Addressing Cascading Failures",
+          "url": "https://sre.google/sre-book/addressing-cascading-failures/"
         }
       ],
       "relatedRules": [
         "EXP-M1",
         "EXP-M3",
-        "EXP-M4",
+        "EXP-R3",
         "EXP-R1",
-        "EXP-R3"
+        "OBS-M1",
+        "INC-M1"
       ],
       "tags": [
         "explainability",
         "mandatory",
-        "manual"
+        "hybrid",
+        "decision-path",
+        "reconstruction",
+        "operator"
       ],
       "applicability": {
         "technologies": [],
@@ -5666,51 +5698,67 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "EXP-M3",
       "category": "explainability",
       "title": "Explanation content must not disclose secrets or unauthorized data",
-      "description": "Explanation content shall not disclose secrets or unauthorized data",
-      "whyItMatters": "Explanation content shall not disclose secrets or unauthorized data Failing this leaves a production gap against: Synthetic secret/PII fixtures in explanation paths are redacted or blocked at 100% in tests; latest production explanation sample scan shows 0 privileged secret pattern hits",
+      "description": "Explanation payloads (user-facing rationales, operator reconstructions, citation snippets) shall redact or block secrets and unauthorized data—so explainability does not become a leak path.\n",
+      "whyItMatters": "Decision-path and citation features often echo prompts, tool results, or retrieved chunks that can contain API keys, PII, or privileged internals. Without redaction tests and a clean production sample scan, explanations undermine the security and privacy controls they sit beside. Distinct from OBS-M2 trace-field redaction and general log scrubbers.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Synthetic secret/PII fixtures in explanation paths are redacted or blocked at 100% in tests; latest production explanation sample scan shows 0 privileged secret pattern hits",
+      "passCondition": "Synthetic secret/PII fixtures in explanation paths are redacted or blocked at 100% in tests; latest production explanation sample scan shows 0 privileged secret pattern hits (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Explanation redaction policy + automated secret/PII scan on explanation payloads"
+        "Explanation redaction/blocking policy covering explanation payloads",
+        "Automated test showing 100% redaction/block of synthetic secret/PII fixtures",
+        "Production explanation sample scan with 0 privileged secret pattern hits (≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-explanation-hygiene",
+            "params": {
+              "hint": "Discover explanation redaction policies, synthetic secret/PII tests on explanation paths, and production explanation sample scans.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Explanation redaction policy + automated secret/PII scan on explanation payloads"
+              "hint": "If automation cannot prove coverage, attest 100% synthetic redaction/block on explanation paths and 0 production secret hits (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Explanation content must not disclose secrets or unauthorized data): inspect current evidence for [Explanation redaction policy + automated secret/PII scan on explanation payloads] and confirm the pass condition holds — Synthetic secret/PII fixtures in explanation paths are redacted or blocked at 100% in tests; latest production explanation sample scan shows 0 privileged secret pattern hits",
-      "falsePositiveGuidance": "(Explainability & Transparency): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm explanation payloads exist (user rationale, operator reconstruction, citation snippets, or equivalent). If none, score NOT_APPLICABLE. 2) Locate a redaction/blocking policy for those payloads. 3) Review tests showing synthetic secret/PII fixtures are redacted or blocked at 100%. 4) Review a production explanation sample scan ≤90 days with 0 privileged secret pattern hits. 5) PASS only if policy + 100% test + clean sample scan hold with measuredAt ≤90 days. OBS-M2 trace redaction alone does not prove explanation-payload hygiene. SEC2-M2 general log scrubbers alone do not prove explanation-path coverage. EXP-M1/EXP-M2 alone do not prove secret-free explanations.\n",
+      "falsePositiveGuidance": "Do not pass generic logging redaction that omits explanation payloads. Do not pass policies without 100% synthetic fixture tests. Do not pass production scans with any privileged secret hits. Sibling OBS-M2 and SEC2-M2 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Explanation content must not disclose secrets or unauthorized data",
-        "Retain evidence artifacts required by this Check, starting with: Explanation redaction policy + automated secret/PII scan on explanation payloads",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Apply redaction/blocking to all explanation payloads (user and operator)",
+        "Add synthetic secret/PII fixture tests asserting 100% redaction or block",
+        "Scan production explanation samples ≤90 days; retain under imports/ai-explanation-hygiene/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "NIST AI RMF — Explainability and Interpretability",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "title": "OWASP LLM Top 10 — LLM02 Insecure Output Handling",
+          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
       "relatedRules": [
         "EXP-M1",
         "EXP-M2",
-        "EXP-M4",
+        "EXP-R3",
         "EXP-R1",
-        "EXP-R3"
+        "OBS-M2",
+        "SEC2-M2"
       ],
       "tags": [
         "explainability",
         "mandatory",
-        "manual"
+        "hybrid",
+        "redaction",
+        "secrets",
+        "pii"
       ],
       "applicability": {
         "technologies": [],
@@ -5721,112 +5769,143 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "introducedIn": "0.10.0"
     },
     {
-      "id": "EXP-M4",
+      "id": "EXP-R1",
       "category": "explainability",
-      "title": "Counterfactual or change summaries must be available for material model/prompt version diffs",
-      "description": "Counterfactual or change summaries shall be available for material model/prompt version diffs",
-      "whyItMatters": "Counterfactual or change summaries shall be available for material model/prompt version diffs Failing this leaves a production gap against: PASS if the last material model/prompt promotion includes a retained change/counterfactual summary",
+      "title": "Production systems should have user-facing rationale for material automated decisions",
+      "description": "Material automated decisions should return a user-facing rationale (API field or UI explanation) so affected people can understand why the system acted— not only operators reconstructing traces after the fact.\n",
+      "whyItMatters": "Operator-only explainability leaves customers and end users without a usable reason for material outcomes (denials, pricing, eligibility, routing). A decision catalog plus sampled coverage of user-facing rationales turns opaque automation into accountable UX. Distinct from EXP-M2 operator path reconstruction and EXP-R2 regulated-feature matrices.\n",
       "severity": "high",
       "weight": 3,
-      "gate": "mandatory",
-      "passCondition": "PASS if the last material model/prompt promotion includes a retained change/counterfactual summary",
+      "gate": "recommended",
+      "passCondition": "100% of decision types marked material in the catalog return a rationale field or UI explanation in a ≥20-case sample; gaps are tracked with named owners (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Change-summary tooling/config + sample summaries for recent promotions"
+        "Material automated-decision catalog (decision types marked material)",
+        "≥20-case sample showing user-facing rationale for each material type (100% coverage)",
+        "Gap list with named owners for any missing rationale"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-user-rationale",
+            "params": {
+              "hint": "Discover material-decision catalogs, user-facing rationale fields/UI, and coverage samples for material automated decisions.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Change-summary tooling/config + sample summaries for recent promotions"
+              "hint": "If automation cannot prove coverage, attest 100% of material decision types return user-facing rationale in a ≥20-case sample with owned gaps (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Counterfactual or change summaries must be available for material model/prompt version diffs): inspect current evidence for [Change-summary tooling/config + sample summaries for recent promotions] and confirm the pass condition holds — PASS if the last material model/prompt promotion includes a retained change/counterfactual summary",
-      "falsePositiveGuidance": "(Explainability & Transparency): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm material automated decisions exist. If none, score NOT_APPLICABLE. 2) Locate a catalog marking which decision types are material. 3) Review a ≥20-case sample showing each material type returns a rationale field or UI explanation. 4) Confirm any gaps have named owners. 5) PASS only if catalog + 100% sample coverage + owned gaps hold with measuredAt ≤90 days. EXP-M2 operator reconstruction alone does not prove user-facing rationale. EXP-M1 citations alone do not prove decision rationales. EXP-R2 regulatory matrices alone do not prove runtime UI/API rationale delivery.\n",
+      "falsePositiveGuidance": "Do not pass operator-only logs as user-facing rationale. Do not pass samples under 20 cases. Do not pass catalogs without material marking. Do not pass gaps without named owners. Sibling EXP-M2, EXP-M1, and EXP-R2 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Counterfactual or change summaries must be available for material model/prompt version diffs",
-        "Retain evidence artifacts required by this Check, starting with: Change-summary tooling/config + sample summaries for recent promotions",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Catalog material automated decision types",
+        "Return a rationale field or UI explanation for every material type",
+        "Sample ≥20 cases ≤90 days; track gaps with owners under imports/ai-user-rationale/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "NIST AI RMF — Explainability and Interpretability",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "title": "EU AI Act — Transparency obligations (conceptual)",
+          "url": "https://artificialintelligenceact.eu/"
         }
       ],
       "relatedRules": [
         "EXP-M1",
         "EXP-M2",
         "EXP-M3",
-        "EXP-R1",
-        "EXP-R3"
+        "EXP-R3",
+        "EXP-R2",
+        "HUM-M1"
       ],
       "tags": [
         "explainability",
-        "mandatory",
-        "manual"
+        "recommended",
+        "hybrid",
+        "user-facing",
+        "rationale",
+        "material-decision"
       ],
       "applicability": {
         "technologies": [],
-        "minCriticality": 3,
-        "requiredFromLevel": 5
+        "minCriticality": 2,
+        "requiredFromLevel": 4
       },
       "status": "active",
       "introducedIn": "0.10.0"
     },
     {
-      "id": "EXP-R1",
+      "id": "EXP-R2",
       "category": "explainability",
-      "title": "Production systems should have user-facing rationale for material automated decisions",
-      "description": "User-facing rationale for material automated decisions",
-      "whyItMatters": "User-facing rationale for material automated decisions Failing this leaves a production gap against: 100% of decision types marked material in the catalog return a rationale field or UI explanation in a 20-case sample; gaps tracked with owners",
+      "title": "Production systems should have formal explainability requirements mapped for regulated features",
+      "description": "Every regulated AI feature should list the required explanation type and evidence in a maintained matrix—so compliance obligations are explicit, owned, and reviewable rather than implied by adjacent controls.\n",
+      "whyItMatters": "Regulated features without a mapped explanation obligation leave gaps that surface only in audits or incidents. A feature×regulation matrix with a recent owner-reviewed refresh keeps explainability requirements current. Distinct from EXP-R1 runtime user-facing rationale delivery.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "100% of decision types marked material in the catalog return a rationale field or UI explanation in a 20-case sample; gaps tracked with owners",
+      "passCondition": "Every regulated AI feature lists required explanation type and evidence; the matrix was reviewed ≤12 months ago with a named owner (attest measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Product UI/API screenshots or traces showing user-facing rationale for material automated decisions + decision catalog"
+        "Explainability requirements matrix (feature × regulation/obligation)",
+        "Last compliance review record ≤12 months with named owner"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-explainability-matrix",
+            "params": {
+              "hint": "Discover explainability requirements matrices for regulated AI features and compliance review records with named owners.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Product UI/API screenshots or traces showing user-facing rationale for material automated decisions + decision catalog"
+              "hint": "If automation cannot prove coverage, attest 100% of regulated AI features have required explanation type/evidence in a matrix reviewed ≤12 months with named owner (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (User-facing rationale for material automated decisions): inspect current evidence for [Product UI/API screenshots or traces showing user-facing rationale for material automated decisions + decision catalog] and confirm the pass condition holds — 100% of decision types marked material in the catalog return a rationale field or UI explanation in a 20-case sample; gaps tracked with owners",
-      "falsePositiveGuidance": "(Explainability & Transparency): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm regulated AI features exist. If none, score NOT_APPLICABLE. 2) Locate an explainability requirements matrix mapping features to regulation/obligation and required explanation type + evidence. 3) Confirm the matrix was reviewed ≤12 months ago with a named owner. 4) PASS only if 100% regulated-feature coverage + fresh review hold with measuredAt ≤90 days. EXP-R1 user-facing rationale samples alone do not prove a formal obligations matrix. CMP compliance registers alone do not prove explainability-type mapping. EXP-M2 operator drills alone do not prove regulated-feature explainability requirements.\n",
+      "falsePositiveGuidance": "Do not pass generic AI policy docs that omit feature×regulation rows. Do not pass matrices without named review owner or older than 12 months. Do not pass EXP-R1 UI samples as formal requirement mapping. Sibling EXP-R1 and CMP Checks do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: User-facing rationale for material automated decisions",
-        "Retain evidence artifacts required by this Check, starting with: Product UI/API screenshots or traces showing user-facing rationale for material automated decisions + decision catalog",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Build a feature×regulation explainability requirements matrix",
+        "List required explanation type and evidence for every regulated AI feature",
+        "Review ≤12 months with named owner; retain under imports/ai-explainability-matrix/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "NIST AI RMF — Explainability and Interpretability",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "title": "EU AI Act — Transparency obligations (conceptual)",
+          "url": "https://artificialintelligenceact.eu/"
         }
       ],
       "relatedRules": [
         "EXP-M1",
         "EXP-M2",
         "EXP-M3",
-        "EXP-M4",
-        "EXP-R3"
+        "EXP-R3",
+        "EXP-R1",
+        "CMP-M1"
       ],
       "tags": [
         "explainability",
         "recommended",
-        "manual"
+        "hybrid",
+        "regulated",
+        "requirements-matrix",
+        "compliance"
       ],
       "applicability": {
         "technologies": [],
@@ -5839,57 +5918,74 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "EXP-R3",
       "category": "explainability",
-      "title": "Production systems should have formal explainability requirements mapped for regulated features",
-      "description": "Formal explainability requirements mapped for regulated features",
-      "whyItMatters": "Formal explainability requirements mapped for regulated features Failing this leaves a production gap against: Every regulated AI feature lists required explanation type and evidence; matrix reviewed ≤12 months ago with named owner",
+      "title": "Counterfactual or change summaries should be available for material model/prompt version diffs",
+      "description": "Material model or prompt promotions should retain a change or counterfactual summary describing what differed and expected impact—so operators can explain version-to-version behavior without archaeology.\n",
+      "whyItMatters": "Version IDs and eval gates alone do not tell on-call or auditors what changed in the last promotion. A retained change/counterfactual summary turns opaque model/prompt diffs into explainable releases. Distinct from PRM-M2 review/eval linkage and CHG-M1 registry retention depth.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Every regulated AI feature lists required explanation type and evidence; matrix reviewed ≤12 months ago with named owner",
+      "passCondition": "The last material model or prompt promotion includes a retained change or counterfactual summary (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Explainability requirements matrix (feature × regulation/obligation) + last compliance review record"
+        "Change/counterfactual summary tooling or template for model/prompt promotions",
+        "Retained summary for the last material model or prompt promotion (≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-change-summary",
+            "params": {
+              "hint": "Discover change/counterfactual summary tooling and retained summaries for material model/prompt promotions.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Explainability requirements matrix (feature × regulation/obligation) + last compliance review record"
+              "hint": "If automation cannot prove coverage, attest the last material model/prompt promotion has a retained change/counterfactual summary (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Formal explainability requirements mapped for regulated features): inspect current evidence for [Explainability requirements matrix (feature × regulation/obligation) + last compliance review record] and confirm the pass condition holds — Every regulated AI feature lists required explanation type and evidence; matrix reviewed ≤12 months ago with named owner",
-      "falsePositiveGuidance": "(Explainability & Transparency): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm material model or prompt promotions occur. If none, score NOT_APPLICABLE. 2) Locate tooling or a template that produces change or counterfactual summaries for those promotions. 3) Confirm the last material promotion retains such a summary ≤90 days. 4) PASS only if tooling/template + retained last-promotion summary hold with measuredAt ≤90 days. PRM-M2 review/eval linkage alone does not prove a human-readable change summary. CHG-M1 version retention alone does not prove a counterfactual/change narrative. EVL-M4 shadow/A-B metrics alone do not prove a retained promotion summary.\n",
+      "falsePositiveGuidance": "Do not pass git commit messages as change summaries unless they document expected behavioral impact. Do not pass empty “N/A” summaries for material promotions. Do not pass summaries older than the last material promotion without linking to that promotion. Sibling PRM-M2, CHG-M1, and EVL-M4 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Formal explainability requirements mapped for regulated features",
-        "Retain evidence artifacts required by this Check, starting with: Explainability requirements matrix (feature × regulation/obligation) + last compliance review record",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Require a change or counterfactual summary on every material model/prompt promotion",
+        "Retain the last promotion’s summary under imports/ai-change-summary/",
+        "Wire summary generation into the promotion checklist or CI gate",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "NIST AI RMF — Explainability and Interpretability",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "title": "Google SRE — Embracing Risk",
+          "url": "https://sre.google/sre-book/embracing-risk/"
         }
       ],
       "relatedRules": [
         "EXP-M1",
         "EXP-M2",
         "EXP-M3",
-        "EXP-M4",
-        "EXP-R1"
+        "EXP-R1",
+        "EXP-R2",
+        "PRM-M2",
+        "CHG-M1",
+        "EVL-M4"
       ],
       "tags": [
         "explainability",
         "recommended",
-        "manual"
+        "hybrid",
+        "change-summary",
+        "counterfactual",
+        "promotion"
       ],
       "applicability": {
         "technologies": [],
-        "minCriticality": 2,
-        "requiredFromLevel": 4
+        "minCriticality": 3,
+        "requiredFromLevel": 5
       },
       "status": "active",
       "introducedIn": "0.10.0"

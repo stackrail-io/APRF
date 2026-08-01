@@ -1,0 +1,82 @@
+id: "EXP-R2"
+category: "explainability"
+title: "Production systems should have formal explainability requirements mapped for regulated features"
+description: >
+  Every regulated AI feature should list the required explanation type and
+  evidence in a maintained matrix—so compliance obligations are explicit,
+  owned, and reviewable rather than implied by adjacent controls.
+whyItMatters: >
+  Regulated features without a mapped explanation obligation leave gaps that
+  surface only in audits or incidents. A feature×regulation matrix with a
+  recent owner-reviewed refresh keeps explainability requirements current.
+  Distinct from EXP-R1 runtime user-facing rationale delivery.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  Every regulated AI feature lists required explanation type and evidence;
+  the matrix was reviewed ≤12 months ago with a named owner (attest
+  measuredAt ≤90 days).
+evidenceRequired:
+  - "Explainability requirements matrix (feature × regulation/obligation)"
+  - "Last compliance review record ≤12 months with named owner"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-explainability-matrix"
+      params:
+        hint: >
+          Discover explainability requirements matrices for regulated AI
+          features and compliance review records with named owners.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest 100% of regulated AI
+          features have required explanation type/evidence in a matrix
+          reviewed ≤12 months with named owner (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm regulated AI features exist. If none, score NOT_APPLICABLE. 2)
+  Locate an explainability requirements matrix mapping features to
+  regulation/obligation and required explanation type + evidence. 3) Confirm
+  the matrix was reviewed ≤12 months ago with a named owner. 4) PASS only if
+  100% regulated-feature coverage + fresh review hold with measuredAt ≤90
+  days. EXP-R1 user-facing rationale samples alone do not prove a formal
+  obligations matrix. CMP compliance registers alone do not prove
+  explainability-type mapping. EXP-M2 operator drills alone do not prove
+  regulated-feature explainability requirements.
+falsePositiveGuidance: >
+  Do not pass generic AI policy docs that omit feature×regulation rows. Do
+  not pass matrices without named review owner or older than 12 months. Do
+  not pass EXP-R1 UI samples as formal requirement mapping. Sibling EXP-R1
+  and CMP Checks do not substitute. Named exceptions need owner and expiry
+  ≤90 days.
+recommendedFixes:
+  - "Build a feature×regulation explainability requirements matrix"
+  - "List required explanation type and evidence for every regulated AI feature"
+  - "Review ≤12 months with named owner; retain under imports/ai-explainability-matrix/"
+  - "Time-box gaps with owner and expiry ≤90 days"
+references:
+  - title: "NIST AI RMF — Explainability and Interpretability"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "EU AI Act — Transparency obligations (conceptual)"
+    url: "https://artificialintelligenceact.eu/"
+relatedRules:
+  - "EXP-M1"
+  - "EXP-M2"
+  - "EXP-M3"
+  - "EXP-R3"
+  - "EXP-R1"
+  - "CMP-M1"
+tags:
+  - "explainability"
+  - "recommended"
+  - "hybrid"
+  - "regulated"
+  - "requirements-matrix"
+  - "compliance"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

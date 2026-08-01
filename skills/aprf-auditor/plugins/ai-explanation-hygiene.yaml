@@ -1,0 +1,26 @@
+id: ai-explanation-hygiene
+title: Explanation payload secret/PII hygiene (EXP-M3)
+version: "0.2.0"
+executor: collectors/ai-explanation-hygiene.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-explanation-hygiene]
+inputs:
+  - "Target repo (explanation redaction policy + synthetic tests + sample scan)"
+  - "Optional suite: aprf-assessment/imports/ai-explanation-hygiene/*.{json}"
+collect:
+  - "Detect explanation / redaction / fixture-test / sample-scan signals"
+  - "Ingest coverage; write ai-explanation-hygiene-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-explanation-hygiene/*"
+  signals: [ai-explanation-hygiene, exp-m3, repo-ai-explanation-hygiene]
+mapsToChecks: [EXP-M3]
+whenUnavailable: >
+  Hygiene signals alone are PARTIAL. EXP-M3 PASS needs
+  explanationRedactionPolicyConfigured,
+  syntheticSecretPiiRedactedOrBlockedPct=100,
+  productionExplanationSampleSecretHits=0, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline explanation-hygiene heuristics + optional imported JSON.

@@ -1,49 +1,78 @@
 id: "EXP-M1"
 category: "explainability"
 title: "High-stakes or factual RAG outputs must include provenance (citations or source IDs)"
-description: "High-stakes or factual RAG outputs shall include provenance (citations or source IDs)"
-whyItMatters: "High-stakes or factual RAG outputs shall include provenance (citations or source IDs)
-  Failing this leaves a production gap against: On the factual/high-stakes RAG eval set, ≥90% of
-  answers include ≥1 valid source ID/citation that resolves to an authorized corpus document"
+description: >
+  High-stakes or factual RAG answers shall include ≥1 valid source ID or
+  citation that resolves to an authorized corpus document—so operators and
+  users can verify where the claim came from.
+whyItMatters: >
+  Ungrounded factual or high-stakes answers are hard to audit and easy to
+  over-trust. Requiring resolvable provenance on the eval set catches missing
+  citations and hallucinated source IDs before they ship. Distinct from DG-M1
+  corpus ownership and EXP-M2 operator path reconstruction.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "On the factual/high-stakes RAG eval set, ≥90% of answers include ≥1 valid source
-  ID/citation that resolves to an authorized corpus document"
+passCondition: >
+  On the factual/high-stakes RAG eval set, ≥90% of answers include ≥1 valid
+  source ID/citation that resolves to an authorized corpus document
+  (measuredAt ≤90 days).
 evidenceRequired:
-  - "RAG eval suite measuring citation presence/accuracy + sample production traces"
+  - "Factual/high-stakes RAG eval suite measuring citation presence"
+  - "Eval report showing ≥90% answers with ≥1 resolvable citation/source ID"
+  - "Sample production traces with citations (supporting evidence)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-rag-provenance"
+      params:
+        hint: >
+          Discover RAG citation/provenance config, factual/high-stakes eval
+          suites, and reports that citations resolve to authorized corpus docs.
     - id: "manual-attest"
       params:
-        hint: "RAG eval suite measuring citation presence/accuracy + sample production traces"
-manualVerification: "For this Check (Include provenance (citations or source IDs)): inspect current
-  evidence for [RAG eval suite measuring citation presence/accuracy + sample production traces] and
-  confirm the pass condition holds — On the factual/high-stakes RAG eval set, ≥90% of answers
-  include ≥1 valid source ID/citation that resolves to an authorized corpus document"
-falsePositiveGuidance: "(Explainability & Transparency): re-verify against a current artifact for
-  this specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest factual/high-stakes RAG
+          eval ≥90% answers with resolvable citations (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm factual or high-stakes RAG outputs exist. If none, score
+  NOT_APPLICABLE. 2) Locate an eval suite for those outputs that measures
+  citation/source-ID presence. 3) Confirm ≥90% of answers include ≥1 citation
+  that resolves to an authorized corpus document (not a dangling ID). 4) PASS
+  only if eval + coverage + resolveability hold with measuredAt ≤90 days.
+  DG-M1 corpus owner/version/cadence alone does not prove answer-level
+  citations. EXP-M2 operator reconstruction alone does not prove citation
+  coverage. Promptfoo connectivity smoke without citation resolveability does
+  not satisfy.
+falsePositiveGuidance: >
+  Do not pass citation-format prompts without eval coverage ≥90%. Do not pass
+  source IDs that do not resolve to authorized corpus documents. Do not pass
+  generic RAG evals that omit provenance metrics. Sibling DG-M1 and EXP-M2 do
+  not substitute. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: High-stakes or factual RAG outputs must include provenance
-    (citations or source IDs)"
-  - "Retain evidence artifacts required by this Check, starting with: RAG eval suite measuring
-    citation presence/accuracy + sample production traces"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Require citations/source IDs on factual and high-stakes RAG answer paths"
+  - "Add an eval measuring ≥90% answers with resolvable authorized-corpus citations"
+  - "Retain evidence under imports/ai-rag-provenance/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "NIST AI RMF — Explainability and Interpretability"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM Top 10 — LLM09 Overreliance"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
   - "EXP-M2"
   - "EXP-M3"
-  - "EXP-M4"
-  - "EXP-R1"
   - "EXP-R3"
+  - "EXP-R1"
+  - "DG-M1"
+  - "OBS-M1"
 tags:
   - "explainability"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "rag"
+  - "citation"
+  - "provenance"
 applicability:
   technologies: []
   minCriticality: 2

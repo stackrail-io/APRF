@@ -1,51 +1,81 @@
 id: "EXP-M3"
 category: "explainability"
 title: "Explanation content must not disclose secrets or unauthorized data"
-description: "Explanation content shall not disclose secrets or unauthorized data"
-whyItMatters: "Explanation content shall not disclose secrets or unauthorized data Failing this
-  leaves a production gap against: Synthetic secret/PII fixtures in explanation paths are redacted
-  or blocked at 100% in tests; latest production explanation sample scan shows 0 privileged secret
-  pattern hits"
+description: >
+  Explanation payloads (user-facing rationales, operator reconstructions,
+  citation snippets) shall redact or block secrets and unauthorized data—so
+  explainability does not become a leak path.
+whyItMatters: >
+  Decision-path and citation features often echo prompts, tool results, or
+  retrieved chunks that can contain API keys, PII, or privileged internals.
+  Without redaction tests and a clean production sample scan, explanations
+  undermine the security and privacy controls they sit beside. Distinct from
+  OBS-M2 trace-field redaction and general log scrubbers.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Synthetic secret/PII fixtures in explanation paths are redacted or blocked at 100%
-  in tests; latest production explanation sample scan shows 0 privileged secret pattern hits"
+passCondition: >
+  Synthetic secret/PII fixtures in explanation paths are redacted or blocked
+  at 100% in tests; latest production explanation sample scan shows 0
+  privileged secret pattern hits (measuredAt ≤90 days).
 evidenceRequired:
-  - "Explanation redaction policy + automated secret/PII scan on explanation payloads"
+  - "Explanation redaction/blocking policy covering explanation payloads"
+  - "Automated test showing 100% redaction/block of synthetic secret/PII fixtures"
+  - "Production explanation sample scan with 0 privileged secret pattern hits (≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-explanation-hygiene"
+      params:
+        hint: >
+          Discover explanation redaction policies, synthetic secret/PII tests
+          on explanation paths, and production explanation sample scans.
     - id: "manual-attest"
       params:
-        hint: "Explanation redaction policy + automated secret/PII scan on explanation payloads"
-manualVerification: "For this Check (Explanation content must not disclose secrets or unauthorized
-  data): inspect current evidence for [Explanation redaction policy + automated secret/PII scan on
-  explanation payloads] and confirm the pass condition holds — Synthetic secret/PII fixtures in
-  explanation paths are redacted or blocked at 100% in tests; latest production explanation sample
-  scan shows 0 privileged secret pattern hits"
-falsePositiveGuidance: "(Explainability & Transparency): re-verify against a current artifact for
-  this specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest 100% synthetic
+          redaction/block on explanation paths and 0 production secret hits
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm explanation payloads exist (user rationale, operator
+  reconstruction, citation snippets, or equivalent). If none, score
+  NOT_APPLICABLE. 2) Locate a redaction/blocking policy for those payloads.
+  3) Review tests showing synthetic secret/PII fixtures are redacted or
+  blocked at 100%. 4) Review a production explanation sample scan ≤90 days
+  with 0 privileged secret pattern hits. 5) PASS only if policy + 100% test +
+  clean sample scan hold with measuredAt ≤90 days. OBS-M2 trace redaction
+  alone does not prove explanation-payload hygiene. SEC2-M2 general log
+  scrubbers alone do not prove explanation-path coverage. EXP-M1/EXP-M2
+  alone do not prove secret-free explanations.
+falsePositiveGuidance: >
+  Do not pass generic logging redaction that omits explanation payloads. Do
+  not pass policies without 100% synthetic fixture tests. Do not pass
+  production scans with any privileged secret hits. Sibling OBS-M2 and
+  SEC2-M2 do not substitute. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Explanation content must not disclose secrets or unauthorized
-    data"
-  - "Retain evidence artifacts required by this Check, starting with: Explanation redaction policy +
-    automated secret/PII scan on explanation payloads"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Apply redaction/blocking to all explanation payloads (user and operator)"
+  - "Add synthetic secret/PII fixture tests asserting 100% redaction or block"
+  - "Scan production explanation samples ≤90 days; retain under imports/ai-explanation-hygiene/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "NIST AI RMF — Explainability and Interpretability"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP LLM Top 10 — LLM02 Insecure Output Handling"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
   - "EXP-M1"
   - "EXP-M2"
-  - "EXP-M4"
-  - "EXP-R1"
   - "EXP-R3"
+  - "EXP-R1"
+  - "OBS-M2"
+  - "SEC2-M2"
 tags:
   - "explainability"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "redaction"
+  - "secrets"
+  - "pii"
 applicability:
   technologies: []
   minCriticality: 2

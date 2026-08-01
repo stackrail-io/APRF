@@ -1,0 +1,26 @@
+id: ai-user-rationale
+title: User-facing rationale for material automated decisions (EXP-R1)
+version: "0.2.0"
+executor: collectors/ai-user-rationale.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-user-rationale]
+inputs:
+  - "Target repo (material decision catalog + user-facing rationale sample)"
+  - "Optional suite: aprf-assessment/imports/ai-user-rationale/*.{json}"
+collect:
+  - "Detect catalog / rationale / sample signals"
+  - "Ingest coverage; write ai-user-rationale-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-user-rationale/*"
+  signals: [ai-user-rationale, exp-r1, repo-ai-user-rationale]
+mapsToChecks: [EXP-R1]
+whenUnavailable: >
+  Rationale signals alone are PARTIAL. EXP-R1 PASS needs
+  materialDecisionCatalogConfigured, sampleCaseCount≥20,
+  materialTypesWithUserRationalePct=100, rationaleGapsTrackedWithOwners,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline user-rationale heuristics + optional imported JSON.
