@@ -1,0 +1,26 @@
+id: ai-chaos-dependency
+title: AI-dependency chaos experiments (REL-R5)
+version: "0.2.0"
+executor: collectors/ai-chaos-dependency.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-chaos-tests]
+inputs:
+  - "Target repo (chaos plans + AI-dependency after-actions)"
+  - "Optional suite: aprf-assessment/imports/ai-chaos-dependency/*.{json}"
+collect:
+  - "Detect chaos / AI-dependency / after-action signals"
+  - "Ingest coverage; write ai-chaos-dependency-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-chaos-dependency/*"
+  signals: [ai-chaos-dependency, rel-r5, repo-chaos-tests]
+mapsToChecks: [REL-R5]
+whenUnavailable: >
+  Chaos signals alone are PARTIAL. REL-R5 PASS needs
+  chaosPlanCoversAiDependencies,
+  aiDependencyChaosExerciseCompletedWithin180Days,
+  afterActionRetainedWithActions, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline chaos heuristics + optional imported JSON.

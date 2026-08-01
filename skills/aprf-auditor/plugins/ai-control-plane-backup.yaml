@@ -1,0 +1,25 @@
+id: ai-control-plane-backup
+title: AI control-plane backup inventory + restore test (REL-M4)
+version: "0.2.0"
+executor: collectors/ai-control-plane-backup.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-control-plane-backup]
+inputs:
+  - "Target repo (backup inventory + restore-test signals for AI control-plane artifacts)"
+  - "Optional suite: aprf-assessment/imports/ai-control-plane-backup/*.{json}"
+collect:
+  - "Detect backup / control-plane artifact / restore-test signals"
+  - "Ingest coverage; write ai-control-plane-backup-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-control-plane-backup/*"
+  signals: [ai-control-plane-backup, rel-m4, repo-ai-control-plane-backup]
+mapsToChecks: [REL-M4]
+whenUnavailable: >
+  Backup signals alone are PARTIAL. REL-M4 PASS needs
+  controlPlaneBackupInventoryConfigured, requiredArtifactClassesCovered,
+  restoreTestSucceededWithin90Days, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline backup/restore heuristics + optional imported JSON.

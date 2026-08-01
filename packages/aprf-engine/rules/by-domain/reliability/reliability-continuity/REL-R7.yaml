@@ -1,0 +1,84 @@
+id: "REL-R7"
+category: "reliability-continuity"
+title: "Level 5 continuity should include contractual and technical multi-provider options"
+description: >
+  Level-5 workloads should have a documented alternate provider or path
+  (contractual and technical) and a successful failover test within 180 days.
+whyItMatters: >
+  Single-provider Level-5 systems inherit that provider’s outage as their own.
+  A contracted alternate path plus a recent failover test turns provider loss
+  into a planned switch. This remains recommended maturity: REL-M5 RTO/RPO and
+  REL-M2 degraded mode are the production-blocking siblings; REL-R2 covers
+  fallback eval quality rather than contractual continuity.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  Level-5 workloads have a documented alternate provider/path and a successful
+  failover test ≤180 days (attest measuredAt ≤90 days).
+evidenceRequired:
+  - "Provider contract summary or equivalent documenting alternate provider/path options"
+  - "Technical failover design + successful failover test evidence (≤180 days)"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-multi-provider-continuity"
+      params:
+        hint: >
+          Discover alternate-provider contracts/designs and failover-test
+          evidence for Level-5 AI continuity.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest Level-5 workloads have a
+          documented alternate provider/path and a successful failover test
+          ≤180 days (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm Level-5 / mission-critical AI workloads are in scope. If none,
+  score NOT_APPLICABLE. 2) Locate contractual or equivalent documentation of an
+  alternate provider/path (not aspirational slides). 3) Locate technical
+  failover design and a successful failover test ≤180 days. 4) PASS only if
+  contract/path + test hold with measuredAt ≤90 days. REL-R2 fallback eval
+  coverage alone does not prove contractual multi-provider options. REL-M5
+  RTO/RPO alone does not prove an alternate provider. REL-R6 warm standby alone
+  does not prove contractual multi-provider options.
+falsePositiveGuidance: >
+  Do not pass marketing “multi-cloud ready” claims without a documented
+  alternate path. Do not pass contracts without a successful failover test
+  ≤180 days. Do not pass same-AZ redundancy as multi-provider continuity.
+  Sibling REL-R2, REL-R5, REL-R6, and REL-M5 do not substitute. Named
+  exceptions need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Document contractual (or equivalent) alternate provider/path options for Level-5 workloads"
+  - "Design and test technical failover at least every 180 days; retain results"
+  - "Retain evidence under imports/ai-multi-provider-continuity/"
+  - "Time-box gaps with owner and expiry ≤90 days"
+references:
+  - title: "APRF-RFC-0007 — Demote former REL-M8 multi-provider continuity to recommended"
+    url: "https://github.com/stackrail-io/APRF/blob/main/rfcs/0007-reliability-continuity-rel-m8-to-recommended.md"
+  - title: "Google SRE Book — Addressing Cascading Failures"
+    url: "https://sre.google/sre-book/addressing-cascading-failures/"
+  - title: "AWS Well-Architected — Reliability"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "Google SRE — Disaster Recovery"
+    url: "https://sre.google/sre-book/disaster-recovery/"
+relatedRules:
+  - "REL-M2"
+  - "REL-M4"
+  - "REL-M5"
+  - "REL-R2"
+  - "REL-R5"
+  - "REL-R6"
+tags:
+  - "reliability-continuity"
+  - "recommended"
+  - "hybrid"
+  - "multi-provider"
+  - "failover"
+  - "level-5"
+applicability:
+  technologies: []
+  minCriticality: 3
+  requiredFromLevel: 5
+status: "active"
+introducedIn: "0.10.0"

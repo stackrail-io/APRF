@@ -237,7 +237,12 @@ categoryDefaults:
       - "**/*retry*"
       - "**/*degrad*"
       - "**/*chaos*"
-    signals: [timeout, fallback, multi-provider]
+      - "**/*rto*"
+      - "**/*rpo*"
+      - "**/*failover*"
+      - "**/*disaster*recovery*"
+    plugins: [ai-rto-rpo-catalog, repo-filesystem]
+    signals: [timeout, fallback, multi-provider, RTO, RPO, restore, failover]
   change-management:
     search:
       - "**/.github/workflows/**"
@@ -744,6 +749,211 @@ checks:
       PASS if ai-streaming-slis statusHint=pass (TTFT + inter-token SLIs + alerts + retention ≥30d + measuredAt ≤90d).
       PARTIAL if streaming signals without complete import.
       NOT_APPLICABLE when no streaming signals. Distinct from PERF-M2 generic latency and PERF-R4 ops dashboards.
+  REL-M1:
+    requiredEvidence:
+      - "Client config or code declaring finite timeout and max-retry for model/tool call sites"
+      - "timeoutsConfigured + retriesBounded + callSitesCoveredPct=100 + verifiedByStaticOrIntegrationTest under imports/ai-timeouts-retries/"
+    searchExtra:
+      - "**/*timeout*"
+      - "**/*max*retr*"
+      - "**/*retry*policy*"
+      - "**/*openai*client*"
+      - "**/*llm*client*"
+      - "**/*tool*call*"
+    plugins: [ai-timeouts-retries, repo-filesystem]
+    naWhen: "No production model/tool clients in scope"
+    evaluation: |
+      PASS if ai-timeouts-retries statusHint=pass (finite timeout + bounded retries + 100% call-site coverage + static/integration verify + measuredAt ≤90d).
+      PARTIAL if timeout/retry signals without complete import.
+      NOT_APPLICABLE when no AI timeout/retry signals. Distinct from COST-M3 cost amplification and AGN-M2 agent loop budgets.
+  REL-M2:
+    requiredEvidence:
+      - "Degraded-mode specification covering each critical AI-dependent journey"
+      - "degradedModeDocumented + criticalJourneyCount≥1 + criticalJourneysWithDegradedModePct=100 + failoverTestShowsSafeFallback under imports/ai-degraded-mode/"
+    searchExtra:
+      - "**/*degraded*mode*"
+      - "**/*graceful*degrad*"
+      - "**/*fallback*"
+      - "**/*failover*test*"
+      - "**/*feature*flag*"
+      - "**/*circuit*break*"
+    plugins: [ai-degraded-mode, repo-filesystem]
+    naWhen: "No critical AI-dependent journeys in scope"
+    evaluation: |
+      PASS if ai-degraded-mode statusHint=pass (documented degraded mode + ≥1 critical journey + 100% coverage + failover test shows safe fallback + measuredAt ≤90d).
+      PARTIAL if degraded-mode signals without complete import.
+      NOT_APPLICABLE when no degraded-mode signals. Distinct from REL-R3 continuity options and REL-M5 RTO/RPO.
+  REL-M3:
+    requiredEvidence:
+      - "Agent/tool error-handling policy or code that detects partial tool failure"
+      - "partialFailureHandlingConfigured + testEvidenceShowsNoFalseSuccess + noFalseSuccessWithoutRemediationPct=100 under imports/ai-partial-tool-failure/"
+    searchExtra:
+      - "**/*partial*fail*"
+      - "**/*false*success*"
+      - "**/*tool*error*"
+      - "**/*compensat*"
+      - "**/*rollback*"
+      - "**/*chaos*"
+      - "**/*replay*test*"
+      - "**/*contract*test*"
+    plugins: [ai-partial-tool-failure, repo-filesystem]
+    naWhen: "No tool-using agents/workflows in scope"
+    evaluation: |
+      PASS if ai-partial-tool-failure statusHint=pass (partial-failure handling + outcome test evidence + 100% no false-success without compensation/rollback/retry/approval + measuredAt ≤90d).
+      PARTIAL if partial-failure signals without complete import.
+      NOT_APPLICABLE when no tool/agent signals. Distinct from REL-M1 timeouts and REL-M2 degraded mode. Test method is not prescribed (integration/chaos/e2e/replay/contract/simulator all acceptable).
+  REL-R3:
+    requiredEvidence:
+      - "Continuity options documentation per critical AI-dependent process (failover, manual, alternate provider, or equivalent)"
+      - "continuityOptionsDocumented + criticalAiProcessCount≥1 + criticalAiProcessesWithOwnedContinuityOptionPct=100 under imports/ai-continuity-options/"
+    searchExtra:
+      - "**/*continuity*option*"
+      - "**/*continuity*plan*"
+      - "**/*alternate*provider*"
+      - "**/*failover*"
+      - "**/*manual*procedure*"
+      - "**/*critical*ai*process*"
+    plugins: [ai-continuity-options, repo-filesystem]
+    naWhen: "No critical AI-dependent processes in scope"
+    evaluation: |
+      PASS if ai-continuity-options statusHint=pass (documented continuity options + ≥1 critical AI process + 100% with named owner + measuredAt ≤90d).
+      PARTIAL if continuity signals without complete import.
+      NOT_APPLICABLE when no continuity signals. Distinct from REL-M2 journey degraded mode and REL-M5 RTO/RPO.
+  REL-R1:
+    requiredEvidence:
+      - "Client library/config showing circuit breakers around model/provider calls"
+      - "circuitBreakerConfigured + bulkheadLimitsConcurrentCalls + breakerTripEvidenceWithin90Days under imports/ai-circuit-bulkhead/"
+    searchExtra:
+      - "**/*circuit*break*"
+      - "**/*bulkhead*"
+      - "**/*opossum*"
+      - "**/*resilience4j*"
+      - "**/*max*concurrent*"
+      - "**/*breaker*trip*"
+    plugins: [ai-circuit-bulkhead, repo-filesystem]
+    naWhen: "No production AI/provider clients in scope"
+    evaluation: |
+      PASS if ai-circuit-bulkhead statusHint=pass (circuit breaker + bulkhead + trip evidence ≤90d + measuredAt ≤90d).
+      PARTIAL if isolation signals without complete import.
+      NOT_APPLICABLE when no isolation signals. Distinct from REL-M1 timeouts and COST-M3 retry amplification.
+  REL-R2:
+    requiredEvidence:
+      - "Multi-provider or multi-region fallback configuration"
+      - "fallbackPathConfigured + fallbackExercisedWithin90Days + fallbackEvalMeetsQualitySafetyBars under imports/ai-fallback-eval/"
+    searchExtra:
+      - "**/*fallback*"
+      - "**/*multi*provider*"
+      - "**/*multi*region*"
+      - "**/*primary*vs*fallback*"
+      - "**/*fallback*eval*"
+    plugins: [ai-fallback-eval, repo-filesystem]
+    naWhen: "No production AI paths that warrant fallback in scope"
+    evaluation: |
+      PASS if ai-fallback-eval statusHint=pass (fallback configured + exercised ≤90d + quality/safety eval bars + measuredAt ≤90d).
+      PARTIAL if fallback signals without complete import.
+      NOT_APPLICABLE when no fallback signals. Distinct from REL-R7 contractual multi-provider continuity and REL-M2 degraded mode.
+  REL-R4:
+    requiredEvidence:
+      - "Continuity drill calendar covering provider-loss (or equivalent) scenarios"
+      - "continuityDrillCalendarConfigured + providerLossDrillCompletedWithin90Days + rtoRpoMetOrOwnedExceptions under imports/ai-continuity-drill/"
+    searchExtra:
+      - "**/*continuity*drill*"
+      - "**/*provider*loss*"
+      - "**/*drill*calendar*"
+      - "**/*bcp*drill*"
+      - "**/*rto*rpo*result*"
+    plugins: [ai-continuity-drill, repo-filesystem]
+    naWhen: "No production AI provider dependencies in scope"
+    evaluation: |
+      PASS if ai-continuity-drill statusHint=pass (calendar + provider-loss drill ≤90d + RTO/RPO met or owned exceptions + measuredAt ≤90d).
+      PARTIAL if drill signals without complete import.
+      NOT_APPLICABLE when no drill signals. Distinct from REL-R5 chaos and REL-M5 documented RTO/RPO.
+  REL-R6:
+    requiredEvidence:
+      - "Warm-standby inference architecture for self-hosted critical workloads"
+      - "warmStandbyArchitectureDocumented + failoverWithinRtoWithin90Days + standbyCapacityCoversDeclaredPeak under imports/ai-warm-standby/"
+    searchExtra:
+      - "**/*warm*standby*"
+      - "**/*self*host*"
+      - "**/*vllm*"
+      - "**/*standby*capacity*"
+      - "**/*inference*failover*"
+    plugins: [ai-warm-standby, repo-filesystem]
+    naWhen: "No self-hosted inference in scope"
+    evaluation: |
+      PASS if ai-warm-standby statusHint=pass (warm-standby architecture + failover within RTO ≤90d + peak capacity + measuredAt ≤90d).
+      PARTIAL if self-hosted/standby signals without complete import.
+      NOT_APPLICABLE when no self-hosted signals. Distinct from REL-R7 multi-provider contracts and REL-M2 degraded mode.
+  REL-M4:
+    requiredEvidence:
+      - "Backup job or inventory covering required AI control-plane artifacts (prompt registry, policies, indexes, as applicable)"
+      - "controlPlaneBackupInventoryConfigured + requiredArtifactClassesCovered + restoreTestSucceededWithin90Days under imports/ai-control-plane-backup/"
+    searchExtra:
+      - "**/*backup*"
+      - "**/*restore*test*"
+      - "**/*prompt*registry*"
+      - "**/*policy*store*"
+      - "**/*vector*index*"
+      - "**/*control*plane*"
+    plugins: [ai-control-plane-backup, repo-filesystem]
+    naWhen: "No AI control-plane artifacts in scope"
+    evaluation: |
+      PASS if ai-control-plane-backup statusHint=pass (backup inventory + required artifact classes + restore test ≤90d + measuredAt ≤90d).
+      PARTIAL if backup signals without complete import.
+      NOT_APPLICABLE when no backup/artifact signals. Distinct from REL-M5 service RTO/RPO and REL-R3 continuity-option docs.
+  REL-R5:
+    requiredEvidence:
+      - "Chaos experiment plan covering AI provider/tool/gateway failure modes"
+      - "chaosPlanCoversAiDependencies + aiDependencyChaosExerciseCompletedWithin180Days + afterActionRetainedWithActions under imports/ai-chaos-dependency/"
+    searchExtra:
+      - "**/*chaos*"
+      - "**/*litmus*"
+      - "**/*chaosmesh*"
+      - "**/*game*day*"
+      - "**/*fault*inject*"
+      - "**/*provider*outage*"
+      - "**/*after*action*"
+    plugins: [ai-chaos-dependency, repo-filesystem]
+    naWhen: "No production AI dependencies in scope"
+    evaluation: |
+      PASS if ai-chaos-dependency statusHint=pass (AI-dependency chaos plan + exercise ≤180d + retained actions + measuredAt ≤90d).
+      PARTIAL if chaos signals without complete import.
+      NOT_APPLICABLE when no chaos signals. Distinct from REL-R4 provider-loss drills and INC-R4 tabletops.
+  REL-R7:
+    requiredEvidence:
+      - "Provider contract summary or equivalent documenting alternate provider/path options"
+      - "alternateProviderPathDocumented + failoverTestSucceededWithin180Days under imports/ai-multi-provider-continuity/"
+    searchExtra:
+      - "**/*multi*provider*"
+      - "**/*alternate*provider*"
+      - "**/*provider*failover*"
+      - "**/*provider*contract*"
+      - "**/*cross*provider*"
+    plugins: [ai-multi-provider-continuity, repo-filesystem]
+    naWhen: "No Level-5 AI workloads in scope"
+    evaluation: |
+      PASS if ai-multi-provider-continuity statusHint=pass (documented alternate provider/path + failover test ≤180d + measuredAt ≤90d).
+      PARTIAL if multi-provider signals without complete import.
+      NOT_APPLICABLE when no multi-provider signals. Distinct from REL-R2 fallback evals and REL-M5 RTO/RPO.
+  REL-M5:
+    requiredEvidence:
+      - "Business continuity, service-catalog, or disaster-recovery documentation with numeric RTO and RPO for business-critical AI services"
+      - "continuityDocumentationConfigured + businessCriticalAiServiceCount≥1 + businessCriticalAiServicesWithNumericRtoRpoPct=100 + linkedToTestedRestoreOrFailoverProcedure under imports/ai-rto-rpo-catalog/"
+    searchExtra:
+      - "**/*rto*rpo*"
+      - "**/*rpo*rto*"
+      - "**/*business*continuity*"
+      - "**/*service*catalog*"
+      - "**/*disaster*recovery*"
+      - "**/*dr*plan*"
+      - "**/*failover*test*"
+      - "**/*restore*procedure*"
+    plugins: [ai-rto-rpo-catalog, repo-filesystem]
+    naWhen: "No business-critical AI services in scope"
+    evaluation: |
+      PASS if ai-rto-rpo-catalog statusHint=pass (BCP/service-catalog/DR docs + ≥1 business-critical AI service + 100% numeric RTO/RPO + tested restore/failover link + measuredAt ≤90d).
+      PARTIAL if continuity signals without complete import.
+      NOT_APPLICABLE when no continuity signals. Distinct from REL-M4 backup inventory and PERF-M1 SLOs.
   EVL-M1:
     requiredEvidence:
       - "Eval suite registry mapping critical journeys to versioned offline suites"

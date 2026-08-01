@@ -1,0 +1,25 @@
+id: ai-continuity-options
+title: Critical AI process continuity options with owners (REL-R3)
+version: "0.2.0"
+executor: collectors/ai-continuity-options.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-continuity-options]
+inputs:
+  - "Target repo (continuity-options docs with owners)"
+  - "Optional suite: aprf-assessment/imports/ai-continuity-options/*.{json}"
+collect:
+  - "Detect continuity-option / critical-process / owner signals"
+  - "Ingest coverage; write ai-continuity-options-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-continuity-options/*"
+  signals: [ai-continuity-options, rel-r3, repo-ai-continuity-options]
+mapsToChecks: [REL-R3]
+whenUnavailable: >
+  Continuity signals alone are PARTIAL. REL-R3 PASS needs
+  continuityOptionsDocumented, criticalAiProcessCount≥1,
+  criticalAiProcessesWithOwnedContinuityOptionPct=100, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline continuity-option heuristics + optional imported JSON.

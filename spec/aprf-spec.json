@@ -628,7 +628,7 @@
         "INC-M2",
         "COST-M1",
         "COST-M3",
-        "REL-M6",
+        "REL-M5",
         "CMP-M2",
         "SEC-M5",
         "AUTHN-M4",
@@ -641,9 +641,7 @@
         "PRI-M3",
         "MEM-M4",
         "EVL-M4",
-        "HUM-M4",
-        "REL-M7",
-        "REL-M8"
+        "HUM-M4"
       ],
       "rationale": [
         "Includes every Core gate \u2014 regulated systems must still clear production minimums.",
@@ -4307,111 +4305,111 @@
       "mandatoryChecks": [
         {
           "id": "REL-M1",
-          "requirement": "All model and tool calls shall have timeouts and bounded retries",
-          "artifact": "Client config / static analysis report for timeouts and max retries",
-          "passCondition": "100% of model/tool client call sites have finite timeout and max-retry \u2264 bound; verified by static check or integration test",
-          "method": "automated",
+          "requirement": "Every production model and tool client call site shall declare a finite timeout and a finite max-retry bound\u2014verified by static analysis or integration test\u2014so hung providers and retry storms cannot cascade.",
+          "artifact": "Client config or code declaring finite timeout and max-retry for model/tool call sites + Static analysis report or integration test covering 100% of in-scope call sites",
+          "passCondition": "100% of production model/tool client call sites have a finite timeout and a finite max-retry bound; verified by static check or integration test (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "REL-M2",
-          "requirement": "Critical user journeys shall define a degraded mode when AI is unavailable",
-          "artifact": "Degraded-mode spec per critical journey + feature-flag or fallback test",
-          "passCondition": "100% of critical journeys document degraded behavior; failover test shows non-AI or safe fallback activates when AI dependency fails",
-          "method": "manual",
+          "requirement": "Every critical user journey that depends on AI shall document degraded behavior when the AI dependency fails, and a failover test shall show a non-AI or safe fallback activates\u2014not a blank error or silent hang.",
+          "artifact": "Degraded-mode specification covering each critical AI-dependent journey + Feature-flag, circuit-breaker, or fallback test proving safe activation when AI fails",
+          "passCondition": "100% of critical AI-dependent journeys document degraded behavior; a failover test shows non-AI or safe fallback activates when the AI dependency fails (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "REL-M3",
-          "requirement": "Partial tool failures shall be detected and shall prevent false-success continuation",
-          "artifact": "Agent/tool error-handling tests for partial failure",
-          "passCondition": "Tests inject tool failure after partial success; agent does not report overall success in 100% of cases without explicit compensation/approval",
-          "method": "manual",
+          "requirement": "Tool-using AI workflows shall detect partial tool failures (success then failure mid-sequence, truncated results, or failed side effects) and must not report overall success without explicit compensation, rollback, retry, or human approval.",
+          "artifact": "Agent/tool error-handling policy or code that detects partial tool failure + Test evidence (integration, chaos, e2e, replay, contract, simulator, or equivalent) showing no false-success without compensation/rollback/retry/approval",
+          "passCondition": "Test evidence demonstrates that when a tool partially succeeds and a later step fails, the workflow does not report overall success without explicit compensation, rollback, retry, or human approval (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "REL-M4",
-          "requirement": "Critical AI-dependent processes shall have documented continuity options",
-          "artifact": "Continuity options doc per critical process (failover, manual, alternate provider)",
-          "passCondition": "100% of processes marked critical-AI-dependent have \u22651 documented continuity option with owner",
-          "method": "manual",
+          "requirement": "Backup inventories shall include the AI control-plane artifacts required to restore service (prompt registry, policies, indexes, and other declared dependencies), and a restore test of a sample artifact set shall succeed within 90 days.",
+          "artifact": "Backup job or inventory covering required AI control-plane artifacts (prompt registry, policies, indexes, as applicable) + Restore test report for a sample artifact set",
+          "passCondition": "Backup inventory includes required AI control-plane artifacts; a restore test in the last 90 days succeeds for a sample artifact set (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "REL-M5",
-          "requirement": "Backups shall include AI control-plane artifacts needed to restore service",
-          "artifact": "Backup job config covering prompt registry, policies, indexes as required + restore test",
-          "passCondition": "Backup inventory includes required AI control-plane artifacts; restore test in last 90 days succeeds for a sample artifact set",
-          "method": "manual",
-          "requiredFromLevel": 3,
-          "minCriticality": 2
-        },
-        {
-          "id": "REL-M6",
-          "requirement": "RTO/RPO objectives shall exist for critical AI features",
-          "artifact": "RTO/RPO catalog for critical AI features",
-          "passCondition": "100% of critical AI features have numeric RTO and RPO documented and linked to a tested restore/failover procedure",
-          "method": "manual",
-          "requiredFromLevel": 4,
-          "minCriticality": 3
-        },
-        {
-          "id": "REL-M7",
-          "requirement": "Chaos experiments shall cover AI dependency failure modes",
-          "artifact": "Chaos experiment plan + dated after-action report including AI provider/tool failures",
-          "passCondition": "PASS if at least one AI-dependency chaos exercise completed in the last 180 days with retained actions",
+          "requirement": "Every business-critical AI service must have numeric RTO and RPO documented in continuity, service-catalog, or disaster-recovery materials and linked to a tested restore or failover procedure.",
+          "artifact": "Business continuity, service-catalog, or disaster-recovery documentation with numeric RTO and RPO for business-critical AI services + Linkage from each in-scope service to a tested restore/failover procedure",
+          "passCondition": "100% of business-critical AI services have numeric RTO and RPO documented and linked to a tested restore/failover procedure (continuity evidence measuredAt \u226490 days).",
           "method": "hybrid",
-          "requiredFromLevel": 5,
-          "minCriticality": 3
-        },
-        {
-          "id": "REL-M8",
-          "requirement": "Contractual and technical multi-provider options shall exist for Level 5 continuity",
-          "artifact": "Provider contract summary + technical failover design and test evidence",
-          "passCondition": "PASS if Level 5 workloads have a documented alternate provider/path and a successful failover test \u2264180 days",
-          "method": "manual",
-          "requiredFromLevel": 5,
+          "requiredFromLevel": 4,
           "minCriticality": 3
         }
       ],
       "recommendedChecks": [
         {
           "id": "REL-R1",
-          "requirement": "Circuit breakers and bulkheads around provider clients",
-          "artifact": "Client library/config showing circuit breakers and bulkheads around model/provider calls + last trip log",
-          "passCondition": "Breaker opens under induced failure in test or observed prod trip within 90 days; bulkhead limits concurrent calls per provider dependency",
-          "method": "manual",
+          "requirement": "Production AI/provider clients should isolate failures with circuit breakers (open under sustained failure) and bulkheads (finite concurrency per dependency)\u2014so one slow or down provider cannot exhaust the whole fleet.",
+          "artifact": "Client library/config showing circuit breakers around model/provider calls + Bulkhead or concurrency limit per provider dependency + Breaker trip evidence: induced-failure test or production trip log",
+          "passCondition": "Circuit breakers are configured around AI/provider clients and open under induced failure in test or an observed production trip within 90 days; bulkheads limit concurrent calls per provider dependency (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "REL-R2",
-          "requirement": "Multi-provider or multi-region fallback with eval coverage",
-          "artifact": "Multi-provider or multi-region fallback config + eval report comparing primary vs fallback quality/safety",
-          "passCondition": "Fallback path is configured and was exercised \u226490 days; fallback eval meets minimum quality/safety bars (not only connectivity)",
-          "method": "manual",
+          "requirement": "Production AI paths should have a configured multi-provider or multi-region fallback that was exercised within 90 days, with an eval comparing primary vs fallback quality and safety\u2014not connectivity alone\u2014so failover does not silently degrade outcomes.",
+          "artifact": "Multi-provider or multi-region fallback configuration + Evidence the fallback path was exercised \u226490 days + Eval report comparing primary vs fallback quality/safety against minimum bars",
+          "passCondition": "A multi-provider or multi-region fallback path is configured and was exercised \u226490 days; a retained eval comparing primary vs fallback meets documented minimum quality/safety bars (not connectivity-only; measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
+          "minCriticality": 2
+        },
+        {
+          "id": "REL-R3",
+          "requirement": "Every process marked critical-AI-dependent should have at least one documented continuity option (failover, manual procedure, alternate provider, or equivalent) with a named owner\u2014so operators know how to keep the process running when the primary AI path fails.",
+          "artifact": "Continuity options documentation per critical AI-dependent process (failover, manual, alternate provider, or equivalent) + Named owner for each continuity option",
+          "passCondition": "100% of processes marked critical-AI-dependent have \u22651 documented continuity option with a named owner (continuity evidence measuredAt \u226490 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "REL-R4",
-          "requirement": "Periodic continuity drills including provider loss",
-          "artifact": "Continuity drill calendar + last provider-loss drill report with RTO/RPO results",
-          "passCondition": "Provider-loss (or equivalent) continuity drill completed \u226490 days; RTO/RPO met or exceptions have named owners and expiry",
-          "method": "manual",
+          "requirement": "Production AI systems should run periodic continuity drills that include provider loss (or equivalent), measure RTO/RPO outcomes, and retain a report\u2014so recovery objectives are proven under rehearsal, not assumed from documents alone.",
+          "artifact": "Continuity drill calendar covering provider-loss (or equivalent) scenarios + Last provider-loss drill report with RTO/RPO results (\u226490 days) + Named owner + expiry for any RTO/RPO miss",
+          "passCondition": "A provider-loss (or equivalent) continuity drill completed \u226490 days with retained RTO/RPO results that met objectives or have named owners and expiry (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
+          "id": "REL-R5",
+          "requirement": "Production systems should run chaos experiments that cover AI dependency failure modes (provider, model, tool, or gateway outages) and retain an after-action with tracked actions.",
+          "artifact": "Chaos experiment plan covering AI provider/tool/gateway failure modes + Dated after-action report with retained actions",
+          "passCondition": "At least one AI-dependency chaos exercise completed in the last 180 days with retained after-action actions (attest measuredAt \u226490 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 5,
+          "minCriticality": 3
+        },
+        {
           "id": "REL-R6",
-          "requirement": "Warm standby for self-hosted inference where required",
-          "artifact": "Warm-standby inference architecture + last failover test report with RTO result",
-          "passCondition": "Failover to warm standby completes within documented RTO in the last test (\u226490 days); standby capacity covers declared peak for critical workloads",
-          "method": "manual",
+          "requirement": "Where critical workloads depend on self-hosted inference, a warm standby should exist with capacity for declared peak load and a recent failover test that met documented RTO\u2014so self-hosted model loss does not strand the service.",
+          "artifact": "Warm-standby inference architecture for self-hosted critical workloads + Last failover test report with RTO result (\u226490 days) + Standby capacity sizing covering declared peak",
+          "passCondition": "For in-scope self-hosted inference, failover to warm standby completed within documented RTO in a test \u226490 days, and standby capacity covers declared peak for critical workloads (measuredAt \u226490 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 5,
+          "minCriticality": 3
+        },
+        {
+          "id": "REL-R7",
+          "requirement": "Level-5 workloads should have a documented alternate provider or path (contractual and technical) and a successful failover test within 180 days.",
+          "artifact": "Provider contract summary or equivalent documenting alternate provider/path options + Technical failover design + successful failover test evidence",
+          "passCondition": "Level-5 workloads have a documented alternate provider/path and a successful failover test \u2264180 days (attest measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }

@@ -343,6 +343,54 @@ PERF-R3 streaming SLIs (TTFT + inter-token + alerts + ≥30d retention):
   npm run aprf:ai-streaming-slis -- --target <app> --out <app>/aprf-assessment
   # PASS needs ttftSliConfiguredForStreamingSurfaces + interTokenLatencySliConfiguredForStreamingSurfaces + streamingSliAlertsConfigured + streamingSeriesRetainedAtLeast30Days under imports/ai-streaming-slis/
 
+REL-M1 model/tool timeouts + bounded retries (100% call-site coverage + static/integration verify):
+  npm run aprf:ai-timeouts-retries -- --target <app> --out <app>/aprf-assessment
+  # PASS needs timeoutsConfigured + retriesBounded + callSitesCoveredPct=100 + verifiedByStaticOrIntegrationTest under imports/ai-timeouts-retries/
+
+REL-M2 critical journey degraded mode when AI unavailable (docs + failover test):
+  npm run aprf:ai-degraded-mode -- --target <app> --out <app>/aprf-assessment
+  # PASS needs degradedModeDocumented + criticalJourneyCount≥1 + criticalJourneysWithDegradedModePct=100 + failoverTestShowsSafeFallback under imports/ai-degraded-mode/
+
+REL-M3 partial tool failure / no false-success (handling + outcome test evidence):
+  npm run aprf:ai-partial-tool-failure -- --target <app> --out <app>/aprf-assessment
+  # PASS needs partialFailureHandlingConfigured + testEvidenceShowsNoFalseSuccess + noFalseSuccessWithoutRemediationPct=100 under imports/ai-partial-tool-failure/
+
+REL-R3 critical AI process continuity options (docs + named owners):
+  npm run aprf:ai-continuity-options -- --target <app> --out <app>/aprf-assessment
+  # PASS needs continuityOptionsDocumented + criticalAiProcessCount≥1 + criticalAiProcessesWithOwnedContinuityOptionPct=100 under imports/ai-continuity-options/
+
+REL-M4 AI control-plane backup inventory + restore test:
+  npm run aprf:ai-control-plane-backup -- --target <app> --out <app>/aprf-assessment
+  # PASS needs controlPlaneBackupInventoryConfigured + requiredArtifactClassesCovered + restoreTestSucceededWithin90Days under imports/ai-control-plane-backup/
+
+REL-R5 AI-dependency chaos experiments (plan + ≤180d exercise + retained actions):
+  npm run aprf:ai-chaos-dependency -- --target <app> --out <app>/aprf-assessment
+  # PASS needs chaosPlanCoversAiDependencies + aiDependencyChaosExerciseCompletedWithin180Days + afterActionRetainedWithActions under imports/ai-chaos-dependency/
+
+REL-R1 circuit breakers + bulkheads on AI/provider clients (config + trip evidence):
+  npm run aprf:ai-circuit-bulkhead -- --target <app> --out <app>/aprf-assessment
+  # PASS needs circuitBreakerConfigured + bulkheadLimitsConcurrentCalls + breakerTripEvidenceWithin90Days under imports/ai-circuit-bulkhead/
+
+REL-R2 multi-provider/multi-region fallback with quality/safety eval:
+  npm run aprf:ai-fallback-eval -- --target <app> --out <app>/aprf-assessment
+  # PASS needs fallbackPathConfigured + fallbackExercisedWithin90Days + fallbackEvalMeetsQualitySafetyBars under imports/ai-fallback-eval/
+
+REL-R4 provider-loss continuity drills (calendar + RTO/RPO results):
+  npm run aprf:ai-continuity-drill -- --target <app> --out <app>/aprf-assessment
+  # PASS needs continuityDrillCalendarConfigured + providerLossDrillCompletedWithin90Days + rtoRpoMetOrOwnedExceptions under imports/ai-continuity-drill/
+
+REL-R6 warm standby for self-hosted inference (architecture + RTO failover + capacity):
+  npm run aprf:ai-warm-standby -- --target <app> --out <app>/aprf-assessment
+  # PASS needs warmStandbyArchitectureDocumented + failoverWithinRtoWithin90Days + standbyCapacityCoversDeclaredPeak under imports/ai-warm-standby/
+
+REL-R7 Level-5 multi-provider contractual + technical continuity:
+  npm run aprf:ai-multi-provider-continuity -- --target <app> --out <app>/aprf-assessment
+  # PASS needs alternateProviderPathDocumented + failoverTestSucceededWithin180Days under imports/ai-multi-provider-continuity/
+
+REL-M5 business-critical AI service RTO/RPO (BCP/service-catalog/DR + tested restore/failover):
+  npm run aprf:ai-rto-rpo-catalog -- --target <app> --out <app>/aprf-assessment
+  # PASS needs continuityDocumentationConfigured + businessCriticalAiServiceCount≥1 + businessCriticalAiServicesWithNumericRtoRpoPct=100 + linkedToTestedRestoreOrFailoverProcedure under imports/ai-rto-rpo-catalog/
+
 COST-M2 AI cost budget-burn / anomaly alerts:
   npm run aprf:cost-alerts -- --target <app> --out <app>/aprf-assessment
   # PASS needs notify proof under imports/ai-cost-alerts/

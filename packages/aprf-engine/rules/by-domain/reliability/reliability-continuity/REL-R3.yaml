@@ -1,0 +1,86 @@
+id: "REL-R3"
+category: "reliability-continuity"
+title: "Critical AI-dependent processes should have documented continuity options"
+description: >
+  Every process marked critical-AI-dependent should have at least one
+  documented continuity option (failover, manual procedure, alternate
+  provider, or equivalent) with a named owner—so operators know how to keep
+  the process running when the primary AI path fails.
+whyItMatters: >
+  Critical processes that only work when the primary model or AI gateway is
+  healthy have a single point of failure. Documented continuity options with
+  owners turn outages into planned switches instead of ad-hoc improvisation.
+  This remains recommended maturity: REL-M2 (journey degraded mode) and
+  REL-M5 (service RTO/RPO) are the production-blocking siblings.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  100% of processes marked critical-AI-dependent have ≥1 documented continuity
+  option with a named owner (continuity evidence measuredAt ≤90 days).
+evidenceRequired:
+  - "Continuity options documentation per critical AI-dependent process (failover, manual, alternate provider, or equivalent)"
+  - "Named owner for each continuity option"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-continuity-options"
+      params:
+        hint: >
+          Discover continuity-options docs for critical AI-dependent processes
+          (failover, manual, alternate provider) with named owners.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest 100% of critical
+          AI-dependent processes have ≥1 documented continuity option with
+          owner (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm processes marked critical-AI-dependent exist. If none, score
+  NOT_APPLICABLE. 2) For each process, locate ≥1 documented continuity option
+  (failover path, manual procedure, alternate provider, or equivalent) with a
+  named owner. Blank “AI required” with no option fails. 3) PASS only if
+  coverage is 100% with measuredAt ≤90 days. REL-M2 journey degraded-mode +
+  failover tests alone do not prove process-level continuity options. REL-M5
+  RTO/RPO alone does not prove named continuity options per process. Multi-
+  provider routing config alone does not prove a documented, owned option.
+falsePositiveGuidance: >
+  Do not pass generic DR plans that omit critical AI-dependent processes. Do
+  not pass options without a named owner. Do not pass aspirational “we could
+  failover” notes without a documented procedure. Sibling REL-M2 and REL-M5
+  do not substitute. Named exceptions need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Document ≥1 continuity option (failover, manual, alternate provider) for every critical AI-dependent process"
+  - "Assign a named owner to each option"
+  - "Retain evidence under imports/ai-continuity-options/"
+  - "Time-box gaps with owner and expiry ≤90 days"
+references:
+  - title: "APRF-RFC-0005 — Demote former REL-M4 continuity options to recommended"
+    url: "https://github.com/stackrail-io/APRF/blob/main/rfcs/0005-reliability-continuity-rel-m4-to-recommended.md"
+  - title: "Google SRE Book — Addressing Cascading Failures"
+    url: "https://sre.google/sre-book/addressing-cascading-failures/"
+  - title: "AWS Well-Architected — Reliability"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "Google SRE — Disaster Recovery"
+    url: "https://sre.google/sre-book/disaster-recovery/"
+relatedRules:
+  - "REL-M1"
+  - "REL-M2"
+  - "REL-M3"
+  - "REL-M4"
+  - "REL-M5"
+  - "REL-R2"
+  - "CHG-M2"
+tags:
+  - "reliability-continuity"
+  - "recommended"
+  - "hybrid"
+  - "continuity"
+  - "failover"
+  - "alternate-provider"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"
