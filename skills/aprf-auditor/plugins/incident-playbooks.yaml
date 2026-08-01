@@ -1,0 +1,25 @@
+id: incident-playbooks
+title: AI-specific incident playbooks for four scenarios (INC-M1)
+version: "0.2.0"
+executor: collectors/incident-playbooks.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-incident-playbooks]
+inputs:
+  - "Target repo (AI incident playbooks for abuse/leakage/bad actions/provider outage)"
+  - "Optional suite: aprf-assessment/imports/incident-playbooks/*.{json}"
+collect:
+  - "Detect playbooks covering the four AI incident scenarios"
+  - "Ingest owner/review coverage; write incident-playbooks-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/incident-playbooks/*"
+  signals: [incident-playbooks, inc-m1, repo-incident-playbooks]
+mapsToChecks: [INC-M1]
+whenUnavailable: >
+  Playbook signals alone are PARTIAL. INC-M1 PASS needs
+  fourPlaybooksPresent, allPlaybooksHaveOwner,
+  allPlaybooksReviewedWithin12Months, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline playbook heuristics + optional imported JSON.

@@ -83,10 +83,10 @@ assert(
   `Core profile expected 39, got ${PROFILE_CORE.mandatoryCheckIds.length}`,
 );
 assert(
-  PROFILE_REGULATED.mandatoryCheckIds.length === 56,
-  `Regulated profile expected 56, got ${PROFILE_REGULATED.mandatoryCheckIds.length}`,
+  PROFILE_REGULATED.mandatoryCheckIds.length === 55,
+  `Regulated profile expected 55, got ${PROFILE_REGULATED.mandatoryCheckIds.length}`,
 );
-assert(getTier3OnlyMandatoryIds().length === 17, "tier3-only count");
+assert(getTier3OnlyMandatoryIds().length === 16, "tier3-only count");
 
 for (const id of PROFILE_REGULATED.mandatoryCheckIds) {
   assert(catalogIds.has(id), `profile Check missing from YAML catalog: ${id}`);

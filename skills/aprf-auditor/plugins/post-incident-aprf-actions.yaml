@@ -1,0 +1,27 @@
+id: post-incident-aprf-actions
+title: Post-incident reviews with APRF-pillar tracked actions (INC-R2)
+version: "0.2.0"
+executor: collectors/post-incident-aprf-actions.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-post-incident-aprf-actions]
+inputs:
+  - "Target repo (post-incident / postmortem templates and reviews)"
+  - "Optional suite: aprf-assessment/imports/post-incident-aprf-actions/*.{json}"
+collect:
+  - "Detect post-incident reviews + APRF pillar action mapping"
+  - "Ingest coverage; write post-incident-aprf-actions-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/post-incident-aprf-actions/*"
+  signals: [post-incident-aprf-actions, inc-r2, repo-post-incident-aprf-actions]
+mapsToChecks: [INC-R2]
+whenUnavailable: >
+  Review signals alone are PARTIAL. INC-R2 PASS needs
+  sevEligibleIncidentCount>0 and
+  reviewsWithTrackedActionOrRationalePct=100 (or
+  reviewsMissingTrackedActionOrRationale=0), measuredAt ≤90 days.
+  N/A when sevEligibleIncidentCount=0.
+live:
+  required: false
+  note: Offline post-incident heuristics + optional imported JSON.

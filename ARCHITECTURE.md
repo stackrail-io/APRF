@@ -220,7 +220,7 @@ flowchart TB
 
 Stewards do **not** review all Detection logic. They own catalog integrity and vocabulary discipline.
 
-Deprecation: `deprecated` + `replacedBy` + N−1 MINOR support window; mandatory→recommended needs RFC.
+Deprecation: `deprecated` + `replacedBy` + N−1 MINOR support window; mandatory→recommended needs RFC. **Pre-release exception** (no tagged versions yet): see [`id-gaps.md`](packages/aprf-engine/rules/_index/id-gaps.md) and [APRF-RFC-0002](rfcs/0002-incident-readiness-mandatory-to-recommended.md).
 
 ---
 

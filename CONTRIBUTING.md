@@ -18,7 +18,7 @@ This repository is the **normative public home** for APRF:
 1. Read [ARCHITECTURE.md](ARCHITECTURE.md) and [rfcs/0000-template.md](rfcs/0000-template.md).
 2. For substantive normative changes (new Pillars, gate semantics, ID renumbers), open an RFC first.
 3. For Check edits: follow the schema in `packages/aprf-engine/rules/_schema/rule.schema.json`.
-4. Never reuse a published Check ID — deprecate with `replacedBy` instead.
+4. Never reuse a published Check ID — deprecate with `replacedBy` instead. Before the first tagged release, M→R remaps may omit deprecated stubs only when documented in an RFC and [`id-gaps.md`](packages/aprf-engine/rules/_index/id-gaps.md).
 
 ## Local checks
 

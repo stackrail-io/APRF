@@ -96,7 +96,6 @@ export const PROFILE_REGULATED: AprfProfile = {
     "HUM-M4",
     "REL-M7",
     "REL-M8",
-    "INC-M4",
   ],
   rationale: [
     "Includes every Core gate — regulated systems must still clear production minimums.",

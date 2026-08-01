@@ -62,6 +62,12 @@ import { aiConfigAsCodeCollector } from "./ai-config-as-code.ts";
 import { aiCanaryProgressiveDeliveryCollector } from "./ai-canary-progressive-delivery.ts";
 import { envParityModelToolCatalogCollector } from "./env-parity-model-tool-catalog.ts";
 import { embeddingIndexMigrationCollector } from "./embedding-index-migration.ts";
+import { incidentPlaybooksCollector } from "./incident-playbooks.ts";
+import { aiContainmentDrillCollector } from "./ai-containment-drill.ts";
+import { postIncidentAprfActionsCollector } from "./post-incident-aprf-actions.ts";
+import { aiIncidentTabletopCollector } from "./ai-incident-tabletop.ts";
+import { aiSafetyQualityAlertsCollector } from "./ai-safety-quality-alerts.ts";
+import { aiCustomerNotificationCriteriaCollector } from "./ai-customer-notification-criteria.ts";
 import { aiCostAlertsCollector } from "./ai-cost-alerts.ts";
 import { aiRetryAmplificationCollector } from "./ai-retry-amplification.ts";
 import { aiPromptCacheCollector } from "./ai-prompt-cache.ts";
@@ -172,6 +178,12 @@ export const COLLECTORS: Collector[] = [
   aiCanaryProgressiveDeliveryCollector,
   envParityModelToolCatalogCollector,
   embeddingIndexMigrationCollector,
+  incidentPlaybooksCollector,
+  aiContainmentDrillCollector,
+  postIncidentAprfActionsCollector,
+  aiIncidentTabletopCollector,
+  aiSafetyQualityAlertsCollector,
+  aiCustomerNotificationCriteriaCollector,
   aiCostAlertsCollector,
   aiRetryAmplificationCollector,
   aiPromptCacheCollector,

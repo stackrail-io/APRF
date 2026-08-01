@@ -1,0 +1,25 @@
+id: ai-safety-quality-alerts
+title: AI safety/quality on-call paging alerts (INC-R1)
+version: "0.2.0"
+executor: collectors/ai-safety-quality-alerts.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-safety-quality-alerts]
+inputs:
+  - "Target repo (alert policies for safety/quality signals)"
+  - "Optional suite: aprf-assessment/imports/ai-safety-quality-alerts/*.{json}"
+collect:
+  - "Detect non-infra AI safety/quality paging signals"
+  - "Ingest coverage; write ai-safety-quality-alerts-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-safety-quality-alerts/*"
+  signals: [ai-safety-quality-alerts, inc-r1, repo-ai-safety-quality-alerts]
+mapsToChecks: [INC-R1]
+whenUnavailable: >
+  Alert signals alone are PARTIAL. INC-R1 PASS needs
+  atLeastTwoNonInfraPagingSignals, eachSignalHasThresholdAndOwner,
+  policyReviewedWithin90Days, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline alert heuristics + optional imported JSON.

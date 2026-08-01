@@ -99,6 +99,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **ai-canary-progressive-delivery** | `ai-canary-progressive-delivery.ts` | canary / progressive delivery for high-traffic AI (DEP-R1) | `imports/ai-canary-progressive-delivery/` | — |
 | **env-parity-model-tool-catalog** | `env-parity-model-tool-catalog.ts` | prod vs staging parity for model pins + tool catalogs (DEP-R2) | `imports/env-parity-model-tool-catalog/` | — |
 | **embedding-index-migration** | `embedding-index-migration.ts` | automated embedding/index version migration (DEP-R3) | `imports/embedding-index-migration/` | — |
+| **incident-playbooks** | `incident-playbooks.ts` | AI-specific incident playbooks for four scenarios (INC-M1) | `imports/incident-playbooks/` | — |
+| **ai-containment-drill** | `ai-containment-drill.ts` | pause / disable tools / rollback containment drill (INC-M2) | `imports/ai-containment-drill/` | — |
+| **post-incident-aprf-actions** | `post-incident-aprf-actions.ts` | post-incident APRF-pillar tracked actions (INC-R2) | `imports/post-incident-aprf-actions/` | — |
+| **ai-incident-tabletop** | `ai-incident-tabletop.ts` | AI-focused incident tabletop ≤180 days (INC-R4) | `imports/ai-incident-tabletop/` | — |
+| **ai-safety-quality-alerts** | `ai-safety-quality-alerts.ts` | safety/quality on-call paging ≥2 signals (INC-R1) | `imports/ai-safety-quality-alerts/` | — |
+| **ai-customer-notification-criteria** | `ai-customer-notification-criteria.ts` | customer notify/no-notify criteria + sample ≤12m (INC-R3) | `imports/ai-customer-notification-criteria/` | — |
 | **ai-cost-alerts** | `ai-cost-alerts.ts` | budget-burn + anomaly alerts | `imports/ai-cost-alerts/` | — |
 | **ai-retry-amplification** | `ai-retry-amplification.ts` | retry/loop cost bounds | `imports/ai-retry-amplification/` | — |
 | **ai-prompt-cache** | `ai-prompt-cache.ts` | prompt cache + hit-rate | `imports/ai-prompt-cache/` | — |

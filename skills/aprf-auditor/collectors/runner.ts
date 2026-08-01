@@ -266,6 +266,30 @@ DEP-R3 automated embedding/index version migration:
   npm run aprf:embedding-index-migration -- --target <app> --out <app>/aprf-assessment
   # PASS needs automatedMigrationWithValidationGates + lastUpgradeWithin12Months + lastUpgradeSucceededWithoutDualWriteGaps under imports/embedding-index-migration/
 
+INC-M1 AI-specific incident playbooks (abuse/leakage/bad actions/provider outage):
+  npm run aprf:incident-playbooks -- --target <app> --out <app>/aprf-assessment
+  # PASS needs fourPlaybooksPresent + allPlaybooksHaveOwner + allPlaybooksReviewedWithin12Months under imports/incident-playbooks/
+
+INC-M2 AI containment drill (pause / disable tools / rollback):
+  npm run aprf:ai-containment-drill -- --target <app> --out <app>/aprf-assessment
+  # PASS needs pauseAgentsDemonstrated + disableToolsDemonstrated + rollbackPromptOrModelDemonstrated + withinDocumentedTimeBudgets under imports/ai-containment-drill/
+
+INC-R2 post-incident reviews with APRF-pillar tracked actions:
+  npm run aprf:post-incident-aprf-actions -- --target <app> --out <app>/aprf-assessment
+  # PASS needs sevEligibleIncidentCount>0 + reviewsWithTrackedActionOrRationalePct=100 (or reviewsMissingTrackedActionOrRationale=0) under imports/post-incident-aprf-actions/
+
+INC-R4 AI-focused incident tabletop ≤180 days:
+  npm run aprf:ai-incident-tabletop -- --target <app> --out <app>/aprf-assessment
+  # PASS needs aiFocusedTabletopCompletedWithin180Days + retainedActionsWithOwners under imports/ai-incident-tabletop/
+
+INC-R1 AI safety/quality on-call paging (≥2 non-infra signals):
+  npm run aprf:ai-safety-quality-alerts -- --target <app> --out <app>/aprf-assessment
+  # PASS needs atLeastTwoNonInfraPagingSignals + eachSignalHasThresholdAndOwner + policyReviewedWithin90Days under imports/ai-safety-quality-alerts/
+
+INC-R3 AI customer notification criteria (notify/no-notify + followed sample ≤12m):
+  npm run aprf:ai-customer-notification-criteria -- --target <app> --out <app>/aprf-assessment
+  # PASS needs criteriaMapEventTypesToNotifyDecision + lastDrillOrIncidentFollowedCriteriaWithin12Months + timestampsPresent under imports/ai-customer-notification-criteria/
+
 COST-M2 AI cost budget-burn / anomaly alerts:
   npm run aprf:cost-alerts -- --target <app> --out <app>/aprf-assessment
   # PASS needs notify proof under imports/ai-cost-alerts/
