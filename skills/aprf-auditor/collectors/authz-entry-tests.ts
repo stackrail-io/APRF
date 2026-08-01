@@ -129,14 +129,31 @@ function loadImportedCoverage(ctx: CollectorContext): {
       const paths = [
         ...((data.coveredPaths as string[]) || []),
         ...((data.covered_paths as string[]) || []),
-        ...((data.entryPoints as Array<{ path?: string; hasDenialTest?: boolean }>) || [])
+        ...((
+          data.entryPoints as Array<{
+            path?: string;
+            method?: string;
+            hasDenialTest?: boolean;
+          }>
+        ) || [])
           .filter((e) => e.hasDenialTest && e.path)
-          .map((e) => e.path as string),
+          .map((e) =>
+            e.method
+              ? `${String(e.method).toUpperCase()} ${e.path}`
+              : (e.path as string),
+          ),
       ];
       if (Array.isArray(data.tests)) {
-        for (const t of data.tests as Array<{ path?: string; url?: string }>) {
-          if (t.path) paths.push(t.path);
-          if (t.url) paths.push(t.url);
+        for (const t of data.tests as Array<{
+          path?: string;
+          url?: string;
+          method?: string;
+        }>) {
+          const p = t.path || t.url;
+          if (!p) continue;
+          paths.push(
+            t.method ? `${String(t.method).toUpperCase()} ${p}` : p,
+          );
         }
       }
       for (const p of paths) {
@@ -288,6 +305,8 @@ function normalizeAuthzPath(raw: string): string {
 /**
  * Exact route-path match only (after normalization). Substring / prefix
  * matches are too loose and can launder AUTHZ-M1 denial coverage.
+ * When scoring a method+path route, require a method-qualified coveredPaths
+ * entry (`GET /path`) — path-only coverage must not cover every method.
  */
 function importedCoversPath(
   path: string,
@@ -306,8 +325,25 @@ function importedCoversPath(
       if (wantMethod && cm !== wantMethod) return false;
       return cp === p;
     }
+    // Path-only entries are insufficient for method-scoped route scoring.
+    if (wantMethod) return false;
     return normalizeAuthzPath(raw) === p;
   });
+}
+
+/**
+ * Score declared AI routes and code-discovered include_router prefix
+ * fallbacks (declaredInCode=false when the router module wasn't parsed).
+ * Exclude builtin seed / import-invented surfaces.
+ */
+function isScoredAiRoute(r: ProbeRoute): boolean {
+  if (!r.aiSurface || r.advisoryGet) return false;
+  if (r.declaredInCode) return true;
+  const src = (r.source || "").toLowerCase();
+  if (!src || src.includes("builtin") || src.startsWith("imports/")) {
+    return false;
+  }
+  return /\.(py|ts|tsx|js|jsx)(:|$)/.test(src) || /(?:^|\/)main\./.test(src);
 }
 
 export function buildAuthzReport(
@@ -327,11 +363,9 @@ export function buildAuthzReport(
   const contentCache = new Map<string, string>();
   const notes: string[] = [];
 
-  // Prefer declared AI routes only — seed/OpenAPI hints must not invent entry
-  // points (vacuous FAIL) or block explicit N/A attests.
-  let ai = opts.routes.filter(
-    (r) => r.aiSurface && !r.advisoryGet && r.declaredInCode,
-  );
+  // Prefer declared AI routes + code-discovered include_router prefix
+  // fallbacks. Builtin seed routes must not invent entry points.
+  const ai = opts.routes.filter(isScoredAiRoute);
 
   // Dedupe by METHOD+path for scoring
   const seen = new Set<string>();
@@ -435,7 +469,7 @@ export function buildAuthzReport(
   let presentAttest = opts.privilegedAiFeatureToolOrRetrievalEntryPointsPresent;
   if (entryPoints.length > 0 && presentAttest === false) {
     notes.push(
-      "Imported privilegedAiFeatureToolOrRetrievalEntryPointsPresent=false ignored — declared AI entry points prove the surface exists.",
+      "Imported privilegedAiFeatureToolOrRetrievalEntryPointsPresent=false ignored — discovered AI entry points prove the surface exists.",
     );
     presentAttest = true;
   }

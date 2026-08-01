@@ -353,7 +353,7 @@ def test_chats_unauthorized():
     join(mixedOutStale, "imports", "authz-entry-tests", "coverage.json"),
     JSON.stringify({
       measuredAt: "2020-01-01T00:00:00.000Z",
-      coveredPaths: ["/api/v1/knowledge"],
+      coveredPaths: ["GET /api/v1/knowledge"],
     }),
     "utf8",
   );
@@ -406,7 +406,7 @@ def test_chats_unauthorized():
     join(mixedOutFresh, "imports", "authz-entry-tests", "coverage.json"),
     JSON.stringify({
       measuredAt: new Date().toISOString(),
-      coveredPaths: ["/api/v1/knowledge", "GET /api/v1/knowledge/"],
+      coveredPaths: ["GET /api/v1/knowledge/"],
     }),
     "utf8",
   );
@@ -437,6 +437,117 @@ def test_chats_unauthorized():
     );
   }
 
+  // Path-only coveredPaths must not cover every HTTP method on that path.
+  const methodMismatchOut = mkdtempSync(
+    join(tmpdir(), "aprf-authz-method-mismatch-"),
+  );
+  mkdirSync(join(methodMismatchOut, "imports", "authz-entry-tests"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(methodMismatchOut, "imports", "authz-entry-tests", "coverage.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      // Path-only + wrong method — must not cover POST /api/v1/chats
+      coveredPaths: ["/api/v1/chats", "GET /api/v1/chats"],
+    }),
+    "utf8",
+  );
+  const methodMismatchTarget = mkdtempSync(
+    join(tmpdir(), "aprf-authz-method-mismatch-target-"),
+  );
+  mkdirSync(join(methodMismatchTarget, "routers"), { recursive: true });
+  writeFileSync(
+    join(methodMismatchTarget, "main.py"),
+    `app.include_router(chats.router, prefix='/api/v1/chats', tags=['chats'])\n`,
+    "utf8",
+  );
+  writeFileSync(
+    join(methodMismatchTarget, "routers", "chats.py"),
+    `
+from fastapi import APIRouter, Depends
+from open_webui.utils.auth import get_verified_user
+router = APIRouter()
+@router.post('/')
+async def create_chat(user=Depends(get_verified_user)):
+    return {}
+`,
+    "utf8",
+  );
+  await authzEntryTestsCollector.collect({
+    targetPath: methodMismatchTarget,
+    outputDir: methodMismatchOut,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 200,
+  });
+  const reportMethodMismatch = JSON.parse(
+    readFileSync(
+      join(
+        methodMismatchOut,
+        "imports",
+        "authz-entry-tests",
+        "authz-entry-report.json",
+      ),
+      "utf8",
+    ),
+  ) as AuthzEntryReport;
+  if (
+    reportMethodMismatch.entryPoints.some(
+      (e) => e.hasDenialTest || e.denialFromImport,
+    )
+  ) {
+    throw new Error(
+      `path-only/wrong-method coveredPaths must not set hasDenialTest; got ${JSON.stringify(reportMethodMismatch.entryPoints)}`,
+    );
+  }
+  if (reportMethodMismatch.summary.statusHint === "pass") {
+    throw new Error("path-only/wrong-method coveredPaths must not PASS AUTHZ-M1");
+  }
+
+  // include_router prefix fallbacks (declaredInCode=false) must still be scored.
+  const fallbackTarget = mkdtempSync(join(tmpdir(), "aprf-authz-fallback-"));
+  const fallbackOut = mkdtempSync(join(tmpdir(), "aprf-authz-fallback-out-"));
+  writeFileSync(
+    join(fallbackTarget, "main.py"),
+    // Module not resolvable → http-auth-probe emits prefix fallbacks.
+    `app.include_router(missing_mod.router, prefix='/api/v1/knowledge', tags=['knowledge'])\n`,
+    "utf8",
+  );
+  await authzEntryTestsCollector.collect({
+    targetPath: fallbackTarget,
+    outputDir: fallbackOut,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 200,
+  });
+  const reportFallback = JSON.parse(
+    readFileSync(
+      join(
+        fallbackOut,
+        "imports",
+        "authz-entry-tests",
+        "authz-entry-report.json",
+      ),
+      "utf8",
+    ),
+  ) as AuthzEntryReport;
+  if (reportFallback.entryPoints.length === 0) {
+    throw new Error(
+      "include_router prefix fallbacks must become AUTHZ-M1 entry points",
+    );
+  }
+  if (reportFallback.entryPoints.every((e) => e.declaredInCode)) {
+    throw new Error(
+      "expected at least one declaredInCode=false prefix fallback entry point",
+    );
+  }
+  if (reportFallback.summary.statusHint === "not_demonstrated") {
+    throw new Error(
+      "prefix-fallback-only inventory must not collapse to not_demonstrated",
+    );
+  }
+
   console.log("aprf-auditor authz-entry-tests smoke OK");
   for (const d of [
     outDir,
@@ -451,6 +562,10 @@ def test_chats_unauthorized():
     mixedTarget,
     mixedOutStale,
     mixedOutFresh,
+    methodMismatchOut,
+    methodMismatchTarget,
+    fallbackTarget,
+    fallbackOut,
   ]) {
     rmSync(d, { recursive: true, force: true });
   }
