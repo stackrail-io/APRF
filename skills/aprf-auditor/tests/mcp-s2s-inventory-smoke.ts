@@ -345,6 +345,70 @@ if auth_type == 'bearer':
   }
   rmSync(naOut, { recursive: true, force: true });
 
+  // Later false must not wipe earlier true (no vacuous N/A)
+  const scopeOut = mkdtempSync(join(tmpdir(), "aprf-mcp-s2s-scope-"));
+  mkdirSync(join(scopeOut, "imports", "mcp-s2s-inventory"), { recursive: true });
+  writeFileSync(
+    join(scopeOut, "imports", "mcp-s2s-inventory", "a-present.json"),
+    JSON.stringify({
+      measuredAt: "2020-01-01T00:00:00.000Z",
+      productionMcpOrAiS2sConnectionsPresent: true,
+      TOOL_SERVER_CONNECTIONS: [
+        {
+          url: "http://mcp.local/oauth",
+          type: "mcp",
+          auth_type: "oauth_2.1",
+          info: { id: "ok", name: "ok" },
+        },
+      ],
+    }),
+  );
+  writeFileSync(
+    join(scopeOut, "imports", "mcp-s2s-inventory", "z-absent.json"),
+    JSON.stringify({
+      measuredAt: assessedAt.toISOString(),
+      productionMcpOrAiS2sConnectionsPresent: false,
+    }),
+  );
+  const scopeRan = await mcpS2sInventoryCollector.collect({
+    targetPath: targetDir,
+    outputDir: scopeOut,
+    assessedAt,
+    live: false,
+    maxFiles: 100,
+  });
+  if (scopeRan.status !== "ran") {
+    throw new Error(`scope merge expected ran: ${scopeRan.status}`);
+  }
+  const scopeReport = JSON.parse(
+    readFileSync(
+      join(
+        scopeOut,
+        "imports",
+        "mcp-s2s-inventory",
+        "mcp-s2s-inventory-report.json",
+      ),
+      "utf8",
+    ),
+  ) as McpS2sReport;
+  if (scopeReport.summary.statusHint === "not_applicable") {
+    throw new Error("present=true must win over later false — should not N/A");
+  }
+  if (scopeReport.measuredAt !== "2020-01-01T00:00:00.000Z") {
+    throw new Error(
+      `expected oldest measuredAt, got ${scopeReport.measuredAt}`,
+    );
+  }
+  if (
+    scopeReport.summary.statusHint !== "partial" ||
+    scopeReport.summary.authnM2Satisfied !== false
+  ) {
+    throw new Error(
+      `stale oldest measuredAt should block PASS: ${JSON.stringify(scopeReport.summary)}`,
+    );
+  }
+  rmSync(scopeOut, { recursive: true, force: true });
+
   console.log("aprf-auditor mcp-s2s-inventory smoke OK");
   rmSync(outDir, { recursive: true, force: true });
   rmSync(targetDir, { recursive: true, force: true });

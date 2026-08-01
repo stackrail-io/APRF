@@ -32,6 +32,8 @@ import {
 import {
   asBool,
   measuredAtFresh,
+  mergeOldestMeasuredAt,
+  mergeOrBool,
   parseMeasuredAt,
 } from "./lib/import-attest.ts";
 
@@ -690,7 +692,19 @@ export async function runAuthProbe(
     ? false
     : aiDeclared.length === 0
       ? null
-      : scored.filter((r) => !r.advisoryGet).length >= aiDeclared.length;
+      : (() => {
+          const declaredKeys = new Set(
+            aiDeclared.map(
+              (r) => `${r.method.toUpperCase()} ${normalizePath(r.path)}`,
+            ),
+          );
+          const probedKeys = new Set(
+            scored
+              .filter((r) => !r.advisoryGet)
+              .map((r) => `${r.method.toUpperCase()} ${normalizePath(r.path)}`),
+          );
+          return [...declaredKeys].every((k) => probedKeys.has(k));
+        })();
   if (catalogMatch === true) {
     notes.push(
       "Probe inventory covers declared AI routes from the discovered production route catalog.",
@@ -781,11 +795,12 @@ function loadScopeImport(
     if (!text) continue;
     try {
       const data = JSON.parse(text) as Record<string, unknown>;
-      customerFacingAiHttpApisPresent =
+      customerFacingAiHttpApisPresent = mergeOrBool(
+        customerFacingAiHttpApisPresent,
         asBool(data.customerFacingAiHttpApisPresent) ??
-        asBool(data.customer_facing_ai_http_apis_present) ??
-        asBool(data.hasCustomerFacingAiHttpApis) ??
-        customerFacingAiHttpApisPresent;
+          asBool(data.customer_facing_ai_http_apis_present) ??
+          asBool(data.hasCustomerFacingAiHttpApis),
+      );
     } catch {
       /* skip */
     }

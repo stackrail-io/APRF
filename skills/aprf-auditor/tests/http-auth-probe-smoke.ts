@@ -264,6 +264,37 @@ async def signin():
       throw new Error(`n/a expected: ${JSON.stringify(naReport.summary)}`);
     }
     rmSync(outNa, { recursive: true, force: true });
+
+    const outScope = mkdtempSync(join(tmpdir(), "aprf-auth-scope-"));
+    mkdirSync(join(outScope, "imports", "http-auth-probe"), { recursive: true });
+    writeFileSync(
+      join(outScope, "imports", "http-auth-probe", "a-present.json"),
+      JSON.stringify({ customerFacingAiHttpApisPresent: true }),
+    );
+    writeFileSync(
+      join(outScope, "imports", "http-auth-probe", "z-absent.json"),
+      JSON.stringify({ customerFacingAiHttpApisPresent: false }),
+    );
+    const scopeMerge = await httpAuthProbeCollector.collect({
+      targetPath: emptyTarget,
+      outputDir: outScope,
+      assessedAt,
+      live: false,
+    });
+    if (scopeMerge.status === "ran") {
+      const scopeReport = JSON.parse(
+        readFileSync(
+          join(outScope, "imports", "http-auth-probe", "auth-probe-report.json"),
+          "utf8",
+        ),
+      ) as AuthProbeReport;
+      if (scopeReport.summary.statusHint === "not_applicable") {
+        throw new Error(
+          "present=true must win over later false — should not N/A",
+        );
+      }
+    }
+    rmSync(outScope, { recursive: true, force: true });
     rmSync(emptyTarget, { recursive: true, force: true });
   } finally {
     await fixture.close();

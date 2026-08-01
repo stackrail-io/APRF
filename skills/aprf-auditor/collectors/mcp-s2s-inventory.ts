@@ -32,6 +32,8 @@ import {
 import {
   asBool,
   measuredAtFresh,
+  mergeOldestMeasuredAt,
+  mergeOrBool,
   parseMeasuredAt,
 } from "./lib/import-attest.ts";
 
@@ -432,12 +434,13 @@ function loadImportInventories(ctx: CollectorContext): {
     try {
       const data = JSON.parse(text) as Record<string, unknown>;
       const src = rel(ctx.outputDir, file);
-      measuredAt = parseMeasuredAt(data) ?? measuredAt;
-      productionMcpOrAiS2sConnectionsPresent =
+      measuredAt = mergeOldestMeasuredAt(measuredAt, parseMeasuredAt(data));
+      productionMcpOrAiS2sConnectionsPresent = mergeOrBool(
+        productionMcpOrAiS2sConnectionsPresent,
         asBool(data.productionMcpOrAiS2sConnectionsPresent) ??
-        asBool(data.production_mcp_or_ai_s2s_connections_present) ??
-        asBool(data.hasProductionMcpOrAiS2sConnections) ??
-        productionMcpOrAiS2sConnectionsPresent;
+          asBool(data.production_mcp_or_ai_s2s_connections_present) ??
+          asBool(data.hasProductionMcpOrAiS2sConnections),
+      );
       const normalized = normalizeInventoryPayload(data, src);
       if (normalized.length > 0) {
         connections.push(...normalized);
