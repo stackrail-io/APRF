@@ -1,41 +1,65 @@
 id: "SAF-M1"
 category: "safety-responsible-ai"
-title: "A documented harm taxonomy and refusal/escalation policy must exist for the product domain"
-description: "A documented harm taxonomy and refusal/escalation policy shall exist for the product domain"
-whyItMatters: "A documented harm taxonomy and refusal/escalation policy shall exist for the product
-  domain Failing this leaves a production gap against: Policy document has version, owner, and
-  review date ≤ 12 months; maps ≥ domain-minimum harm categories with explicit refuse vs escalate
-  actions for each"
+title: "A domain-specific AI safety policy must exist for the product domain"
+description: >
+  Product domains shall maintain a versioned, owned AI safety policy that
+  includes domain-specific harm categories with refuse-vs-escalate actions
+  for each—so safety filters and human escalation are grounded in explicit
+  policy, not ad-hoc judgment.
+whyItMatters: >
+  Without a domain-specific AI safety policy, refusals and escalations drift
+  by team and release. A reviewed policy with version, owner, and mapped
+  refuse/escalate actions per harm category makes safety enforceable and
+  auditable. Distinct from SAF-M2 automated safety eval gates and ORG-M1
+  acceptable-use policy.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "Policy document has version, owner, and review date ≤ 12 months; maps ≥
-  domain-minimum harm categories with explicit refuse vs escalate actions for each"
+passCondition: >
+  Domain-specific AI safety policy has version, owner, and review date ≤12
+  months; maps ≥ domain-minimum harm categories with explicit refuse vs
+  escalate actions for each (measuredAt ≤90 days).
 evidenceRequired:
-  - "Approved harm taxonomy + refusal/escalation policy (versioned, owned)"
+  - "Approved domain-specific AI safety policy (versioned, owned) including harm categories and refusal/escalation"
+  - "Evidence each domain-minimum harm category maps refuse vs escalate"
+  - "Last review record ≤12 months with named owner"
 detection:
   capability: "hybrid"
   detectors:
-    - id: "repo-harm-policy"
-      params: {}
+    - id: "repo-ai-harm-policy"
+      params:
+        hint: >
+          Discover domain-specific AI safety policies that include harm
+          categories and refuse/escalate mappings, with version and owner.
     - id: "manual-attest"
       params:
-        hint: "Approved harm taxonomy + refusal/escalation policy (versioned, owned)"
-manualVerification: "For this Check (A documented harm taxonomy and refusal/escalation policy must
-  exist for the product domain): inspect current evidence for [Approved harm taxonomy +
-  refusal/escalation policy (versioned, owned)] and confirm the pass condition holds — Policy
-  document has version, owner, and review date ≤ 12 months; maps ≥ domain-minimum harm categories
-  with explicit refuse vs escalate actions for each"
-falsePositiveGuidance: "(Safety & Responsible AI): when automation and attestation disagree, prefer
-  the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the
-  gap."
+        hint: >
+          If automation cannot prove coverage, attest a versioned owned
+          domain-specific AI safety policy reviewed ≤12 months with
+          domain-minimum categories each mapping refuse vs escalate
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the product has AI user- or tool-facing behavior in scope. If
+  none, score NOT_APPLICABLE. 2) Locate an approved domain-specific AI
+  safety policy with version and named owner that includes harm categories
+  and refusal/escalation. 3) Confirm review date ≤12 months. 4) Confirm
+  domain-minimum harm categories each list an explicit refuse vs escalate
+  action. 5) PASS only if version + owner + fresh review + category
+  mappings hold with measuredAt ≤90 days. SAF-M2 safety eval gates alone
+  do not prove a domain safety policy. ORG-M1 acceptable-use alone does
+  not prove domain harm refuse/escalate mapping. SEC injection suites alone
+  do not prove AI safety policy coverage.
+falsePositiveGuidance: >
+  Do not pass generic AI ethics statements without category-level
+  refuse/escalate actions. Do not pass policies missing version, owner, or
+  review ≤12 months. Do not pass moderation prompts without an owned
+  domain-specific AI safety policy. Sibling SAF-M2 and ORG-M1 do not
+  substitute. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: A documented harm taxonomy and refusal/escalation policy must
-    exist for the product domain"
-  - "Retain evidence artifacts required by this Check, starting with: Approved harm taxonomy +
-    refusal/escalation policy (versioned, owned)"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish a domain-specific AI safety policy with refuse vs escalate per harm category"
+  - "Assign version, owner, and review ≤12 months"
+  - "Retain evidence under imports/ai-harm-policy/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "NIST AI RMF — Trustworthiness characteristics"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -46,14 +70,17 @@ relatedRules:
   - "SAF-M3"
   - "SAF-M4"
   - "SAF-R2"
-  - "SAF-R3"
+  - "SAF-R1"
+  - "ORG-M1"
 tags:
   - "safety-responsible-ai"
   - "mandatory"
   - "hybrid"
+  - "ai-safety-policy"
+  - "refusal"
+  - "escalation"
 applicability:
-  technologies:
-    - "prompt-templates"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

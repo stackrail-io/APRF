@@ -1,61 +1,92 @@
 id: "SAF-R2"
 category: "safety-responsible-ai"
-title: "Production systems should have red-team exercises covering jailbreak-to-harm scenarios
-  (distinct from security red team)"
-description: "Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)"
-whyItMatters: "Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red
-  team) Failing this leaves a production gap against: A jailbreak-to-harm red-team suite (distinct
-  from the security injection suite) covers documented harm categories; latest run ≤90 days meets
-  refusal/safety thresholds; findings feed the safety backlog with owners"
+title: "Production systems should have red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)"
+description: >
+  Production systems should run a jailbreak-to-harm red-team suite—distinct
+  from security injection corpora—that covers documented harm categories,
+  meets refusal/safety thresholds on a run ≤90 days old, and routes findings
+  into the safety backlog with owners.
+whyItMatters: >
+  Security red teams prove privilege/injection resistance; they do not prove
+  the model refuses domain harms under jailbreak pressure. A dedicated
+  jailbreak-to-harm suite tied to SAF-M1 policy harm categories and a owned backlog
+  closes that gap before users find it. Distinct from SAF-M2 release safety
+  gates and SEC-M1 injection deny suites.
 severity: "critical"
 weight: 4
 gate: "recommended"
-passCondition: "A jailbreak-to-harm red-team suite (distinct from the security injection suite)
-  covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings
-  feed the safety backlog with owners"
+passCondition: >
+  A jailbreak-to-harm red-team suite (distinct from the security injection
+  suite) covers documented harm categories; the latest run ≤90 days meets
+  refusal/safety thresholds; findings feed the safety backlog with named
+  owners (measuredAt ≤90 days).
 evidenceRequired:
-  - "Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run
-    report"
+  - "Jailbreak-to-harm red-team suite definition (explicitly distinct from security injection suite)"
+  - "Latest scored run report ≤90 days vs refusal/safety thresholds"
+  - "Safety backlog items for findings with named owners"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-jailbreak-harm-redteam"
+      params:
+        hint: >
+          Discover jailbreak-to-harm red-team suites, scored runs against
+          harm categories, and backlog ownership for findings—distinct from
+          security injection corpora.
     - id: "manual-attest"
       params:
-        hint: "Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run
-          report"
-manualVerification: "For this Check (SAF: Red-team exercises covering jailbreak-to-harm scenarios
-  (distinct from security red team)): inspect current evidence for [Jailbreak-to-harm red-team suite
-  (distinct from security injection suite) + latest scored run report] and confirm the pass
-  condition holds — A jailbreak-to-harm red-team suite (distinct from the security injection suite)
-  covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings
-  feed the safety backlog with owners"
-falsePositiveGuidance: "(Safety & Responsible AI): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest a distinct
+          jailbreak-to-harm suite covering documented harm categories, a
+          ≤90-day run meeting thresholds, and owned backlog findings
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI with user- or tool-facing generation exists. If
+  none, score NOT_APPLICABLE. 2) Locate a jailbreak-to-harm red-team suite
+  and confirm it is distinct from the SEC-M1 / security injection corpus. 3)
+  Confirm the suite maps to documented harm categories (ideally from the SAF-M1 policy). 4)
+  Review the latest scored run ≤90 days against refusal/safety thresholds.
+  5) Confirm findings appear in a safety backlog with named owners. 6) PASS
+  only if distinct suite + category coverage + fresh thresholded run +
+  owned findings hold with measuredAt ≤90 days. SAF-M2 CI safety gates alone
+  do not prove jailbreak-to-harm red teaming. SEC-M1 injection deny rates
+  alone do not prove harm-category refusal under jailbreak. SAF-R1 human
+  sampling alone does not prove an automated red-team suite.
+falsePositiveGuidance: >
+  Do not pass security injection / prompt-injection suites as jailbreak-to-
+  harm red teams. Do not pass suites that omit documented harm categories.
+  Do not pass runs older than 90 days or without numeric refusal/safety
+  thresholds. Do not pass findings without named backlog owners. Sibling
+  SAF-M2, SEC-M1, and SAF-R1 do not substitute. Named exceptions need owner
+  and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Red-team exercises covering jailbreak-to-harm
-    scenarios (distinct from security red team)"
-  - "Retain evidence artifacts required by this Check, starting with: Jailbreak-to-harm red-team
-    suite (distinct from security injection suite) + latest scored run report"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Build a jailbreak-to-harm suite mapped to SAF-M1 policy harm categories"
+  - "Keep it separate from the security injection corpus"
+  - "Run ≤90 days against refusal/safety thresholds; own findings in the safety backlog"
+  - "Retain evidence under imports/ai-jailbreak-harm-redteam/"
 references:
   - title: "NIST AI RMF — Trustworthiness characteristics"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
   - title: "ISO/IEC 42001 — AI management systems"
     url: "https://www.iso.org/standard/81230.html"
+  - title: "OWASP LLM Top 10 — LLM01 Prompt Injection (related, not substitute)"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
   - "SAF-M1"
   - "SAF-M2"
   - "SAF-M3"
   - "SAF-M4"
-  - "SAF-R3"
+  - "SAF-R1"
+  - "SEC-M1"
 tags:
   - "safety-responsible-ai"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "red-team"
+  - "jailbreak"
+  - "harm"
 applicability:
-  technologies:
-    - "prompt-templates"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

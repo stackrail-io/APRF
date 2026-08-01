@@ -1,35 +1,64 @@
 id: "SAF-M2"
 category: "safety-responsible-ai"
 title: "Automated safety evaluation gates must run on relevant releases"
-description: "Automated safety evaluation gates shall run on relevant releases"
-whyItMatters: "Automated safety evaluation gates shall run on relevant releases Failing this leaves
-  a production gap against: Safety gate executed on 100% of in-scope releases in last 30 days; fail
-  blocks promote unless time-boxed waiver (expiry ≤ 14 days) with owner"
+description: >
+  In-scope releases shall run an automated safety evaluation suite with
+  numeric thresholds that blocks promote on fail—unless a time-boxed waiver
+  (expiry ≤14 days) with a named owner is recorded.
+whyItMatters: >
+  A domain-specific AI safety policy without release gates leaves unsafe
+  content free to ship.
+  Requiring 100% safety-gate execution on in-scope releases in the last 30
+  days turns policy into a blocking control. Distinct from SAF-M1 domain
+  safety policy, EVL-M2 journey quality/safety metrics, and SEC-M1 injection
+  suites.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "Safety gate executed on 100% of in-scope releases in last 30 days; fail blocks
-  promote unless time-boxed waiver (expiry ≤ 14 days) with owner"
+passCondition: >
+  Safety gate executed on 100% of in-scope releases in the last 30 days;
+  fail blocks promote unless a time-boxed waiver (expiry ≤14 days) with
+  owner is recorded (measuredAt ≤90 days).
 evidenceRequired:
-  - "Safety suite definition with numeric thresholds + CI gate reports"
+  - "Safety suite definition with numeric thresholds"
+  - "CI/gate reports covering in-scope releases in the last 30 days (100%)"
+  - "Waiver register for gate failures (owner + expiry ≤14 days) when used"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-safety-eval-gates"
+      params:
+        hint: >
+          Discover safety eval suites with numeric thresholds, CI release
+          gates, and time-boxed waiver records for failed promotes.
     - id: "manual-attest"
       params:
-        hint: "Safety suite definition with numeric thresholds + CI gate reports"
-manualVerification: "For this Check (Automated safety evaluation gates must run on relevant
-  releases): inspect current evidence for [Safety suite definition with numeric thresholds + CI gate
-  reports] and confirm the pass condition holds — Safety gate executed on 100% of in-scope releases
-  in last 30 days; fail blocks promote unless time-boxed waiver (expiry ≤ 14 days) with owner"
-falsePositiveGuidance: "(Safety & Responsible AI): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest 100% of in-scope
+          releases in the last 30 days ran the safety gate and fails block
+          promote unless owned waiver expiry ≤14 days (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm in-scope AI releases exist. If none, score NOT_APPLICABLE. 2)
+  Locate a safety suite definition with numeric thresholds. 3) Review CI/gate
+  reports for the last 30 days showing 100% of in-scope releases executed the
+  gate. 4) Confirm fails block promote unless a waiver with owner and expiry
+  ≤14 days is recorded. 5) PASS only if suite + 100% execution + blocking/
+  waiver behavior hold with measuredAt ≤90 days. SAF-M1 domain AI safety
+  policy alone does
+  not prove release gating. EVL-M2 quality/safety journey metrics alone do
+  not prove content-safety suite coverage. SEC-M1 injection deny rates alone
+  do not prove domain harm-safety gates.
+falsePositiveGuidance: >
+  Do not pass quality-only eval suites as safety gates. Do not pass optional
+  (non-blocking) safety jobs. Do not pass coverage under 100% of in-scope
+  releases in the last 30 days. Do not pass open-ended waivers without owner
+  or expiry ≤14 days. Sibling SAF-M1, EVL-M2, and SEC-M1 do not substitute.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Automated safety evaluation gates must run on relevant releases"
-  - "Retain evidence artifacts required by this Check, starting with: Safety suite definition with
-    numeric thresholds + CI gate reports"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Define a safety eval suite with numeric thresholds"
+  - "Require the suite as a blocking CI/release gate on every in-scope promote"
+  - "Track ≤14-day owned waivers; retain evidence under imports/ai-safety-eval-gates/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "NIST AI RMF — Trustworthiness characteristics"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -40,14 +69,18 @@ relatedRules:
   - "SAF-M3"
   - "SAF-M4"
   - "SAF-R2"
-  - "SAF-R3"
+  - "SAF-R1"
+  - "EVL-M2"
+  - "SEC-M1"
 tags:
   - "safety-responsible-ai"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "safety-eval"
+  - "release-gate"
+  - "ci"
 applicability:
-  technologies:
-    - "prompt-templates"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

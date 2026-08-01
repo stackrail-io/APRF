@@ -1,0 +1,25 @@
+id: ai-interaction-disclosure
+title: AI-interaction disclosure on in-scope user surfaces (SAF-M3)
+version: "0.2.0"
+executor: collectors/ai-interaction-disclosure.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-interaction-disclosure]
+inputs:
+  - "Target repo (disclosure copy, UX inventory, audit checklist)"
+  - "Optional suite: aprf-assessment/imports/ai-interaction-disclosure/*.{json}"
+collect:
+  - "Detect disclosure / inventory / audit signals"
+  - "Ingest coverage; write ai-interaction-disclosure-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-interaction-disclosure/*"
+  signals: [ai-interaction-disclosure, saf-m3, repo-ai-interaction-disclosure]
+mapsToChecks: [SAF-M3]
+whenUnavailable: >
+  Disclosure signals alone are PARTIAL. SAF-M3 PASS needs
+  disclosureUxInventoryConfigured, inScopeSurfacesWithAiDisclosurePct=100,
+  criticalSurfacesMissingDisclosure=0, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline disclosure heuristics + optional imported JSON.

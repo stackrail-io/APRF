@@ -77,6 +77,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **ai-explanation-hygiene** | `ai-explanation-hygiene.ts` | explanation payload secret/PII hygiene (EXP-M3) | `imports/ai-explanation-hygiene/` | — |
 | **ai-change-summary** | `ai-change-summary.ts` | change/counterfactual summaries for model/prompt promotions (EXP-R3) | `imports/ai-change-summary/` | — |
 | **ai-user-rationale** | `ai-user-rationale.ts` | user-facing rationale for material automated decisions (EXP-R1) | `imports/ai-user-rationale/` | — |
+| **ai-harm-policy** | `ai-harm-policy.ts` | domain-specific AI safety policy with refuse/escalate (SAF-M1) | `imports/ai-harm-policy/` | — |
+| **ai-safety-eval-gates** | `ai-safety-eval-gates.ts` | automated safety eval release gates (SAF-M2) | `imports/ai-safety-eval-gates/` | — |
+| **ai-interaction-disclosure** | `ai-interaction-disclosure.ts` | AI-interaction disclosure on in-scope UX (SAF-M3) | `imports/ai-interaction-disclosure/` | — |
+| **ai-fairness-eval** | `ai-fairness-eval.ts` | fairness/disparity eval for high-stakes paths (SAF-M4, conditional) | `imports/ai-fairness-eval/` | — |
+| **ai-safety-edge-sampling** | `ai-safety-edge-sampling.ts` | human safety edge-case sampling (SAF-R1) | `imports/ai-safety-edge-sampling/` | — |
+| **ai-jailbreak-harm-redteam** | `ai-jailbreak-harm-redteam.ts` | jailbreak-to-harm red-team suite (SAF-R2) | `imports/ai-jailbreak-harm-redteam/` | — |
 | **ai-explainability-matrix** | `ai-explainability-matrix.ts` | regulated-feature explainability requirements matrix (EXP-R2) | `imports/ai-explainability-matrix/` | — |
 | **ai-multi-provider-continuity** | `ai-multi-provider-continuity.ts` | Level-5 multi-provider contractual + technical continuity (REL-R7) | `imports/ai-multi-provider-continuity/` | — |
 | **ai-rto-rpo-catalog** | `ai-rto-rpo-catalog.ts` | business-critical AI service RTO/RPO in BCP/service-catalog/DR + tested restore/failover (REL-M5) | `imports/ai-rto-rpo-catalog/` | — |

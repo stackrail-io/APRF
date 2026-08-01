@@ -1,0 +1,26 @@
+id: ai-safety-eval-gates
+title: Automated safety evaluation release gates (SAF-M2)
+version: "0.2.0"
+executor: collectors/ai-safety-eval-gates.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-safety-eval-gates]
+inputs:
+  - "Target repo (safety eval suite + CI/release gates + waivers)"
+  - "Optional suite: aprf-assessment/imports/ai-safety-eval-gates/*.{json}"
+collect:
+  - "Detect safety suite / threshold / gate / waiver signals"
+  - "Ingest coverage; write ai-safety-eval-gates-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-safety-eval-gates/*"
+  signals: [ai-safety-eval-gates, saf-m2, repo-ai-safety-eval-gates]
+mapsToChecks: [SAF-M2]
+whenUnavailable: >
+  Gate signals alone are PARTIAL. SAF-M2 PASS needs
+  safetySuiteWithNumericThresholdsConfigured,
+  inScopeReleasesWithSafetyGatePct=100,
+  failingGateBlocksPromoteUnlessOwnedWaiverExpiry14d, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline safety-eval-gate heuristics + optional imported JSON.

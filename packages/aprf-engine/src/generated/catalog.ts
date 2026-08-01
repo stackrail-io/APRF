@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:1f1d1c980b2bf5912f73b362e3238a2d83b37f572cd0bef6cec53891dbf9fa79",
+  "generatedAt": "sha256:0be2a48fd7cb19398308d1fdb27c25f6b289793f7d4046cfdc3580cdbb6494a0",
   "ruleCount": 178,
   "domains": [
     {
@@ -11478,38 +11478,42 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SAF-M1",
       "category": "safety-responsible-ai",
-      "title": "A documented harm taxonomy and refusal/escalation policy must exist for the product domain",
-      "description": "A documented harm taxonomy and refusal/escalation policy shall exist for the product domain",
-      "whyItMatters": "A documented harm taxonomy and refusal/escalation policy shall exist for the product domain Failing this leaves a production gap against: Policy document has version, owner, and review date ≤ 12 months; maps ≥ domain-minimum harm categories with explicit refuse vs escalate actions for each",
+      "title": "A domain-specific AI safety policy must exist for the product domain",
+      "description": "Product domains shall maintain a versioned, owned AI safety policy that includes domain-specific harm categories with refuse-vs-escalate actions for each—so safety filters and human escalation are grounded in explicit policy, not ad-hoc judgment.\n",
+      "whyItMatters": "Without a domain-specific AI safety policy, refusals and escalations drift by team and release. A reviewed policy with version, owner, and mapped refuse/escalate actions per harm category makes safety enforceable and auditable. Distinct from SAF-M2 automated safety eval gates and ORG-M1 acceptable-use policy.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Policy document has version, owner, and review date ≤ 12 months; maps ≥ domain-minimum harm categories with explicit refuse vs escalate actions for each",
+      "passCondition": "Domain-specific AI safety policy has version, owner, and review date ≤12 months; maps ≥ domain-minimum harm categories with explicit refuse vs escalate actions for each (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Approved harm taxonomy + refusal/escalation policy (versioned, owned)"
+        "Approved domain-specific AI safety policy (versioned, owned) including harm categories and refusal/escalation",
+        "Evidence each domain-minimum harm category maps refuse vs escalate",
+        "Last review record ≤12 months with named owner"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
-            "id": "repo-harm-policy",
-            "params": {}
+            "id": "repo-ai-harm-policy",
+            "params": {
+              "hint": "Discover domain-specific AI safety policies that include harm categories and refuse/escalate mappings, with version and owner.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Approved harm taxonomy + refusal/escalation policy (versioned, owned)"
+              "hint": "If automation cannot prove coverage, attest a versioned owned domain-specific AI safety policy reviewed ≤12 months with domain-minimum categories each mapping refuse vs escalate (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (A documented harm taxonomy and refusal/escalation policy must exist for the product domain): inspect current evidence for [Approved harm taxonomy + refusal/escalation policy (versioned, owned)] and confirm the pass condition holds — Policy document has version, owner, and review date ≤ 12 months; maps ≥ domain-minimum harm categories with explicit refuse vs escalate actions for each",
-      "falsePositiveGuidance": "(Safety & Responsible AI): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm the product has AI user- or tool-facing behavior in scope. If none, score NOT_APPLICABLE. 2) Locate an approved domain-specific AI safety policy with version and named owner that includes harm categories and refusal/escalation. 3) Confirm review date ≤12 months. 4) Confirm domain-minimum harm categories each list an explicit refuse vs escalate action. 5) PASS only if version + owner + fresh review + category mappings hold with measuredAt ≤90 days. SAF-M2 safety eval gates alone do not prove a domain safety policy. ORG-M1 acceptable-use alone does not prove domain harm refuse/escalate mapping. SEC injection suites alone do not prove AI safety policy coverage.\n",
+      "falsePositiveGuidance": "Do not pass generic AI ethics statements without category-level refuse/escalate actions. Do not pass policies missing version, owner, or review ≤12 months. Do not pass moderation prompts without an owned domain-specific AI safety policy. Sibling SAF-M2 and ORG-M1 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: A documented harm taxonomy and refusal/escalation policy must exist for the product domain",
-        "Retain evidence artifacts required by this Check, starting with: Approved harm taxonomy + refusal/escalation policy (versioned, owned)",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish a domain-specific AI safety policy with refuse vs escalate per harm category",
+        "Assign version, owner, and review ≤12 months",
+        "Retain evidence under imports/ai-harm-policy/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -11526,17 +11530,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SAF-M3",
         "SAF-M4",
         "SAF-R2",
-        "SAF-R3"
+        "SAF-R1",
+        "ORG-M1"
       ],
       "tags": [
         "safety-responsible-ai",
         "mandatory",
-        "hybrid"
+        "hybrid",
+        "ai-safety-policy",
+        "refusal",
+        "escalation"
       ],
       "applicability": {
-        "technologies": [
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -11547,33 +11553,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SAF-M2",
       "category": "safety-responsible-ai",
       "title": "Automated safety evaluation gates must run on relevant releases",
-      "description": "Automated safety evaluation gates shall run on relevant releases",
-      "whyItMatters": "Automated safety evaluation gates shall run on relevant releases Failing this leaves a production gap against: Safety gate executed on 100% of in-scope releases in last 30 days; fail blocks promote unless time-boxed waiver (expiry ≤ 14 days) with owner",
+      "description": "In-scope releases shall run an automated safety evaluation suite with numeric thresholds that blocks promote on fail—unless a time-boxed waiver (expiry ≤14 days) with a named owner is recorded.\n",
+      "whyItMatters": "A domain-specific AI safety policy without release gates leaves unsafe content free to ship. Requiring 100% safety-gate execution on in-scope releases in the last 30 days turns policy into a blocking control. Distinct from SAF-M1 domain safety policy, EVL-M2 journey quality/safety metrics, and SEC-M1 injection suites.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Safety gate executed on 100% of in-scope releases in last 30 days; fail blocks promote unless time-boxed waiver (expiry ≤ 14 days) with owner",
+      "passCondition": "Safety gate executed on 100% of in-scope releases in the last 30 days; fail blocks promote unless a time-boxed waiver (expiry ≤14 days) with owner is recorded (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Safety suite definition with numeric thresholds + CI gate reports"
+        "Safety suite definition with numeric thresholds",
+        "CI/gate reports covering in-scope releases in the last 30 days (100%)",
+        "Waiver register for gate failures (owner + expiry ≤14 days) when used"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-safety-eval-gates",
+            "params": {
+              "hint": "Discover safety eval suites with numeric thresholds, CI release gates, and time-boxed waiver records for failed promotes.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Safety suite definition with numeric thresholds + CI gate reports"
+              "hint": "If automation cannot prove coverage, attest 100% of in-scope releases in the last 30 days ran the safety gate and fails block promote unless owned waiver expiry ≤14 days (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Automated safety evaluation gates must run on relevant releases): inspect current evidence for [Safety suite definition with numeric thresholds + CI gate reports] and confirm the pass condition holds — Safety gate executed on 100% of in-scope releases in last 30 days; fail blocks promote unless time-boxed waiver (expiry ≤ 14 days) with owner",
-      "falsePositiveGuidance": "(Safety & Responsible AI): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm in-scope AI releases exist. If none, score NOT_APPLICABLE. 2) Locate a safety suite definition with numeric thresholds. 3) Review CI/gate reports for the last 30 days showing 100% of in-scope releases executed the gate. 4) Confirm fails block promote unless a waiver with owner and expiry ≤14 days is recorded. 5) PASS only if suite + 100% execution + blocking/ waiver behavior hold with measuredAt ≤90 days. SAF-M1 domain AI safety policy alone does not prove release gating. EVL-M2 quality/safety journey metrics alone do not prove content-safety suite coverage. SEC-M1 injection deny rates alone do not prove domain harm-safety gates.\n",
+      "falsePositiveGuidance": "Do not pass quality-only eval suites as safety gates. Do not pass optional (non-blocking) safety jobs. Do not pass coverage under 100% of in-scope releases in the last 30 days. Do not pass open-ended waivers without owner or expiry ≤14 days. Sibling SAF-M1, EVL-M2, and SEC-M1 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Automated safety evaluation gates must run on relevant releases",
-        "Retain evidence artifacts required by this Check, starting with: Safety suite definition with numeric thresholds + CI gate reports",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Define a safety eval suite with numeric thresholds",
+        "Require the suite as a blocking CI/release gate on every in-scope promote",
+        "Track ≤14-day owned waivers; retain evidence under imports/ai-safety-eval-gates/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -11590,17 +11604,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SAF-M3",
         "SAF-M4",
         "SAF-R2",
-        "SAF-R3"
+        "SAF-R1",
+        "EVL-M2",
+        "SEC-M1"
       ],
       "tags": [
         "safety-responsible-ai",
         "mandatory",
-        "manual"
+        "hybrid",
+        "safety-eval",
+        "release-gate",
+        "ci"
       ],
       "applicability": {
-        "technologies": [
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -11611,33 +11628,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SAF-M3",
       "category": "safety-responsible-ai",
       "title": "Users must be disclosed when interacting with AI where required by policy or law",
-      "description": "Users shall be disclosed when interacting with AI where required by policy or law",
-      "whyItMatters": "Users shall be disclosed when interacting with AI where required by policy or law Failing this leaves a production gap against: AI-interaction disclosure present on 100% of in-scope user surfaces per policy checklist; 0 critical surfaces missing disclosure in the latest audit",
+      "description": "Where policy or law requires it, in-scope user surfaces shall disclose that the user is interacting with AI—so people are not misled about automated vs human counterparts.\n",
+      "whyItMatters": "Undisclosed AI interactions create regulatory, trust, and consent gaps. An inventory of in-scope surfaces plus an audit showing 100% disclosure coverage (0 critical misses) makes the obligation measurable. Distinct from SAF-M1 domain AI safety policy, SAF-M2 safety eval gates, and INC customer- notification criteria for incidents.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "AI-interaction disclosure present on 100% of in-scope user surfaces per policy checklist; 0 critical surfaces missing disclosure in the latest audit",
+      "passCondition": "AI-interaction disclosure present on 100% of in-scope user surfaces per policy checklist; 0 critical surfaces missing disclosure in the latest audit (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Disclosure UX inventory + screenshot/checklist audit of in-scope surfaces"
+        "Disclosure UX inventory of in-scope user surfaces (policy checklist)",
+        "Latest screenshot/checklist audit showing coverage + critical-surface status"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-interaction-disclosure",
+            "params": {
+              "hint": "Discover AI-interaction disclosure copy, UX inventory, and audit checklists/screenshots for in-scope user surfaces.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Disclosure UX inventory + screenshot/checklist audit of in-scope surfaces"
+              "hint": "If automation cannot prove coverage, attest 100% of in-scope surfaces show AI-interaction disclosure and 0 critical surfaces missing disclosure in the latest audit (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Users must be disclosed when interacting with AI where required by policy or law): inspect current evidence for [Disclosure UX inventory + screenshot/checklist audit of in-scope surfaces] and confirm the pass condition holds — AI-interaction disclosure present on 100% of in-scope user surfaces per policy checklist; 0 critical surfaces missing disclosure in the latest audit",
-      "falsePositiveGuidance": "(Safety & Responsible AI): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm policy or law requires AI-interaction disclosure for in-scope surfaces. If none apply (and no AI user surfaces), score NOT_APPLICABLE. 2) Locate a disclosure UX inventory / policy checklist of in-scope surfaces. 3) Review the latest audit (screenshots or checklist) showing disclosure present on 100% of those surfaces. 4) Confirm 0 critical surfaces are missing disclosure. 5) PASS only if inventory + 100% coverage + 0 critical misses hold with measuredAt ≤90 days. SAF-M1/M2 alone do not prove user-facing disclosure. INC-R3 customer-notification criteria alone do not prove everyday AI-interaction labeling. Marketing “powered by AI” badges on unrelated pages alone do not prove in-scope surface coverage.\n",
+      "falsePositiveGuidance": "Do not pass footer/legal boilerplate that never appears on the AI interaction surface. Do not pass inventories without a latest audit. Do not pass audits with any critical surface missing disclosure. Sibling SAF-M1, SAF-M2, and INC notification Checks do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Users must be disclosed when interacting with AI where required by policy or law",
-        "Retain evidence artifacts required by this Check, starting with: Disclosure UX inventory + screenshot/checklist audit of in-scope surfaces",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Inventory in-scope user surfaces requiring AI-interaction disclosure",
+        "Add clear disclosure copy/UI on every in-scope surface",
+        "Run a checklist/screenshot audit; retain under imports/ai-interaction-disclosure/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -11654,17 +11678,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SAF-M2",
         "SAF-M4",
         "SAF-R2",
-        "SAF-R3"
+        "SAF-R1",
+        "INC-R3"
       ],
       "tags": [
         "safety-responsible-ai",
         "mandatory",
-        "manual"
+        "hybrid",
+        "disclosure",
+        "transparency",
+        "ux"
       ],
       "applicability": {
-        "technologies": [
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -11675,33 +11701,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SAF-M4",
       "category": "safety-responsible-ai",
       "title": "Fairness/disparity evaluation must cover high-stakes decision paths",
-      "description": "Fairness/disparity evaluation shall cover high-stakes decision paths",
-      "whyItMatters": "Fairness/disparity evaluation shall cover high-stakes decision paths Failing this leaves a production gap against: PASS if in-scope high-stakes paths are inventoried and the latest eval (≤90 days) is retained with thresholds and owners",
+      "description": "When AI influences or automates high-stakes decisions (rights, opportunities, or access to essential services), those paths shall be inventoried and covered by a retained fairness/disparity evaluation with numeric thresholds and named owners. If the system has no such paths, score NOT_APPLICABLE.\n",
+      "whyItMatters": "Fairness obligations scale with decision stakes (NIST AI RMF, ISO/IEC 42001, EU AI Act risk tiers). Missing disparity eval on hiring, lending, insurance, healthcare triage, criminal justice, admissions, benefits, identity verification, or employment scoring is a production gap; forcing the same gate on docs/code assistants or marketing copilots creates false fails. Distinct from SAF-M2 content-safety gates and EVL quality suites.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "PASS if in-scope high-stakes paths are inventoried and the latest eval (≤90 days) is retained with thresholds and owners",
+      "passCondition": "If the system influences or automates high-stakes decision paths, those paths are inventoried and the latest fairness/disparity eval (≤90 days) is retained with thresholds and named owners (measuredAt ≤90 days). If no high-stakes decision paths exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Fairness/disparity eval methodology + latest run report for in-scope high-stakes paths"
+        "Scope attestation: whether AI influences/automates high-stakes decisions",
+        "Inventory of in-scope high-stakes decision paths (when applicable)",
+        "Fairness/disparity eval methodology + latest run report with thresholds and owners (≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-fairness-eval",
+            "params": {
+              "hint": "Discover high-stakes decision-path inventories and fairness/disparity eval suites, reports, thresholds, and owners.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Fairness/disparity eval methodology + latest run report for in-scope high-stakes paths"
+              "hint": "If automation cannot prove coverage, attest either NOT_APPLICABLE (no high-stakes decision paths) or inventory + latest fairness eval ≤90 days with thresholds and owners (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Fairness/disparity evaluation must cover high-stakes decision paths): inspect current evidence for [Fairness/disparity eval methodology + latest run report for in-scope high-stakes paths] and confirm the pass condition holds — PASS if in-scope high-stakes paths are inventoried and the latest eval (≤90 days) is retained with thresholds and owners",
-      "falsePositiveGuidance": "(Safety & Responsible AI): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Determine whether the system influences or automates high-stakes decisions (e.g. hiring/recruiting, lending/credit, insurance underwriting, healthcare diagnosis/triage, criminal justice, education admissions, government benefits, identity verification, employment performance). If none—typical for docs assistants, code generation, meeting summarization, internal chatbots, SQL assistants, marketing copy, translation, or developer copilots that do not decide those outcomes—score NOT_APPLICABLE with retained rationale. 2) If high-stakes paths exist, inventory them. 3) Locate fairness/disparity methodology and the latest run ≤90 days with numeric thresholds and named owners. 4) PASS only if inventory + fresh eval hold with measuredAt ≤90 days. SAF-M2 content-safety gates alone do not prove subgroup disparity coverage. EVL journey quality suites alone do not prove fairness metrics. Aggregate accuracy without slice analysis does not satisfy.\n",
+      "falsePositiveGuidance": "Do not claim NOT_APPLICABLE when the product ranks, scores, denies, or routes people on high-stakes outcomes. Do not pass overall accuracy as fairness. Do not pass evals older than 90 days or without thresholds/ owners. Do not fail low-risk assistants solely for lacking fairness suites. Sibling SAF-M2 and EVL Checks do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Fairness/disparity evaluation must cover high-stakes decision paths",
-        "Retain evidence artifacts required by this Check, starting with: Fairness/disparity eval methodology + latest run report for in-scope high-stakes paths",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Classify whether the system influences/automates high-stakes decisions",
+        "Inventory high-stakes paths; define fairness/disparity metrics and thresholds",
+        "Run and retain evals ≤90 days under imports/ai-fairness-eval/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -11711,6 +11745,10 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "ISO/IEC 42001 — AI management systems",
           "url": "https://www.iso.org/standard/81230.html"
+        },
+        {
+          "title": "EU AI Act — risk-based approach (conceptual)",
+          "url": "https://artificialintelligenceact.eu/"
         }
       ],
       "relatedRules": [
@@ -11718,17 +11756,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SAF-M2",
         "SAF-M3",
         "SAF-R2",
-        "SAF-R3"
+        "SAF-R1",
+        "EVL-M1",
+        "EVL-M2"
       ],
       "tags": [
         "safety-responsible-ai",
         "mandatory",
-        "manual"
+        "hybrid",
+        "conditional",
+        "fairness",
+        "disparity",
+        "high-stakes"
       ],
       "applicability": {
-        "technologies": [
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 3,
         "requiredFromLevel": 4
       },
@@ -11736,93 +11778,43 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "introducedIn": "0.10.0"
     },
     {
-      "id": "SAF-R2",
+      "id": "SAF-R1",
       "category": "safety-responsible-ai",
-      "title": "Production systems should have red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)",
-      "description": "Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)",
-      "whyItMatters": "Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team) Failing this leaves a production gap against: A jailbreak-to-harm red-team suite (distinct from the security injection suite) covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
+      "title": "Production systems should have human review sampling of safety edge cases on a defined cadence",
+      "description": "Production systems should sample safety edge cases on a defined cadence (≥ monthly or per release), with a retained review packet that dispositions each fail/edge case and links backlog items when needed.\n",
+      "whyItMatters": "Automated gates and red teams miss nuanced edge cases. Periodic human review with named reviewers and dispositions catches residual harm and calibrates graders. Distinct from SAF-M2 automated release gates and SAF-R2 jailbreak-to-harm red-team suites.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "A jailbreak-to-harm red-team suite (distinct from the security injection suite) covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
+      "passCondition": "Defined sample size and cadence (≥ monthly or per release); last packet ≤90 days includes disposition for each fail/edge case and links to backlog items when needed, with reviewer names (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run report"
+        "Safety edge-case sampling plan (sample size + cadence)",
+        "Last review packet ≤90 days (labels, dispositions, reviewer names, backlog links when needed)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-safety-edge-sampling",
+            "params": {
+              "hint": "Discover safety edge-case sampling plans and recent human review packets with dispositions, reviewers, and backlog links.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run report"
+              "hint": "If automation cannot prove coverage, attest a defined sample size and cadence (≥ monthly or per release) and a ≤90-day packet with dispositions, reviewers, and backlog links when needed (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (SAF: Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)): inspect current evidence for [Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run report] and confirm the pass condition holds — A jailbreak-to-harm red-team suite (distinct from the security injection suite) covers documented harm categories; latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
-      "falsePositiveGuidance": "(Safety & Responsible AI): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI with safety-relevant outputs exists. If none, score NOT_APPLICABLE. 2) Locate a sampling plan with defined sample size and cadence (≥ monthly or per release). 3) Open the last review packet ≤90 days; confirm each fail/edge case has a disposition and reviewer name(s). 4) Confirm backlog links exist when disposition requires follow- up. 5) PASS only if plan + fresh packet completeness hold with measuredAt ≤90 days. SAF-M2 CI gate reports alone do not prove human edge-case sampling. SAF-R2 automated red-team scores alone do not prove human disposition packets. Generic QA sampling without safety edge-case scope does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass plans without a recent packet. Do not pass packets missing dispositions, reviewers, or backlog links for open fails. Do not pass ad-hoc reviews without defined cadence/sample size. Sibling SAF-M2 and SAF-R2 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)",
-        "Retain evidence artifacts required by this Check, starting with: Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run report",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "NIST AI RMF — Trustworthiness characteristics",
-          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
-        },
-        {
-          "title": "ISO/IEC 42001 — AI management systems",
-          "url": "https://www.iso.org/standard/81230.html"
-        }
-      ],
-      "relatedRules": [
-        "SAF-M1",
-        "SAF-M2",
-        "SAF-M3",
-        "SAF-M4",
-        "SAF-R3"
-      ],
-      "tags": [
-        "safety-responsible-ai",
-        "recommended",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [
-          "prompt-templates"
-        ],
-        "minCriticality": 2,
-        "requiredFromLevel": 4
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "SAF-R3",
-      "category": "safety-responsible-ai",
-      "title": "Production systems should have human review sampling of safety edge cases on a defined cadence",
-      "description": "Human review sampling of safety edge cases on a defined cadence",
-      "whyItMatters": "Human review sampling of safety edge cases on a defined cadence Failing this leaves a production gap against: Defined sample size and cadence (≥ monthly or per release); last packet ≤90 days includes disposition for each fail/edge case and links to backlog items when needed",
-      "severity": "critical",
-      "weight": 4,
-      "gate": "recommended",
-      "passCondition": "Defined sample size and cadence (≥ monthly or per release); last packet ≤90 days includes disposition for each fail/edge case and links to backlog items when needed",
-      "evidenceRequired": [
-        "Safety edge-case sampling plan + last review packet (sample size, labels, actions) with reviewer names"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": []
-      },
-      "manualVerification": "For this Check (Human review sampling of safety edge cases on a defined cadence): inspect current evidence for [Safety edge-case sampling plan + last review packet (sample size, labels, actions) with reviewer names] and confirm the pass condition holds — Defined sample size and cadence (≥ monthly or per release); last packet ≤90 days includes disposition for each fail/edge case and links to backlog items when needed",
-      "falsePositiveGuidance": "(Safety & Responsible AI): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: this Check: Human review sampling of safety edge cases on a defined cadence",
-        "Retain evidence artifacts required by this Check, starting with: Safety edge-case sampling plan + last review packet (sample size, labels, actions) with reviewer names",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Define sample size and cadence (≥ monthly or per release)",
+        "Run human review of safety edge cases; record dispositions and reviewers",
+        "Link fails to the safety backlog; retain under imports/ai-safety-edge-sampling/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -11844,12 +11836,91 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "safety-responsible-ai",
         "recommended",
-        "manual"
+        "hybrid",
+        "human-review",
+        "edge-case",
+        "sampling"
       ],
       "applicability": {
-        "technologies": [
-          "prompt-templates"
-        ],
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 4
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "SAF-R2",
+      "category": "safety-responsible-ai",
+      "title": "Production systems should have red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)",
+      "description": "Production systems should run a jailbreak-to-harm red-team suite—distinct from security injection corpora—that covers documented harm categories, meets refusal/safety thresholds on a run ≤90 days old, and routes findings into the safety backlog with owners.\n",
+      "whyItMatters": "Security red teams prove privilege/injection resistance; they do not prove the model refuses domain harms under jailbreak pressure. A dedicated jailbreak-to-harm suite tied to SAF-M1 policy harm categories and a owned backlog closes that gap before users find it. Distinct from SAF-M2 release safety gates and SEC-M1 injection deny suites.\n",
+      "severity": "critical",
+      "weight": 4,
+      "gate": "recommended",
+      "passCondition": "A jailbreak-to-harm red-team suite (distinct from the security injection suite) covers documented harm categories; the latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with named owners (measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Jailbreak-to-harm red-team suite definition (explicitly distinct from security injection suite)",
+        "Latest scored run report ≤90 days vs refusal/safety thresholds",
+        "Safety backlog items for findings with named owners"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-jailbreak-harm-redteam",
+            "params": {
+              "hint": "Discover jailbreak-to-harm red-team suites, scored runs against harm categories, and backlog ownership for findings—distinct from security injection corpora.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest a distinct jailbreak-to-harm suite covering documented harm categories, a ≤90-day run meeting thresholds, and owned backlog findings (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm production AI with user- or tool-facing generation exists. If none, score NOT_APPLICABLE. 2) Locate a jailbreak-to-harm red-team suite and confirm it is distinct from the SEC-M1 / security injection corpus. 3) Confirm the suite maps to documented harm categories (ideally from the SAF-M1 policy). 4) Review the latest scored run ≤90 days against refusal/safety thresholds. 5) Confirm findings appear in a safety backlog with named owners. 6) PASS only if distinct suite + category coverage + fresh thresholded run + owned findings hold with measuredAt ≤90 days. SAF-M2 CI safety gates alone do not prove jailbreak-to-harm red teaming. SEC-M1 injection deny rates alone do not prove harm-category refusal under jailbreak. SAF-R1 human sampling alone does not prove an automated red-team suite.\n",
+      "falsePositiveGuidance": "Do not pass security injection / prompt-injection suites as jailbreak-to- harm red teams. Do not pass suites that omit documented harm categories. Do not pass runs older than 90 days or without numeric refusal/safety thresholds. Do not pass findings without named backlog owners. Sibling SAF-M2, SEC-M1, and SAF-R1 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Build a jailbreak-to-harm suite mapped to SAF-M1 policy harm categories",
+        "Keep it separate from the security injection corpus",
+        "Run ≤90 days against refusal/safety thresholds; own findings in the safety backlog",
+        "Retain evidence under imports/ai-jailbreak-harm-redteam/"
+      ],
+      "references": [
+        {
+          "title": "NIST AI RMF — Trustworthiness characteristics",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "title": "ISO/IEC 42001 — AI management systems",
+          "url": "https://www.iso.org/standard/81230.html"
+        },
+        {
+          "title": "OWASP LLM Top 10 — LLM01 Prompt Injection (related, not substitute)",
+          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        }
+      ],
+      "relatedRules": [
+        "SAF-M1",
+        "SAF-M2",
+        "SAF-M3",
+        "SAF-M4",
+        "SAF-R1",
+        "SEC-M1"
+      ],
+      "tags": [
+        "safety-responsible-ai",
+        "recommended",
+        "hybrid",
+        "red-team",
+        "jailbreak",
+        "harm"
+      ],
+      "applicability": {
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },

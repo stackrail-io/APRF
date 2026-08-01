@@ -1,54 +1,97 @@
 id: "SAF-M4"
 category: "safety-responsible-ai"
 title: "Fairness/disparity evaluation must cover high-stakes decision paths"
-description: "Fairness/disparity evaluation shall cover high-stakes decision paths"
-whyItMatters: "Fairness/disparity evaluation shall cover high-stakes decision paths Failing this
-  leaves a production gap against: PASS if in-scope high-stakes paths are inventoried and the latest
-  eval (≤90 days) is retained with thresholds and owners"
+description: >
+  When AI influences or automates high-stakes decisions (rights,
+  opportunities, or access to essential services), those paths shall be
+  inventoried and covered by a retained fairness/disparity evaluation with
+  numeric thresholds and named owners. If the system has no such paths,
+  score NOT_APPLICABLE.
+whyItMatters: >
+  Fairness obligations scale with decision stakes (NIST AI RMF, ISO/IEC
+  42001, EU AI Act risk tiers). Missing disparity eval on hiring, lending,
+  insurance, healthcare triage, criminal justice, admissions, benefits,
+  identity verification, or employment scoring is a production gap; forcing
+  the same gate on docs/code assistants or marketing copilots creates false
+  fails. Distinct from SAF-M2 content-safety gates and EVL quality suites.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "PASS if in-scope high-stakes paths are inventoried and the latest eval (≤90 days) is
-  retained with thresholds and owners"
+passCondition: >
+  If the system influences or automates high-stakes decision paths, those
+  paths are inventoried and the latest fairness/disparity eval (≤90 days) is
+  retained with thresholds and named owners (measuredAt ≤90 days). If no
+  high-stakes decision paths exist, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Fairness/disparity eval methodology + latest run report for in-scope high-stakes paths"
+  - "Scope attestation: whether AI influences/automates high-stakes decisions"
+  - "Inventory of in-scope high-stakes decision paths (when applicable)"
+  - "Fairness/disparity eval methodology + latest run report with thresholds and owners (≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-fairness-eval"
+      params:
+        hint: >
+          Discover high-stakes decision-path inventories and
+          fairness/disparity eval suites, reports, thresholds, and owners.
     - id: "manual-attest"
       params:
-        hint: "Fairness/disparity eval methodology + latest run report for in-scope high-stakes paths"
-manualVerification: "For this Check (Fairness/disparity evaluation must cover high-stakes decision
-  paths): inspect current evidence for [Fairness/disparity eval methodology + latest run report for
-  in-scope high-stakes paths] and confirm the pass condition holds — PASS if in-scope high-stakes
-  paths are inventoried and the latest eval (≤90 days) is retained with thresholds and owners"
-falsePositiveGuidance: "(Safety & Responsible AI): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest either NOT_APPLICABLE
+          (no high-stakes decision paths) or inventory + latest fairness
+          eval ≤90 days with thresholds and owners (measuredAt ≤90 days).
+manualVerification: >
+  1) Determine whether the system influences or automates high-stakes
+  decisions (e.g. hiring/recruiting, lending/credit, insurance underwriting,
+  healthcare diagnosis/triage, criminal justice, education admissions,
+  government benefits, identity verification, employment performance). If
+  none—typical for docs assistants, code generation, meeting summarization,
+  internal chatbots, SQL assistants, marketing copy, translation, or
+  developer copilots that do not decide those outcomes—score NOT_APPLICABLE
+  with retained rationale. 2) If high-stakes paths exist, inventory them. 3)
+  Locate fairness/disparity methodology and the latest run ≤90 days with
+  numeric thresholds and named owners. 4) PASS only if inventory + fresh
+  eval hold with measuredAt ≤90 days. SAF-M2 content-safety gates alone do
+  not prove subgroup disparity coverage. EVL journey quality suites alone
+  do not prove fairness metrics. Aggregate accuracy without slice analysis
+  does not satisfy.
+falsePositiveGuidance: >
+  Do not claim NOT_APPLICABLE when the product ranks, scores, denies, or
+  routes people on high-stakes outcomes. Do not pass overall accuracy as
+  fairness. Do not pass evals older than 90 days or without thresholds/
+  owners. Do not fail low-risk assistants solely for lacking fairness
+  suites. Sibling SAF-M2 and EVL Checks do not substitute. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Fairness/disparity evaluation must cover high-stakes decision
-    paths"
-  - "Retain evidence artifacts required by this Check, starting with: Fairness/disparity eval
-    methodology + latest run report for in-scope high-stakes paths"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Classify whether the system influences/automates high-stakes decisions"
+  - "Inventory high-stakes paths; define fairness/disparity metrics and thresholds"
+  - "Run and retain evals ≤90 days under imports/ai-fairness-eval/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "NIST AI RMF — Trustworthiness characteristics"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
   - title: "ISO/IEC 42001 — AI management systems"
     url: "https://www.iso.org/standard/81230.html"
+  - title: "EU AI Act — risk-based approach (conceptual)"
+    url: "https://artificialintelligenceact.eu/"
 relatedRules:
   - "SAF-M1"
   - "SAF-M2"
   - "SAF-M3"
   - "SAF-R2"
-  - "SAF-R3"
+  - "SAF-R1"
+  - "EVL-M1"
+  - "EVL-M2"
 tags:
   - "safety-responsible-ai"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "conditional"
+  - "fairness"
+  - "disparity"
+  - "high-stakes"
 applicability:
-  technologies:
-    - "prompt-templates"
+  technologies: []
   minCriticality: 3
   requiredFromLevel: 4
 status: "active"
