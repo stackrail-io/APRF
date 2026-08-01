@@ -290,6 +290,31 @@ INC-R3 AI customer notification criteria (notify/no-notify + followed sample ≤
   npm run aprf:ai-customer-notification-criteria -- --target <app> --out <app>/aprf-assessment
   # PASS needs criteriaMapEventTypesToNotifyDecision + lastDrillOrIncidentFollowedCriteriaWithin12Months + timestampsPresent under imports/ai-customer-notification-criteria/
 
+OBS-M1 request→model→tool→outcome distributed trace linkage (≥95% / 24h):
+  npm run aprf:ai-distributed-trace-linkage -- --target <app> --out <app>/aprf-assessment
+  # PASS needs linkedTracePct≥95 + sampleWindowHours≥24 + coversModelToolOutcome under imports/ai-distributed-trace-linkage/
+
+OBS-R4 token/cost attribution per request/feature/tenant (≥95% / 24h):
+  npm run aprf:ai-token-cost-attribution -- --target <app> --out <app>/aprf-assessment
+  # PASS needs attributedBilledCallPct≥95 + sampleWindowHours≥24 + coversRequestFeatureTenant under imports/ai-token-cost-attribution/
+
+OBS-M2 sensitive fields in traces (conditional mandatory):
+  npm run aprf:ai-trace-sensitive-redaction -- --target <app> --out <app>/aprf-assessment
+  # PASS needs tracesContainSecretsOrSensitiveData=true + syntheticSensitiveFieldRedactionOrAclPct=100
+  # N/A when tracesContainSecretsOrSensitiveData=false under imports/ai-trace-sensitive-redaction/
+
+OBS-R1 secure failed-AI-trace replay (restricted env + RTO + ≤90d drill):
+  npm run aprf:ai-trace-replay -- --target <app> --out <app>/aprf-assessment
+  # PASS needs restrictedReplayEnvironmentConfigured + replayWithinDocumentedRto + lastDrillOrRealReplayWithin90Days under imports/ai-trace-replay/
+
+OBS-R2 trace quality annotations (≥50/90d feeding eval or review):
+  npm run aprf:ai-trace-quality-annotations -- --target <app> --out <app>/aprf-assessment
+  # PASS needs qualityAnnotationToolingConfigured + annotationsLast90Days≥50 + annotationsFeedEvalOrReviewLoop under imports/ai-trace-quality-annotations/
+
+OBS-R3 AI SLO dashboards (latency/error/quality burn + alerts):
+  npm run aprf:ai-slo-dashboards -- --target <app> --out <app>/aprf-assessment
+  # PASS needs namedSloTargetsForCriticalAiJourneys + coversLatencyErrorAndQualityBurn + burnRateAlertConfigured under imports/ai-slo-dashboards/
+
 COST-M2 AI cost budget-burn / anomaly alerts:
   npm run aprf:cost-alerts -- --target <app> --out <app>/aprf-assessment
   # PASS needs notify proof under imports/ai-cost-alerts/

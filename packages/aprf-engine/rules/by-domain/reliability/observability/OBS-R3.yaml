@@ -1,36 +1,57 @@
 id: "OBS-R3"
 category: "observability"
-title: "Production systems should have sLO dashboards for AI latency, error, and quality burn rates"
-description: "SLO dashboards for AI latency, error, and quality burn rates"
-whyItMatters: "SLO dashboards for AI latency, error, and quality burn rates Failing this leaves a
-  production gap against: Named SLOs with numeric targets exist for each critical AI journey; alert
-  fires when burn exceeds documented threshold"
+title: "Production systems should have SLO dashboards for AI latency, error, and quality burn"
+description: >
+  Critical AI journeys should have named SLOs with numeric targets for latency,
+  error, and quality burn, plus burn-rate alerts and a dashboard retained for
+  review.
+whyItMatters: >
+  Without journey-level SLOs and burn alerts, AI latency/error/quality
+  regressions stay invisible until users escalate. Dashboards turn error budgets
+  into operable signals for on-call and release owners.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Named SLOs with numeric targets exist for each critical AI journey; alert fires when
-  burn exceeds documented threshold"
+passCondition: >
+  Named SLOs with numeric targets cover latency, error, and quality burn for
+  each critical AI journey; burn-rate alerts fire when burn exceeds the
+  documented threshold (SLO evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "SLO/alert configuration export + dashboard screenshot or URL with retention note"
+  - "Named SLO targets for critical AI journeys covering latency, error, and quality burn"
+  - "Burn-rate alert config + dashboard screenshot or URL with retention note"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-slo-dashboards"
+      params:
+        hint: >
+          Discover named AI SLO targets (latency/error/quality burn), burn-rate
+          alerts, and dashboard/retention evidence.
     - id: "manual-attest"
       params:
-        hint: "SLO/alert configuration export + dashboard screenshot or URL with retention note"
-manualVerification: "For this Check (SLO dashboards for AI latency, error, and quality burn rates):
-  inspect current evidence for [SLO/alert configuration export + dashboard screenshot or URL with
-  retention note] and confirm the pass condition holds — Named SLOs with numeric targets exist for
-  each critical AI journey; alert fires when burn exceeds documented threshold"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest named SLOs with numeric
+          targets for latency, error, and quality burn on each critical AI
+          journey, plus burn-rate alerts (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm critical AI journeys are in scope. If none, score NOT_APPLICABLE.
+  2) Confirm named SLOs with numeric targets exist for each critical journey.
+  3) Confirm coverage includes latency, error, and quality burn. 4) Confirm
+  burn-rate alerts fire when burn exceeds a documented threshold. 5) Confirm a
+  dashboard (screenshot/URL) with a retention note. 6) PASS only if SLOs +
+  burn coverage + alerts hold with measuredAt ≤90 days. OBS-M1 linkage alone
+  does not prove SLOs. CHG-R3 quality-SLO auto-rollback alone does not prove
+  dashboards for all three burn dimensions. Generic infra SLOs without AI
+  journey scope do not satisfy.
+falsePositiveGuidance: >
+  Do not pass dashboard mocks without named numeric targets. Do not pass
+  latency-only SLOs missing error or quality burn. Do not pass alerts without a
+  documented burn threshold. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: SLO dashboards for AI latency, error, and quality
-    burn rates"
-  - "Retain evidence artifacts required by this Check, starting with: SLO/alert configuration export
-    + dashboard screenshot or URL with retention note"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Define named numeric SLOs for latency, error, and quality burn per critical AI journey"
+  - "Wire burn-rate alerts to the documented threshold and retain a dashboard with retention note"
+  - "Retain evidence under imports/ai-slo-dashboards/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Workbook — Observability"
     url: "https://sre.google/workbook/observability/"
@@ -39,19 +60,19 @@ references:
 relatedRules:
   - "OBS-M1"
   - "OBS-M2"
-  - "OBS-M3"
   - "OBS-R1"
   - "OBS-R2"
+  - "OBS-R4"
+  - "CHG-R3"
+  - "INC-M1"
 tags:
   - "observability"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "slo"
+  - "burn-rate"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

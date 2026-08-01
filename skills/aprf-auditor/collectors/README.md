@@ -49,6 +49,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | repo-filesystem | `repo-filesystem.ts` | yes | — | — |
 | github-actions | `github-actions.ts` | workflow YAML | — | Actions runs API |
 | otel | `otel.ts` | config scan | `imports/otel/` | — |
+| **ai-distributed-trace-linkage** | `ai-distributed-trace-linkage.ts` | request→model→tool→outcome linkage ≥95%/24h (OBS-M1) | `imports/ai-distributed-trace-linkage/` | — |
+| **ai-token-cost-attribution** | `ai-token-cost-attribution.ts` | token/cost attribution request/feature/tenant (OBS-R4) | `imports/ai-token-cost-attribution/` | — |
+| **ai-trace-sensitive-redaction** | `ai-trace-sensitive-redaction.ts` | sensitive span redaction/ACL when secrets/PII in traces (OBS-M2) | `imports/ai-trace-sensitive-redaction/` | — |
+| **ai-trace-replay** | `ai-trace-replay.ts` | secure failed-trace replay + RTO + ≤90d drill (OBS-R1) | `imports/ai-trace-replay/` | — |
+| **ai-trace-quality-annotations** | `ai-trace-quality-annotations.ts` | quality labels on traces ≥50/90d → eval/review (OBS-R2) | `imports/ai-trace-quality-annotations/` | — |
+| **ai-slo-dashboards** | `ai-slo-dashboards.ts` | named AI SLOs + latency/error/quality burn alerts (OBS-R3) | `imports/ai-slo-dashboards/` | — |
 | **http-auth-probe** | `http-auth-probe.ts` | route catalog | `imports/http-auth-probe/` | **`--base-url` probe** |
 | promptfoo | `promptfoo.ts` | eval configs | `imports/promptfoo/` | — |
 | aws / azure / gcp | `iac-cloud.ts` | Terraform/Bicep signals | `imports/<cloud>/` | — |

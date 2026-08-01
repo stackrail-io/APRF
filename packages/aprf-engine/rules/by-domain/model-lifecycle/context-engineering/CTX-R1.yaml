@@ -66,7 +66,7 @@ relatedRules:
   - "CTX-R2"
   - "CTX-R3"
   - "OBS-M1"
-  - "OBS-M2"
+  - "OBS-R4"
   - "COST-M2"
 tags:
   - "context-engineering"

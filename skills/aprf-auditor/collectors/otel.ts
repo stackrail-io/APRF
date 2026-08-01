@@ -33,7 +33,7 @@ export const otelCollector: Collector = {
         gitCommit: ctx.gitCommit,
         evidenceAgeDays: ageDays(ctx.assessedAt, mt),
         signals: ["otel-config"],
-        relatedCheckIds: ["OBS-M1", "OBS-M2"],
+        relatedCheckIds: ["OBS-M1", "OBS-R4"],
       });
     }
     if (nodes.length === 0) {

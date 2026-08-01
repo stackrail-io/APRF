@@ -1,39 +1,55 @@
 id: "OBS-R2"
 category: "observability"
-title: "Production systems should have quality annotations attachable to traces for closed-loop eval"
-description: "Quality annotations attachable to traces for closed-loop eval"
-whyItMatters: "Quality annotations attachable to traces for closed-loop eval Failing this leaves a
-  production gap against: Annotators can attach quality labels to production traces in a secure
-  tool; ≥50 annotations in the last 90 days feed an eval or review loop"
+title: "Production systems should attach quality annotations to traces for closed-loop eval"
+description: >
+  Annotators should be able to attach quality labels to production traces in a
+  secure tool, with ≥50 annotations in the last 90 days feeding an eval or
+  review loop.
+whyItMatters: >
+  Traces without quality labels stay forensic only. Attaching labels in a
+  secure tool and routing them into eval or review closes the loop from
+  production failures to measurable quality improvement.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Annotators can attach quality labels to production traces in a secure tool; ≥50
-  annotations in the last 90 days feed an eval or review loop"
+passCondition: >
+  Annotators can attach quality labels to production traces in a secure tool;
+  ≥50 annotations in the last 90 days feed an eval or review loop (annotation
+  evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Trace annotation schema + tooling config allowing quality labels on spans + sample annotated
-    traces"
+  - "Trace annotation schema and secure tooling for quality labels on spans"
+  - "Last-90-day count ≥50 annotations feeding an eval or review loop"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-trace-quality-annotations"
+      params:
+        hint: >
+          Discover secure trace quality-annotation tooling/schema and coverage
+          showing ≥50 annotations in 90 days feeding eval or review.
     - id: "manual-attest"
       params:
-        hint: "Trace annotation schema + tooling config allowing quality labels on spans + sample annotated
-          traces"
-manualVerification: "For this Check (Quality annotations attachable to traces for closed-loop eval):
-  inspect current evidence for [Trace annotation schema + tooling config allowing quality labels on
-  spans + sample annotated traces] and confirm the pass condition holds — Annotators can attach
-  quality labels to production traces in a secure tool; ≥50 annotations in the last 90 days feed an
-  eval or review loop"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest secure annotation tooling
+          plus ≥50 annotations in the last 90 days feeding an eval or review
+          loop (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI traces are in scope. If none, score NOT_APPLICABLE.
+  2) Confirm a secure tool/schema lets annotators attach quality labels to
+  spans. 3) Confirm ≥50 annotations in the last 90 days. 4) Confirm those
+  annotations feed an eval suite or human review loop. 5) PASS only if tooling
+  + volume + closed loop hold with measuredAt ≤90 days. OBS-M1 linkage alone
+  does not prove annotations. OBS-R1 replay alone does not prove a closed-loop
+  eval feed. Offline spreadsheet labels not attached to traces do not satisfy.
+falsePositiveGuidance: >
+  Do not pass annotation UI mocks without production-trace attachment. Do not
+  pass fewer than 50 labels in 90 days. Do not pass labels that never enter
+  eval/review. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Quality annotations attachable to traces for
-    closed-loop eval"
-  - "Retain evidence artifacts required by this Check, starting with: Trace annotation schema +
-    tooling config allowing quality labels on spans + sample annotated traces"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Deploy secure span quality-annotation tooling with a documented schema"
+  - "Route ≥50 annotations / 90 days into an eval or review loop"
+  - "Retain evidence under imports/ai-trace-quality-annotations/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Workbook — Observability"
     url: "https://sre.google/workbook/observability/"
@@ -42,19 +58,18 @@ references:
 relatedRules:
   - "OBS-M1"
   - "OBS-M2"
-  - "OBS-M3"
   - "OBS-R1"
   - "OBS-R3"
+  - "OBS-R4"
+  - "EVL-M1"
 tags:
   - "observability"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "trace-annotation"
+  - "closed-loop-eval"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

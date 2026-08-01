@@ -1,0 +1,77 @@
+id: "OBS-R4"
+category: "observability"
+title: "Production systems should attribute token usage and cost per request/feature/tenant"
+description: >
+  Billed model calls should carry request, feature, and tenant (or equivalent)
+  attribution labels so spend and usage can be reconstructed per path.
+whyItMatters: >
+  Without attribution, FinOps and on-call cannot tie spend spikes or quality
+  regressions to a feature or tenant. Cost ceilings (COST) and traces (OBS-M1)
+  alone do not explain who burned tokens.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  ≥95% of billed model calls in a 24h sample carry request ID + feature +
+  tenant (or equivalent) attribution labels (attribution evidence measuredAt
+  ≤90 days).
+evidenceRequired:
+  - "Cost/token metrics schema with request, feature, and tenant (or equivalent) labels"
+  - "24h sample showing ≥95% attributed billed model calls"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-token-cost-attribution"
+      params:
+        hint: >
+          Discover token/cost metrics instrumentation with request, feature,
+          and tenant attribution labels.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest ≥95% of billed model
+          calls in a 24h sample carry request + feature + tenant (or
+          equivalent) labels (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm billed model calls are in scope. If none, score NOT_APPLICABLE.
+  2) Confirm metrics/logs include request ID, feature, and tenant (or
+  equivalent) labels. 3) Confirm a 24h sample shows ≥95% attribution. 4) PASS
+  only if coverage holds with measuredAt ≤90 days. OBS-M1 span linkage alone
+  does not prove cost labels. COST-M2 spend alerts alone do not prove
+  per-request/feature/tenant attribution.
+falsePositiveGuidance: >
+  Do not pass dashboards without the three label classes. Do not pass a single
+  happy-path sample as ≥95% coverage. Do not pass samples without a ≥24h
+  window. Named exceptions need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Emit request + feature + tenant (or equivalent) labels on billed model calls"
+  - "Retain a 24h sample showing ≥95% attribution"
+  - "Retain evidence under imports/ai-token-cost-attribution/"
+  - "Time-box gaps with owner and expiry ≤90 days"
+references:
+  - title: "APRF-RFC-0003 — Demote token/cost attribution Check to recommended"
+    url: "https://github.com/stackrail-io/APRF/blob/main/rfcs/0003-observability-obs-m2-to-recommended.md"
+  - title: "Google SRE Workbook — Observability"
+    url: "https://sre.google/workbook/observability/"
+  - title: "OpenTelemetry"
+    url: "https://opentelemetry.io/"
+relatedRules:
+  - "OBS-M1"
+  - "OBS-M2"
+  - "OBS-R1"
+  - "OBS-R2"
+  - "OBS-R3"
+  - "COST-M1"
+  - "COST-M2"
+tags:
+  - "observability"
+  - "recommended"
+  - "hybrid"
+  - "cost-attribution"
+  - "tokens"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

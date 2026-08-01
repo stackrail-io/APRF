@@ -62,7 +62,7 @@ relatedRules:
   - "COST-M1"
   - "COST-M3"
   - "OBS-M1"
-  - "OBS-M2"
+  - "OBS-R4"
   - "INC-M1"
 tags:
   - "cost-optimization"

@@ -2,6 +2,12 @@ import type { Collector } from "./types.ts";
 import { repoFilesystemCollector } from "./repo-filesystem.ts";
 import { githubActionsCollector } from "./github-actions.ts";
 import { otelCollector } from "./otel.ts";
+import { aiDistributedTraceLinkageCollector } from "./ai-distributed-trace-linkage.ts";
+import { aiTokenCostAttributionCollector } from "./ai-token-cost-attribution.ts";
+import { aiTraceSensitiveRedactionCollector } from "./ai-trace-sensitive-redaction.ts";
+import { aiTraceReplayCollector } from "./ai-trace-replay.ts";
+import { aiTraceQualityAnnotationsCollector } from "./ai-trace-quality-annotations.ts";
+import { aiSloDashboardsCollector } from "./ai-slo-dashboards.ts";
 import { promptfooCollector } from "./promptfoo.ts";
 import { httpAuthProbeCollector } from "./http-auth-probe.ts";
 import { mcpS2sInventoryCollector } from "./mcp-s2s-inventory.ts";
@@ -121,6 +127,12 @@ export const COLLECTORS: Collector[] = [
   repoFilesystemCollector,
   githubActionsCollector,
   otelCollector,
+  aiDistributedTraceLinkageCollector,
+  aiTokenCostAttributionCollector,
+  aiTraceSensitiveRedactionCollector,
+  aiTraceReplayCollector,
+  aiTraceQualityAnnotationsCollector,
+  aiSloDashboardsCollector,
   promptfooCollector,
   httpAuthProbeCollector,
   mcpS2sInventoryCollector,

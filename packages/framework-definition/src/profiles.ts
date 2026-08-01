@@ -46,7 +46,6 @@ export const PROFILE_CORE: AprfProfile = {
     "HUM-M1",
     "HUM-M3",
     "OBS-M1",
-    "OBS-M2",
     "PERF-M1",
     "REL-M1",
     "REL-M2",

@@ -1,0 +1,25 @@
+id: ai-token-cost-attribution
+title: Token/cost attribution per request/feature/tenant (OBS-R4)
+version: "0.2.0"
+executor: collectors/ai-token-cost-attribution.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-token-cost-attribution]
+inputs:
+  - "Target repo (token/cost metrics with attribution labels)"
+  - "Optional suite: aprf-assessment/imports/ai-token-cost-attribution/*.{json}"
+collect:
+  - "Detect request/feature/tenant attribution on billed model calls"
+  - "Ingest coverage; write ai-token-cost-attribution-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-token-cost-attribution/*"
+  signals: [ai-token-cost-attribution, obs-r4, repo-ai-token-cost-attribution]
+mapsToChecks: [OBS-R4]
+whenUnavailable: >
+  Attribution signals alone are PARTIAL. OBS-R4 PASS needs
+  attributedBilledCallPct≥95, sampleWindowHours≥24,
+  coversRequestFeatureTenant=true, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline attribution heuristics + optional imported JSON.

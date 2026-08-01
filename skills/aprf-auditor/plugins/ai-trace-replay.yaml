@@ -1,0 +1,25 @@
+id: ai-trace-replay
+title: Secure failed-AI-trace replay tooling (OBS-R1)
+version: "0.2.0"
+executor: collectors/ai-trace-replay.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-trace-replay]
+inputs:
+  - "Target repo (restricted replay tooling + RTO + drill/real replay)"
+  - "Optional suite: aprf-assessment/imports/ai-trace-replay/*.{json}"
+collect:
+  - "Detect secure AI trace replay tooling and recent drills"
+  - "Ingest coverage; write ai-trace-replay-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-trace-replay/*"
+  signals: [ai-trace-replay, obs-r1, repo-ai-trace-replay]
+mapsToChecks: [OBS-R1]
+whenUnavailable: >
+  Replay signals alone are PARTIAL. OBS-R1 PASS needs
+  restrictedReplayEnvironmentConfigured, replayWithinDocumentedRto,
+  lastDrillOrRealReplayWithin90Days, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline replay heuristics + optional imported JSON.

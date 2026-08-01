@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:0901f1e9378603cfef2af7d7ba02aafc847c15a5aad2fc9a52e5bb2b1932830d",
+  "generatedAt": "sha256:172b4b7034b3530ba435c602cbb3c70b1c5d721a290bcb2ec1d741edaf401718",
   "ruleCount": 177,
   "domains": [
     {
@@ -2967,7 +2967,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "COST-M1",
         "COST-M3",
         "OBS-M1",
-        "OBS-M2",
+        "OBS-R4",
         "INC-M1"
       ],
       "tags": [
@@ -3558,7 +3558,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "CTX-R2",
         "CTX-R3",
         "OBS-M1",
-        "OBS-M2",
+        "OBS-R4",
         "COST-M2"
       ],
       "tags": [
@@ -4499,7 +4499,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DG-M2",
         "DG-R2",
         "OBS-M1",
-        "OBS-M2"
+        "OBS-R4"
       ],
       "tags": [
         "data-governance",
@@ -4574,7 +4574,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "DG-R1",
         "DG-R3",
         "OBS-M1",
-        "OBS-M2",
+        "OBS-R4",
         "MOD-M1"
       ],
       "tags": [
@@ -5308,7 +5308,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "EVL-R1",
         "EVL-R2",
         "OBS-M1",
-        "OBS-M2",
+        "OBS-R4",
         "SAF-M2"
       ],
       "tags": [
@@ -8108,43 +8108,46 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "OBS-M1",
       "category": "observability",
       "title": "Distributed traces must link user request → model calls → tools → outcome",
-      "description": "Distributed traces shall link user request → model calls → tools → outcome",
-      "whyItMatters": "Distributed traces shall link user request → model calls → tools → outcome Failing this leaves a production gap against: Canary or sampled traces show parent request ID linking model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours",
+      "description": "Production AI paths must emit distributed traces that connect the parent user/request ID through model spans, tool spans, and the request outcome.\n",
+      "whyItMatters": "Without end-to-end linkage, on-call cannot reconstruct what the model and tools did for a failing user request. Debugging becomes log archaeology, and safety/quality incidents lack forensic evidence.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Canary or sampled traces show parent request ID linking model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours",
+      "passCondition": "Canary or sampled traces show parent request ID linking model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours (trace evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Sample production traces (redacted) + tracing config"
+        "Tracing config (or equivalent) instrumenting request → model → tool → outcome",
+        "Canary or 24h sampled traces showing ≥95% linked coverage (redacted)"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
-            "id": "otel-services-present",
+            "id": "repo-ai-distributed-trace-linkage",
             "params": {
-              "hint": "APEP apep.otel.service_inventory — require listed services"
+              "hint": "Discover OTel/tracing instrumentation for request→model→tool→outcome linkage and canary/sample coverage.\n"
             }
           },
           {
             "id": "repo-otel-config",
-            "params": {}
+            "params": {
+              "hint": "Discover OpenTelemetry collector or SDK config for AI services."
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Sample production traces (redacted) + tracing config"
+              "hint": "If automation cannot prove coverage, attest canary or sampled traces link request→model→tool→outcome in ≥95% of canary requests over 24 hours (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Distributed traces must link user request → model calls → tools → outcome): inspect current evidence for [Sample production traces (redacted) + tracing config] and confirm the pass condition holds — Canary or sampled traces show parent request ID linking model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours",
-      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm a production AI request path is in scope. If none, score NOT_APPLICABLE. 2) Confirm tracing/instrumentation covers parent request ID, model spans, tool spans, and outcome. 3) Confirm a canary or 24h sample shows ≥95% of requests with that linkage. 4) PASS only if coverage holds with measuredAt ≤90 days. Generic HTTP APM without model/tool spans does not satisfy. Cost attribution (OBS-R4) alone does not prove span linkage.\n",
+      "falsePositiveGuidance": "Do not pass SDK init without model/tool span evidence. Do not pass a single happy-path trace as ≥95% coverage. Do not pass samples older than the measuredAt freshness window. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Distributed traces must link user request → model calls → tools → outcome",
-        "Retain evidence artifacts required by this Check, starting with: Sample production traces (redacted) + tracing config",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Instrument request → model → tool → outcome spans with a shared parent request ID",
+        "Run a 24h canary/sample and retain ≥95% linkage coverage (redacted)",
+        "Retain evidence under imports/ai-distributed-trace-linkage/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -8157,24 +8160,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         }
       ],
       "relatedRules": [
+        "OBS-R4",
         "OBS-M2",
-        "OBS-M3",
         "OBS-R1",
         "OBS-R2",
-        "OBS-R3"
+        "OBS-R3",
+        "INC-R1"
       ],
       "tags": [
         "observability",
         "mandatory",
-        "automated"
+        "hybrid",
+        "tracing",
+        "opentelemetry"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -8184,101 +8185,42 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "OBS-M2",
       "category": "observability",
-      "title": "Token usage and cost must be attributable per request/feature/tenant",
-      "description": "Token usage and cost shall be attributable per request/feature/tenant",
-      "whyItMatters": "Token usage and cost shall be attributable per request/feature/tenant Failing this leaves a production gap against: ≥95% of billed model calls in a 24h sample carry request ID + feature + tenant (or equivalent) attribution labels",
-      "severity": "high",
-      "weight": 3,
-      "gate": "mandatory",
-      "passCondition": "≥95% of billed model calls in a 24h sample carry request ID + feature + tenant (or equivalent) attribution labels",
-      "evidenceRequired": [
-        "Cost/token metrics with request, feature, and tenant labels"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": [
-          {
-            "id": "manual-attest",
-            "params": {
-              "hint": "Cost/token metrics with request, feature, and tenant labels"
-            }
-          }
-        ]
-      },
-      "manualVerification": "For this Check (Token usage and cost must be attributable per request/feature/tenant): inspect current evidence for [Cost/token metrics with request, feature, and tenant labels] and confirm the pass condition holds — ≥95% of billed model calls in a 24h sample carry request ID + feature + tenant (or equivalent) attribution labels",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: Token usage and cost must be attributable per request/feature/tenant",
-        "Retain evidence artifacts required by this Check, starting with: Cost/token metrics with request, feature, and tenant labels",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "Google SRE Workbook — Observability",
-          "url": "https://sre.google/workbook/observability/"
-        },
-        {
-          "title": "OpenTelemetry",
-          "url": "https://opentelemetry.io/"
-        }
-      ],
-      "relatedRules": [
-        "OBS-M1",
-        "OBS-M3",
-        "OBS-R1",
-        "OBS-R2",
-        "OBS-R3"
-      ],
-      "tags": [
-        "observability",
-        "mandatory",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
-        "minCriticality": 2,
-        "requiredFromLevel": 3
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "OBS-M3",
-      "category": "observability",
       "title": "Sensitive fields in traces must be redacted or access-controlled",
-      "description": "Sensitive fields in traces shall be redacted or access-controlled",
-      "whyItMatters": "Sensitive fields in traces shall be redacted or access-controlled Failing this leaves a production gap against: Synthetic secrets/PII in traced fields are redacted or inaccessible to unauthorized roles at 100% in tests",
+      "description": "When production traces can contain secrets or regulated/sensitive data (API keys, JWTs, passwords, customer PII/PHI, financial data), those fields must be redacted, masked, tokenized, or access-controlled before reaching the tracing backend.\n",
+      "whyItMatters": "Traces that leak credentials or regulated personal data are a security and privacy incident—not an observability nicety. Unredacted spans turn debugging backends into a second copy of production secrets and customer data.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Synthetic secrets/PII in traced fields are redacted or inaccessible to unauthorized roles at 100% in tests",
+      "passCondition": "If traces contain (or are designed to contain) secrets or regulated/sensitive data, those fields are redacted, masked, tokenized, or access-controlled before reaching the tracing backend—proven by synthetic sensitive-field tests at 100% (evidence measuredAt ≤90 days). If traces demonstrably cannot carry secrets or regulated/sensitive data, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Trace redaction/ACL config + synthetic sensitive-field test"
+        "Scope attestation: whether traces can contain secrets or regulated/sensitive data",
+        "Trace redaction/masking/tokenization or ACL config for sensitive span fields",
+        "Synthetic sensitive-field test showing 100% redaction or unauthorized-access denial"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-trace-sensitive-redaction",
+            "params": {
+              "hint": "Discover AI/OTel trace redaction or ACL controls for secrets and sensitive span fields, plus synthetic sensitive-field tests.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Trace redaction/ACL config + synthetic sensitive-field test"
+              "hint": "If automation cannot prove coverage, attest either NOT_APPLICABLE (traces cannot carry secrets/regulated sensitive data) or 100% synthetic redaction/ACL success with measuredAt ≤90 days.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Sensitive fields in traces must be redacted or access-controlled): inspect current evidence for [Trace redaction/ACL config + synthetic sensitive-field test] and confirm the pass condition holds — Synthetic secrets/PII in traced fields are redacted or inaccessible to unauthorized roles at 100% in tests",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI tracing is in scope. If none, score NOT_APPLICABLE. 2) Determine whether traces can contain secrets or regulated/sensitive data (API keys, JWTs, passwords, customer PII/PHI, financial data, prompt/completion payloads with those classes). If they demonstrably cannot, score NOT_APPLICABLE with retained rationale. 3) If they can, confirm redaction, masking, tokenization, or ACL before the tracing backend. 4) Confirm synthetic sensitive-field tests show 100% redaction or unauthorized denial. 5) PASS only if in-scope sensitive traces + 100% test hold with measuredAt ≤90 days. SEC2-M2 general log redaction alone does not prove AI span-attribute controls. OBS-M1 linkage alone does not prove sensitive-field handling.\n",
+      "falsePositiveGuidance": "Do not pass “we don’t log PII” without checking span attributes and baggage. Do not pass redaction of console logs only. Do not pass partial canary rates. Do not claim NOT_APPLICABLE when prompts, tool args, or auth headers are traced. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Sensitive fields in traces must be redacted or access-controlled",
-        "Retain evidence artifacts required by this Check, starting with: Trace redaction/ACL config + synthetic sensitive-field test",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Classify whether AI traces can carry secrets or regulated/sensitive data",
+        "Redact/mask/tokenize or ACL sensitive span fields before export",
+        "Add synthetic sensitive-field tests and retain 100% results under imports/ai-trace-sensitive-redaction/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -8288,27 +8230,31 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "OpenTelemetry",
           "url": "https://opentelemetry.io/"
+        },
+        {
+          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
       "relatedRules": [
         "OBS-M1",
-        "OBS-M2",
+        "OBS-R4",
         "OBS-R1",
         "OBS-R2",
-        "OBS-R3"
+        "OBS-R3",
+        "SEC2-M2",
+        "PRI-M1"
       ],
       "tags": [
         "observability",
         "mandatory",
-        "manual"
+        "hybrid",
+        "trace-redaction",
+        "sensitive-data",
+        "conditional"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -8319,33 +8265,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "OBS-R1",
       "category": "observability",
       "title": "Production systems should have replay tooling for failed traces in a secure environment",
-      "description": "Replay tooling for failed traces in a secure environment",
-      "whyItMatters": "Replay tooling for failed traces in a secure environment Failing this leaves a production gap against: On-call can replay a failed AI trace in a restricted environment within the documented RTO; last drill or real replay ≤90 days old",
+      "description": "On-call should be able to replay a failed AI trace in a restricted environment within a documented RTO, with a drill or real replay in the last 90 days.\n",
+      "whyItMatters": "Linked traces (OBS-M1) without a secure replay path leave on-call reading redacted spans instead of reproducing the failure. Restricted replay turns failed production traces into diagnosable incidents without exposing secrets to broad tooling.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "On-call can replay a failed AI trace in a restricted environment within the documented RTO; last drill or real replay ≤90 days old",
+      "passCondition": "On-call can replay a failed AI trace in a restricted environment within the documented RTO; last drill or real replay ≤90 days old (replay evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Secure replay tooling config + sample replay session for a failed production trace (redacted)"
+        "Secure/restricted replay tooling config for failed AI traces",
+        "Documented RTO for replay",
+        "Drill or real replay sample ≤90 days (redacted)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-trace-replay",
+            "params": {
+              "hint": "Discover secure AI trace replay tooling, documented RTO, and recent drill or real replay evidence.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Secure replay tooling config + sample replay session for a failed production trace (redacted)"
+              "hint": "If automation cannot prove coverage, attest on-call can replay a failed AI trace in a restricted environment within documented RTO, with last drill or real replay ≤90 days (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Replay tooling for failed traces in a secure environment): inspect current evidence for [Secure replay tooling config + sample replay session for a failed production trace (redacted)] and confirm the pass condition holds — On-call can replay a failed AI trace in a restricted environment within the documented RTO; last drill or real replay ≤90 days old",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI tracing with failed traces is in scope. If none, score NOT_APPLICABLE. 2) Confirm replay tooling exists in a restricted environment (not unrestricted prod copies). 3) Confirm a documented RTO for replay. 4) Confirm a drill or real replay ≤90 days. 5) PASS only if tooling + RTO + recent replay hold with measuredAt ≤90 days. OBS-M1 linkage alone does not prove replay. OBS-R2 quality annotations alone do not prove replay. Unrestricted local dumps of production traces do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a debugger without restricted access controls. Do not pass RTO docs without a recent drill/real replay. Do not pass replays older than 90 days. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Replay tooling for failed traces in a secure environment",
-        "Retain evidence artifacts required by this Check, starting with: Secure replay tooling config + sample replay session for a failed production trace (redacted)",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Provide restricted-environment replay for failed AI traces with a documented RTO",
+        "Run a drill (or retain a real replay) ≤90 days",
+        "Retain evidence under imports/ai-trace-replay/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -8360,22 +8314,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "OBS-M1",
         "OBS-M2",
-        "OBS-M3",
         "OBS-R2",
-        "OBS-R3"
+        "OBS-R3",
+        "OBS-R4",
+        "INC-M1"
       ],
       "tags": [
         "observability",
         "recommended",
-        "manual"
+        "hybrid",
+        "trace-replay",
+        "incident-debug"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -8385,34 +8337,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "OBS-R2",
       "category": "observability",
-      "title": "Production systems should have quality annotations attachable to traces for closed-loop eval",
-      "description": "Quality annotations attachable to traces for closed-loop eval",
-      "whyItMatters": "Quality annotations attachable to traces for closed-loop eval Failing this leaves a production gap against: Annotators can attach quality labels to production traces in a secure tool; ≥50 annotations in the last 90 days feed an eval or review loop",
+      "title": "Production systems should attach quality annotations to traces for closed-loop eval",
+      "description": "Annotators should be able to attach quality labels to production traces in a secure tool, with ≥50 annotations in the last 90 days feeding an eval or review loop.\n",
+      "whyItMatters": "Traces without quality labels stay forensic only. Attaching labels in a secure tool and routing them into eval or review closes the loop from production failures to measurable quality improvement.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Annotators can attach quality labels to production traces in a secure tool; ≥50 annotations in the last 90 days feed an eval or review loop",
+      "passCondition": "Annotators can attach quality labels to production traces in a secure tool; ≥50 annotations in the last 90 days feed an eval or review loop (annotation evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Trace annotation schema + tooling config allowing quality labels on spans + sample annotated traces"
+        "Trace annotation schema and secure tooling for quality labels on spans",
+        "Last-90-day count ≥50 annotations feeding an eval or review loop"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-trace-quality-annotations",
+            "params": {
+              "hint": "Discover secure trace quality-annotation tooling/schema and coverage showing ≥50 annotations in 90 days feeding eval or review.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Trace annotation schema + tooling config allowing quality labels on spans + sample annotated traces"
+              "hint": "If automation cannot prove coverage, attest secure annotation tooling plus ≥50 annotations in the last 90 days feeding an eval or review loop (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Quality annotations attachable to traces for closed-loop eval): inspect current evidence for [Trace annotation schema + tooling config allowing quality labels on spans + sample annotated traces] and confirm the pass condition holds — Annotators can attach quality labels to production traces in a secure tool; ≥50 annotations in the last 90 days feed an eval or review loop",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI traces are in scope. If none, score NOT_APPLICABLE. 2) Confirm a secure tool/schema lets annotators attach quality labels to spans. 3) Confirm ≥50 annotations in the last 90 days. 4) Confirm those annotations feed an eval suite or human review loop. 5) PASS only if tooling + volume + closed loop hold with measuredAt ≤90 days. OBS-M1 linkage alone does not prove annotations. OBS-R1 replay alone does not prove a closed-loop eval feed. Offline spreadsheet labels not attached to traces do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass annotation UI mocks without production-trace attachment. Do not pass fewer than 50 labels in 90 days. Do not pass labels that never enter eval/review. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Quality annotations attachable to traces for closed-loop eval",
-        "Retain evidence artifacts required by this Check, starting with: Trace annotation schema + tooling config allowing quality labels on spans + sample annotated traces",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Deploy secure span quality-annotation tooling with a documented schema",
+        "Route ≥50 annotations / 90 days into an eval or review loop",
+        "Retain evidence under imports/ai-trace-quality-annotations/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -8427,22 +8386,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "OBS-M1",
         "OBS-M2",
-        "OBS-M3",
         "OBS-R1",
-        "OBS-R3"
+        "OBS-R3",
+        "OBS-R4",
+        "EVL-M1"
       ],
       "tags": [
         "observability",
         "recommended",
-        "manual"
+        "hybrid",
+        "trace-annotation",
+        "closed-loop-eval"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -8452,34 +8409,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "OBS-R3",
       "category": "observability",
-      "title": "Production systems should have sLO dashboards for AI latency, error, and quality burn rates",
-      "description": "SLO dashboards for AI latency, error, and quality burn rates",
-      "whyItMatters": "SLO dashboards for AI latency, error, and quality burn rates Failing this leaves a production gap against: Named SLOs with numeric targets exist for each critical AI journey; alert fires when burn exceeds documented threshold",
+      "title": "Production systems should have SLO dashboards for AI latency, error, and quality burn",
+      "description": "Critical AI journeys should have named SLOs with numeric targets for latency, error, and quality burn, plus burn-rate alerts and a dashboard retained for review.\n",
+      "whyItMatters": "Without journey-level SLOs and burn alerts, AI latency/error/quality regressions stay invisible until users escalate. Dashboards turn error budgets into operable signals for on-call and release owners.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Named SLOs with numeric targets exist for each critical AI journey; alert fires when burn exceeds documented threshold",
+      "passCondition": "Named SLOs with numeric targets cover latency, error, and quality burn for each critical AI journey; burn-rate alerts fire when burn exceeds the documented threshold (SLO evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "SLO/alert configuration export + dashboard screenshot or URL with retention note"
+        "Named SLO targets for critical AI journeys covering latency, error, and quality burn",
+        "Burn-rate alert config + dashboard screenshot or URL with retention note"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-slo-dashboards",
+            "params": {
+              "hint": "Discover named AI SLO targets (latency/error/quality burn), burn-rate alerts, and dashboard/retention evidence.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "SLO/alert configuration export + dashboard screenshot or URL with retention note"
+              "hint": "If automation cannot prove coverage, attest named SLOs with numeric targets for latency, error, and quality burn on each critical AI journey, plus burn-rate alerts (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (SLO dashboards for AI latency, error, and quality burn rates): inspect current evidence for [SLO/alert configuration export + dashboard screenshot or URL with retention note] and confirm the pass condition holds — Named SLOs with numeric targets exist for each critical AI journey; alert fires when burn exceeds documented threshold",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm critical AI journeys are in scope. If none, score NOT_APPLICABLE. 2) Confirm named SLOs with numeric targets exist for each critical journey. 3) Confirm coverage includes latency, error, and quality burn. 4) Confirm burn-rate alerts fire when burn exceeds a documented threshold. 5) Confirm a dashboard (screenshot/URL) with a retention note. 6) PASS only if SLOs + burn coverage + alerts hold with measuredAt ≤90 days. OBS-M1 linkage alone does not prove SLOs. CHG-R3 quality-SLO auto-rollback alone does not prove dashboards for all three burn dimensions. Generic infra SLOs without AI journey scope do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass dashboard mocks without named numeric targets. Do not pass latency-only SLOs missing error or quality burn. Do not pass alerts without a documented burn threshold. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: SLO dashboards for AI latency, error, and quality burn rates",
-        "Retain evidence artifacts required by this Check, starting with: SLO/alert configuration export + dashboard screenshot or URL with retention note",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Define named numeric SLOs for latency, error, and quality burn per critical AI journey",
+        "Wire burn-rate alerts to the documented threshold and retain a dashboard with retention note",
+        "Retain evidence under imports/ai-slo-dashboards/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -8494,24 +8458,100 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "OBS-M1",
         "OBS-M2",
-        "OBS-M3",
         "OBS-R1",
-        "OBS-R2"
+        "OBS-R2",
+        "OBS-R4",
+        "CHG-R3",
+        "INC-M1"
       ],
       "tags": [
         "observability",
         "recommended",
-        "manual"
+        "hybrid",
+        "slo",
+        "burn-rate"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "OBS-R4",
+      "category": "observability",
+      "title": "Production systems should attribute token usage and cost per request/feature/tenant",
+      "description": "Billed model calls should carry request, feature, and tenant (or equivalent) attribution labels so spend and usage can be reconstructed per path.\n",
+      "whyItMatters": "Without attribution, FinOps and on-call cannot tie spend spikes or quality regressions to a feature or tenant. Cost ceilings (COST) and traces (OBS-M1) alone do not explain who burned tokens.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "recommended",
+      "passCondition": "≥95% of billed model calls in a 24h sample carry request ID + feature + tenant (or equivalent) attribution labels (attribution evidence measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Cost/token metrics schema with request, feature, and tenant (or equivalent) labels",
+        "24h sample showing ≥95% attributed billed model calls"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-token-cost-attribution",
+            "params": {
+              "hint": "Discover token/cost metrics instrumentation with request, feature, and tenant attribution labels.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest ≥95% of billed model calls in a 24h sample carry request + feature + tenant (or equivalent) labels (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm billed model calls are in scope. If none, score NOT_APPLICABLE. 2) Confirm metrics/logs include request ID, feature, and tenant (or equivalent) labels. 3) Confirm a 24h sample shows ≥95% attribution. 4) PASS only if coverage holds with measuredAt ≤90 days. OBS-M1 span linkage alone does not prove cost labels. COST-M2 spend alerts alone do not prove per-request/feature/tenant attribution.\n",
+      "falsePositiveGuidance": "Do not pass dashboards without the three label classes. Do not pass a single happy-path sample as ≥95% coverage. Do not pass samples without a ≥24h window. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Emit request + feature + tenant (or equivalent) labels on billed model calls",
+        "Retain a 24h sample showing ≥95% attribution",
+        "Retain evidence under imports/ai-token-cost-attribution/",
+        "Time-box gaps with owner and expiry ≤90 days"
+      ],
+      "references": [
+        {
+          "title": "APRF-RFC-0003 — Demote token/cost attribution Check to recommended",
+          "url": "https://github.com/stackrail-io/APRF/blob/main/rfcs/0003-observability-obs-m2-to-recommended.md"
+        },
+        {
+          "title": "Google SRE Workbook — Observability",
+          "url": "https://sre.google/workbook/observability/"
+        },
+        {
+          "title": "OpenTelemetry",
+          "url": "https://opentelemetry.io/"
+        }
+      ],
+      "relatedRules": [
+        "OBS-M1",
+        "OBS-M2",
+        "OBS-R1",
+        "OBS-R2",
+        "OBS-R3",
+        "COST-M1",
+        "COST-M2"
+      ],
+      "tags": [
+        "observability",
+        "recommended",
+        "hybrid",
+        "cost-attribution",
+        "tokens"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 3
       },
       "status": "active",
       "introducedIn": "0.10.0"
