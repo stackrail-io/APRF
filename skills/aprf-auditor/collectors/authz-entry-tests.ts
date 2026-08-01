@@ -52,6 +52,8 @@ export interface AuthzEntryPoint {
   hasServerGuard: boolean;
   guardRefs: string[];
   hasDenialTest: boolean;
+  /** true when denial coverage for this route comes only from imported coveredPaths */
+  denialFromImport: boolean;
   testRefs: string[];
   ok: boolean;
 }
@@ -264,11 +266,47 @@ function findDenialTestsForPath(
   return hits;
 }
 
-function importedCoversPath(path: string, covered: string[]): boolean {
-  const p = path.toLowerCase();
+function normalizeAuthzPath(raw: string): string {
+  let s = raw.trim();
+  // Allow "METHOD /path" coverage entries.
+  const methodPath = /^([A-Za-z]+)\s+(\S+)$/.exec(s);
+  if (methodPath && methodPath[2].includes("/")) s = methodPath[2];
+  try {
+    if (/^https?:\/\//i.test(s)) s = new URL(s).pathname;
+  } catch {
+    /* keep s */
+  }
+  const q = s.indexOf("?");
+  if (q >= 0) s = s.slice(0, q);
+  const h = s.indexOf("#");
+  if (h >= 0) s = s.slice(0, h);
+  if (!s.startsWith("/")) s = `/${s}`;
+  if (s.length > 1 && s.endsWith("/")) s = s.slice(0, -1);
+  return s.toLowerCase();
+}
+
+/**
+ * Exact route-path match only (after normalization). Substring / prefix
+ * matches are too loose and can launder AUTHZ-M1 denial coverage.
+ */
+function importedCoversPath(
+  path: string,
+  covered: string[],
+  method?: string,
+): boolean {
+  const p = normalizeAuthzPath(path);
+  const wantMethod = (method || "").toUpperCase();
   return covered.some((c) => {
-    const x = c.toLowerCase();
-    return p === x || p.startsWith(x) || x.startsWith(p) || p.includes(x);
+    const raw = c.trim();
+    if (!raw) return false;
+    const methodPath = /^([A-Za-z]+)\s+(\S+)$/.exec(raw);
+    if (methodPath && methodPath[2].includes("/")) {
+      const cm = methodPath[1].toUpperCase();
+      const cp = normalizeAuthzPath(methodPath[2]);
+      if (wantMethod && cm !== wantMethod) return false;
+      return cp === p;
+    }
+    return normalizeAuthzPath(raw) === p;
   });
 }
 
@@ -311,8 +349,14 @@ export function buildAuthzReport(
       ctx.targetPath,
       contentCache,
     );
-    const hasDenialTest =
-      testRefs.length > 0 || importedCoversPath(r.path, opts.importedCovered);
+    const coveredByImport = importedCoversPath(
+      r.path,
+      opts.importedCovered,
+      r.method,
+    );
+    // In-repo denial tests win; otherwise require an exact imported path match.
+    const denialFromImport = testRefs.length === 0 && coveredByImport;
+    const hasDenialTest = testRefs.length > 0 || coveredByImport;
 
     // AUTHZ-M1: per-route server-side guard + unauthorized-caller denial coverage.
     // Global codeGuards.found is supporting evidence only — do not launder onto every route.
@@ -325,6 +369,7 @@ export function buildAuthzReport(
       hasServerGuard: guard.has,
       guardRefs: guard.refs,
       hasDenialTest,
+      denialFromImport,
       testRefs: hasDenialTest
         ? testRefs.length
           ? testRefs
@@ -367,14 +412,10 @@ export function buildAuthzReport(
     notes.push(`Imported coverage from: ${opts.importedSources.join(", ")}`);
   }
 
-  // Live code/test scan is measured at assessment time. Import-backed denial
-  // coverage requires an import measuredAt ≤90d (do not launder undated imports).
-  const importBackedDenial = entryPoints.some(
-    (e) =>
-      e.hasDenialTest &&
-      e.testRefs.length > 0 &&
-      e.testRefs.every((t) => /(^|[/\\])imports[/\\]/.test(t)),
-  );
+  // Live in-repo denial tests are measured at assessment time. Any route that
+  // relies solely on imported coveredPaths requires import measuredAt ≤90d —
+  // do not keep assessment-time freshness when other routes are import-backed.
+  const importBackedDenial = entryPoints.some((e) => e.denialFromImport);
   let measuredAt: string | null = ctx.assessedAt.toISOString();
   if (importBackedDenial) {
     measuredAt = opts.importedMeasuredAt;

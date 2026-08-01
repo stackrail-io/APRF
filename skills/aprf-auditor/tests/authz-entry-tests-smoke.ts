@@ -245,14 +245,215 @@ def test_chats_unauthorized():
     throw new Error("unguarded router must not report hasServerGuard");
   }
 
+  // Loose substring coveredPaths must not launder denial coverage.
+  const looseOut = mkdtempSync(join(tmpdir(), "aprf-authz-loose-"));
+  mkdirSync(join(looseOut, "imports", "authz-entry-tests"), { recursive: true });
+  writeFileSync(
+    join(looseOut, "imports", "authz-entry-tests", "coverage.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      coveredPaths: ["chats", "/api"], // substring / prefix — too loose
+    }),
+    "utf8",
+  );
+  // No in-repo denial tests on targetDir for this run — wipe tests by using a copy
+  // without tests: reuse target before tests were added via a fresh tree.
+  const looseTarget = mkdtempSync(join(tmpdir(), "aprf-authz-loose-target-"));
+  mkdirSync(join(looseTarget, "routers"), { recursive: true });
+  writeFileSync(
+    join(looseTarget, "main.py"),
+    `app.include_router(chats.router, prefix='/api/v1/chats', tags=['chats'])\n`,
+    "utf8",
+  );
+  writeFileSync(
+    join(looseTarget, "routers", "chats.py"),
+    `
+from fastapi import APIRouter, Depends
+from open_webui.utils.auth import get_verified_user
+router = APIRouter()
+@router.post('/')
+async def create_chat(user=Depends(get_verified_user)):
+    return {}
+`,
+    "utf8",
+  );
+  await authzEntryTestsCollector.collect({
+    targetPath: looseTarget,
+    outputDir: looseOut,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 200,
+  });
+  const reportLoose = JSON.parse(
+    readFileSync(
+      join(looseOut, "imports", "authz-entry-tests", "authz-entry-report.json"),
+      "utf8",
+    ),
+  ) as AuthzEntryReport;
+  if (reportLoose.summary.statusHint === "pass") {
+    throw new Error("substring/prefix coveredPaths must not PASS AUTHZ-M1");
+  }
+  if (reportLoose.entryPoints.some((e) => e.hasDenialTest || e.denialFromImport)) {
+    throw new Error(
+      `loose coveredPaths must not set hasDenialTest; got ${JSON.stringify(reportLoose.entryPoints)}`,
+    );
+  }
+
+  // Exact import path covers the route; stale measuredAt blocks PASS even when
+  // a sibling route has fresh in-repo denial tests.
+  const mixedTarget = mkdtempSync(join(tmpdir(), "aprf-authz-mixed-"));
+  mkdirSync(join(mixedTarget, "routers"), { recursive: true });
+  mkdirSync(join(mixedTarget, "tests"), { recursive: true });
+  writeFileSync(
+    join(mixedTarget, "main.py"),
+    `
+app.include_router(chats.router, prefix='/api/v1/chats', tags=['chats'])
+app.include_router(knowledge.router, prefix='/api/v1/knowledge', tags=['knowledge'])
+`,
+    "utf8",
+  );
+  writeFileSync(
+    join(mixedTarget, "routers", "chats.py"),
+    `
+from fastapi import APIRouter, Depends
+from open_webui.utils.auth import get_verified_user
+router = APIRouter()
+@router.post('/')
+async def create_chat(user=Depends(get_verified_user)):
+    return {}
+`,
+    "utf8",
+  );
+  writeFileSync(
+    join(mixedTarget, "routers", "knowledge.py"),
+    `
+from fastapi import APIRouter, Depends
+from open_webui.utils.auth import get_verified_user
+router = APIRouter()
+@router.get('/')
+async def list_kb(user=Depends(get_verified_user)):
+    return []
+`,
+    "utf8",
+  );
+  writeFileSync(
+    join(mixedTarget, "tests", "test_authz_chats.py"),
+    `
+def test_chats_unauthorized():
+    r = client.post('/api/v1/chats/')
+    assert r.status_code == 401
+`,
+    "utf8",
+  );
+  const mixedOutStale = mkdtempSync(join(tmpdir(), "aprf-authz-mixed-stale-"));
+  mkdirSync(join(mixedOutStale, "imports", "authz-entry-tests"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(mixedOutStale, "imports", "authz-entry-tests", "coverage.json"),
+    JSON.stringify({
+      measuredAt: "2020-01-01T00:00:00.000Z",
+      coveredPaths: ["/api/v1/knowledge"],
+    }),
+    "utf8",
+  );
+  await authzEntryTestsCollector.collect({
+    targetPath: mixedTarget,
+    outputDir: mixedOutStale,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 200,
+  });
+  const reportStaleImport = JSON.parse(
+    readFileSync(
+      join(
+        mixedOutStale,
+        "imports",
+        "authz-entry-tests",
+        "authz-entry-report.json",
+      ),
+      "utf8",
+    ),
+  ) as AuthzEntryReport;
+  const knowledgeEp = reportStaleImport.entryPoints.find((e) =>
+    e.path.includes("knowledge"),
+  );
+  if (!knowledgeEp?.denialFromImport) {
+    throw new Error(
+      `expected knowledge denialFromImport=true, got ${JSON.stringify(knowledgeEp)}`,
+    );
+  }
+  if (reportStaleImport.summary.statusHint === "pass") {
+    throw new Error(
+      "stale import measuredAt must block PASS when any route is import-backed",
+    );
+  }
+  if (reportStaleImport.summary.authzM1Satisfied === true) {
+    throw new Error("stale import-backed suite expected satisfied≠true");
+  }
+  if (reportStaleImport.measuredAt !== "2020-01-01T00:00:00.000Z") {
+    throw new Error(
+      `expected import measuredAt on mixed report, got ${reportStaleImport.measuredAt}`,
+    );
+  }
+
+  // Exact fresh import coverage unlocks PASS for the import-backed route.
+  const mixedOutFresh = mkdtempSync(join(tmpdir(), "aprf-authz-mixed-fresh-"));
+  mkdirSync(join(mixedOutFresh, "imports", "authz-entry-tests"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(mixedOutFresh, "imports", "authz-entry-tests", "coverage.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      coveredPaths: ["/api/v1/knowledge", "GET /api/v1/knowledge/"],
+    }),
+    "utf8",
+  );
+  await authzEntryTestsCollector.collect({
+    targetPath: mixedTarget,
+    outputDir: mixedOutFresh,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 200,
+  });
+  const reportFreshImport = JSON.parse(
+    readFileSync(
+      join(
+        mixedOutFresh,
+        "imports",
+        "authz-entry-tests",
+        "authz-entry-report.json",
+      ),
+      "utf8",
+    ),
+  ) as AuthzEntryReport;
+  if (
+    reportFreshImport.summary.statusHint !== "pass" ||
+    reportFreshImport.summary.authzM1Satisfied !== true
+  ) {
+    throw new Error(
+      `exact fresh import coverage expected pass, got ${JSON.stringify(reportFreshImport.summary)} notes=${reportFreshImport.notes.join("; ")}`,
+    );
+  }
+
   console.log("aprf-auditor authz-entry-tests smoke OK");
-  rmSync(outDir, { recursive: true, force: true });
-  rmSync(out2, { recursive: true, force: true });
-  rmSync(outNa, { recursive: true, force: true });
-  rmSync(emptyTarget, { recursive: true, force: true });
-  rmSync(targetDir, { recursive: true, force: true });
-  rmSync(unguardedTarget, { recursive: true, force: true });
-  rmSync(outUnguarded, { recursive: true, force: true });
+  for (const d of [
+    outDir,
+    out2,
+    outNa,
+    emptyTarget,
+    targetDir,
+    unguardedTarget,
+    outUnguarded,
+    looseOut,
+    looseTarget,
+    mixedTarget,
+    mixedOutStale,
+    mixedOutFresh,
+  ]) {
+    rmSync(d, { recursive: true, force: true });
+  }
 }
 
 main().catch((e) => {
