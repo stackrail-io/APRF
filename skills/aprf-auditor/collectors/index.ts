@@ -15,6 +15,18 @@ import { aiSloBurnAlertsCollector } from "./ai-slo-burn-alerts.ts";
 import { aiErrorBudgetReleaseGateCollector } from "./ai-error-budget-release-gate.ts";
 import { aiAdversarialCapacityTestsCollector } from "./ai-adversarial-capacity-tests.ts";
 import { aiStreamingSlisCollector } from "./ai-streaming-slis.ts";
+import { aiRtoRpoCatalogCollector } from "./ai-rto-rpo-catalog.ts";
+import { aiTimeoutsRetriesCollector } from "./ai-timeouts-retries.ts";
+import { aiDegradedModeCollector } from "./ai-degraded-mode.ts";
+import { aiPartialToolFailureCollector } from "./ai-partial-tool-failure.ts";
+import { aiContinuityOptionsCollector } from "./ai-continuity-options.ts";
+import { aiControlPlaneBackupCollector } from "./ai-control-plane-backup.ts";
+import { aiChaosDependencyCollector } from "./ai-chaos-dependency.ts";
+import { aiMultiProviderContinuityCollector } from "./ai-multi-provider-continuity.ts";
+import { aiCircuitBulkheadCollector } from "./ai-circuit-bulkhead.ts";
+import { aiFallbackEvalCollector } from "./ai-fallback-eval.ts";
+import { aiContinuityDrillCollector } from "./ai-continuity-drill.ts";
+import { aiWarmStandbyCollector } from "./ai-warm-standby.ts";
 import { promptfooCollector } from "./promptfoo.ts";
 import { httpAuthProbeCollector } from "./http-auth-probe.ts";
 import { mcpS2sInventoryCollector } from "./mcp-s2s-inventory.ts";
@@ -147,6 +159,18 @@ export const COLLECTORS: Collector[] = [
   aiErrorBudgetReleaseGateCollector,
   aiAdversarialCapacityTestsCollector,
   aiStreamingSlisCollector,
+  aiRtoRpoCatalogCollector,
+  aiTimeoutsRetriesCollector,
+  aiDegradedModeCollector,
+  aiPartialToolFailureCollector,
+  aiContinuityOptionsCollector,
+  aiControlPlaneBackupCollector,
+  aiChaosDependencyCollector,
+  aiMultiProviderContinuityCollector,
+  aiCircuitBulkheadCollector,
+  aiFallbackEvalCollector,
+  aiContinuityDrillCollector,
+  aiWarmStandbyCollector,
   promptfooCollector,
   httpAuthProbeCollector,
   mcpS2sInventoryCollector,

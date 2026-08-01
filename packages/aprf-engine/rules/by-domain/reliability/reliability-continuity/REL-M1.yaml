@@ -1,59 +1,83 @@
 id: "REL-M1"
 category: "reliability-continuity"
 title: "All model and tool calls must have timeouts and bounded retries"
-description: "All model and tool calls shall have timeouts and bounded retries"
-whyItMatters: "All model and tool calls shall have timeouts and bounded retries Failing this leaves
-  a production gap against: 100% of model/tool client call sites have finite timeout and max-retry ≤
-  bound; verified by static check or integration test"
+description: >
+  Every production model and tool client call site shall declare a finite
+  timeout and a finite max-retry bound—verified by static analysis or
+  integration test—so hung providers and retry storms cannot cascade.
+whyItMatters: >
+  Unbounded waits and unlimited retries turn a slow provider or flaky tool into
+  thread exhaustion, queue backlog, and cascading timeouts across dependent
+  services. Finite timeouts plus bounded retries make failure modes predictable
+  and recoverable instead of silent hangs.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "100% of model/tool client call sites have finite timeout and max-retry ≤ bound;
-  verified by static check or integration test"
+passCondition: >
+  100% of production model/tool client call sites have a finite timeout and a
+  finite max-retry bound; verified by static check or integration test
+  (measuredAt ≤90 days).
 evidenceRequired:
-  - "Client config / static analysis report for timeouts and max retries"
+  - "Client config or code declaring finite timeout and max-retry for model/tool call sites"
+  - "Static analysis report or integration test covering 100% of in-scope call sites (≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-timeouts-retries"
+      params:
+        hint: >
+          Discover finite timeout and max-retry settings on model/tool client
+          call sites, plus static-analysis or integration-test coverage signals.
     - id: "manual-attest"
       params:
-        hint: "Client config / static analysis report for timeouts and max retries"
-manualVerification: "For this Check (All model and tool calls must have timeouts and bounded
-  retries): inspect current evidence for [Client config / static analysis report for timeouts and
-  max retries] and confirm the pass condition holds — 100% of model/tool client call sites have
-  finite timeout and max-retry ≤ bound; verified by static check or integration test"
-falsePositiveGuidance: "(Reliability & Continuity): confirm the detector target matches the
-  production path for this Check before waiving. Named exceptions need an owner and expiry ≤90
-  days."
+        hint: >
+          If automation cannot prove coverage, attest 100% of production
+          model/tool call sites have finite timeout and max-retry, verified by
+          static check or integration test (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production model or tool clients exist. If none, score
+  NOT_APPLICABLE. 2) For each in-scope call site (SDK, gateway, tool runner),
+  locate a finite timeout and a finite max-retry (or retries=0). Infinite,
+  null, or unset-as-unlimited fails. 3) Confirm coverage is 100% via static
+  analysis report or integration test ≤90 days. 4) PASS only if timeout +
+  retry bound + coverage evidence all hold. COST-M3 amplification/cost bounds
+  alone do not prove hang-prevention timeouts. AGN-M2 agent step/wall-clock
+  limits alone do not prove per-call-site model/tool client timeouts.
+falsePositiveGuidance: >
+  Do not pass HTTP client defaults that omit model/tool paths. Do not pass
+  timeout without a retry bound (or the reverse). Do not pass prompt-only
+  “retry carefully” guidance. Do not pass CI job timeouts as client call-site
+  policy. Sibling COST-M3 (cost amplification) and AGN-M2 (agent loop budgets)
+  do not substitute. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: All model and tool calls must have timeouts and bounded retries"
-  - "Retain evidence artifacts required by this Check, starting with: Client config / static
-    analysis report for timeouts and max retries"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Set finite timeout and max-retry on every production model and tool client"
+  - "Add static analysis or an integration test that asserts coverage of all in-scope call sites"
+  - "Retain evidence under imports/ai-timeouts-retries/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Book — Addressing Cascading Failures"
     url: "https://sre.google/sre-book/addressing-cascading-failures/"
   - title: "AWS Well-Architected — Reliability"
     url: "https://aws.amazon.com/architecture/well-architected/"
-  - title: "Google SRE — Disaster Recovery"
-    url: "https://sre.google/sre-book/disaster-recovery/"
+  - title: "Google SRE — Handling Overload"
+    url: "https://sre.google/sre-book/handling-overload/"
 relatedRules:
   - "REL-M2"
   - "REL-M3"
-  - "REL-M4"
-  - "REL-M5"
-  - "REL-M6"
+  - "REL-R3"
+  - "COST-M1"
+  - "COST-M3"
+  - "AGN-M2"
+  - "PERF-M1"
 tags:
   - "reliability-continuity"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "timeout"
+  - "retry"
+  - "cascading-failure"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

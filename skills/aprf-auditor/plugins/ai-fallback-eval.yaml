@@ -1,0 +1,25 @@
+id: ai-fallback-eval
+title: Multi-provider/multi-region fallback with eval coverage (REL-R2)
+version: "0.2.0"
+executor: collectors/ai-fallback-eval.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-fallback-eval]
+inputs:
+  - "Target repo (fallback config + exercise + primary-vs-fallback eval)"
+  - "Optional suite: aprf-assessment/imports/ai-fallback-eval/*.{json}"
+collect:
+  - "Detect fallback / exercise / eval signals"
+  - "Ingest coverage; write ai-fallback-eval-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-fallback-eval/*"
+  signals: [ai-fallback-eval, rel-r2, repo-ai-fallback-eval]
+mapsToChecks: [REL-R2]
+whenUnavailable: >
+  Fallback signals alone are PARTIAL. REL-R2 PASS needs
+  fallbackPathConfigured, fallbackExercisedWithin90Days,
+  fallbackEvalMeetsQualitySafetyBars, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline fallback/eval heuristics + optional imported JSON.

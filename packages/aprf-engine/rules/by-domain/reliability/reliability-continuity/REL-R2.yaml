@@ -1,39 +1,64 @@
 id: "REL-R2"
 category: "reliability-continuity"
 title: "Production systems should have multi-provider or multi-region fallback with eval coverage"
-description: "Multi-provider or multi-region fallback with eval coverage"
-whyItMatters: "Multi-provider or multi-region fallback with eval coverage Failing this leaves a
-  production gap against: Fallback path is configured and was exercised ≤90 days; fallback eval
-  meets minimum quality/safety bars (not only connectivity)"
+description: >
+  Production AI paths should have a configured multi-provider or multi-region
+  fallback that was exercised within 90 days, with an eval comparing primary
+  vs fallback quality and safety—not connectivity alone—so failover does not
+  silently degrade outcomes.
+whyItMatters: >
+  A fallback that only checks “the other endpoint responds” can still ship
+  worse answers, weaker safety, or untested region behavior under outage.
+  Exercising the path and scoring quality/safety against the primary keeps
+  continuity from becoming a reliability theater. Distinct from REL-R7
+  contractual Level-5 multi-provider options.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Fallback path is configured and was exercised ≤90 days; fallback eval meets minimum
-  quality/safety bars (not only connectivity)"
+passCondition: >
+  A multi-provider or multi-region fallback path is configured and was
+  exercised ≤90 days; a retained eval comparing primary vs fallback meets
+  documented minimum quality/safety bars (not connectivity-only; measuredAt
+  ≤90 days).
 evidenceRequired:
-  - "Multi-provider or multi-region fallback config + eval report comparing primary vs fallback
-    quality/safety"
+  - "Multi-provider or multi-region fallback configuration"
+  - "Evidence the fallback path was exercised ≤90 days"
+  - "Eval report comparing primary vs fallback quality/safety against minimum bars"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-fallback-eval"
+      params:
+        hint: >
+          Discover multi-provider/multi-region fallback config, exercise
+          evidence, and primary-vs-fallback quality/safety eval reports.
     - id: "manual-attest"
       params:
-        hint: "Multi-provider or multi-region fallback config + eval report comparing primary vs fallback
-          quality/safety"
-manualVerification: "For this Check (Multi-provider or multi-region fallback with eval coverage):
-  inspect current evidence for [Multi-provider or multi-region fallback config + eval report
-  comparing primary vs fallback quality/safety] and confirm the pass condition holds — Fallback path
-  is configured and was exercised ≤90 days; fallback eval meets minimum quality/safety bars (not
-  only connectivity)"
-falsePositiveGuidance: "(Reliability & Continuity): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest fallback configured +
+          exercised ≤90 days + eval meets quality/safety bars (measuredAt ≤90
+          days).
+manualVerification: >
+  1) Confirm production AI paths that warrant fallback are in scope. If none,
+  score NOT_APPLICABLE. 2) Locate multi-provider or multi-region fallback
+  config (not aspirational slides). 3) Confirm the fallback was exercised ≤90
+  days (drill, chaos, or production switch). 4) Locate an eval comparing
+  primary vs fallback against minimum quality/safety bars—connectivity-only
+  probes fail. 5) PASS only if config + exercise + eval bars hold with
+  measuredAt ≤90 days. REL-R7 contractual multi-provider continuity alone
+  does not prove eval coverage. REL-M2 journey degraded mode alone does not
+  prove primary-vs-fallback quality/safety evals. Promptfoo smoke without
+  primary-vs-fallback comparison does not satisfy.
+falsePositiveGuidance: >
+  Do not pass connectivity-only health checks as quality/safety evals. Do not
+  pass fallback config never exercised ≤90 days. Do not pass same-AZ replica
+  as multi-region fallback. Sibling REL-R7, REL-M2, and REL-R3 do not
+  substitute. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Multi-provider or multi-region fallback with eval
-    coverage"
-  - "Retain evidence artifacts required by this Check, starting with: Multi-provider or multi-region
-    fallback config + eval report comparing primary vs fallback quality/safety"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Configure multi-provider or multi-region fallback for production AI paths"
+  - "Exercise the fallback ≤90 days and retain evidence"
+  - "Run primary-vs-fallback quality/safety evals against documented minimum bars; retain under imports/ai-fallback-eval/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Book — Addressing Cascading Failures"
     url: "https://sre.google/sre-book/addressing-cascading-failures/"
@@ -42,21 +67,22 @@ references:
   - title: "Google SRE — Disaster Recovery"
     url: "https://sre.google/sre-book/disaster-recovery/"
 relatedRules:
-  - "REL-M1"
   - "REL-M2"
-  - "REL-M3"
-  - "REL-M4"
   - "REL-M5"
+  - "REL-R3"
+  - "REL-R5"
+  - "REL-R7"
+  - "REL-R1"
 tags:
   - "reliability-continuity"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "fallback"
+  - "multi-provider"
+  - "multi-region"
+  - "eval"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

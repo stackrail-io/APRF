@@ -1,59 +1,84 @@
 id: "REL-R6"
 category: "reliability-continuity"
 title: "Production systems should have warm standby for self-hosted inference where required"
-description: "Warm standby for self-hosted inference where required"
-whyItMatters: "Warm standby for self-hosted inference where required Failing this leaves a
-  production gap against: Failover to warm standby completes within documented RTO in the last test
-  (≤90 days); standby capacity covers declared peak for critical workloads"
+description: >
+  Where critical workloads depend on self-hosted inference, a warm standby
+  should exist with capacity for declared peak load and a recent failover
+  test that met documented RTO—so self-hosted model loss does not strand
+  the service.
+whyItMatters: >
+  Multi-provider cloud fallbacks do not help when the bottleneck is your own
+  GPU fleet or self-hosted model stack. Warm standby plus a recent RTO-met
+  failover test keeps self-hosted critical paths recoverable. NOT_APPLICABLE
+  when there is no self-hosted inference in scope. Distinct from REL-R7
+  contractual multi-provider options.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Failover to warm standby completes within documented RTO in the last test (≤90
-  days); standby capacity covers declared peak for critical workloads"
+passCondition: >
+  For in-scope self-hosted inference, failover to warm standby completed
+  within documented RTO in a test ≤90 days, and standby capacity covers
+  declared peak for critical workloads (measuredAt ≤90 days).
 evidenceRequired:
-  - "Warm-standby inference architecture + last failover test report with RTO result"
+  - "Warm-standby inference architecture for self-hosted critical workloads"
+  - "Last failover test report with RTO result (≤90 days)"
+  - "Standby capacity sizing covering declared peak"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-warm-standby"
+      params:
+        hint: >
+          Discover self-hosted inference warm-standby architecture, capacity
+          sizing, and failover-test evidence with RTO results.
     - id: "manual-attest"
       params:
-        hint: "Warm-standby inference architecture + last failover test report with RTO result"
-manualVerification: "For this Check (Warm standby for self-hosted inference where required): inspect
-  current evidence for [Warm-standby inference architecture + last failover test report with RTO
-  result] and confirm the pass condition holds — Failover to warm standby completes within
-  documented RTO in the last test (≤90 days); standby capacity covers declared peak for critical
-  workloads"
-falsePositiveGuidance: "(Reliability & Continuity): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest warm standby failover
+          within RTO ≤90 days and standby capacity covering declared peak
+          (measuredAt ≤90 days); NA if no self-hosted inference.
+manualVerification: >
+  1) Confirm self-hosted inference serves critical workloads. If none, score
+  NOT_APPLICABLE. 2) Locate warm-standby architecture (not cold spare docs
+  alone). 3) Confirm standby capacity covers declared peak for those
+  workloads. 4) Confirm failover test ≤90 days met documented RTO. 5) PASS
+  only if architecture + capacity + RTO-met test hold with measuredAt ≤90
+  days. REL-R7 multi-provider contracts alone do not prove self-hosted warm
+  standby. REL-M2 journey degraded mode alone does not prove standby
+  capacity. REL-M5 RTO/RPO docs alone do not prove a recent standby failover
+  test.
+falsePositiveGuidance: >
+  Do not pass cold spares as warm standby. Do not pass capacity notes without
+  declared peak coverage. Do not pass failover tests older than 90 days or
+  that missed RTO without owned exceptions. Sibling REL-R7, REL-M2, and
+  REL-M5 do not substitute. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Warm standby for self-hosted inference where required"
-  - "Retain evidence artifacts required by this Check, starting with: Warm-standby inference
-    architecture + last failover test report with RTO result"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Deploy warm standby for critical self-hosted inference with peak capacity coverage"
+  - "Run failover tests ≤90 days and retain RTO results"
+  - "Retain evidence under imports/ai-warm-standby/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Book — Addressing Cascading Failures"
     url: "https://sre.google/sre-book/addressing-cascading-failures/"
-  - title: "AWS Well-Architected — Reliability"
-    url: "https://aws.amazon.com/architecture/well-architected/"
   - title: "Google SRE — Disaster Recovery"
     url: "https://sre.google/sre-book/disaster-recovery/"
+  - title: "AWS Well-Architected — Reliability"
+    url: "https://aws.amazon.com/architecture/well-architected/"
 relatedRules:
-  - "REL-M1"
   - "REL-M2"
-  - "REL-M3"
-  - "REL-M4"
   - "REL-M5"
+  - "REL-R5"
+  - "REL-R7"
+  - "REL-R4"
 tags:
   - "reliability-continuity"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "warm-standby"
+  - "self-hosted"
+  - "inference"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
+  technologies: []
   minCriticality: 3
   requiredFromLevel: 5
 status: "active"

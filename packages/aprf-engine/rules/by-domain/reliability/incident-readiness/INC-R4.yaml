@@ -61,7 +61,7 @@ relatedRules:
   - "INC-R1"
   - "INC-R2"
   - "INC-R3"
-  - "REL-M7"
+  - "REL-R5"
 tags:
   - "incident-readiness"
   - "recommended"

@@ -1,0 +1,25 @@
+id: ai-partial-tool-failure
+title: Tool-using workflows — partial failure / no false-success (REL-M3)
+version: "0.2.0"
+executor: collectors/ai-partial-tool-failure.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-partial-tool-failure]
+inputs:
+  - "Target repo (partial-failure handling + outcome test evidence)"
+  - "Optional suite: aprf-assessment/imports/ai-partial-tool-failure/*.{json}"
+collect:
+  - "Detect partial tool-failure handling and outcome test signals"
+  - "Ingest coverage; write ai-partial-tool-failure-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-partial-tool-failure/*"
+  signals: [ai-partial-tool-failure, rel-m3, repo-ai-partial-tool-failure]
+mapsToChecks: [REL-M3]
+whenUnavailable: >
+  Partial-failure signals alone are PARTIAL. REL-M3 PASS needs
+  partialFailureHandlingConfigured, testEvidenceShowsNoFalseSuccess,
+  noFalseSuccessWithoutRemediationPct=100, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline partial-failure heuristics + optional imported JSON.

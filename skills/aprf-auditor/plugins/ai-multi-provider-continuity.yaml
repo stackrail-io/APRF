@@ -1,0 +1,26 @@
+id: ai-multi-provider-continuity
+title: Level-5 multi-provider contractual + technical continuity (REL-R7)
+version: "0.2.0"
+executor: collectors/ai-multi-provider-continuity.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-multi-provider-continuity]
+inputs:
+  - "Target repo (alternate-provider docs + failover tests)"
+  - "Optional suite: aprf-assessment/imports/ai-multi-provider-continuity/*.{json}"
+collect:
+  - "Detect multi-provider / contract / failover-test signals"
+  - "Ingest coverage; write ai-multi-provider-continuity-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-multi-provider-continuity/*"
+  signals:
+    [ai-multi-provider-continuity, rel-r7, repo-ai-multi-provider-continuity]
+mapsToChecks: [REL-R7]
+whenUnavailable: >
+  Multi-provider signals alone are PARTIAL. REL-R7 PASS needs
+  alternateProviderPathDocumented, failoverTestSucceededWithin180Days,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline multi-provider heuristics + optional imported JSON.

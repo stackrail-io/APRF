@@ -1,0 +1,26 @@
+id: ai-rto-rpo-catalog
+title: Business-critical AI service RTO/RPO objectives (REL-M5)
+version: "0.2.0"
+executor: collectors/ai-rto-rpo-catalog.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-rto-rpo-catalog]
+inputs:
+  - "Target repo (BCP, service catalog, or DR docs with RTO/RPO + restore/failover linkage)"
+  - "Optional suite: aprf-assessment/imports/ai-rto-rpo-catalog/*.{json}"
+collect:
+  - "Detect AI continuity/RTO/RPO and restore/failover signals"
+  - "Ingest coverage; write ai-rto-rpo-catalog-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-rto-rpo-catalog/*"
+  signals: [ai-rto-rpo-catalog, rel-m5, repo-ai-rto-rpo-catalog]
+mapsToChecks: [REL-M5]
+whenUnavailable: >
+  Continuity signals alone are PARTIAL. REL-M5 PASS needs
+  continuityDocumentationConfigured, businessCriticalAiServiceCount≥1,
+  businessCriticalAiServicesWithNumericRtoRpoPct=100,
+  linkedToTestedRestoreOrFailoverProcedure, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline BCP/service-catalog/DR heuristics + optional imported JSON.

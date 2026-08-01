@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:223303b36395963ea441909a6c6ce5a76bdcafac0fcfd3d3dbb8eed7a25524ab",
+  "generatedAt": "sha256:71c7f09ac24274a2770c7628a5608e9acb4fe437774c634eb0905bf99bda891c",
   "ruleCount": 178,
   "domains": [
     {
@@ -6747,7 +6747,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "INC-R1",
         "INC-R2",
         "INC-R3",
-        "REL-M7"
+        "REL-R5"
       ],
       "tags": [
         "incident-readiness",
@@ -10434,33 +10434,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "REL-M1",
       "category": "reliability-continuity",
       "title": "All model and tool calls must have timeouts and bounded retries",
-      "description": "All model and tool calls shall have timeouts and bounded retries",
-      "whyItMatters": "All model and tool calls shall have timeouts and bounded retries Failing this leaves a production gap against: 100% of model/tool client call sites have finite timeout and max-retry ≤ bound; verified by static check or integration test",
+      "description": "Every production model and tool client call site shall declare a finite timeout and a finite max-retry bound—verified by static analysis or integration test—so hung providers and retry storms cannot cascade.\n",
+      "whyItMatters": "Unbounded waits and unlimited retries turn a slow provider or flaky tool into thread exhaustion, queue backlog, and cascading timeouts across dependent services. Finite timeouts plus bounded retries make failure modes predictable and recoverable instead of silent hangs.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of model/tool client call sites have finite timeout and max-retry ≤ bound; verified by static check or integration test",
+      "passCondition": "100% of production model/tool client call sites have a finite timeout and a finite max-retry bound; verified by static check or integration test (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Client config / static analysis report for timeouts and max retries"
+        "Client config or code declaring finite timeout and max-retry for model/tool call sites",
+        "Static analysis report or integration test covering 100% of in-scope call sites (≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-timeouts-retries",
+            "params": {
+              "hint": "Discover finite timeout and max-retry settings on model/tool client call sites, plus static-analysis or integration-test coverage signals.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Client config / static analysis report for timeouts and max retries"
+              "hint": "If automation cannot prove coverage, attest 100% of production model/tool call sites have finite timeout and max-retry, verified by static check or integration test (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (All model and tool calls must have timeouts and bounded retries): inspect current evidence for [Client config / static analysis report for timeouts and max retries] and confirm the pass condition holds — 100% of model/tool client call sites have finite timeout and max-retry ≤ bound; verified by static check or integration test",
-      "falsePositiveGuidance": "(Reliability & Continuity): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm production model or tool clients exist. If none, score NOT_APPLICABLE. 2) For each in-scope call site (SDK, gateway, tool runner), locate a finite timeout and a finite max-retry (or retries=0). Infinite, null, or unset-as-unlimited fails. 3) Confirm coverage is 100% via static analysis report or integration test ≤90 days. 4) PASS only if timeout + retry bound + coverage evidence all hold. COST-M3 amplification/cost bounds alone do not prove hang-prevention timeouts. AGN-M2 agent step/wall-clock limits alone do not prove per-call-site model/tool client timeouts.\n",
+      "falsePositiveGuidance": "Do not pass HTTP client defaults that omit model/tool paths. Do not pass timeout without a retry bound (or the reverse). Do not pass prompt-only “retry carefully” guidance. Do not pass CI job timeouts as client call-site policy. Sibling COST-M3 (cost amplification) and AGN-M2 (agent loop budgets) do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: All model and tool calls must have timeouts and bounded retries",
-        "Retain evidence artifacts required by this Check, starting with: Client config / static analysis report for timeouts and max retries",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Set finite timeout and max-retry on every production model and tool client",
+        "Add static analysis or an integration test that asserts coverage of all in-scope call sites",
+        "Retain evidence under imports/ai-timeouts-retries/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -10472,29 +10479,29 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://aws.amazon.com/architecture/well-architected/"
         },
         {
-          "title": "Google SRE — Disaster Recovery",
-          "url": "https://sre.google/sre-book/disaster-recovery/"
+          "title": "Google SRE — Handling Overload",
+          "url": "https://sre.google/sre-book/handling-overload/"
         }
       ],
       "relatedRules": [
         "REL-M2",
         "REL-M3",
-        "REL-M4",
-        "REL-M5",
-        "REL-M6"
+        "REL-R3",
+        "COST-M1",
+        "COST-M3",
+        "AGN-M2",
+        "PERF-M1"
       ],
       "tags": [
         "reliability-continuity",
         "mandatory",
-        "manual"
+        "hybrid",
+        "timeout",
+        "retry",
+        "cascading-failure"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -10505,33 +10512,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "REL-M2",
       "category": "reliability-continuity",
       "title": "Critical user journeys must define a degraded mode when AI is unavailable",
-      "description": "Critical user journeys shall define a degraded mode when AI is unavailable",
-      "whyItMatters": "Critical user journeys shall define a degraded mode when AI is unavailable Failing this leaves a production gap against: 100% of critical journeys document degraded behavior; failover test shows non-AI or safe fallback activates when AI dependency fails",
+      "description": "Every critical user journey that depends on AI shall document degraded behavior when the AI dependency fails, and a failover test shall show a non-AI or safe fallback activates—not a blank error or silent hang.\n",
+      "whyItMatters": "When the model, tool, or AI gateway is down, critical journeys still need a defined path: cached answer, human handoff, rule-based fallback, or graceful denial. Undocumented degraded modes leave operators improvising under outage and customers stuck with opaque failures.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of critical journeys document degraded behavior; failover test shows non-AI or safe fallback activates when AI dependency fails",
+      "passCondition": "100% of critical AI-dependent journeys document degraded behavior; a failover test shows non-AI or safe fallback activates when the AI dependency fails (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Degraded-mode spec per critical journey + feature-flag or fallback test"
+        "Degraded-mode specification covering each critical AI-dependent journey",
+        "Feature-flag, circuit-breaker, or fallback test proving safe activation when AI fails (≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-degraded-mode",
+            "params": {
+              "hint": "Discover degraded-mode / fallback / feature-flag specs for critical AI journeys and failover-test signals that exercise safe fallback.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Degraded-mode spec per critical journey + feature-flag or fallback test"
+              "hint": "If automation cannot prove coverage, attest 100% of critical AI-dependent journeys document degraded behavior and a failover test shows safe fallback (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Critical user journeys must define a degraded mode when AI is unavailable): inspect current evidence for [Degraded-mode spec per critical journey + feature-flag or fallback test] and confirm the pass condition holds — 100% of critical journeys document degraded behavior; failover test shows non-AI or safe fallback activates when AI dependency fails",
-      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm critical AI-dependent user journeys exist. If none, score NOT_APPLICABLE. 2) For each journey, locate documented degraded behavior (non-AI path, safe denial, human handoff, or equivalent). Blank “AI required” with no fallback fails. 3) Review a failover test ≤90 days that forces AI failure and shows the safe fallback activates. 4) PASS only if documentation coverage is 100% and the test holds. REL-R3 continuity-option docs alone do not prove journey-level degraded mode. REL-M5 RTO/RPO alone does not prove runtime fallback. Multi-provider model routing alone does not prove a non-AI or safe user-facing fallback.\n",
+      "falsePositiveGuidance": "Do not pass marketing “graceful degradation” claims without a journey-level spec. Do not pass generic HTTP 503 pages that omit AI-journey behavior. Do not pass feature flags that only disable AI without defined degraded UX. Do not pass untested runbooks. Sibling REL-R3, REL-M5, and multi-provider fallback Checks do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Critical user journeys must define a degraded mode when AI is unavailable",
-        "Retain evidence artifacts required by this Check, starting with: Degraded-mode spec per critical journey + feature-flag or fallback test",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Document degraded mode for every critical AI-dependent journey",
+        "Add a failover test that forces AI failure and asserts safe fallback activation",
+        "Retain evidence under imports/ai-degraded-mode/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -10543,29 +10557,28 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://aws.amazon.com/architecture/well-architected/"
         },
         {
-          "title": "Google SRE — Disaster Recovery",
-          "url": "https://sre.google/sre-book/disaster-recovery/"
+          "title": "Google SRE — Embracing Risk",
+          "url": "https://sre.google/sre-book/embracing-risk/"
         }
       ],
       "relatedRules": [
         "REL-M1",
         "REL-M3",
-        "REL-M4",
+        "REL-R3",
         "REL-M5",
-        "REL-M6"
+        "PERF-M1",
+        "CHG-M2"
       ],
       "tags": [
         "reliability-continuity",
         "mandatory",
-        "manual"
+        "hybrid",
+        "degraded-mode",
+        "fallback",
+        "failover"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -10575,34 +10588,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "REL-M3",
       "category": "reliability-continuity",
-      "title": "Partial tool failures must be detected and must prevent false-success continuation",
-      "description": "Partial tool failures shall be detected and shall prevent false-success continuation",
-      "whyItMatters": "Partial tool failures shall be detected and shall prevent false-success continuation Failing this leaves a production gap against: Tests inject tool failure after partial success; agent does not report overall success in 100% of cases without explicit compensation/approval",
+      "title": "Tool-using AI workflows must detect partial failures and prevent false-success completion",
+      "description": "Tool-using AI workflows shall detect partial tool failures (success then failure mid-sequence, truncated results, or failed side effects) and must not report overall success without explicit compensation, rollback, retry, or human approval.\n",
+      "whyItMatters": "Partial tool success followed by a later failure is a common false-success path: the workflow claims the goal completed while side effects are incomplete or inconsistent. Without test evidence that this outcome is prevented, production systems silently leave users and downstream systems in a broken state.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Tests inject tool failure after partial success; agent does not report overall success in 100% of cases without explicit compensation/approval",
+      "passCondition": "Test evidence demonstrates that when a tool partially succeeds and a later step fails, the workflow does not report overall success without explicit compensation, rollback, retry, or human approval (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Agent/tool error-handling tests for partial failure"
+        "Agent/tool error-handling policy or code that detects partial tool failure",
+        "Test evidence (integration, chaos, e2e, replay, contract, simulator, or equivalent) showing no false-success without compensation/rollback/retry/approval (≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-partial-tool-failure",
+            "params": {
+              "hint": "Discover partial-failure handling for tool/agent workflows and test evidence that asserts no false-success without compensation, rollback, retry, or approval.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Agent/tool error-handling tests for partial failure"
+              "hint": "If automation cannot prove coverage, attest test evidence shows the workflow never reports overall success after partial tool failure without compensation, rollback, retry, or human approval (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Partial tool failures must be detected and must prevent false-success continuation): inspect current evidence for [Agent/tool error-handling tests for partial failure] and confirm the pass condition holds — Tests inject tool failure after partial success; agent does not report overall success in 100% of cases without explicit compensation/approval",
-      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm tool-using agents or workflows exist. If none, score NOT_APPLICABLE. 2) Locate detection of partial tool failure (mid-sequence error, truncated payload, failed side effect after earlier success). 3) Review test evidence ≤90 days (integration, chaos, e2e, replay, contract, simulator, or equivalent) demonstrating that when a tool partially succeeds and a later step fails, the workflow does not claim overall success without compensation, rollback, retry, or human approval. 4) PASS only if handling + outcome evidence hold. REL-M1 timeouts alone do not prove partial-failure detection. REL-M2 degraded-mode docs alone do not prove mid-tool-sequence handling. Generic exception handling that suppresses or masks failures while reporting successful completion does not satisfy this control.\n",
+      "falsePositiveGuidance": "Do not pass unit tests that only assert thrown exceptions without checking the workflow’s final success claim. Do not pass retries that remask partial failure as eventual success without a defined abort, rollback, compensation, or approval path. Do not pass prompt-only “check tool results” guidance. Do not require a specific test technique (injection-only) when other valid evidence demonstrates the outcome. Sibling REL-M1/REL-M2 and tool-schema Checks (TOL-*) do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Partial tool failures must be detected and must prevent false-success continuation",
-        "Retain evidence artifacts required by this Check, starting with: Agent/tool error-handling tests for partial failure",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Detect partial tool failures explicitly; abort, rollback, retry, compensate, or require human approval before reporting success",
+        "Add test evidence (integration, chaos, e2e, replay, contract, or simulator) that proves no false overall success after partial failure",
+        "Retain evidence under imports/ai-partial-tool-failure/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -10614,29 +10634,29 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://aws.amazon.com/architecture/well-architected/"
         },
         {
-          "title": "Google SRE — Disaster Recovery",
-          "url": "https://sre.google/sre-book/disaster-recovery/"
+          "title": "Google SRE — Testing for Reliability",
+          "url": "https://sre.google/sre-book/testing-reliability/"
         }
       ],
       "relatedRules": [
         "REL-M1",
         "REL-M2",
-        "REL-M4",
-        "REL-M5",
-        "REL-M6"
+        "REL-R3",
+        "TOL-M1",
+        "TOL-M4",
+        "AGN-M2",
+        "HUM-M1"
       ],
       "tags": [
         "reliability-continuity",
         "mandatory",
-        "manual"
+        "hybrid",
+        "partial-failure",
+        "tool-error",
+        "false-success"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -10646,27 +10666,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "REL-M4",
       "category": "reliability-continuity",
-      "title": "Critical AI-dependent processes must have documented continuity options",
-      "description": "Critical AI-dependent processes shall have documented continuity options",
-      "whyItMatters": "Critical AI-dependent processes shall have documented continuity options Failing this leaves a production gap against: 100% of processes marked critical-AI-dependent have ≥1 documented continuity option with owner",
+      "title": "Backups must include AI control-plane artifacts needed to restore service",
+      "description": "Backup inventories shall include the AI control-plane artifacts required to restore service (prompt registry, policies, indexes, and other declared dependencies), and a restore test of a sample artifact set shall succeed within 90 days.\n",
+      "whyItMatters": "Restoring compute without prompts, policies, or retrieval indexes leaves the AI service unable to serve correctly. Control-plane backups plus a recent restore test prove the system can return to a working state—not just that disks were snapshotted.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of processes marked critical-AI-dependent have ≥1 documented continuity option with owner",
+      "passCondition": "Backup inventory includes required AI control-plane artifacts; a restore test in the last 90 days succeeds for a sample artifact set (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Continuity options doc per critical process (failover, manual, alternate provider)"
+        "Backup job or inventory covering required AI control-plane artifacts (prompt registry, policies, indexes, as applicable)",
+        "Restore test report for a sample artifact set (≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-control-plane-backup",
+            "params": {
+              "hint": "Discover backup inventory/config covering AI control-plane artifacts and restore-test signals for a sample artifact set.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest backup inventory includes required AI control-plane artifacts and a restore test succeeded in the last 90 days (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (Critical AI-dependent processes must have documented continuity options): inspect current evidence for [Continuity options doc per critical process (failover, manual, alternate provider)] and confirm the pass condition holds — 100% of processes marked critical-AI-dependent have ≥1 documented continuity option with owner",
-      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm AI control-plane artifacts exist in scope (prompt registry, policies, vector/index state, or equivalent). If none, score NOT_APPLICABLE. 2) Locate backup inventory or job config that includes those artifact classes. App/DB backups that omit AI control-plane artifacts fail. 3) Review a restore test ≤90 days that restores a sample artifact set successfully. 4) PASS only if inventory coverage + restore evidence hold. REL-M5 RTO/RPO alone does not prove control-plane backups. REL-R3 continuity-option docs alone do not prove restoreable artifact inventories.\n",
+      "falsePositiveGuidance": "Do not pass infrastructure snapshots that omit prompt registries, policy stores, or indexes required for AI restore. Do not pass backup configs without a recent successful restore test. Do not pass restore of unrelated app data as control-plane evidence. Sibling REL-M5 and REL-R3 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Critical AI-dependent processes must have documented continuity options",
-        "Retain evidence artifacts required by this Check, starting with: Continuity options doc per critical process (failover, manual, alternate provider)",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Include prompt registry, policies, indexes, and other required AI control-plane artifacts in backup inventory",
+        "Run and retain a sample restore test at least every 90 days",
+        "Retain evidence under imports/ai-control-plane-backup/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -10686,21 +10720,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "REL-M1",
         "REL-M2",
         "REL-M3",
+        "REL-R3",
         "REL-M5",
-        "REL-M6"
+        "PRM-M1",
+        "MOD-M1"
       ],
       "tags": [
         "reliability-continuity",
         "mandatory",
-        "manual"
+        "hybrid",
+        "backup",
+        "restore",
+        "control-plane"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -10710,173 +10744,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "REL-M5",
       "category": "reliability-continuity",
-      "title": "Backups must include AI control-plane artifacts needed to restore service",
-      "description": "Backups shall include AI control-plane artifacts needed to restore service",
-      "whyItMatters": "Backups shall include AI control-plane artifacts needed to restore service Failing this leaves a production gap against: Backup inventory includes required AI control-plane artifacts; restore test in last 90 days succeeds for a sample artifact set",
+      "title": "Business-critical AI services must have documented RTO and RPO objectives",
+      "description": "Every business-critical AI service must have numeric RTO and RPO documented in continuity, service-catalog, or disaster-recovery materials and linked to a tested restore or failover procedure.\n",
+      "whyItMatters": "Disaster recovery is planned for services, not per feature. Without numeric RTO/RPO tied to a tested restore path, business-critical AI services have no continuity contract—operators discover recovery time only during an outage.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Backup inventory includes required AI control-plane artifacts; restore test in last 90 days succeeds for a sample artifact set",
+      "passCondition": "100% of business-critical AI services have numeric RTO and RPO documented and linked to a tested restore/failover procedure (continuity evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Backup job config covering prompt registry, policies, indexes as required + restore test"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": [
-          {
-            "id": "manual-attest",
-            "params": {
-              "hint": "Backup job config covering prompt registry, policies, indexes as required + restore test"
-            }
-          }
-        ]
-      },
-      "manualVerification": "For this Check (Backups must include AI control-plane artifacts needed to restore service): inspect current evidence for [Backup job config covering prompt registry, policies, indexes as required + restore test] and confirm the pass condition holds — Backup inventory includes required AI control-plane artifacts; restore test in last 90 days succeeds for a sample artifact set",
-      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: Backups must include AI control-plane artifacts needed to restore service",
-        "Retain evidence artifacts required by this Check, starting with: Backup job config covering prompt registry, policies, indexes as required + restore test",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "Google SRE Book — Addressing Cascading Failures",
-          "url": "https://sre.google/sre-book/addressing-cascading-failures/"
-        },
-        {
-          "title": "AWS Well-Architected — Reliability",
-          "url": "https://aws.amazon.com/architecture/well-architected/"
-        },
-        {
-          "title": "Google SRE — Disaster Recovery",
-          "url": "https://sre.google/sre-book/disaster-recovery/"
-        }
-      ],
-      "relatedRules": [
-        "REL-M1",
-        "REL-M2",
-        "REL-M3",
-        "REL-M4",
-        "REL-M6"
-      ],
-      "tags": [
-        "reliability-continuity",
-        "mandatory",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
-        "minCriticality": 2,
-        "requiredFromLevel": 3
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "REL-M6",
-      "category": "reliability-continuity",
-      "title": "RTO/RPO objectives must exist for critical AI features",
-      "description": "RTO/RPO objectives shall exist for critical AI features",
-      "whyItMatters": "RTO/RPO objectives shall exist for critical AI features Failing this leaves a production gap against: 100% of critical AI features have numeric RTO and RPO documented and linked to a tested restore/failover procedure",
-      "severity": "high",
-      "weight": 3,
-      "gate": "mandatory",
-      "passCondition": "100% of critical AI features have numeric RTO and RPO documented and linked to a tested restore/failover procedure",
-      "evidenceRequired": [
-        "RTO/RPO catalog for critical AI features"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": []
-      },
-      "manualVerification": "For this Check (RTO/RPO objectives must exist for critical AI features): inspect current evidence for [RTO/RPO catalog for critical AI features] and confirm the pass condition holds — 100% of critical AI features have numeric RTO and RPO documented and linked to a tested restore/failover procedure",
-      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: RTO/RPO objectives must exist for critical AI features",
-        "Retain evidence artifacts required by this Check, starting with: RTO/RPO catalog for critical AI features",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "Google SRE Book — Addressing Cascading Failures",
-          "url": "https://sre.google/sre-book/addressing-cascading-failures/"
-        },
-        {
-          "title": "AWS Well-Architected — Reliability",
-          "url": "https://aws.amazon.com/architecture/well-architected/"
-        },
-        {
-          "title": "Google SRE — Disaster Recovery",
-          "url": "https://sre.google/sre-book/disaster-recovery/"
-        }
-      ],
-      "relatedRules": [
-        "REL-M1",
-        "REL-M2",
-        "REL-M3",
-        "REL-M4",
-        "REL-M5"
-      ],
-      "tags": [
-        "reliability-continuity",
-        "mandatory",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
-        "minCriticality": 3,
-        "requiredFromLevel": 4
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "REL-M7",
-      "category": "reliability-continuity",
-      "title": "Chaos experiments must cover AI dependency failure modes",
-      "description": "Chaos experiments shall cover AI dependency failure modes",
-      "whyItMatters": "Chaos experiments shall cover AI dependency failure modes Failing this leaves a production gap against: PASS if at least one AI-dependency chaos exercise completed in the last 180 days with retained actions",
-      "severity": "high",
-      "weight": 3,
-      "gate": "mandatory",
-      "passCondition": "PASS if at least one AI-dependency chaos exercise completed in the last 180 days with retained actions",
-      "evidenceRequired": [
-        "Chaos experiment plan + dated after-action report including AI provider/tool failures"
+        "Business continuity, service-catalog, or disaster-recovery documentation with numeric RTO and RPO for business-critical AI services",
+        "Linkage from each in-scope service to a tested restore/failover procedure"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
-            "id": "repo-chaos-tests",
-            "params": {}
+            "id": "repo-ai-rto-rpo-catalog",
+            "params": {
+              "hint": "Discover BCP, service-catalog, or DR documentation with numeric RTO and RPO for business-critical AI services plus tested restore/failover linkage.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Chaos experiment plan + dated after-action report including AI provider/tool failures"
+              "hint": "If automation cannot prove coverage, attest 100% of business-critical AI services have numeric RTO and RPO documented and linked to a tested restore/failover procedure (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Chaos experiments must cover AI dependency failure modes): inspect current evidence for [Chaos experiment plan + dated after-action report including AI provider/tool failures] and confirm the pass condition holds — PASS if at least one AI-dependency chaos exercise completed in the last 180 days with retained actions",
-      "falsePositiveGuidance": "(Reliability & Continuity): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm business-critical AI services are in scope. If none, score NOT_APPLICABLE. 2) Confirm numeric RTO and RPO appear in business continuity, service-catalog, or disaster-recovery documentation (not only a standalone RTO/RPO spreadsheet). 3) Confirm each in-scope service links to a restore or failover procedure that has been tested. 4) PASS only if coverage is 100% with measuredAt ≤90 days. REL-M4 backup/restore of control-plane artifacts alone does not prove service RTO/RPO. PERF-M1 latency/availability SLOs alone do not prove recovery objectives. Untested runbooks without a restore/failover link do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass blank RTO templates. Do not pass RTO without RPO (or the reverse). Do not pass feature-level notes that omit the owning business-critical service. Do not pass unlinked procedures or untested failover docs. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Chaos experiments must cover AI dependency failure modes",
-        "Retain evidence artifacts required by this Check, starting with: Chaos experiment plan + dated after-action report including AI provider/tool failures",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Document numeric RTO and RPO for every business-critical AI service in BCP, service catalog, or DR materials",
+        "Link each service to a tested restore/failover procedure",
+        "Retain evidence under imports/ai-rto-rpo-catalog/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -10896,94 +10798,26 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "REL-M1",
         "REL-M2",
         "REL-M3",
+        "REL-R3",
         "REL-M4",
-        "REL-M5"
+        "REL-R5",
+        "REL-R7",
+        "PERF-M1",
+        "CHG-M2"
       ],
       "tags": [
         "reliability-continuity",
         "mandatory",
-        "hybrid"
+        "hybrid",
+        "rto",
+        "rpo",
+        "disaster-recovery",
+        "business-continuity"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 3,
-        "requiredFromLevel": 5
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "REL-M8",
-      "category": "reliability-continuity",
-      "title": "Contractual and technical multi-provider options must exist for Level 5 continuity",
-      "description": "Contractual and technical multi-provider options shall exist for Level 5 continuity",
-      "whyItMatters": "Contractual and technical multi-provider options shall exist for Level 5 continuity Failing this leaves a production gap against: PASS if Level 5 workloads have a documented alternate provider/path and a successful failover test ≤180 days",
-      "severity": "high",
-      "weight": 3,
-      "gate": "mandatory",
-      "passCondition": "PASS if Level 5 workloads have a documented alternate provider/path and a successful failover test ≤180 days",
-      "evidenceRequired": [
-        "Provider contract summary + technical failover design and test evidence"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": [
-          {
-            "id": "manual-attest",
-            "params": {
-              "hint": "Provider contract summary + technical failover design and test evidence"
-            }
-          }
-        ]
-      },
-      "manualVerification": "For this Check (Contractual and technical multi-provider options must exist for Level 5 continuity): inspect current evidence for [Provider contract summary + technical failover design and test evidence] and confirm the pass condition holds — PASS if Level 5 workloads have a documented alternate provider/path and a successful failover test ≤180 days",
-      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: Contractual and technical multi-provider options must exist for Level 5 continuity",
-        "Retain evidence artifacts required by this Check, starting with: Provider contract summary + technical failover design and test evidence",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "Google SRE Book — Addressing Cascading Failures",
-          "url": "https://sre.google/sre-book/addressing-cascading-failures/"
-        },
-        {
-          "title": "AWS Well-Architected — Reliability",
-          "url": "https://aws.amazon.com/architecture/well-architected/"
-        },
-        {
-          "title": "Google SRE — Disaster Recovery",
-          "url": "https://sre.google/sre-book/disaster-recovery/"
-        }
-      ],
-      "relatedRules": [
-        "REL-M1",
-        "REL-M2",
-        "REL-M3",
-        "REL-M4",
-        "REL-M5"
-      ],
-      "tags": [
-        "reliability-continuity",
-        "mandatory",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
-        "minCriticality": 3,
-        "requiredFromLevel": 5
+        "requiredFromLevel": 4
       },
       "status": "active",
       "introducedIn": "0.10.0"
@@ -10992,33 +10826,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "REL-R1",
       "category": "reliability-continuity",
       "title": "Production systems should have circuit breakers and bulkheads around provider clients",
-      "description": "Circuit breakers and bulkheads around provider clients",
-      "whyItMatters": "Circuit breakers and bulkheads around provider clients Failing this leaves a production gap against: Breaker opens under induced failure in test or observed prod trip within 90 days; bulkhead limits concurrent calls per provider dependency",
+      "description": "Production AI/provider clients should isolate failures with circuit breakers (open under sustained failure) and bulkheads (finite concurrency per dependency)—so one slow or down provider cannot exhaust the whole fleet.\n",
+      "whyItMatters": "Timeouts alone still allow every instance to pile onto a failing provider. Circuit breakers stop the storm after a threshold; bulkheads cap concurrent calls so one dependency cannot starve others. Without trip evidence, the breaker may be decorative.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Breaker opens under induced failure in test or observed prod trip within 90 days; bulkhead limits concurrent calls per provider dependency",
+      "passCondition": "Circuit breakers are configured around AI/provider clients and open under induced failure in test or an observed production trip within 90 days; bulkheads limit concurrent calls per provider dependency (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Client library/config showing circuit breakers and bulkheads around model/provider calls + last trip log"
+        "Client library/config showing circuit breakers around model/provider calls",
+        "Bulkhead or concurrency limit per provider dependency",
+        "Breaker trip evidence: induced-failure test or production trip log (≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-circuit-bulkhead",
+            "params": {
+              "hint": "Discover circuit-breaker and bulkhead/concurrency limits on AI/provider clients plus trip or induced-failure test signals.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Client library/config showing circuit breakers and bulkheads around model/provider calls + last trip log"
+              "hint": "If automation cannot prove coverage, attest circuit breakers and bulkheads on AI/provider clients plus a trip (test or prod) within 90 days (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Circuit breakers and bulkheads around provider clients): inspect current evidence for [Client library/config showing circuit breakers and bulkheads around model/provider calls + last trip log] and confirm the pass condition holds — Breaker opens under induced failure in test or observed prod trip within 90 days; bulkhead limits concurrent calls per provider dependency",
-      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI/provider clients exist. If none, score NOT_APPLICABLE. 2) Locate circuit-breaker config on those clients. 3) Locate bulkhead or per-dependency concurrency limits. 4) Confirm breaker opened under induced failure in test or an observed production trip ≤90 days. 5) PASS only if breaker + bulkhead + trip evidence hold with measuredAt ≤90 days. REL-M1 timeouts/retries alone do not prove isolation. COST-M3 retry amplification bounds alone do not prove circuit breakers. Generic HTTP pool limits that omit AI/provider paths do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass timeout-only clients as circuit breakers. Do not pass global concurrency limits that are not per provider dependency. Do not pass breaker config without trip evidence ≤90 days. Sibling REL-M1 and COST-M3 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Circuit breakers and bulkheads around provider clients",
-        "Retain evidence artifacts required by this Check, starting with: Client library/config showing circuit breakers and bulkheads around model/provider calls + last trip log",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Add circuit breakers around every production AI/provider client",
+        "Cap concurrent calls per provider dependency (bulkhead)",
+        "Retain induced-failure or production trip evidence under imports/ai-circuit-bulkhead/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -11030,29 +10872,28 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://aws.amazon.com/architecture/well-architected/"
         },
         {
-          "title": "Google SRE — Disaster Recovery",
-          "url": "https://sre.google/sre-book/disaster-recovery/"
+          "title": "Release It! — Circuit Breaker",
+          "url": "https://pragprog.com/titles/mnee2/release-it-second-edition/"
         }
       ],
       "relatedRules": [
         "REL-M1",
         "REL-M2",
         "REL-M3",
-        "REL-M4",
-        "REL-M5"
+        "REL-M5",
+        "COST-M3",
+        "REL-R5"
       ],
       "tags": [
         "reliability-continuity",
         "recommended",
-        "manual"
+        "hybrid",
+        "circuit-breaker",
+        "bulkhead",
+        "isolation"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -11063,35 +10904,125 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "REL-R2",
       "category": "reliability-continuity",
       "title": "Production systems should have multi-provider or multi-region fallback with eval coverage",
-      "description": "Multi-provider or multi-region fallback with eval coverage",
-      "whyItMatters": "Multi-provider or multi-region fallback with eval coverage Failing this leaves a production gap against: Fallback path is configured and was exercised ≤90 days; fallback eval meets minimum quality/safety bars (not only connectivity)",
+      "description": "Production AI paths should have a configured multi-provider or multi-region fallback that was exercised within 90 days, with an eval comparing primary vs fallback quality and safety—not connectivity alone—so failover does not silently degrade outcomes.\n",
+      "whyItMatters": "A fallback that only checks “the other endpoint responds” can still ship worse answers, weaker safety, or untested region behavior under outage. Exercising the path and scoring quality/safety against the primary keeps continuity from becoming a reliability theater. Distinct from REL-R7 contractual Level-5 multi-provider options.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Fallback path is configured and was exercised ≤90 days; fallback eval meets minimum quality/safety bars (not only connectivity)",
+      "passCondition": "A multi-provider or multi-region fallback path is configured and was exercised ≤90 days; a retained eval comparing primary vs fallback meets documented minimum quality/safety bars (not connectivity-only; measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Multi-provider or multi-region fallback config + eval report comparing primary vs fallback quality/safety"
+        "Multi-provider or multi-region fallback configuration",
+        "Evidence the fallback path was exercised ≤90 days",
+        "Eval report comparing primary vs fallback quality/safety against minimum bars"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-fallback-eval",
+            "params": {
+              "hint": "Discover multi-provider/multi-region fallback config, exercise evidence, and primary-vs-fallback quality/safety eval reports.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Multi-provider or multi-region fallback config + eval report comparing primary vs fallback quality/safety"
+              "hint": "If automation cannot prove coverage, attest fallback configured + exercised ≤90 days + eval meets quality/safety bars (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Multi-provider or multi-region fallback with eval coverage): inspect current evidence for [Multi-provider or multi-region fallback config + eval report comparing primary vs fallback quality/safety] and confirm the pass condition holds — Fallback path is configured and was exercised ≤90 days; fallback eval meets minimum quality/safety bars (not only connectivity)",
-      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI paths that warrant fallback are in scope. If none, score NOT_APPLICABLE. 2) Locate multi-provider or multi-region fallback config (not aspirational slides). 3) Confirm the fallback was exercised ≤90 days (drill, chaos, or production switch). 4) Locate an eval comparing primary vs fallback against minimum quality/safety bars—connectivity-only probes fail. 5) PASS only if config + exercise + eval bars hold with measuredAt ≤90 days. REL-R7 contractual multi-provider continuity alone does not prove eval coverage. REL-M2 journey degraded mode alone does not prove primary-vs-fallback quality/safety evals. Promptfoo smoke without primary-vs-fallback comparison does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass connectivity-only health checks as quality/safety evals. Do not pass fallback config never exercised ≤90 days. Do not pass same-AZ replica as multi-region fallback. Sibling REL-R7, REL-M2, and REL-R3 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Multi-provider or multi-region fallback with eval coverage",
-        "Retain evidence artifacts required by this Check, starting with: Multi-provider or multi-region fallback config + eval report comparing primary vs fallback quality/safety",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Configure multi-provider or multi-region fallback for production AI paths",
+        "Exercise the fallback ≤90 days and retain evidence",
+        "Run primary-vs-fallback quality/safety evals against documented minimum bars; retain under imports/ai-fallback-eval/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
+        {
+          "title": "Google SRE Book — Addressing Cascading Failures",
+          "url": "https://sre.google/sre-book/addressing-cascading-failures/"
+        },
+        {
+          "title": "AWS Well-Architected — Reliability",
+          "url": "https://aws.amazon.com/architecture/well-architected/"
+        },
+        {
+          "title": "Google SRE — Disaster Recovery",
+          "url": "https://sre.google/sre-book/disaster-recovery/"
+        }
+      ],
+      "relatedRules": [
+        "REL-M2",
+        "REL-M5",
+        "REL-R3",
+        "REL-R5",
+        "REL-R7",
+        "REL-R1"
+      ],
+      "tags": [
+        "reliability-continuity",
+        "recommended",
+        "hybrid",
+        "fallback",
+        "multi-provider",
+        "multi-region",
+        "eval"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 4
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "REL-R3",
+      "category": "reliability-continuity",
+      "title": "Critical AI-dependent processes should have documented continuity options",
+      "description": "Every process marked critical-AI-dependent should have at least one documented continuity option (failover, manual procedure, alternate provider, or equivalent) with a named owner—so operators know how to keep the process running when the primary AI path fails.\n",
+      "whyItMatters": "Critical processes that only work when the primary model or AI gateway is healthy have a single point of failure. Documented continuity options with owners turn outages into planned switches instead of ad-hoc improvisation. This remains recommended maturity: REL-M2 (journey degraded mode) and REL-M5 (service RTO/RPO) are the production-blocking siblings.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "recommended",
+      "passCondition": "100% of processes marked critical-AI-dependent have ≥1 documented continuity option with a named owner (continuity evidence measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Continuity options documentation per critical AI-dependent process (failover, manual, alternate provider, or equivalent)",
+        "Named owner for each continuity option"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-continuity-options",
+            "params": {
+              "hint": "Discover continuity-options docs for critical AI-dependent processes (failover, manual, alternate provider) with named owners.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest 100% of critical AI-dependent processes have ≥1 documented continuity option with owner (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm processes marked critical-AI-dependent exist. If none, score NOT_APPLICABLE. 2) For each process, locate ≥1 documented continuity option (failover path, manual procedure, alternate provider, or equivalent) with a named owner. Blank “AI required” with no option fails. 3) PASS only if coverage is 100% with measuredAt ≤90 days. REL-M2 journey degraded-mode + failover tests alone do not prove process-level continuity options. REL-M5 RTO/RPO alone does not prove named continuity options per process. Multi- provider routing config alone does not prove a documented, owned option.\n",
+      "falsePositiveGuidance": "Do not pass generic DR plans that omit critical AI-dependent processes. Do not pass options without a named owner. Do not pass aspirational “we could failover” notes without a documented procedure. Sibling REL-M2 and REL-M5 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Document ≥1 continuity option (failover, manual, alternate provider) for every critical AI-dependent process",
+        "Assign a named owner to each option",
+        "Retain evidence under imports/ai-continuity-options/",
+        "Time-box gaps with owner and expiry ≤90 days"
+      ],
+      "references": [
+        {
+          "title": "APRF-RFC-0005 — Demote former REL-M4 continuity options to recommended",
+          "url": "https://github.com/stackrail-io/APRF/blob/main/rfcs/0005-reliability-continuity-rel-m4-to-recommended.md"
+        },
         {
           "title": "Google SRE Book — Addressing Cascading Failures",
           "url": "https://sre.google/sre-book/addressing-cascading-failures/"
@@ -11110,22 +11041,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "REL-M2",
         "REL-M3",
         "REL-M4",
-        "REL-M5"
+        "REL-M5",
+        "REL-R2",
+        "CHG-M2"
       ],
       "tags": [
         "reliability-continuity",
         "recommended",
-        "manual"
+        "hybrid",
+        "continuity",
+        "failover",
+        "alternate-provider"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
-        "requiredFromLevel": 4
+        "requiredFromLevel": 3
       },
       "status": "active",
       "introducedIn": "0.10.0"
@@ -11134,35 +11065,47 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "REL-R4",
       "category": "reliability-continuity",
       "title": "Production systems should have periodic continuity drills including provider loss",
-      "description": "Periodic continuity drills including provider loss",
-      "whyItMatters": "Periodic continuity drills including provider loss Failing this leaves a production gap against: Provider-loss (or equivalent) continuity drill completed ≤90 days; RTO/RPO met or exceptions have named owners and expiry",
+      "description": "Production AI systems should run periodic continuity drills that include provider loss (or equivalent), measure RTO/RPO outcomes, and retain a report—so recovery objectives are proven under rehearsal, not assumed from documents alone.\n",
+      "whyItMatters": "RTO/RPO numbers and chaos plans do not prove operators can recover when the primary AI provider is gone. A dated provider-loss drill with RTO/RPO results (or owned exceptions) turns continuity paperwork into practiced muscle memory. Distinct from REL-R5 dependency-injection chaos and REL-M5 documented objectives.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Provider-loss (or equivalent) continuity drill completed ≤90 days; RTO/RPO met or exceptions have named owners and expiry",
+      "passCondition": "A provider-loss (or equivalent) continuity drill completed ≤90 days with retained RTO/RPO results that met objectives or have named owners and expiry (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Continuity drill calendar + last provider-loss drill report with RTO/RPO results"
+        "Continuity drill calendar covering provider-loss (or equivalent) scenarios",
+        "Last provider-loss drill report with RTO/RPO results (≤90 days)",
+        "Named owner + expiry for any RTO/RPO miss"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-continuity-drill",
+            "params": {
+              "hint": "Discover continuity drill calendars and provider-loss drill reports with RTO/RPO results.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Continuity drill calendar + last provider-loss drill report with RTO/RPO results"
+              "hint": "If automation cannot prove coverage, attest a provider-loss continuity drill ≤90 days with RTO/RPO met or owned exceptions (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Periodic continuity drills including provider loss): inspect current evidence for [Continuity drill calendar + last provider-loss drill report with RTO/RPO results] and confirm the pass condition holds — Provider-loss (or equivalent) continuity drill completed ≤90 days; RTO/RPO met or exceptions have named owners and expiry",
-      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI provider dependencies exist. If none, score NOT_APPLICABLE. 2) Locate a continuity drill calendar that includes provider-loss or equivalent scenarios. 3) Confirm a drill completed ≤90 days with retained RTO/RPO results. 4) If objectives were missed, confirm named owner and expiry ≤90 days. 5) PASS only if drill + results (or owned exceptions) hold with measuredAt ≤90 days. REL-R5 chaos injection alone does not prove a scheduled continuity drill with RTO/RPO measurement. REL-M5 documented RTO/RPO alone does not prove a recent drill. INC-R4 tabletops alone do not prove provider-loss continuity drills with RTO/RPO.\n",
+      "falsePositiveGuidance": "Do not pass generic fire-drill calendars that omit provider loss. Do not pass drills without RTO/RPO results. Do not pass RTO/RPO misses without named owner and expiry. Sibling REL-R5, REL-M5, and INC-R4 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Periodic continuity drills including provider loss",
-        "Retain evidence artifacts required by this Check, starting with: Continuity drill calendar + last provider-loss drill report with RTO/RPO results",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Schedule provider-loss (or equivalent) continuity drills on a calendar",
+        "Run a drill ≤90 days; retain RTO/RPO results and owned exceptions",
+        "Retain evidence under imports/ai-continuity-drill/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
+        {
+          "title": "Google SRE — Disaster Recovery",
+          "url": "https://sre.google/sre-book/disaster-recovery/"
+        },
         {
           "title": "Google SRE Book — Addressing Cascading Failures",
           "url": "https://sre.google/sre-book/addressing-cascading-failures/"
@@ -11170,10 +11113,87 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "AWS Well-Architected — Reliability",
           "url": "https://aws.amazon.com/architecture/well-architected/"
+        }
+      ],
+      "relatedRules": [
+        "REL-M2",
+        "REL-M5",
+        "REL-R3",
+        "REL-R5",
+        "REL-R7",
+        "INC-R4"
+      ],
+      "tags": [
+        "reliability-continuity",
+        "recommended",
+        "hybrid",
+        "continuity-drill",
+        "provider-loss",
+        "rto-rpo"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 4
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "REL-R5",
+      "category": "reliability-continuity",
+      "title": "Chaos experiments should cover AI dependency failure modes",
+      "description": "Production systems should run chaos experiments that cover AI dependency failure modes (provider, model, tool, or gateway outages) and retain an after-action with tracked actions.\n",
+      "whyItMatters": "Timeouts and degraded-mode docs do not prove the system behaves under real AI-dependency loss. Chaos that injects provider/tool failures surfaces cascade and fallback gaps before customers do. This remains recommended Level-5 maturity: REL-M2 degraded mode and REL-M5 RTO/RPO are the production-blocking siblings.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "recommended",
+      "passCondition": "At least one AI-dependency chaos exercise completed in the last 180 days with retained after-action actions (attest measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Chaos experiment plan covering AI provider/tool/gateway failure modes",
+        "Dated after-action report with retained actions (exercise ≤180 days)"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-chaos-tests",
+            "params": {
+              "hint": "Discover chaos plans and after-actions that cover AI dependency failure modes (provider, model, tool, or gateway).\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest ≥1 AI-dependency chaos exercise in the last 180 days with retained actions (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm production AI dependencies exist. If none, score NOT_APPLICABLE. 2) Locate a chaos plan that includes AI provider, model, tool, or gateway failure modes—not only generic CPU/network chaos. 3) Confirm ≥1 exercise in the last 180 days has a dated after-action with retained actions. 4) PASS only if plan + recent exercise + actions hold with measuredAt ≤90 days. REL-R4 provider-loss continuity drills alone do not prove chaos injection. INC-R4 tabletops alone do not prove dependency chaos. REL-M2 degraded-mode docs alone do not prove exercised failure under chaos.\n",
+      "falsePositiveGuidance": "Do not pass generic infrastructure chaos that never targets AI dependencies. Do not pass plans without a completed exercise ≤180 days. Do not pass after-actions without tracked actions (or explicit no-action rationale). Sibling REL-R4 and INC-R4 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Add AI provider/tool/gateway failure modes to the chaos experiment plan",
+        "Run at least one AI-dependency chaos exercise every 180 days and retain after-action actions",
+        "Retain evidence under imports/ai-chaos-dependency/",
+        "Time-box gaps with owner and expiry ≤90 days"
+      ],
+      "references": [
+        {
+          "title": "APRF-RFC-0006 — Demote former REL-M7 AI-dependency chaos to recommended",
+          "url": "https://github.com/stackrail-io/APRF/blob/main/rfcs/0006-reliability-continuity-rel-m7-to-recommended.md"
         },
         {
-          "title": "Google SRE — Disaster Recovery",
-          "url": "https://sre.google/sre-book/disaster-recovery/"
+          "title": "Google SRE Book — Addressing Cascading Failures",
+          "url": "https://sre.google/sre-book/addressing-cascading-failures/"
+        },
+        {
+          "title": "Principles of Chaos Engineering",
+          "url": "https://principlesofchaos.org/"
+        },
+        {
+          "title": "AWS Well-Architected — Reliability",
+          "url": "https://aws.amazon.com/architecture/well-architected/"
         }
       ],
       "relatedRules": [
@@ -11181,22 +11201,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "REL-M2",
         "REL-M3",
         "REL-M4",
-        "REL-M5"
+        "REL-M5",
+        "REL-R7",
+        "REL-R4",
+        "INC-R4"
       ],
       "tags": [
         "reliability-continuity",
         "recommended",
-        "manual"
+        "hybrid",
+        "chaos",
+        "ai-dependency"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
-        "minCriticality": 2,
-        "requiredFromLevel": 4
+        "technologies": [],
+        "minCriticality": 3,
+        "requiredFromLevel": 5
       },
       "status": "active",
       "introducedIn": "0.10.0"
@@ -11205,35 +11225,123 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "REL-R6",
       "category": "reliability-continuity",
       "title": "Production systems should have warm standby for self-hosted inference where required",
-      "description": "Warm standby for self-hosted inference where required",
-      "whyItMatters": "Warm standby for self-hosted inference where required Failing this leaves a production gap against: Failover to warm standby completes within documented RTO in the last test (≤90 days); standby capacity covers declared peak for critical workloads",
+      "description": "Where critical workloads depend on self-hosted inference, a warm standby should exist with capacity for declared peak load and a recent failover test that met documented RTO—so self-hosted model loss does not strand the service.\n",
+      "whyItMatters": "Multi-provider cloud fallbacks do not help when the bottleneck is your own GPU fleet or self-hosted model stack. Warm standby plus a recent RTO-met failover test keeps self-hosted critical paths recoverable. NOT_APPLICABLE when there is no self-hosted inference in scope. Distinct from REL-R7 contractual multi-provider options.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Failover to warm standby completes within documented RTO in the last test (≤90 days); standby capacity covers declared peak for critical workloads",
+      "passCondition": "For in-scope self-hosted inference, failover to warm standby completed within documented RTO in a test ≤90 days, and standby capacity covers declared peak for critical workloads (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Warm-standby inference architecture + last failover test report with RTO result"
+        "Warm-standby inference architecture for self-hosted critical workloads",
+        "Last failover test report with RTO result (≤90 days)",
+        "Standby capacity sizing covering declared peak"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-warm-standby",
+            "params": {
+              "hint": "Discover self-hosted inference warm-standby architecture, capacity sizing, and failover-test evidence with RTO results.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Warm-standby inference architecture + last failover test report with RTO result"
+              "hint": "If automation cannot prove coverage, attest warm standby failover within RTO ≤90 days and standby capacity covering declared peak (measuredAt ≤90 days); NA if no self-hosted inference.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Warm standby for self-hosted inference where required): inspect current evidence for [Warm-standby inference architecture + last failover test report with RTO result] and confirm the pass condition holds — Failover to warm standby completes within documented RTO in the last test (≤90 days); standby capacity covers declared peak for critical workloads",
-      "falsePositiveGuidance": "(Reliability & Continuity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm self-hosted inference serves critical workloads. If none, score NOT_APPLICABLE. 2) Locate warm-standby architecture (not cold spare docs alone). 3) Confirm standby capacity covers declared peak for those workloads. 4) Confirm failover test ≤90 days met documented RTO. 5) PASS only if architecture + capacity + RTO-met test hold with measuredAt ≤90 days. REL-R7 multi-provider contracts alone do not prove self-hosted warm standby. REL-M2 journey degraded mode alone does not prove standby capacity. REL-M5 RTO/RPO docs alone do not prove a recent standby failover test.\n",
+      "falsePositiveGuidance": "Do not pass cold spares as warm standby. Do not pass capacity notes without declared peak coverage. Do not pass failover tests older than 90 days or that missed RTO without owned exceptions. Sibling REL-R7, REL-M2, and REL-M5 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Warm standby for self-hosted inference where required",
-        "Retain evidence artifacts required by this Check, starting with: Warm-standby inference architecture + last failover test report with RTO result",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Deploy warm standby for critical self-hosted inference with peak capacity coverage",
+        "Run failover tests ≤90 days and retain RTO results",
+        "Retain evidence under imports/ai-warm-standby/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
+        {
+          "title": "Google SRE Book — Addressing Cascading Failures",
+          "url": "https://sre.google/sre-book/addressing-cascading-failures/"
+        },
+        {
+          "title": "Google SRE — Disaster Recovery",
+          "url": "https://sre.google/sre-book/disaster-recovery/"
+        },
+        {
+          "title": "AWS Well-Architected — Reliability",
+          "url": "https://aws.amazon.com/architecture/well-architected/"
+        }
+      ],
+      "relatedRules": [
+        "REL-M2",
+        "REL-M5",
+        "REL-R5",
+        "REL-R7",
+        "REL-R4"
+      ],
+      "tags": [
+        "reliability-continuity",
+        "recommended",
+        "hybrid",
+        "warm-standby",
+        "self-hosted",
+        "inference"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 3,
+        "requiredFromLevel": 5
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "REL-R7",
+      "category": "reliability-continuity",
+      "title": "Level 5 continuity should include contractual and technical multi-provider options",
+      "description": "Level-5 workloads should have a documented alternate provider or path (contractual and technical) and a successful failover test within 180 days.\n",
+      "whyItMatters": "Single-provider Level-5 systems inherit that provider’s outage as their own. A contracted alternate path plus a recent failover test turns provider loss into a planned switch. This remains recommended maturity: REL-M5 RTO/RPO and REL-M2 degraded mode are the production-blocking siblings; REL-R2 covers fallback eval quality rather than contractual continuity.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "recommended",
+      "passCondition": "Level-5 workloads have a documented alternate provider/path and a successful failover test ≤180 days (attest measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Provider contract summary or equivalent documenting alternate provider/path options",
+        "Technical failover design + successful failover test evidence (≤180 days)"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-multi-provider-continuity",
+            "params": {
+              "hint": "Discover alternate-provider contracts/designs and failover-test evidence for Level-5 AI continuity.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest Level-5 workloads have a documented alternate provider/path and a successful failover test ≤180 days (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm Level-5 / mission-critical AI workloads are in scope. If none, score NOT_APPLICABLE. 2) Locate contractual or equivalent documentation of an alternate provider/path (not aspirational slides). 3) Locate technical failover design and a successful failover test ≤180 days. 4) PASS only if contract/path + test hold with measuredAt ≤90 days. REL-R2 fallback eval coverage alone does not prove contractual multi-provider options. REL-M5 RTO/RPO alone does not prove an alternate provider. REL-R6 warm standby alone does not prove contractual multi-provider options.\n",
+      "falsePositiveGuidance": "Do not pass marketing “multi-cloud ready” claims without a documented alternate path. Do not pass contracts without a successful failover test ≤180 days. Do not pass same-AZ redundancy as multi-provider continuity. Sibling REL-R2, REL-R5, REL-R6, and REL-M5 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Document contractual (or equivalent) alternate provider/path options for Level-5 workloads",
+        "Design and test technical failover at least every 180 days; retain results",
+        "Retain evidence under imports/ai-multi-provider-continuity/",
+        "Time-box gaps with owner and expiry ≤90 days"
+      ],
+      "references": [
+        {
+          "title": "APRF-RFC-0007 — Demote former REL-M8 multi-provider continuity to recommended",
+          "url": "https://github.com/stackrail-io/APRF/blob/main/rfcs/0007-reliability-continuity-rel-m8-to-recommended.md"
+        },
         {
           "title": "Google SRE Book — Addressing Cascading Failures",
           "url": "https://sre.google/sre-book/addressing-cascading-failures/"
@@ -11248,24 +11356,23 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         }
       ],
       "relatedRules": [
-        "REL-M1",
         "REL-M2",
-        "REL-M3",
         "REL-M4",
-        "REL-M5"
+        "REL-M5",
+        "REL-R2",
+        "REL-R5",
+        "REL-R6"
       ],
       "tags": [
         "reliability-continuity",
         "recommended",
-        "manual"
+        "hybrid",
+        "multi-provider",
+        "failover",
+        "level-5"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 3,
         "requiredFromLevel": 5
       },

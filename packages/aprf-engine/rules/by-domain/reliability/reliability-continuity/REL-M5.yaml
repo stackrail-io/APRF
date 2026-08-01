@@ -1,37 +1,59 @@
 id: "REL-M5"
 category: "reliability-continuity"
-title: "Backups must include AI control-plane artifacts needed to restore service"
-description: "Backups shall include AI control-plane artifacts needed to restore service"
-whyItMatters: "Backups shall include AI control-plane artifacts needed to restore service Failing
-  this leaves a production gap against: Backup inventory includes required AI control-plane
-  artifacts; restore test in last 90 days succeeds for a sample artifact set"
+title: "Business-critical AI services must have documented RTO and RPO objectives"
+description: >
+  Every business-critical AI service must have numeric RTO and RPO documented
+  in continuity, service-catalog, or disaster-recovery materials and linked to
+  a tested restore or failover procedure.
+whyItMatters: >
+  Disaster recovery is planned for services, not per feature. Without numeric
+  RTO/RPO tied to a tested restore path, business-critical AI services have no
+  continuity contract—operators discover recovery time only during an outage.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Backup inventory includes required AI control-plane artifacts; restore test in last
-  90 days succeeds for a sample artifact set"
+passCondition: >
+  100% of business-critical AI services have numeric RTO and RPO documented
+  and linked to a tested restore/failover procedure (continuity evidence
+  measuredAt ≤90 days).
 evidenceRequired:
-  - "Backup job config covering prompt registry, policies, indexes as required + restore test"
+  - "Business continuity, service-catalog, or disaster-recovery documentation with numeric RTO and RPO for business-critical AI services"
+  - "Linkage from each in-scope service to a tested restore/failover procedure"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-rto-rpo-catalog"
+      params:
+        hint: >
+          Discover BCP, service-catalog, or DR documentation with numeric RTO
+          and RPO for business-critical AI services plus tested
+          restore/failover linkage.
     - id: "manual-attest"
       params:
-        hint: "Backup job config covering prompt registry, policies, indexes as required + restore test"
-manualVerification: "For this Check (Backups must include AI control-plane artifacts needed to
-  restore service): inspect current evidence for [Backup job config covering prompt registry,
-  policies, indexes as required + restore test] and confirm the pass condition holds — Backup
-  inventory includes required AI control-plane artifacts; restore test in last 90 days succeeds for
-  a sample artifact set"
-falsePositiveGuidance: "(Reliability & Continuity): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest 100% of business-critical
+          AI services have numeric RTO and RPO documented and linked to a
+          tested restore/failover procedure (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm business-critical AI services are in scope. If none, score
+  NOT_APPLICABLE. 2) Confirm numeric RTO and RPO appear in business continuity,
+  service-catalog, or disaster-recovery documentation (not only a standalone
+  RTO/RPO spreadsheet). 3) Confirm each in-scope service links to a restore or
+  failover procedure that has been tested. 4) PASS only if coverage is 100%
+  with measuredAt ≤90 days. REL-M4 backup/restore of control-plane artifacts
+  alone does not prove service RTO/RPO. PERF-M1 latency/availability SLOs alone
+  do not prove recovery objectives. Untested runbooks without a
+  restore/failover link do not satisfy.
+falsePositiveGuidance: >
+  Do not pass blank RTO templates. Do not pass RTO without RPO (or the reverse).
+  Do not pass feature-level notes that omit the owning business-critical
+  service. Do not pass unlinked procedures or untested failover docs. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Backups must include AI control-plane artifacts needed to restore
-    service"
-  - "Retain evidence artifacts required by this Check, starting with: Backup job config covering
-    prompt registry, policies, indexes as required + restore test"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Document numeric RTO and RPO for every business-critical AI service in BCP, service catalog, or DR materials"
+  - "Link each service to a tested restore/failover procedure"
+  - "Retain evidence under imports/ai-rto-rpo-catalog/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Book — Addressing Cascading Failures"
     url: "https://sre.google/sre-book/addressing-cascading-failures/"
@@ -43,19 +65,23 @@ relatedRules:
   - "REL-M1"
   - "REL-M2"
   - "REL-M3"
+  - "REL-R3"
   - "REL-M4"
-  - "REL-M6"
+  - "REL-R5"
+  - "REL-R7"
+  - "PERF-M1"
+  - "CHG-M2"
 tags:
   - "reliability-continuity"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "rto"
+  - "rpo"
+  - "disaster-recovery"
+  - "business-continuity"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
-  minCriticality: 2
-  requiredFromLevel: 3
+  technologies: []
+  minCriticality: 3
+  requiredFromLevel: 4
 status: "active"
 introducedIn: "0.10.0"

@@ -1,0 +1,26 @@
+id: ai-warm-standby
+title: Warm standby for self-hosted inference (REL-R6)
+version: "0.2.0"
+executor: collectors/ai-warm-standby.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-warm-standby]
+inputs:
+  - "Target repo (warm-standby architecture + failover RTO + capacity)"
+  - "Optional suite: aprf-assessment/imports/ai-warm-standby/*.{json}"
+collect:
+  - "Detect self-hosted / warm-standby / failover / capacity signals"
+  - "Ingest coverage; write ai-warm-standby-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-warm-standby/*"
+  signals: [ai-warm-standby, rel-r6, repo-ai-warm-standby]
+mapsToChecks: [REL-R6]
+whenUnavailable: >
+  Self-hosted/standby signals alone are PARTIAL. REL-R6 PASS needs
+  warmStandbyArchitectureDocumented, failoverWithinRtoWithin90Days,
+  standbyCapacityCoversDeclaredPeak, measuredAt ≤90 days. NA when no
+  self-hosted inference.
+live:
+  required: false
+  note: Offline warm-standby heuristics + optional imported JSON.

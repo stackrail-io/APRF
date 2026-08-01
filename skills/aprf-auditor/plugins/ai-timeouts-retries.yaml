@@ -1,0 +1,25 @@
+id: ai-timeouts-retries
+title: Model/tool client timeouts and bounded retries (REL-M1)
+version: "0.2.0"
+executor: collectors/ai-timeouts-retries.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-timeouts-retries]
+inputs:
+  - "Target repo (model/tool client timeout + max-retry config)"
+  - "Optional suite: aprf-assessment/imports/ai-timeouts-retries/*.{json}"
+collect:
+  - "Detect timeout and bounded-retry signals on AI client paths"
+  - "Ingest coverage; write ai-timeouts-retries-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-timeouts-retries/*"
+  signals: [ai-timeouts-retries, rel-m1, repo-ai-timeouts-retries]
+mapsToChecks: [REL-M1]
+whenUnavailable: >
+  Timeout/retry signals alone are PARTIAL. REL-M1 PASS needs
+  timeoutsConfigured, retriesBounded, callSitesCoveredPct=100,
+  verifiedByStaticOrIntegrationTest, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline timeout/retry heuristics + optional imported JSON.

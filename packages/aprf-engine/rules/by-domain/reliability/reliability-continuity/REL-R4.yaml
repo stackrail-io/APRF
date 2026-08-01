@@ -1,58 +1,85 @@
 id: "REL-R4"
 category: "reliability-continuity"
 title: "Production systems should have periodic continuity drills including provider loss"
-description: "Periodic continuity drills including provider loss"
-whyItMatters: "Periodic continuity drills including provider loss Failing this leaves a production
-  gap against: Provider-loss (or equivalent) continuity drill completed ≤90 days; RTO/RPO met or
-  exceptions have named owners and expiry"
+description: >
+  Production AI systems should run periodic continuity drills that include
+  provider loss (or equivalent), measure RTO/RPO outcomes, and retain a
+  report—so recovery objectives are proven under rehearsal, not assumed from
+  documents alone.
+whyItMatters: >
+  RTO/RPO numbers and chaos plans do not prove operators can recover when the
+  primary AI provider is gone. A dated provider-loss drill with RTO/RPO
+  results (or owned exceptions) turns continuity paperwork into practiced
+  muscle memory. Distinct from REL-R5 dependency-injection chaos and REL-M5
+  documented objectives.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Provider-loss (or equivalent) continuity drill completed ≤90 days; RTO/RPO met or
-  exceptions have named owners and expiry"
+passCondition: >
+  A provider-loss (or equivalent) continuity drill completed ≤90 days with
+  retained RTO/RPO results that met objectives or have named owners and
+  expiry (measuredAt ≤90 days).
 evidenceRequired:
-  - "Continuity drill calendar + last provider-loss drill report with RTO/RPO results"
+  - "Continuity drill calendar covering provider-loss (or equivalent) scenarios"
+  - "Last provider-loss drill report with RTO/RPO results (≤90 days)"
+  - "Named owner + expiry for any RTO/RPO miss"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-continuity-drill"
+      params:
+        hint: >
+          Discover continuity drill calendars and provider-loss drill reports
+          with RTO/RPO results.
     - id: "manual-attest"
       params:
-        hint: "Continuity drill calendar + last provider-loss drill report with RTO/RPO results"
-manualVerification: "For this Check (Periodic continuity drills including provider loss): inspect
-  current evidence for [Continuity drill calendar + last provider-loss drill report with RTO/RPO
-  results] and confirm the pass condition holds — Provider-loss (or equivalent) continuity drill
-  completed ≤90 days; RTO/RPO met or exceptions have named owners and expiry"
-falsePositiveGuidance: "(Reliability & Continuity): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest a provider-loss
+          continuity drill ≤90 days with RTO/RPO met or owned exceptions
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI provider dependencies exist. If none, score
+  NOT_APPLICABLE. 2) Locate a continuity drill calendar that includes
+  provider-loss or equivalent scenarios. 3) Confirm a drill completed ≤90
+  days with retained RTO/RPO results. 4) If objectives were missed, confirm
+  named owner and expiry ≤90 days. 5) PASS only if drill + results (or owned
+  exceptions) hold with measuredAt ≤90 days. REL-R5 chaos injection alone
+  does not prove a scheduled continuity drill with RTO/RPO measurement.
+  REL-M5 documented RTO/RPO alone does not prove a recent drill. INC-R4
+  tabletops alone do not prove provider-loss continuity drills with RTO/RPO.
+falsePositiveGuidance: >
+  Do not pass generic fire-drill calendars that omit provider loss. Do not
+  pass drills without RTO/RPO results. Do not pass RTO/RPO misses without
+  named owner and expiry. Sibling REL-R5, REL-M5, and INC-R4 do not
+  substitute. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Periodic continuity drills including provider loss"
-  - "Retain evidence artifacts required by this Check, starting with: Continuity drill calendar +
-    last provider-loss drill report with RTO/RPO results"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Schedule provider-loss (or equivalent) continuity drills on a calendar"
+  - "Run a drill ≤90 days; retain RTO/RPO results and owned exceptions"
+  - "Retain evidence under imports/ai-continuity-drill/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
+  - title: "Google SRE — Disaster Recovery"
+    url: "https://sre.google/sre-book/disaster-recovery/"
   - title: "Google SRE Book — Addressing Cascading Failures"
     url: "https://sre.google/sre-book/addressing-cascading-failures/"
   - title: "AWS Well-Architected — Reliability"
     url: "https://aws.amazon.com/architecture/well-architected/"
-  - title: "Google SRE — Disaster Recovery"
-    url: "https://sre.google/sre-book/disaster-recovery/"
 relatedRules:
-  - "REL-M1"
   - "REL-M2"
-  - "REL-M3"
-  - "REL-M4"
   - "REL-M5"
+  - "REL-R3"
+  - "REL-R5"
+  - "REL-R7"
+  - "INC-R4"
 tags:
   - "reliability-continuity"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "continuity-drill"
+  - "provider-loss"
+  - "rto-rpo"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

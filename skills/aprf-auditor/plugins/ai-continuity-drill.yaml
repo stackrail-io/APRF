@@ -1,0 +1,25 @@
+id: ai-continuity-drill
+title: Provider-loss continuity drills with RTO/RPO results (REL-R4)
+version: "0.2.0"
+executor: collectors/ai-continuity-drill.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-continuity-drill]
+inputs:
+  - "Target repo (drill calendar + provider-loss drill report)"
+  - "Optional suite: aprf-assessment/imports/ai-continuity-drill/*.{json}"
+collect:
+  - "Detect calendar / provider-loss / drill-report signals"
+  - "Ingest coverage; write ai-continuity-drill-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-continuity-drill/*"
+  signals: [ai-continuity-drill, rel-r4, repo-ai-continuity-drill]
+mapsToChecks: [REL-R4]
+whenUnavailable: >
+  Drill signals alone are PARTIAL. REL-R4 PASS needs
+  continuityDrillCalendarConfigured, providerLossDrillCompletedWithin90Days,
+  rtoRpoMetOrOwnedExceptions, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline continuity-drill heuristics + optional imported JSON.

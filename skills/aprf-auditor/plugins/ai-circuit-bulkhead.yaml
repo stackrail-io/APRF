@@ -1,0 +1,25 @@
+id: ai-circuit-bulkhead
+title: Circuit breakers and bulkheads on AI/provider clients (REL-R1)
+version: "0.2.0"
+executor: collectors/ai-circuit-bulkhead.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-circuit-bulkhead]
+inputs:
+  - "Target repo (circuit-breaker + bulkhead config + trip evidence)"
+  - "Optional suite: aprf-assessment/imports/ai-circuit-bulkhead/*.{json}"
+collect:
+  - "Detect breaker / bulkhead / trip signals"
+  - "Ingest coverage; write ai-circuit-bulkhead-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-circuit-bulkhead/*"
+  signals: [ai-circuit-bulkhead, rel-r1, repo-ai-circuit-bulkhead]
+mapsToChecks: [REL-R1]
+whenUnavailable: >
+  Isolation signals alone are PARTIAL. REL-R1 PASS needs
+  circuitBreakerConfigured, bulkheadLimitsConcurrentCalls,
+  breakerTripEvidenceWithin90Days, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline breaker/bulkhead heuristics + optional imported JSON.

@@ -1,0 +1,26 @@
+id: ai-degraded-mode
+title: Critical journey degraded mode when AI unavailable (REL-M2)
+version: "0.2.0"
+executor: collectors/ai-degraded-mode.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-degraded-mode]
+inputs:
+  - "Target repo (degraded-mode specs, feature flags, failover tests)"
+  - "Optional suite: aprf-assessment/imports/ai-degraded-mode/*.{json}"
+collect:
+  - "Detect degraded-mode / fallback / failover-test signals"
+  - "Ingest coverage; write ai-degraded-mode-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-degraded-mode/*"
+  signals: [ai-degraded-mode, rel-m2, repo-ai-degraded-mode]
+mapsToChecks: [REL-M2]
+whenUnavailable: >
+  Degraded-mode signals alone are PARTIAL. REL-M2 PASS needs
+  degradedModeDocumented, criticalJourneyCount≥1,
+  criticalJourneysWithDegradedModePct=100, failoverTestShowsSafeFallback,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline degraded-mode heuristics + optional imported JSON.

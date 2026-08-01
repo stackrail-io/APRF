@@ -62,6 +62,18 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **ai-error-budget-release-gate** | `ai-error-budget-release-gate.ts` | error-budget → freeze/risk acceptance + gated event ≤90d (PERF-R1) | `imports/ai-error-budget-release-gate/` | — |
 | **ai-adversarial-capacity-tests** | `ai-adversarial-capacity-tests.ts` | adversarial long-prompt + agent-loop capacity ≤90d (PERF-R2) | `imports/ai-adversarial-capacity-tests/` | — |
 | **ai-streaming-slis** | `ai-streaming-slis.ts` | TTFT + inter-token SLIs + alerts + ≥30d retention (PERF-R3) | `imports/ai-streaming-slis/` | — |
+| **ai-timeouts-retries** | `ai-timeouts-retries.ts` | model/tool timeouts + bounded retries 100% coverage (REL-M1) | `imports/ai-timeouts-retries/` | — |
+| **ai-degraded-mode** | `ai-degraded-mode.ts` | critical journey degraded mode + failover test (REL-M2) | `imports/ai-degraded-mode/` | — |
+| **ai-partial-tool-failure** | `ai-partial-tool-failure.ts` | partial tool failure / no false-success via outcome tests (REL-M3) | `imports/ai-partial-tool-failure/` | — |
+| **ai-continuity-options** | `ai-continuity-options.ts` | critical AI process continuity options + owners (REL-R3) | `imports/ai-continuity-options/` | — |
+| **ai-control-plane-backup** | `ai-control-plane-backup.ts` | AI control-plane backup inventory + restore test (REL-M4) | `imports/ai-control-plane-backup/` | — |
+| **ai-chaos-dependency** | `ai-chaos-dependency.ts` | AI-dependency chaos experiments (REL-R5) | `imports/ai-chaos-dependency/` | — |
+| **ai-circuit-bulkhead** | `ai-circuit-bulkhead.ts` | circuit breakers + bulkheads on AI/provider clients (REL-R1) | `imports/ai-circuit-bulkhead/` | — |
+| **ai-fallback-eval** | `ai-fallback-eval.ts` | multi-provider/multi-region fallback + quality/safety eval (REL-R2) | `imports/ai-fallback-eval/` | — |
+| **ai-continuity-drill** | `ai-continuity-drill.ts` | provider-loss continuity drills + RTO/RPO results (REL-R4) | `imports/ai-continuity-drill/` | — |
+| **ai-warm-standby** | `ai-warm-standby.ts` | warm standby for self-hosted inference (REL-R6) | `imports/ai-warm-standby/` | — |
+| **ai-multi-provider-continuity** | `ai-multi-provider-continuity.ts` | Level-5 multi-provider contractual + technical continuity (REL-R7) | `imports/ai-multi-provider-continuity/` | — |
+| **ai-rto-rpo-catalog** | `ai-rto-rpo-catalog.ts` | business-critical AI service RTO/RPO in BCP/service-catalog/DR + tested restore/failover (REL-M5) | `imports/ai-rto-rpo-catalog/` | — |
 | **http-auth-probe** | `http-auth-probe.ts` | route catalog | `imports/http-auth-probe/` | **`--base-url` probe** |
 | promptfoo | `promptfoo.ts` | eval configs | `imports/promptfoo/` | — |
 | aws / azure / gcp | `iac-cloud.ts` | Terraform/Bicep signals | `imports/<cloud>/` | — |

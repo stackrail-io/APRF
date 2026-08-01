@@ -1,62 +1,83 @@
 id: "REL-R1"
 category: "reliability-continuity"
 title: "Production systems should have circuit breakers and bulkheads around provider clients"
-description: "Circuit breakers and bulkheads around provider clients"
-whyItMatters: "Circuit breakers and bulkheads around provider clients Failing this leaves a
-  production gap against: Breaker opens under induced failure in test or observed prod trip within
-  90 days; bulkhead limits concurrent calls per provider dependency"
+description: >
+  Production AI/provider clients should isolate failures with circuit breakers
+  (open under sustained failure) and bulkheads (finite concurrency per
+  dependency)—so one slow or down provider cannot exhaust the whole fleet.
+whyItMatters: >
+  Timeouts alone still allow every instance to pile onto a failing provider.
+  Circuit breakers stop the storm after a threshold; bulkheads cap concurrent
+  calls so one dependency cannot starve others. Without trip evidence, the
+  breaker may be decorative.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Breaker opens under induced failure in test or observed prod trip within 90 days;
-  bulkhead limits concurrent calls per provider dependency"
+passCondition: >
+  Circuit breakers are configured around AI/provider clients and open under
+  induced failure in test or an observed production trip within 90 days;
+  bulkheads limit concurrent calls per provider dependency (measuredAt ≤90
+  days).
 evidenceRequired:
-  - "Client library/config showing circuit breakers and bulkheads around model/provider calls + last
-    trip log"
+  - "Client library/config showing circuit breakers around model/provider calls"
+  - "Bulkhead or concurrency limit per provider dependency"
+  - "Breaker trip evidence: induced-failure test or production trip log (≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-circuit-bulkhead"
+      params:
+        hint: >
+          Discover circuit-breaker and bulkhead/concurrency limits on
+          AI/provider clients plus trip or induced-failure test signals.
     - id: "manual-attest"
       params:
-        hint: "Client library/config showing circuit breakers and bulkheads around model/provider calls +
-          last trip log"
-manualVerification: "For this Check (Circuit breakers and bulkheads around provider clients):
-  inspect current evidence for [Client library/config showing circuit breakers and bulkheads around
-  model/provider calls + last trip log] and confirm the pass condition holds — Breaker opens under
-  induced failure in test or observed prod trip within 90 days; bulkhead limits concurrent calls per
-  provider dependency"
-falsePositiveGuidance: "(Reliability & Continuity): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest circuit breakers and
+          bulkheads on AI/provider clients plus a trip (test or prod) within
+          90 days (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI/provider clients exist. If none, score
+  NOT_APPLICABLE. 2) Locate circuit-breaker config on those clients. 3) Locate
+  bulkhead or per-dependency concurrency limits. 4) Confirm breaker opened
+  under induced failure in test or an observed production trip ≤90 days. 5)
+  PASS only if breaker + bulkhead + trip evidence hold with measuredAt ≤90
+  days. REL-M1 timeouts/retries alone do not prove isolation. COST-M3 retry
+  amplification bounds alone do not prove circuit breakers. Generic HTTP
+  pool limits that omit AI/provider paths do not satisfy.
+falsePositiveGuidance: >
+  Do not pass timeout-only clients as circuit breakers. Do not pass global
+  concurrency limits that are not per provider dependency. Do not pass
+  breaker config without trip evidence ≤90 days. Sibling REL-M1 and COST-M3
+  do not substitute. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Circuit breakers and bulkheads around provider
-    clients"
-  - "Retain evidence artifacts required by this Check, starting with: Client library/config showing
-    circuit breakers and bulkheads around model/provider calls + last trip log"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Add circuit breakers around every production AI/provider client"
+  - "Cap concurrent calls per provider dependency (bulkhead)"
+  - "Retain induced-failure or production trip evidence under imports/ai-circuit-bulkhead/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Book — Addressing Cascading Failures"
     url: "https://sre.google/sre-book/addressing-cascading-failures/"
   - title: "AWS Well-Architected — Reliability"
     url: "https://aws.amazon.com/architecture/well-architected/"
-  - title: "Google SRE — Disaster Recovery"
-    url: "https://sre.google/sre-book/disaster-recovery/"
+  - title: "Release It! — Circuit Breaker"
+    url: "https://pragprog.com/titles/mnee2/release-it-second-edition/"
 relatedRules:
   - "REL-M1"
   - "REL-M2"
   - "REL-M3"
-  - "REL-M4"
   - "REL-M5"
+  - "COST-M3"
+  - "REL-R5"
 tags:
   - "reliability-continuity"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "circuit-breaker"
+  - "bulkhead"
+  - "isolation"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

@@ -1,0 +1,86 @@
+id: "REL-R5"
+category: "reliability-continuity"
+title: "Chaos experiments should cover AI dependency failure modes"
+description: >
+  Production systems should run chaos experiments that cover AI dependency
+  failure modes (provider, model, tool, or gateway outages) and retain an
+  after-action with tracked actions.
+whyItMatters: >
+  Timeouts and degraded-mode docs do not prove the system behaves under real
+  AI-dependency loss. Chaos that injects provider/tool failures surfaces
+  cascade and fallback gaps before customers do. This remains recommended
+  Level-5 maturity: REL-M2 degraded mode and REL-M5 RTO/RPO are the
+  production-blocking siblings.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  At least one AI-dependency chaos exercise completed in the last 180 days
+  with retained after-action actions (attest measuredAt ≤90 days).
+evidenceRequired:
+  - "Chaos experiment plan covering AI provider/tool/gateway failure modes"
+  - "Dated after-action report with retained actions (exercise ≤180 days)"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-chaos-tests"
+      params:
+        hint: >
+          Discover chaos plans and after-actions that cover AI dependency
+          failure modes (provider, model, tool, or gateway).
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest ≥1 AI-dependency chaos
+          exercise in the last 180 days with retained actions (measuredAt ≤90
+          days).
+manualVerification: >
+  1) Confirm production AI dependencies exist. If none, score NOT_APPLICABLE.
+  2) Locate a chaos plan that includes AI provider, model, tool, or gateway
+  failure modes—not only generic CPU/network chaos. 3) Confirm ≥1 exercise in
+  the last 180 days has a dated after-action with retained actions. 4) PASS
+  only if plan + recent exercise + actions hold with measuredAt ≤90 days.
+  REL-R4 provider-loss continuity drills alone do not prove chaos injection.
+  INC-R4 tabletops alone do not prove dependency chaos. REL-M2 degraded-mode
+  docs alone do not prove exercised failure under chaos.
+falsePositiveGuidance: >
+  Do not pass generic infrastructure chaos that never targets AI dependencies.
+  Do not pass plans without a completed exercise ≤180 days. Do not pass
+  after-actions without tracked actions (or explicit no-action rationale).
+  Sibling REL-R4 and INC-R4 do not substitute. Named exceptions need owner and
+  expiry ≤90 days.
+recommendedFixes:
+  - "Add AI provider/tool/gateway failure modes to the chaos experiment plan"
+  - "Run at least one AI-dependency chaos exercise every 180 days and retain after-action actions"
+  - "Retain evidence under imports/ai-chaos-dependency/"
+  - "Time-box gaps with owner and expiry ≤90 days"
+references:
+  - title: "APRF-RFC-0006 — Demote former REL-M7 AI-dependency chaos to recommended"
+    url: "https://github.com/stackrail-io/APRF/blob/main/rfcs/0006-reliability-continuity-rel-m7-to-recommended.md"
+  - title: "Google SRE Book — Addressing Cascading Failures"
+    url: "https://sre.google/sre-book/addressing-cascading-failures/"
+  - title: "Principles of Chaos Engineering"
+    url: "https://principlesofchaos.org/"
+  - title: "AWS Well-Architected — Reliability"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+relatedRules:
+  - "REL-M1"
+  - "REL-M2"
+  - "REL-M3"
+  - "REL-M4"
+  - "REL-M5"
+  - "REL-R7"
+  - "REL-R4"
+  - "INC-R4"
+tags:
+  - "reliability-continuity"
+  - "recommended"
+  - "hybrid"
+  - "chaos"
+  - "ai-dependency"
+applicability:
+  technologies: []
+  minCriticality: 3
+  requiredFromLevel: 5
+status: "active"
+introducedIn: "0.10.0"

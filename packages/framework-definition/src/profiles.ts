@@ -79,7 +79,7 @@ export const PROFILE_REGULATED: AprfProfile = {
   targetCapability: 5,
   mandatoryCheckIds: [
     ...PROFILE_CORE.mandatoryCheckIds,
-    "REL-M6",
+    "REL-M5",
     "CMP-M2",
     "SEC-M5",
     "AUTHN-M4",
@@ -93,13 +93,11 @@ export const PROFILE_REGULATED: AprfProfile = {
     "MEM-M4",
     "EVL-M4",
     "HUM-M4",
-    "REL-M7",
-    "REL-M8",
   ],
   rationale: [
     "Includes every Core gate — regulated systems must still clear production minimums.",
     "Adds residency, fairness, dual control, and signed admission for regulated blast radius.",
-    "Requires chaos/continuity drills and independent assessment sampling.",
+    "Requires continuity/RTO evidence and independent assessment sampling.",
     "Target capability Level 5 — Tier 3 is not Core with a different label.",
   ],
 };
