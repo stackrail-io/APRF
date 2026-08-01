@@ -102,7 +102,7 @@ excludedFromCore:
     reason: "Human approval — not applicable"
   - id: OBS-M1
     reason: "LLM/tool path observability — use general SRE outside this subset"
-  - id: OBS-M2
+  - id: OBS-R4
     reason: "AI cost/trace attribution — not applicable"
   - id: PERF-M1
     reason: "AI feature SLO — not applicable"

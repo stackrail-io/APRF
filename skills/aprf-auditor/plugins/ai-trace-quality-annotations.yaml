@@ -1,0 +1,26 @@
+id: ai-trace-quality-annotations
+title: Trace quality annotations for closed-loop eval (OBS-R2)
+version: "0.2.0"
+executor: collectors/ai-trace-quality-annotations.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-trace-quality-annotations]
+inputs:
+  - "Target repo (annotation schema/tooling + eval/review feed)"
+  - "Optional suite: aprf-assessment/imports/ai-trace-quality-annotations/*.{json}"
+collect:
+  - "Detect secure quality-annotation tooling on traces"
+  - "Ingest coverage; write ai-trace-quality-annotations-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-trace-quality-annotations/*"
+  signals:
+    [ai-trace-quality-annotations, obs-r2, repo-ai-trace-quality-annotations]
+mapsToChecks: [OBS-R2]
+whenUnavailable: >
+  Annotation signals alone are PARTIAL. OBS-R2 PASS needs
+  qualityAnnotationToolingConfigured, annotationsLast90Days≥50,
+  annotationsFeedEvalOrReviewLoop, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline annotation heuristics + optional imported JSON.

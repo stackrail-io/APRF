@@ -1,0 +1,26 @@
+id: ai-trace-sensitive-redaction
+title: AI trace sensitive-field redaction / ACL (OBS-M2)
+version: "0.2.0"
+executor: collectors/ai-trace-sensitive-redaction.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-trace-sensitive-redaction]
+inputs:
+  - "Target repo (trace redaction/ACL + synthetic sensitive-field tests)"
+  - "Optional suite: aprf-assessment/imports/ai-trace-sensitive-redaction/*.{json}"
+collect:
+  - "Detect AI/OTel sensitive span redaction or ACL controls"
+  - "Ingest coverage; write ai-trace-sensitive-redaction-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-trace-sensitive-redaction/*"
+  signals: [ai-trace-sensitive-redaction, obs-m2, repo-ai-trace-sensitive-redaction]
+mapsToChecks: [OBS-M2]
+whenUnavailable: >
+  Control signals alone are PARTIAL. OBS-M2 PASS needs
+  tracesContainSecretsOrSensitiveData=true and
+  syntheticSensitiveFieldRedactionOrAclPct=100, measuredAt ≤90 days.
+  N/A when tracesContainSecretsOrSensitiveData=false.
+live:
+  required: false
+  note: Offline redaction heuristics + optional imported JSON.

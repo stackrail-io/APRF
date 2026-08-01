@@ -68,7 +68,7 @@ relatedRules:
   - "EVL-R1"
   - "EVL-R2"
   - "OBS-M1"
-  - "OBS-M2"
+  - "OBS-R4"
   - "SAF-M2"
 tags:
   - "evaluation"

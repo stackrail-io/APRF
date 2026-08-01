@@ -1,0 +1,25 @@
+id: ai-distributed-trace-linkage
+title: Request→model→tool→outcome distributed trace linkage (OBS-M1)
+version: "0.2.0"
+executor: collectors/ai-distributed-trace-linkage.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-distributed-trace-linkage]
+inputs:
+  - "Target repo (OTel/tracing instrumentation for AI paths)"
+  - "Optional suite: aprf-assessment/imports/ai-distributed-trace-linkage/*.{json}"
+collect:
+  - "Detect request→model→tool→outcome tracing signals"
+  - "Ingest coverage; write ai-distributed-trace-linkage-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-distributed-trace-linkage/*"
+  signals:
+    [ai-distributed-trace-linkage, obs-m1, repo-ai-distributed-trace-linkage]
+mapsToChecks: [OBS-M1]
+whenUnavailable: >
+  Trace signals alone are PARTIAL. OBS-M1 PASS needs linkedTracePct≥95,
+  sampleWindowHours≥24, coversModelToolOutcome=true, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline tracing heuristics + optional imported JSON.

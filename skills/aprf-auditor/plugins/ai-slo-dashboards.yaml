@@ -1,0 +1,25 @@
+id: ai-slo-dashboards
+title: AI SLO dashboards + burn-rate alerts (OBS-R3)
+version: "0.2.0"
+executor: collectors/ai-slo-dashboards.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-slo-dashboards]
+inputs:
+  - "Target repo (named AI SLOs, latency/error/quality burn, burn alerts, dashboards)"
+  - "Optional suite: aprf-assessment/imports/ai-slo-dashboards/*.{json}"
+collect:
+  - "Detect AI SLO/dashboard and burn-alert signals"
+  - "Ingest coverage; write ai-slo-dashboards-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-slo-dashboards/*"
+  signals: [ai-slo-dashboards, obs-r3, repo-ai-slo-dashboards]
+mapsToChecks: [OBS-R3]
+whenUnavailable: >
+  SLO signals alone are PARTIAL. OBS-R3 PASS needs
+  namedSloTargetsForCriticalAiJourneys, coversLatencyErrorAndQualityBurn,
+  burnRateAlertConfigured, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline SLO/dashboard heuristics + optional imported JSON.

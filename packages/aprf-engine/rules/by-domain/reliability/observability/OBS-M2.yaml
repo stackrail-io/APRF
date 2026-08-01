@@ -1,56 +1,87 @@
-id: "OBS-M3"
+id: "OBS-M2"
 category: "observability"
 title: "Sensitive fields in traces must be redacted or access-controlled"
-description: "Sensitive fields in traces shall be redacted or access-controlled"
-whyItMatters: "Sensitive fields in traces shall be redacted or access-controlled Failing this leaves
-  a production gap against: Synthetic secrets/PII in traced fields are redacted or inaccessible to
-  unauthorized roles at 100% in tests"
+description: >
+  When production traces can contain secrets or regulated/sensitive data
+  (API keys, JWTs, passwords, customer PII/PHI, financial data), those fields
+  must be redacted, masked, tokenized, or access-controlled before reaching
+  the tracing backend.
+whyItMatters: >
+  Traces that leak credentials or regulated personal data are a security and
+  privacy incident—not an observability nicety. Unredacted spans turn debugging
+  backends into a second copy of production secrets and customer data.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Synthetic secrets/PII in traced fields are redacted or inaccessible to unauthorized
-  roles at 100% in tests"
+passCondition: >
+  If traces contain (or are designed to contain) secrets or regulated/sensitive
+  data, those fields are redacted, masked, tokenized, or access-controlled
+  before reaching the tracing backend—proven by synthetic sensitive-field tests
+  at 100% (evidence measuredAt ≤90 days). If traces demonstrably cannot carry
+  secrets or regulated/sensitive data, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Trace redaction/ACL config + synthetic sensitive-field test"
+  - "Scope attestation: whether traces can contain secrets or regulated/sensitive data"
+  - "Trace redaction/masking/tokenization or ACL config for sensitive span fields"
+  - "Synthetic sensitive-field test showing 100% redaction or unauthorized-access denial"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-trace-sensitive-redaction"
+      params:
+        hint: >
+          Discover AI/OTel trace redaction or ACL controls for secrets and
+          sensitive span fields, plus synthetic sensitive-field tests.
     - id: "manual-attest"
       params:
-        hint: "Trace redaction/ACL config + synthetic sensitive-field test"
-manualVerification: "For this Check (Sensitive fields in traces must be redacted or
-  access-controlled): inspect current evidence for [Trace redaction/ACL config + synthetic
-  sensitive-field test] and confirm the pass condition holds — Synthetic secrets/PII in traced
-  fields are redacted or inaccessible to unauthorized roles at 100% in tests"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest either NOT_APPLICABLE
+          (traces cannot carry secrets/regulated sensitive data) or 100%
+          synthetic redaction/ACL success with measuredAt ≤90 days.
+manualVerification: >
+  1) Confirm production AI tracing is in scope. If none, score NOT_APPLICABLE.
+  2) Determine whether traces can contain secrets or regulated/sensitive data
+  (API keys, JWTs, passwords, customer PII/PHI, financial data, prompt/completion
+  payloads with those classes). If they demonstrably cannot, score
+  NOT_APPLICABLE with retained rationale. 3) If they can, confirm redaction,
+  masking, tokenization, or ACL before the tracing backend. 4) Confirm
+  synthetic sensitive-field tests show 100% redaction or unauthorized denial.
+  5) PASS only if in-scope sensitive traces + 100% test hold with measuredAt
+  ≤90 days. SEC2-M2 general log redaction alone does not prove AI span-attribute
+  controls. OBS-M1 linkage alone does not prove sensitive-field handling.
+falsePositiveGuidance: >
+  Do not pass “we don’t log PII” without checking span attributes and baggage.
+  Do not pass redaction of console logs only. Do not pass partial canary rates.
+  Do not claim NOT_APPLICABLE when prompts, tool args, or auth headers are
+  traced. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Sensitive fields in traces must be redacted or access-controlled"
-  - "Retain evidence artifacts required by this Check, starting with: Trace redaction/ACL config +
-    synthetic sensitive-field test"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Classify whether AI traces can carry secrets or regulated/sensitive data"
+  - "Redact/mask/tokenize or ACL sensitive span fields before export"
+  - "Add synthetic sensitive-field tests and retain 100% results under imports/ai-trace-sensitive-redaction/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Workbook — Observability"
     url: "https://sre.google/workbook/observability/"
   - title: "OpenTelemetry"
     url: "https://opentelemetry.io/"
+  - title: "OWASP LLM — Sensitive Information Disclosure"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
   - "OBS-M1"
-  - "OBS-M2"
+  - "OBS-R4"
   - "OBS-R1"
   - "OBS-R2"
   - "OBS-R3"
+  - "SEC2-M2"
+  - "PRI-M1"
 tags:
   - "observability"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "trace-redaction"
+  - "sensitive-data"
+  - "conditional"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

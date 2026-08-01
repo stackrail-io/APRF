@@ -1,62 +1,76 @@
 id: "OBS-M1"
 category: "observability"
 title: "Distributed traces must link user request → model calls → tools → outcome"
-description: "Distributed traces shall link user request → model calls → tools → outcome"
-whyItMatters: "Distributed traces shall link user request → model calls → tools → outcome Failing
-  this leaves a production gap against: Canary or sampled traces show parent request ID linking
-  model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours"
+description: >
+  Production AI paths must emit distributed traces that connect the parent
+  user/request ID through model spans, tool spans, and the request outcome.
+whyItMatters: >
+  Without end-to-end linkage, on-call cannot reconstruct what the model and
+  tools did for a failing user request. Debugging becomes log archaeology, and
+  safety/quality incidents lack forensic evidence.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Canary or sampled traces show parent request ID linking model spans, tool spans, and
-  outcome in ≥95% of canary requests over 24 hours"
+passCondition: >
+  Canary or sampled traces show parent request ID linking model spans, tool
+  spans, and outcome in ≥95% of canary requests over 24 hours (trace evidence
+  measuredAt ≤90 days).
 evidenceRequired:
-  - "Sample production traces (redacted) + tracing config"
+  - "Tracing config (or equivalent) instrumenting request → model → tool → outcome"
+  - "Canary or 24h sampled traces showing ≥95% linked coverage (redacted)"
 detection:
-  capability: "automated"
+  capability: "hybrid"
   detectors:
-    - id: "otel-services-present"
+    - id: "repo-ai-distributed-trace-linkage"
       params:
-        hint: "APEP apep.otel.service_inventory — require listed services"
+        hint: >
+          Discover OTel/tracing instrumentation for request→model→tool→outcome
+          linkage and canary/sample coverage.
     - id: "repo-otel-config"
-      params: {}
+      params:
+        hint: Discover OpenTelemetry collector or SDK config for AI services.
     - id: "manual-attest"
       params:
-        hint: "Sample production traces (redacted) + tracing config"
-manualVerification: "For this Check (Distributed traces must link user request → model calls → tools
-  → outcome): inspect current evidence for [Sample production traces (redacted) + tracing config]
-  and confirm the pass condition holds — Canary or sampled traces show parent request ID linking
-  model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours"
-falsePositiveGuidance: "confirm the detector target matches the production path for this Check
-  before waiving. Named exceptions need an owner and expiry ≤90 days."
+        hint: >
+          If automation cannot prove coverage, attest canary or sampled traces
+          link request→model→tool→outcome in ≥95% of canary requests over 24
+          hours (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm a production AI request path is in scope. If none, score
+  NOT_APPLICABLE. 2) Confirm tracing/instrumentation covers parent request ID,
+  model spans, tool spans, and outcome. 3) Confirm a canary or 24h sample shows
+  ≥95% of requests with that linkage. 4) PASS only if coverage holds with
+  measuredAt ≤90 days. Generic HTTP APM without model/tool spans does not
+  satisfy. Cost attribution (OBS-R4) alone does not prove span linkage.
+falsePositiveGuidance: >
+  Do not pass SDK init without model/tool span evidence. Do not pass a single
+  happy-path trace as ≥95% coverage. Do not pass samples older than the
+  measuredAt freshness window. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Distributed traces must link user request → model calls → tools →
-    outcome"
-  - "Retain evidence artifacts required by this Check, starting with: Sample production traces
-    (redacted) + tracing config"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Instrument request → model → tool → outcome spans with a shared parent request ID"
+  - "Run a 24h canary/sample and retain ≥95% linkage coverage (redacted)"
+  - "Retain evidence under imports/ai-distributed-trace-linkage/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE Workbook — Observability"
     url: "https://sre.google/workbook/observability/"
   - title: "OpenTelemetry"
     url: "https://opentelemetry.io/"
 relatedRules:
+  - "OBS-R4"
   - "OBS-M2"
-  - "OBS-M3"
   - "OBS-R1"
   - "OBS-R2"
   - "OBS-R3"
+  - "INC-R1"
 tags:
   - "observability"
   - "mandatory"
-  - "automated"
+  - "hybrid"
+  - "tracing"
+  - "opentelemetry"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

@@ -64,7 +64,7 @@ relatedRules:
   - "DG-R1"
   - "DG-R3"
   - "OBS-M1"
-  - "OBS-M2"
+  - "OBS-R4"
   - "MOD-M1"
 tags:
   - "data-governance"

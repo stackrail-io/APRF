@@ -13,5 +13,5 @@ emits:
   nodeClass: runtime
   refPattern: "**/*otel*"
   signals: [trace, span-llm, span-tool]
-mapsToChecks: [OBS-M1, OBS-M2, COST-M1]
+mapsToChecks: [OBS-M1, OBS-R4, COST-M1]
 whenUnavailable: "Ask user; do not assume production tracing is enabled"
