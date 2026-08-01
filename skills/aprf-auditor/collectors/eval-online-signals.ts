@@ -259,8 +259,7 @@ export function buildEvalOnlineSignalsReport(opts: {
     opts.imported.dashboardFreshnessHours <= MAX_DASHBOARD_FRESHNESS_HOURS;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: EvalOnlineSignalsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: EvalOnlineSignalsReport["summary"]["statusHint"];
   let evlM3Satisfied: boolean | null = null;
 
   const measuredFail =

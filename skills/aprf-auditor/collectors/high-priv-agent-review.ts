@@ -156,8 +156,7 @@ function loadImported(
       let revokeOrNone: boolean | null = revokeCombined;
       if (revokeOrNone === null) {
         if (revokeCycle === true || noneWarranted === true) revokeOrNone = true;
-        else if (revokeCycle === false && noneWarranted !== true)
-          revokeOrNone = false;
+        else if (revokeCycle === false) revokeOrNone = false;
       }
       measuredAt = mergeOldestMeasuredAt(measuredAt, fileMeasuredAt);
       highPrivilegeAgentIdentitiesPresent = mergeOrBool(

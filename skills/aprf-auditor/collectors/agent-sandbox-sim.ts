@@ -280,8 +280,7 @@ export function buildAgentSandboxSimReport(opts: {
     opts.imported.outcomePass !== false;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AgentSandboxSimReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AgentSandboxSimReport["summary"]["statusHint"];
   let agnR2Satisfied: boolean | null = null;
 
   const measuredFail =

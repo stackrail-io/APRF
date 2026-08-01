@@ -244,8 +244,7 @@ export function buildPromptRollbackReport(opts: {
   const pathOk = opts.imported.rollbackWithoutFullAppRedeploy === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: PromptRollbackReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: PromptRollbackReport["summary"]["statusHint"];
   let prmM3Satisfied: boolean | null = null;
 
   const measuredFail =

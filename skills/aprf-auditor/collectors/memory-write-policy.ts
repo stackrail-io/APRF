@@ -233,8 +233,7 @@ export function buildMemoryWritePolicyReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: MemoryWritePolicyReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: MemoryWritePolicyReport["summary"]["statusHint"];
   let memM3Satisfied: boolean | null = null;
 
   const measuredFail =

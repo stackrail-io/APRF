@@ -267,8 +267,7 @@ export function buildModelDeprecationSunsetReport(opts: {
     opts.imported.undocumentedPinsPastSunset === 0;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: ModelDeprecationSunsetReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: ModelDeprecationSunsetReport["summary"]["statusHint"];
   let modR1Satisfied: boolean | null = null;
 
   const measuredFail =

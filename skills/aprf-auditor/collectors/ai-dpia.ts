@@ -288,7 +288,7 @@ export function buildAiDpiaReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: AiDpiaReport["summary"]["statusHint"] = "not_demonstrated";
+  let statusHint: AiDpiaReport["summary"]["statusHint"];
   let priR3Satisfied: boolean | null = null;
 
   const measuredFail =

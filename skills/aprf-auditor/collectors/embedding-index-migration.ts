@@ -257,8 +257,7 @@ export function buildEmbeddingIndexMigrationReport(opts: {
   const noUpgrade =
     opts.imported.found && opts.imported.noUpgradeInWindowAttested === true;
 
-  let statusHint: EmbeddingIndexMigrationReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: EmbeddingIndexMigrationReport["summary"]["statusHint"];
   let depR3Satisfied: boolean | null = null;
 
   const explicitFail =

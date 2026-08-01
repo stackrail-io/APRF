@@ -245,8 +245,7 @@ export function buildPromptModelVersionRetentionReport(opts: {
   const dryRunOk = opts.imported.immediatePriorRestoreDryRunPassed === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: PromptModelVersionRetentionReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: PromptModelVersionRetentionReport["summary"]["statusHint"];
   let chgM1Satisfied: boolean | null = null;
 
   const measuredFail =

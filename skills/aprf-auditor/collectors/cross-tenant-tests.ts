@@ -395,8 +395,7 @@ export function buildCrossTenantReport(
     presentAttest = true;
   }
 
-  let statusHint: CrossTenantReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: CrossTenantReport["summary"]["statusHint"];
   let authzM2Satisfied: boolean | null = null;
 
   if (cases.length === 0 && presentAttest === false) {

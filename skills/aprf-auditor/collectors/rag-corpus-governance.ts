@@ -335,8 +335,7 @@ export function buildRagCorpusGovernanceReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: RagCorpusGovernanceReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: RagCorpusGovernanceReport["summary"]["statusHint"];
   let dgM1Satisfied: boolean | null = null;
 
   const measuredFail =

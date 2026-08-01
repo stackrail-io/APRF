@@ -8,6 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
+- Added CI gate `npm run aprf:collectors:unused` (TypeScript `noUnusedLocals`/`noUnusedParameters` + path-sensitive useless non-nullish initializers) so collector dead defaults like `statusHint = "not_demonstrated"` fail the build; removed those dead initializers across collectors.
 - Rewrote **authorization** **AUTHZ-R2** (hybrid high-privilege agent ≤90d access review + revoke/scope-reduction or signed none-warranted; `high-priv-agent-review` collector + measuredAt ≤90d; N/A via `highPrivilegeAgentIdentitiesPresent=false`); cleared `technologies`; synced `aprf-spec.json`.
 - Rewrote **authorization** **AUTHZ-R1** (hybrid tool/model policy-as-code + CI/admission enforcement + ≤90d deny evidence; `policy-as-code` / `repo-policy-as-code` collector + measuredAt ≤90d; N/A via `toolOrModelAccessControlPresent=false`); cleared `technologies`; synced `aprf-spec.json`.
 - Rewrote **authorization** **AUTHZ-M4** (hybrid sensitive document-class ABAC + inventory match + deny tests; `sensitive-doc-abac` collector + measuredAt ≤90d; N/A via `sensitiveDocumentClassesPresent=false`); cleared `technologies`; synced `aprf-spec.json`.

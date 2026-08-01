@@ -316,8 +316,7 @@ export function buildCorpusFreshnessMetricsReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: CorpusFreshnessMetricsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: CorpusFreshnessMetricsReport["summary"]["statusHint"];
   let dgR1Satisfied: boolean | null = null;
 
   const measuredFail =

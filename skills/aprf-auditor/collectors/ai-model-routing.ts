@@ -259,8 +259,7 @@ export function buildAiModelRoutingReport(opts: {
     opts.routing.found || opts.imported.routingEnabled === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AiModelRoutingReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiModelRoutingReport["summary"]["statusHint"];
   let costR2Satisfied: boolean | null = null;
 
   const measuredFail =

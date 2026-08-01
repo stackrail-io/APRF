@@ -399,8 +399,7 @@ export function buildAuthzReport(
     presentAttest = true;
   }
 
-  let statusHint: AuthzEntryReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AuthzEntryReport["summary"]["statusHint"];
   let authzM1Satisfied: boolean | null = null;
 
   if (entryPoints.length === 0 && presentAttest === false) {

@@ -230,8 +230,7 @@ export function buildAiSpendLimitsReport(opts: {
     opts.imported.enforcedDenyOrThrottle === true && ageOk;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AiSpendLimitsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiSpendLimitsReport["summary"]["statusHint"];
   let costM1Satisfied: boolean | null = null;
 
   const measuredFail =

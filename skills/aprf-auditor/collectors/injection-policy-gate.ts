@@ -338,8 +338,7 @@ export function buildInjectionPolicyReport(opts: {
     );
   }
 
-  let statusHint: InjectionPolicyReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: InjectionPolicyReport["summary"]["statusHint"];
   let secM1Satisfied: boolean | null = null;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
   const scopeAbsent =

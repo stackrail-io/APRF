@@ -264,8 +264,7 @@ export function buildModelPayloadClassificationReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: ModelPayloadClassificationReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: ModelPayloadClassificationReport["summary"]["statusHint"];
   let priM1Satisfied: boolean | null = null;
 
   const measuredFail =

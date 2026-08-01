@@ -253,8 +253,7 @@ export function buildRollbackRunbookReport(opts: {
   const drillOk = opts.imported.onCallWalkthroughOrDrillCompleted === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: RollbackRunbookReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: RollbackRunbookReport["summary"]["statusHint"];
   let chgM2Satisfied: boolean | null = null;
 
   const measuredFail =

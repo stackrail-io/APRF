@@ -261,8 +261,7 @@ export function buildAiPromptCacheReport(opts: {
     opts.cache.found || opts.imported.cacheEnabled === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AiPromptCacheReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiPromptCacheReport["summary"]["statusHint"];
   let costR1Satisfied: boolean | null = null;
 
   const measuredFail =

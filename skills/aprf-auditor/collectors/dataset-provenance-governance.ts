@@ -293,8 +293,7 @@ export function buildDatasetProvenanceGovernanceReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: DatasetProvenanceGovernanceReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: DatasetProvenanceGovernanceReport["summary"]["statusHint"];
   let dgM2Satisfied: boolean | null = null;
 
   const measuredFail =

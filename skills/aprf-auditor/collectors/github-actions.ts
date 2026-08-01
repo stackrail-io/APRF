@@ -119,7 +119,7 @@ async function fetchRecentRuns(ctx: CollectorContext): Promise<EvidenceNode[]> {
         head_sha: string;
       }>;
     };
-    return (body.workflow_runs ?? []).map((run, idx) => ({
+    return (body.workflow_runs ?? []).map((run) => ({
       id: `github-actions:live:${run.id}`,
       class: "ci" as const,
       ref: run.html_url,

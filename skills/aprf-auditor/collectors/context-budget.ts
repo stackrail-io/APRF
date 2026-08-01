@@ -249,8 +249,7 @@ export function buildContextBudgetReport(opts: {
     opts.imported.silentOverflowCount === 0;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: ContextBudgetReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: ContextBudgetReport["summary"]["statusHint"];
   let ctxM1Satisfied: boolean | null = null;
 
   const measuredFail =

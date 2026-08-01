@@ -279,8 +279,7 @@ export function buildAiFinopsUnitEconomicsReport(opts: {
     ageOk;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AiFinopsUnitEconomicsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiFinopsUnitEconomicsReport["summary"]["statusHint"];
   let costR3Satisfied: boolean | null = null;
 
   const measuredFail =

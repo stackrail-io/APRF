@@ -248,8 +248,7 @@ export function buildAgentBehaviorFeatureFlagsReport(opts: {
   const disableOk = opts.imported.killDisablePathTestedLast90Days === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AgentBehaviorFeatureFlagsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AgentBehaviorFeatureFlagsReport["summary"]["statusHint"];
   let chgR2Satisfied: boolean | null = null;
 
   const measuredFail =

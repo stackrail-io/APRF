@@ -198,8 +198,7 @@ export function buildAiLeadershipReviewReport(opts: {
     opts.imported.reviewAgeDays <= REVIEW_MAX_AGE_DAYS;
   const actionsOk = opts.imported.openActionsIncomplete === 0;
   const passOk = reviewOk && actionsOk && ageOk && importFresh;
-  let statusHint: AiLeadershipReviewReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiLeadershipReviewReport["summary"]["statusHint"];
   let orgR1Satisfied: boolean | null = null;
   const measuredFail =
     opts.imported.found &&

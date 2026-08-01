@@ -282,8 +282,7 @@ export function buildAiControlEvidenceMatrixReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: AiControlEvidenceMatrixReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiControlEvidenceMatrixReport["summary"]["statusHint"];
   let cmpM2Satisfied: boolean | null = null;
 
   const measuredFail =

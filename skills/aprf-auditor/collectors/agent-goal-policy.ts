@@ -266,8 +266,7 @@ export function buildAgentGoalPolicyReport(opts: {
   const denyOk = opts.imported.syntheticConflictDenied === true && ageOk;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AgentGoalPolicyReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AgentGoalPolicyReport["summary"]["statusHint"];
   let agnR1Satisfied: boolean | null = null;
 
   const measuredFail =

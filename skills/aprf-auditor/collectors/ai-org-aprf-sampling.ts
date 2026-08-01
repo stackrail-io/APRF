@@ -8,7 +8,6 @@ import type {
   Collector,
   CollectorContext,
   CollectorResult,
-  EvidenceNode,
 } from "./types.ts";
 import {
   ensureDir,
@@ -201,8 +200,7 @@ export function buildAiOrgAprfSamplingReport(opts: {
   const findingsOk = opts.imported.findingsListed === true;
   const passOk =
     assessmentOk && sampledOk && findingsOk && ageOk && importFresh;
-  let statusHint: AiOrgAprfSamplingReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiOrgAprfSamplingReport["summary"]["statusHint"];
   let orgR5Satisfied: boolean | null = null;
   const measuredFail =
     opts.imported.found &&

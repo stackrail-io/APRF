@@ -246,8 +246,7 @@ export function buildModelCapabilityAllowlistReport(opts: {
   const denyOk = opts.imported.deniedCapabilityAttemptRecorded === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: ModelCapabilityAllowlistReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: ModelCapabilityAllowlistReport["summary"]["statusHint"];
   let modR2Satisfied: boolean | null = null;
 
   const measuredFail =

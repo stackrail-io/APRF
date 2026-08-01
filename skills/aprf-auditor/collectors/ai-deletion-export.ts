@@ -257,8 +257,7 @@ export function buildAiDeletionExportReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: AiDeletionExportReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiDeletionExportReport["summary"]["statusHint"];
   let priM2Satisfied: boolean | null = null;
 
   const measuredFail =

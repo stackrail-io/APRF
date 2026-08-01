@@ -237,8 +237,7 @@ export function buildMemoryIntegrityReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: MemoryIntegrityReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: MemoryIntegrityReport["summary"]["statusHint"];
   let memM4Satisfied: boolean | null = null;
 
   const measuredFail =

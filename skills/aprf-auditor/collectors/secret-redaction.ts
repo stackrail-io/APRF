@@ -276,8 +276,7 @@ export function buildSecretRedactionReport(opts: {
     );
   }
 
-  let statusHint: SecretRedactionReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: SecretRedactionReport["summary"]["statusHint"];
   let sec2M2Satisfied: boolean | null = null;
 
   if (detectionRatePct !== null && detectionRatePct < 100) {

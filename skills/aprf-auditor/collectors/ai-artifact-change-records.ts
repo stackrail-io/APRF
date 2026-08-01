@@ -231,8 +231,7 @@ export function buildAiArtifactChangeRecordsReport(opts: {
     opts.imported.changesMissingWhoWhatWhenOrReviewLink === 0;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AiArtifactChangeRecordsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiArtifactChangeRecordsReport["summary"]["statusHint"];
   let depM2Satisfied: boolean | null = null;
 
   const explicitFail =

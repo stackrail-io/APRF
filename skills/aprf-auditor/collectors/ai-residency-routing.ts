@@ -242,8 +242,7 @@ export function buildAiResidencyRoutingReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: AiResidencyRoutingReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiResidencyRoutingReport["summary"]["statusHint"];
   let priM3Satisfied: boolean | null = null;
 
   const measuredFail =

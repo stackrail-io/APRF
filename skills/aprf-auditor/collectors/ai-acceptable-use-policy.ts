@@ -268,8 +268,7 @@ export function buildAiAcceptableUsePolicyReport(opts: {
     opts.imported.hasVersion === true && opts.imported.hasOwner === true;
   const passOk = metaOk && sectionsOk && reviewOk && ageOk && importFresh;
 
-  let statusHint: AiAcceptableUsePolicyReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiAcceptableUsePolicyReport["summary"]["statusHint"];
   let orgM1Satisfied: boolean | null = null;
 
   const measuredFail =

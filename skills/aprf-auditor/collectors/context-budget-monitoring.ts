@@ -240,8 +240,7 @@ export function buildContextBudgetMonitoringReport(opts: {
   const notifyOk = opts.imported.alertNotifyProven === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: ContextBudgetMonitoringReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: ContextBudgetMonitoringReport["summary"]["statusHint"];
   let ctxR1Satisfied: boolean | null = null;
 
   const measuredFail =

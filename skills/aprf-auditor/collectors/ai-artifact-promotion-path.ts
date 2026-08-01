@@ -252,8 +252,7 @@ export function buildAiArtifactPromotionPathReport(opts: {
   const hotEditOk = opts.imported.productionHotEditsWithoutChangeRecord === 0;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AiArtifactPromotionPathReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiArtifactPromotionPathReport["summary"]["statusHint"];
   let depM1Satisfied: boolean | null = null;
 
   const explicitFail =

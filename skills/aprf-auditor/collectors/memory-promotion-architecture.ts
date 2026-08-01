@@ -272,8 +272,7 @@ export function buildMemoryPromotionArchitectureReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: MemoryPromotionArchitectureReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: MemoryPromotionArchitectureReport["summary"]["statusHint"];
   let memR3Satisfied: boolean | null = null;
 
   const measuredFail =

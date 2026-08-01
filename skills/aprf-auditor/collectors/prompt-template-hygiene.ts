@@ -261,8 +261,7 @@ export function buildPromptTemplateHygieneReport(opts: {
     opts.imported.hardcodedPiiInTemplates === 0;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: PromptTemplateHygieneReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: PromptTemplateHygieneReport["summary"]["statusHint"];
   let prmR1Satisfied: boolean | null = null;
 
   const measuredFail =

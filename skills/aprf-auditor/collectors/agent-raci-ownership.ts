@@ -279,8 +279,7 @@ export function buildAgentRaciOwnershipReport(opts: {
   const coversAll = opts.imported.coversAllProductionIds === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AgentRaciOwnershipReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AgentRaciOwnershipReport["summary"]["statusHint"];
   let agnR3Satisfied: boolean | null = null;
 
   const measuredFail =

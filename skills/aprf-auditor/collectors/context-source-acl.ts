@@ -250,8 +250,7 @@ export function buildContextSourceAclReport(opts: {
     opts.imported.unlabeledIncludedCount === 0;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: ContextSourceAclReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: ContextSourceAclReport["summary"]["statusHint"];
   let ctxM2Satisfied: boolean | null = null;
 
   const measuredFail =

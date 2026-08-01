@@ -263,8 +263,7 @@ export function buildModelLicenseProvenanceReport(opts: {
     opts.imported.blockedLicensesMissingException === 0;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: ModelLicenseProvenanceReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: ModelLicenseProvenanceReport["summary"]["statusHint"];
   let modR3Satisfied: boolean | null = null;
 
   const measuredFail =

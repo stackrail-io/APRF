@@ -2,6 +2,22 @@
 
 Shipped **local** collectors that emit `evidence-graph.json`. No StackRail backend.
 
+## Quality gate
+
+CI runs `npm run aprf:collectors:unused`, which fails on:
+
+1. Unused locals / parameters / imports (`noUnusedLocals`, `noUnusedParameters`)
+2. Useless non-nullish initializers overwritten on every path before read
+   (e.g. `let statusHint = "not_demonstrated"` then always reassigned)
+
+Declare locals without a dummy default when every branch assigns them:
+
+```ts
+let statusHint: Report["summary"]["statusHint"];
+```
+
+`= null` / `= undefined` sentinels are allowed (common merge/attest pattern).
+
 ## Quick start
 
 ```bash

@@ -275,8 +275,7 @@ export function buildFeedbackPromotionGovernanceReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: FeedbackPromotionGovernanceReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: FeedbackPromotionGovernanceReport["summary"]["statusHint"];
   let dgM3Satisfied: boolean | null = null;
 
   const measuredFail =

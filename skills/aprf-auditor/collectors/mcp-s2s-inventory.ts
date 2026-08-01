@@ -248,8 +248,8 @@ function scoreConnection(c: S2SConnection, index: number): ScoredConnection {
       (c.raw?.info as { id?: string; name?: string } | undefined)?.name,
   );
 
-  let ok = false;
-  let reason = "";
+  let ok: boolean;
+  let reason: string;
 
   if (ANON_AUTH.has(auth) || auth === "null" || auth === "undefined") {
     ok = false;

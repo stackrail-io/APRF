@@ -269,8 +269,7 @@ export function buildPlatformInnerLoopEvalsReport(opts: {
     ageOk &&
     importFresh;
 
-  let statusHint: PlatformInnerLoopEvalsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: PlatformInnerLoopEvalsReport["summary"]["statusHint"];
   let dxR2Satisfied: boolean | null = null;
 
   const measuredFail =
