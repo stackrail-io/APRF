@@ -11,9 +11,10 @@ whyItMatters: >
   admin APIs and data stores become reachable through natural language. A
   documented trust boundary, egress allowlist, and probe proving only
   allowlisted destinations (with 0 unrestricted internal admin/data-store
-  routes) makes the boundary measurable. Distinct from INF-M3 agent/tool
-  dependency-inventory segmentation, SEC-M1 injection privilege mediation, and
-  AUTHZ Checks on application RBAC alone.
+  routes) makes the boundary measurable. Distinct from INF-M3 (infra
+  least-privilege connectivity of agent/tool runtimes to documented
+  dependencies via network and/or identity controls), SEC-M1 injection
+  privilege mediation, and AUTHZ Checks on application RBAC alone.
 severity: "critical"
 weight: 4
 gate: "mandatory"
@@ -48,10 +49,11 @@ manualVerification: >
   results: only allowlisted destinations are reachable; unrestricted routes
   from the model identity to internal admin APIs or data stores = 0. 5) PASS
   only if trust boundary + allowlist + probe results hold with measuredAt ≤90
-  days. INF-M3 dependency-inventory match alone does not prove model-path
-  proxy prevention. SEC-M1 injection suites alone do not prove egress
-  boundaries. AUTHZ application RBAC alone does not prove network/identity
-  isolation of the model path.
+  days. INF-M3 least-privilege connectivity to documented dependencies alone
+  does not prove the model path cannot proxy to admin APIs/data stores.
+  SEC-M1 injection suites alone do not prove egress boundaries. AUTHZ
+  application RBAC alone does not prove network/identity isolation of the
+  model path.
 falsePositiveGuidance: >
   Do not pass open egress with “deny in docs only.” Do not pass cluster-wide
   NetworkPolicies that omit the model/tool identity. Do not pass probes that

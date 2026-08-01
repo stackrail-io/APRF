@@ -1,62 +1,105 @@
 id: "INF-M2"
 category: "infrastructure"
-title: "Base images and runtimes must follow documented patching SLAs"
-description: "Base images and runtimes shall follow documented patching SLAs"
-whyItMatters: "Base images and runtimes shall follow documented patching SLAs Failing this leaves a
-  production gap against: 100% of production AI runtime images are within patching SLA (e.g.
-  critical fixes ≤ 14 days); report shows 0 SLA breaches or open waivers with expiry"
+title: "Production AI runtime environments must follow documented patching SLAs"
+description: >
+  Production AI runtime environments shall comply with the organization's
+  documented patching SLA—or hold approved time-boxed waivers—proven by
+  inventory plus vulnerability/age evidence, not by image-tag pinning alone.
+whyItMatters: >
+  Stale containers, VMs, and managed AI runtimes accumulate known CVEs and
+  unsupported bases. Measuring against the org's written SLA (not a fixed
+  calendar) keeps APRF compatible with enterprise policy while still
+  requiring 100% coverage or owned waivers. Distinct from INF-M1 (public
+  exposure of data stores/control planes), INF-M3 (agent/tool least-privilege
+  connectivity), INF-M4 (shared accelerator isolation), SCI-M2 (dependency
+  lock/pin), and image-tag pinning checks that do not prove patch age or CVE
+  disposition.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "100% of production AI runtime images are within patching SLA (e.g. critical fixes ≤
-  14 days); report shows 0 SLA breaches or open waivers with expiry"
+passCondition: >
+  Inventory of production AI runtime environments exists; a documented
+  patching SLA covers those environments; 100% comply with that SLA or
+  approved time-boxed waivers exist with owner and expiry; report shows 0
+  SLA breaches without such waivers and vulnerability/age evidence covers
+  the inventory (measuredAt ≤90 days). If no production AI runtime
+  environments exist, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Patching SLA policy + image age/CVE backlog report for AI runtimes"
+  - "Documented patching SLA for production AI runtime environments"
+  - "Inventory of production AI runtime environments (containers, VMs, serverless, managed AI platforms, or equivalent)"
+  - "Vulnerability scan and/or image/runtime age report covering that inventory (measuredAt ≤90 days)"
+  - "CVE/patch backlog disposition + waiver register for any SLA exceptions (owner and expiry)"
 detection:
   capability: "hybrid"
   detectors:
-    - id: "docker-no-latest-tag"
-      params: {}
+    - id: "repo-ai-runtime-patching"
+      params:
+        hint: >
+          Discover patching-SLA, runtime-inventory (required for PASS),
+          CVE/age-scan, and waiver signals; ingest coverage under
+          imports/ai-runtime-patching/; require inventory (or present=true),
+          documented SLA, 100% within SLA (or waived), 0 unwaived breaches,
+          vulnerability/age report, measuredAt ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "Patching SLA policy + image age/CVE backlog report for AI runtimes"
-manualVerification: "For this Check (Base images and runtimes must follow documented patching SLAs):
-  inspect current evidence for [Patching SLA policy + image age/CVE backlog report for AI runtimes]
-  and confirm the pass condition holds — 100% of production AI runtime images are within patching
-  SLA (e.g. critical fixes ≤ 14 days); report shows 0 SLA breaches or open waivers with expiry"
-falsePositiveGuidance: "when automation and attestation disagree, prefer the stricter outcome until
-  reconciled. Waive only with owner, expiry, and which signal covers the gap."
+        hint: >
+          If automation cannot prove coverage, attest inventory plus a
+          documented patching SLA and scan/age evidence showing 100% of
+          production AI runtimes within SLA or approved time-boxed waivers
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI runtime environments exist (containers, VMs,
+  serverless, managed AI platforms, or equivalent). If none, score
+  NOT_APPLICABLE. 2) Inventory those runtimes (required—do not PASS from
+  SLA, CVE, or waiver docs alone). 3) Locate the organization's documented
+  patching SLA (critical/high windows may differ by org—do not require a
+  fixed day count). 4) Review vulnerability scan and/or image/runtime age
+  evidence covering that inventory (measuredAt ≤90 days). 5) Confirm 100%
+  comply with the documented SLA, or each breach has an approved waiver
+  with owner and expiry. 6) PASS only if inventory + SLA + scan/age
+  evidence + zero unwaived breaches hold. Image pinning without :latest
+  alone does not prove patch compliance. INF-M1 public-exposure scans alone
+  do not prove patching SLA. SCI-M2 lockfiles alone do not prove runtime
+  image age/CVE disposition.
+falsePositiveGuidance: >
+  Do not pass image-tag pinning (absence of :latest) as this Check. Do not
+  hardcode a universal critical-fix window (e.g. 14 days)—use the org's
+  documented SLA. Do not pass SLA, CVE/age-scan, or waiver signals without
+  an inventory of production AI runtimes (or present=true). Do not pass
+  empty inventories without an explicit N/A attest. Do not score INF-M1,
+  INF-M3, INF-M4, or SCI-M2 as substitutes. Named exceptions need owner and
+  expiry ≤90 days (or the SLA's waiver window, if stricter).
 recommendedFixes:
-  - "Implement and operationalize: Base images and runtimes must follow documented patching SLAs"
-  - "Retain evidence artifacts required by this Check, starting with: Patching SLA policy + image
-    age/CVE backlog report for AI runtimes"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Document a patching SLA for production AI runtime environments and inventory those runtimes"
+  - "Run vulnerability/age scans (Trivy, Grype, Scout, cloud registry/inspector, or equivalent) against the inventory"
+  - "Close or time-box SLA breaches with owner and expiry; retain under imports/ai-runtime-patching/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "CIS Benchmarks"
     url: "https://www.cisecurity.org/cis-benchmarks"
-  - title: "CNCF security technical advisory guidance"
-    url: "https://www.cncf.io/"
+  - title: "NIST SP 800-40 — Guide to Enterprise Patch Management Technologies"
+    url: "https://csrc.nist.gov/publications/detail/sp/800-40/rev-4/final"
   - title: "AWS Well-Architected — Security"
     url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "INF-M1"
   - "INF-M3"
   - "INF-M4"
   - "INF-R1"
   - "INF-R3"
+  - "SCI-M2"
+  - "SCI-R1"
 tags:
   - "infrastructure"
   - "mandatory"
   - "hybrid"
+  - "patching"
+  - "runtime"
+  - "cve"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
-    - "terraform"
-    - "docker"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

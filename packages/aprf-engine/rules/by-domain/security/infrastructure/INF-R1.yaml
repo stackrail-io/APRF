@@ -1,47 +1,53 @@
 id: "INF-R1"
 category: "infrastructure"
 title: "Production systems should have signed model and container artifacts with verify-on-deploy"
-description: "Signed model and container artifacts with verify-on-deploy"
-whyItMatters: "Signed model and container artifacts with verify-on-deploy Failing this leaves a
-  production gap against: Unsigned model/container images cannot schedule in production namespaces;
-  policy verified by a failed admission test within 90 days"
+description: >
+  Deprecated: superseded by SCI-R1 (SLSA-aligned signed model/container
+  verify-on-deploy). Retained for N−1 readers; new assessments should use the
+  supply-chain successor Check.
+whyItMatters: >
+  Unsigned model and container images can be substituted in production.
+  Prefer SCI-R1 for the active supply-chain outcome. This Check remains only
+  for historical assessments that still reference the infrastructure
+  predecessor.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Unsigned model/container images cannot schedule in production namespaces; policy
-  verified by a failed admission test within 90 days"
+passCondition: >
+  Unsigned model/container images cannot schedule in production namespaces;
+  policy verified by a failed admission test within 90 days. Prefer scoring
+  SCI-R1 instead.
 evidenceRequired:
-  - "Cluster/admission controller config requiring signed images + last failed-unsigned admission
-    event or drill"
+  - "Cluster/admission controller config requiring signed images + last failed-unsigned admission event or drill"
 detection:
   capability: "manual"
   detectors:
     - id: "manual-attest"
       params:
-        hint: "Cluster/admission controller config requiring signed images + last failed-unsigned admission
-          event or drill"
-manualVerification: "For this Check (Signed model and container artifacts with verify-on-deploy):
-  inspect current evidence for [Cluster/admission controller config requiring signed images + last
-  failed-unsigned admission event or drill] and confirm the pass condition holds — Unsigned
-  model/container images cannot schedule in production namespaces; policy verified by a failed
-  admission test within 90 days"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          Prefer SCI-R1. If scoring this deprecated Check for N−1 continuity,
+          attest admission policy requiring signed images plus a
+          failed-unsigned admission event or drill within 90 days.
+manualVerification: >
+  Prefer SCI-R1. If this deprecated Check must be scored: 1) Confirm
+  admission/verify-on-deploy requires signed model/container images. 2)
+  Confirm an unsigned artifact was rejected in a recorded test or event
+  within 90 days. 3) PASS only if policy + rejection evidence hold.
+falsePositiveGuidance: >
+  Do not score this Check when SCI-R1 already covers the outcome. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Signed model and container artifacts with
-    verify-on-deploy"
-  - "Retain evidence artifacts required by this Check, starting with: Cluster/admission controller
-    config requiring signed images + last failed-unsigned admission event or drill"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Migrate assessments to SCI-R1 (SLSA-aligned signed model/container verify-on-deploy)"
+  - "If still scoring this deprecated Check, retain admission config plus a failed-unsigned admission drill within 90 days"
 references:
+  - title: "SLSA — Supply-chain Levels for Software Artifacts"
+    url: "https://slsa.dev/"
   - title: "CIS Benchmarks"
     url: "https://www.cisecurity.org/cis-benchmarks"
-  - title: "CNCF security technical advisory guidance"
-    url: "https://www.cncf.io/"
   - title: "AWS Well-Architected — Security"
     url: "https://aws.amazon.com/architecture/well-architected/"
 relatedRules:
+  - "SCI-R1"
   - "INF-M1"
   - "INF-M2"
   - "INF-M3"
@@ -51,14 +57,9 @@ tags:
   - "infrastructure"
   - "recommended"
   - "manual"
+  - "deprecated"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
-    - "terraform"
-    - "docker"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "deprecated"

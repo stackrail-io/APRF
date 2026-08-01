@@ -1,62 +1,108 @@
 id: "INF-M4"
 category: "infrastructure"
-title: "GPU/accelerator isolation and noisy-neighbor controls must protect multi-tenant inference"
-description: "GPU/accelerator isolation and noisy-neighbor controls shall protect multi-tenant inference"
-whyItMatters: "GPU/accelerator isolation and noisy-neighbor controls shall protect multi-tenant
-  inference Failing this leaves a production gap against: PASS if isolation controls are documented
-  and the latest isolation/capacity test (≤90 days) meets stated limits"
+title: "Shared AI accelerator infrastructure must enforce tenant isolation and noisy-neighbor
+  controls"
+description: >
+  Shared AI accelerator infrastructure shall enforce tenant isolation and
+  noisy-neighbor controls—proven by documented isolation design plus a fresh
+  isolation/capacity test meeting stated limits—not by GPU presence alone.
+whyItMatters: >
+  On shared GPU/accelerator clusters, one tenant’s load or escape can starve
+  or interfere with others. Scheduling policy, MIG/vGPU/resource quotas,
+  QoS, and a ≤90-day isolation/capacity test make the control measurable.
+  Not applicable when inference is CPU-only, single-tenant/dedicated
+  accelerators, or consumed only via managed model APIs (OpenAI, Anthropic,
+  Bedrock, Azure OpenAI, Vertex managed endpoints, and equivalents) where
+  the organization does not operate shared accelerator infrastructure.
+  Distinct from INF-M1 (public exposure of data stores/control planes),
+  INF-M2 (runtime patching SLA), and INF-M3 (agent/tool network/identity
+  connectivity).
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "PASS if isolation controls are documented and the latest isolation/capacity test
-  (≤90 days) meets stated limits"
+passCondition: >
+  Inventory or explicit scope confirms shared AI accelerator infrastructure;
+  isolation and noisy-neighbor controls are documented; and the latest
+  isolation/capacity test (measuredAt ≤90 days) meets stated limits. If the
+  organization does not operate shared AI accelerator infrastructure (e.g.
+  managed-API-only, CPU-only, single-tenant, or dedicated GPU per workload),
+  score NOT_APPLICABLE.
 evidenceRequired:
-  - "Isolation design + capacity/isolation test report for shared accelerators"
+  - "Scope note: shared AI accelerator infrastructure present (or explicit N/A for managed-API/CPU-only/single-tenant/dedicated)"
+  - "Isolation design (GPU scheduling, MIG/vGPU, resource quotas, tenant QoS, or equivalent)"
+  - "Isolation and/or capacity test report meeting stated limits (measuredAt ≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-shared-accelerator-isolation"
+      params:
+        hint: >
+          Discover shared GPU/accelerator inventory (required for PASS)
+          plus MIG/vGPU, scheduling/QoS, and isolation/capacity-test
+          signals; ingest coverage under imports/shared-accelerator-isolation/;
+          require inventory (or present=true), isolation design + test
+          meeting limits with measuredAt ≤90 days; N/A when
+          sharedAiAcceleratorInfrastructurePresent=false.
     - id: "manual-attest"
       params:
-        hint: "Isolation design + capacity/isolation test report for shared accelerators"
-manualVerification: "For this Check (GPU/accelerator isolation and noisy-neighbor controls must
-  protect multi-tenant inference): inspect current evidence for [Isolation design +
-  capacity/isolation test report for shared accelerators] and confirm the pass condition holds —
-  PASS if isolation controls are documented and the latest isolation/capacity test (≤90 days) meets
-  stated limits"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest shared-accelerator
+          scope plus isolation design and a ≤90-day isolation/capacity test
+          meeting stated limits—or attest
+          sharedAiAcceleratorInfrastructurePresent=false for managed-API,
+          CPU-only, single-tenant, or dedicated-GPU deployments.
+manualVerification: >
+  1) Confirm the organization operates shared AI accelerator infrastructure
+  (multi-tenant GPU clusters, internal model-serving platforms, MIG/vGPU,
+  Triton/Ray/vLLM multi-tenant serving, or equivalent). If inference is only
+  via managed model APIs, CPU-only, single-tenant, or dedicated GPU per
+  workload, score NOT_APPLICABLE. 2) Confirm shared-accelerator inventory
+  or present=true (required—do not PASS from isolation-design or test docs
+  alone). 3) Review isolation design (scheduling, MIG/vGPU, resource quotas,
+  tenant QoS). 4) Review the latest isolation/capacity test (measuredAt ≤90
+  days) against stated limits. 5) PASS only if inventory/scope + design +
+  passing test hold. Managed-API usage alone is N/A, not a vacuous FAIL.
+  INF-M2 patching reports alone do not prove accelerator isolation. INF-M3
+  connectivity controls alone do not prove GPU tenant isolation.
+falsePositiveGuidance: >
+  Do not fail managed-API-only or CPU-only stacks without an explicit shared-
+  accelerator inventory. Do not pass isolation-design or capacity-test
+  signals without shared-accelerator inventory (or present=true). Do not
+  pass GPU mentions without isolation design and a fresh test. Do not pass
+  empty inventories without an explicit N/A attest. Do not score INF-M1,
+  INF-M2, or INF-M3 as substitutes. Named exceptions need owner and expiry
+  ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: GPU/accelerator isolation and noisy-neighbor controls must
-    protect multi-tenant inference"
-  - "Retain evidence artifacts required by this Check, starting with: Isolation design +
-    capacity/isolation test report for shared accelerators"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Document shared-accelerator isolation (scheduling, MIG/vGPU, quotas, tenant QoS)"
+  - "Run isolation/capacity tests that meet stated limits and retain under imports/shared-accelerator-isolation/ (measuredAt ≤90 days)"
+  - "If out of scope, attest sharedAiAcceleratorInfrastructurePresent=false with rationale"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
-  - title: "CIS Benchmarks"
-    url: "https://www.cisecurity.org/cis-benchmarks"
-  - title: "CNCF security technical advisory guidance"
-    url: "https://www.cncf.io/"
-  - title: "AWS Well-Architected — Security"
+  - title: "NVIDIA Multi-Instance GPU (MIG)"
+    url: "https://www.nvidia.com/en-us/technologies/multi-instance-gpu/"
+  - title: "Kubernetes Device Plugins / Resource Management"
+    url: "https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/"
+  - title: "AWS Well-Architected — Performance Efficiency"
     url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "INF-M1"
   - "INF-M2"
   - "INF-M3"
   - "INF-R1"
   - "INF-R3"
+  - "PERF-M1"
 tags:
   - "infrastructure"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "gpu"
+  - "accelerator"
+  - "multi-tenant"
+  - "isolation"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
-    - "terraform"
-    - "docker"
+  technologies: []
   minCriticality: 3
   requiredFromLevel: 5
 status: "active"

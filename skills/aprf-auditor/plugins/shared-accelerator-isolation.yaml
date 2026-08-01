@@ -1,0 +1,28 @@
+id: shared-accelerator-isolation
+title: Shared AI accelerator isolation (INF-M4)
+version: "0.2.0"
+executor: collectors/shared-accelerator-isolation.ts
+evidenceClass: iac
+alsoEmits: []
+detectorIds: [repo-shared-accelerator-isolation]
+inputs:
+  - "Target repo (shared GPU/accelerator isolation, scheduling/QoS, capacity tests)"
+  - "Optional coverage: aprf-assessment/imports/shared-accelerator-isolation/*.{json}"
+collect:
+  - "Detect shared-accelerator, isolation/QoS, and capacity/isolation-test signals"
+  - "Ingest coverage; write shared-accelerator-isolation-report.json"
+emits:
+  nodeClass: iac
+  refPattern: "aprf-assessment/imports/shared-accelerator-isolation/*"
+  signals: [shared-accelerator-isolation, inf-m4, repo-shared-accelerator-isolation]
+mapsToChecks: [INF-M4]
+whenUnavailable: >
+  Signals alone are PARTIAL. INF-M4 PASS needs inventory (in-repo or
+  sharedAiAcceleratorInfrastructurePresent=true),
+  isolationControlsDocumented=true +
+  isolationOrCapacityTestMeetsStatedLimits=true, measuredAt ≤90 days.
+  Set sharedAiAcceleratorInfrastructurePresent=false for NOT_APPLICABLE
+  (managed model APIs, CPU-only, single-tenant, or dedicated GPU per workload).
+live:
+  required: false
+  note: Offline shared-accelerator isolation heuristics + optional imported JSON.

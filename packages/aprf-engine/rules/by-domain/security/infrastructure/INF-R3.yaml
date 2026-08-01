@@ -1,61 +1,83 @@
 id: "INF-R3"
 category: "infrastructure"
-title: "Production systems should have infrastructure-as-code with policy checks (CIS-aligned)"
-description: "Infrastructure-as-code with policy checks (CIS-aligned)"
-whyItMatters: "Infrastructure-as-code with policy checks (CIS-aligned) Failing this leaves a
-  production gap against: Production AI infra is declared in IaC; CIS (or equivalent) policy checks
-  run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions ≤90
-  days"
+title: "Production AI infrastructure should be declared as code with CIS-aligned policy checks"
+description: >
+  Production AI infrastructure shall be declared in infrastructure-as-code
+  with CIS-aligned (or equivalent) policy checks on every apply/PR—proven by
+  IaC modules, policy-scan config, and a fresh production-stack report—not
+  by console-built stacks alone.
+whyItMatters: >
+  Click-ops AI infra drifts from reviewable baselines and accumulates
+  misconfigurations. Declaring production AI stacks in IaC and gating merges
+  with CIS-aligned policy scans (critical findings closed or time-boxed)
+  makes posture measurable. Distinct from INF-M1 (public exposure scans of
+  data stores/control planes), INF-M2 (runtime patching SLA), and SCI-R1
+  (signed artifact verify-on-deploy).
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Production AI infra is declared in IaC; CIS (or equivalent) policy checks run on
-  every apply/PR; critical findings for production stacks are 0 or have dated exceptions ≤90 days"
+passCondition: >
+  Production AI infrastructure is declared in IaC; CIS-aligned (or
+  equivalent) policy checks run on every apply/PR; critical findings for
+  production stacks are 0 or have dated exceptions with owner and expiry
+  (measuredAt ≤90 days). If no production AI infrastructure is managed by
+  the organization, score NOT_APPLICABLE.
 evidenceRequired:
-  - "IaC modules for AI infra + CIS-aligned policy scan config + latest scan report for production
-    stacks"
+  - "IaC modules covering production AI infrastructure"
+  - "CIS-aligned (or equivalent) policy-scan config wired to apply/PR"
+  - "Latest policy-scan report for production stacks (measuredAt ≤90 days)"
+  - "Critical findings closed or waived with owner and expiry"
 detection:
   capability: "manual"
-  detectors: []
-manualVerification: "For this Check (INF: Infrastructure-as-code with policy checks (CIS-aligned)):
-  inspect current evidence for [IaC modules for AI infra + CIS-aligned policy scan config + latest
-  scan report for production stacks] and confirm the pass condition holds — Production AI infra is
-  declared in IaC; CIS (or equivalent) policy checks run on every apply/PR; critical findings for
-  production stacks are 0 or have dated exceptions ≤90 days"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+  detectors:
+    - id: "manual-attest"
+      params:
+        hint: >
+          Attest IaC for production AI infra plus CIS-aligned (or equivalent)
+          policy checks on apply/PR with 0 open unwaived critical findings
+          (measuredAt ≤90 days)—or attest no production AI infrastructure.
+manualVerification: >
+  1) Confirm the organization manages production AI infrastructure. If none,
+  score NOT_APPLICABLE. 2) Confirm those stacks are declared in IaC. 3)
+  Confirm CIS-aligned (or equivalent) policy checks run on every apply/PR.
+  4) Review the latest production-stack scan (measuredAt ≤90 days): critical
+  findings are 0 or waived with owner and expiry. 5) PASS only if IaC +
+  policy gate + disposition hold. INF-M1 CSPM public-exposure scans alone do
+  not prove IaC policy-as-code. Console-only changes without IaC do not
+  satisfy.
+falsePositiveGuidance: >
+  Do not pass sample Terraform without production AI coverage. Do not pass
+  policy configs that never run on apply/PR. Do not pass empty inventories
+  without an explicit N/A attest. Do not score INF-M1 or SCI-R1 as
+  substitutes. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Infrastructure-as-code with policy checks
-    (CIS-aligned)"
-  - "Retain evidence artifacts required by this Check, starting with: IaC modules for AI infra +
-    CIS-aligned policy scan config + latest scan report for production stacks"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Declare production AI infrastructure in IaC and wire CIS-aligned (or equivalent) policy checks to apply/PR"
+  - "Close or time-box critical findings; retain the latest report (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "CIS Benchmarks"
     url: "https://www.cisecurity.org/cis-benchmarks"
-  - title: "CNCF security technical advisory guidance"
-    url: "https://www.cncf.io/"
+  - title: "Open Policy Agent / Conftest"
+    url: "https://www.openpolicyagent.org/"
   - title: "AWS Well-Architected — Security"
     url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "INF-M1"
   - "INF-M2"
   - "INF-M3"
   - "INF-M4"
   - "INF-R1"
+  - "SCI-R1"
 tags:
   - "infrastructure"
   - "recommended"
   - "manual"
+  - "iac"
+  - "policy-as-code"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
-    - "terraform"
-    - "docker"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

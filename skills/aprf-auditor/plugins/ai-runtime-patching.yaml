@@ -1,0 +1,30 @@
+id: ai-runtime-patching
+title: AI runtime patching SLA (INF-M2)
+version: "0.2.0"
+executor: collectors/ai-runtime-patching.ts
+evidenceClass: iac
+alsoEmits: []
+detectorIds: [repo-ai-runtime-patching]
+inputs:
+  - "Target repo (patching SLA, runtime inventory, CVE/age scans, waiver register)"
+  - "Optional coverage: aprf-assessment/imports/ai-runtime-patching/*.{json}"
+collect:
+  - "Detect patching-SLA, runtime-inventory, CVE/age-scan, and waiver signals"
+  - "Ingest coverage; write ai-runtime-patching-report.json"
+emits:
+  nodeClass: iac
+  refPattern: "aprf-assessment/imports/ai-runtime-patching/*"
+  signals: [ai-runtime-patching, inf-m2, repo-ai-runtime-patching]
+mapsToChecks: [INF-M2]
+whenUnavailable: >
+  Signals alone are PARTIAL. INF-M2 PASS needs inventory (in-repo or
+  productionAiRuntimeEnvironmentsPresent=true),
+  patchingSlaDocumented=true,
+  productionAiRuntimesWithinDocumentedPatchingSlaPct=100,
+  openSlaBreachesWithoutApprovedWaiver=0,
+  vulnerabilityOrImageAgeReportPresent=true, measuredAt ≤90 days.
+  Set productionAiRuntimeEnvironmentsPresent=false for NOT_APPLICABLE.
+  Image-tag pinning without SLA proof is not a PASS.
+live:
+  required: false
+  note: Offline AI runtime patching heuristics + optional imported JSON.

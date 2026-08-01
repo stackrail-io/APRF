@@ -1,0 +1,30 @@
+id: ai-public-exposure-scan
+title: AI public exposure / edge auth scan (INF-M1)
+version: "0.2.0"
+executor: collectors/ai-public-exposure-scan.ts
+evidenceClass: iac
+alsoEmits: []
+detectorIds: [repo-ai-public-exposure-scan]
+inputs:
+  - "Target repo (AI data-store / control-plane inventory, edge auth, CSPM docs)"
+  - "Optional coverage: aprf-assessment/imports/ai-public-exposure-scan/*.{json}"
+collect:
+  - "Detect AI data-store, control-plane, edge-auth, and CSPM/scan signals"
+  - "Ingest coverage; write ai-public-exposure-scan-report.json"
+emits:
+  nodeClass: iac
+  refPattern: "aprf-assessment/imports/ai-public-exposure-scan/*"
+  signals: [ai-public-exposure-scan, inf-m1, repo-ai-public-exposure-scan]
+mapsToChecks: [INF-M1]
+whenUnavailable: >
+  Signals alone are PARTIAL. INF-M1 PASS needs inventory (in-repo or
+  aiDataStoresOrControlPlanesPresent=true),
+  publiclyReachableUnauthenticatedCount=0,
+  openHighOrCriticalFindingsUnwaived=0,
+  authenticatedEdgeControlsConfigured=true OR
+  privateOnlyExposureProvenByScan=true,
+  cspmOrNetworkScanPresent=true, measuredAt ≤90 days.
+  Set aiDataStoresOrControlPlanesPresent=false for NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline AI public-exposure heuristics + optional imported JSON.

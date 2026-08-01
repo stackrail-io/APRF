@@ -1,0 +1,30 @@
+id: agent-tool-connectivity
+title: Agent/tool least-privilege connectivity (INF-M3)
+version: "0.2.0"
+executor: collectors/agent-tool-connectivity.ts
+evidenceClass: iac
+alsoEmits: []
+detectorIds: [repo-agent-tool-connectivity]
+inputs:
+  - "Target repo (dependency inventory, network/identity connectivity, unauthorized-access probes)"
+  - "Optional coverage: aprf-assessment/imports/agent-tool-connectivity/*.{json}"
+collect:
+  - "Detect dependency inventory, connectivity controls, probes, and agent/tool runtime signals"
+  - "Ingest coverage; write agent-tool-connectivity-report.json"
+emits:
+  nodeClass: iac
+  refPattern: "aprf-assessment/imports/agent-tool-connectivity/*"
+  signals: [agent-tool-connectivity, inf-m3, repo-agent-tool-connectivity]
+mapsToChecks: [INF-M3]
+whenUnavailable: >
+  Signals alone are PARTIAL. INF-M3 PASS needs inventory (in-repo or
+  agentOrToolRuntimesPresent=true),
+  dependencyInventoryDocumented=true,
+  leastPrivilegeConnectivityControlsConfigured=true,
+  connectivityControlsMatchDependencyInventory=true,
+  unauthorizedInternalServiceAccessBlockedInProbe=true, measuredAt ≤90 days.
+  Set agentOrToolRuntimesPresent=false for NOT_APPLICABLE.
+  SEC-M4 model-path proxy evidence alone is not a PASS.
+live:
+  required: false
+  note: Offline agent/tool connectivity heuristics + optional imported JSON.

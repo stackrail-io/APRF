@@ -52,6 +52,10 @@ import { agentRoleMatrixCollector } from "./agent-role-matrix.ts";
 import { sensitiveDocAbacCollector } from "./sensitive-doc-abac.ts";
 import { policyAsCodeCollector } from "./policy-as-code.ts";
 import { highPrivAgentReviewCollector } from "./high-priv-agent-review.ts";
+import { aiPublicExposureScanCollector } from "./ai-public-exposure-scan.ts";
+import { aiRuntimePatchingCollector } from "./ai-runtime-patching.ts";
+import { agentToolConnectivityCollector } from "./agent-tool-connectivity.ts";
+import { sharedAcceleratorIsolationCollector } from "./shared-accelerator-isolation.ts";
 import { secretsHygieneCollector } from "./secrets-hygiene.ts";
 import { secretRedactionCollector } from "./secret-redaction.ts";
 import { injectionPolicyGateCollector } from "./injection-policy-gate.ts";
@@ -222,6 +226,10 @@ export const COLLECTORS: Collector[] = [
   sensitiveDocAbacCollector,
   policyAsCodeCollector,
   highPrivAgentReviewCollector,
+  aiPublicExposureScanCollector,
+  aiRuntimePatchingCollector,
+  agentToolConnectivityCollector,
+  sharedAcceleratorIsolationCollector,
   secretsHygieneCollector,
   secretRedactionCollector,
   injectionPolicyGateCollector,
