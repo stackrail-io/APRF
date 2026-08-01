@@ -4,8 +4,9 @@
  *
  * Discovers AI customer notification criteria + drill/incident samples.
  * Import criteriaMapEventTypesToNotifyDecision +
- * lastDrillOrIncidentFollowedCriteriaWithin12Months under
- * imports/ai-customer-notification-criteria/ to unlock PASS (measuredAt ≤90d).
+ * lastDrillOrIncidentFollowedCriteriaWithin12Months + timestampsPresent
+ * under imports/ai-customer-notification-criteria/ to unlock PASS
+ * (measuredAt ≤90d).
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
@@ -217,13 +218,10 @@ export function buildAiCustomerNotificationCriteriaReport(opts: {
     opts.imported.lastDrillOrIncidentFollowedCriteriaWithin12Months === true ||
     (opts.imported.lastDrillOrIncidentAgeDays !== null &&
       opts.imported.lastDrillOrIncidentAgeDays <= FOLLOWED_MAX_AGE_DAYS);
-  const timestampsOk =
-    opts.imported.timestampsPresent === null ||
-    opts.imported.timestampsPresent === true;
+  const timestampsOk = opts.imported.timestampsPresent === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AiCustomerNotificationCriteriaReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiCustomerNotificationCriteriaReport["summary"]["statusHint"] ;
   let incR3Satisfied: boolean | null = null;
 
   const explicitFail =

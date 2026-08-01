@@ -122,6 +122,33 @@ async function main() {
       throw new Error(`na expected: ${JSON.stringify(r4.summary)}`);
     }
 
+    const t5 = join(root, "t5");
+    mkdirSync(join(t5, "docs"), { recursive: true });
+    writeFileSync(
+      join(t5, "docs", "postmortem.md"),
+      "Post-incident review with APRF pillar action\n",
+    );
+    const out5 = join(root, "o5");
+    mkdirSync(join(out5, "imports", "post-incident-aprf-actions"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(out5, "imports", "post-incident-aprf-actions", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        reviewsWithTrackedActionOrRationalePct: 100,
+      }),
+    );
+    const r5 = await run(t5, out5);
+    if (
+      r5.summary.statusHint !== "partial" ||
+      r5.summary.incR2Satisfied !== false
+    ) {
+      throw new Error(
+        `partial without sev count expected: ${JSON.stringify(r5.summary)}`,
+      );
+    }
+
     console.log("post-incident-aprf-actions smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

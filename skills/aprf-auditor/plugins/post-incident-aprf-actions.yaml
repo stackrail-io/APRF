@@ -18,6 +18,7 @@ emits:
 mapsToChecks: [INC-R2]
 whenUnavailable: >
   Review signals alone are PARTIAL. INC-R2 PASS needs
+  sevEligibleIncidentCount>0 and
   reviewsWithTrackedActionOrRationalePct=100 (or
   reviewsMissingTrackedActionOrRationale=0), measuredAt ≤90 days.
   N/A when sevEligibleIncidentCount=0.

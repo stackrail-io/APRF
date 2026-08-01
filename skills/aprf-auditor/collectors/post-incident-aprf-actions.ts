@@ -3,8 +3,8 @@
  *
  * Discovers post-incident reviews with APRF-pillar-mapped actions.
  * Import reviewsWithTrackedActionOrRationalePct=100 (or
- * reviewsMissingTrackedActionOrRationale=0) under
- * imports/post-incident-aprf-actions/ to unlock PASS (measuredAt ≤90d).
+ * reviewsMissingTrackedActionOrRationale=0) with sevEligibleIncidentCount>0
+ * under imports/post-incident-aprf-actions/ to unlock PASS (measuredAt ≤90d).
  * N/A when sevEligibleIncidentCount=0.
  */
 import { writeFileSync } from "node:fs";
@@ -211,9 +211,11 @@ export function buildPostIncidentAprfActionsReport(opts: {
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
   const noSev =
     opts.imported.found && opts.imported.sevEligibleIncidentCount === 0;
+  const sevCountOk =
+    typeof opts.imported.sevEligibleIncidentCount === "number" &&
+    opts.imported.sevEligibleIncidentCount > 0;
 
-  let statusHint: PostIncidentAprfActionsReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: PostIncidentAprfActionsReport["summary"]["statusHint"] ;
   let incR2Satisfied: boolean | null = null;
 
   const explicitFail =
@@ -245,6 +247,7 @@ export function buildPostIncidentAprfActionsReport(opts: {
     );
   } else if (
     (reviewSignalsPresent || opts.imported.found) &&
+    sevCountOk &&
     coverageOk &&
     ageOk &&
     importFresh &&
@@ -255,6 +258,11 @@ export function buildPostIncidentAprfActionsReport(opts: {
   } else if (reviewSignalsPresent || opts.imported.found) {
     statusHint = "partial";
     incR2Satisfied = false;
+    if (opts.imported.found && !sevCountOk) {
+      notes.push(
+        "Import must show sevEligibleIncidentCount>0 to unlock PASS (use 0 for NOT_APPLICABLE).",
+      );
+    }
     if (opts.imported.found && !coverageOk) {
       notes.push(
         "Import must show reviewsWithTrackedActionOrRationalePct=100 or reviewsMissingTrackedActionOrRationale=0.",

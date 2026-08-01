@@ -1785,7 +1785,7 @@ checks:
   INC-R2:
     requiredEvidence:
       - "Post-incident review template requiring APRF pillar mapping"
-      - "reviewsWithTrackedActionOrRationalePct=100 under imports/post-incident-aprf-actions/"
+      - "sevEligibleIncidentCount>0 + reviewsWithTrackedActionOrRationalePct=100 under imports/post-incident-aprf-actions/"
     searchExtra:
       - "**/*postmortem*"
       - "**/*post-incident*"
@@ -1795,8 +1795,8 @@ checks:
     plugins: [post-incident-aprf-actions, repo-filesystem]
     naWhen: "No SEV-eligible AI incidents (sevEligibleIncidentCount=0)"
     evaluation: |
-      PASS if post-incident-aprf-actions statusHint=pass (reviewsWithTrackedActionOrRationalePct=100 or reviewsMissingTrackedActionOrRationale=0 + measuredAt ≤90d).
-      PARTIAL if review signals without complete import.
+      PASS if post-incident-aprf-actions statusHint=pass (sevEligibleIncidentCount>0 + reviewsWithTrackedActionOrRationalePct=100 or reviewsMissingTrackedActionOrRationale=0 + measuredAt ≤90d).
+      PARTIAL if review signals without complete import (including omitted sevEligibleIncidentCount).
       NOT_APPLICABLE when sevEligibleIncidentCount=0 or no review signals. Distinct from INC-M1/M2.
   INC-R1:
     requiredEvidence:
@@ -1818,7 +1818,7 @@ checks:
   INC-R3:
     requiredEvidence:
       - "Customer notification criteria for AI-related events"
-      - "criteriaMapEventTypesToNotifyDecision + lastDrillOrIncidentFollowedCriteriaWithin12Months under imports/ai-customer-notification-criteria/"
+      - "criteriaMapEventTypesToNotifyDecision + lastDrillOrIncidentFollowedCriteriaWithin12Months + timestampsPresent under imports/ai-customer-notification-criteria/"
     searchExtra:
       - "**/*customer*notif*"
       - "**/*disclosure*"
@@ -1828,7 +1828,7 @@ checks:
     plugins: [ai-customer-notification-criteria, repo-filesystem]
     naWhen: "No customer-facing / externally disclosed AI system in scope"
     evaluation: |
-      PASS if ai-customer-notification-criteria statusHint=pass (criteria map + followed sample ≤12 months + measuredAt ≤90d).
+      PASS if ai-customer-notification-criteria statusHint=pass (criteria map + followed sample ≤12 months + timestampsPresent=true + measuredAt ≤90d).
       PARTIAL if notification signals without complete import.
       NOT_APPLICABLE when no notification signals. Distinct from INC-R2 internal post-incident reviews and generic PR playbooks without AI event-type mapping.
   INC-R4:

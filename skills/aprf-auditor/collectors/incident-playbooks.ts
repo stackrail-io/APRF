@@ -302,8 +302,7 @@ export function buildIncidentPlaybooksReport(opts: {
     opts.imported.playbooksWithStaleReview === 0;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: IncidentPlaybooksReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: IncidentPlaybooksReport["summary"]["statusHint"] ;
   let incM1Satisfied: boolean | null = null;
 
   const explicitFail =

@@ -49,6 +49,8 @@ recommendedFixes:
   - "Retain evidence under imports/ai-incident-tabletop/"
   - "Time-box gaps with owner and expiry ≤90 days"
 references:
+  - title: "APRF-RFC-0002 — Demote INC-M3 / INC-M4 to recommended"
+    url: "https://github.com/stackrail-io/APRF/blob/main/rfcs/0002-incident-readiness-mandatory-to-recommended.md"
   - title: "Google SRE — Managing Incidents"
     url: "https://sre.google/sre-book/managing-incidents/"
   - title: "NIST AI RMF — Manage"

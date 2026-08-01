@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:39fd54009ea4e4efcbf4b92c3bdeea8b9b3d00de6279eb1169d3392d0c1bf461",
+  "generatedAt": "sha256:0901f1e9378603cfef2af7d7ba02aafc847c15a5aad2fc9a52e5bb2b1932830d",
   "ruleCount": 177,
   "domains": [
     {
@@ -6581,6 +6581,10 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "references": [
         {
+          "title": "APRF-RFC-0002 — Demote INC-M3 / INC-M4 to recommended",
+          "url": "https://github.com/stackrail-io/APRF/blob/main/rfcs/0002-incident-readiness-mandatory-to-recommended.md"
+        },
+        {
           "title": "Google SRE — Managing Incidents",
           "url": "https://sre.google/sre-book/managing-incidents/"
         },
@@ -6724,6 +6728,10 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
+        {
+          "title": "APRF-RFC-0002 — Demote INC-M3 / INC-M4 to recommended",
+          "url": "https://github.com/stackrail-io/APRF/blob/main/rfcs/0002-incident-readiness-mandatory-to-recommended.md"
+        },
         {
           "title": "Google SRE — Managing Incidents",
           "url": "https://sre.google/sre-book/managing-incidents/"

@@ -273,6 +273,18 @@
       "slug": "0001-working-draft-rfc-process",
       "href": "/aprf/rfc/0001-working-draft-rfc-process/",
       "markdownPath": "/aprf/rfc/0001-working-draft-rfc-process.md"
+    },
+    {
+      "id": "APRF-RFC-0002",
+      "number": 2,
+      "title": "Demote incident-readiness INC-M3 and INC-M4 to recommended",
+      "status": "accepted",
+      "created": "2026-08-01",
+      "semverImpact": "MINOR",
+      "summary": "Demotes INC-M3→INC-R2 and INC-M4→INC-R4; documents pre-release exception for removing IDs without deprecated stubs before the first tagged version.",
+      "slug": "0002-incident-readiness-mandatory-to-recommended",
+      "href": "/aprf/rfc/0002-incident-readiness-mandatory-to-recommended/",
+      "markdownPath": "/aprf/rfc/0002-incident-readiness-mandatory-to-recommended.md"
     }
   ],
   "scope": {

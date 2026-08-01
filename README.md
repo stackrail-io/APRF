@@ -131,7 +131,7 @@ Platform-specific **detections** (scanners, collectors) stay in product/plugin r
 5. If the generated catalog changed, commit `packages/aprf-engine/src/generated/catalog.ts`.
 6. Open a PR — CI will re-validate and fail on catalog drift.
 
-Deprecate with `status: deprecated`, `replacedBy`, and `deprecationNote` — never reuse IDs. Numbering gaps are intentional — see [`packages/aprf-engine/rules/_index/id-gaps.md`](packages/aprf-engine/rules/_index/id-gaps.md).
+Deprecate with `status: deprecated`, `replacedBy`, and `deprecationNote` — never reuse IDs. Numbering gaps are intentional — see [`packages/aprf-engine/rules/_index/id-gaps.md`](packages/aprf-engine/rules/_index/id-gaps.md). **Pre-release exception:** before the first tagged version, M→R remaps may remove IDs when an RFC and `id-gaps.md` record the change (see [APRF-RFC-0002](rfcs/0002-incident-readiness-mandatory-to-recommended.md)).
 
 ## Continuous integration
 

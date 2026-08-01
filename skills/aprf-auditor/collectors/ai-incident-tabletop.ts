@@ -209,8 +209,7 @@ export function buildAiIncidentTabletopReport(opts: {
   const actionsOk = opts.imported.retainedActionsWithOwners === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AiIncidentTabletopReport["summary"]["statusHint"] =
-    "not_demonstrated";
+  let statusHint: AiIncidentTabletopReport["summary"]["statusHint"] ;
   let incR4Satisfied: boolean | null = null;
 
   const explicitFail =

@@ -276,7 +276,7 @@ INC-M2 AI containment drill (pause / disable tools / rollback):
 
 INC-R2 post-incident reviews with APRF-pillar tracked actions:
   npm run aprf:post-incident-aprf-actions -- --target <app> --out <app>/aprf-assessment
-  # PASS needs reviewsWithTrackedActionOrRationalePct=100 (or reviewsMissingTrackedActionOrRationale=0) under imports/post-incident-aprf-actions/
+  # PASS needs sevEligibleIncidentCount>0 + reviewsWithTrackedActionOrRationalePct=100 (or reviewsMissingTrackedActionOrRationale=0) under imports/post-incident-aprf-actions/
 
 INC-R4 AI-focused incident tabletop ≤180 days:
   npm run aprf:ai-incident-tabletop -- --target <app> --out <app>/aprf-assessment
@@ -288,7 +288,7 @@ INC-R1 AI safety/quality on-call paging (≥2 non-infra signals):
 
 INC-R3 AI customer notification criteria (notify/no-notify + followed sample ≤12m):
   npm run aprf:ai-customer-notification-criteria -- --target <app> --out <app>/aprf-assessment
-  # PASS needs criteriaMapEventTypesToNotifyDecision + lastDrillOrIncidentFollowedCriteriaWithin12Months under imports/ai-customer-notification-criteria/
+  # PASS needs criteriaMapEventTypesToNotifyDecision + lastDrillOrIncidentFollowedCriteriaWithin12Months + timestampsPresent under imports/ai-customer-notification-criteria/
 
 COST-M2 AI cost budget-burn / anomaly alerts:
   npm run aprf:cost-alerts -- --target <app> --out <app>/aprf-assessment

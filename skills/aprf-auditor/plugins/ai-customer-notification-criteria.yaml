@@ -24,7 +24,8 @@ mapsToChecks: [INC-R3]
 whenUnavailable: >
   Notification signals alone are PARTIAL. INC-R3 PASS needs
   criteriaMapEventTypesToNotifyDecision,
-  lastDrillOrIncidentFollowedCriteriaWithin12Months, measuredAt ≤90 days.
+  lastDrillOrIncidentFollowedCriteriaWithin12Months,
+  timestampsPresent=true, measuredAt ≤90 days.
 live:
   required: false
   note: Offline notification heuristics + optional imported JSON.

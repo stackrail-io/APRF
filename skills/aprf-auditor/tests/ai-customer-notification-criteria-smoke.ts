@@ -116,6 +116,39 @@ async function main() {
       throw new Error(`fail expected: ${JSON.stringify(r3.summary)}`);
     }
 
+    const t4 = join(root, "t4");
+    mkdirSync(join(t4, "docs"), { recursive: true });
+    writeFileSync(
+      join(t4, "docs", "customer-notification-criteria.md"),
+      "AI customer notification criteria map with notify/no-notify for safety incident\n",
+    );
+    const out4 = join(root, "o4");
+    mkdirSync(join(out4, "imports", "ai-customer-notification-criteria"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(
+        out4,
+        "imports",
+        "ai-customer-notification-criteria",
+        "coverage.json",
+      ),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        criteriaMapEventTypesToNotifyDecision: true,
+        lastDrillOrIncidentFollowedCriteriaWithin12Months: true,
+      }),
+    );
+    const r4 = await run(t4, out4);
+    if (
+      r4.summary.statusHint !== "partial" ||
+      r4.summary.incR3Satisfied !== false
+    ) {
+      throw new Error(
+        `partial without timestamps expected: ${JSON.stringify(r4.summary)}`,
+      );
+    }
+
     console.log("ai-customer-notification-criteria smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });
