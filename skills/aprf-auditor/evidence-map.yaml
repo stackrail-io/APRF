@@ -226,7 +226,10 @@ categoryDefaults:
       - "**/*latency*"
       - "**/grafana*"
       - "**/*budget*"
-    signals: [SLO, error budget, load test]
+      - "**/*journey*slo*"
+      - "**/*slo*catalog*"
+    plugins: [ai-journey-slo-catalog, ai-ops-metrics, ai-ops-dashboards, ai-slo-burn-alerts, ai-error-budget-release-gate, ai-adversarial-capacity-tests, ai-streaming-slis, ai-slo-dashboards, repo-filesystem]
+    signals: [SLO, error budget, load test, journey SLO catalog, availability, latency percentile, ops metrics, near-real-time dashboards, SLO burn alerts, error-budget release gate, adversarial capacity tests, streaming TTFT/inter-token SLIs]
   reliability-continuity:
     search:
       - "**/*fallback*"
@@ -629,6 +632,118 @@ checks:
       PASS if ai-slo-dashboards statusHint=pass (named SLOs + latency/error/quality burn + burn alerts + measuredAt ≤90d).
       PARTIAL if SLO signals without complete import.
       NOT_APPLICABLE when no SLO signals. Distinct from OBS-M1 linkage and CHG-R3 auto-rollback.
+  PERF-M1:
+    requiredEvidence:
+      - "SLO catalog listing critical AI journeys with numeric availability and latency targets"
+      - "sloCatalogConfigured + criticalAiJourneyCount≥1 + journeysWithAvailabilityAndLatencyTargetsPct=100 under imports/ai-journey-slo-catalog/"
+    searchExtra:
+      - "**/*slo*catalog*"
+      - "**/*journey*slo*"
+      - "**/*critical*journey*"
+      - "**/*availability*slo*"
+      - "**/*latency*slo*"
+    plugins: [ai-journey-slo-catalog, repo-filesystem]
+    naWhen: "No critical AI journeys in scope"
+    evaluation: |
+      PASS if ai-journey-slo-catalog statusHint=pass (catalog + ≥1 critical journey + 100% availability+latency coverage + measuredAt ≤90d).
+      PARTIAL if catalog signals without complete import.
+      NOT_APPLICABLE when no catalog signals. Distinct from OBS-R3 dashboards/burn and PERF-R4 live panels.
+  PERF-M2:
+    requiredEvidence:
+      - "Metric definitions or exporters covering latency, error rate, and ≥1 AI quality/task-success signal"
+      - "latencyMetricsCollected + errorRateMetricsCollected + aiQualityOrTaskSuccessMetricCollected + metricsAvailableForOperationalMonitoring under imports/ai-ops-metrics/"
+    searchExtra:
+      - "**/*latency*metric*"
+      - "**/*error*rate*"
+      - "**/*task*success*"
+      - "**/*prometheus*"
+      - "**/*otel*metric*"
+    plugins: [ai-ops-metrics, otel, repo-filesystem]
+    naWhen: "No production AI services in scope"
+    evaluation: |
+      PASS if ai-ops-metrics statusHint=pass (latency+error+quality metrics collected and available + measuredAt ≤90d).
+      PARTIAL if metric signals without complete import.
+      NOT_APPLICABLE when no metric signals. Distinct from PERF-R4 dashboards and PERF-M1 catalog.
+  PERF-R4:
+    requiredEvidence:
+      - "Dashboard URL/config covering latency, error rate, throughput, resource utilization, and AI quality"
+      - "dashboardCoversLatencyErrorThroughput + dashboardCoversResourceUtilization + dashboardCoversAiQuality + nearRealtimeRefreshConfigured under imports/ai-ops-dashboards/"
+    searchExtra:
+      - "**/*grafana*"
+      - "**/*ops*dashboard*"
+      - "**/*ai*dashboard*"
+      - "**/*near*real*time*"
+    plugins: [ai-ops-dashboards, otel, repo-filesystem]
+    naWhen: "No production AI services in scope"
+    evaluation: |
+      PASS if ai-ops-dashboards statusHint=pass (latency/error/throughput + resource + AI quality + near-real-time ≤15m + measuredAt ≤90d).
+      PARTIAL if dashboard signals without complete import.
+      NOT_APPLICABLE when no dashboard signals. Distinct from PERF-M2 metric exporters and OBS-R3 burn alerts.
+  PERF-M3:
+    requiredEvidence:
+      - "Burn-rate or SLO alert policies covering each critical AI journey SLO"
+      - "alertPoliciesCoverCriticalJourneySlos + notificationPathProvenByTestOrDocumentedFire under imports/ai-slo-burn-alerts/"
+    searchExtra:
+      - "**/*burn*rate*alert*"
+      - "**/*slo*alert*"
+      - "**/*error*budget*alert*"
+      - "**/*alert*test*"
+      - "**/*pagerduty*"
+    plugins: [ai-slo-burn-alerts, repo-filesystem]
+    naWhen: "No critical AI journey SLOs in scope"
+    evaluation: |
+      PASS if ai-slo-burn-alerts statusHint=pass (critical-journey SLO alert coverage + notify proof + measuredAt ≤90d).
+      PARTIAL if alert signals without complete import.
+      NOT_APPLICABLE when no alert signals. Distinct from PERF-R4 dashboards, OBS-R3, CHG-R3, COST-M2.
+  PERF-R1:
+    requiredEvidence:
+      - "Error-budget policy linking AI SLOs to release freezes or risk acceptance"
+      - "errorBudgetPolicyLinksAiSlosToReleaseFreezeOrRiskAcceptance + gatedEventOrDrillWithin90Days under imports/ai-error-budget-release-gate/"
+    searchExtra:
+      - "**/*error*budget*"
+      - "**/*release*freeze*"
+      - "**/*deploy*freeze*"
+      - "**/*risk*acceptance*"
+      - "**/*budget*burn*gate*"
+    plugins: [ai-error-budget-release-gate, repo-filesystem]
+    naWhen: "No critical AI journey error budgets in scope"
+    evaluation: |
+      PASS if ai-error-budget-release-gate statusHint=pass (freeze/risk-acceptance policy + gated event/drill ≤90d + measuredAt ≤90d).
+      PARTIAL if gate signals without complete import.
+      NOT_APPLICABLE when no gate signals. Distinct from PERF-M3 alerts and CHG-R3 auto-rollback.
+  PERF-R2:
+    requiredEvidence:
+      - "Load-test plan including long-prompt and agent-loop scenarios"
+      - "capacityTestIncludesAdversarialLongPrompts + capacityTestIncludesMultiStepAgentLoops + p95LatencyAndErrorRateWithinSloUnderDocumentedConcurrency + lastCapacityTestWithin90Days under imports/ai-adversarial-capacity-tests/"
+    searchExtra:
+      - "**/*load*test*"
+      - "**/*capacity*test*"
+      - "**/*long*prompt*"
+      - "**/*agent*loop*"
+      - "**/k6/**"
+      - "**/locust*"
+    plugins: [ai-adversarial-capacity-tests, repo-filesystem]
+    naWhen: "No production AI capacity risk in scope"
+    evaluation: |
+      PASS if ai-adversarial-capacity-tests statusHint=pass (long-prompt + agent-loop + within SLO under concurrency + test ≤90d + measuredAt ≤90d).
+      PARTIAL if capacity signals without complete import.
+      NOT_APPLICABLE when no capacity signals. Distinct from PERF-R1 gates and PERF-R3 streaming SLIs.
+  PERF-R3:
+    requiredEvidence:
+      - "Streaming SLI definitions/dashboard for TTFT and inter-token latency"
+      - "ttftSliConfiguredForStreamingSurfaces + interTokenLatencySliConfiguredForStreamingSurfaces + streamingSliAlertsConfigured + streamingSeriesRetainedAtLeast30Days under imports/ai-streaming-slis/"
+    searchExtra:
+      - "**/*ttft*"
+      - "**/*time*to*first*token*"
+      - "**/*inter*token*"
+      - "**/*streaming*sli*"
+      - "**/*token*stream*"
+    plugins: [ai-streaming-slis, otel, repo-filesystem]
+    naWhen: "No streaming AI surfaces in scope"
+    evaluation: |
+      PASS if ai-streaming-slis statusHint=pass (TTFT + inter-token SLIs + alerts + retention ≥30d + measuredAt ≤90d).
+      PARTIAL if streaming signals without complete import.
+      NOT_APPLICABLE when no streaming signals. Distinct from PERF-M2 generic latency and PERF-R4 ops dashboards.
   EVL-M1:
     requiredEvidence:
       - "Eval suite registry mapping critical journeys to versioned offline suites"

@@ -1,0 +1,26 @@
+id: ai-ops-metrics
+title: AI ops latency/error/quality metrics (PERF-M2)
+version: "0.2.0"
+executor: collectors/ai-ops-metrics.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-ops-metrics]
+inputs:
+  - "Target repo (latency/error/quality metric definitions or exporters)"
+  - "Optional suite: aprf-assessment/imports/ai-ops-metrics/*.{json}"
+collect:
+  - "Detect AI operational metric signals"
+  - "Ingest coverage; write ai-ops-metrics-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-ops-metrics/*"
+  signals: [ai-ops-metrics, perf-m2, repo-ai-ops-metrics]
+mapsToChecks: [PERF-M2]
+whenUnavailable: >
+  Metric signals alone are PARTIAL. PERF-M2 PASS needs
+  latencyMetricsCollected, errorRateMetricsCollected,
+  aiQualityOrTaskSuccessMetricCollected,
+  metricsAvailableForOperationalMonitoring, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline metrics heuristics + optional imported JSON.

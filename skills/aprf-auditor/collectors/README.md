@@ -55,6 +55,13 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **ai-trace-replay** | `ai-trace-replay.ts` | secure failed-trace replay + RTO + ≤90d drill (OBS-R1) | `imports/ai-trace-replay/` | — |
 | **ai-trace-quality-annotations** | `ai-trace-quality-annotations.ts` | quality labels on traces ≥50/90d → eval/review (OBS-R2) | `imports/ai-trace-quality-annotations/` | — |
 | **ai-slo-dashboards** | `ai-slo-dashboards.ts` | named AI SLOs + latency/error/quality burn alerts (OBS-R3) | `imports/ai-slo-dashboards/` | — |
+| **ai-journey-slo-catalog** | `ai-journey-slo-catalog.ts` | critical journey availability+latency SLO catalog 100% (PERF-M1) | `imports/ai-journey-slo-catalog/` | — |
+| **ai-ops-metrics** | `ai-ops-metrics.ts` | latency+error+AI quality metrics available for ops (PERF-M2) | `imports/ai-ops-metrics/` | — |
+| **ai-ops-dashboards** | `ai-ops-dashboards.ts` | near-real-time latency/error/throughput/resource/quality boards (PERF-R4) | `imports/ai-ops-dashboards/` | — |
+| **ai-slo-burn-alerts** | `ai-slo-burn-alerts.ts` | critical-journey SLO burn alerts + notify proof (PERF-M3) | `imports/ai-slo-burn-alerts/` | — |
+| **ai-error-budget-release-gate** | `ai-error-budget-release-gate.ts` | error-budget → freeze/risk acceptance + gated event ≤90d (PERF-R1) | `imports/ai-error-budget-release-gate/` | — |
+| **ai-adversarial-capacity-tests** | `ai-adversarial-capacity-tests.ts` | adversarial long-prompt + agent-loop capacity ≤90d (PERF-R2) | `imports/ai-adversarial-capacity-tests/` | — |
+| **ai-streaming-slis** | `ai-streaming-slis.ts` | TTFT + inter-token SLIs + alerts + ≥30d retention (PERF-R3) | `imports/ai-streaming-slis/` | — |
 | **http-auth-probe** | `http-auth-probe.ts` | route catalog | `imports/http-auth-probe/` | **`--base-url` probe** |
 | promptfoo | `promptfoo.ts` | eval configs | `imports/promptfoo/` | — |
 | aws / azure / gcp | `iac-cloud.ts` | Terraform/Bicep signals | `imports/<cloud>/` | — |

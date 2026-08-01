@@ -315,6 +315,34 @@ OBS-R3 AI SLO dashboards (latency/error/quality burn + alerts):
   npm run aprf:ai-slo-dashboards -- --target <app> --out <app>/aprf-assessment
   # PASS needs namedSloTargetsForCriticalAiJourneys + coversLatencyErrorAndQualityBurn + burnRateAlertConfigured under imports/ai-slo-dashboards/
 
+PERF-M1 critical AI journey SLO catalog (availability + latency, 100% coverage):
+  npm run aprf:ai-journey-slo-catalog -- --target <app> --out <app>/aprf-assessment
+  # PASS needs sloCatalogConfigured + criticalAiJourneyCount≥1 + journeysWithAvailabilityAndLatencyTargetsPct=100 under imports/ai-journey-slo-catalog/
+
+PERF-M2 AI ops metrics (latency + error + AI quality, available for monitoring):
+  npm run aprf:ai-ops-metrics -- --target <app> --out <app>/aprf-assessment
+  # PASS needs latencyMetricsCollected + errorRateMetricsCollected + aiQualityOrTaskSuccessMetricCollected + metricsAvailableForOperationalMonitoring under imports/ai-ops-metrics/
+
+PERF-R4 near-real-time AI ops dashboards (latency/error/throughput/resource/quality):
+  npm run aprf:ai-ops-dashboards -- --target <app> --out <app>/aprf-assessment
+  # PASS needs dashboardCoversLatencyErrorThroughput + dashboardCoversResourceUtilization + dashboardCoversAiQuality + nearRealtimeRefreshConfigured under imports/ai-ops-dashboards/
+
+PERF-M3 critical-journey SLO burn alerts (coverage + notify proof):
+  npm run aprf:ai-slo-burn-alerts -- --target <app> --out <app>/aprf-assessment
+  # PASS needs alertPoliciesCoverCriticalJourneySlos + notificationPathProvenByTestOrDocumentedFire under imports/ai-slo-burn-alerts/
+
+PERF-R1 error-budget release gates (freeze/risk acceptance + gated event ≤90d):
+  npm run aprf:ai-error-budget-release-gate -- --target <app> --out <app>/aprf-assessment
+  # PASS needs errorBudgetPolicyLinksAiSlosToReleaseFreezeOrRiskAcceptance + gatedEventOrDrillWithin90Days under imports/ai-error-budget-release-gate/
+
+PERF-R2 adversarial capacity tests (long-prompt + agent-loop + SLO under concurrency ≤90d):
+  npm run aprf:ai-adversarial-capacity-tests -- --target <app> --out <app>/aprf-assessment
+  # PASS needs capacityTestIncludesAdversarialLongPrompts + capacityTestIncludesMultiStepAgentLoops + p95LatencyAndErrorRateWithinSloUnderDocumentedConcurrency + lastCapacityTestWithin90Days under imports/ai-adversarial-capacity-tests/
+
+PERF-R3 streaming SLIs (TTFT + inter-token + alerts + ≥30d retention):
+  npm run aprf:ai-streaming-slis -- --target <app> --out <app>/aprf-assessment
+  # PASS needs ttftSliConfiguredForStreamingSurfaces + interTokenLatencySliConfiguredForStreamingSurfaces + streamingSliAlertsConfigured + streamingSeriesRetainedAtLeast30Days under imports/ai-streaming-slis/
+
 COST-M2 AI cost budget-burn / anomaly alerts:
   npm run aprf:cost-alerts -- --target <app> --out <app>/aprf-assessment
   # PASS needs notify proof under imports/ai-cost-alerts/

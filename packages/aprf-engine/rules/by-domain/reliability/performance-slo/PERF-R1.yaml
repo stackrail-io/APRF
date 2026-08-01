@@ -1,39 +1,56 @@
 id: "PERF-R1"
 category: "performance-slo"
 title: "Production systems should have error budgets formally gate release velocity for AI features"
-description: "Error budgets formally gate release velocity for AI features"
-whyItMatters: "Error budgets formally gate release velocity for AI features Failing this leaves a
-  production gap against: When error budget for a critical AI journey is exhausted, release velocity
-  is blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days"
+description: >
+  When a critical AI journey's error budget is exhausted, release velocity
+  should be blocked or require explicit risk acceptance, with ≥1 gated event
+  or drill in the last 90 days.
+whyItMatters: >
+  Alerts (PERF-M3) without a release consequence let teams ship into a burned
+  budget. Formal freeze-or-accept gates turn error budgets into change control
+  so AI features recover SLOs before the next experiment lands.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "When error budget for a critical AI journey is exhausted, release velocity is
-  blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days"
+passCondition: >
+  When error budget for a critical AI journey is exhausted, release velocity is
+  blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90
+  days (gate evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Error-budget policy linking AI SLOs to release freezes + last budget burn report that gated a
-    release"
+  - "Error-budget policy linking AI SLOs to release freezes or risk acceptance"
+  - "Last budget-burn gated release or drill ≤90 days"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-error-budget-release-gate"
+      params:
+        hint: >
+          Discover error-budget policy linking AI SLOs to release freeze/risk
+          acceptance plus a gated event or drill ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "Error-budget policy linking AI SLOs to release freezes + last budget burn report that gated a
-          release"
-manualVerification: "For this Check (Error budgets formally gate release velocity for AI features):
-  inspect current evidence for [Error-budget policy linking AI SLOs to release freezes + last budget
-  burn report that gated a release] and confirm the pass condition holds — When error budget for a
-  critical AI journey is exhausted, release velocity is blocked or requires explicit risk
-  acceptance; ≥1 gated event or drill in 90 days"
-falsePositiveGuidance: "(Performance & SLO Engineering): re-verify against a current artifact for
-  this specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest exhausted critical-journey
+          error budgets block releases or require risk acceptance, with ≥1 gated
+          event or drill in 90 days (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm critical AI journeys with error budgets are in scope. If none,
+  score NOT_APPLICABLE. 2) Confirm a written policy links exhausted budgets to
+  release freeze or explicit risk acceptance. 3) Confirm ≥1 real gated release
+  or drill in the last 90 days. 4) PASS only if policy + recent gate hold with
+  measuredAt ≤90 days. PERF-M3 burn alerts alone do not prove release gating.
+  PERF-R4 dashboards alone do not prove freeze policy. CHG-R3 quality
+  auto-rollback alone does not prove error-budget release velocity gates.
+falsePositiveGuidance: >
+  Do not pass aspirational policy without a gated event/drill ≤90 days. Do not
+  pass infra-only freezes without AI journey SLO linkage. Do not pass risk
+  acceptances without named owner/expiry. Named exceptions need owner and
+  expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Error budgets formally gate release velocity for AI
-    features"
-  - "Retain evidence artifacts required by this Check, starting with: Error-budget policy linking AI
-    SLOs to release freezes + last budget burn report that gated a release"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish an error-budget policy that freezes AI releases or requires risk acceptance when burned"
+  - "Run or retain ≥1 gated event/drill ≤90 days"
+  - "Retain evidence under imports/ai-error-budget-release-gate/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE — Service Level Objectives"
     url: "https://sre.google/sre-book/service-level-objectives/"
@@ -45,14 +62,17 @@ relatedRules:
   - "PERF-M3"
   - "PERF-R2"
   - "PERF-R3"
+  - "PERF-R4"
+  - "CHG-R3"
+  - "CHG-M1"
 tags:
   - "performance-slo"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "error-budget"
+  - "release-gate"
 applicability:
-  technologies:
-    - "cicd"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

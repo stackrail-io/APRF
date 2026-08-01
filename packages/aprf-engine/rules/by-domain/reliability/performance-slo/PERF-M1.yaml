@@ -1,32 +1,54 @@
 id: "PERF-M1"
 category: "performance-slo"
 title: "Critical AI user journeys must have documented latency and availability SLOs"
-description: "Critical AI user journeys shall have documented latency and availability SLOs"
-whyItMatters: "Critical AI user journeys shall have documented latency and availability SLOs Failing
-  this leaves a production gap against: 100% of journeys marked critical have availability % and
-  latency percentile targets recorded"
+description: >
+  Every journey marked critical must have documented numeric availability and
+  latency-percentile SLO targets in a maintained catalog.
+whyItMatters: >
+  Without written latency and availability targets, AI journeys cannot hold an
+  error budget, page on burn, or prove readiness. Operators guess at “slow”
+  instead of measuring against a shared contract.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "100% of journeys marked critical have availability % and latency percentile targets recorded"
+passCondition: >
+  100% of journeys marked critical have availability % and latency percentile
+  targets recorded in an SLO catalog (catalog evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "SLO catalog with numeric targets per journey"
+  - "SLO catalog listing critical AI journeys with numeric availability and latency targets"
+  - "Coverage showing 100% of marked-critical journeys have both target types"
 detection:
-  capability: "manual"
-  detectors: []
-manualVerification: "For this Check (Critical AI user journeys must have documented latency and
-  availability SLOs): inspect current evidence for [SLO catalog with numeric targets per journey]
-  and confirm the pass condition holds — 100% of journeys marked critical have availability % and
-  latency percentile targets recorded"
-falsePositiveGuidance: "(Performance & SLO Engineering): re-verify against a current artifact for
-  this specific Check , not a sibling control. Document named exceptions with owner and expiry."
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-journey-slo-catalog"
+      params:
+        hint: >
+          Discover an SLO catalog for critical AI journeys with availability %
+          and latency percentile targets, plus 100% coverage evidence.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest 100% of journeys marked
+          critical have availability % and latency percentile targets in a
+          catalog (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm at least one AI journey is marked critical. If none, score
+  NOT_APPLICABLE. 2) Confirm an SLO catalog (or equivalent registry) lists those
+  journeys. 3) Confirm each critical journey has a numeric availability % and a
+  latency percentile target (e.g. p95/p99). 4) PASS only if coverage is 100%
+  with measuredAt ≤90 days. OBS-R3 dashboards/burn alerts alone do not prove a
+  catalog. PERF-M2 emitted metrics alone do not prove written targets. PERF-R4
+  dashboards alone do not prove a catalog. Infra-only SLOs without AI journey
+  scope do not satisfy.
+falsePositiveGuidance: >
+  Do not pass a blank template catalog. Do not pass latency targets without
+  availability (or the reverse). Do not pass partial coverage as 100%. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Critical AI user journeys must have documented latency and
-    availability SLOs"
-  - "Retain evidence artifacts required by this Check, starting with: SLO catalog with numeric
-    targets per journey"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish an SLO catalog with availability % and latency percentile targets per critical AI journey"
+  - "Close coverage gaps until 100% of marked-critical journeys are documented"
+  - "Retain evidence under imports/ai-journey-slo-catalog/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE — Service Level Objectives"
     url: "https://sre.google/sre-book/service-level-objectives/"
@@ -38,14 +60,17 @@ relatedRules:
   - "PERF-R1"
   - "PERF-R2"
   - "PERF-R3"
+  - "PERF-R4"
+  - "OBS-R3"
 tags:
   - "performance-slo"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "slo-catalog"
+  - "latency"
+  - "availability"
 applicability:
-  technologies:
-    - "cicd"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

@@ -8,6 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
+- Rewrote **performance-slo** **PERF-M1**–**PERF-M3** and **PERF-R1**–**PERF-R4** hybrid collectors; split former dashboard stub into mandatory **PERF-M2** (ops metrics) + recommended **PERF-R4** (near-real-time dashboards) per [APRF-RFC-0004](rfcs/0004-performance-slo-perf-m2-dashboards-to-recommended.md); cleared `technologies`; synced `aprf-spec.json`.
 - Rewrote **observability** **OBS-M1** (hybrid trace linkage); demoted former token/cost attribution **OBS-M2 → OBS-R4** per [APRF-RFC-0003](rfcs/0003-observability-obs-m2-to-recommended.md) (core 39→38, regulated 55→54); renumbered sensitive-field redaction **OBS-M3 → OBS-M2** (conditionally mandatory); rewrote **OBS-R1**/**OBS-R2**/**OBS-R3** hybrid collectors; cleared cloud-only `technologies`; synced `aprf-spec.json`.
 - Rewrote **incident-readiness** **INC-M1**–**INC-M2** and **INC-R1**/**INC-R3**; demoted **INC-M3 → INC-R2** and **INC-M4 → INC-R4** per [APRF-RFC-0002](rfcs/0002-incident-readiness-mandatory-to-recommended.md) (regulated 56→55, tier3-only 17→16; pre-release ID-removal exception in `id-gaps.md`); hybrid collectors; synced `aprf-spec.json`.
 - Rewrote **change management** from template stub to hybrid Check + collectors; cleared `technologies` filter; synced `aprf-spec.json`.

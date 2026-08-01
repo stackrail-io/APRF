@@ -1,0 +1,27 @@
+id: ai-adversarial-capacity-tests
+title: Adversarial long-prompt + agent-loop capacity tests (PERF-R2)
+version: "0.2.0"
+executor: collectors/ai-adversarial-capacity-tests.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-adversarial-capacity-tests]
+inputs:
+  - "Target repo (capacity/load plans + reports with AI adversarial scenarios)"
+  - "Optional suite: aprf-assessment/imports/ai-adversarial-capacity-tests/*.{json}"
+collect:
+  - "Detect adversarial AI capacity/load-test signals"
+  - "Ingest coverage; write ai-adversarial-capacity-tests-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-adversarial-capacity-tests/*"
+  signals: [ai-adversarial-capacity-tests, perf-r2, repo-ai-adversarial-capacity-tests]
+mapsToChecks: [PERF-R2]
+whenUnavailable: >
+  Capacity signals alone are PARTIAL. PERF-R2 PASS needs
+  capacityTestIncludesAdversarialLongPrompts,
+  capacityTestIncludesMultiStepAgentLoops,
+  p95LatencyAndErrorRateWithinSloUnderDocumentedConcurrency,
+  lastCapacityTestWithin90Days, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline capacity-test heuristics + optional imported JSON.

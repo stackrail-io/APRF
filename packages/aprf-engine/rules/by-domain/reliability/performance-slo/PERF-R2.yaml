@@ -1,39 +1,60 @@
 id: "PERF-R2"
 category: "performance-slo"
-title: "Production systems should have capacity and load tests include adversarial long-prompt and
-  agent-loop scenarios"
-description: "Capacity and load tests include adversarial long-prompt and agent-loop scenarios"
-whyItMatters: "Capacity and load tests include adversarial long-prompt and agent-loop scenarios
-  Failing this leaves a production gap against: Last capacity test ≤90 days includes adversarial
-  long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under
-  documented concurrency"
+title: "Production systems should include adversarial long-prompt and agent-loop capacity tests"
+description: >
+  Capacity and load tests should include adversarial long-prompt and multi-step
+  agent-loop scenarios within 90 days, with p95 latency and error rate staying
+  within SLO under documented concurrency.
+whyItMatters: >
+  Generic HTTP load tests miss AI failure modes—context blow-ups, long prompts,
+  and recursive agent tool loops—that burn latency and error budgets. Adversarial
+  capacity scenarios prove journeys still meet SLOs under realistic AI stress.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Last capacity test ≤90 days includes adversarial long prompts and multi-step agent
-  loops; p95 latency and error rate stay within SLO under documented concurrency"
+passCondition: >
+  Last capacity test ≤90 days includes adversarial long prompts and multi-step
+  agent loops; p95 latency and error rate stay within SLO under documented
+  concurrency (capacity evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Load-test plan including long-prompt and agent-loop scenarios + latest capacity test report"
+  - "Load-test plan including long-prompt and agent-loop scenarios"
+  - "Latest capacity test report ≤90 days showing p95/error within SLO at documented concurrency"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-adversarial-capacity-tests"
+      params:
+        hint: >
+          Discover capacity/load-test plans and reports covering adversarial
+          long prompts, multi-step agent loops, and SLO compliance under
+          documented concurrency.
     - id: "manual-attest"
       params:
-        hint: "Load-test plan including long-prompt and agent-loop scenarios + latest capacity test report"
-manualVerification: "For this Check (Capacity and load tests include adversarial long-prompt and
-  agent-loop scenarios): inspect current evidence for [Load-test plan including long-prompt and
-  agent-loop scenarios + latest capacity test report] and confirm the pass condition holds — Last
-  capacity test ≤90 days includes adversarial long prompts and multi-step agent loops; p95 latency
-  and error rate stay within SLO under documented concurrency"
-falsePositiveGuidance: "(Performance & SLO Engineering): re-verify against a current artifact for
-  this specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest last capacity test ≤90
+          days included adversarial long prompts and multi-step agent loops with
+          p95/error within SLO under documented concurrency (measuredAt ≤90
+          days).
+manualVerification: >
+  1) Confirm production AI paths with capacity risk are in scope. If none,
+  score NOT_APPLICABLE. 2) Confirm a load/capacity plan includes adversarial
+  long-prompt scenarios. 3) Confirm multi-step agent-loop scenarios are
+  included (or N/A only if no agents). 4) Confirm latest run ≤90 days kept p95
+  latency and error rate within SLO at documented concurrency. 5) PASS only if
+  scenarios + SLO result + freshness hold with measuredAt ≤90 days. PERF-R1
+  error-budget freezes alone do not prove capacity tests. PERF-R3 streaming
+  SLIs alone do not prove adversarial load. Generic k6/JMeter without AI
+  scenarios do not satisfy.
+falsePositiveGuidance: >
+  Do not pass plans without a report ≤90 days. Do not pass short-prompt-only
+  load as adversarial long-prompt coverage. Do not pass concurrency docs
+  without measured p95/error vs SLO. Named exceptions need owner and expiry
+  ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Capacity and load tests include adversarial
-    long-prompt and agent-loop scenarios"
-  - "Retain evidence artifacts required by this Check, starting with: Load-test plan including
-    long-prompt and agent-loop scenarios + latest capacity test report"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Add adversarial long-prompt and multi-step agent-loop scenarios to capacity/load tests"
+  - "Run ≤90 days and retain p95/error vs SLO at documented concurrency"
+  - "Retain evidence under imports/ai-adversarial-capacity-tests/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE — Service Level Objectives"
     url: "https://sre.google/sre-book/service-level-objectives/"
@@ -45,14 +66,17 @@ relatedRules:
   - "PERF-M3"
   - "PERF-R1"
   - "PERF-R3"
+  - "PERF-R4"
+  - "AGN-M2"
 tags:
   - "performance-slo"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "capacity"
+  - "load-test"
+  - "adversarial"
 applicability:
-  technologies:
-    - "cicd"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

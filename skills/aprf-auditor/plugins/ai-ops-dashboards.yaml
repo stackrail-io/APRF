@@ -1,0 +1,25 @@
+id: ai-ops-dashboards
+title: Near-real-time AI ops dashboards (PERF-R4)
+version: "0.2.0"
+executor: collectors/ai-ops-dashboards.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-ops-dashboards]
+inputs:
+  - "Target repo (ops dashboards covering latency/error/throughput/resource/quality)"
+  - "Optional suite: aprf-assessment/imports/ai-ops-dashboards/*.{json}"
+collect:
+  - "Detect near-real-time AI ops dashboard signals"
+  - "Ingest coverage; write ai-ops-dashboards-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-ops-dashboards/*"
+  signals: [ai-ops-dashboards, perf-r4, repo-ai-ops-dashboards]
+mapsToChecks: [PERF-R4]
+whenUnavailable: >
+  Dashboard signals alone are PARTIAL. PERF-R4 PASS needs
+  dashboardCoversLatencyErrorThroughput, dashboardCoversResourceUtilization,
+  dashboardCoversAiQuality, nearRealtimeRefreshConfigured, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline dashboard heuristics + optional imported JSON.

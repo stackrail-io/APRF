@@ -8,6 +8,13 @@ import { aiTraceSensitiveRedactionCollector } from "./ai-trace-sensitive-redacti
 import { aiTraceReplayCollector } from "./ai-trace-replay.ts";
 import { aiTraceQualityAnnotationsCollector } from "./ai-trace-quality-annotations.ts";
 import { aiSloDashboardsCollector } from "./ai-slo-dashboards.ts";
+import { aiJourneySloCatalogCollector } from "./ai-journey-slo-catalog.ts";
+import { aiOpsMetricsCollector } from "./ai-ops-metrics.ts";
+import { aiOpsDashboardsCollector } from "./ai-ops-dashboards.ts";
+import { aiSloBurnAlertsCollector } from "./ai-slo-burn-alerts.ts";
+import { aiErrorBudgetReleaseGateCollector } from "./ai-error-budget-release-gate.ts";
+import { aiAdversarialCapacityTestsCollector } from "./ai-adversarial-capacity-tests.ts";
+import { aiStreamingSlisCollector } from "./ai-streaming-slis.ts";
 import { promptfooCollector } from "./promptfoo.ts";
 import { httpAuthProbeCollector } from "./http-auth-probe.ts";
 import { mcpS2sInventoryCollector } from "./mcp-s2s-inventory.ts";
@@ -133,6 +140,13 @@ export const COLLECTORS: Collector[] = [
   aiTraceReplayCollector,
   aiTraceQualityAnnotationsCollector,
   aiSloDashboardsCollector,
+  aiJourneySloCatalogCollector,
+  aiOpsMetricsCollector,
+  aiOpsDashboardsCollector,
+  aiSloBurnAlertsCollector,
+  aiErrorBudgetReleaseGateCollector,
+  aiAdversarialCapacityTestsCollector,
+  aiStreamingSlisCollector,
   promptfooCollector,
   httpAuthProbeCollector,
   mcpS2sInventoryCollector,
