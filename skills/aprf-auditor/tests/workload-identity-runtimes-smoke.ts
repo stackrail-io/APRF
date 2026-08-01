@@ -125,6 +125,48 @@ async function main() {
       );
     }
 
+    const outNaThenInv = join(root, "o-na-inv");
+    mkdirSync(join(outNaThenInv, "imports", "workload-identity-runtimes"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNaThenInv, "imports", "workload-identity-runtimes", "a-na.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        selfHostedModelRuntimesPresent: false,
+      }),
+    );
+    writeFileSync(
+      join(outNaThenInv, "imports", "workload-identity-runtimes", "z-inv.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        selfHostedModelRuntimesWithWorkloadIdentityPct: 100,
+        staticSharedKeysInRuntimeInventory: 0,
+        sampleAuthenticatedCallsPresent: true,
+        runtimes: [
+          {
+            name: "vllm",
+            workloadIdentity: true,
+            spiffeId: "spiffe://example/vllm",
+          },
+        ],
+      }),
+    );
+    const rNaInv = await run(t2, outNaThenInv);
+    if (rNaInv.summary.statusHint === "not_applicable") {
+      throw new Error(
+        `later runtime inventory must clear prior N/A: ${JSON.stringify(rNaInv.summary)}`,
+      );
+    }
+    if (
+      rNaInv.summary.statusHint !== "pass" ||
+      rNaInv.summary.authnR2Satisfied !== true
+    ) {
+      throw new Error(
+        `N/A then inventory should PASS: ${JSON.stringify(rNaInv.summary)}`,
+      );
+    }
+
     const tEmpty = join(root, "t-empty");
     mkdirSync(tEmpty, { recursive: true });
     const outNa = join(root, "ona");

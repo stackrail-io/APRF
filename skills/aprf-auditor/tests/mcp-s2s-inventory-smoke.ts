@@ -259,6 +259,107 @@ if auth_type == 'bearer':
   }
   rmSync(liveOut, { recursive: true, force: true });
 
+  // Live fetch must not launder a stale imported measuredAt
+  const staleLiveOut = mkdtempSync(join(tmpdir(), "aprf-mcp-s2s-stale-live-"));
+  mkdirSync(join(staleLiveOut, "imports", "mcp-s2s-inventory"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(staleLiveOut, "imports", "mcp-s2s-inventory", "stale.json"),
+    JSON.stringify({
+      measuredAt: "2020-01-01T00:00:00.000Z",
+      TOOL_SERVER_CONNECTIONS: [
+        {
+          url: "http://mcp.local/oauth",
+          type: "mcp",
+          auth_type: "oauth_2.1",
+          info: { id: "imported", name: "imported" },
+        },
+      ],
+    }),
+  );
+  const staleMock = createServer((req, res) => {
+    const url = req.url ?? "";
+    if (req.method === "POST" && url.includes("/auths/signin")) {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ token: "stale-jwt" }));
+      return;
+    }
+    if (req.method === "GET" && url.includes("/configs/")) {
+      const key = url.includes("terminal")
+        ? "TERMINAL_SERVER_CONNECTIONS"
+        : "TOOL_SERVER_CONNECTIONS";
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          [key]:
+            key === "TOOL_SERVER_CONNECTIONS"
+              ? [
+                  {
+                    url: "http://live.local/oauth",
+                    path: "",
+                    type: "mcp",
+                    auth_type: "oauth_2.1",
+                    info: { id: "live", name: "live" },
+                  },
+                ]
+              : [],
+        }),
+      );
+      return;
+    }
+    res.writeHead(404);
+    res.end();
+  });
+  await new Promise<void>((resolve) =>
+    staleMock.listen(0, "127.0.0.1", resolve),
+  );
+  const staleAddr = staleMock.address();
+  if (!staleAddr || typeof staleAddr === "string") {
+    throw new Error("no stale mock port");
+  }
+  const staleLive = await mcpS2sInventoryCollector.collect({
+    targetPath: targetDir,
+    outputDir: staleLiveOut,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 100,
+    baseUrl: `http://127.0.0.1:${staleAddr.port}`,
+    adminEmail: "admin@test.local",
+    adminPassword: "secret",
+  });
+  staleMock.close();
+  if (staleLive.status !== "ran") {
+    throw new Error(
+      `stale+live expected ran: ${staleLive.status} ${staleLive.detail}`,
+    );
+  }
+  const staleLiveReport = JSON.parse(
+    readFileSync(
+      join(
+        staleLiveOut,
+        "imports",
+        "mcp-s2s-inventory",
+        "mcp-s2s-inventory-report.json",
+      ),
+      "utf8",
+    ),
+  ) as McpS2sReport;
+  if (staleLiveReport.measuredAt !== "2020-01-01T00:00:00.000Z") {
+    throw new Error(
+      `live fetch must keep oldest measuredAt, got ${staleLiveReport.measuredAt}`,
+    );
+  }
+  if (
+    staleLiveReport.summary.statusHint !== "partial" ||
+    staleLiveReport.summary.authnM2Satisfied !== false
+  ) {
+    throw new Error(
+      `stale import + live must not PASS: ${JSON.stringify(staleLiveReport.summary)}`,
+    );
+  }
+  rmSync(staleLiveOut, { recursive: true, force: true });
+
   // Empty live inventory → partial (not vacuous PASS)
   const emptyMock = createServer((req, res) => {
     const url = req.url ?? "";

@@ -445,6 +445,10 @@ function loadImportInventories(ctx: CollectorContext): {
       if (normalized.length > 0) {
         connections.push(...normalized);
         sources.push(src);
+        productionMcpOrAiS2sConnectionsPresent = mergeOrBool(
+          productionMcpOrAiS2sConnectionsPresent,
+          true,
+        );
       } else if (
         productionMcpOrAiS2sConnectionsPresent !== null ||
         parseMeasuredAt(data)
@@ -700,7 +704,17 @@ export const mcpS2sInventoryCollector: Collector = {
       // Record sources even when the inventory is empty — proves we fetched live config.
       connections = [...connections, ...live.connections];
       inventorySource.push(...live.sources);
-      measuredAt = ctx.assessedAt.toISOString();
+      // Keep oldest timestamp so stale imports cannot be laundered by a live fetch.
+      measuredAt = mergeOldestMeasuredAt(
+        measuredAt,
+        ctx.assessedAt.toISOString(),
+      );
+      if (live.connections.length > 0) {
+        productionMcpOrAiS2sConnectionsPresent = mergeOrBool(
+          productionMcpOrAiS2sConnectionsPresent,
+          true,
+        );
+      }
       if (live.error) {
         liveError = liveError
           ? `${liveError}; ${live.error}`

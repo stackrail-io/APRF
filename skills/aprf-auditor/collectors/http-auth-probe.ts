@@ -32,7 +32,6 @@ import {
 import {
   asBool,
   measuredAtFresh,
-  mergeOldestMeasuredAt,
   mergeOrBool,
   parseMeasuredAt,
 } from "./lib/import-attest.ts";

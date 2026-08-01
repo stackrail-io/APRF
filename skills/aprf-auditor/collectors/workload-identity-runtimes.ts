@@ -210,8 +210,10 @@ function loadImported(
           staticSharedKeysInRuntimeInventory,
           staticKeys,
         );
-        selfHostedModelRuntimesPresent =
-          selfHostedModelRuntimesPresent ?? true;
+        selfHostedModelRuntimesPresent = mergeOrBool(
+          selfHostedModelRuntimesPresent,
+          true,
+        );
       }
     } catch {
       /* skip */
