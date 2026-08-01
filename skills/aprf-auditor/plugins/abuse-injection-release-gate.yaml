@@ -1,0 +1,26 @@
+id: abuse-injection-release-gate
+title: Abuse/jailbreak/injection release gate (SEC-M3)
+version: "0.2.0"
+executor: collectors/abuse-injection-release-gate.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-abuse-injection-release-gate]
+inputs:
+  - "Target repo (abuse/jailbreak/injection suite + CI/release gates + waivers)"
+  - "Optional coverage: aprf-assessment/imports/abuse-injection-release-gate/*.{json}"
+collect:
+  - "Detect abuse/jailbreak/injection suite, case-class, gate, and waiver signals"
+  - "Ingest coverage; write abuse-injection-release-gate-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/abuse-injection-release-gate/*"
+  signals: [abuse-injection-release-gate, sec-m3, repo-abuse-injection-release-gate]
+mapsToChecks: [SEC-M3]
+whenUnavailable: >
+  Gate signals alone are PARTIAL. SEC-M3 PASS needs
+  abuseJailbreakInjectionSuiteConfigured,
+  productionReleasesWithSecuritySuiteGatePassPct=100,
+  failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline abuse-injection-release-gate heuristics + optional imported JSON.

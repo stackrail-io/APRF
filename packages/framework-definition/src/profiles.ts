@@ -81,7 +81,6 @@ export const PROFILE_REGULATED: AprfProfile = {
     ...PROFILE_CORE.mandatoryCheckIds,
     "REL-M5",
     "CMP-M2",
-    "SEC-M5",
     "AUTHN-M4",
     "AUTHZ-M4",
     "TOL-M5",

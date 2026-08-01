@@ -630,7 +630,6 @@
         "COST-M3",
         "REL-M5",
         "CMP-M2",
-        "SEC-M5",
         "AUTHN-M4",
         "AUTHZ-M4",
         "TOL-M5",
@@ -1987,66 +1986,66 @@
       "mandatoryChecks": [
         {
           "id": "SEC-M1",
-          "requirement": "Untrusted input shall never authorize privileged actions without server-side policy",
-          "artifact": "Injection/privilege-escalation corpus (versioned) + CI gate report + policy-engine deny sample logs",
-          "passCondition": "\u226595% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the suite",
-          "method": "manual",
+          "requirement": "Untrusted input (including model-generated text) shall never authorize privileged tool or side-effect actions without server-side policy\u2014so prompt injection and privilege escalation cannot bypass the control plane.",
+          "artifact": "Server-side policy mediating privileged tool/actions (not prompt-only) + Versioned injection/privilege-escalation corpus + CI gate report + Policy-engine deny sample logs or harness results (denyRatePct + modelTextPrivilegeGrants)",
+          "passCondition": "\u226595% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the suite (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "SEC-M2",
-          "requirement": "High-risk outputs shall be schema-validated or policy-filtered before side effects",
-          "artifact": "Schema/policy definitions for high-risk paths + contract test results",
-          "passCondition": "100% of high-risk side-effect paths (impact tier write/irreversible/financial) reject non-conforming model output in contract tests; coverage inventory lists every such path",
-          "method": "manual",
+          "requirement": "High-risk model outputs shall be schema-validated or policy-filtered before any write, irreversible, or financial side effect\u2014so non-conforming output cannot drive privileged downstream actions.",
+          "artifact": "Coverage inventory of high-risk side-effect paths (write/irreversible/financial) + Schema or policy filter definitions applied before those side effects + Contract test results showing non-conforming output rejected on 100% of inventoried paths",
+          "passCondition": "100% of high-risk side-effect paths (impact tier write/irreversible/financial) reject non-conforming model output in contract tests; coverage inventory lists every such path (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "SEC-M3",
-          "requirement": "Abuse, jailbreak, and injection testing shall gate customer-facing releases",
-          "artifact": "CI gate configuration + last 30 days of release reports",
-          "passCondition": "100% of production releases in the last 30 days show security-suite gate = pass, or a time-boxed waiver with owner and expiry \u2264 30 days",
-          "method": "manual",
+          "requirement": "Customer-facing releases shall run an abuse/jailbreak/injection security suite\u2014with those case classes present\u2014as a blocking gate, or record a time-boxed waiver (owner + expiry \u226430 days) when the gate does not pass.",
+          "artifact": "Abuse/jailbreak/injection suite definition covering those case classes + CI/release gate configuration that blocks promote on suite fail + Last 30 days of release reports showing gate=pass, or owned waivers (expiry \u226430 days)",
+          "passCondition": "100% of production releases in the last 30 days show an abuse/jailbreak/injection suite gate = pass (suite must include those case classes), or a time-boxed waiver with owner and expiry \u226430 days (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "SEC-M4",
-          "requirement": "Network and identity boundaries shall prevent the model path from becoming a universal proxy to internal systems",
-          "artifact": "Architecture diagram of model/tool trust boundaries + network policy or egress allowlist export",
-          "passCondition": "Automated or reviewed probe shows the model/tool runtime can reach only allowlisted destinations; 0 unrestricted routes to internal admin APIs or data stores from the model identity",
-          "method": "manual",
+          "requirement": "Network and identity boundaries shall prevent the model/tool runtime path from becoming a universal proxy to internal systems\u2014so the model identity reaches only allowlisted destinations and has 0 unrestricted routes to internal admin APIs or data stores.",
+          "artifact": "Architecture diagram of model/tool trust boundaries + Network policy or egress allowlist export for the model/tool runtime identity + Automated or reviewed probe results (allowlisted-only reachability; unrestricted internal admin/data-store routes = 0)",
+          "passCondition": "Automated or reviewed probe shows the model/tool runtime can reach only allowlisted destinations; 0 unrestricted routes to internal admin APIs or data stores from the model identity (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
-        },
-        {
-          "id": "SEC-M5",
-          "requirement": "Canary tokens or tripwires shall detect exfiltration attempts in sensitive AI contexts",
-          "artifact": "Canary/tripwire design + detection test report with sample alerts for sensitive contexts",
-          "passCondition": "PASS if canaries/tripwires are deployed in production-sensitive paths and the latest detection test (\u226490 days) shows expected alerts with 0 silent misses in the suite",
-          "method": "manual",
-          "requiredFromLevel": 5,
-          "minCriticality": 3
         }
       ],
       "recommendedChecks": [
         {
           "id": "SEC-R1",
-          "requirement": "Red-team exercises cover multi-turn and indirect injection via RAG/MCP",
-          "artifact": "Versioned red-team suite covering multi-turn and indirect injection via RAG/MCP + latest scored run report",
-          "passCondition": "Suite includes \u226510 multi-turn and \u226510 indirect RAG/MCP injection cases; latest run \u226490 days meets documented pass thresholds; report retained \u226590 days",
-          "method": "manual",
+          "requirement": "Production systems that use multi-turn dialogue, RAG, or MCP should run a versioned red-team suite with \u226510 multi-turn and \u226510 indirect RAG/MCP injection cases\u2014so single-turn jailbreak tests alone cannot claim coverage.",
+          "artifact": "Versioned red-team suite covering multi-turn and indirect RAG/MCP injection + Case counts (\u226510 multi-turn, \u226510 indirect RAG/MCP) with documented pass thresholds + Latest scored run report \u226490 days with retention \u226590 days",
+          "passCondition": "Suite includes \u226510 multi-turn and \u226510 indirect RAG/MCP injection cases; latest run \u226490 days meets documented pass thresholds; report retained \u226590 days (measuredAt \u226490 days). If the system has no multi-turn, RAG, or MCP surfaces, score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "SEC-R2",
-          "requirement": "Content safety and malware scanning on multimodal inputs where applicable",
-          "artifact": "Multimodal input safety/malware scanner config + latest CI or batch scan report for production-bound media",
-          "passCondition": "Where multimodal inputs are accepted, scanner runs before model ingest; last report \u226490 days shows coverage of image/file types in use and 0 unscanned production paths",
-          "method": "manual",
+          "requirement": "Where production AI accepts multimodal inputs (images, files, or similar), content-safety and malware scanners should run before model ingest\u2014so unscanned media cannot reach the model path.",
+          "artifact": "Multimodal input content-safety and/or malware scanner config (pre-model-ingest) + Inventory of image/file types accepted in production + Latest CI or batch scan report \u226490 days showing type coverage and 0 unscanned production paths",
+          "passCondition": "Where multimodal inputs are accepted, scanner runs before model ingest; last report \u226490 days shows coverage of image/file types in use and 0 unscanned production paths (measuredAt \u226490 days). If multimodal inputs are not accepted, score NOT_APPLICABLE.",
+          "method": "hybrid",
+          "requiredFromLevel": 4,
+          "minCriticality": 2
+        },
+        {
+          "id": "SEC-R3",
+          "requirement": "Sensitive AI contexts should have mechanisms to detect data exfiltration attempts\u2014canary/honeytokens are one strong implementation; equivalent DLP, SIEM/UEBA, egress monitoring, or similar controls also satisfy when validated.",
+          "artifact": "Documented exfiltration-detection mechanism for sensitive AI contexts (mechanism class named) + Coverage of production-sensitive AI paths (inventory or mapping) + Latest validation \u226490 days (detection test, alert-rule exercise, or equivalent) with expected alerts / 0 silent misses",
+          "passCondition": "Sensitive AI contexts have a documented exfiltration-detection mechanism (canary/honeytoken, DLP, SIEM/UEBA, egress monitoring, or equivalent); latest validation \u226490 days shows expected detection/alerts for covered paths with 0 silent misses in the validation suite or review (measuredAt \u226490 days). If no sensitive AI contexts exist, score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }

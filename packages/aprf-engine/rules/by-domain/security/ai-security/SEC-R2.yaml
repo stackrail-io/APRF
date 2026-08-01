@@ -1,43 +1,68 @@
 id: "SEC-R2"
 category: "ai-security"
-title: "Production systems should have content safety and malware scanning on multimodal inputs
-  where applicable"
-description: "Content safety and malware scanning on multimodal inputs where applicable"
-whyItMatters: "Content safety and malware scanning on multimodal inputs where applicable Failing
-  this leaves a production gap against: Where multimodal inputs are accepted, scanner runs before
-  model ingest; last report ≤90 days shows coverage of image/file types in use and 0 unscanned
-  production paths"
-severity: "critical"
-weight: 4
+title: "Multimodal inputs should be content-safety and malware scanned before model ingest"
+description: >
+  Where production AI accepts multimodal inputs (images, files, or similar),
+  content-safety and malware scanners should run before model ingest—so
+  unscanned media cannot reach the model path.
+whyItMatters: >
+  Images and file uploads are a common bypass of text-only guardrails: malware,
+  steganographic prompts, and unsafe visual content reach the model if ingest
+  is ungated. A pre-ingest scanner plus a recent report showing coverage of
+  types in use and 0 unscanned production paths makes the control measurable.
+  Distinct from SAF-M2 text safety eval release gates, SEC-M2 high-risk output
+  schema filters, and SEC-R1 injection red-team depth.
+severity: "high"
+weight: 3
 gate: "recommended"
-passCondition: "Where multimodal inputs are accepted, scanner runs before model ingest; last report
-  ≤90 days shows coverage of image/file types in use and 0 unscanned production paths"
+passCondition: >
+  Where multimodal inputs are accepted, scanner runs before model ingest; last
+  report ≤90 days shows coverage of image/file types in use and 0 unscanned
+  production paths (measuredAt ≤90 days). If multimodal inputs are not
+  accepted, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Multimodal input safety/malware scanner config + latest CI or batch scan report for
-    production-bound media"
+  - "Multimodal input content-safety and/or malware scanner config (pre-model-ingest)"
+  - "Inventory of image/file types accepted in production"
+  - "Latest CI or batch scan report ≤90 days showing type coverage and 0 unscanned production paths"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-multimodal-input-scan"
+      params:
+        hint: >
+          Discover pre-ingest multimodal content-safety/malware scanners and
+          coverage reports; ingest results under imports/multimodal-input-scan/.
     - id: "manual-attest"
       params:
-        hint: "Multimodal input safety/malware scanner config + latest CI or batch scan report for
-          production-bound media"
-manualVerification: "For this Check (Content safety and malware scanning on multimodal inputs where
-  applicable): inspect current evidence for [Multimodal input safety/malware scanner config + latest
-  CI or batch scan report for production-bound media] and confirm the pass condition holds — Where
-  multimodal inputs are accepted, scanner runs before model ingest; last report ≤90 days shows
-  coverage of image/file types in use and 0 unscanned production paths"
-falsePositiveGuidance: "(Adversarial Security): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest scanners run before model
+          ingest, last report ≤90 days covers image/file types in use, and
+          unscanned production paths = 0 (measuredAt ≤90 days). Score N/A if
+          multimodal inputs are not accepted.
+manualVerification: >
+  1) Confirm production AI accepts multimodal inputs (images, documents, audio,
+  or similar). If none, score NOT_APPLICABLE. 2) Locate content-safety and/or
+  malware scanner config that runs before model ingest. 3) Confirm an inventory
+  of accepted image/file types. 4) Review the latest CI or batch report ≤90
+  days: types in use are covered; unscanned production paths = 0. 5) PASS only
+  if pre-ingest scanning + coverage + 0 unscanned paths hold with measuredAt ≤90
+  days. SAF-M2 text safety release gates alone do not prove multimodal media
+  scanning. SEC-M2 output schema filters alone do not prove input media
+  scanning. SEC-R1 injection red teams alone do not prove malware/content-safety
+  ingest gates.
+falsePositiveGuidance: >
+  Do not pass text-only moderation as multimodal coverage. Do not pass
+  post-ingest or async-only scans that leave the model path ungated. Do not
+  pass reports older than 90 days. Do not pass scanners that omit file types
+  actually accepted in production. Sibling SAF-M2, SEC-M2, and SEC-R1 do not
+  substitute. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Content safety and malware scanning on multimodal
-    inputs where applicable"
-  - "Retain evidence artifacts required by this Check, starting with: Multimodal input
-    safety/malware scanner config + latest CI or batch scan report for production-bound media"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Run content-safety and malware scanners before multimodal model ingest"
+  - "Inventory accepted image/file types and require scanner coverage for each"
+  - "Retain latest report ≤90 days with 0 unscanned paths under imports/multimodal-input-scan/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
-  - title: "OWASP Top 10 for Large Language Model Applications"
+  - title: "OWASP Top 10 for Large Language Model Applications — LLM02 Insecure Output Handling / multimodal risks"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
   - title: "NIST AI Risk Management Framework"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -48,16 +73,18 @@ relatedRules:
   - "SEC-M2"
   - "SEC-M3"
   - "SEC-M4"
-  - "SEC-M5"
+  - "SEC-R1"
+  - "SEC-R3"
+  - "SAF-M2"
 tags:
   - "ai-security"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "multimodal"
+  - "malware"
+  - "content-safety"
 applicability:
-  technologies:
-    - "openapi"
-    - "prompt-templates"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

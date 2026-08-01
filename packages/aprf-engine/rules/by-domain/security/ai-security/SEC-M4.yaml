@@ -1,44 +1,70 @@
 id: "SEC-M4"
 category: "ai-security"
-title: "Network and identity boundaries must prevent the model path from becoming a universal proxy
-  to internal systems"
-description: "Network and identity boundaries shall prevent the model path from becoming a universal
-  proxy to internal systems"
-whyItMatters: "Network and identity boundaries shall prevent the model path from becoming a
-  universal proxy to internal systems Failing this leaves a production gap against: Automated or
-  reviewed probe shows the model/tool runtime can reach only allowlisted destinations; 0
-  unrestricted routes to internal admin APIs or data stores from the model identity"
+title: "Network and identity boundaries must prevent the model path from becoming a universal proxy to internal systems"
+description: >
+  Network and identity boundaries shall prevent the model/tool runtime path
+  from becoming a universal proxy to internal systems—so the model identity
+  reaches only allowlisted destinations and has 0 unrestricted routes to
+  internal admin APIs or data stores.
+whyItMatters: >
+  An unbounded model or tool identity turns every prompt into lateral movement:
+  admin APIs and data stores become reachable through natural language. A
+  documented trust boundary, egress allowlist, and probe proving only
+  allowlisted destinations (with 0 unrestricted internal admin/data-store
+  routes) makes the boundary measurable. Distinct from INF-M3 agent/tool
+  dependency-inventory segmentation, SEC-M1 injection privilege mediation, and
+  AUTHZ Checks on application RBAC alone.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "Automated or reviewed probe shows the model/tool runtime can reach only allowlisted
-  destinations; 0 unrestricted routes to internal admin APIs or data stores from the model identity"
+passCondition: >
+  Automated or reviewed probe shows the model/tool runtime can reach only
+  allowlisted destinations; 0 unrestricted routes to internal admin APIs or
+  data stores from the model identity (measuredAt ≤90 days).
 evidenceRequired:
-  - "Architecture diagram of model/tool trust boundaries + network policy or egress allowlist export"
+  - "Architecture diagram of model/tool trust boundaries"
+  - "Network policy or egress allowlist export for the model/tool runtime identity"
+  - "Automated or reviewed probe results (allowlisted-only reachability; unrestricted internal admin/data-store routes = 0)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-model-path-egress-boundary"
+      params:
+        hint: >
+          Discover trust-boundary diagrams, model/tool egress allowlists, and
+          reachability probe evidence; ingest results under
+          imports/model-path-egress-boundary/.
     - id: "manual-attest"
       params:
-        hint: "Architecture diagram of model/tool trust boundaries + network policy or egress allowlist
-          export"
-manualVerification: "For this Check (Network and identity boundaries must prevent the model path
-  from becoming a universal proxy to internal systems): inspect current evidence for [Architecture
-  diagram of model/tool trust boundaries + network policy or egress allowlist export] and confirm
-  the pass condition holds — Automated or reviewed probe shows the model/tool runtime can reach only
-  allowlisted destinations; 0 unrestricted routes to internal admin APIs or data stores from the
-  model identity"
-falsePositiveGuidance: "(Adversarial Security): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest allowlisted-only
+          reachability for the model/tool runtime and 0 unrestricted routes to
+          internal admin APIs or data stores (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI uses a model or tool runtime that can initiate
+  network calls. If none, score NOT_APPLICABLE. 2) Locate an architecture
+  diagram of model/tool trust boundaries. 3) Locate network policy or egress
+  allowlist for that runtime identity. 4) Review automated or reviewed probe
+  results: only allowlisted destinations are reachable; unrestricted routes
+  from the model identity to internal admin APIs or data stores = 0. 5) PASS
+  only if trust boundary + allowlist + probe results hold with measuredAt ≤90
+  days. INF-M3 dependency-inventory match alone does not prove model-path
+  proxy prevention. SEC-M1 injection suites alone do not prove egress
+  boundaries. AUTHZ application RBAC alone does not prove network/identity
+  isolation of the model path.
+falsePositiveGuidance: >
+  Do not pass open egress with “deny in docs only.” Do not pass cluster-wide
+  NetworkPolicies that omit the model/tool identity. Do not pass probes that
+  never attempt internal admin or data-store destinations. Sibling INF-M3,
+  SEC-M1, and AUTHZ Checks do not substitute. Named exceptions need owner and
+  expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Network and identity boundaries must prevent the model path from
-    becoming a universal proxy to internal systems"
-  - "Retain evidence artifacts required by this Check, starting with: Architecture diagram of
-    model/tool trust boundaries + network policy or egress allowlist export"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Document model/tool trust boundaries and bind the runtime to a dedicated identity"
+  - "Export and enforce egress allowlists for that identity"
+  - "Run allowlisted-only reachability probes; keep unrestricted internal admin/data-store routes at 0"
+  - "Retain evidence under imports/model-path-egress-boundary/; time-box gaps ≤90 days"
 references:
-  - title: "OWASP Top 10 for Large Language Model Applications"
+  - title: "OWASP Top 10 for Large Language Model Applications — LLM08 Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
   - title: "NIST AI Risk Management Framework"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -48,17 +74,19 @@ relatedRules:
   - "SEC-M1"
   - "SEC-M2"
   - "SEC-M3"
-  - "SEC-M5"
+  - "SEC-R3"
   - "SEC-R1"
+  - "INF-M3"
+  - "AUTHZ-M1"
 tags:
   - "ai-security"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "egress"
+  - "trust-boundary"
+  - "model-path"
 applicability:
-  technologies:
-    - "openapi"
-    - "prompt-templates"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

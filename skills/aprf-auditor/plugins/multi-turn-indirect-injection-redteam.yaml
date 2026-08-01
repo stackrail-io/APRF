@@ -1,0 +1,29 @@
+id: multi-turn-indirect-injection-redteam
+title: Multi-turn and indirect RAG/MCP injection red-team (SEC-R1)
+version: "0.2.0"
+executor: collectors/multi-turn-indirect-injection-redteam.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-multi-turn-indirect-injection-redteam]
+inputs:
+  - "Target repo (multi-turn + indirect RAG/MCP injection red-team suites)"
+  - "Optional coverage: aprf-assessment/imports/multi-turn-indirect-injection-redteam/*.{json}"
+collect:
+  - "Detect multi-turn, indirect RAG/MCP, red-team suite, and threshold signals"
+  - "Ingest case counts and run results; write multi-turn-indirect-injection-redteam-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/multi-turn-indirect-injection-redteam/*"
+  signals:
+    - multi-turn-indirect-injection-redteam
+    - sec-r1
+    - repo-multi-turn-indirect-injection-redteam
+mapsToChecks: [SEC-R1]
+whenUnavailable: >
+  Red-team signals alone are PARTIAL. SEC-R1 PASS needs
+  multiTurnInjectionCaseCount≥10, indirectRagOrMcpInjectionCaseCount≥10,
+  latestRunWithin90DaysMeetsPassThresholds, reportRetainedAtLeast90Days,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline multi-turn/indirect injection red-team heuristics + optional imported JSON.

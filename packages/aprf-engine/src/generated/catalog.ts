@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:0be2a48fd7cb19398308d1fdb27c25f6b289793f7d4046cfdc3580cdbb6494a0",
+  "generatedAt": "sha256:8c3124cea299b99491cc5f21acd40c3ef8b8c41e6b5a5b8d29e5de6c6b788df8",
   "ruleCount": 178,
   "domains": [
     {
@@ -12381,37 +12381,45 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SEC-M1",
       "category": "ai-security",
       "title": "Untrusted input must never authorize privileged actions without server-side policy",
-      "description": "Untrusted input shall never authorize privileged actions without server-side policy",
-      "whyItMatters": "Untrusted input shall never authorize privileged actions without server-side policy Failing this leaves a production gap against: ≥95% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the suite",
+      "description": "Untrusted input (including model-generated text) shall never authorize privileged tool or side-effect actions without server-side policy—so prompt injection and privilege escalation cannot bypass the control plane.\n",
+      "whyItMatters": "Letting the model decide which privileged tools to run turns injection into remote code/action. A versioned corpus plus CI gate proving ≥95% deny and 0 model-text-alone privilege grants makes the boundary measurable. Distinct from SAF-M2 content-safety gates and SAF-R2 jailbreak-to-harm red teams.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "≥95% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the suite",
+      "passCondition": "≥95% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the suite (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Injection/privilege-escalation corpus (versioned) + CI gate report + policy-engine deny sample logs"
+        "Server-side policy mediating privileged tool/actions (not prompt-only)",
+        "Versioned injection/privilege-escalation corpus + CI gate report",
+        "Policy-engine deny sample logs or harness results (denyRatePct + modelTextPrivilegeGrants)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-injection-policy-gate",
+            "params": {
+              "hint": "Discover server-side tool/policy mediation, versioned injection/privilege-escalation corpora, and CI gate wiring; ingest deny-rate harness results under imports/injection-policy-gate/.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Injection/privilege-escalation corpus (versioned) + CI gate report + policy-engine deny sample logs"
+              "hint": "If automation cannot prove coverage, attest ≥95% deny on the privilege-escalation corpus and 0 model-text-alone privileged grants (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Untrusted input must never authorize privileged actions without server-side policy): inspect current evidence for [Injection/privilege-escalation corpus (versioned) + CI gate report + policy-engine deny sample logs] and confirm the pass condition holds — ≥95% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the suite",
-      "falsePositiveGuidance": "(Adversarial Security): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI can invoke tools or privileged side effects. If none, score NOT_APPLICABLE. 2) Locate server-side policy that authorizes privileged actions independent of model text. 3) Locate a versioned injection/privilege-escalation corpus and CI gate. 4) Confirm latest suite results: deny rate ≥95% and 0 cases where model text alone granted a privileged tool call. 5) PASS only if policy + corpus/gate + measured results hold with measuredAt ≤90 days. Content filters or “ignore jailbreak” prompts alone do not satisfy. SAF-M2 safety eval gates alone do not prove privilege mediation. SAF-R2 harm red teams alone do not prove server-side tool authorization. AUTHZ Checks alone do not prove injection corpus coverage.\n",
+      "falsePositiveGuidance": "Do not pass prompt-only instructions as server-side policy. Do not pass corpora without measured denyRatePct ≥95. Do not pass suites with any model-text-alone privilege grant. Do not pass content moderation as privilege gating. Sibling SAF-M2, SAF-R2, and AUTHZ Checks do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Untrusted input must never authorize privileged actions without server-side policy",
-        "Retain evidence artifacts required by this Check, starting with: Injection/privilege-escalation corpus (versioned) + CI gate report + policy-engine deny sample logs",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Authorize privileged tools only via server-side policy (never model text alone)",
+        "Maintain a versioned injection/privilege-escalation corpus with CI gate",
+        "Retain ≥95% deny / 0 model-text grants under imports/injection-policy-gate/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications",
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM01 Prompt Injection",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -12427,20 +12435,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SEC-M2",
         "SEC-M3",
         "SEC-M4",
-        "SEC-M5",
-        "SEC-R1"
+        "SEC-R3",
+        "SEC-R1",
+        "SAF-M2",
+        "SAF-R2",
+        "AUTHZ-M1"
       ],
       "tags": [
         "ai-security",
         "mandatory",
-        "manual"
+        "hybrid",
+        "injection",
+        "privilege-escalation",
+        "policy-engine"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "prompt-templates",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -12451,37 +12461,45 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SEC-M2",
       "category": "ai-security",
       "title": "High-risk outputs must be schema-validated or policy-filtered before side effects",
-      "description": "High-risk outputs shall be schema-validated or policy-filtered before side effects",
-      "whyItMatters": "High-risk outputs shall be schema-validated or policy-filtered before side effects Failing this leaves a production gap against: 100% of high-risk side-effect paths (impact tier write/irreversible/financial) reject non-conforming model output in contract tests; coverage inventory lists every such path",
+      "description": "High-risk model outputs shall be schema-validated or policy-filtered before any write, irreversible, or financial side effect—so non-conforming output cannot drive privileged downstream actions.\n",
+      "whyItMatters": "Free-form model text that triggers writes, irreversible changes, or money movement turns a generation bug into a production incident. A complete high-risk path inventory plus contract tests proving 100% rejection of non-conforming output makes the gate measurable. Distinct from SEC-M1 injection/privilege-escalation mediation, TOL-M4 tool-argument schemas, and SAF-M2 content-safety release gates.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of high-risk side-effect paths (impact tier write/irreversible/financial) reject non-conforming model output in contract tests; coverage inventory lists every such path",
+      "passCondition": "100% of high-risk side-effect paths (impact tier write/irreversible/financial) reject non-conforming model output in contract tests; coverage inventory lists every such path (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Schema/policy definitions for high-risk paths + contract test results"
+        "Coverage inventory of high-risk side-effect paths (write/irreversible/financial)",
+        "Schema or policy filter definitions applied before those side effects",
+        "Contract test results showing non-conforming output rejected on 100% of inventoried paths"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-high-risk-output-gate",
+            "params": {
+              "hint": "Discover high-risk path inventories, output schema/policy filters, and contract tests; ingest coverage under imports/high-risk-output-gate/.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Schema/policy definitions for high-risk paths + contract test results"
+              "hint": "If automation cannot prove coverage, attest a complete high-risk path inventory and 100% contract-test rejection of non-conforming output before side effects (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (High-risk outputs must be schema-validated or policy-filtered before side effects): inspect current evidence for [Schema/policy definitions for high-risk paths + contract test results] and confirm the pass condition holds — 100% of high-risk side-effect paths (impact tier write/irreversible/financial) reject non-conforming model output in contract tests; coverage inventory lists every such path",
-      "falsePositiveGuidance": "(Adversarial Security): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI can drive write, irreversible, or financial side effects. If none, score NOT_APPLICABLE. 2) Locate a coverage inventory of every such path. 3) Confirm each path applies schema validation or a policy filter before the side effect (not prompt-only). 4) Review contract tests: non-conforming fixtures are rejected on 100% of inventoried paths. 5) PASS only if inventory + schema/policy + 100% rejection hold with measuredAt ≤90 days. SEC-M1 injection deny suites alone do not prove output schema gates. TOL-M4 tool-argument schemas alone do not prove model-output filtering before side effects. SAF-M2 safety eval release gates alone do not prove per-path output contracts.\n",
+      "falsePositiveGuidance": "Do not pass prompt-only “follow the schema” instructions. Do not pass inventories that omit write/irreversible/financial paths. Do not pass contract coverage under 100% of inventoried high-risk paths. Do not pass tool-argument validation (TOL-M4) as model-output gating. Sibling SEC-M1, TOL-M4, and SAF-M2 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: High-risk outputs must be schema-validated or policy-filtered before side effects",
-        "Retain evidence artifacts required by this Check, starting with: Schema/policy definitions for high-risk paths + contract test results",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Inventory every write/irreversible/financial side-effect path driven by model output",
+        "Enforce JSON Schema (or equivalent) or policy filter before those side effects",
+        "Add contract tests that reject non-conforming fixtures on 100% of inventoried paths",
+        "Retain evidence under imports/high-risk-output-gate/; time-box gaps ≤90 days"
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications",
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM02 Insecure Output Handling",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -12497,20 +12515,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SEC-M1",
         "SEC-M3",
         "SEC-M4",
-        "SEC-M5",
-        "SEC-R1"
+        "SEC-R3",
+        "SEC-R1",
+        "TOL-M4",
+        "SAF-M2"
       ],
       "tags": [
         "ai-security",
         "mandatory",
-        "manual"
+        "hybrid",
+        "output-schema",
+        "policy-filter",
+        "side-effects"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "prompt-templates",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -12521,37 +12540,45 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SEC-M3",
       "category": "ai-security",
       "title": "Abuse, jailbreak, and injection testing must gate customer-facing releases",
-      "description": "Abuse, jailbreak, and injection testing shall gate customer-facing releases",
-      "whyItMatters": "Abuse, jailbreak, and injection testing shall gate customer-facing releases Failing this leaves a production gap against: 100% of production releases in the last 30 days show an abuse/jailbreak/injection suite gate = pass (suite must include those case classes), or a time-boxed waiver with owner and expiry ≤ 30 days",
+      "description": "Customer-facing releases shall run an abuse/jailbreak/injection security suite—with those case classes present—as a blocking gate, or record a time-boxed waiver (owner + expiry ≤30 days) when the gate does not pass.\n",
+      "whyItMatters": "Shipping without a blocking adversarial suite leaves injection and jailbreak regressions free to reach customers. Requiring 100% of production releases in the last 30 days to show gate=pass (or an owned ≤30-day waiver) turns the suite into a release control. Distinct from SEC-M1 privilege-mediation deny rates, SAF-M2 content-safety eval gates, SAF-R2 jailbreak-to-harm red teams, and SEC-R1 multi-turn/RAG/MCP red-team depth.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production releases in the last 30 days show an abuse/jailbreak/injection suite gate = pass (suite must include those case classes), or a time-boxed waiver with owner and expiry ≤ 30 days",
+      "passCondition": "100% of production releases in the last 30 days show an abuse/jailbreak/injection suite gate = pass (suite must include those case classes), or a time-boxed waiver with owner and expiry ≤30 days (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "CI gate configuration for abuse/jailbreak/injection suite + last 30 days of release reports showing that suite passed (or waiver)"
+        "Abuse/jailbreak/injection suite definition covering those case classes",
+        "CI/release gate configuration that blocks promote on suite fail",
+        "Last 30 days of release reports showing gate=pass, or owned waivers (expiry ≤30 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-abuse-injection-release-gate",
+            "params": {
+              "hint": "Discover abuse/jailbreak/injection suites, blocking CI/release gates, and ≤30-day owned waivers; ingest coverage under imports/abuse-injection-release-gate/.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "CI gate configuration for abuse/jailbreak/injection suite + last 30 days of release reports"
+              "hint": "If automation cannot prove coverage, attest 100% of production releases in the last 30 days ran the abuse/jailbreak/injection suite gate to pass, or owned waiver expiry ≤30 days (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Abuse, jailbreak, and injection testing must gate customer-facing releases): inspect current evidence for [CI gate configuration for abuse/jailbreak/injection suite + last 30 days of release reports showing that suite passed (or waiver)] and confirm the pass condition holds — 100% of production releases in the last 30 days show an abuse/jailbreak/injection suite gate = pass (suite must include those case classes), or a time-boxed waiver with owner and expiry ≤ 30 days",
-      "falsePositiveGuidance": "(Adversarial Security): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm customer-facing / production AI releases exist. If none, score NOT_APPLICABLE. 2) Locate an abuse/jailbreak/injection suite that includes those case classes (not quality-only, not content-safety-only). 3) Confirm the suite is a blocking CI/release gate. 4) Review the last 30 days: 100% of production releases show gate=pass, or a waiver with owner and expiry ≤30 days. 5) PASS only if suite + blocking gate + 100% coverage/waivers hold with measuredAt ≤90 days. SEC-M1 corpus deny rates alone do not prove release gating. SAF-M2 safety eval gates alone do not prove security abuse suites. SAF-R2 harm red teams alone do not prove customer-facing release gates. SEC-R1 multi-turn/RAG depth alone does not prove last-30-day release coverage.\n",
+      "falsePositiveGuidance": "Do not pass content-safety-only suites as abuse/injection gates. Do not pass optional (non-blocking) adversarial jobs. Do not pass coverage under 100% of production releases in the last 30 days without owned ≤30-day waivers. Do not pass open-ended waivers. Sibling SEC-M1, SAF-M2, SAF-R2, and SEC-R1 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Abuse, jailbreak, and injection testing must gate customer-facing releases",
-        "Retain evidence artifacts required by this Check, starting with: CI gate configuration for abuse/jailbreak/injection suite + last 30 days of release reports",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Define an abuse/jailbreak/injection suite covering those case classes",
+        "Require the suite as a blocking CI/release gate on every customer-facing promote",
+        "Track ≤30-day owned waivers; retain evidence under imports/abuse-injection-release-gate/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications",
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM01 Prompt Injection",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -12567,20 +12594,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SEC-M1",
         "SEC-M2",
         "SEC-M4",
-        "SEC-M5",
-        "SEC-R1"
+        "SEC-R3",
+        "SEC-R1",
+        "SAF-M2",
+        "SAF-R2"
       ],
       "tags": [
         "ai-security",
         "mandatory",
-        "manual"
+        "hybrid",
+        "abuse",
+        "jailbreak",
+        "injection",
+        "release-gate"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "prompt-templates",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -12591,37 +12620,45 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SEC-M4",
       "category": "ai-security",
       "title": "Network and identity boundaries must prevent the model path from becoming a universal proxy to internal systems",
-      "description": "Network and identity boundaries shall prevent the model path from becoming a universal proxy to internal systems",
-      "whyItMatters": "Network and identity boundaries shall prevent the model path from becoming a universal proxy to internal systems Failing this leaves a production gap against: Automated or reviewed probe shows the model/tool runtime can reach only allowlisted destinations; 0 unrestricted routes to internal admin APIs or data stores from the model identity",
+      "description": "Network and identity boundaries shall prevent the model/tool runtime path from becoming a universal proxy to internal systems—so the model identity reaches only allowlisted destinations and has 0 unrestricted routes to internal admin APIs or data stores.\n",
+      "whyItMatters": "An unbounded model or tool identity turns every prompt into lateral movement: admin APIs and data stores become reachable through natural language. A documented trust boundary, egress allowlist, and probe proving only allowlisted destinations (with 0 unrestricted internal admin/data-store routes) makes the boundary measurable. Distinct from INF-M3 agent/tool dependency-inventory segmentation, SEC-M1 injection privilege mediation, and AUTHZ Checks on application RBAC alone.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Automated or reviewed probe shows the model/tool runtime can reach only allowlisted destinations; 0 unrestricted routes to internal admin APIs or data stores from the model identity",
+      "passCondition": "Automated or reviewed probe shows the model/tool runtime can reach only allowlisted destinations; 0 unrestricted routes to internal admin APIs or data stores from the model identity (measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Architecture diagram of model/tool trust boundaries + network policy or egress allowlist export"
+        "Architecture diagram of model/tool trust boundaries",
+        "Network policy or egress allowlist export for the model/tool runtime identity",
+        "Automated or reviewed probe results (allowlisted-only reachability; unrestricted internal admin/data-store routes = 0)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-model-path-egress-boundary",
+            "params": {
+              "hint": "Discover trust-boundary diagrams, model/tool egress allowlists, and reachability probe evidence; ingest results under imports/model-path-egress-boundary/.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Architecture diagram of model/tool trust boundaries + network policy or egress allowlist export"
+              "hint": "If automation cannot prove coverage, attest allowlisted-only reachability for the model/tool runtime and 0 unrestricted routes to internal admin APIs or data stores (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Network and identity boundaries must prevent the model path from becoming a universal proxy to internal systems): inspect current evidence for [Architecture diagram of model/tool trust boundaries + network policy or egress allowlist export] and confirm the pass condition holds — Automated or reviewed probe shows the model/tool runtime can reach only allowlisted destinations; 0 unrestricted routes to internal admin APIs or data stores from the model identity",
-      "falsePositiveGuidance": "(Adversarial Security): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI uses a model or tool runtime that can initiate network calls. If none, score NOT_APPLICABLE. 2) Locate an architecture diagram of model/tool trust boundaries. 3) Locate network policy or egress allowlist for that runtime identity. 4) Review automated or reviewed probe results: only allowlisted destinations are reachable; unrestricted routes from the model identity to internal admin APIs or data stores = 0. 5) PASS only if trust boundary + allowlist + probe results hold with measuredAt ≤90 days. INF-M3 dependency-inventory match alone does not prove model-path proxy prevention. SEC-M1 injection suites alone do not prove egress boundaries. AUTHZ application RBAC alone does not prove network/identity isolation of the model path.\n",
+      "falsePositiveGuidance": "Do not pass open egress with “deny in docs only.” Do not pass cluster-wide NetworkPolicies that omit the model/tool identity. Do not pass probes that never attempt internal admin or data-store destinations. Sibling INF-M3, SEC-M1, and AUTHZ Checks do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Network and identity boundaries must prevent the model path from becoming a universal proxy to internal systems",
-        "Retain evidence artifacts required by this Check, starting with: Architecture diagram of model/tool trust boundaries + network policy or egress allowlist export",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Document model/tool trust boundaries and bind the runtime to a dedicated identity",
+        "Export and enforce egress allowlists for that identity",
+        "Run allowlisted-only reachability probes; keep unrestricted internal admin/data-store routes at 0",
+        "Retain evidence under imports/model-path-egress-boundary/; time-box gaps ≤90 days"
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications",
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM08 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -12637,20 +12674,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SEC-M1",
         "SEC-M2",
         "SEC-M3",
-        "SEC-M5",
-        "SEC-R1"
+        "SEC-R3",
+        "SEC-R1",
+        "INF-M3",
+        "AUTHZ-M1"
       ],
       "tags": [
         "ai-security",
         "mandatory",
-        "manual"
+        "hybrid",
+        "egress",
+        "trust-boundary",
+        "model-path"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "prompt-templates",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -12658,110 +12696,48 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "introducedIn": "0.10.0"
     },
     {
-      "id": "SEC-M5",
-      "category": "ai-security",
-      "title": "Canary tokens or tripwires must detect exfiltration attempts in sensitive AI contexts",
-      "description": "Canary tokens or tripwires shall detect exfiltration attempts in sensitive AI contexts",
-      "whyItMatters": "Canary tokens or tripwires shall detect exfiltration attempts in sensitive AI contexts Failing this leaves a production gap against: PASS if canaries/tripwires are deployed in production-sensitive paths and the latest detection test (≤90 days) shows expected alerts with 0 silent misses in the suite",
-      "severity": "critical",
-      "weight": 4,
-      "gate": "mandatory",
-      "passCondition": "PASS if canaries/tripwires are deployed in production-sensitive paths and the latest detection test (≤90 days) shows expected alerts with 0 silent misses in the suite",
-      "evidenceRequired": [
-        "Canary/tripwire design + detection test report with sample alerts for sensitive contexts"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": [
-          {
-            "id": "manual-attest",
-            "params": {
-              "hint": "Canary/tripwire design + detection test report with sample alerts for sensitive contexts"
-            }
-          }
-        ]
-      },
-      "manualVerification": "For this Check (Canary tokens or tripwires must detect exfiltration attempts in sensitive AI contexts): inspect current evidence for [Canary/tripwire design + detection test report with sample alerts for sensitive contexts] and confirm the pass condition holds — PASS if canaries/tripwires are deployed in production-sensitive paths and the latest detection test (≤90 days) shows expected alerts with 0 silent misses in the suite",
-      "falsePositiveGuidance": "(Adversarial Security): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: Canary tokens or tripwires must detect exfiltration attempts in sensitive AI contexts",
-        "Retain evidence artifacts required by this Check, starting with: Canary/tripwire design + detection test report with sample alerts for sensitive contexts",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "OWASP Top 10 for Large Language Model Applications",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
-        },
-        {
-          "title": "NIST AI Risk Management Framework",
-          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
-        },
-        {
-          "title": "CIS Controls (select mappings for AI workloads)",
-          "url": "https://www.cisecurity.org/controls"
-        }
-      ],
-      "relatedRules": [
-        "SEC-M1",
-        "SEC-M2",
-        "SEC-M3",
-        "SEC-M4",
-        "SEC-R1"
-      ],
-      "tags": [
-        "ai-security",
-        "mandatory",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [
-          "openapi",
-          "prompt-templates",
-          "cicd"
-        ],
-        "minCriticality": 3,
-        "requiredFromLevel": 5
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
       "id": "SEC-R1",
       "category": "ai-security",
-      "title": "Production systems should have red-team exercises cover multi-turn and indirect injection via RAG/MCP",
-      "description": "Red-team exercises cover multi-turn and indirect injection via RAG/MCP",
-      "whyItMatters": "Red-team exercises cover multi-turn and indirect injection via RAG/MCP Failing this leaves a production gap against: Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases; latest run ≤90 days meets documented pass thresholds; report retained ≥90 days",
-      "severity": "critical",
-      "weight": 4,
+      "title": "Red-team exercises should cover multi-turn and indirect injection via RAG/MCP",
+      "description": "Production systems that use multi-turn dialogue, RAG, or MCP should run a versioned red-team suite with ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases—so single-turn jailbreak tests alone cannot claim coverage.\n",
+      "whyItMatters": "Indirect injection through retrieved documents or MCP payloads, and multi-turn priming, bypass suites that only fire one-shot prompts. Requiring depth counts plus a recent scored run turns red-teaming into a measurable control. Distinct from SEC-M1 privilege-mediation deny rates, SEC-M3 customer-facing release gates, and SAF-R2 jailbreak-to-harm (content-safety) red teams.\n",
+      "severity": "high",
+      "weight": 3,
       "gate": "recommended",
-      "passCondition": "Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases; latest run ≤90 days meets documented pass thresholds; report retained ≥90 days",
+      "passCondition": "Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases; latest run ≤90 days meets documented pass thresholds; report retained ≥90 days (measuredAt ≤90 days). If the system has no multi-turn, RAG, or MCP surfaces, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Versioned red-team suite covering multi-turn and indirect injection via RAG/MCP + latest scored run report"
+        "Versioned red-team suite covering multi-turn and indirect RAG/MCP injection",
+        "Case counts (≥10 multi-turn, ≥10 indirect RAG/MCP) with documented pass thresholds",
+        "Latest scored run report ≤90 days with retention ≥90 days"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-multi-turn-indirect-injection-redteam",
+            "params": {
+              "hint": "Discover multi-turn and indirect RAG/MCP injection red-team suites and scored runs; ingest counts under imports/multi-turn-indirect-injection-redteam/.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Versioned red-team suite covering multi-turn and indirect injection via RAG/MCP + latest scored run report"
+              "hint": "If automation cannot prove coverage, attest ≥10 multi-turn and ≥10 indirect RAG/MCP cases, latest run ≤90 days meeting thresholds, and report retention ≥90 days (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Red-team exercises cover multi-turn and indirect injection via RAG/MCP): inspect current evidence for [Versioned red-team suite covering multi-turn and indirect injection via RAG/MCP + latest scored run report] and confirm the pass condition holds — Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases; latest run ≤90 days meets documented pass thresholds; report retained ≥90 days",
-      "falsePositiveGuidance": "(Adversarial Security): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI uses multi-turn dialogue, RAG retrieval, or MCP tool bridges. If none, score NOT_APPLICABLE. 2) Locate a versioned red-team suite that includes multi-turn and indirect RAG/MCP injection case classes. 3) Confirm counts: ≥10 multi-turn and ≥10 indirect RAG/MCP cases. 4) Confirm the latest scored run is ≤90 days old, meets documented pass thresholds, and the report is retained ≥90 days. 5) PASS only if suite depth + recent scored run + retention hold with measuredAt ≤90 days. SEC-M1 deny-rate corpora alone do not prove multi-turn/RAG depth. SEC-M3 release-gate pass alone does not prove ≥10/≥10 case classes. SAF-R2 harm red teams alone do not prove security injection depth via RAG/MCP.\n",
+      "falsePositiveGuidance": "Do not pass single-turn-only jailbreak suites. Do not pass quality evals without injection case classes. Do not pass runs older than 90 days. Do not pass suites missing either multi-turn or indirect RAG/MCP tracks. Sibling SEC-M1, SEC-M3, and SAF-R2 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Red-team exercises cover multi-turn and indirect injection via RAG/MCP",
-        "Retain evidence artifacts required by this Check, starting with: Versioned red-team suite covering multi-turn and indirect injection via RAG/MCP + latest scored run report",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Add ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases to a versioned red-team suite",
+        "Document pass thresholds and run the suite at least every 90 days",
+        "Retain scored reports ≥90 days under imports/multi-turn-indirect-injection-redteam/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications",
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM01 Prompt Injection",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -12778,19 +12754,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SEC-M2",
         "SEC-M3",
         "SEC-M4",
-        "SEC-M5"
+        "SEC-R2",
+        "SEC-R3",
+        "SAF-R2"
       ],
       "tags": [
         "ai-security",
         "recommended",
-        "manual"
+        "hybrid",
+        "red-team",
+        "multi-turn",
+        "rag",
+        "mcp",
+        "injection"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "prompt-templates",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -12800,38 +12779,46 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SEC-R2",
       "category": "ai-security",
-      "title": "Production systems should have content safety and malware scanning on multimodal inputs where applicable",
-      "description": "Content safety and malware scanning on multimodal inputs where applicable",
-      "whyItMatters": "Content safety and malware scanning on multimodal inputs where applicable Failing this leaves a production gap against: Where multimodal inputs are accepted, scanner runs before model ingest; last report ≤90 days shows coverage of image/file types in use and 0 unscanned production paths",
-      "severity": "critical",
-      "weight": 4,
+      "title": "Multimodal inputs should be content-safety and malware scanned before model ingest",
+      "description": "Where production AI accepts multimodal inputs (images, files, or similar), content-safety and malware scanners should run before model ingest—so unscanned media cannot reach the model path.\n",
+      "whyItMatters": "Images and file uploads are a common bypass of text-only guardrails: malware, steganographic prompts, and unsafe visual content reach the model if ingest is ungated. A pre-ingest scanner plus a recent report showing coverage of types in use and 0 unscanned production paths makes the control measurable. Distinct from SAF-M2 text safety eval release gates, SEC-M2 high-risk output schema filters, and SEC-R1 injection red-team depth.\n",
+      "severity": "high",
+      "weight": 3,
       "gate": "recommended",
-      "passCondition": "Where multimodal inputs are accepted, scanner runs before model ingest; last report ≤90 days shows coverage of image/file types in use and 0 unscanned production paths",
+      "passCondition": "Where multimodal inputs are accepted, scanner runs before model ingest; last report ≤90 days shows coverage of image/file types in use and 0 unscanned production paths (measuredAt ≤90 days). If multimodal inputs are not accepted, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Multimodal input safety/malware scanner config + latest CI or batch scan report for production-bound media"
+        "Multimodal input content-safety and/or malware scanner config (pre-model-ingest)",
+        "Inventory of image/file types accepted in production",
+        "Latest CI or batch scan report ≤90 days showing type coverage and 0 unscanned production paths"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-multimodal-input-scan",
+            "params": {
+              "hint": "Discover pre-ingest multimodal content-safety/malware scanners and coverage reports; ingest results under imports/multimodal-input-scan/.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Multimodal input safety/malware scanner config + latest CI or batch scan report for production-bound media"
+              "hint": "If automation cannot prove coverage, attest scanners run before model ingest, last report ≤90 days covers image/file types in use, and unscanned production paths = 0 (measuredAt ≤90 days). Score N/A if multimodal inputs are not accepted.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Content safety and malware scanning on multimodal inputs where applicable): inspect current evidence for [Multimodal input safety/malware scanner config + latest CI or batch scan report for production-bound media] and confirm the pass condition holds — Where multimodal inputs are accepted, scanner runs before model ingest; last report ≤90 days shows coverage of image/file types in use and 0 unscanned production paths",
-      "falsePositiveGuidance": "(Adversarial Security): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI accepts multimodal inputs (images, documents, audio, or similar). If none, score NOT_APPLICABLE. 2) Locate content-safety and/or malware scanner config that runs before model ingest. 3) Confirm an inventory of accepted image/file types. 4) Review the latest CI or batch report ≤90 days: types in use are covered; unscanned production paths = 0. 5) PASS only if pre-ingest scanning + coverage + 0 unscanned paths hold with measuredAt ≤90 days. SAF-M2 text safety release gates alone do not prove multimodal media scanning. SEC-M2 output schema filters alone do not prove input media scanning. SEC-R1 injection red teams alone do not prove malware/content-safety ingest gates.\n",
+      "falsePositiveGuidance": "Do not pass text-only moderation as multimodal coverage. Do not pass post-ingest or async-only scans that leave the model path ungated. Do not pass reports older than 90 days. Do not pass scanners that omit file types actually accepted in production. Sibling SAF-M2, SEC-M2, and SEC-R1 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Content safety and malware scanning on multimodal inputs where applicable",
-        "Retain evidence artifacts required by this Check, starting with: Multimodal input safety/malware scanner config + latest CI or batch scan report for production-bound media",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Run content-safety and malware scanners before multimodal model ingest",
+        "Inventory accepted image/file types and require scanner coverage for each",
+        "Retain latest report ≤90 days with 0 unscanned paths under imports/multimodal-input-scan/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications",
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM02 Insecure Output Handling / multimodal risks",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -12848,19 +12835,99 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SEC-M2",
         "SEC-M3",
         "SEC-M4",
-        "SEC-M5"
+        "SEC-R1",
+        "SEC-R3",
+        "SAF-M2"
       ],
       "tags": [
         "ai-security",
         "recommended",
-        "manual"
+        "hybrid",
+        "multimodal",
+        "malware",
+        "content-safety"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "prompt-templates",
-          "cicd"
-        ],
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 4
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "SEC-R3",
+      "category": "ai-security",
+      "title": "Sensitive AI contexts should detect data exfiltration attempts",
+      "description": "Sensitive AI contexts should have mechanisms to detect data exfiltration attempts—so operators learn of prompt/tool/corpus leakage paths before they become silent incidents. Canary tokens and tripwires are one strong implementation; equivalent DLP, SIEM/UEBA, egress monitoring, or similar controls also satisfy when validated.\n",
+      "whyItMatters": "Mandating canary tokens alone fails production systems that already detect exfiltration via DLP, SIEM, UEBA, CloudTrail/GuardDuty-class monitoring, or Purview-style insider risk—without honeytokens. The outcome that matters is detection coverage for sensitive AI contexts, not a single technology. Distinct from SEC-M1 injection privilege mediation, SEC-M4 model-path egress boundaries, and PRI classification controls that reduce surface without proving detection.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "recommended",
+      "passCondition": "Sensitive AI contexts have a documented exfiltration-detection mechanism (canary/honeytoken, DLP, SIEM/UEBA, egress monitoring, or equivalent); latest validation ≤90 days shows expected detection/alerts for covered paths with 0 silent misses in the validation suite or review (measuredAt ≤90 days). If no sensitive AI contexts exist, score NOT_APPLICABLE.\n",
+      "evidenceRequired": [
+        "Documented exfiltration-detection mechanism for sensitive AI contexts (mechanism class named)",
+        "Coverage of production-sensitive AI paths (inventory or mapping)",
+        "Latest validation ≤90 days (detection test, alert-rule exercise, or equivalent) with expected alerts / 0 silent misses"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-exfil-detection",
+            "params": {
+              "hint": "Discover canary/honeytoken, DLP, SIEM/UEBA, or equivalent AI exfiltration-detection signals; ingest validation under imports/ai-exfil-detection/.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest a named exfil-detection mechanism covers sensitive AI contexts and latest validation ≤90 days shows expected alerts with 0 silent misses (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm sensitive AI contexts exist (prompts/tools/corpora with secrets, regulated data, or high-value IP). If none, score NOT_APPLICABLE. 2) Identify the detection mechanism class (canary/honeytoken, DLP, SIEM/UEBA, egress monitoring, or equivalent)—do not require canaries specifically. 3) Confirm coverage of production-sensitive AI paths. 4) Review latest validation ≤90 days: expected detections/alerts fire; silent misses in the suite/review = 0. 5) PASS only if mechanism + coverage + validation hold with measuredAt ≤90 days. SEC-M1 injection suites alone do not prove exfil detection. SEC-M4 egress allowlists alone do not prove detection. PRI classification alone does not prove detection alerts.\n",
+      "falsePositiveGuidance": "Do not fail systems that use DLP/SIEM/UEBA without canaries when validation evidence is present. Do not pass canary designs never deployed to sensitive paths. Do not pass SIEM rules never exercised ≤90 days. Do not pass generic infra IDS with no AI-context mapping. Sibling SEC-M1, SEC-M4, and PRI do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Document an exfil-detection mechanism for sensitive AI contexts (canary, DLP, SIEM/UEBA, or equivalent)",
+        "Map coverage to production-sensitive AI paths",
+        "Run validation ≤90 days; retain expected-alert / 0-silent-miss evidence under imports/ai-exfil-detection/",
+        "Time-box gaps with owner and expiry ≤90 days"
+      ],
+      "references": [
+        {
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM06 Sensitive Information Disclosure",
+          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        },
+        {
+          "title": "NIST AI Risk Management Framework",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "title": "CIS Controls (select mappings for AI workloads)",
+          "url": "https://www.cisecurity.org/controls"
+        }
+      ],
+      "relatedRules": [
+        "SEC-M1",
+        "SEC-M2",
+        "SEC-M3",
+        "SEC-M4",
+        "SEC-R1",
+        "SEC-R2",
+        "PRI-M1"
+      ],
+      "tags": [
+        "ai-security",
+        "recommended",
+        "hybrid",
+        "exfiltration",
+        "detection",
+        "dlp"
+      ],
+      "applicability": {
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },

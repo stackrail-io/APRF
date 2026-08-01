@@ -1,0 +1,26 @@
+id: multimodal-input-scan
+title: Multimodal input safety/malware scan before ingest (SEC-R2)
+version: "0.2.0"
+executor: collectors/multimodal-input-scan.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-multimodal-input-scan]
+inputs:
+  - "Target repo (multimodal ingest, content-safety/malware scanners)"
+  - "Optional coverage: aprf-assessment/imports/multimodal-input-scan/*.{json}"
+collect:
+  - "Detect multimodal input, scanner, pre-ingest, and coverage signals"
+  - "Ingest coverage; write multimodal-input-scan-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/multimodal-input-scan/*"
+  signals: [multimodal-input-scan, sec-r2, repo-multimodal-input-scan]
+mapsToChecks: [SEC-R2]
+whenUnavailable: >
+  Scanner signals alone are PARTIAL. SEC-R2 PASS needs multimodalInputsAccepted=true,
+  scannerRunsBeforeModelIngest, imageFileTypesInUseCoveredInLastReport,
+  unscannedProductionMultimodalPaths=0, measuredAt ≤90 days.
+  Set multimodalInputsAccepted=false for NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline multimodal-input-scan heuristics + optional imported JSON.

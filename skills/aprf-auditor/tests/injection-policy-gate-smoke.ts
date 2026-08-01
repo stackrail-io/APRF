@@ -78,7 +78,12 @@ def authorize_tool(user, tool_name):
   mkdirSync(join(out2, "imports", "injection-policy-gate"), { recursive: true });
   writeFileSync(
     join(out2, "imports", "injection-policy-gate", "suite.json"),
-    JSON.stringify({ denyRatePct: 80, modelTextPrivilegeGrants: 0, caseCount: 20 }),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      denyRatePct: 80,
+      modelTextPrivilegeGrants: 0,
+      caseCount: 20,
+    }),
     "utf8",
   );
   await injectionPolicyGateCollector.collect({ ...baseCtx, outputDir: out2 });
@@ -103,6 +108,7 @@ def authorize_tool(user, tool_name):
   writeFileSync(
     join(out3, "imports", "injection-policy-gate", "suite.json"),
     JSON.stringify({
+      measuredAt: new Date().toISOString(),
       denyRatePct: 97,
       modelTextPrivilegeGrants: 0,
       cases: Array.from({ length: 20 }, (_, i) => ({
