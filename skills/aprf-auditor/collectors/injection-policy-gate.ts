@@ -447,9 +447,7 @@ export const injectionPolicyGateCollector: Collector = {
           ...(report.corpus.found || report.importedResults.found
             ? ["injection-corpus"]
             : []),
-          ...(report.summary.secM1Satisfied
-            ? ["sec-m1-satisfied"]
-            : ["sec-m1-fail-or-incomplete"]),
+          ...(report.summary.secM1Satisfied ? ["sec-m1-satisfied"] : []),
         ],
         relatedCheckIds: [...RELATED],
       },
