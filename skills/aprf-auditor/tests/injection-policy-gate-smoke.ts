@@ -134,8 +134,38 @@ def authorize_tool(user, tool_name):
     throw new Error(`expected pass, got ${JSON.stringify(r3.summary)}`);
   }
 
+  // Partial: deny rate OK but modelTextPrivilegeGrants omitted — must not PASS
+  const out4 = mkdtempSync(join(tmpdir(), "aprf-inj4-"));
+  mkdirSync(join(out4, "imports", "injection-policy-gate"), { recursive: true });
+  writeFileSync(
+    join(out4, "imports", "injection-policy-gate", "suite.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      denyRatePct: 97,
+      caseCount: 20,
+    }),
+    "utf8",
+  );
+  await injectionPolicyGateCollector.collect({ ...baseCtx, outputDir: out4 });
+  const r4 = JSON.parse(
+    readFileSync(
+      join(
+        out4,
+        "imports",
+        "injection-policy-gate",
+        "injection-policy-gate-report.json",
+      ),
+      "utf8",
+    ),
+  ) as InjectionPolicyReport;
+  if (r4.summary.statusHint !== "partial" || r4.summary.secM1Satisfied !== false) {
+    throw new Error(
+      `expected partial without grants, got ${JSON.stringify(r4.summary)}`,
+    );
+  }
+
   console.log("aprf-auditor injection-policy-gate smoke OK");
-  for (const d of [outDir, out1, out2, out3, targetDir]) {
+  for (const d of [outDir, out1, out2, out3, out4, targetDir]) {
     rmSync(d, { recursive: true, force: true });
   }
 }

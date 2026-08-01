@@ -201,7 +201,7 @@ export function buildAbuseInjectionReleaseGateReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No abuse/jailbreak/injection release-gate signals — SEC-M3 may be NOT_APPLICABLE if there are no customer-facing AI releases.",
+      "No abuse/jailbreak/injection release-gate signals — SEC-M3 remains not demonstrated until suite/gate evidence or an explicit N/A attest (no customer-facing AI releases) is imported.",
     );
   }
   if (opts.suite.found) {
@@ -250,7 +250,7 @@ export function buildAbuseInjectionReleaseGateReport(opts: {
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
   if (!gateSignalsPresent && !opts.imported.found) {
-    statusHint = "not_applicable";
+    statusHint = "not_demonstrated";
     secM3Satisfied = null;
   } else if (explicitFail) {
     statusHint = "fail";

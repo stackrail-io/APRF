@@ -118,6 +118,43 @@ async function main() {
       throw new Error(`fail expected: ${JSON.stringify(r3.summary)}`);
     }
 
+    // Fail: reportRetainedAtLeast90Days=true contradicted by reportRetentionDays<90
+    const t4 = join(root, "t4");
+    mkdirSync(join(t4, "redteam"), { recursive: true });
+    writeFileSync(
+      join(t4, "redteam", "suite.md"),
+      "multi_turn rag_inject red_team pass_threshold\n",
+    );
+    const out4 = join(root, "o4");
+    mkdirSync(join(out4, "imports", "multi-turn-indirect-injection-redteam"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(
+        out4,
+        "imports",
+        "multi-turn-indirect-injection-redteam",
+        "coverage.json",
+      ),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        multiTurnInjectionCaseCount: 12,
+        indirectRagOrMcpInjectionCaseCount: 15,
+        latestRunWithin90DaysMeetsPassThresholds: true,
+        reportRetainedAtLeast90Days: true,
+        reportRetentionDays: 30,
+      }),
+    );
+    const r4 = await run(t4, out4);
+    if (
+      r4.summary.statusHint !== "fail" ||
+      r4.importedResults.reportRetainedAtLeast90Days !== false
+    ) {
+      throw new Error(
+        `retentionDays override fail expected: ${JSON.stringify(r4.summary)} retained=${r4.importedResults.reportRetainedAtLeast90Days}`,
+      );
+    }
+
     console.log("multi-turn-indirect-injection-redteam smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

@@ -165,14 +165,18 @@ function loadImported(
         asBool(data.latest_run_within_90_days_meets_pass_thresholds) ??
         asBool(data.latestRunMeetsThresholds) ??
         latestRunWithin90DaysMeetsPassThresholds;
-      reportRetainedAtLeast90Days =
+      const retainedBool =
         asBool(data.reportRetainedAtLeast90Days) ??
         asBool(data.report_retained_at_least_90_days) ??
-        asBool(data.reportRetained90Days) ??
-        (asNum(data.reportRetentionDays) !== null &&
-        (asNum(data.reportRetentionDays) as number) >= 90
-          ? true
-          : reportRetainedAtLeast90Days);
+        asBool(data.reportRetained90Days);
+      const retentionDays =
+        asNum(data.reportRetentionDays) ?? asNum(data.report_retention_days);
+      // Numeric retention is authoritative when present (including <90 → false).
+      if (retentionDays !== null) {
+        reportRetainedAtLeast90Days = retentionDays >= 90;
+      } else if (retainedBool !== null) {
+        reportRetainedAtLeast90Days = retainedBool;
+      }
     } catch {
       /* skip */
     }

@@ -187,7 +187,7 @@ export function buildHighRiskOutputGateReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No high-risk output gate signals — SEC-M2 may be NOT_APPLICABLE if there are no write/irreversible/financial AI side-effect paths.",
+      "No high-risk output gate signals — SEC-M2 remains not demonstrated until inventory/contract evidence or an explicit N/A attest (no write/irreversible/financial AI side-effect paths) is imported.",
     );
   }
   if (opts.schema.found) {
@@ -233,7 +233,7 @@ export function buildHighRiskOutputGateReport(opts: {
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
   if (!gateSignalsPresent && !opts.imported.found) {
-    statusHint = "not_applicable";
+    statusHint = "not_demonstrated";
     secM2Satisfied = null;
   } else if (explicitFail) {
     statusHint = "fail";

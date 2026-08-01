@@ -209,7 +209,7 @@ export function buildModelPathEgressBoundaryReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No model-path egress boundary signals — SEC-M4 may be NOT_APPLICABLE if the model/tool runtime cannot initiate network calls.",
+      "No model-path egress boundary signals — SEC-M4 remains not demonstrated until trust/egress/probe evidence or an explicit N/A attest (runtime cannot initiate network calls) is imported.",
     );
   }
   if (opts.trustBoundary.found) {
@@ -262,7 +262,7 @@ export function buildModelPathEgressBoundaryReport(opts: {
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
   if (!gateSignalsPresent && !opts.imported.found) {
-    statusHint = "not_applicable";
+    statusHint = "not_demonstrated";
     secM4Satisfied = null;
   } else if (explicitFail) {
     statusHint = "fail";

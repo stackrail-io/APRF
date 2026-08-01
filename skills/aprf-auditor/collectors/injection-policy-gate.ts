@@ -328,7 +328,7 @@ export function buildInjectionPolicyReport(opts: {
     ciGatePresent &&
     denyRatePct !== null &&
     denyRatePct >= MIN_DENY_RATE &&
-    (grants === null || grants === 0) &&
+    grants === 0 &&
     importFresh &&
     opts.imported.found
   ) {
@@ -340,6 +340,11 @@ export function buildInjectionPolicyReport(opts: {
     if (corpusPresent && denyRatePct === null) {
       notes.push(
         `Corpus/gate evidence present but no measured denyRatePct (≥${MIN_DENY_RATE}) — import harness JSON to PASS.`,
+      );
+    }
+    if (opts.imported.found && grants === null) {
+      notes.push(
+        "Import missing modelTextPrivilegeGrants=0 — required to unlock SEC-M1 PASS.",
       );
     }
     if (opts.imported.found && !importFresh) {
