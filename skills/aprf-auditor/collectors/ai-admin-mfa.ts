@@ -264,7 +264,9 @@ export function buildAiAdminMfaReport(opts: {
     opts.imported.documentedBreakGlassMaximum !== null &&
     opts.imported.breakGlassAccountCount <=
       opts.imported.documentedBreakGlassMaximum;
-  const monitoringOk = opts.imported.breakGlassMonitoringEnabled === true;
+  const monitoringOk =
+    opts.imported.breakGlassMonitoringEnabled === true ||
+    opts.monitoring.found;
   const importFresh = measuredAtFresh(
     opts.imported.measuredAt,
     new Date(opts.assessedAt),
@@ -287,7 +289,8 @@ export function buildAiAdminMfaReport(opts: {
         opts.imported.documentedBreakGlassMaximum !== null &&
         opts.imported.breakGlassAccountCount >
           opts.imported.documentedBreakGlassMaximum) ||
-      opts.imported.breakGlassMonitoringEnabled === false ||
+      (opts.imported.breakGlassMonitoringEnabled === false &&
+        !opts.monitoring.found) ||
       (opts.imported.ageDays !== null &&
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 

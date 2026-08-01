@@ -243,6 +243,36 @@ async function main() {
       );
     }
 
+    // TTL-only inventory clears stale ownedExceptionsWithin30Days=false
+    const outTtlOwned = join(root, "o-ttl-owned");
+    mkdirSync(join(outTtlOwned, "imports", "short-lived-agent-tokens"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outTtlOwned, "imports", "short-lived-agent-tokens", "a-false.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        ownedExceptionsWithin30Days: false,
+      }),
+    );
+    writeFileSync(
+      join(outTtlOwned, "imports", "short-lived-agent-tokens", "b-creds.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        longLivedStaticApiKeysInPromptsOrConfig: 0,
+        credentials: [{ ttlMinutes: 30 }, { ttlMinutes: 45 }],
+      }),
+    );
+    const rTtlOwned = await run(tEmpty, outTtlOwned);
+    if (
+      rTtlOwned.summary.statusHint !== "pass" ||
+      rTtlOwned.importedResults.ownedExceptionsWithin30Days === false
+    ) {
+      throw new Error(
+        `TTL-only inventory must clear ownedExceptions=false: ${JSON.stringify(rTtlOwned.summary)} owned=${rTtlOwned.importedResults.ownedExceptionsWithin30Days}`,
+      );
+    }
+
     const outNa = join(root, "ona");
     mkdirSync(join(outNa, "imports", "short-lived-agent-tokens"), {
       recursive: true,

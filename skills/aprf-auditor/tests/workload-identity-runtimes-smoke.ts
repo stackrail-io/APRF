@@ -167,6 +167,33 @@ async function main() {
       );
     }
 
+    // Bare Kubernetes serviceAccount names are not workload identity
+    const outSa = join(root, "o-sa");
+    mkdirSync(join(outSa, "imports", "workload-identity-runtimes"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outSa, "imports", "workload-identity-runtimes", "runtimes.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        sampleAuthenticatedCallsPresent: true,
+        runtimes: [
+          { name: "vllm", serviceAccount: "default" },
+          { name: "tgi", serviceAccount: "default" },
+        ],
+      }),
+    );
+    const rSa = await run(t2, outSa);
+    if (
+      (rSa.importedResults.selfHostedModelRuntimesWithWorkloadIdentityPct ??
+        -1) === 100 ||
+      rSa.summary.statusHint === "pass"
+    ) {
+      throw new Error(
+        `default serviceAccount must not count as WI / PASS: pct=${rSa.importedResults.selfHostedModelRuntimesWithWorkloadIdentityPct} status=${rSa.summary.statusHint}`,
+      );
+    }
+
     const tEmpty = join(root, "t-empty");
     mkdirSync(tEmpty, { recursive: true });
     const outNa = join(root, "ona");
@@ -191,7 +218,7 @@ async function main() {
   }
 }
 
-main().catch((e) => {
-  console.error(e);
+main().catch((e: unknown) => {
+  console.error(e instanceof Error ? e.message : String(e));
   process.exit(1);
 });

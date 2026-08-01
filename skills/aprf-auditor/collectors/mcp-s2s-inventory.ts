@@ -560,7 +560,9 @@ export function buildReport(
     ctx.assessedAt,
     IMPORT_MAX_AGE_DAYS,
   );
-  const scopeAbsent = opts.productionMcpOrAiS2sConnectionsPresent === false;
+  const scopeAbsent =
+    opts.productionMcpOrAiS2sConnectionsPresent === false &&
+    scored.length === 0;
   const scope = {
     productionMcpOrAiS2sConnectionsPresent:
       opts.productionMcpOrAiS2sConnectionsPresent ?? null,
@@ -731,6 +733,8 @@ export const mcpS2sInventoryCollector: Collector = {
         const prev = JSON.parse(
           readFileSync(reportExisting, "utf8"),
         ) as McpS2sReport;
+        const prevScope =
+          prev.importedScope?.productionMcpOrAiS2sConnectionsPresent ?? null;
         if (prev.connections?.length) {
           connections = prev.connections.map((c) => ({
             id: c.id,
@@ -744,14 +748,28 @@ export const mcpS2sInventoryCollector: Collector = {
           inventorySource.push(
             "imports/mcp-s2s-inventory/mcp-s2s-inventory-report.json",
           );
-          measuredAt =
-            prev.measuredAt ??
-            parseMeasuredAt(prev as unknown as Record<string, unknown>) ??
-            prev.assessedAt ??
-            measuredAt;
-          productionMcpOrAiS2sConnectionsPresent =
-            prev.importedScope?.productionMcpOrAiS2sConnectionsPresent ??
-            productionMcpOrAiS2sConnectionsPresent;
+          // Only trust an explicit measuredAt — never launder assessedAt.
+          measuredAt = prev.measuredAt ?? measuredAt;
+          productionMcpOrAiS2sConnectionsPresent = mergeOrBool(
+            productionMcpOrAiS2sConnectionsPresent,
+            prevScope,
+          );
+          if (connections.length > 0) {
+            productionMcpOrAiS2sConnectionsPresent = mergeOrBool(
+              productionMcpOrAiS2sConnectionsPresent,
+              true,
+            );
+          }
+        } else if (prevScope === false) {
+          // Preserve N/A from a prior empty report when scope JSON imports are gone.
+          inventorySource.push(
+            "imports/mcp-s2s-inventory/mcp-s2s-inventory-report.json",
+          );
+          measuredAt = prev.measuredAt ?? measuredAt;
+          productionMcpOrAiS2sConnectionsPresent = mergeOrBool(
+            productionMcpOrAiS2sConnectionsPresent,
+            false,
+          );
         }
       } catch {
         /* ignore */

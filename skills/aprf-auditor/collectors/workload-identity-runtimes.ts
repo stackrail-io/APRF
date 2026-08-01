@@ -193,7 +193,14 @@ function loadImported(
             r.hasWorkloadIdentity === true ||
             Boolean(r.spiffeId) ||
             Boolean(r.iamRole) ||
-            Boolean(r.serviceAccount),
+            Boolean(r.workloadIdentityBinding) ||
+            Boolean(r.awsRoleArn) ||
+            Boolean(r.gcpServiceAccount) ||
+            // Bare Kubernetes serviceAccount names (e.g. "default") are not WI.
+            (typeof r.serviceAccount === "string" &&
+              /(?:workload|irsa|federat|gke-wi|spiffe)/i.test(
+                r.serviceAccount,
+              )),
         ).length;
         const staticKeys = runtimes.filter(
           (r) =>

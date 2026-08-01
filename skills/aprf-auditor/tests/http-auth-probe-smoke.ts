@@ -265,6 +265,63 @@ async def signin():
     }
     rmSync(outNa, { recursive: true, force: true });
 
+    // Declared AI routes must override present=false N/A
+    const declaredTarget = mkdtempSync(join(tmpdir(), "aprf-auth-declared-"));
+    mkdirSync(join(declaredTarget, "routers"), { recursive: true });
+    writeFileSync(
+      join(declaredTarget, "main.py"),
+      "app.include_router(openai.router, prefix='/openai', tags=['openai'])\n",
+    );
+    writeFileSync(
+      join(declaredTarget, "routers", "openai.py"),
+      `
+from fastapi import APIRouter
+router = APIRouter()
+
+@router.post('/v1/chat/completions')
+async def chat():
+    return {}
+`,
+    );
+    const outDeclaredNa = mkdtempSync(join(tmpdir(), "aprf-auth-declared-na-"));
+    mkdirSync(join(outDeclaredNa, "imports", "http-auth-probe"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outDeclaredNa, "imports", "http-auth-probe", "scope.json"),
+      JSON.stringify({ customerFacingAiHttpApisPresent: false }),
+    );
+    const declaredNa = await httpAuthProbeCollector.collect({
+      targetPath: declaredTarget,
+      outputDir: outDeclaredNa,
+      assessedAt,
+      live: false,
+    });
+    if (declaredNa.status === "ran") {
+      const declaredNaReport = JSON.parse(
+        readFileSync(
+          join(
+            outDeclaredNa,
+            "imports",
+            "http-auth-probe",
+            "auth-probe-report.json",
+          ),
+          "utf8",
+        ),
+      ) as AuthProbeReport;
+      if (declaredNaReport.summary.statusHint === "not_applicable") {
+        throw new Error(
+          `declared AI routes must override present=false N/A: ${JSON.stringify(declaredNaReport.summary)}`,
+        );
+      }
+    } else if (declaredNa.status !== "needs-user") {
+      throw new Error(
+        `declared+present=false expected needs-user or non-N/A ran, got ${declaredNa.status}`,
+      );
+    }
+    rmSync(outDeclaredNa, { recursive: true, force: true });
+    rmSync(declaredTarget, { recursive: true, force: true });
+
     const outScope = mkdtempSync(join(tmpdir(), "aprf-auth-scope-"));
     mkdirSync(join(outScope, "imports", "http-auth-probe"), { recursive: true });
     writeFileSync(

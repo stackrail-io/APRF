@@ -145,6 +145,8 @@ function loadImported(
   let ownedExceptionsWithin30Days: boolean | null = null;
   let ageDays: number | null = null;
   let measuredAt: string | null = null;
+  let sawTtlOnlyFullCoverage = false;
+  let sawBadOwnedExceptions = false;
 
   for (const f of listImportFiles(ctx.outputDir, PLUGIN_ID)) {
     if (/short-lived-agent-tokens-report\.json$/i.test(f)) continue;
@@ -182,18 +184,19 @@ function loadImported(
           asNum(data.staticKeysInPrompts) ??
           asNum(data.longLivedKeyFindings),
       );
-      ownedExceptionsWithin30Days = mergeAndBool(
-        ownedExceptionsWithin30Days,
+      const ownedScalar =
         asBool(data.ownedExceptionsWithin30Days) ??
-          asBool(data.owned_exceptions_within_30_days) ??
-          asBool(data.exceptionsOwnedExpiry30d),
-      );
+        asBool(data.owned_exceptions_within_30_days) ??
+        asBool(data.exceptionsOwnedExpiry30d);
 
       const creds =
         (data.credentials as Array<Record<string, unknown>>) ||
         (data.inventory as Array<Record<string, unknown>>) ||
         [];
       if (creds.length) {
+        let exceptionCreds = 0;
+        let exceptionOk = 0;
+        let ttlOnlyOk = 0;
         const ok = creds.filter((c) => {
           const ttlMin =
             asNum(c.ttlMinutes) ??
@@ -207,9 +210,19 @@ function loadImported(
           const excDays =
             asNum(c.exceptionExpiryDays) ?? asNum(c.exception_expiry_days);
           const hasOwner = Boolean(c.owner || c.exceptionOwner);
+          const usesException =
+            excDays !== null ||
+            Boolean(c.owner || c.exceptionOwner) ||
+            c.namedException === true;
           const ttlOk = ttlMin !== null && ttlMin <= 60;
           const excOk =
             hasOwner && excDays !== null && excDays <= 30;
+          if (usesException && !ttlOk) {
+            exceptionCreds += 1;
+            if (excOk) exceptionOk += 1;
+          } else if (ttlOk) {
+            ttlOnlyOk += 1;
+          }
           return ttlOk || excOk;
         }).length;
         const pct = (ok / creds.length) * 100;
@@ -223,10 +236,40 @@ function loadImported(
           agentToolCredentialsInProductionPromptsOrConfigPresent,
           true,
         );
+        if (exceptionCreds > 0) {
+          const allOk = exceptionOk === exceptionCreds;
+          if (!allOk) sawBadOwnedExceptions = true;
+          ownedExceptionsWithin30Days = mergeAndBool(
+            ownedExceptionsWithin30Days,
+            allOk,
+          );
+        } else if (ttlOnlyOk === creds.length) {
+          sawTtlOnlyFullCoverage = true;
+        } else if (ownedScalar !== null) {
+          ownedExceptionsWithin30Days = mergeAndBool(
+            ownedExceptionsWithin30Days,
+            ownedScalar,
+          );
+        }
+      } else if (ownedScalar !== null) {
+        ownedExceptionsWithin30Days = mergeAndBool(
+          ownedExceptionsWithin30Days,
+          ownedScalar,
+        );
       }
     } catch {
       /* skip */
     }
+  }
+
+  // TTL-only inventories do not use named exceptions — clear a stale
+  // ownedExceptionsWithin30Days=false unless exception inventory proved bad.
+  if (
+    sawTtlOnlyFullCoverage &&
+    !sawBadOwnedExceptions &&
+    ownedExceptionsWithin30Days === false
+  ) {
+    ownedExceptionsWithin30Days = null;
   }
 
   return {

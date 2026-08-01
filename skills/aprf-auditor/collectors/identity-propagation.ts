@@ -26,6 +26,7 @@ import {
 import {
   asBool,
   measuredAtFresh,
+  mergeAndBool,
   mergeMaxNum,
   mergeMinNum,
   mergeOldestMeasuredAt,
@@ -165,7 +166,7 @@ function loadImported(
           asBool(data.hasToolsAgentsWorkflowsOrDelegatedActions) ??
           asBool(data.agenticSurfacesPresent),
       );
-      identityPropagationDesignDocumented = mergeOrBool(
+      identityPropagationDesignDocumented = mergeAndBool(
         identityPropagationDesignDocumented,
         asBool(data.identityPropagationDesignDocumented) ??
           asBool(data.identity_propagation_design_documented) ??

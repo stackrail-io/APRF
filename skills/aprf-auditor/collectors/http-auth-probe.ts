@@ -33,7 +33,6 @@ import {
   asBool,
   measuredAtFresh,
   mergeOrBool,
-  parseMeasuredAt,
 } from "./lib/import-attest.ts";
 
 const PLUGIN_ID = "http-auth-probe";
@@ -680,7 +679,11 @@ export async function runAuthProbe(
   const advisoryGet405 = get405.length;
   const probedAt = ctx.assessedAt.toISOString();
   const fresh = measuredAtFresh(probedAt, ctx.assessedAt, IMPORT_MAX_AGE_DAYS);
-  const aiDeclared = routes.filter((r) => r.aiSurface && !r.advisoryGet);
+  // Catalog match / PASS only over declared-in-code AI routes — builtin seed
+  // prefixes alone must not unlock AUTHN-M1 PASS.
+  const aiDeclared = routes.filter(
+    (r) => r.aiSurface && r.declaredInCode && !r.advisoryGet,
+  );
   const truncated = opts.declaredAiRoutesTruncated === true;
   if (truncated) {
     notes.push(
@@ -712,11 +715,26 @@ export async function runAuthProbe(
     notes.push(
       "Probe inventory does not fully cover declared AI routes in the production route catalog.",
     );
+  } else if (catalogMatch === null) {
+    notes.push(
+      "No declared-in-code AI routes in catalog — builtin seed prefixes alone cannot unlock AUTHN-M1 PASS.",
+    );
   }
 
-  const scopeAbsent = scope.customerFacingAiHttpApisPresent === false;
+  const declaredAiPresent = routes.some((r) => r.aiSurface && r.declaredInCode);
+  const scopeAbsent =
+    scope.customerFacingAiHttpApisPresent === false && !declaredAiPresent;
   let authnM1Satisfied: boolean | null = null;
   let statusHint: AuthProbeReport["summary"]["statusHint"];
+
+  if (
+    scope.customerFacingAiHttpApisPresent === false &&
+    declaredAiPresent
+  ) {
+    notes.push(
+      "Imported customerFacingAiHttpApisPresent=false ignored — declared-in-code AI HTTP routes prove the surface exists.",
+    );
+  }
 
   if (scopeAbsent) {
     statusHint = "not_applicable";
@@ -811,6 +829,7 @@ function evaluatePriorReport(
   ctx: CollectorContext,
   file: string,
   scope: { customerFacingAiHttpApisPresent: boolean | null },
+  declaredAiPresent: boolean,
 ): AuthProbeReport | null {
   const text = readText(file, 2_000_000);
   if (!text) return null;
@@ -818,15 +837,15 @@ function evaluatePriorReport(
     const data = JSON.parse(text) as AuthProbeReport;
     if (!data?.summary) return null;
     const measuredAt =
-      parseMeasuredAt(data as unknown as Record<string, unknown>) ??
-      (typeof data.probedAt === "string" ? data.probedAt : null) ??
-      (typeof data.measuredAt === "string" ? data.measuredAt : null);
+      (typeof data.measuredAt === "string" ? data.measuredAt : null) ??
+      (typeof data.probedAt === "string" ? data.probedAt : null);
     const fresh = measuredAtFresh(
       measuredAt,
       ctx.assessedAt,
       IMPORT_MAX_AGE_DAYS,
     );
-    const scopeAbsent = scope.customerFacingAiHttpApisPresent === false;
+    const scopeAbsent =
+      scope.customerFacingAiHttpApisPresent === false && !declaredAiPresent;
     const notes = [...(data.notes ?? [])];
     let authnM1Satisfied = data.summary.authnM1Satisfied ?? null;
     let statusHint: AuthProbeReport["summary"]["statusHint"] =
@@ -839,6 +858,15 @@ function evaluatePriorReport(
 
     const catalogMatch =
       data.summary.probeInventoryMatchesRouteCatalog === true;
+
+    if (
+      scope.customerFacingAiHttpApisPresent === false &&
+      declaredAiPresent
+    ) {
+      notes.push(
+        "Imported customerFacingAiHttpApisPresent=false ignored — declared-in-code AI HTTP routes prove the surface exists.",
+      );
+    }
 
     if (scopeAbsent) {
       statusHint = "not_applicable";
@@ -948,54 +976,63 @@ export const httpAuthProbeCollector: Collector = {
     });
 
     if (scope.customerFacingAiHttpApisPresent === false) {
-      ensureDir(importDir(ctx));
-      const naReport: AuthProbeReport = {
-        schemaVersion: "0.2.0",
-        pluginId: PLUGIN_ID,
-        relatedCheckIds: [...RELATED],
-        probedAt: ctx.assessedAt.toISOString(),
-        measuredAt: ctx.assessedAt.toISOString(),
-        baseUrl: null,
-        expectStatus: [...EXPECT_STATUS],
-        catalogSource: sources,
-        routesDiscovered: routes.length,
-        routesProbed: 0,
-        importedScope: scope,
-        summary: {
-          pass: 0,
-          fail: 0,
-          skipped: 0,
-          errors: 0,
-          advisoryGet405: 0,
-          probeInventoryMatchesRouteCatalog: null,
-          authnM1Satisfied: null,
-          statusHint: "not_applicable",
-        },
-        notes: [
-          "Imported customerFacingAiHttpApisPresent=false — AUTHN-M1 NOT_APPLICABLE.",
-        ],
-        results: [],
-      };
-      const reportPath = join(importDir(ctx), "auth-probe-report.json");
-      writeFileSync(reportPath, JSON.stringify(naReport, null, 2), "utf8");
-      nodes.push({
-        id: `${PLUGIN_ID}:report`,
-        class: "runtime",
-        ref: rel(ctx.outputDir, reportPath),
-        excerpt: redact(naReport.notes.join(" | ").slice(0, 400)),
-        pluginId: PLUGIN_ID,
-        gitCommit: ctx.gitCommit,
-        evidenceAgeDays: 0,
-        signals: ["auth-probe", "authn-m1"],
-        relatedCheckIds: [...RELATED],
-      });
-      return {
-        pluginId: PLUGIN_ID,
-        status: "ran",
-        detail: `AUTHN-M1 status=not_applicable (customerFacingAiHttpApisPresent=false); report=${rel(ctx.outputDir, reportPath)}`,
-        nodes,
-      };
+      const declaredAiPresentForNa = routes.some(
+        (r) => r.aiSurface && r.declaredInCode,
+      );
+      if (!declaredAiPresentForNa) {
+        ensureDir(importDir(ctx));
+        const naReport: AuthProbeReport = {
+          schemaVersion: "0.2.0",
+          pluginId: PLUGIN_ID,
+          relatedCheckIds: [...RELATED],
+          probedAt: ctx.assessedAt.toISOString(),
+          measuredAt: ctx.assessedAt.toISOString(),
+          baseUrl: null,
+          expectStatus: [...EXPECT_STATUS],
+          catalogSource: sources,
+          routesDiscovered: routes.length,
+          routesProbed: 0,
+          importedScope: scope,
+          summary: {
+            pass: 0,
+            fail: 0,
+            skipped: 0,
+            errors: 0,
+            advisoryGet405: 0,
+            probeInventoryMatchesRouteCatalog: null,
+            authnM1Satisfied: null,
+            statusHint: "not_applicable",
+          },
+          notes: [
+            "Imported customerFacingAiHttpApisPresent=false — AUTHN-M1 NOT_APPLICABLE.",
+          ],
+          results: [],
+        };
+        const reportPath = join(importDir(ctx), "auth-probe-report.json");
+        writeFileSync(reportPath, JSON.stringify(naReport, null, 2), "utf8");
+        nodes.push({
+          id: `${PLUGIN_ID}:report`,
+          class: "runtime",
+          ref: rel(ctx.outputDir, reportPath),
+          excerpt: redact(naReport.notes.join(" | ").slice(0, 400)),
+          pluginId: PLUGIN_ID,
+          gitCommit: ctx.gitCommit,
+          evidenceAgeDays: 0,
+          signals: ["auth-probe", "authn-m1"],
+          relatedCheckIds: [...RELATED],
+        });
+        return {
+          pluginId: PLUGIN_ID,
+          status: "ran",
+          detail: `AUTHN-M1 status=not_applicable (customerFacingAiHttpApisPresent=false); report=${rel(ctx.outputDir, reportPath)}`,
+          nodes,
+        };
+      }
     }
+
+    const declaredAiPresent = routes.some(
+      (r) => r.aiSurface && r.declaredInCode,
+    );
 
     if (!baseUrl) {
       if (prior.length > 0) {
@@ -1009,7 +1046,9 @@ export const httpAuthProbeCollector: Collector = {
             return ap - bp;
           });
         const evaluated = reportFiles
-          .map((f) => evaluatePriorReport(ctx, f, scope))
+          .map((f) =>
+            evaluatePriorReport(ctx, f, scope, declaredAiPresent),
+          )
           .find(Boolean);
         if (evaluated) {
           const reportPath = join(importDir(ctx), "auth-probe-report.json");

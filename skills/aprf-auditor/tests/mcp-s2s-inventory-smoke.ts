@@ -614,6 +614,151 @@ if auth_type == 'bearer':
   }
   rmSync(noMtOut, { recursive: true, force: true });
 
+  // Prior N/A report with empty connections must stay N/A (not needs-user)
+  const priorNaOut = mkdtempSync(join(tmpdir(), "aprf-mcp-s2s-prior-na-"));
+  mkdirSync(join(priorNaOut, "imports", "mcp-s2s-inventory"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(
+      priorNaOut,
+      "imports",
+      "mcp-s2s-inventory",
+      "mcp-s2s-inventory-report.json",
+    ),
+    JSON.stringify({
+      schemaVersion: "0.2.0",
+      pluginId: "mcp-s2s-inventory",
+      assessedAt: assessedAt.toISOString(),
+      measuredAt: assessedAt.toISOString(),
+      connections: [],
+      importedScope: { productionMcpOrAiS2sConnectionsPresent: false },
+      summary: {
+        total: 0,
+        pass: 0,
+        fail: 0,
+        authnM2Satisfied: null,
+        statusHint: "not_applicable",
+      },
+      notes: [],
+      inventorySource: [],
+      codePolicy: {
+        allowsAnonymousAuthType: false,
+        authTypesMentioned: [],
+        refs: [],
+      },
+      baseUrl: null,
+    }),
+  );
+  const priorNaRan = await mcpS2sInventoryCollector.collect({
+    targetPath: targetDir,
+    outputDir: priorNaOut,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 100,
+  });
+  if (priorNaRan.status !== "ran") {
+    throw new Error(
+      `prior N/A report must stay ran/N/A, got ${priorNaRan.status}`,
+    );
+  }
+  const priorNaReport = JSON.parse(
+    readFileSync(
+      join(
+        priorNaOut,
+        "imports",
+        "mcp-s2s-inventory",
+        "mcp-s2s-inventory-report.json",
+      ),
+      "utf8",
+    ),
+  ) as McpS2sReport;
+  if (priorNaReport.summary.statusHint !== "not_applicable") {
+    throw new Error(
+      `prior empty N/A report must stay not_applicable: ${priorNaReport.summary.statusHint}`,
+    );
+  }
+  rmSync(priorNaOut, { recursive: true, force: true });
+
+  // Prior report without measuredAt must not launder assessedAt into PASS
+  const priorNoMtOut = mkdtempSync(join(tmpdir(), "aprf-mcp-s2s-prior-nomt-"));
+  mkdirSync(join(priorNoMtOut, "imports", "mcp-s2s-inventory"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(
+      priorNoMtOut,
+      "imports",
+      "mcp-s2s-inventory",
+      "mcp-s2s-inventory-report.json",
+    ),
+    JSON.stringify({
+      schemaVersion: "0.2.0",
+      pluginId: "mcp-s2s-inventory",
+      assessedAt: assessedAt.toISOString(),
+      measuredAt: null,
+      connections: [
+        {
+          id: "oauth-only",
+          name: "oauth-only",
+          url: "http://mcp.local/oauth",
+          type: "mcp",
+          auth_type: "oauth_2.1",
+          hasStaticKey: false,
+          ok: true,
+          reason: "ok",
+        },
+      ],
+      importedScope: { productionMcpOrAiS2sConnectionsPresent: true },
+      summary: {
+        total: 1,
+        pass: 1,
+        fail: 0,
+        authnM2Satisfied: true,
+        statusHint: "pass",
+      },
+      notes: [],
+      inventorySource: ["prior"],
+      codePolicy: {
+        allowsAnonymousAuthType: false,
+        authTypesMentioned: [],
+        refs: [],
+      },
+      baseUrl: null,
+    }),
+  );
+  const priorNoMtRan = await mcpS2sInventoryCollector.collect({
+    targetPath: targetDir,
+    outputDir: priorNoMtOut,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 100,
+  });
+  if (priorNoMtRan.status !== "ran") {
+    throw new Error("prior report without measuredAt expected ran");
+  }
+  const priorNoMtReport = JSON.parse(
+    readFileSync(
+      join(
+        priorNoMtOut,
+        "imports",
+        "mcp-s2s-inventory",
+        "mcp-s2s-inventory-report.json",
+      ),
+      "utf8",
+    ),
+  ) as McpS2sReport;
+  if (priorNoMtReport.measuredAt !== null) {
+    throw new Error("prior report must not invent measuredAt from assessedAt");
+  }
+  if (
+    priorNoMtReport.summary.statusHint === "pass" ||
+    priorNoMtReport.summary.authnM2Satisfied === true
+  ) {
+    throw new Error("prior report without measuredAt must not PASS");
+  }
+  rmSync(priorNoMtOut, { recursive: true, force: true });
+
   console.log("aprf-auditor mcp-s2s-inventory smoke OK");
   rmSync(outDir, { recursive: true, force: true });
   rmSync(targetDir, { recursive: true, force: true });
