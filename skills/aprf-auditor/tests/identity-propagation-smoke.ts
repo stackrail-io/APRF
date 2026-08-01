@@ -131,6 +131,40 @@ async function main() {
       );
     }
 
+    const outMerge = join(root, "o-merge");
+    mkdirSync(join(outMerge, "imports", "identity-propagation"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outMerge, "imports", "identity-propagation", "a-bad.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        identityPropagationDesignDocumented: true,
+        privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct: 100,
+        anonymousPrivilegedHops: 3,
+        sampleSize: 10,
+      }),
+    );
+    writeFileSync(
+      join(outMerge, "imports", "identity-propagation", "z-good.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        identityPropagationDesignDocumented: true,
+        privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct: 100,
+        anonymousPrivilegedHops: 0,
+        sampleSize: 10,
+      }),
+    );
+    const rMerge = await run(t2, outMerge);
+    if (
+      rMerge.summary.statusHint !== "fail" ||
+      (rMerge.importedResults.anonymousPrivilegedHops ?? 0) < 3
+    ) {
+      throw new Error(
+        `multi-file merge must keep worse anon hops: ${JSON.stringify(rMerge.summary)} anon=${rMerge.importedResults.anonymousPrivilegedHops}`,
+      );
+    }
+
     const tEmpty = join(root, "t-empty");
     mkdirSync(tEmpty, { recursive: true });
     const outNa = join(root, "ona");

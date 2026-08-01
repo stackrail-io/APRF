@@ -26,6 +26,11 @@ import {
 import {
   asBool,
   measuredAtFresh,
+  mergeAndBool,
+  mergeMaxNum,
+  mergeMinNum,
+  mergeOldestMeasuredAt,
+  mergeOrBool,
   parseMeasuredAt,
 } from "./lib/import-attest.ts";
 
@@ -146,29 +151,36 @@ function loadImported(
     try {
       const data = JSON.parse(text) as Record<string, unknown>;
       sources.push(basename(f));
-      measuredAt = parseMeasuredAt(data) ?? measuredAt;
-      ageDays = asNum(data.ageDays) ?? asNum(data.age_days) ?? ageDays;
-      selfHostedModelRuntimesPresent =
+      measuredAt = mergeOldestMeasuredAt(measuredAt, parseMeasuredAt(data));
+      ageDays = mergeMaxNum(
+        ageDays,
+        asNum(data.ageDays) ?? asNum(data.age_days),
+      );
+      selfHostedModelRuntimesPresent = mergeOrBool(
+        selfHostedModelRuntimesPresent,
         asBool(data.selfHostedModelRuntimesPresent) ??
-        asBool(data.self_hosted_model_runtimes_present) ??
-        asBool(data.hasSelfHostedModelRuntimes) ??
-        selfHostedModelRuntimesPresent;
-      selfHostedModelRuntimesWithWorkloadIdentityPct =
+          asBool(data.self_hosted_model_runtimes_present) ??
+          asBool(data.hasSelfHostedModelRuntimes),
+      );
+      selfHostedModelRuntimesWithWorkloadIdentityPct = mergeMinNum(
+        selfHostedModelRuntimesWithWorkloadIdentityPct,
         asNum(data.selfHostedModelRuntimesWithWorkloadIdentityPct) ??
-        asNum(data.self_hosted_model_runtimes_with_workload_identity_pct) ??
-        asNum(data.workloadIdentityCoveragePct) ??
-        asNum(data.runtimeWorkloadIdentityPct) ??
-        selfHostedModelRuntimesWithWorkloadIdentityPct;
-      staticSharedKeysInRuntimeInventory =
+          asNum(data.self_hosted_model_runtimes_with_workload_identity_pct) ??
+          asNum(data.workloadIdentityCoveragePct) ??
+          asNum(data.runtimeWorkloadIdentityPct),
+      );
+      staticSharedKeysInRuntimeInventory = mergeMaxNum(
+        staticSharedKeysInRuntimeInventory,
         asNum(data.staticSharedKeysInRuntimeInventory) ??
-        asNum(data.static_shared_keys_in_runtime_inventory) ??
-        asNum(data.staticSharedKeyCount) ??
-        staticSharedKeysInRuntimeInventory;
-      sampleAuthenticatedCallsPresent =
+          asNum(data.static_shared_keys_in_runtime_inventory) ??
+          asNum(data.staticSharedKeyCount),
+      );
+      sampleAuthenticatedCallsPresent = mergeAndBool(
+        sampleAuthenticatedCallsPresent,
         asBool(data.sampleAuthenticatedCallsPresent) ??
-        asBool(data.sample_authenticated_calls_present) ??
-        asBool(data.sampleTracesPresent) ??
-        sampleAuthenticatedCallsPresent;
+          asBool(data.sample_authenticated_calls_present) ??
+          asBool(data.sampleTracesPresent),
+      );
 
       const runtimes =
         (data.runtimes as Array<Record<string, unknown>>) ||
@@ -190,17 +202,14 @@ function loadImported(
             Boolean(r.staticApiKey),
         ).length;
         const pct = (withWi / runtimes.length) * 100;
-        selfHostedModelRuntimesWithWorkloadIdentityPct =
-          selfHostedModelRuntimesWithWorkloadIdentityPct === null
-            ? pct
-            : Math.min(
-                selfHostedModelRuntimesWithWorkloadIdentityPct,
-                pct,
-              );
-        staticSharedKeysInRuntimeInventory =
-          staticSharedKeysInRuntimeInventory === null
-            ? staticKeys
-            : Math.max(staticSharedKeysInRuntimeInventory, staticKeys);
+        selfHostedModelRuntimesWithWorkloadIdentityPct = mergeMinNum(
+          selfHostedModelRuntimesWithWorkloadIdentityPct,
+          pct,
+        );
+        staticSharedKeysInRuntimeInventory = mergeMaxNum(
+          staticSharedKeysInRuntimeInventory,
+          staticKeys,
+        );
         selfHostedModelRuntimesPresent =
           selfHostedModelRuntimesPresent ?? true;
       }
@@ -272,10 +281,11 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
   const wiOk =
     opts.imported.selfHostedModelRuntimesWithWorkloadIdentityPct === 100;
   const staticOk = opts.imported.staticSharedKeysInRuntimeInventory === 0;
-  const sampleOk =
-    opts.imported.sampleAuthenticatedCallsPresent === true ||
-    opts.traces.found;
-  const importFresh = measuredAtFresh(opts.imported.measuredAt);
+  const sampleOk = opts.imported.sampleAuthenticatedCallsPresent === true;
+  const importFresh = measuredAtFresh(
+    opts.imported.measuredAt,
+    new Date(opts.assessedAt),
+  );
   const scopeAbsent = opts.imported.selfHostedModelRuntimesPresent === false;
 
   let statusHint: WorkloadIdentityRuntimesReport["summary"]["statusHint"];
@@ -332,7 +342,7 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
     }
     if (opts.imported.found && !sampleOk) {
       notes.push(
-        "Import must show sampleAuthenticatedCallsPresent=true (or discover sample traces in-repo).",
+        "Import must show sampleAuthenticatedCallsPresent=true — in-repo trace regex alone does not unlock AUTHN-R2 PASS.",
       );
     }
     if (opts.imported.found && !importFresh) {

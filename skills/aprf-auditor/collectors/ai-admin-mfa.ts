@@ -26,6 +26,11 @@ import {
 import {
   asBool,
   measuredAtFresh,
+  mergeAndBool,
+  mergeMaxNum,
+  mergeMinNum,
+  mergeOldestMeasuredAt,
+  mergeOrBool,
   parseMeasuredAt,
 } from "./lib/import-attest.ts";
 
@@ -147,35 +152,43 @@ function loadImported(
     try {
       const data = JSON.parse(text) as Record<string, unknown>;
       sources.push(basename(f));
-      measuredAt = parseMeasuredAt(data) ?? measuredAt;
-      ageDays = asNum(data.ageDays) ?? asNum(data.age_days) ?? ageDays;
-      aiControlPlaneAdminAccessPresent =
+      measuredAt = mergeOldestMeasuredAt(measuredAt, parseMeasuredAt(data));
+      ageDays = mergeMaxNum(
+        ageDays,
+        asNum(data.ageDays) ?? asNum(data.age_days),
+      );
+      aiControlPlaneAdminAccessPresent = mergeOrBool(
+        aiControlPlaneAdminAccessPresent,
         asBool(data.aiControlPlaneAdminAccessPresent) ??
-        asBool(data.ai_control_plane_admin_access_present) ??
-        asBool(data.hasAiControlPlaneAdminAccess) ??
-        aiControlPlaneAdminAccessPresent;
-      aiControlPlaneAdminRolesMfaEnforcedPct =
+          asBool(data.ai_control_plane_admin_access_present) ??
+          asBool(data.hasAiControlPlaneAdminAccess),
+      );
+      aiControlPlaneAdminRolesMfaEnforcedPct = mergeMinNum(
+        aiControlPlaneAdminRolesMfaEnforcedPct,
         asNum(data.aiControlPlaneAdminRolesMfaEnforcedPct) ??
-        asNum(data.ai_control_plane_admin_roles_mfa_enforced_pct) ??
-        asNum(data.adminRolesMfaEnforcedPct) ??
-        asNum(data.mfaEnforcedPct) ??
-        aiControlPlaneAdminRolesMfaEnforcedPct;
-      breakGlassAccountCount =
+          asNum(data.ai_control_plane_admin_roles_mfa_enforced_pct) ??
+          asNum(data.adminRolesMfaEnforcedPct) ??
+          asNum(data.mfaEnforcedPct),
+      );
+      breakGlassAccountCount = mergeMaxNum(
+        breakGlassAccountCount,
         asNum(data.breakGlassAccountCount) ??
-        asNum(data.break_glass_account_count) ??
-        asNum(data.breakGlassCount) ??
-        breakGlassAccountCount;
-      documentedBreakGlassMaximum =
+          asNum(data.break_glass_account_count) ??
+          asNum(data.breakGlassCount),
+      );
+      documentedBreakGlassMaximum = mergeMinNum(
+        documentedBreakGlassMaximum,
         asNum(data.documentedBreakGlassMaximum) ??
-        asNum(data.documented_break_glass_maximum) ??
-        asNum(data.breakGlassMaximum) ??
-        asNum(data.maxBreakGlassAccounts) ??
-        documentedBreakGlassMaximum;
-      breakGlassMonitoringEnabled =
+          asNum(data.documented_break_glass_maximum) ??
+          asNum(data.breakGlassMaximum) ??
+          asNum(data.maxBreakGlassAccounts),
+      );
+      breakGlassMonitoringEnabled = mergeAndBool(
+        breakGlassMonitoringEnabled,
         asBool(data.breakGlassMonitoringEnabled) ??
-        asBool(data.break_glass_monitoring_enabled) ??
-        asBool(data.breakGlassMonitored) ??
-        breakGlassMonitoringEnabled;
+          asBool(data.break_glass_monitoring_enabled) ??
+          asBool(data.breakGlassMonitored),
+      );
     } catch {
       /* skip */
     }
@@ -252,7 +265,10 @@ export function buildAiAdminMfaReport(opts: {
     opts.imported.breakGlassAccountCount <=
       opts.imported.documentedBreakGlassMaximum;
   const monitoringOk = opts.imported.breakGlassMonitoringEnabled === true;
-  const importFresh = measuredAtFresh(opts.imported.measuredAt);
+  const importFresh = measuredAtFresh(
+    opts.imported.measuredAt,
+    new Date(opts.assessedAt),
+  );
   const scopeAbsent = opts.imported.aiControlPlaneAdminAccessPresent === false;
 
   let statusHint: AiAdminMfaReport["summary"]["statusHint"];

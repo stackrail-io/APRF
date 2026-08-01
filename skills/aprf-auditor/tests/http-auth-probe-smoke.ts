@@ -207,6 +207,37 @@ async def signin():
     rmSync(outNoCatalog, { recursive: true, force: true });
     rmSync(out2, { recursive: true, force: true });
 
+    const outAlt = mkdtempSync(join(tmpdir(), "aprf-auth-alt-"));
+    mkdirSync(join(outAlt, "imports", "http-auth-probe"), { recursive: true });
+    writeFileSync(
+      join(outAlt, "imports", "http-auth-probe", "probe-results.json"),
+      JSON.stringify(report, null, 2),
+    );
+    const alt = await httpAuthProbeCollector.collect({
+      targetPath: targetDir,
+      outputDir: outAlt,
+      assessedAt,
+      live: false,
+    });
+    if (alt.status !== "ran") {
+      throw new Error(`alternate probe*.json expected ran, got ${alt.status}`);
+    }
+    const altReport = JSON.parse(
+      readFileSync(
+        join(outAlt, "imports", "http-auth-probe", "auth-probe-report.json"),
+        "utf8",
+      ),
+    ) as AuthProbeReport;
+    if (
+      altReport.summary.authnM1Satisfied !== true ||
+      altReport.summary.statusHint !== "pass"
+    ) {
+      throw new Error(
+        `probe*.json prior report should evaluate to pass: ${JSON.stringify(altReport.summary)}`,
+      );
+    }
+    rmSync(outAlt, { recursive: true, force: true });
+
     const emptyTarget = mkdtempSync(join(tmpdir(), "aprf-auth-empty-"));
     const outNa = mkdtempSync(join(tmpdir(), "aprf-auth-na-"));
     mkdirSync(join(outNa, "imports", "http-auth-probe"), { recursive: true });

@@ -103,6 +103,28 @@ async function main() {
       throw new Error(`fail expected: ${JSON.stringify(rFail.summary)}`);
     }
 
+    const outNoSample = join(root, "o-nosample");
+    mkdirSync(join(outNoSample, "imports", "workload-identity-runtimes"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNoSample, "imports", "workload-identity-runtimes", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        selfHostedModelRuntimesWithWorkloadIdentityPct: 100,
+        staticSharedKeysInRuntimeInventory: 0,
+      }),
+    );
+    const rNoSample = await run(t2, outNoSample);
+    if (
+      rNoSample.summary.statusHint !== "partial" ||
+      rNoSample.summary.authnR2Satisfied !== false
+    ) {
+      throw new Error(
+        `repo traces without sampleAuthenticatedCallsPresent must stay partial: ${JSON.stringify(rNoSample.summary)}`,
+      );
+    }
+
     const tEmpty = join(root, "t-empty");
     mkdirSync(tEmpty, { recursive: true });
     const outNa = join(root, "ona");

@@ -26,6 +26,11 @@ import {
 import {
   asBool,
   measuredAtFresh,
+  mergeAndBool,
+  mergeMaxNum,
+  mergeMinNum,
+  mergeOldestMeasuredAt,
+  mergeOrBool,
   parseMeasuredAt,
 } from "./lib/import-attest.ts";
 
@@ -149,39 +154,48 @@ function loadImported(
     try {
       const data = JSON.parse(text) as Record<string, unknown>;
       sources.push(basename(f));
-      measuredAt = parseMeasuredAt(data) ?? measuredAt;
-      ageDays = asNum(data.ageDays) ?? asNum(data.age_days) ?? ageDays;
-      toolsAgentsWorkflowsOrDelegatedActionsPresent =
+      measuredAt = mergeOldestMeasuredAt(measuredAt, parseMeasuredAt(data));
+      ageDays = mergeMaxNum(
+        ageDays,
+        asNum(data.ageDays) ?? asNum(data.age_days),
+      );
+      toolsAgentsWorkflowsOrDelegatedActionsPresent = mergeOrBool(
+        toolsAgentsWorkflowsOrDelegatedActionsPresent,
         asBool(data.toolsAgentsWorkflowsOrDelegatedActionsPresent) ??
-        asBool(data.tools_agents_workflows_or_delegated_actions_present) ??
-        asBool(data.hasToolsAgentsWorkflowsOrDelegatedActions) ??
-        asBool(data.agenticSurfacesPresent) ??
-        toolsAgentsWorkflowsOrDelegatedActionsPresent;
-      identityPropagationDesignDocumented =
+          asBool(data.tools_agents_workflows_or_delegated_actions_present) ??
+          asBool(data.hasToolsAgentsWorkflowsOrDelegatedActions) ??
+          asBool(data.agenticSurfacesPresent),
+      );
+      identityPropagationDesignDocumented = mergeAndBool(
+        identityPropagationDesignDocumented,
         asBool(data.identityPropagationDesignDocumented) ??
-        asBool(data.identity_propagation_design_documented) ??
-        asBool(data.designDocumented) ??
-        identityPropagationDesignDocumented;
+          asBool(data.identity_propagation_design_documented) ??
+          asBool(data.designDocumented),
+      );
       privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct =
-        asNum(
-          data.privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct,
-        ) ??
-        asNum(
-          data.privileged_tool_calls_with_end_user_or_documented_service_subject_pct,
-        ) ??
-        asNum(data.subjectBoundPrivilegedCallPct) ??
-        asNum(data.subjectCoveragePct) ??
-        privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct;
-      anonymousPrivilegedHops =
+        mergeMinNum(
+          privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct,
+          asNum(
+            data.privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct,
+          ) ??
+            asNum(
+              data.privileged_tool_calls_with_end_user_or_documented_service_subject_pct,
+            ) ??
+            asNum(data.subjectBoundPrivilegedCallPct) ??
+            asNum(data.subjectCoveragePct),
+        );
+      anonymousPrivilegedHops = mergeMaxNum(
+        anonymousPrivilegedHops,
         asNum(data.anonymousPrivilegedHops) ??
-        asNum(data.anonymous_privileged_hops) ??
-        asNum(data.anonymousHops) ??
-        anonymousPrivilegedHops;
-      sampleSize =
+          asNum(data.anonymous_privileged_hops) ??
+          asNum(data.anonymousHops),
+      );
+      sampleSize = mergeMaxNum(
+        sampleSize,
         asNum(data.sampleSize) ??
-        asNum(data.sample_size) ??
-        asNum(data.sampledPrivilegedCalls) ??
-        sampleSize;
+          asNum(data.sample_size) ??
+          asNum(data.sampledPrivilegedCalls),
+      );
 
       const samples =
         (data.samples as Array<Record<string, unknown>>) ||
@@ -209,12 +223,10 @@ function loadImported(
         ).length;
         const pct = (withSubject / samples.length) * 100;
         privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct =
-          privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct === null
-            ? pct
-            : Math.min(
-                privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct,
-                pct,
-              );
+          mergeMinNum(
+            privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct,
+            pct,
+          );
         anonymousPrivilegedHops = (anonymousPrivilegedHops ?? 0) + anon;
       }
     } catch {
@@ -286,7 +298,10 @@ export function buildIdentityPropagationReport(opts: {
     opts.imported.privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct ===
     100;
   const anonOk = opts.imported.anonymousPrivilegedHops === 0;
-  const importFresh = measuredAtFresh(opts.imported.measuredAt);
+  const importFresh = measuredAtFresh(
+    opts.imported.measuredAt,
+    new Date(opts.assessedAt),
+  );
   const scopeAbsent =
     opts.imported.toolsAgentsWorkflowsOrDelegatedActionsPresent === false;
 

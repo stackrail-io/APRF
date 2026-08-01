@@ -26,6 +26,11 @@ import {
 import {
   asBool,
   measuredAtFresh,
+  mergeAndBool,
+  mergeMaxNum,
+  mergeMinNum,
+  mergeOldestMeasuredAt,
+  mergeOrBool,
   parseMeasuredAt,
 } from "./lib/import-attest.ts";
 
@@ -148,34 +153,41 @@ function loadImported(
     try {
       const data = JSON.parse(text) as Record<string, unknown>;
       sources.push(basename(f));
-      measuredAt = parseMeasuredAt(data) ?? measuredAt;
-      ageDays = asNum(data.ageDays) ?? asNum(data.age_days) ?? ageDays;
-      agentToolCredentialsInProductionPromptsOrConfigPresent =
+      measuredAt = mergeOldestMeasuredAt(measuredAt, parseMeasuredAt(data));
+      ageDays = mergeMaxNum(
+        ageDays,
+        asNum(data.ageDays) ?? asNum(data.age_days),
+      );
+      agentToolCredentialsInProductionPromptsOrConfigPresent = mergeOrBool(
+        agentToolCredentialsInProductionPromptsOrConfigPresent,
         asBool(data.agentToolCredentialsInProductionPromptsOrConfigPresent) ??
-        asBool(
-          data.agent_tool_credentials_in_production_prompts_or_config_present,
-        ) ??
-        asBool(data.hasAgentToolCredentialsInPromptsOrConfig) ??
-        agentToolCredentialsInProductionPromptsOrConfigPresent;
-      agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct =
+          asBool(
+            data.agent_tool_credentials_in_production_prompts_or_config_present,
+          ) ??
+          asBool(data.hasAgentToolCredentialsInPromptsOrConfig),
+      );
+      agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct = mergeMinNum(
+        agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct,
         asNum(data.agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct) ??
-        asNum(
-          data.agent_tool_credentials_with_ttl_at_most_1h_or_owned_exception_pct,
-        ) ??
-        asNum(data.shortLivedCredentialPct) ??
-        asNum(data.ttlCoveragePct) ??
-        agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct;
-      longLivedStaticApiKeysInPromptsOrConfig =
+          asNum(
+            data.agent_tool_credentials_with_ttl_at_most_1h_or_owned_exception_pct,
+          ) ??
+          asNum(data.shortLivedCredentialPct) ??
+          asNum(data.ttlCoveragePct),
+      );
+      longLivedStaticApiKeysInPromptsOrConfig = mergeMaxNum(
+        longLivedStaticApiKeysInPromptsOrConfig,
         asNum(data.longLivedStaticApiKeysInPromptsOrConfig) ??
-        asNum(data.long_lived_static_api_keys_in_prompts_or_config) ??
-        asNum(data.staticKeysInPrompts) ??
-        asNum(data.longLivedKeyFindings) ??
-        longLivedStaticApiKeysInPromptsOrConfig;
-      ownedExceptionsWithin30Days =
+          asNum(data.long_lived_static_api_keys_in_prompts_or_config) ??
+          asNum(data.staticKeysInPrompts) ??
+          asNum(data.longLivedKeyFindings),
+      );
+      ownedExceptionsWithin30Days = mergeAndBool(
+        ownedExceptionsWithin30Days,
         asBool(data.ownedExceptionsWithin30Days) ??
-        asBool(data.owned_exceptions_within_30_days) ??
-        asBool(data.exceptionsOwnedExpiry30d) ??
-        ownedExceptionsWithin30Days;
+          asBool(data.owned_exceptions_within_30_days) ??
+          asBool(data.exceptionsOwnedExpiry30d),
+      );
 
       const creds =
         (data.credentials as Array<Record<string, unknown>>) ||
@@ -201,13 +213,10 @@ function loadImported(
           return ttlOk || excOk;
         }).length;
         const pct = (ok / creds.length) * 100;
-        agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct =
-          agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct === null
-            ? pct
-            : Math.min(
-                agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct,
-                pct,
-              );
+        agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct = mergeMinNum(
+          agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct,
+          pct,
+        );
       }
     } catch {
       /* skip */
@@ -281,7 +290,10 @@ export function buildShortLivedAgentTokensReport(opts: {
     opts.imported.agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct ===
     100;
   const scanOk = opts.imported.longLivedStaticApiKeysInPromptsOrConfig === 0;
-  const importFresh = measuredAtFresh(opts.imported.measuredAt);
+  const importFresh = measuredAtFresh(
+    opts.imported.measuredAt,
+    new Date(opts.assessedAt),
+  );
   const scopeAbsent =
     opts.imported.agentToolCredentialsInProductionPromptsOrConfigPresent ===
     false;

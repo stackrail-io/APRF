@@ -774,7 +774,8 @@ function loadScopeImport(
 ): { customerFacingAiHttpApisPresent: boolean | null } {
   let customerFacingAiHttpApisPresent: boolean | null = null;
   for (const file of listImportFiles(ctx.outputDir, PLUGIN_ID)) {
-    if (/auth-probe-report\.json$/i.test(file)) continue;
+    if (/(?:^|[/\\])(?:auth-probe-report\.json|probe[^/\\]*\.json)$/i.test(file))
+      continue;
     if (!/\.json$/i.test(file)) continue;
     const text = readText(file, 200_000);
     if (!text) continue;
@@ -866,7 +867,7 @@ function evaluatePriorReport(
 
 function ingestPriorReports(ctx: CollectorContext): EvidenceNode[] {
   const files = listImportFiles(ctx.outputDir, PLUGIN_ID).filter((f) =>
-    /auth-probe-report|probe.*\.json$/i.test(f),
+    /(?:^|[/\\])(?:auth-probe-report\.json|probe[^/\\]*\.json)$/i.test(f),
   );
   return files.map((file, i) => {
     const text = readText(file, 16_000) ?? "";
@@ -984,9 +985,15 @@ export const httpAuthProbeCollector: Collector = {
 
     if (!baseUrl) {
       if (prior.length > 0) {
-        const reportFiles = listImportFiles(ctx.outputDir, PLUGIN_ID).filter(
-          (f) => /auth-probe-report\.json$/i.test(f),
-        );
+        const reportFiles = listImportFiles(ctx.outputDir, PLUGIN_ID)
+          .filter((f) =>
+            /(?:^|[/\\])(?:auth-probe-report\.json|probe[^/\\]*\.json)$/i.test(f),
+          )
+          .sort((a, b) => {
+            const ap = /auth-probe-report\.json$/i.test(a) ? 0 : 1;
+            const bp = /auth-probe-report\.json$/i.test(b) ? 0 : 1;
+            return ap - bp;
+          });
         const evaluated = reportFiles
           .map((f) => evaluatePriorReport(ctx, f, scope))
           .find(Boolean);
