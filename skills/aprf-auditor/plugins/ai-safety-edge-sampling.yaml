@@ -1,0 +1,26 @@
+id: ai-safety-edge-sampling
+title: Human safety edge-case sampling (SAF-R1)
+version: "0.2.0"
+executor: collectors/ai-safety-edge-sampling.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-safety-edge-sampling]
+inputs:
+  - "Target repo (sampling plan + review packets)"
+  - "Optional suite: aprf-assessment/imports/ai-safety-edge-sampling/*.{json}"
+collect:
+  - "Detect plan / packet / cadence / backlog signals"
+  - "Ingest coverage; write ai-safety-edge-sampling-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-safety-edge-sampling/*"
+  signals: [ai-safety-edge-sampling, saf-r1, repo-ai-safety-edge-sampling]
+mapsToChecks: [SAF-R1]
+whenUnavailable: >
+  Signals alone are PARTIAL. SAF-R1 PASS needs
+  safetyEdgeCaseSamplingPlanConfigured,
+  lastPacketWithin90DaysWithDispositionsAndReviewers,
+  backlogLinkedWhenNeeded, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline edge-sampling heuristics + optional imported JSON.

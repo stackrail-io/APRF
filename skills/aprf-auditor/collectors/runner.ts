@@ -435,6 +435,30 @@ DX-R3 DX metrics (TTSP + bypass rate):
   npm run aprf:dx-metrics -- --target <app> --out <app>/aprf-assessment
   # PASS needs formulas + ≥30d series + bypass alert/owner under imports/platform-dx-metrics/
 
+SAF-M1 domain-specific AI safety policy (versioned, owned, reviewed ≤12 months):
+  npm run aprf:ai-harm-policy -- --target <app> --out <app>/aprf-assessment
+  # PASS needs hasVersion + hasOwner + domainMinimumHarmCategoriesWithRefuseEscalateMapped + reviewAgeDays≤365 under imports/ai-harm-policy/
+
+SAF-M2 automated safety evaluation gates on in-scope releases (100% last 30d + blocking/waivers):
+  npm run aprf:ai-safety-eval-gates -- --target <app> --out <app>/aprf-assessment
+  # PASS needs safetySuiteWithNumericThresholdsConfigured + inScopeReleasesWithSafetyGatePct=100 + failingGateBlocksPromoteUnlessOwnedWaiverExpiry14d under imports/ai-safety-eval-gates/
+
+SAF-M3 AI-interaction disclosure on in-scope user surfaces (inventory + audit coverage):
+  npm run aprf:ai-interaction-disclosure -- --target <app> --out <app>/aprf-assessment
+  # PASS needs disclosureUxInventoryConfigured + inScopeSurfacesWithAiDisclosurePct=100 + criticalSurfacesMissingDisclosure=0 under imports/ai-interaction-disclosure/
+
+SAF-M4 fairness/disparity eval for high-stakes paths (conditionally mandatory):
+  npm run aprf:ai-fairness-eval -- --target <app> --out <app>/aprf-assessment
+  # N/A if highStakesDecisionPathsPresent=false; PASS needs inventoried + latestFairnessEvalWithin90DaysWithThresholdsAndOwners under imports/ai-fairness-eval/
+
+SAF-R1 human safety edge-case sampling (plan + review packet ≤90d):
+  npm run aprf:ai-safety-edge-sampling -- --target <app> --out <app>/aprf-assessment
+  # PASS needs safetyEdgeCaseSamplingPlanConfigured + lastPacketWithin90DaysWithDispositionsAndReviewers + backlogLinkedWhenNeeded under imports/ai-safety-edge-sampling/
+
+SAF-R2 jailbreak-to-harm red-team (distinct from security injection; thresholds + owned backlog):
+  npm run aprf:ai-jailbreak-harm-redteam -- --target <app> --out <app>/aprf-assessment
+  # PASS needs jailbreakToHarmSuiteDistinctFromSecurityInjection + suiteCoversDocumentedHarmCategories + latestRunWithin90DaysMeetsRefusalSafetyThresholds + findingsFeedSafetyBacklogWithOwners under imports/ai-jailbreak-harm-redteam/
+
 EXP-M1 factual/high-stakes RAG provenance (citations + resolvable source IDs):
   npm run aprf:ai-rag-provenance -- --target <app> --out <app>/aprf-assessment
   # PASS needs factualOrHighStakesRagEvalConfigured + answersWithValidCitationPct≥90 + citationsResolveToAuthorizedCorpus under imports/ai-rag-provenance/

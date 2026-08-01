@@ -1,0 +1,27 @@
+id: ai-jailbreak-harm-redteam
+title: Jailbreak-to-harm red-team suite (SAF-R2)
+version: "0.2.0"
+executor: collectors/ai-jailbreak-harm-redteam.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-jailbreak-harm-redteam]
+inputs:
+  - "Target repo (jailbreak-to-harm suite + run reports + backlog)"
+  - "Optional suite: aprf-assessment/imports/ai-jailbreak-harm-redteam/*.{json}"
+collect:
+  - "Detect jailbreak / suite / threshold / backlog signals"
+  - "Ingest coverage; write ai-jailbreak-harm-redteam-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-jailbreak-harm-redteam/*"
+  signals: [ai-jailbreak-harm-redteam, saf-r2, repo-ai-jailbreak-harm-redteam]
+mapsToChecks: [SAF-R2]
+whenUnavailable: >
+  Signals alone are PARTIAL. SAF-R2 PASS needs
+  jailbreakToHarmSuiteDistinctFromSecurityInjection,
+  suiteCoversDocumentedHarmCategories,
+  latestRunWithin90DaysMeetsRefusalSafetyThresholds,
+  findingsFeedSafetyBacklogWithOwners, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline jailbreak-to-harm heuristics + optional imported JSON.

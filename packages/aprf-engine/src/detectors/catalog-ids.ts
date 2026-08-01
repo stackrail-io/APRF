@@ -171,7 +171,12 @@ export const CATALOG_DETECTOR_IDS = [
   "repo-dual-control-config",
   "repo-approval-ui-context",
   "repo-approval-queue-sla",
-  "repo-harm-policy",
+  "repo-ai-harm-policy",
+  "repo-ai-safety-eval-gates",
+  "repo-ai-interaction-disclosure",
+  "repo-ai-fairness-eval",
+  "repo-ai-jailbreak-harm-redteam",
+  "repo-ai-safety-edge-sampling",
   "repo-rollback-runbook",
   "repo-network-policy",
 ] as const;

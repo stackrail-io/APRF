@@ -1,0 +1,25 @@
+id: ai-fairness-eval
+title: Fairness/disparity eval for high-stakes paths (SAF-M4, conditional)
+version: "0.2.0"
+executor: collectors/ai-fairness-eval.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-fairness-eval]
+inputs:
+  - "Target repo (fairness/disparity evals + high-stakes path inventory)"
+  - "Optional suite: aprf-assessment/imports/ai-fairness-eval/*.{json}"
+collect:
+  - "Detect fairness / high-stakes / inventory signals"
+  - "Ingest coverage; write ai-fairness-eval-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-fairness-eval/*"
+  signals: [ai-fairness-eval, saf-m4, repo-ai-fairness-eval]
+mapsToChecks: [SAF-M4]
+whenUnavailable: >
+  Conditionally mandatory. N/A if highStakesDecisionPathsPresent=false.
+  PASS needs highStakesDecisionPathsInventoried +
+  latestFairnessEvalWithin90DaysWithThresholdsAndOwners, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline fairness-eval heuristics + optional imported JSON.

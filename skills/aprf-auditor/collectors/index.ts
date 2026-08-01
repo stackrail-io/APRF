@@ -33,6 +33,12 @@ import { aiExplanationHygieneCollector } from "./ai-explanation-hygiene.ts";
 import { aiChangeSummaryCollector } from "./ai-change-summary.ts";
 import { aiUserRationaleCollector } from "./ai-user-rationale.ts";
 import { aiExplainabilityMatrixCollector } from "./ai-explainability-matrix.ts";
+import { aiHarmPolicyCollector } from "./ai-harm-policy.ts";
+import { aiSafetyEvalGatesCollector } from "./ai-safety-eval-gates.ts";
+import { aiInteractionDisclosureCollector } from "./ai-interaction-disclosure.ts";
+import { aiFairnessEvalCollector } from "./ai-fairness-eval.ts";
+import { aiJailbreakHarmRedteamCollector } from "./ai-jailbreak-harm-redteam.ts";
+import { aiSafetyEdgeSamplingCollector } from "./ai-safety-edge-sampling.ts";
 import { promptfooCollector } from "./promptfoo.ts";
 import { httpAuthProbeCollector } from "./http-auth-probe.ts";
 import { mcpS2sInventoryCollector } from "./mcp-s2s-inventory.ts";
@@ -183,6 +189,12 @@ export const COLLECTORS: Collector[] = [
   aiChangeSummaryCollector,
   aiUserRationaleCollector,
   aiExplainabilityMatrixCollector,
+  aiHarmPolicyCollector,
+  aiSafetyEvalGatesCollector,
+  aiInteractionDisclosureCollector,
+  aiFairnessEvalCollector,
+  aiJailbreakHarmRedteamCollector,
+  aiSafetyEdgeSamplingCollector,
   promptfooCollector,
   httpAuthProbeCollector,
   mcpS2sInventoryCollector,

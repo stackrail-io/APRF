@@ -2800,7 +2800,7 @@
       "engineeringPhilosophy": "Safety is not a synonym for security. Adversarial controls stop attackers; safety controls stop harmful or unfair outcomes for users and society. Both are required for production readiness.",
       "whyItMatters": "Systems can be \u201csecure\u201d yet produce toxic, discriminatory, or undisclosed AI-generated content that creates regulatory, brand, and user harm.",
       "commonFailures": [
-        "No domain-specific harm taxonomy or refusal policy",
+        "No domain-specific AI safety policy (harm categories + refusal/escalation)",
         "Safety filters only on output, not on tool-mediated side effects",
         "No fairness or disparity testing for high-stakes decisions",
         "Users not informed when they interact with AI"
@@ -2808,63 +2808,63 @@
       "mandatoryChecks": [
         {
           "id": "SAF-M1",
-          "requirement": "A documented harm taxonomy and refusal/escalation policy shall exist for the product domain",
-          "artifact": "Approved harm taxonomy + refusal/escalation policy (versioned, owned)",
-          "passCondition": "Policy document has version, owner, and review date \u2264 12 months; maps \u2265 domain-minimum harm categories with explicit refuse vs escalate actions for each",
+          "requirement": "Product domains shall maintain a versioned, owned AI safety policy that includes domain-specific harm categories with refuse-vs-escalate actions for each\u2014so safety filters and human escalation are grounded in explicit policy, not ad-hoc judgment.",
+          "artifact": "Approved domain-specific AI safety policy (versioned, owned) including harm categories and refusal/escalation + Evidence each domain-minimum harm category maps refuse vs escalate + Last review record \u226412 months with named owner",
+          "passCondition": "Domain-specific AI safety policy has version, owner, and review date \u226412 months; maps \u2265 domain-minimum harm categories with explicit refuse vs escalate actions for each (measuredAt \u226490 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "SAF-M2",
-          "requirement": "Automated safety evaluation gates shall run on relevant releases",
-          "artifact": "Safety suite definition with numeric thresholds + CI gate reports",
-          "passCondition": "Safety gate executed on 100% of in-scope releases in last 30 days; fail blocks promote unless time-boxed waiver (expiry \u2264 14 days) with owner",
-          "method": "manual",
+          "requirement": "In-scope releases shall run an automated safety evaluation suite with numeric thresholds that blocks promote on fail\u2014unless a time-boxed waiver (expiry \u226414 days) with a named owner is recorded.",
+          "artifact": "Safety suite definition with numeric thresholds + CI/gate reports covering in-scope releases in the last 30 days (100%) + Waiver register for gate failures (owner + expiry \u226414 days) when used",
+          "passCondition": "Safety gate executed on 100% of in-scope releases in the last 30 days; fail blocks promote unless a time-boxed waiver (expiry \u226414 days) with owner is recorded (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "SAF-M3",
-          "requirement": "Users shall be disclosed when interacting with AI where required by policy or law",
-          "artifact": "Disclosure UX inventory + screenshot/checklist audit of in-scope surfaces",
-          "passCondition": "AI-interaction disclosure present on 100% of in-scope user surfaces per policy checklist; 0 critical surfaces missing disclosure in the latest audit",
-          "method": "manual",
+          "requirement": "Where policy or law requires it, in-scope user surfaces shall disclose that the user is interacting with AI\u2014so people are not misled about automated vs human counterparts.",
+          "artifact": "Disclosure UX inventory of in-scope user surfaces (policy checklist) + Latest screenshot/checklist audit showing coverage + critical-surface status",
+          "passCondition": "AI-interaction disclosure present on 100% of in-scope user surfaces per policy checklist; 0 critical surfaces missing disclosure in the latest audit (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "SAF-M4",
-          "requirement": "Fairness/disparity evaluation shall cover high-stakes decision paths",
-          "artifact": "Fairness/disparity eval methodology + latest run report for in-scope high-stakes paths",
-          "passCondition": "PASS if in-scope high-stakes paths are inventoried and the latest eval (\u226490 days) is retained with thresholds and owners",
-          "method": "manual",
+          "requirement": "When AI influences or automates high-stakes decisions (rights, opportunities, or access to essential services), those paths shall be inventoried and covered by a retained fairness/disparity evaluation with numeric thresholds and named owners. If the system has no such paths, score NOT_APPLICABLE.",
+          "artifact": "Scope attestation: whether AI influences/automates high-stakes decisions + Inventory of in-scope high-stakes decision paths (when applicable) + Fairness/disparity eval methodology + latest run report with thresholds and owners (\u226490 days)",
+          "passCondition": "If the system influences or automates high-stakes decision paths, those paths are inventoried and the latest fairness/disparity eval (\u226490 days) is retained with thresholds and named owners (measuredAt \u226490 days). If no high-stakes decision paths exist, score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 3
         }
       ],
       "recommendedChecks": [
         {
-          "id": "SAF-R2",
-          "requirement": "Red-team exercises covering jailbreak-to-harm scenarios (distinct from security red team)",
-          "artifact": "Jailbreak-to-harm red-team suite (distinct from security injection suite) + latest scored run report",
-          "passCondition": "Suite covers documented harm categories; latest run \u226490 days meets refusal/safety thresholds; findings feed the safety backlog with owners",
-          "method": "manual",
+          "id": "SAF-R1",
+          "requirement": "Production systems should sample safety edge cases on a defined cadence (\u2265 monthly or per release), with a retained review packet that dispositions each fail/edge case and links backlog items when needed.",
+          "artifact": "Safety edge-case sampling plan (sample size + cadence) + Last review packet \u226490 days (labels, dispositions, reviewer names, backlog links when needed)",
+          "passCondition": "Defined sample size and cadence (\u2265 monthly or per release); last packet \u226490 days includes disposition for each fail/edge case and links to backlog items when needed, with reviewer names (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
-          "id": "SAF-R3",
-          "requirement": "Human review sampling of safety edge cases on a defined cadence",
-          "artifact": "Safety edge-case sampling plan + last review packet (sample size, labels, actions) with reviewer names",
-          "passCondition": "Defined sample size and cadence (\u2265 monthly or per release); last packet \u226490 days includes disposition for each fail/edge case and links to backlog items when needed",
-          "method": "manual",
+          "id": "SAF-R2",
+          "requirement": "Production systems should run a jailbreak-to-harm red-team suite\u2014distinct from security injection corpora\u2014that covers documented harm categories, meets refusal/safety thresholds on a run \u226490 days old, and routes findings into the safety backlog with owners.",
+          "artifact": "Jailbreak-to-harm red-team suite definition (explicitly distinct from security injection suite) + Latest scored run report \u226490 days vs refusal/safety thresholds + Safety backlog items for findings with named owners",
+          "passCondition": "A jailbreak-to-harm red-team suite (distinct from the security injection suite) covers documented harm categories; the latest run \u226490 days meets refusal/safety thresholds; findings feed the safety backlog with named owners (measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
       ],
       "evidenceRequired": [
-        "Harm taxonomy and policy document",
+        "Domain-specific AI safety policy document",
         "Safety eval suite definitions and recent gate results",
         "Disclosure UX or policy evidence"
       ],
@@ -2880,7 +2880,7 @@
         "Regression tests for known harmful prompt classes"
       ],
       "manualValidations": [
-        "Domain expert review of harm taxonomy",
+        "Domain expert review of the AI safety policy and harm categories",
         "Periodic calibration of automated safety graders vs human labels"
       ],
       "examples": [

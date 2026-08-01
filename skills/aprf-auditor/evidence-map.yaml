@@ -125,8 +125,11 @@ categoryDefaults:
       - "**/*fairness*"
       - "**/*bias*"
       - "**/*moderation*"
+      - "**/*harm*"
+      - "**/*refusal*"
       - "**/eval/**"
-    signals: [safety policy, harm taxonomy, red team]
+    plugins: [ai-harm-policy, ai-safety-eval-gates, ai-interaction-disclosure, ai-fairness-eval, ai-jailbreak-harm-redteam, ai-safety-edge-sampling, repo-filesystem, promptfoo]
+    signals: [safety policy, domain AI safety policy, refusal escalation, safety eval gates, AI disclosure, fairness disparity, jailbreak-to-harm red team, human edge-case sampling, red team]
   explainability:
     search:
       - "**/*trace*"
@@ -1589,6 +1592,105 @@ checks:
       PASS if platform-dx-metrics statusHint=pass (ttsp+bypass formulas + ≥30d series + bypass alert/threshold + named owner + measuredAt ≤90d).
       PARTIAL if metric name signals without complete import.
       NOT_APPLICABLE when no AI-platform DX metric signals.
+  SAF-M1:
+    requiredEvidence:
+      - "Approved domain-specific AI safety policy (versioned, owned) including harm categories and refusal/escalation"
+      - "hasVersion + hasOwner + domainMinimumHarmCategoriesWithRefuseEscalateMapped + reviewAgeDays≤365 under imports/ai-harm-policy/"
+    searchExtra:
+      - "**/*harm*taxonomy*"
+      - "**/*refusal*"
+      - "**/*escalation*"
+      - "**/*content*safety*"
+      - "**/*moderation*policy*"
+    plugins: [ai-harm-policy, repo-filesystem]
+    naWhen: "No AI user- or tool-facing behavior in scope"
+    evaluation: |
+      PASS if ai-harm-policy statusHint=pass (version + owner + domain-minimum refuse/escalate mapping + reviewAgeDays≤365 + measuredAt ≤90d).
+      PARTIAL if policy signals without complete import.
+      NOT_APPLICABLE when no AI safety policy signals. Distinct from SAF-M2 safety eval gates and ORG-M1 acceptable-use.
+  SAF-M2:
+    requiredEvidence:
+      - "Safety suite definition with numeric thresholds"
+      - "safetySuiteWithNumericThresholdsConfigured + inScopeReleasesWithSafetyGatePct=100 + failingGateBlocksPromoteUnlessOwnedWaiverExpiry14d under imports/ai-safety-eval-gates/"
+    searchExtra:
+      - "**/*safety*eval*"
+      - "**/*safety*suite*"
+      - "**/*safety*gate*"
+      - "**/*toxicity*"
+      - "**/*content*safety*"
+      - "**/*moderation*eval*"
+    plugins: [ai-safety-eval-gates, promptfoo, github-actions, repo-filesystem]
+    naWhen: "No in-scope AI releases"
+    evaluation: |
+      PASS if ai-safety-eval-gates statusHint=pass (suite with numeric thresholds + 100% in-scope release coverage last 30d + blocking fails unless owned ≤14d waiver + measuredAt ≤90d).
+      PARTIAL if gate signals without complete import.
+      NOT_APPLICABLE when no safety-eval-gate signals. Distinct from SAF-M1 domain AI safety policy, EVL-M2 journey metrics, and SEC-M1 injection gates.
+  SAF-M3:
+    requiredEvidence:
+      - "Disclosure UX inventory of in-scope user surfaces (policy checklist)"
+      - "disclosureUxInventoryConfigured + inScopeSurfacesWithAiDisclosurePct=100 + criticalSurfacesMissingDisclosure=0 under imports/ai-interaction-disclosure/"
+    searchExtra:
+      - "**/*disclosure*"
+      - "**/*ai*disclaimer*"
+      - "**/*powered*by*ai*"
+      - "**/*chatbot*notice*"
+      - "**/*surface*inventory*"
+    plugins: [ai-interaction-disclosure, repo-filesystem]
+    naWhen: "No in-scope user surfaces requiring AI-interaction disclosure"
+    evaluation: |
+      PASS if ai-interaction-disclosure statusHint=pass (inventory + 100% surface coverage + 0 critical misses + measuredAt ≤90d).
+      PARTIAL if disclosure signals without complete import.
+      NOT_APPLICABLE when no disclosure signals. Distinct from SAF-M1/M2 and INC-R3 incident notification criteria.
+  SAF-M4:
+    requiredEvidence:
+      - "Scope attestation: whether AI influences/automates high-stakes decisions"
+      - "highStakesDecisionPathsPresent=false (N/A) OR inventoried + latestFairnessEvalWithin90DaysWithThresholdsAndOwners under imports/ai-fairness-eval/"
+    searchExtra:
+      - "**/*fairness*"
+      - "**/*disparit*"
+      - "**/*bias*eval*"
+      - "**/*high*stakes*"
+      - "**/*demographic*parity*"
+      - "**/*subgroup*"
+    plugins: [ai-fairness-eval, promptfoo, repo-filesystem]
+    naWhen: "No high-stakes decision paths (conditionally mandatory)"
+    evaluation: |
+      NOT_APPLICABLE if highStakesDecisionPathsPresent=false (measuredAt ≤90d)—docs/code assistants, marketing copilots, etc.
+      PASS if high-stakes paths inventoried + latest fairness/disparity eval ≤90d with thresholds and owners.
+      PARTIAL if fairness/high-stakes signals without complete import.
+      Distinct from SAF-M2 content-safety gates and EVL quality suites.
+  SAF-R1:
+    requiredEvidence:
+      - "Safety edge-case sampling plan (sample size + cadence)"
+      - "safetyEdgeCaseSamplingPlanConfigured + lastPacketWithin90DaysWithDispositionsAndReviewers + backlogLinkedWhenNeeded under imports/ai-safety-edge-sampling/"
+    searchExtra:
+      - "**/*edge*case*"
+      - "**/*safety*sampling*"
+      - "**/*human*review*"
+      - "**/*review*packet*"
+      - "**/*sampling*plan*"
+    plugins: [ai-safety-edge-sampling, repo-filesystem]
+    naWhen: "No production safety-relevant AI surface"
+    evaluation: |
+      PASS if ai-safety-edge-sampling statusHint=pass (plan + ≤90d packet with dispositions/reviewers + backlog links when needed + measuredAt ≤90d).
+      PARTIAL if sampling signals without complete import.
+      NOT_APPLICABLE when no sampling signals. Distinct from SAF-M2 gates and SAF-R2 red-team suites.
+  SAF-R2:
+    requiredEvidence:
+      - "Jailbreak-to-harm red-team suite definition (explicitly distinct from security injection suite)"
+      - "jailbreakToHarmSuiteDistinctFromSecurityInjection + suiteCoversDocumentedHarmCategories + latestRunWithin90DaysMeetsRefusalSafetyThresholds + findingsFeedSafetyBacklogWithOwners under imports/ai-jailbreak-harm-redteam/"
+    searchExtra:
+      - "**/*jailbreak*"
+      - "**/*red*team*"
+      - "**/*harm*red*"
+      - "**/*refusal*red*"
+      - "**/*adversarial*safety*"
+    plugins: [ai-jailbreak-harm-redteam, promptfoo, repo-filesystem]
+    naWhen: "No production generative AI surface"
+    evaluation: |
+      PASS if ai-jailbreak-harm-redteam statusHint=pass (suite distinct from SEC injection + harm-category coverage + ≤90d thresholded run + owned backlog findings + measuredAt ≤90d).
+      PARTIAL if red-team signals without complete import.
+      NOT_APPLICABLE when no red-team signals. Distinct from SAF-M2 gates, SEC-M1 injection suites, and SAF-R1 human sampling.
   EXP-M1:
     requiredEvidence:
       - "Factual/high-stakes RAG eval suite measuring citation presence"

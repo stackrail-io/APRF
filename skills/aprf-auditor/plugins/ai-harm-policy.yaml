@@ -1,0 +1,25 @@
+id: ai-harm-policy
+title: Domain-specific AI safety policy (SAF-M1)
+version: "0.2.0"
+executor: collectors/ai-harm-policy.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-harm-policy]
+inputs:
+  - "Target repo (domain-specific AI safety policy with harm categories + refuse/escalate)"
+  - "Optional suite: aprf-assessment/imports/ai-harm-policy/*.{json}"
+collect:
+  - "Detect policy / category / refuse-escalate / metadata signals"
+  - "Ingest coverage; write ai-harm-policy-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-harm-policy/*"
+  signals: [ai-harm-policy, saf-m1, repo-ai-harm-policy]
+mapsToChecks: [SAF-M1]
+whenUnavailable: >
+  Policy signals alone are PARTIAL. SAF-M1 PASS needs hasVersion, hasOwner,
+  domainMinimumHarmCategoriesWithRefuseEscalateMapped, reviewAgeDays≤365,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline AI safety policy heuristics + optional imported JSON.

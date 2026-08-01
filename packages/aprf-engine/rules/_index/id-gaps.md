@@ -23,5 +23,6 @@ APRF `0.10.x` is a working draft; **no release versions have been tagged yet**. 
 | Former `REL-M6` (business-critical RTO/RPO) | `REL-M5` | Pre-release renumber into vacated mandatory slot | RTO/RPO catalog; fills ID vacated when backups moved to REL-M4 |
 | `EXP-R3` (regulated explainability matrix) | `EXP-R2` | Pre-release renumber to close recommended ID gap | Formal explainability requirements matrix; vacated `EXP-R3` |
 | `EXP-M4` (change/counterfactual summaries) | `EXP-R3` | [APRF-RFC-0008](../../../rfcs/0008-explainability-exp-m4-to-recommended.md) | Promotion change summaries; removed from Regulated; fills ID vacated when matrix moved to EXP-R2 |
+| `SAF-R3` (human safety edge-case sampling) | `SAF-R1` | Pre-release renumber to close recommended ID gap | Human review sampling; vacated `SAF-R3` |
 
 **After the first tagged release**, this exception closes. New demotions must keep deprecated stubs (pattern: `INF-R1` → `SCI-R1`).

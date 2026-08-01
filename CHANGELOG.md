@@ -8,6 +8,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
+- Reframed **SAF-M1** around a **domain-specific AI safety policy** (harm categories + refuse/escalate as policy contents, not a standalone “harm taxonomy”); synced `aprf-spec.json`.
+- Rewrote **safety-responsible-ai** former **SAF-R3 → SAF-R1** (hybrid human safety edge-case sampling); vacated `SAF-R3` under pre-release exception in `id-gaps.md`; synced `aprf-spec.json`.
+- Rewrote **safety-responsible-ai** **SAF-R2** (hybrid jailbreak-to-harm red-team, distinct from SEC-M1); cleared `technologies`; synced `aprf-spec.json`.
+- Rewrote **safety-responsible-ai** **SAF-M4** as **conditionally mandatory** hybrid fairness/disparity eval for high-stakes decision paths (N/A when none; cleared `technologies`); synced `aprf-spec.json`.
+- Rewrote **safety-responsible-ai** **SAF-M3** (hybrid AI-interaction disclosure on in-scope user surfaces); cleared `technologies`; synced `aprf-spec.json`.
+- Rewrote **safety-responsible-ai** **SAF-M2** (hybrid automated safety evaluation release gates); cleared `technologies`; synced `aprf-spec.json`.
+- Rewrote **safety-responsible-ai** **SAF-M1** (hybrid harm taxonomy + refusal/escalation policy); cleared `technologies`; synced `aprf-spec.json`.
 - Demoted **explainability** former **EXP-M4 → EXP-R3** (recommended change/counterfactual summaries for material model/prompt promotions) per [APRF-RFC-0008](rfcs/0008-explainability-exp-m4-to-recommended.md) (regulated 52→51, tier3-only 14→13); vacated `EXP-M4` under pre-release exception in `id-gaps.md`; synced `aprf-spec.json`.
 - Rewrote **explainability** former **EXP-R3 → EXP-R2** (hybrid regulated-feature explainability requirements matrix); vacated `EXP-R3` under pre-release exception in `id-gaps.md`; synced `aprf-spec.json`.
 - Rewrote **explainability** **EXP-R1** (hybrid user-facing rationale for material automated decisions); synced `aprf-spec.json`.

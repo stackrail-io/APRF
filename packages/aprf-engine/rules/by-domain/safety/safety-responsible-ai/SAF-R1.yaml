@@ -1,0 +1,82 @@
+id: "SAF-R1"
+category: "safety-responsible-ai"
+title: "Production systems should have human review sampling of safety edge cases on a defined cadence"
+description: >
+  Production systems should sample safety edge cases on a defined cadence
+  (≥ monthly or per release), with a retained review packet that dispositions
+  each fail/edge case and links backlog items when needed.
+whyItMatters: >
+  Automated gates and red teams miss nuanced edge cases. Periodic human
+  review with named reviewers and dispositions catches residual harm and
+  calibrates graders. Distinct from SAF-M2 automated release gates and
+  SAF-R2 jailbreak-to-harm red-team suites.
+severity: "critical"
+weight: 4
+gate: "recommended"
+passCondition: >
+  Defined sample size and cadence (≥ monthly or per release); last packet
+  ≤90 days includes disposition for each fail/edge case and links to backlog
+  items when needed, with reviewer names (measuredAt ≤90 days).
+evidenceRequired:
+  - "Safety edge-case sampling plan (sample size + cadence)"
+  - "Last review packet ≤90 days (labels, dispositions, reviewer names, backlog links when needed)"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-safety-edge-sampling"
+      params:
+        hint: >
+          Discover safety edge-case sampling plans and recent human review
+          packets with dispositions, reviewers, and backlog links.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest a defined sample size
+          and cadence (≥ monthly or per release) and a ≤90-day packet with
+          dispositions, reviewers, and backlog links when needed
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI with safety-relevant outputs exists. If none,
+  score NOT_APPLICABLE. 2) Locate a sampling plan with defined sample size
+  and cadence (≥ monthly or per release). 3) Open the last review packet
+  ≤90 days; confirm each fail/edge case has a disposition and reviewer
+  name(s). 4) Confirm backlog links exist when disposition requires follow-
+  up. 5) PASS only if plan + fresh packet completeness hold with measuredAt
+  ≤90 days. SAF-M2 CI gate reports alone do not prove human edge-case
+  sampling. SAF-R2 automated red-team scores alone do not prove human
+  disposition packets. Generic QA sampling without safety edge-case scope
+  does not satisfy.
+falsePositiveGuidance: >
+  Do not pass plans without a recent packet. Do not pass packets missing
+  dispositions, reviewers, or backlog links for open fails. Do not pass
+  ad-hoc reviews without defined cadence/sample size. Sibling SAF-M2 and
+  SAF-R2 do not substitute. Named exceptions need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Define sample size and cadence (≥ monthly or per release)"
+  - "Run human review of safety edge cases; record dispositions and reviewers"
+  - "Link fails to the safety backlog; retain under imports/ai-safety-edge-sampling/"
+  - "Time-box gaps with owner and expiry ≤90 days"
+references:
+  - title: "NIST AI RMF — Trustworthiness characteristics"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "ISO/IEC 42001 — AI management systems"
+    url: "https://www.iso.org/standard/81230.html"
+relatedRules:
+  - "SAF-M1"
+  - "SAF-M2"
+  - "SAF-M3"
+  - "SAF-M4"
+  - "SAF-R2"
+tags:
+  - "safety-responsible-ai"
+  - "recommended"
+  - "hybrid"
+  - "human-review"
+  - "edge-case"
+  - "sampling"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"
