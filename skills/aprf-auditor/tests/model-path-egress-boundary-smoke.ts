@@ -108,6 +108,24 @@ async function main() {
       throw new Error(`fail expected: ${JSON.stringify(r3.summary)}`);
     }
 
+    const tEmpty = join(root, "t-empty");
+    mkdirSync(tEmpty, { recursive: true });
+    const outNa = join(root, "ona");
+    mkdirSync(join(outNa, "imports", "model-path-egress-boundary"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNa, "imports", "model-path-egress-boundary", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        modelToolRuntimeCanInitiateNetworkCalls: false,
+      }),
+    );
+    const rNa = await run(tEmpty, outNa);
+    if (rNa.summary.statusHint !== "not_applicable") {
+      throw new Error(`n/a expected: ${JSON.stringify(rNa.summary)}`);
+    }
+
     console.log("model-path-egress-boundary smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

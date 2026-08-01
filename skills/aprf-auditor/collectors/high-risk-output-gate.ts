@@ -63,6 +63,7 @@ export interface HighRiskOutputGateReport {
   };
   importedResults: {
     found: boolean;
+    highRiskSideEffectPathsPresent: boolean | null;
     highRiskSideEffectPathInventoryComplete: boolean | null;
     highRiskPathsRejectingNonConformingOutputPct: number | null;
     ageDays: number | null;
@@ -129,6 +130,7 @@ function loadImported(
   ctx: CollectorContext,
 ): HighRiskOutputGateReport["importedResults"] {
   const sources: string[] = [];
+  let highRiskSideEffectPathsPresent: boolean | null = null;
   let highRiskSideEffectPathInventoryComplete: boolean | null = null;
   let highRiskPathsRejectingNonConformingOutputPct: number | null = null;
   let ageDays: number | null = null;
@@ -143,6 +145,11 @@ function loadImported(
       sources.push(basename(f));
       measuredAt = parseMeasuredAt(data) ?? measuredAt;
       ageDays = asNum(data.ageDays) ?? asNum(data.age_days) ?? ageDays;
+      highRiskSideEffectPathsPresent =
+        asBool(data.highRiskSideEffectPathsPresent) ??
+        asBool(data.high_risk_side_effect_paths_present) ??
+        asBool(data.hasHighRiskSideEffectPaths) ??
+        highRiskSideEffectPathsPresent;
       highRiskSideEffectPathInventoryComplete =
         asBool(data.highRiskSideEffectPathInventoryComplete) ??
         asBool(data.high_risk_side_effect_path_inventory_complete) ??
@@ -162,6 +169,7 @@ function loadImported(
 
   return {
     found: sources.length > 0,
+    highRiskSideEffectPathsPresent,
     highRiskSideEffectPathInventoryComplete,
     highRiskPathsRejectingNonConformingOutputPct,
     ageDays,
@@ -187,7 +195,7 @@ export function buildHighRiskOutputGateReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No high-risk output gate signals — SEC-M2 remains not demonstrated until inventory/contract evidence or an explicit N/A attest (no write/irreversible/financial AI side-effect paths) is imported.",
+      "No high-risk output gate signals — SEC-M2 remains not demonstrated until inventory/contract evidence or an explicit N/A attest (highRiskSideEffectPathsPresent=false) is imported.",
     );
   }
   if (opts.schema.found) {
@@ -208,7 +216,7 @@ export function buildHighRiskOutputGateReport(opts: {
     );
   } else if (gateSignalsPresent) {
     notes.push(
-      "Gate signals alone are PARTIAL — import highRiskSideEffectPathInventoryComplete=true + highRiskPathsRejectingNonConformingOutputPct=100 (measuredAt ≤90d) under imports/high-risk-output-gate/ to PASS.",
+      "Gate signals alone are PARTIAL — import highRiskSideEffectPathInventoryComplete=true + highRiskPathsRejectingNonConformingOutputPct=100 (measuredAt ≤90d) under imports/high-risk-output-gate/ to PASS. Set highRiskSideEffectPathsPresent=false for NOT_APPLICABLE.",
     );
   }
 
@@ -220,19 +228,27 @@ export function buildHighRiskOutputGateReport(opts: {
   const rejectOk =
     opts.imported.highRiskPathsRejectingNonConformingOutputPct === 100;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
+  const scopeAbsent = opts.imported.highRiskSideEffectPathsPresent === false;
 
   let statusHint: HighRiskOutputGateReport["summary"]["statusHint"];
   let secM2Satisfied: boolean | null = null;
 
   const explicitFail =
     opts.imported.found &&
+    !scopeAbsent &&
     (opts.imported.highRiskSideEffectPathInventoryComplete === false ||
       (opts.imported.highRiskPathsRejectingNonConformingOutputPct !== null &&
         opts.imported.highRiskPathsRejectingNonConformingOutputPct < 100) ||
       (opts.imported.ageDays !== null &&
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
-  if (!gateSignalsPresent && !opts.imported.found) {
+  if (opts.imported.found && scopeAbsent) {
+    statusHint = "not_applicable";
+    secM2Satisfied = null;
+    notes.push(
+      "Imported highRiskSideEffectPathsPresent=false — SEC-M2 NOT_APPLICABLE.",
+    );
+  } else if (!gateSignalsPresent && !opts.imported.found) {
     statusHint = "not_demonstrated";
     secM2Satisfied = null;
   } else if (explicitFail) {

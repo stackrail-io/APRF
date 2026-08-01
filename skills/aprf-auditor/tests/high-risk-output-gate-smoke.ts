@@ -104,6 +104,24 @@ async function main() {
       throw new Error(`fail expected: ${JSON.stringify(r3.summary)}`);
     }
 
+    const tEmpty = join(root, "t-empty");
+    mkdirSync(tEmpty, { recursive: true });
+    const outNa = join(root, "ona");
+    mkdirSync(join(outNa, "imports", "high-risk-output-gate"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNa, "imports", "high-risk-output-gate", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        highRiskSideEffectPathsPresent: false,
+      }),
+    );
+    const rNa = await run(tEmpty, outNa);
+    if (rNa.summary.statusHint !== "not_applicable") {
+      throw new Error(`n/a expected: ${JSON.stringify(rNa.summary)}`);
+    }
+
     console.log("high-risk-output-gate smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

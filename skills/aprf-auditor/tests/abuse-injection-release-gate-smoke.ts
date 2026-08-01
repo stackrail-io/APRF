@@ -106,6 +106,24 @@ async function main() {
       throw new Error(`fail expected: ${JSON.stringify(r3.summary)}`);
     }
 
+    const tEmpty = join(root, "t-empty");
+    mkdirSync(tEmpty, { recursive: true });
+    const outNa = join(root, "ona");
+    mkdirSync(join(outNa, "imports", "abuse-injection-release-gate"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNa, "imports", "abuse-injection-release-gate", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        customerFacingAiReleasesPresent: false,
+      }),
+    );
+    const rNa = await run(tEmpty, outNa);
+    if (rNa.summary.statusHint !== "not_applicable") {
+      throw new Error(`n/a expected: ${JSON.stringify(rNa.summary)}`);
+    }
+
     console.log("abuse-injection-release-gate smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

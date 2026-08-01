@@ -63,6 +63,7 @@ export interface AbuseInjectionReleaseGateReport {
   };
   importedResults: {
     found: boolean;
+    customerFacingAiReleasesPresent: boolean | null;
     abuseJailbreakInjectionSuiteConfigured: boolean | null;
     productionReleasesWithSecuritySuiteGatePassPct: number | null;
     failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d: boolean | null;
@@ -130,6 +131,7 @@ function loadImported(
   ctx: CollectorContext,
 ): AbuseInjectionReleaseGateReport["importedResults"] {
   const sources: string[] = [];
+  let customerFacingAiReleasesPresent: boolean | null = null;
   let abuseJailbreakInjectionSuiteConfigured: boolean | null = null;
   let productionReleasesWithSecuritySuiteGatePassPct: number | null = null;
   let failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d: boolean | null =
@@ -146,6 +148,11 @@ function loadImported(
       sources.push(basename(f));
       measuredAt = parseMeasuredAt(data) ?? measuredAt;
       ageDays = asNum(data.ageDays) ?? asNum(data.age_days) ?? ageDays;
+      customerFacingAiReleasesPresent =
+        asBool(data.customerFacingAiReleasesPresent) ??
+        asBool(data.customer_facing_ai_releases_present) ??
+        asBool(data.hasCustomerFacingAiReleases) ??
+        customerFacingAiReleasesPresent;
       abuseJailbreakInjectionSuiteConfigured =
         asBool(data.abuseJailbreakInjectionSuiteConfigured) ??
         asBool(data.abuse_jailbreak_injection_suite_configured) ??
@@ -175,6 +182,7 @@ function loadImported(
 
   return {
     found: sources.length > 0,
+    customerFacingAiReleasesPresent,
     abuseJailbreakInjectionSuiteConfigured,
     productionReleasesWithSecuritySuiteGatePassPct,
     failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d,
@@ -201,7 +209,7 @@ export function buildAbuseInjectionReleaseGateReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No abuse/jailbreak/injection release-gate signals — SEC-M3 remains not demonstrated until suite/gate evidence or an explicit N/A attest (no customer-facing AI releases) is imported.",
+      "No abuse/jailbreak/injection release-gate signals — SEC-M3 remains not demonstrated until suite/gate evidence or an explicit N/A attest (customerFacingAiReleasesPresent=false) is imported.",
     );
   }
   if (opts.suite.found) {
@@ -221,7 +229,7 @@ export function buildAbuseInjectionReleaseGateReport(opts: {
     );
   } else if (gateSignalsPresent) {
     notes.push(
-      "Gate signals alone are PARTIAL — import abuseJailbreakInjectionSuiteConfigured=true + productionReleasesWithSecuritySuiteGatePassPct=100 + failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d=true (measuredAt ≤90d) under imports/abuse-injection-release-gate/ to PASS.",
+      "Gate signals alone are PARTIAL — import abuseJailbreakInjectionSuiteConfigured=true + productionReleasesWithSecuritySuiteGatePassPct=100 + failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d=true (measuredAt ≤90d) under imports/abuse-injection-release-gate/ to PASS. Set customerFacingAiReleasesPresent=false for NOT_APPLICABLE.",
     );
   }
 
@@ -234,12 +242,14 @@ export function buildAbuseInjectionReleaseGateReport(opts: {
   const blockingOk =
     opts.imported.failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
+  const scopeAbsent = opts.imported.customerFacingAiReleasesPresent === false;
 
   let statusHint: AbuseInjectionReleaseGateReport["summary"]["statusHint"];
   let secM3Satisfied: boolean | null = null;
 
   const explicitFail =
     opts.imported.found &&
+    !scopeAbsent &&
     (opts.imported.abuseJailbreakInjectionSuiteConfigured === false ||
       (opts.imported.productionReleasesWithSecuritySuiteGatePassPct !==
         null &&
@@ -249,7 +259,13 @@ export function buildAbuseInjectionReleaseGateReport(opts: {
       (opts.imported.ageDays !== null &&
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
-  if (!gateSignalsPresent && !opts.imported.found) {
+  if (opts.imported.found && scopeAbsent) {
+    statusHint = "not_applicable";
+    secM3Satisfied = null;
+    notes.push(
+      "Imported customerFacingAiReleasesPresent=false — SEC-M3 NOT_APPLICABLE.",
+    );
+  } else if (!gateSignalsPresent && !opts.imported.found) {
     statusHint = "not_demonstrated";
     secM3Satisfied = null;
   } else if (explicitFail) {

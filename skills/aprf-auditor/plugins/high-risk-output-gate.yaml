@@ -20,6 +20,7 @@ whenUnavailable: >
   Gate signals alone are PARTIAL. SEC-M2 PASS needs
   highRiskSideEffectPathInventoryComplete,
   highRiskPathsRejectingNonConformingOutputPct=100, measuredAt ≤90 days.
+  Set highRiskSideEffectPathsPresent=false for NOT_APPLICABLE.
 live:
   required: false
   note: Offline high-risk-output-gate heuristics + optional imported JSON.

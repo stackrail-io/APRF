@@ -64,6 +64,7 @@ export interface ModelPathEgressBoundaryReport {
   };
   importedResults: {
     found: boolean;
+    modelToolRuntimeCanInitiateNetworkCalls: boolean | null;
     trustBoundaryArchitectureDocumented: boolean | null;
     modelToolRuntimeEgressAllowlistConfigured: boolean | null;
     unrestrictedInternalAdminOrDataStoreRoutesFromModelIdentity: number | null;
@@ -133,6 +134,7 @@ function loadImported(
   ctx: CollectorContext,
 ): ModelPathEgressBoundaryReport["importedResults"] {
   const sources: string[] = [];
+  let modelToolRuntimeCanInitiateNetworkCalls: boolean | null = null;
   let trustBoundaryArchitectureDocumented: boolean | null = null;
   let modelToolRuntimeEgressAllowlistConfigured: boolean | null = null;
   let unrestrictedInternalAdminOrDataStoreRoutesFromModelIdentity:
@@ -151,6 +153,11 @@ function loadImported(
       sources.push(basename(f));
       measuredAt = parseMeasuredAt(data) ?? measuredAt;
       ageDays = asNum(data.ageDays) ?? asNum(data.age_days) ?? ageDays;
+      modelToolRuntimeCanInitiateNetworkCalls =
+        asBool(data.modelToolRuntimeCanInitiateNetworkCalls) ??
+        asBool(data.model_tool_runtime_can_initiate_network_calls) ??
+        asBool(data.runtimeCanInitiateNetworkCalls) ??
+        modelToolRuntimeCanInitiateNetworkCalls;
       trustBoundaryArchitectureDocumented =
         asBool(data.trustBoundaryArchitectureDocumented) ??
         asBool(data.trust_boundary_architecture_documented) ??
@@ -182,6 +189,7 @@ function loadImported(
 
   return {
     found: sources.length > 0,
+    modelToolRuntimeCanInitiateNetworkCalls,
     trustBoundaryArchitectureDocumented,
     modelToolRuntimeEgressAllowlistConfigured,
     unrestrictedInternalAdminOrDataStoreRoutesFromModelIdentity,
@@ -209,7 +217,7 @@ export function buildModelPathEgressBoundaryReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No model-path egress boundary signals — SEC-M4 remains not demonstrated until trust/egress/probe evidence or an explicit N/A attest (runtime cannot initiate network calls) is imported.",
+      "No model-path egress boundary signals — SEC-M4 remains not demonstrated until trust/egress/probe evidence or an explicit N/A attest (modelToolRuntimeCanInitiateNetworkCalls=false) is imported.",
     );
   }
   if (opts.trustBoundary.found) {
@@ -229,7 +237,7 @@ export function buildModelPathEgressBoundaryReport(opts: {
     );
   } else if (gateSignalsPresent) {
     notes.push(
-      "Boundary signals alone are PARTIAL — import trustBoundaryArchitectureDocumented=true + modelToolRuntimeEgressAllowlistConfigured=true + unrestrictedInternalAdminOrDataStoreRoutesFromModelIdentity=0 + probeShowsOnlyAllowlistedDestinations=true (measuredAt ≤90d) under imports/model-path-egress-boundary/ to PASS.",
+      "Boundary signals alone are PARTIAL — import trustBoundaryArchitectureDocumented=true + modelToolRuntimeEgressAllowlistConfigured=true + unrestrictedInternalAdminOrDataStoreRoutesFromModelIdentity=0 + probeShowsOnlyAllowlistedDestinations=true (measuredAt ≤90d) under imports/model-path-egress-boundary/ to PASS. Set modelToolRuntimeCanInitiateNetworkCalls=false for NOT_APPLICABLE.",
     );
   }
 
@@ -244,12 +252,15 @@ export function buildModelPathEgressBoundaryReport(opts: {
     0;
   const probeOk = opts.imported.probeShowsOnlyAllowlistedDestinations === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
+  const scopeAbsent =
+    opts.imported.modelToolRuntimeCanInitiateNetworkCalls === false;
 
   let statusHint: ModelPathEgressBoundaryReport["summary"]["statusHint"];
   let secM4Satisfied: boolean | null = null;
 
   const explicitFail =
     opts.imported.found &&
+    !scopeAbsent &&
     (opts.imported.trustBoundaryArchitectureDocumented === false ||
       opts.imported.modelToolRuntimeEgressAllowlistConfigured === false ||
       (opts.imported
@@ -261,7 +272,13 @@ export function buildModelPathEgressBoundaryReport(opts: {
       (opts.imported.ageDays !== null &&
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
-  if (!gateSignalsPresent && !opts.imported.found) {
+  if (opts.imported.found && scopeAbsent) {
+    statusHint = "not_applicable";
+    secM4Satisfied = null;
+    notes.push(
+      "Imported modelToolRuntimeCanInitiateNetworkCalls=false — SEC-M4 NOT_APPLICABLE.",
+    );
+  } else if (!gateSignalsPresent && !opts.imported.found) {
     statusHint = "not_demonstrated";
     secM4Satisfied = null;
   } else if (explicitFail) {

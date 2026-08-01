@@ -21,6 +21,7 @@ whenUnavailable: >
   abuseJailbreakInjectionSuiteConfigured,
   productionReleasesWithSecuritySuiteGatePassPct=100,
   failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d, measuredAt ≤90 days.
+  Set customerFacingAiReleasesPresent=false for NOT_APPLICABLE.
 live:
   required: false
   note: Offline abuse-injection-release-gate heuristics + optional imported JSON.
