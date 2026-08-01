@@ -183,14 +183,94 @@ async function main() {
       }),
     );
     const rDouble = await run(t2, outDouble);
-    if ((rDouble.importedResults.anonymousPrivilegedHops ?? 0) !== 2) {
+    if ((rDouble.importedResults.anonymousPrivilegedHops ?? -1) !== 1) {
       throw new Error(
-        `scalar+samples must not double-count anon hops, got ${rDouble.importedResults.anonymousPrivilegedHops}`,
+        `samples must own anon count for the file (expect 1), got ${rDouble.importedResults.anonymousPrivilegedHops}`,
       );
     }
 
+    // Stale scalar must not beat sample evidence in the same file
+    const outSampleWin = join(root, "o-sample-win");
+    mkdirSync(join(outSampleWin, "imports", "identity-propagation"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outSampleWin, "imports", "identity-propagation", "stale-scalar.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        identityPropagationDesignDocumented: true,
+        privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct: 50,
+        anonymousPrivilegedHops: 9,
+        samples: [
+          { hasEndUserSubject: true },
+          { hasDocumentedServiceSubject: true },
+        ],
+      }),
+    );
+    const rSampleWin = await run(t2, outSampleWin);
+    if (
+      (rSampleWin.importedResults.anonymousPrivilegedHops ?? -1) !== 0 ||
+      (rSampleWin.importedResults
+        .privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct ?? -1) !==
+        100
+    ) {
+      throw new Error(
+        `samples must override stale scalar anon/pct, got anon=${rSampleWin.importedResults.anonymousPrivilegedHops} pct=${rSampleWin.importedResults.privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct}`,
+      );
+    }
+
+    // Vacuous PASS: good metrics without present=true and without in-repo signals
     const tEmpty = join(root, "t-empty");
     mkdirSync(tEmpty, { recursive: true });
+    const outVacuous = join(root, "o-vacuous");
+    mkdirSync(join(outVacuous, "imports", "identity-propagation"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outVacuous, "imports", "identity-propagation", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        identityPropagationDesignDocumented: true,
+        privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct: 100,
+        anonymousPrivilegedHops: 0,
+        sampleSize: 25,
+      }),
+    );
+    const rVacuous = await run(tEmpty, outVacuous);
+    if (
+      rVacuous.summary.statusHint !== "partial" ||
+      rVacuous.summary.authnM4Satisfied !== false
+    ) {
+      throw new Error(
+        `metrics without present/signals must stay partial: ${JSON.stringify(rVacuous.summary)}`,
+      );
+    }
+
+    const outPresent = join(root, "o-present");
+    mkdirSync(join(outPresent, "imports", "identity-propagation"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outPresent, "imports", "identity-propagation", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        toolsAgentsWorkflowsOrDelegatedActionsPresent: true,
+        identityPropagationDesignDocumented: true,
+        privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct: 100,
+        anonymousPrivilegedHops: 0,
+        sampleSize: 25,
+      }),
+    );
+    const rPresent = await run(tEmpty, outPresent);
+    if (
+      rPresent.summary.statusHint !== "pass" ||
+      rPresent.summary.authnM4Satisfied !== true
+    ) {
+      throw new Error(
+        `present=true + metrics should pass: ${JSON.stringify(rPresent.summary)}`,
+      );
+    }
+
     const outNa = join(root, "ona");
     mkdirSync(join(outNa, "imports", "identity-propagation"), {
       recursive: true,
@@ -213,7 +293,7 @@ async function main() {
   }
 }
 
-main().catch((e) => {
-  console.error(e);
+main().catch((e: unknown) => {
+  console.error(e instanceof Error ? e.message : String(e));
   process.exit(1);
 });

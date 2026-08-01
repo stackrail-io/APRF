@@ -297,6 +297,12 @@ export function buildShortLivedAgentTokensReport(opts: {
   const scopeAbsent =
     opts.imported.agentToolCredentialsInProductionPromptsOrConfigPresent ===
     false;
+  const scopePresent =
+    opts.imported.agentToolCredentialsInProductionPromptsOrConfigPresent ===
+    true;
+  // Metrics alone with present=null cannot unlock PASS — need in-repo signals
+  // or an explicit present=true attest.
+  const surfaceOk = gateSignalsPresent || scopePresent;
 
   let statusHint: ShortLivedAgentTokensReport["summary"]["statusHint"];
   let authnR1Satisfied: boolean | null = null;
@@ -332,7 +338,7 @@ export function buildShortLivedAgentTokensReport(opts: {
         : "Imported evidence shows TTL coverage <100%, long-lived static keys in prompts/config, or attest older than 90 days — AUTHN-R1 fail.",
     );
   } else if (
-    (gateSignalsPresent || opts.imported.found) &&
+    surfaceOk &&
     ttlOk &&
     scanOk &&
     ageOk &&
@@ -345,6 +351,11 @@ export function buildShortLivedAgentTokensReport(opts: {
   } else if (gateSignalsPresent || opts.imported.found) {
     statusHint = "partial";
     authnR1Satisfied = false;
+    if (opts.imported.found && !surfaceOk) {
+      notes.push(
+        "Import must set agentToolCredentialsInProductionPromptsOrConfigPresent=true (or discover in-repo TTL/scan signals) — coverage metrics alone without an attested surface cannot unlock PASS.",
+      );
+    }
     if (opts.imported.found && !ttlOk) {
       notes.push(
         "Import must show agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct=100.",

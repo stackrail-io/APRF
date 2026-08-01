@@ -270,6 +270,8 @@ export function buildAiAdminMfaReport(opts: {
     new Date(opts.assessedAt),
   );
   const scopeAbsent = opts.imported.aiControlPlaneAdminAccessPresent === false;
+  const scopePresent = opts.imported.aiControlPlaneAdminAccessPresent === true;
+  const surfaceOk = gateSignalsPresent || scopePresent;
 
   let statusHint: AiAdminMfaReport["summary"]["statusHint"];
   let authnM3Satisfied: boolean | null = null;
@@ -303,7 +305,7 @@ export function buildAiAdminMfaReport(opts: {
       "Imported evidence shows MFA <100%, break-glass over documented maximum, monitoring disabled, or attest older than 90 days — AUTHN-M3 fail.",
     );
   } else if (
-    (gateSignalsPresent || opts.imported.found) &&
+    surfaceOk &&
     mfaOk &&
     breakGlassBoundOk &&
     monitoringOk &&
@@ -316,6 +318,11 @@ export function buildAiAdminMfaReport(opts: {
   } else if (gateSignalsPresent || opts.imported.found) {
     statusHint = "partial";
     authnM3Satisfied = false;
+    if (opts.imported.found && !surfaceOk) {
+      notes.push(
+        "Import must set aiControlPlaneAdminAccessPresent=true (or discover in-repo IdP/break-glass signals) — coverage metrics alone without an attested surface cannot unlock PASS.",
+      );
+    }
     if (opts.imported.found && !mfaOk) {
       notes.push(
         "Import must show aiControlPlaneAdminRolesMfaEnforcedPct=100.",

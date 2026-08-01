@@ -126,6 +126,53 @@ async function main() {
 
     const tEmpty = join(root, "t-empty");
     mkdirSync(tEmpty, { recursive: true });
+
+    // Vacuous PASS: good metrics without present=true and without in-repo signals
+    const outVacuous = join(root, "o-vacuous");
+    mkdirSync(join(outVacuous, "imports", "short-lived-agent-tokens"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outVacuous, "imports", "short-lived-agent-tokens", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct: 100,
+        longLivedStaticApiKeysInPromptsOrConfig: 0,
+      }),
+    );
+    const rVacuous = await run(tEmpty, outVacuous);
+    if (
+      rVacuous.summary.statusHint !== "partial" ||
+      rVacuous.summary.authnR1Satisfied !== false
+    ) {
+      throw new Error(
+        `metrics without present/signals must stay partial: ${JSON.stringify(rVacuous.summary)}`,
+      );
+    }
+
+    const outPresent = join(root, "o-present");
+    mkdirSync(join(outPresent, "imports", "short-lived-agent-tokens"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outPresent, "imports", "short-lived-agent-tokens", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        agentToolCredentialsInProductionPromptsOrConfigPresent: true,
+        agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct: 100,
+        longLivedStaticApiKeysInPromptsOrConfig: 0,
+      }),
+    );
+    const rPresent = await run(tEmpty, outPresent);
+    if (
+      rPresent.summary.statusHint !== "pass" ||
+      rPresent.summary.authnR1Satisfied !== true
+    ) {
+      throw new Error(
+        `present=true + metrics should pass: ${JSON.stringify(rPresent.summary)}`,
+      );
+    }
+
     const outNa = join(root, "ona");
     mkdirSync(join(outNa, "imports", "short-lived-agent-tokens"), {
       recursive: true,
@@ -148,7 +195,7 @@ async function main() {
   }
 }
 
-main().catch((e) => {
-  console.error(e);
+main().catch((e: unknown) => {
+  console.error(e instanceof Error ? e.message : String(e));
   process.exit(1);
 });

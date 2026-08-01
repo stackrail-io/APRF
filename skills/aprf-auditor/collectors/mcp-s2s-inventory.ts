@@ -554,9 +554,7 @@ export function buildReport(
   const pass = scored.filter((c) => c.ok).length;
   const fail = scored.filter((c) => !c.ok).length;
   const notes: string[] = [];
-  const measuredAt =
-    opts.measuredAt ??
-    (opts.inventorySource.length > 0 ? ctx.assessedAt.toISOString() : null);
+  const measuredAt = opts.measuredAt ?? null;
   const importFresh = measuredAtFresh(
     measuredAt,
     ctx.assessedAt,

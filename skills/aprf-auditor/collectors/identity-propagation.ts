@@ -172,38 +172,31 @@ function loadImported(
           asBool(data.identity_propagation_design_documented) ??
           asBool(data.designDocumented),
       );
-      privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct =
-        mergeMinNum(
-          privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct,
-          asNum(
-            data.privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct,
-          ) ??
-            asNum(
-              data.privileged_tool_calls_with_end_user_or_documented_service_subject_pct,
-            ) ??
-            asNum(data.subjectBoundPrivilegedCallPct) ??
-            asNum(data.subjectCoveragePct),
-        );
-      anonymousPrivilegedHops = mergeMaxNum(
-        anonymousPrivilegedHops,
+      const scalarPct =
+        asNum(
+          data.privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct,
+        ) ??
+        asNum(
+          data.privileged_tool_calls_with_end_user_or_documented_service_subject_pct,
+        ) ??
+        asNum(data.subjectBoundPrivilegedCallPct) ??
+        asNum(data.subjectCoveragePct);
+      const scalarAnon =
         asNum(data.anonymousPrivilegedHops) ??
-          asNum(data.anonymous_privileged_hops) ??
-          asNum(data.anonymousHops),
-      );
-      sampleSize = mergeMaxNum(
-        sampleSize,
+        asNum(data.anonymous_privileged_hops) ??
+        asNum(data.anonymousHops);
+      const scalarSampleSize =
         asNum(data.sampleSize) ??
-          asNum(data.sample_size) ??
-          asNum(data.sampledPrivilegedCalls),
-      );
+        asNum(data.sample_size) ??
+        asNum(data.sampledPrivilegedCalls);
 
       const samples =
         (data.samples as Array<Record<string, unknown>>) ||
         (data.calls as Array<Record<string, unknown>>) ||
         [];
       if (samples.length) {
-        // Samples are authoritative for this file — do not add on top of a
-        // top-level anonymousPrivilegedHops scalar (avoids double-counting).
+        // Samples are authoritative for this file — ignore co-located scalar
+        // anon/pct/sampleSize so a stale scalar cannot beat sample evidence.
         const withSubject = samples.filter(
           (s) =>
             s.hasEndUserSubject === true ||
@@ -230,6 +223,17 @@ function loadImported(
           );
         anonymousPrivilegedHops = mergeMaxNum(anonymousPrivilegedHops, anon);
         sampleSize = mergeMaxNum(sampleSize, samples.length);
+      } else {
+        privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct =
+          mergeMinNum(
+            privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct,
+            scalarPct,
+          );
+        anonymousPrivilegedHops = mergeMaxNum(
+          anonymousPrivilegedHops,
+          scalarAnon,
+        );
+        sampleSize = mergeMaxNum(sampleSize, scalarSampleSize);
       }
     } catch {
       /* skip */
@@ -306,6 +310,11 @@ export function buildIdentityPropagationReport(opts: {
   );
   const scopeAbsent =
     opts.imported.toolsAgentsWorkflowsOrDelegatedActionsPresent === false;
+  const scopePresent =
+    opts.imported.toolsAgentsWorkflowsOrDelegatedActionsPresent === true;
+  // Metrics alone with present=null cannot unlock PASS — need in-repo signals
+  // or an explicit present=true attest.
+  const surfaceOk = gateSignalsPresent || scopePresent;
 
   let statusHint: IdentityPropagationReport["summary"]["statusHint"];
   let authnM4Satisfied: boolean | null = null;
@@ -339,7 +348,7 @@ export function buildIdentityPropagationReport(opts: {
       "Imported evidence shows subject coverage <100%, anonymous privileged hops >0, missing design, or attest older than 90 days — AUTHN-M4 fail.",
     );
   } else if (
-    (gateSignalsPresent || opts.imported.found) &&
+    surfaceOk &&
     designOk &&
     subjectOk &&
     anonOk &&
@@ -352,6 +361,11 @@ export function buildIdentityPropagationReport(opts: {
   } else if (gateSignalsPresent || opts.imported.found) {
     statusHint = "partial";
     authnM4Satisfied = false;
+    if (opts.imported.found && !surfaceOk) {
+      notes.push(
+        "Import must set toolsAgentsWorkflowsOrDelegatedActionsPresent=true (or discover in-repo design/tool/trace signals) — coverage metrics alone without an attested surface cannot unlock PASS.",
+      );
+    }
     if (opts.imported.found && !designOk) {
       notes.push(
         "Import must show identityPropagationDesignDocumented=true (or discover design in-repo).",

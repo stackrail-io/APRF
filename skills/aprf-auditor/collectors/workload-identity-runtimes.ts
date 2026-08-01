@@ -289,6 +289,8 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
     new Date(opts.assessedAt),
   );
   const scopeAbsent = opts.imported.selfHostedModelRuntimesPresent === false;
+  const scopePresent = opts.imported.selfHostedModelRuntimesPresent === true;
+  const surfaceOk = gateSignalsPresent || scopePresent;
 
   let statusHint: WorkloadIdentityRuntimesReport["summary"]["statusHint"];
   let authnR2Satisfied: boolean | null = null;
@@ -319,7 +321,7 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
       "Imported evidence shows workload-identity coverage <100%, static shared keys >0, or attest older than 90 days — AUTHN-R2 fail.",
     );
   } else if (
-    (gateSignalsPresent || opts.imported.found) &&
+    surfaceOk &&
     wiOk &&
     staticOk &&
     sampleOk &&
@@ -332,6 +334,11 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
   } else if (gateSignalsPresent || opts.imported.found) {
     statusHint = "partial";
     authnR2Satisfied = false;
+    if (opts.imported.found && !surfaceOk) {
+      notes.push(
+        "Import must set selfHostedModelRuntimesPresent=true (or discover in-repo runtime/WI signals) — coverage metrics alone without an attested surface cannot unlock PASS.",
+      );
+    }
     if (opts.imported.found && !wiOk) {
       notes.push(
         "Import must show selfHostedModelRuntimesWithWorkloadIdentityPct=100.",

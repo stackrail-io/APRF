@@ -138,8 +138,10 @@ if auth_type == 'bearer':
     live: false,
     maxFiles: 100,
   });
+  // Do not interpolate collector/report objects into Error messages — inventory
+  // imports carry static keys and CodeQL flags clear-text logging via catch.
   if (oauthKeyRan.status !== "ran") {
-    throw new Error(`oauth+key expected ran: ${oauthKeyRan.status}`);
+    throw new Error("oauth+static key collect expected status ran");
   }
   const oauthKeyReport = JSON.parse(
     readFileSync(
@@ -152,14 +154,12 @@ if auth_type == 'bearer':
       "utf8",
     ),
   ) as McpS2sReport;
-  if (
-    oauthKeyReport.summary.statusHint !== "fail" ||
-    oauthKeyReport.summary.authnM2Satisfied !== false ||
-    oauthKeyReport.summary.pass !== 0
-  ) {
-    throw new Error(
-      `oauth+static key must fail: ${JSON.stringify(oauthKeyReport.summary)}`,
-    );
+  const oauthKeyFailed =
+    oauthKeyReport.summary.statusHint === "fail" &&
+    oauthKeyReport.summary.authnM2Satisfied === false &&
+    oauthKeyReport.summary.pass === 0;
+  if (!oauthKeyFailed) {
+    throw new Error("oauth+static key must fail AUTHN-M2 (expected fail, pass=0)");
   }
   rmSync(oauthKeyOut, { recursive: true, force: true });
 
@@ -304,9 +304,13 @@ if auth_type == 'bearer':
     liveReport.summary.statusHint !== "pass" ||
     liveReport.summary.authnM2Satisfied !== true
   ) {
-    throw new Error(`live password login report unexpected: ${JSON.stringify(liveReport.summary)}`);
+    throw new Error("live password login report unexpected (expected pass)");
   }
-  if (JSON.stringify(liveReport).includes("secret")) {
+  const liveDump = readFileSync(
+    join(liveOut, "imports", "mcp-s2s-inventory", "mcp-s2s-inventory-report.json"),
+    "utf8",
+  );
+  if (liveDump.includes('"secret"')) {
     throw new Error("password leaked into report");
   }
   rmSync(liveOut, { recursive: true, force: true });
@@ -562,13 +566,62 @@ if auth_type == 'bearer':
   }
   rmSync(scopeOut, { recursive: true, force: true });
 
+  // Import inventory without measuredAt must not invent freshness / PASS
+  const noMtOut = mkdtempSync(join(tmpdir(), "aprf-mcp-s2s-nomt-"));
+  mkdirSync(join(noMtOut, "imports", "mcp-s2s-inventory"), { recursive: true });
+  writeFileSync(
+    join(noMtOut, "imports", "mcp-s2s-inventory", "oauth.json"),
+    JSON.stringify({
+      TOOL_SERVER_CONNECTIONS: [
+        {
+          url: "http://mcp.local/oauth",
+          type: "mcp",
+          auth_type: "oauth_2.1",
+          info: { id: "oauth-only", name: "oauth-only" },
+        },
+      ],
+    }),
+  );
+  const noMtRan = await mcpS2sInventoryCollector.collect({
+    targetPath: targetDir,
+    outputDir: noMtOut,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 100,
+  });
+  if (noMtRan.status !== "ran") {
+    throw new Error("missing measuredAt collect expected ran");
+  }
+  const noMtReport = JSON.parse(
+    readFileSync(
+      join(
+        noMtOut,
+        "imports",
+        "mcp-s2s-inventory",
+        "mcp-s2s-inventory-report.json",
+      ),
+      "utf8",
+    ),
+  ) as McpS2sReport;
+  if (noMtReport.measuredAt !== null) {
+    throw new Error("missing import measuredAt must stay null (not assessedAt)");
+  }
+  if (
+    noMtReport.summary.statusHint !== "partial" ||
+    noMtReport.summary.authnM2Satisfied !== false
+  ) {
+    throw new Error("missing measuredAt must block AUTHN-M2 PASS");
+  }
+  rmSync(noMtOut, { recursive: true, force: true });
+
   console.log("aprf-auditor mcp-s2s-inventory smoke OK");
   rmSync(outDir, { recursive: true, force: true });
   rmSync(targetDir, { recursive: true, force: true });
 }
 
-main().catch((e) => {
-  console.error(e);
+main().catch((e: unknown) => {
+  // Never log the raw Error object — it may carry inventory-tainted report text.
+  console.error(e instanceof Error ? e.message : String(e));
   try {
     rmSync(outDir, { recursive: true, force: true });
   } catch {
