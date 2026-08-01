@@ -42,6 +42,10 @@ import { aiSafetyEdgeSamplingCollector } from "./ai-safety-edge-sampling.ts";
 import { promptfooCollector } from "./promptfoo.ts";
 import { httpAuthProbeCollector } from "./http-auth-probe.ts";
 import { mcpS2sInventoryCollector } from "./mcp-s2s-inventory.ts";
+import { aiAdminMfaCollector } from "./ai-admin-mfa.ts";
+import { identityPropagationCollector } from "./identity-propagation.ts";
+import { shortLivedAgentTokensCollector } from "./short-lived-agent-tokens.ts";
+import { workloadIdentityRuntimesCollector } from "./workload-identity-runtimes.ts";
 import { authzEntryTestsCollector } from "./authz-entry-tests.ts";
 import { crossTenantTestsCollector } from "./cross-tenant-tests.ts";
 import { secretsHygieneCollector } from "./secrets-hygiene.ts";
@@ -204,6 +208,10 @@ export const COLLECTORS: Collector[] = [
   promptfooCollector,
   httpAuthProbeCollector,
   mcpS2sInventoryCollector,
+  aiAdminMfaCollector,
+  identityPropagationCollector,
+  shortLivedAgentTokensCollector,
+  workloadIdentityRuntimesCollector,
   authzEntryTestsCollector,
   crossTenantTestsCollector,
   secretsHygieneCollector,

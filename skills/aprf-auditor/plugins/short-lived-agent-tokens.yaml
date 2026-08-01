@@ -1,0 +1,26 @@
+id: short-lived-agent-tokens
+title: Short-lived agent/tool tokens; no static keys in prompts (AUTHN-R1)
+version: "0.2.0"
+executor: collectors/short-lived-agent-tokens.ts
+evidenceClass: runtime
+alsoEmits: []
+detectorIds: [repo-short-lived-agent-tokens]
+inputs:
+  - "Target repo (token TTL policy, agent/tool credentials, prompt/config secret scan)"
+  - "Optional coverage: aprf-assessment/imports/short-lived-agent-tokens/*.{json}"
+collect:
+  - "Detect TTL/token-policy, agent/tool credential, and secret-scan signals"
+  - "Ingest TTL coverage + static-key findings; write short-lived-agent-tokens-report.json"
+emits:
+  nodeClass: runtime
+  refPattern: "aprf-assessment/imports/short-lived-agent-tokens/*"
+  signals: [short-lived-agent-tokens, authn-r1, repo-short-lived-agent-tokens]
+mapsToChecks: [AUTHN-R1]
+whenUnavailable: >
+  Signals alone are PARTIAL. AUTHN-R1 PASS needs
+  agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct=100,
+  longLivedStaticApiKeysInPromptsOrConfig=0, measuredAt ≤90 days.
+  Set agentToolCredentialsInProductionPromptsOrConfigPresent=false for NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline short-lived-agent-tokens heuristics + optional imported JSON.

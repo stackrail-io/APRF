@@ -77,6 +77,10 @@ plugins:
     - github-actions
     - http-auth-probe
     - mcp-s2s-inventory
+    - ai-admin-mfa
+    - identity-propagation
+    - short-lived-agent-tokens
+    - workload-identity-runtimes
     - authz-entry-tests
     - cross-tenant-tests
     - secrets-hygiene
@@ -115,6 +119,10 @@ userInputRequiredWhen:
   - evidence class is runtime and no export/plugin credentials available
   - AUTHN-M1: no --base-url / APRF_AUTH_PROBE_BASE_URL and no imports/http-auth-probe/auth-probe-report.json
   - AUTHN-M2: no MCP/S2S inventory export and no --base-url with admin token or email/password for tool_servers fetch
+  - AUTHN-M3: no IdP MFA / break-glass coverage under imports/ai-admin-mfa/
+  - AUTHN-M4: no identity-propagation design/sample under imports/identity-propagation/ (N/A if no tools/agents/workflows)
+  - AUTHN-R1: no short-lived agent/tool credential inventory + prompt/config secret scan under imports/short-lived-agent-tokens/
+  - AUTHN-R2: no self-hosted runtime workload-identity coverage under imports/workload-identity-runtimes/ (N/A if no self-hosted runtimes)
   - AUTHZ-M1: no authz denial tests covering AI feature/tool/retrieval entry points (run authz-entry-tests or import coverage JSON)
   - AUTHZ-M2: no cross-tenant attack suite (≥10 cases) for AI data/memory paths (run cross-tenant-tests or import results)
   - SEC2-M1: no secrets-manager wiring and/or CI secret-scan report (run secrets-hygiene or import SARIF)
@@ -130,6 +138,10 @@ limitations:
   - Ships TypeScript collectors under collectors/ (local + import ingest); live cloud APIs are opt-in (APRF_AUDITOR_LIVE=1 + credentials)
   - http-auth-probe needs a reachable base URL (or a prior probe report); it does not start the target app for you
   - mcp-s2s-inventory needs a connection inventory export or base URL + admin token/email+password; secrets are redacted from reports
+  - ai-admin-mfa needs IdP MFA % + break-glass count/max/monitoring import (or N/A attest); repo MFA docs alone are not a PASS
+  - identity-propagation needs design + 100% subject-bound privileged sample with 0 anonymous hops (or N/A if non-agentic); outer HTTP auth alone is not a PASS
+  - short-lived-agent-tokens needs TTL≤1h (or owned ≤30d exception) coverage + 0 static keys in prompts/config (or N/A attest); MCP env scanners alone are not a PASS
+  - workload-identity-runtimes needs 100% WI coverage + 0 static shared keys + sample calls (or N/A if no self-hosted runtimes); MCP inventories alone are not a PASS
   - authz-entry-tests scores automated denial-test coverage of AI entry points; server-side guards alone are not a PASS
   - cross-tenant-tests needs ≥10 automated cross-tenant attack cases with 0 unauthorized successes; isolation code alone is not a PASS
   - secrets-hygiene needs secrets-manager refs + clean secret-scan evidence; GitHub Actions secrets alone are not a production secrets manager

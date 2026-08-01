@@ -21,10 +21,10 @@ function assert(cond: unknown, msg: string): asserts cond {
 
 assert(PROFILE_ID_CORE === "aprf-profile-core", "core id");
 assert(PROFILE_CORE.targetCriticality === 2, "tier 2");
-assert(PROFILE_CORE.mandatoryCheckIds.length === 38, "core has 38 mandatories");
+assert(PROFILE_CORE.mandatoryCheckIds.length === 39, "core has 39 mandatories");
 assert(
-  PROFILE_REGULATED.mandatoryCheckIds.length === 50,
-  "regulated has 50 mandatories",
+  PROFILE_REGULATED.mandatoryCheckIds.length === 51,
+  "regulated has 51 mandatories",
 );
 assert(
   PROFILE_REGULATED.mandatoryCheckIds.includes("AUTHN-M1"),

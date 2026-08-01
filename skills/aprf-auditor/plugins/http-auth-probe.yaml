@@ -3,6 +3,7 @@ id: http-auth-probe
 title: Unauthenticated HTTP auth probe (AUTHN-M1)
 version: "0.2.0"
 evidenceClass: runtime
+detectorIds: [http-auth-probe]
 inputs:
   - "Base URL of a running app (local/staging/prod) via --base-url or APRF_AUTH_PROBE_BASE_URL"
   - "Optional route inventory override: aprf-assessment/imports/http-auth-probe/routes.json"
@@ -24,7 +25,8 @@ emits:
 mapsToChecks: [AUTHN-M1]
 whenUnavailable: >
   Ask for a reachable base URL (or start the app locally), or drop an auth-probe-report.json
-  under imports/http-auth-probe/. Code-only auth middleware is supporting evidence, not a PASS.
+  under imports/http-auth-probe/ with measuredAt/probedAt ≤90 days. Code-only auth middleware
+  is supporting evidence, not a PASS. Set customerFacingAiHttpApisPresent=false for NOT_APPLICABLE.
 live:
   required: false
   note: >

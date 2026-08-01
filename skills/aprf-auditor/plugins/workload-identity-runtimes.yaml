@@ -1,0 +1,27 @@
+id: workload-identity-runtimes
+title: Workload identity for self-hosted model runtimes (AUTHN-R2)
+version: "0.2.0"
+executor: collectors/workload-identity-runtimes.ts
+evidenceClass: runtime
+alsoEmits: []
+detectorIds: [repo-workload-identity-runtimes]
+inputs:
+  - "Target repo (self-hosted inference runtimes, SPIFFE/IAM/IRSA bindings, sample traces)"
+  - "Optional coverage: aprf-assessment/imports/workload-identity-runtimes/*.{json}"
+collect:
+  - "Detect self-hosted runtime, workload-identity, and static-key signals"
+  - "Ingest coverage; write workload-identity-runtimes-report.json"
+emits:
+  nodeClass: runtime
+  refPattern: "aprf-assessment/imports/workload-identity-runtimes/*"
+  signals: [workload-identity-runtimes, authn-r2, repo-workload-identity-runtimes]
+mapsToChecks: [AUTHN-R2]
+whenUnavailable: >
+  Signals alone are PARTIAL. AUTHN-R2 PASS needs
+  selfHostedModelRuntimesWithWorkloadIdentityPct=100,
+  staticSharedKeysInRuntimeInventory=0,
+  sampleAuthenticatedCallsPresent=true, measuredAt ≤90 days.
+  Set selfHostedModelRuntimesPresent=false for NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline workload-identity-runtimes heuristics + optional imported JSON.

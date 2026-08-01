@@ -1,57 +1,103 @@
 id: "AUTHN-M4"
 category: "authentication"
 title: "End-user identity must remain bound through agent and tool chains"
-description: "End-user identity shall remain bound through agent and tool chains"
-whyItMatters: "End-user identity shall remain bound through agent and tool chains Failing this
-  leaves a production gap against: PASS if 100% of sampled privileged tool calls in the latest
-  review carry an end-user (or documented service) subject; 0 anonymous privileged hops"
+description: >
+  Where AI systems execute tools, agents, workflows, or delegated actions,
+  the end-user (or documented service) subject shall remain bound through
+  every privileged hop—so agentic chains cannot act as anonymous or
+  ambient privilege.
+whyItMatters: >
+  Agentic AI introduces identity-loss hops unique to tool and workflow
+  chains: a user-authenticated request can become an unattributed tool
+  call, MCP invocation, or child-agent action. That is not a traditional
+  login failure—it is lost authorization context. Binding the subject
+  through the chain and proving 0 anonymous privileged hops closes that
+  class of abuse. Distinct from AUTHN-M1 (HTTP unauthenticated rejection),
+  AUTHN-M2 (MCP/S2S machine identity), and AUTHZ-M1 (server-side permission
+  checks on entry points).
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "PASS if 100% of sampled privileged tool calls in the latest review carry an end-user
-  (or documented service) subject; 0 anonymous privileged hops"
+passCondition: >
+  100% of sampled privileged tool/agent/workflow calls in the latest review
+  carry an end-user (or documented service) subject; 0 anonymous privileged
+  hops (measuredAt ≤90 days). If the system has no tools, agents, workflows,
+  or delegated actions, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Identity-propagation design + sample traces showing end-user subject on tool calls"
+  - "Identity-propagation design for agent/tool/workflow chains (subject carried or re-asserted)"
+  - "Sample traces or harness results showing end-user or documented service subject on privileged calls"
+  - "Review showing 0 anonymous privileged hops in the sample"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-identity-propagation"
+      params:
+        hint: >
+          Discover identity-propagation design and subject-on-tool-call
+          signals; ingest sample coverage under imports/identity-propagation/;
+          require measuredAt ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "Identity-propagation design + sample traces showing end-user subject on tool calls"
-manualVerification: "For this Check (End-user identity must remain bound through agent and tool
-  chains): inspect current evidence for [Identity-propagation design + sample traces showing
-  end-user subject on tool calls] and confirm the pass condition holds — PASS if 100% of sampled
-  privileged tool calls in the latest review carry an end-user (or documented service) subject; 0
-  anonymous privileged hops"
-falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
-  control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest a design plus a sample
+          where 100% of privileged tool/agent/workflow calls carry an end-user
+          or documented service subject and 0 anonymous privileged hops
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the system executes tools, agents, workflows, or delegated
+  actions. If none, score NOT_APPLICABLE. 2) Locate the identity-propagation
+  design: how the end-user (or documented service) subject is carried or
+  re-asserted across hops (tokens, claims, signed context, or equivalent)—not
+  prompt text alone. 3) Review a recent sample of privileged calls (traces or
+  harness): 100% carry that subject; count anonymous privileged hops = 0.
+  4) PASS only if design + sample + 0 anonymous hops hold with measuredAt ≤90
+  days. AUTHN-M1 edge probes alone do not prove mid-chain subject binding.
+  AUTHN-M2 machine identity on MCP links alone does not prove end-user
+  subject propagation. AUTHZ-M1 entry-point permission checks alone do not
+  prove identity survives multi-hop agent/tool execution. AGN-M1 agent
+  charters and HUM-M1 human-approval gates alone do not prove subject
+  binding on privileged hops. AUTHN-R2 runtime workload identity alone does
+  not prove end-user subject propagation.
+falsePositiveGuidance: >
+  Do not pass systems that only authenticate the outer HTTP request. Do not
+  pass “the model knows the user” prompt instructions as propagation. Do not
+  pass service-account-only chains without documenting that service as the
+  intended subject. Do not score AUTHN-M1, AUTHN-M2, AUTHN-R2, AUTHZ-M1,
+  AGN-M1, or HUM-M1 as substitutes. Named exceptions need owner and expiry
+  ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: End-user identity must remain bound through agent and tool chains"
-  - "Retain evidence artifacts required by this Check, starting with: Identity-propagation design +
-    sample traces showing end-user subject on tool calls"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Carry or re-assert end-user/service subject on every privileged tool, agent, and workflow hop"
+  - "Forbid anonymous privileged tool calls; fail closed when subject is missing"
+  - "Retain design + sample traces under imports/identity-propagation/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
-  - title: "OWASP Authentication Cheat Sheet"
-    url: "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
-  - title: "CIS Benchmarks — Identity controls"
-    url: "https://www.cisecurity.org/cis-benchmarks"
+  - title: "OWASP Top 10 for Large Language Model Applications — LLM01 / agent risks"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "RFC 8693 — OAuth 2.0 Token Exchange"
+    url: "https://datatracker.ietf.org/doc/html/rfc8693"
+  - title: "Model Context Protocol — Authorization"
+    url: "https://modelcontextprotocol.io/specification/2025-03-26/basic/authorization"
+  - title: "NIST AI Risk Management Framework"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "AUTHN-M1"
   - "AUTHN-M2"
   - "AUTHN-M3"
   - "AUTHN-R1"
   - "AUTHN-R2"
+  - "AUTHZ-M1"
+  - "AGN-M1"
+  - "HUM-M1"
 tags:
   - "authentication"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "identity-propagation"
+  - "agentic"
+  - "tool-chains"
+  - "authorization-context"
 applicability:
-  technologies:
-    - "openapi"
-    - "mcp"
-    - "a2a"
-    - "cicd"
+  technologies: []
   minCriticality: 3
   requiredFromLevel: 5
 status: "active"

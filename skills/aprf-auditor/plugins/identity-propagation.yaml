@@ -1,0 +1,28 @@
+id: identity-propagation
+title: End-user identity propagation through agent/tool chains (AUTHN-M4)
+version: "0.2.0"
+executor: collectors/identity-propagation.ts
+evidenceClass: runtime
+alsoEmits: []
+detectorIds: [repo-identity-propagation]
+inputs:
+  - "Target repo (identity-propagation design, tool/agent chains, subject-on-call traces)"
+  - "Optional coverage: aprf-assessment/imports/identity-propagation/*.{json}"
+collect:
+  - "Detect identity-propagation design and privileged tool/agent/workflow subject signals"
+  - "Ingest sample coverage; write identity-propagation-report.json"
+emits:
+  nodeClass: runtime
+  refPattern: "aprf-assessment/imports/identity-propagation/*"
+  signals: [identity-propagation, authn-m4, repo-identity-propagation]
+mapsToChecks: [AUTHN-M4]
+whenUnavailable: >
+  Signals alone are PARTIAL. AUTHN-M4 PASS needs
+  identityPropagationDesignDocumented,
+  privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct=100,
+  anonymousPrivilegedHops=0, measuredAt ≤90 days.
+  Set toolsAgentsWorkflowsOrDelegatedActionsPresent=false for NOT_APPLICABLE
+  (systems without tools/agents/workflows/delegated actions).
+live:
+  required: false
+  note: Offline identity-propagation heuristics + optional imported JSON.
