@@ -1,34 +1,33 @@
-id: "OBS-M2"
+id: "OBS-M3"
 category: "observability"
-title: "Token usage and cost must be attributable per request/feature/tenant"
-description: "Token usage and cost shall be attributable per request/feature/tenant"
-whyItMatters: "Token usage and cost shall be attributable per request/feature/tenant Failing this
-  leaves a production gap against: ≥95% of billed model calls in a 24h sample carry request ID +
-  feature + tenant (or equivalent) attribution labels"
+title: "Sensitive fields in traces must be redacted or access-controlled"
+description: "Sensitive fields in traces shall be redacted or access-controlled"
+whyItMatters: "Sensitive fields in traces shall be redacted or access-controlled Failing this leaves
+  a production gap against: Synthetic secrets/PII in traced fields are redacted or inaccessible to
+  unauthorized roles at 100% in tests"
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "≥95% of billed model calls in a 24h sample carry request ID + feature + tenant (or
-  equivalent) attribution labels"
+passCondition: "Synthetic secrets/PII in traced fields are redacted or inaccessible to unauthorized
+  roles at 100% in tests"
 evidenceRequired:
-  - "Cost/token metrics with request, feature, and tenant labels"
+  - "Trace redaction/ACL config + synthetic sensitive-field test"
 detection:
   capability: "manual"
   detectors:
     - id: "manual-attest"
       params:
-        hint: "Cost/token metrics with request, feature, and tenant labels"
-manualVerification: "For this Check (Token usage and cost must be attributable per
-  request/feature/tenant): inspect current evidence for [Cost/token metrics with request, feature,
-  and tenant labels] and confirm the pass condition holds — ≥95% of billed model calls in a 24h
-  sample carry request ID + feature + tenant (or equivalent) attribution labels"
+        hint: "Trace redaction/ACL config + synthetic sensitive-field test"
+manualVerification: "For this Check (Sensitive fields in traces must be redacted or
+  access-controlled): inspect current evidence for [Trace redaction/ACL config + synthetic
+  sensitive-field test] and confirm the pass condition holds — Synthetic secrets/PII in traced
+  fields are redacted or inaccessible to unauthorized roles at 100% in tests"
 falsePositiveGuidance: "re-verify against a current artifact for this specific Check , not a sibling
   control. Document named exceptions with owner and expiry."
 recommendedFixes:
-  - "Implement and operationalize: Token usage and cost must be attributable per
-    request/feature/tenant"
-  - "Retain evidence artifacts required by this Check, starting with: Cost/token metrics with
-    request, feature, and tenant labels"
+  - "Implement and operationalize: Sensitive fields in traces must be redacted or access-controlled"
+  - "Retain evidence artifacts required by this Check, starting with: Trace redaction/ACL config +
+    synthetic sensitive-field test"
   - "Schedule recurring manual verification for this Check with a named owner and retained report"
   - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
 references:
@@ -38,7 +37,7 @@ references:
     url: "https://opentelemetry.io/"
 relatedRules:
   - "OBS-M1"
-  - "OBS-M3"
+  - "OBS-M2"
   - "OBS-R1"
   - "OBS-R2"
   - "OBS-R3"
