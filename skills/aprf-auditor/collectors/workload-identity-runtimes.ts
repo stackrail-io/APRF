@@ -295,9 +295,10 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
     opts.imported.measuredAt,
     new Date(opts.assessedAt),
   );
+  // Explicit present=false wins N/A — incidental regex matches must not block it.
+  // Runtime inventory still clears N/A via mergeOrBool(present, true) in loadImported.
   const scopeAbsent =
-    opts.imported.selfHostedModelRuntimesPresent === false &&
-    !gateSignalsPresent;
+    opts.imported.selfHostedModelRuntimesPresent === false;
   const scopePresent = opts.imported.selfHostedModelRuntimesPresent === true;
   const surfaceOk = gateSignalsPresent || scopePresent;
 

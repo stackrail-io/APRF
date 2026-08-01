@@ -194,6 +194,25 @@ async function main() {
       );
     }
 
+    // present=false wins N/A even with incidental in-repo WI/runtime regex hits
+    const outNaSignals = join(root, "ona-signals");
+    mkdirSync(join(outNaSignals, "imports", "workload-identity-runtimes"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNaSignals, "imports", "workload-identity-runtimes", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        selfHostedModelRuntimesPresent: false,
+      }),
+    );
+    const rNaSignals = await run(t2, outNaSignals);
+    if (rNaSignals.summary.statusHint !== "not_applicable") {
+      throw new Error(
+        `present=false must N/A despite repo signals: ${JSON.stringify(rNaSignals.summary)}`,
+      );
+    }
+
     const tEmpty = join(root, "t-empty");
     mkdirSync(tEmpty, { recursive: true });
     const outNa = join(root, "ona");

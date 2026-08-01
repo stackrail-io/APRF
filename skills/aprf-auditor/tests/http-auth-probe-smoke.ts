@@ -168,6 +168,7 @@ async def signin():
     });
     const incomplete = {
       ...report,
+      results: [],
       summary: {
         ...report.summary,
         probeInventoryMatchesRouteCatalog: false,
@@ -205,6 +206,83 @@ async def signin():
       );
     }
     rmSync(outNoCatalog, { recursive: true, force: true });
+
+    // Prior PASS must downgrade when new declared AI routes appear after the probe
+    const outStaleCatalog = mkdtempSync(join(tmpdir(), "aprf-auth-stale-cat-"));
+    mkdirSync(join(outStaleCatalog, "imports", "http-auth-probe"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(
+        outStaleCatalog,
+        "imports",
+        "http-auth-probe",
+        "auth-probe-report.json",
+      ),
+      JSON.stringify(report, null, 2),
+    );
+    writeFileSync(
+      join(targetDir, "routers", "embeddings.py"),
+      `
+from fastapi import APIRouter
+router = APIRouter()
+
+@router.post('/v1/embeddings')
+async def embeddings():
+    return {}
+`,
+    );
+    writeFileSync(
+      join(targetDir, "main.py"),
+      `
+app.include_router(chats.router, prefix='/api/v1/chats', tags=['chats'])
+app.include_router(openai.router, prefix='/openai', tags=['openai'])
+app.include_router(auths.router, prefix='/api/v1/auths', tags=['auths'])
+app.include_router(embeddings.router, prefix='/openai', tags=['embeddings'])
+`,
+    );
+    const staleCatalog = await httpAuthProbeCollector.collect({
+      targetPath: targetDir,
+      outputDir: outStaleCatalog,
+      assessedAt,
+      live: false,
+    });
+    if (staleCatalog.status !== "ran") {
+      throw new Error(
+        `stale catalog prior report expected ran, got ${staleCatalog.status}`,
+      );
+    }
+    const staleReport = JSON.parse(
+      readFileSync(
+        join(
+          outStaleCatalog,
+          "imports",
+          "http-auth-probe",
+          "auth-probe-report.json",
+        ),
+        "utf8",
+      ),
+    ) as AuthProbeReport;
+    if (
+      staleReport.summary.authnM1Satisfied !== false ||
+      staleReport.summary.statusHint !== "partial" ||
+      staleReport.summary.probeInventoryMatchesRouteCatalog !== false
+    ) {
+      throw new Error(
+        `new declared routes must downgrade prior PASS: ${JSON.stringify(staleReport.summary)}`,
+      );
+    }
+    // Restore original target catalog for subsequent smokes
+    writeFileSync(
+      join(targetDir, "main.py"),
+      `
+app.include_router(chats.router, prefix='/api/v1/chats', tags=['chats'])
+app.include_router(openai.router, prefix='/openai', tags=['openai'])
+app.include_router(auths.router, prefix='/api/v1/auths', tags=['auths'])
+`,
+    );
+    rmSync(join(targetDir, "routers", "embeddings.py"), { force: true });
+    rmSync(outStaleCatalog, { recursive: true, force: true });
     rmSync(out2, { recursive: true, force: true });
 
     const outAlt = mkdtempSync(join(tmpdir(), "aprf-auth-alt-"));

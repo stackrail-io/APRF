@@ -96,6 +96,50 @@ async function main() {
       throw new Error(`fail expected: ${JSON.stringify(rFail.summary)}`);
     }
 
+    // Attested monitoring=false must FAIL even when in-repo monitoring docs exist
+    const outMonFalse = join(root, "o-mon-false");
+    mkdirSync(join(outMonFalse, "imports", "ai-admin-mfa"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outMonFalse, "imports", "ai-admin-mfa", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        aiControlPlaneAdminRolesMfaEnforcedPct: 100,
+        breakGlassAccountCount: 2,
+        documentedBreakGlassMaximum: 3,
+        breakGlassMonitoringEnabled: false,
+      }),
+    );
+    const rMonFalse = await run(t2, outMonFalse);
+    if (
+      rMonFalse.summary.statusHint !== "fail" ||
+      rMonFalse.summary.authnM3Satisfied !== false
+    ) {
+      throw new Error(
+        `monitoring=false must fail despite repo docs: ${JSON.stringify(rMonFalse.summary)}`,
+      );
+    }
+
+    // present=false wins N/A even with in-repo MFA/break-glass regex hits
+    const outNaSignals = join(root, "ona-signals");
+    mkdirSync(join(outNaSignals, "imports", "ai-admin-mfa"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNaSignals, "imports", "ai-admin-mfa", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        aiControlPlaneAdminAccessPresent: false,
+      }),
+    );
+    const rNaSignals = await run(t2, outNaSignals);
+    if (rNaSignals.summary.statusHint !== "not_applicable") {
+      throw new Error(
+        `present=false must N/A despite repo signals: ${JSON.stringify(rNaSignals.summary)}`,
+      );
+    }
+
     const tEmpty = join(root, "t-empty");
     mkdirSync(tEmpty, { recursive: true });
     const outNa = join(root, "ona");
@@ -118,7 +162,7 @@ async function main() {
   }
 }
 
-main().catch((e) => {
-  console.error(e);
+main().catch((e: unknown) => {
+  console.error(e instanceof Error ? e.message : String(e));
   process.exit(1);
 });

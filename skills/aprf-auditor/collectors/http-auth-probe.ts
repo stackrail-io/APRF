@@ -829,7 +829,7 @@ function evaluatePriorReport(
   ctx: CollectorContext,
   file: string,
   scope: { customerFacingAiHttpApisPresent: boolean | null },
-  declaredAiPresent: boolean,
+  declaredAiRoutes: ProbeRoute[],
 ): AuthProbeReport | null {
   const text = readText(file, 2_000_000);
   if (!text) return null;
@@ -844,6 +844,9 @@ function evaluatePriorReport(
       ctx.assessedAt,
       IMPORT_MAX_AGE_DAYS,
     );
+    const declaredAiPresent = declaredAiRoutes.some(
+      (r) => r.aiSurface && r.declaredInCode && !r.advisoryGet,
+    );
     const scopeAbsent =
       scope.customerFacingAiHttpApisPresent === false && !declaredAiPresent;
     const notes = [...(data.notes ?? [])];
@@ -856,8 +859,28 @@ function evaluatePriorReport(
           ? "fail"
           : "partial");
 
-    const catalogMatch =
+    // Re-check current declared catalog against prior probe results — a stale
+    // probeInventoryMatchesRouteCatalog=true must not cover newly added routes.
+    const probedKeys = new Set(
+      (data.results ?? [])
+        .filter((r) => !r.advisoryGet && !r.skipped)
+        .map((r) => `${r.method.toUpperCase()} ${normalizePath(r.path)}`),
+    );
+    const declaredKeys = declaredAiRoutes
+      .filter((r) => r.aiSurface && r.declaredInCode && !r.advisoryGet)
+      .map((r) => `${r.method.toUpperCase()} ${normalizePath(r.path)}`);
+    const liveCatalogMatch =
+      declaredKeys.length === 0
+        ? null
+        : declaredKeys.every((k) => probedKeys.has(k));
+    const storedCatalogMatch =
       data.summary.probeInventoryMatchesRouteCatalog === true;
+    const catalogMatch =
+      liveCatalogMatch === null
+        ? storedCatalogMatch
+          ? true
+          : data.summary.probeInventoryMatchesRouteCatalog ?? null
+        : liveCatalogMatch;
 
     if (
       scope.customerFacingAiHttpApisPresent === false &&
@@ -880,11 +903,13 @@ function evaluatePriorReport(
       notes.push(
         "Prior auth-probe-report measuredAt/probedAt older than 90 days — re-probe to unlock AUTHN-M1 PASS.",
       );
-    } else if (authnM1Satisfied === true && !catalogMatch) {
+    } else if (authnM1Satisfied === true && catalogMatch !== true) {
       statusHint = "partial";
       authnM1Satisfied = false;
       notes.push(
-        "Prior auth-probe-report missing probeInventoryMatchesRouteCatalog=true — re-probe with full catalog coverage to unlock AUTHN-M1 PASS.",
+        liveCatalogMatch === false
+          ? "Current declared AI route catalog is not fully covered by prior probe results — re-probe with --base-url to unlock AUTHN-M1 PASS."
+          : "Prior auth-probe-report missing probeInventoryMatchesRouteCatalog=true — re-probe with full catalog coverage to unlock AUTHN-M1 PASS.",
       );
     }
 
@@ -895,8 +920,7 @@ function evaluatePriorReport(
       importedScope: scope,
       summary: {
         ...data.summary,
-        probeInventoryMatchesRouteCatalog:
-          data.summary.probeInventoryMatchesRouteCatalog ?? null,
+        probeInventoryMatchesRouteCatalog: catalogMatch,
         authnM1Satisfied,
         statusHint,
       },
@@ -1030,9 +1054,10 @@ export const httpAuthProbeCollector: Collector = {
       }
     }
 
-    const declaredAiPresent = routes.some(
-      (r) => r.aiSurface && r.declaredInCode,
+    const declaredAiRoutes = routes.filter(
+      (r) => r.aiSurface && r.declaredInCode && !r.advisoryGet,
     );
+    const declaredAiPresent = declaredAiRoutes.length > 0;
 
     if (!baseUrl) {
       if (prior.length > 0) {
@@ -1047,7 +1072,7 @@ export const httpAuthProbeCollector: Collector = {
           });
         const evaluated = reportFiles
           .map((f) =>
-            evaluatePriorReport(ctx, f, scope, declaredAiPresent),
+            evaluatePriorReport(ctx, f, scope, declaredAiRoutes),
           )
           .find(Boolean);
         if (evaluated) {

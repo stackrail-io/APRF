@@ -264,16 +264,14 @@ export function buildAiAdminMfaReport(opts: {
     opts.imported.documentedBreakGlassMaximum !== null &&
     opts.imported.breakGlassAccountCount <=
       opts.imported.documentedBreakGlassMaximum;
-  const monitoringOk =
-    opts.imported.breakGlassMonitoringEnabled === true ||
-    opts.monitoring.found;
+  const monitoringOk = opts.imported.breakGlassMonitoringEnabled === true;
   const importFresh = measuredAtFresh(
     opts.imported.measuredAt,
     new Date(opts.assessedAt),
   );
+  // Explicit present=false wins N/A — in-repo regex alone must not block it.
   const scopeAbsent =
-    opts.imported.aiControlPlaneAdminAccessPresent === false &&
-    !gateSignalsPresent;
+    opts.imported.aiControlPlaneAdminAccessPresent === false;
   const scopePresent = opts.imported.aiControlPlaneAdminAccessPresent === true;
   const surfaceOk = gateSignalsPresent || scopePresent;
 
@@ -289,8 +287,8 @@ export function buildAiAdminMfaReport(opts: {
         opts.imported.documentedBreakGlassMaximum !== null &&
         opts.imported.breakGlassAccountCount >
           opts.imported.documentedBreakGlassMaximum) ||
-      (opts.imported.breakGlassMonitoringEnabled === false &&
-        !opts.monitoring.found) ||
+      // Attested monitoring=false always fails — docs regex cannot unlock PASS.
+      opts.imported.breakGlassMonitoringEnabled === false ||
       (opts.imported.ageDays !== null &&
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
