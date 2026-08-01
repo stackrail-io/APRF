@@ -35,11 +35,12 @@ detection:
     - id: "repo-agent-tool-connectivity"
       params:
         hint: >
-          Discover agent/tool runtime or dependency inventory (required for
-          PASS) plus network/identity connectivity controls; ingest coverage
-          under imports/agent-tool-connectivity/; require inventory (or
-          present=true), documented dependencies, least-privilege controls,
-          unauthorized-access probe denied, measuredAt ≤90 days.
+          Discover agent/tool runtime inventory (required for PASS) plus
+          dependency inventory and network/identity connectivity controls;
+          ingest coverage under imports/agent-tool-connectivity/; require
+          runtime inventory (or present=true), documented dependencies,
+          least-privilege controls, unauthorized-access probe denied,
+          measuredAt ≤90 days.
     - id: "manual-attest"
       params:
         hint: >

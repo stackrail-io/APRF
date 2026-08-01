@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:4cc12c9fbc601a1279ca5608bac6b4ae56c26a9303e928bed64ce3d98a7d34ac",
+  "generatedAt": "sha256:3080266e72dc03da46ab8080369ddc5031f3a03ec3fb018c97f05bd718e1e26b",
   "ruleCount": 178,
   "domains": [
     {
@@ -7180,7 +7180,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "repo-agent-tool-connectivity",
             "params": {
-              "hint": "Discover agent/tool runtime or dependency inventory (required for PASS) plus network/identity connectivity controls; ingest coverage under imports/agent-tool-connectivity/; require inventory (or present=true), documented dependencies, least-privilege controls, unauthorized-access probe denied, measuredAt ≤90 days.\n"
+              "hint": "Discover agent/tool runtime inventory (required for PASS) plus dependency inventory and network/identity connectivity controls; ingest coverage under imports/agent-tool-connectivity/; require runtime inventory (or present=true), documented dependencies, least-privilege controls, unauthorized-access probe denied, measuredAt ≤90 days.\n"
             }
           },
           {

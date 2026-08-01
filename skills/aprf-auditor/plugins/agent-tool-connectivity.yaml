@@ -17,10 +17,10 @@ emits:
   signals: [agent-tool-connectivity, inf-m3, repo-agent-tool-connectivity]
 mapsToChecks: [INF-M3]
 whenUnavailable: >
-  Signals alone are PARTIAL. INF-M3 PASS needs inventory (in-repo or
-  agentOrToolRuntimesPresent=true),
-  dependencyInventoryDocumented=true,
-  leastPrivilegeConnectivityControlsConfigured=true,
+  Signals alone are PARTIAL. INF-M3 PASS needs agent/tool runtime inventory
+  (in-repo or agentOrToolRuntimesPresent=true),
+  dependencyInventoryDocumented=true (or in-repo dependency inventory),
+  leastPrivilegeConnectivityControlsConfigured=true (or in-repo controls),
   connectivityControlsMatchDependencyInventory=true,
   unauthorizedInternalServiceAccessBlockedInProbe=true, measuredAt ≤90 days.
   Set agentOrToolRuntimesPresent=false for NOT_APPLICABLE.

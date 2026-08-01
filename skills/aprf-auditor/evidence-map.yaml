@@ -776,12 +776,15 @@ checks:
     evaluation: |
       Prefer collectors/agent-tool-connectivity or imports/agent-tool-connectivity/*.json with measuredAt ≤90d.
       PASS if statusHint=pass / infM3Satisfied === true
-      (runtime/dependency inventory in-repo or agentOrToolRuntimesPresent=true +
-      dependencyInventoryDocumented + leastPrivilegeConnectivityControlsConfigured +
+      (agent/tool runtime inventory in-repo or agentOrToolRuntimesPresent=true +
+      dependencyInventoryDocumented or in-repo dependency inventory +
+      leastPrivilegeConnectivityControlsConfigured or in-repo controls +
       connectivityControlsMatchDependencyInventory + unauthorizedInternalServiceAccessBlockedInProbe + measuredAt ≤90d).
-      NOT_APPLICABLE if agentOrToolRuntimesPresent=false and no in-repo agent/tool or dependency inventory.
-      PARTIAL if control/probe signals without inventory, or incomplete import.
-      FAIL if inventory, controls, match, or unauthorized-access deny are attested false.
+      NOT_APPLICABLE if agentOrToolRuntimesPresent=false and no in-repo agent/tool runtime inventory
+      (dependency/control/probe docs alone do not block N/A).
+      PARTIAL if dependency/control/probe signals without runtime inventory, or incomplete import.
+      FAIL if match or unauthorized-access deny attested false; negative design attests FAIL only when
+      matching in-repo dependency/control signals are also absent.
       SEC-M4 model-path proxy prevention alone does not substitute. INF-M1/M2/M4 do not substitute.
   INF-M4:
     requiredEvidence:

@@ -206,9 +206,9 @@ export function buildAgentToolConnectivityReport(opts: {
     opts.connectivityControls.found ||
     opts.unauthorizedAccessProbe.found ||
     opts.agentToolRuntimes.found;
-  // Runtime or dependency inventory proves INF-M3 surface for N/A override.
-  const surfaceProvedForNaOverride =
-    opts.agentToolRuntimes.found || opts.dependencyInventory.found;
+  // Only agent/tool runtime inventory proves the INF-M3 surface for N/A
+  // override — bare dependency/control/probe docs must not launder present=false.
+  const surfaceProvedForNaOverride = opts.agentToolRuntimes.found;
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
@@ -241,7 +241,7 @@ export function buildAgentToolConnectivityReport(opts: {
     );
   } else if (gateSignalsPresent) {
     notes.push(
-      "Signals alone are PARTIAL — import inventory (or present=true) plus dependencyInventoryDocumented=true + leastPrivilegeConnectivityControlsConfigured=true + connectivityControlsMatchDependencyInventory=true + unauthorizedInternalServiceAccessBlockedInProbe=true (measuredAt ≤90d) under imports/agent-tool-connectivity/ to PASS. Set agentOrToolRuntimesPresent=false for NOT_APPLICABLE. SEC-M4 model-path proxy evidence alone does not PASS INF-M3.",
+      "Signals alone are PARTIAL — import agent/tool runtime inventory (or present=true) plus dependencyInventoryDocumented=true + leastPrivilegeConnectivityControlsConfigured=true + connectivityControlsMatchDependencyInventory=true + unauthorizedInternalServiceAccessBlockedInProbe=true (measuredAt ≤90d) under imports/agent-tool-connectivity/ to PASS. Set agentOrToolRuntimesPresent=false for NOT_APPLICABLE. SEC-M4 model-path proxy evidence alone does not PASS INF-M3.",
     );
   }
 
@@ -254,16 +254,18 @@ export function buildAgentToolConnectivityReport(opts: {
     opts.imported.agentOrToolRuntimesPresent === false &&
     !surfaceProvedForNaOverride;
   const scopePresent = opts.imported.agentOrToolRuntimesPresent === true;
-  // PASS requires runtime/dependency inventory — controls or probes alone
-  // must not unlock INF-M3 even with perfect import metrics.
-  const inventoryPresent =
-    opts.agentToolRuntimes.found ||
-    opts.dependencyInventory.found ||
-    scopePresent;
+  // PASS requires agent/tool runtime inventory (or present=true) — dependency
+  // docs, controls, or probes alone must not unlock INF-M3.
+  const inventoryPresent = opts.agentToolRuntimes.found || scopePresent;
 
-  const depsOk = opts.imported.dependencyInventoryDocumented === true;
+  // In-repo design signals override a negative import design attest (identity-
+  // propagation pattern). Outcome metrics (match / probe deny) stay import-only.
+  const depsOk =
+    opts.imported.dependencyInventoryDocumented === true ||
+    opts.dependencyInventory.found;
   const controlsOk =
-    opts.imported.leastPrivilegeConnectivityControlsConfigured === true;
+    opts.imported.leastPrivilegeConnectivityControlsConfigured === true ||
+    opts.connectivityControls.found;
   const matchOk =
     opts.imported.connectivityControlsMatchDependencyInventory === true;
   const probeOk =
@@ -275,8 +277,10 @@ export function buildAgentToolConnectivityReport(opts: {
   const explicitFail =
     opts.imported.found &&
     !scopeAbsent &&
-    (opts.imported.dependencyInventoryDocumented === false ||
-      opts.imported.leastPrivilegeConnectivityControlsConfigured === false ||
+    ((opts.imported.dependencyInventoryDocumented === false &&
+      !opts.dependencyInventory.found) ||
+      (opts.imported.leastPrivilegeConnectivityControlsConfigured === false &&
+        !opts.connectivityControls.found) ||
       opts.imported.connectivityControlsMatchDependencyInventory === false ||
       opts.imported.unauthorizedInternalServiceAccessBlockedInProbe === false);
 
@@ -295,7 +299,7 @@ export function buildAgentToolConnectivityReport(opts: {
     surfaceProvedForNaOverride
   ) {
     notes.push(
-      "Imported agentOrToolRuntimesPresent=false ignored — in-repo agent/tool runtime or dependency inventory proves the surface exists.",
+      "Imported agentOrToolRuntimesPresent=false ignored — in-repo agent/tool runtime inventory proves the surface exists.",
     );
     if (explicitFail) {
       statusHint = "fail";
@@ -343,15 +347,17 @@ export function buildAgentToolConnectivityReport(opts: {
     infM3Satisfied = false;
     if (opts.imported.found && !inventoryPresent) {
       notes.push(
-        "PASS requires agent/tool runtime or dependency inventory (in-repo or agentOrToolRuntimesPresent=true) — connectivity-control/probe signals alone are insufficient.",
+        "PASS requires agent/tool runtime inventory (in-repo or agentOrToolRuntimesPresent=true) — dependency/control/probe signals alone are insufficient.",
       );
     }
     if (opts.imported.found && !depsOk) {
-      notes.push("Import must show dependencyInventoryDocumented=true.");
+      notes.push(
+        "Import must show dependencyInventoryDocumented=true (or discover dependency inventory in-repo).",
+      );
     }
     if (opts.imported.found && !controlsOk) {
       notes.push(
-        "Import must show leastPrivilegeConnectivityControlsConfigured=true.",
+        "Import must show leastPrivilegeConnectivityControlsConfigured=true (or discover connectivity controls in-repo).",
       );
     }
     if (opts.imported.found && !matchOk) {

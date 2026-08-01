@@ -127,7 +127,7 @@ async function main() {
       throw new Error(`N/A expected: ${JSON.stringify(rNa.summary)}`);
     }
 
-    // Controls alone + perfect metrics without inventory/present → PARTIAL.
+    // Controls alone + perfect metrics without runtime inventory/present → PARTIAL.
     const tControlsOnly = join(root, "t-controls-only");
     mkdirSync(join(tControlsOnly, "infra"), { recursive: true });
     writeFileSync(
@@ -152,6 +152,109 @@ async function main() {
     if (rControlsOnly.summary.statusHint !== "partial") {
       throw new Error(
         `controls-only without inventory expected partial: ${JSON.stringify(rControlsOnly.summary)}`,
+      );
+    }
+
+    // Dependency inventory alone (no runtime / present) + perfect metrics → PARTIAL.
+    const tDepsOnly = join(root, "t-deps-only");
+    mkdirSync(join(tDepsOnly, "docs"), { recursive: true });
+    writeFileSync(
+      join(tDepsOnly, "docs", "dependencies.md"),
+      "dependency_inventory required_dependencies\n",
+    );
+    const outDepsOnly = join(root, "o-deps-only");
+    mkdirSync(join(outDepsOnly, "imports", "agent-tool-connectivity"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outDepsOnly, "imports", "agent-tool-connectivity", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        dependencyInventoryDocumented: true,
+        leastPrivilegeConnectivityControlsConfigured: true,
+        connectivityControlsMatchDependencyInventory: true,
+        unauthorizedInternalServiceAccessBlockedInProbe: true,
+      }),
+    );
+    const rDepsOnly = await run(tDepsOnly, outDepsOnly);
+    if (rDepsOnly.summary.statusHint !== "partial") {
+      throw new Error(
+        `deps-only without runtime inventory expected partial: ${JSON.stringify(rDepsOnly.summary)}`,
+      );
+    }
+
+    // Negative design attests do not FAIL when matching in-repo signals exist.
+    const tDesignOverride = join(root, "t-design-override");
+    mkdirSync(join(tDesignOverride, "docs"), { recursive: true });
+    mkdirSync(join(tDesignOverride, "infra"), { recursive: true });
+    writeFileSync(
+      join(tDesignOverride, "docs", "agent-runtime.md"),
+      "agent_runtime tool_runtime workload\n",
+    );
+    writeFileSync(
+      join(tDesignOverride, "docs", "dependencies.md"),
+      "dependency_inventory required_dependencies\n",
+    );
+    writeFileSync(
+      join(tDesignOverride, "infra", "network-policy.yaml"),
+      "kind: NetworkPolicy\negress_allowlist\n",
+    );
+    const outDesignOverride = join(root, "o-design-override");
+    mkdirSync(join(outDesignOverride, "imports", "agent-tool-connectivity"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(
+        outDesignOverride,
+        "imports",
+        "agent-tool-connectivity",
+        "coverage.json",
+      ),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        dependencyInventoryDocumented: false,
+        leastPrivilegeConnectivityControlsConfigured: false,
+        connectivityControlsMatchDependencyInventory: true,
+        unauthorizedInternalServiceAccessBlockedInProbe: true,
+      }),
+    );
+    const rDesignOverride = await run(tDesignOverride, outDesignOverride);
+    if (rDesignOverride.summary.statusHint === "fail") {
+      throw new Error(
+        `in-repo design must not hard-fail on negative import design attests: ${JSON.stringify(rDesignOverride.summary)}`,
+      );
+    }
+    if (
+      rDesignOverride.summary.statusHint !== "pass" ||
+      rDesignOverride.summary.infM3Satisfied !== true
+    ) {
+      throw new Error(
+        `in-repo design + outcome metrics expected pass: ${JSON.stringify(rDesignOverride.summary)}`,
+      );
+    }
+
+    // Dependency docs alone must not block present=false N/A.
+    const tDepsNa = join(root, "t-deps-na");
+    mkdirSync(join(tDepsNa, "docs"), { recursive: true });
+    writeFileSync(
+      join(tDepsNa, "docs", "dependencies.md"),
+      "dependency_inventory required_dependencies\n",
+    );
+    const outDepsNa = join(root, "o-deps-na");
+    mkdirSync(join(outDepsNa, "imports", "agent-tool-connectivity"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outDepsNa, "imports", "agent-tool-connectivity", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        agentOrToolRuntimesPresent: false,
+      }),
+    );
+    const rDepsNa = await run(tDepsNa, outDepsNa);
+    if (rDepsNa.summary.statusHint !== "not_applicable") {
+      throw new Error(
+        `deps-only without runtime must allow N/A: ${JSON.stringify(rDepsNa.summary)}`,
       );
     }
 
