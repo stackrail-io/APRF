@@ -269,9 +269,11 @@ export function buildAiAdminMfaReport(opts: {
     opts.imported.measuredAt,
     new Date(opts.assessedAt),
   );
-  // Explicit present=false wins N/A — in-repo regex alone must not block it.
+  // Match M1/M4: contradictory present=false is ignored when in-repo signals
+  // prove the admin/control-plane surface exists.
   const scopeAbsent =
-    opts.imported.aiControlPlaneAdminAccessPresent === false;
+    opts.imported.aiControlPlaneAdminAccessPresent === false &&
+    !gateSignalsPresent;
   const scopePresent = opts.imported.aiControlPlaneAdminAccessPresent === true;
   const surfaceOk = gateSignalsPresent || scopePresent;
 
@@ -291,6 +293,16 @@ export function buildAiAdminMfaReport(opts: {
       opts.imported.breakGlassMonitoringEnabled === false ||
       (opts.imported.ageDays !== null &&
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
+
+  if (
+    opts.imported.found &&
+    opts.imported.aiControlPlaneAdminAccessPresent === false &&
+    gateSignalsPresent
+  ) {
+    notes.push(
+      "Imported aiControlPlaneAdminAccessPresent=false ignored — in-repo MFA/admin/break-glass signals prove the surface exists.",
+    );
+  }
 
   if (opts.imported.found && scopeAbsent) {
     statusHint = "not_applicable";

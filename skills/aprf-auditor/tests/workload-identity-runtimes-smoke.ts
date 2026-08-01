@@ -194,7 +194,7 @@ async function main() {
       );
     }
 
-    // present=false wins N/A even with incidental in-repo WI/runtime regex hits
+    // present=false must not N/A when in-repo WI/runtime signals exist
     const outNaSignals = join(root, "ona-signals");
     mkdirSync(join(outNaSignals, "imports", "workload-identity-runtimes"), {
       recursive: true,
@@ -204,12 +204,23 @@ async function main() {
       JSON.stringify({
         measuredAt: new Date().toISOString(),
         selfHostedModelRuntimesPresent: false,
+        selfHostedModelRuntimesWithWorkloadIdentityPct: 100,
+        staticSharedKeysInRuntimeInventory: 0,
+        sampleAuthenticatedCallsPresent: true,
       }),
     );
     const rNaSignals = await run(t2, outNaSignals);
-    if (rNaSignals.summary.statusHint !== "not_applicable") {
+    if (rNaSignals.summary.statusHint === "not_applicable") {
       throw new Error(
-        `present=false must N/A despite repo signals: ${JSON.stringify(rNaSignals.summary)}`,
+        `in-repo signals must override present=false N/A: ${JSON.stringify(rNaSignals.summary)}`,
+      );
+    }
+    if (
+      rNaSignals.summary.statusHint !== "pass" ||
+      rNaSignals.summary.authnR2Satisfied !== true
+    ) {
+      throw new Error(
+        `present=false + signals + metrics should pass: ${JSON.stringify(rNaSignals.summary)}`,
       );
     }
 

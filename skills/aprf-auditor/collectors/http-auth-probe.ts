@@ -1057,7 +1057,6 @@ export const httpAuthProbeCollector: Collector = {
     const declaredAiRoutes = routes.filter(
       (r) => r.aiSurface && r.declaredInCode && !r.advisoryGet,
     );
-    const declaredAiPresent = declaredAiRoutes.length > 0;
 
     if (!baseUrl) {
       if (prior.length > 0) {

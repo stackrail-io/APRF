@@ -121,7 +121,7 @@ async function main() {
       );
     }
 
-    // present=false wins N/A even with in-repo MFA/break-glass regex hits
+    // present=false must not N/A when in-repo MFA/break-glass signals exist
     const outNaSignals = join(root, "ona-signals");
     mkdirSync(join(outNaSignals, "imports", "ai-admin-mfa"), {
       recursive: true,
@@ -131,12 +131,24 @@ async function main() {
       JSON.stringify({
         measuredAt: new Date().toISOString(),
         aiControlPlaneAdminAccessPresent: false,
+        aiControlPlaneAdminRolesMfaEnforcedPct: 100,
+        breakGlassAccountCount: 2,
+        documentedBreakGlassMaximum: 3,
+        breakGlassMonitoringEnabled: true,
       }),
     );
     const rNaSignals = await run(t2, outNaSignals);
-    if (rNaSignals.summary.statusHint !== "not_applicable") {
+    if (rNaSignals.summary.statusHint === "not_applicable") {
       throw new Error(
-        `present=false must N/A despite repo signals: ${JSON.stringify(rNaSignals.summary)}`,
+        `in-repo signals must override present=false N/A: ${JSON.stringify(rNaSignals.summary)}`,
+      );
+    }
+    if (
+      rNaSignals.summary.statusHint !== "pass" ||
+      rNaSignals.summary.authnM3Satisfied !== true
+    ) {
+      throw new Error(
+        `present=false + signals + metrics should pass: ${JSON.stringify(rNaSignals.summary)}`,
       );
     }
 
