@@ -1,52 +1,80 @@
 id: "EXP-R1"
 category: "explainability"
 title: "Production systems should have user-facing rationale for material automated decisions"
-description: "User-facing rationale for material automated decisions"
-whyItMatters: "User-facing rationale for material automated decisions Failing this leaves a
-  production gap against: 100% of decision types marked material in the catalog return a rationale
-  field or UI explanation in a 20-case sample; gaps tracked with owners"
+description: >
+  Material automated decisions should return a user-facing rationale (API field
+  or UI explanation) so affected people can understand why the system acted—
+  not only operators reconstructing traces after the fact.
+whyItMatters: >
+  Operator-only explainability leaves customers and end users without a usable
+  reason for material outcomes (denials, pricing, eligibility, routing). A
+  decision catalog plus sampled coverage of user-facing rationales turns
+  opaque automation into accountable UX. Distinct from EXP-M2 operator path
+  reconstruction and EXP-R2 regulated-feature matrices.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "100% of decision types marked material in the catalog return a rationale field or UI
-  explanation in a 20-case sample; gaps tracked with owners"
+passCondition: >
+  100% of decision types marked material in the catalog return a rationale
+  field or UI explanation in a ≥20-case sample; gaps are tracked with named
+  owners (measuredAt ≤90 days).
 evidenceRequired:
-  - "Product UI/API screenshots or traces showing user-facing rationale for material automated
-    decisions + decision catalog"
+  - "Material automated-decision catalog (decision types marked material)"
+  - "≥20-case sample showing user-facing rationale for each material type (100% coverage)"
+  - "Gap list with named owners for any missing rationale"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-user-rationale"
+      params:
+        hint: >
+          Discover material-decision catalogs, user-facing rationale fields/UI,
+          and coverage samples for material automated decisions.
     - id: "manual-attest"
       params:
-        hint: "Product UI/API screenshots or traces showing user-facing rationale for material automated
-          decisions + decision catalog"
-manualVerification: "For this Check (User-facing rationale for material automated decisions):
-  inspect current evidence for [Product UI/API screenshots or traces showing user-facing rationale
-  for material automated decisions + decision catalog] and confirm the pass condition holds — 100%
-  of decision types marked material in the catalog return a rationale field or UI explanation in a
-  20-case sample; gaps tracked with owners"
-falsePositiveGuidance: "(Explainability & Transparency): re-verify against a current artifact for
-  this specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest 100% of material decision
+          types return user-facing rationale in a ≥20-case sample with owned
+          gaps (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm material automated decisions exist. If none, score
+  NOT_APPLICABLE. 2) Locate a catalog marking which decision types are
+  material. 3) Review a ≥20-case sample showing each material type returns a
+  rationale field or UI explanation. 4) Confirm any gaps have named owners.
+  5) PASS only if catalog + 100% sample coverage + owned gaps hold with
+  measuredAt ≤90 days. EXP-M2 operator reconstruction alone does not prove
+  user-facing rationale. EXP-M1 citations alone do not prove decision
+  rationales. EXP-R2 regulatory matrices alone do not prove runtime UI/API
+  rationale delivery.
+falsePositiveGuidance: >
+  Do not pass operator-only logs as user-facing rationale. Do not pass samples
+  under 20 cases. Do not pass catalogs without material marking. Do not pass
+  gaps without named owners. Sibling EXP-M2, EXP-M1, and EXP-R2 do not
+  substitute. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: User-facing rationale for material automated
-    decisions"
-  - "Retain evidence artifacts required by this Check, starting with: Product UI/API screenshots or
-    traces showing user-facing rationale for material automated decisions + decision catalog"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Catalog material automated decision types"
+  - "Return a rationale field or UI explanation for every material type"
+  - "Sample ≥20 cases ≤90 days; track gaps with owners under imports/ai-user-rationale/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "NIST AI RMF — Explainability and Interpretability"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "EU AI Act — Transparency obligations (conceptual)"
+    url: "https://artificialintelligenceact.eu/"
 relatedRules:
   - "EXP-M1"
   - "EXP-M2"
   - "EXP-M3"
-  - "EXP-M4"
   - "EXP-R3"
+  - "EXP-R2"
+  - "HUM-M1"
 tags:
   - "explainability"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "user-facing"
+  - "rationale"
+  - "material-decision"
 applicability:
   technologies: []
   minCriticality: 2

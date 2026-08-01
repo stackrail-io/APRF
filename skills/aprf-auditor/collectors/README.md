@@ -72,6 +72,12 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **ai-fallback-eval** | `ai-fallback-eval.ts` | multi-provider/multi-region fallback + quality/safety eval (REL-R2) | `imports/ai-fallback-eval/` | — |
 | **ai-continuity-drill** | `ai-continuity-drill.ts` | provider-loss continuity drills + RTO/RPO results (REL-R4) | `imports/ai-continuity-drill/` | — |
 | **ai-warm-standby** | `ai-warm-standby.ts` | warm standby for self-hosted inference (REL-R6) | `imports/ai-warm-standby/` | — |
+| **ai-rag-provenance** | `ai-rag-provenance.ts` | factual/high-stakes RAG citation provenance (EXP-M1) | `imports/ai-rag-provenance/` | — |
+| **ai-decision-path-recon** | `ai-decision-path-recon.ts` | operator decision-path reconstruction drills (EXP-M2) | `imports/ai-decision-path-recon/` | — |
+| **ai-explanation-hygiene** | `ai-explanation-hygiene.ts` | explanation payload secret/PII hygiene (EXP-M3) | `imports/ai-explanation-hygiene/` | — |
+| **ai-change-summary** | `ai-change-summary.ts` | change/counterfactual summaries for model/prompt promotions (EXP-R3) | `imports/ai-change-summary/` | — |
+| **ai-user-rationale** | `ai-user-rationale.ts` | user-facing rationale for material automated decisions (EXP-R1) | `imports/ai-user-rationale/` | — |
+| **ai-explainability-matrix** | `ai-explainability-matrix.ts` | regulated-feature explainability requirements matrix (EXP-R2) | `imports/ai-explainability-matrix/` | — |
 | **ai-multi-provider-continuity** | `ai-multi-provider-continuity.ts` | Level-5 multi-provider contractual + technical continuity (REL-R7) | `imports/ai-multi-provider-continuity/` | — |
 | **ai-rto-rpo-catalog** | `ai-rto-rpo-catalog.ts` | business-critical AI service RTO/RPO in BCP/service-catalog/DR + tested restore/failover (REL-M5) | `imports/ai-rto-rpo-catalog/` | — |
 | **http-auth-probe** | `http-auth-probe.ts` | route catalog | `imports/http-auth-probe/` | **`--base-url` probe** |

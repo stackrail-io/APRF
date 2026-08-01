@@ -27,6 +27,12 @@ import { aiCircuitBulkheadCollector } from "./ai-circuit-bulkhead.ts";
 import { aiFallbackEvalCollector } from "./ai-fallback-eval.ts";
 import { aiContinuityDrillCollector } from "./ai-continuity-drill.ts";
 import { aiWarmStandbyCollector } from "./ai-warm-standby.ts";
+import { aiRagProvenanceCollector } from "./ai-rag-provenance.ts";
+import { aiDecisionPathReconCollector } from "./ai-decision-path-recon.ts";
+import { aiExplanationHygieneCollector } from "./ai-explanation-hygiene.ts";
+import { aiChangeSummaryCollector } from "./ai-change-summary.ts";
+import { aiUserRationaleCollector } from "./ai-user-rationale.ts";
+import { aiExplainabilityMatrixCollector } from "./ai-explainability-matrix.ts";
 import { promptfooCollector } from "./promptfoo.ts";
 import { httpAuthProbeCollector } from "./http-auth-probe.ts";
 import { mcpS2sInventoryCollector } from "./mcp-s2s-inventory.ts";
@@ -171,6 +177,12 @@ export const COLLECTORS: Collector[] = [
   aiFallbackEvalCollector,
   aiContinuityDrillCollector,
   aiWarmStandbyCollector,
+  aiRagProvenanceCollector,
+  aiDecisionPathReconCollector,
+  aiExplanationHygieneCollector,
+  aiChangeSummaryCollector,
+  aiUserRationaleCollector,
+  aiExplainabilityMatrixCollector,
   promptfooCollector,
   httpAuthProbeCollector,
   mcpS2sInventoryCollector,

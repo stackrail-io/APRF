@@ -88,7 +88,6 @@ export const PROFILE_REGULATED: AprfProfile = {
     "SCI-M4",
     "INF-M4",
     "SAF-M4",
-    "EXP-M4",
     "PRI-M3",
     "MEM-M4",
     "EVL-M4",

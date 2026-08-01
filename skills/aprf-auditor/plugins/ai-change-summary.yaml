@@ -1,0 +1,25 @@
+id: ai-change-summary
+title: Change/counterfactual summaries for model/prompt promotions (EXP-R3)
+version: "0.2.0"
+executor: collectors/ai-change-summary.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-change-summary]
+inputs:
+  - "Target repo (change-summary tooling + retained last-promotion summary)"
+  - "Optional suite: aprf-assessment/imports/ai-change-summary/*.{json}"
+collect:
+  - "Detect summary / promotion / retained-summary signals"
+  - "Ingest coverage; write ai-change-summary-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-change-summary/*"
+  signals: [ai-change-summary, exp-r3, repo-ai-change-summary]
+mapsToChecks: [EXP-R3]
+whenUnavailable: >
+  Change-summary signals alone are PARTIAL. EXP-R3 PASS needs
+  changeOrCounterfactualSummaryToolingConfigured,
+  lastMaterialPromotionHasRetainedSummary, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline change-summary heuristics + optional imported JSON.

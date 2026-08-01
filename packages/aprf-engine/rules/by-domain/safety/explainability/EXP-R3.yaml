@@ -1,55 +1,83 @@
 id: "EXP-R3"
 category: "explainability"
-title: "Production systems should have formal explainability requirements mapped for regulated features"
-description: "Formal explainability requirements mapped for regulated features"
-whyItMatters: "Formal explainability requirements mapped for regulated features Failing this leaves
-  a production gap against: Every regulated AI feature lists required explanation type and evidence;
-  matrix reviewed ≤12 months ago with named owner"
+title: "Counterfactual or change summaries should be available for material model/prompt version diffs"
+description: >
+  Material model or prompt promotions should retain a change or counterfactual
+  summary describing what differed and expected impact—so operators can
+  explain version-to-version behavior without archaeology.
+whyItMatters: >
+  Version IDs and eval gates alone do not tell on-call or auditors what changed
+  in the last promotion. A retained change/counterfactual summary turns opaque
+  model/prompt diffs into explainable releases. Distinct from PRM-M2 review/eval
+  linkage and CHG-M1 registry retention depth.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Every regulated AI feature lists required explanation type and evidence; matrix
-  reviewed ≤12 months ago with named owner"
+passCondition: >
+  The last material model or prompt promotion includes a retained change or
+  counterfactual summary (measuredAt ≤90 days).
 evidenceRequired:
-  - "Explainability requirements matrix (feature × regulation/obligation) + last compliance review
-    record"
+  - "Change/counterfactual summary tooling or template for model/prompt promotions"
+  - "Retained summary for the last material model or prompt promotion (≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-change-summary"
+      params:
+        hint: >
+          Discover change/counterfactual summary tooling and retained summaries
+          for material model/prompt promotions.
     - id: "manual-attest"
       params:
-        hint: "Explainability requirements matrix (feature × regulation/obligation) + last compliance review
-          record"
-manualVerification: "For this Check (Formal explainability requirements mapped for regulated
-  features): inspect current evidence for [Explainability requirements matrix (feature ×
-  regulation/obligation) + last compliance review record] and confirm the pass condition holds —
-  Every regulated AI feature lists required explanation type and evidence; matrix reviewed ≤12
-  months ago with named owner"
-falsePositiveGuidance: "(Explainability & Transparency): re-verify against a current artifact for
-  this specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest the last material
+          model/prompt promotion has a retained change/counterfactual summary
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm material model or prompt promotions occur. If none, score
+  NOT_APPLICABLE. 2) Locate tooling or a template that produces change or
+  counterfactual summaries for those promotions. 3) Confirm the last material
+  promotion retains such a summary ≤90 days. 4) PASS only if tooling/template
+  + retained last-promotion summary hold with measuredAt ≤90 days. PRM-M2
+  review/eval linkage alone does not prove a human-readable change summary.
+  CHG-M1 version retention alone does not prove a counterfactual/change
+  narrative. EVL-M4 shadow/A-B metrics alone do not prove a retained
+  promotion summary.
+falsePositiveGuidance: >
+  Do not pass git commit messages as change summaries unless they document
+  expected behavioral impact. Do not pass empty “N/A” summaries for material
+  promotions. Do not pass summaries older than the last material promotion
+  without linking to that promotion. Sibling PRM-M2, CHG-M1, and EVL-M4 do
+  not substitute. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Formal explainability requirements mapped for
-    regulated features"
-  - "Retain evidence artifacts required by this Check, starting with: Explainability requirements
-    matrix (feature × regulation/obligation) + last compliance review record"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Require a change or counterfactual summary on every material model/prompt promotion"
+  - "Retain the last promotion’s summary under imports/ai-change-summary/"
+  - "Wire summary generation into the promotion checklist or CI gate"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "NIST AI RMF — Explainability and Interpretability"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "Google SRE — Embracing Risk"
+    url: "https://sre.google/sre-book/embracing-risk/"
 relatedRules:
   - "EXP-M1"
   - "EXP-M2"
   - "EXP-M3"
-  - "EXP-M4"
   - "EXP-R1"
+  - "EXP-R2"
+  - "PRM-M2"
+  - "CHG-M1"
+  - "EVL-M4"
 tags:
   - "explainability"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "change-summary"
+  - "counterfactual"
+  - "promotion"
 applicability:
   technologies: []
-  minCriticality: 2
-  requiredFromLevel: 4
+  minCriticality: 3
+  requiredFromLevel: 5
 status: "active"
 introducedIn: "0.10.0"

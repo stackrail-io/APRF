@@ -8,6 +8,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
+- Demoted **explainability** former **EXP-M4 → EXP-R3** (recommended change/counterfactual summaries for material model/prompt promotions) per [APRF-RFC-0008](rfcs/0008-explainability-exp-m4-to-recommended.md) (regulated 52→51, tier3-only 14→13); vacated `EXP-M4` under pre-release exception in `id-gaps.md`; synced `aprf-spec.json`.
+- Rewrote **explainability** former **EXP-R3 → EXP-R2** (hybrid regulated-feature explainability requirements matrix); vacated `EXP-R3` under pre-release exception in `id-gaps.md`; synced `aprf-spec.json`.
+- Rewrote **explainability** **EXP-R1** (hybrid user-facing rationale for material automated decisions); synced `aprf-spec.json`.
+- Rewrote **explainability** **EXP-M4** (hybrid change/counterfactual summaries for material model/prompt promotions); synced `aprf-spec.json`.
+- Rewrote **explainability** **EXP-M3** (hybrid explanation payload secret/PII hygiene); synced `aprf-spec.json`.
+- Rewrote **explainability** **EXP-M2** (hybrid operator decision-path reconstruction drills); synced `aprf-spec.json`.
+- Rewrote **explainability** **EXP-M1** (hybrid factual/high-stakes RAG provenance citations); synced `aprf-spec.json`.
 - Rewrote **reliability-continuity** **REL-R4** (hybrid provider-loss continuity drills with RTO/RPO results); cleared cloud-only `technologies`; synced `aprf-spec.json`.
 - Rewrote **reliability-continuity** **REL-R6** (hybrid warm standby for self-hosted inference); cleared cloud-only `technologies`; synced `aprf-spec.json`.
 - Rewrote **reliability-continuity** **REL-R2** (hybrid multi-provider/multi-region fallback with quality/safety eval coverage); cleared cloud-only `technologies`; synced `aprf-spec.json`.

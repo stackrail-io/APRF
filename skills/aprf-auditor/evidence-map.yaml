@@ -131,9 +131,12 @@ categoryDefaults:
     search:
       - "**/*trace*"
       - "**/*explain*"
+      - "**/*citation*"
+      - "**/*provenance*"
       - "**/otel*"
       - "**/*audit*log*"
-    signals: [decision log, citation, reconstructable path]
+    plugins: [ai-rag-provenance, ai-decision-path-recon, ai-explanation-hygiene, ai-change-summary, ai-user-rationale, ai-explainability-matrix, repo-filesystem, promptfoo]
+    signals: [decision log, citation, reconstructable path, rag provenance, explanation hygiene, change summary, user rationale, explainability matrix]
   data-privacy:
     search:
       - "**/*pii*"
@@ -1586,6 +1589,105 @@ checks:
       PASS if platform-dx-metrics statusHint=pass (ttsp+bypass formulas + ≥30d series + bypass alert/threshold + named owner + measuredAt ≤90d).
       PARTIAL if metric name signals without complete import.
       NOT_APPLICABLE when no AI-platform DX metric signals.
+  EXP-M1:
+    requiredEvidence:
+      - "Factual/high-stakes RAG eval suite measuring citation presence"
+      - "factualOrHighStakesRagEvalConfigured + answersWithValidCitationPct≥90 + citationsResolveToAuthorizedCorpus under imports/ai-rag-provenance/"
+    searchExtra:
+      - "**/*citation*"
+      - "**/*provenance*"
+      - "**/*groundedness*"
+      - "**/*factual*rag*"
+      - "**/*source*id*"
+      - "**/rag/**"
+    plugins: [ai-rag-provenance, promptfoo, repo-filesystem]
+    naWhen: "No factual or high-stakes RAG outputs in scope"
+    evaluation: |
+      PASS if ai-rag-provenance statusHint=pass (factual/high-stakes eval + ≥90% resolvable citations + measuredAt ≤90d).
+      PARTIAL if RAG/citation signals without complete import.
+      NOT_APPLICABLE when no provenance signals. Distinct from DG-M1 corpus ownership and EXP-M2 path reconstruction.
+  EXP-M2:
+    requiredEvidence:
+      - "Operator reconstruction procedure with documented time budget"
+      - "reconstructionProcedureDocumented + reconstructedSampleCount≥3 + allSamplesWithinDocumentedTimeBudget under imports/ai-decision-path-recon/"
+    searchExtra:
+      - "**/*decision*path*"
+      - "**/*reconstruct*"
+      - "**/*explainability*drill*"
+      - "**/*operator*drill*"
+      - "**/*timed*recon*"
+      - "**/*trace*sample*"
+    plugins: [ai-decision-path-recon, repo-filesystem]
+    naWhen: "No production AI outcomes with reconstructable paths in scope"
+    evaluation: |
+      PASS if ai-decision-path-recon statusHint=pass (procedure + ≥3 samples within time budget + measuredAt ≤90d).
+      PARTIAL if reconstruction signals without complete import.
+      NOT_APPLICABLE when no recon signals. Distinct from EXP-M1 citations and OBS-M1 trace linkage.
+  EXP-M3:
+    requiredEvidence:
+      - "Explanation redaction/blocking policy covering explanation payloads"
+      - "explanationRedactionPolicyConfigured + syntheticSecretPiiRedactedOrBlockedPct=100 + productionExplanationSampleSecretHits=0 under imports/ai-explanation-hygiene/"
+    searchExtra:
+      - "**/*explanation*redact*"
+      - "**/*rationale*scrub*"
+      - "**/*citation*redact*"
+      - "**/*synthetic*secret*"
+      - "**/*explanation*sample*"
+    plugins: [ai-explanation-hygiene, secret-redaction, repo-filesystem]
+    naWhen: "No explanation payloads in scope"
+    evaluation: |
+      PASS if ai-explanation-hygiene statusHint=pass (policy + 100% synthetic redaction/block + 0 production sample secret hits + measuredAt ≤90d).
+      PARTIAL if hygiene signals without complete import.
+      NOT_APPLICABLE when no hygiene signals. Distinct from OBS-M2 trace redaction and SEC2-M2 general log scrubbers.
+  EXP-R3:
+    requiredEvidence:
+      - "Change/counterfactual summary tooling or template for model/prompt promotions"
+      - "changeOrCounterfactualSummaryToolingConfigured + lastMaterialPromotionHasRetainedSummary under imports/ai-change-summary/"
+    searchExtra:
+      - "**/*change*summary*"
+      - "**/*counterfactual*"
+      - "**/*promotion*summary*"
+      - "**/*model*diff*"
+      - "**/*prompt*diff*"
+      - "**/*behavioral*impact*"
+    plugins: [ai-change-summary, repo-filesystem]
+    naWhen: "No material model/prompt promotions in scope"
+    evaluation: |
+      PASS if ai-change-summary statusHint=pass (tooling + retained last-promotion summary + measuredAt ≤90d).
+      PARTIAL if change-summary signals without complete import.
+      NOT_APPLICABLE when no change-summary signals. Distinct from PRM-M2 review/eval linkage and CHG-M1 registry retention.
+  EXP-R1:
+    requiredEvidence:
+      - "Material automated-decision catalog (decision types marked material)"
+      - "materialDecisionCatalogConfigured + sampleCaseCount≥20 + materialTypesWithUserRationalePct=100 + rationaleGapsTrackedWithOwners under imports/ai-user-rationale/"
+    searchExtra:
+      - "**/*decision*catalog*"
+      - "**/*material*decision*"
+      - "**/*user*facing*rationale*"
+      - "**/*rationale*field*"
+      - "**/*decision*reason*"
+    plugins: [ai-user-rationale, repo-filesystem]
+    naWhen: "No material automated decisions in scope"
+    evaluation: |
+      PASS if ai-user-rationale statusHint=pass (catalog + ≥20-case sample at 100% coverage + owned gaps + measuredAt ≤90d).
+      PARTIAL if rationale signals without complete import.
+      NOT_APPLICABLE when no rationale signals. Distinct from EXP-M2 operator reconstruction and EXP-R2 regulated matrices.
+  EXP-R2:
+    requiredEvidence:
+      - "Explainability requirements matrix (feature × regulation/obligation)"
+      - "explainabilityMatrixConfigured + regulatedFeaturesWithExplanationRequirementPct=100 + matrixReviewedWithin12MonthsWithNamedOwner under imports/ai-explainability-matrix/"
+    searchExtra:
+      - "**/*explainability*matrix*"
+      - "**/*explanation*requirements*"
+      - "**/*regulated*feature*"
+      - "**/*compliance*review*"
+      - "**/*feature*regulation*"
+    plugins: [ai-explainability-matrix, repo-filesystem]
+    naWhen: "No regulated AI features in scope"
+    evaluation: |
+      PASS if ai-explainability-matrix statusHint=pass (matrix + 100% regulated-feature coverage + review ≤12 months with named owner + measuredAt ≤90d).
+      PARTIAL if matrix signals without complete import.
+      NOT_APPLICABLE when no matrix signals. Distinct from EXP-R1 user-facing rationale samples and CMP obligation registers.
   DG-M1:
     requiredEvidence:
       - "Production corpus/index inventory with owner, version ID, refresh cadence"

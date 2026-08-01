@@ -23,14 +23,14 @@ assert(PROFILE_ID_CORE === "aprf-profile-core", "core id");
 assert(PROFILE_CORE.targetCriticality === 2, "tier 2");
 assert(PROFILE_CORE.mandatoryCheckIds.length === 38, "core has 38 mandatories");
 assert(
-  PROFILE_REGULATED.mandatoryCheckIds.length === 52,
-  "regulated has 52 mandatories",
+  PROFILE_REGULATED.mandatoryCheckIds.length === 51,
+  "regulated has 51 mandatories",
 );
 assert(
   PROFILE_REGULATED.mandatoryCheckIds.includes("AUTHN-M1"),
   "regulated includes core",
 );
-assert(getTier3OnlyMandatoryIds().length === 14, "tier3-only count");
+assert(getTier3OnlyMandatoryIds().length === 13, "tier3-only count");
 
 assert(
   resolveCheckApplicability("AUTHN-M1", PROFILE_CORE) === "mandatory",

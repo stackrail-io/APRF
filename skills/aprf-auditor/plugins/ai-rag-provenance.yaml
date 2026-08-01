@@ -1,0 +1,25 @@
+id: ai-rag-provenance
+title: Factual/high-stakes RAG provenance citations (EXP-M1)
+version: "0.2.0"
+executor: collectors/ai-rag-provenance.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-rag-provenance]
+inputs:
+  - "Target repo (RAG citation config + factual/high-stakes provenance eval)"
+  - "Optional suite: aprf-assessment/imports/ai-rag-provenance/*.{json}"
+collect:
+  - "Detect RAG / citation / provenance-eval signals"
+  - "Ingest coverage; write ai-rag-provenance-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-rag-provenance/*"
+  signals: [ai-rag-provenance, exp-m1, repo-ai-rag-provenance]
+mapsToChecks: [EXP-M1]
+whenUnavailable: >
+  Provenance signals alone are PARTIAL. EXP-M1 PASS needs
+  factualOrHighStakesRagEvalConfigured, answersWithValidCitationPct≥90,
+  citationsResolveToAuthorizedCorpus, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline RAG provenance heuristics + optional imported JSON.
