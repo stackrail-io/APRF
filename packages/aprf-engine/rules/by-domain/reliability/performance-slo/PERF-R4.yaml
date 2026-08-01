@@ -1,0 +1,80 @@
+id: "PERF-R4"
+category: "performance-slo"
+title: "Online dashboards should present latency, error, throughput, and AI quality metrics near real time"
+description: >
+  Near-real-time operational dashboards should visualize latency, error rate,
+  throughput, resource utilization, and AI quality metrics for production
+  services.
+whyItMatters: >
+  Collected metrics (PERF-M2) still fail operators if nobody can see them under
+  incident pressure. Near-real-time dashboards turn latency, error, throughput,
+  resource, and quality series into a shared operational picture.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  Near-real-time operational dashboards visualize latency, error rate,
+  throughput, resource utilization, and AI quality metrics for production
+  services (dashboard evidence measuredAt ≤90 days).
+evidenceRequired:
+  - "Dashboard URL/config covering latency, error rate, throughput, resource utilization, and AI quality"
+  - "Near-real-time refresh evidence (e.g. panel freshness ≤15 minutes)"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-ops-dashboards"
+      params:
+        hint: >
+          Discover near-real-time dashboards covering latency, error,
+          throughput, resource utilization, and AI quality metrics.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest near-real-time dashboards
+          visualize latency, error rate, throughput, resource utilization, and
+          AI quality metrics (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI services with ops metrics are in scope. If none,
+  score NOT_APPLICABLE. 2) Confirm dashboards show latency and error rate.
+  3) Confirm throughput and resource-utilization panels. 4) Confirm ≥1 AI
+  quality panel. 5) Confirm near-real-time refresh (e.g. freshness ≤15
+  minutes). 6) PASS only if coverage + freshness hold with measuredAt ≤90
+  days. PERF-M2 metric exporters alone do not prove dashboards. OBS-R3 SLO
+  burn alerts alone do not prove throughput/resource panels. EVL-M3 eval
+  dashboards alone do not prove full ops coverage.
+falsePositiveGuidance: >
+  Do not pass static weekly PDF exports as near-real-time. Do not pass
+  latency-only boards missing throughput/resource/quality. Do not pass
+  dashboards older than the freshness window. Named exceptions need owner and
+  expiry ≤90 days.
+recommendedFixes:
+  - "Build near-real-time dashboards covering latency, error, throughput, resource utilization, and AI quality"
+  - "Keep panel freshness appropriate for incident response (e.g. ≤15 minutes)"
+  - "Retain evidence under imports/ai-ops-dashboards/"
+  - "Time-box gaps with owner and expiry ≤90 days"
+references:
+  - title: "Google SRE — Service Level Objectives"
+    url: "https://sre.google/sre-book/service-level-objectives/"
+  - title: "AWS Well-Architected — Performance Efficiency"
+    url: "https://aws.amazon.com/architecture/well-architected/"
+relatedRules:
+  - "PERF-M1"
+  - "PERF-M2"
+  - "PERF-M3"
+  - "PERF-R1"
+  - "PERF-R2"
+  - "PERF-R3"
+  - "OBS-R3"
+  - "EVL-M3"
+tags:
+  - "performance-slo"
+  - "recommended"
+  - "hybrid"
+  - "dashboard"
+  - "near-real-time"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

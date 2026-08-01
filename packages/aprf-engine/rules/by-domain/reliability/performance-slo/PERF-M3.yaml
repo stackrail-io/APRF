@@ -1,35 +1,57 @@
 id: "PERF-M3"
 category: "performance-slo"
 title: "Alerting must exist when SLOs burn beyond defined thresholds"
-description: "Alerting shall exist when SLOs burn beyond defined thresholds"
-whyItMatters: "Alerting shall exist when SLOs burn beyond defined thresholds Failing this leaves a
-  production gap against: Alert policies exist for each critical journey SLO; alert test or
-  documented fire demonstrates notification path works"
+description: >
+  Every critical AI journey SLO must have burn-rate (or equivalent) alert
+  policies, and a test or documented fire must prove the notification path
+  works.
+whyItMatters: >
+  Written SLOs (PERF-M1) and emitted metrics (PERF-M2) still fail operators if
+  burn never pages anyone. Alert policies with a proven notify path turn error
+  budgets into incidents before customers escalate.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Alert policies exist for each critical journey SLO; alert test or documented fire
-  demonstrates notification path works"
+passCondition: >
+  Alert policies exist for each critical journey SLO; an alert test or
+  documented fire demonstrates the notification path works (alert evidence
+  measuredAt ≤90 days).
 evidenceRequired:
-  - "Burn-rate or SLO alert policies"
+  - "Burn-rate or SLO alert policies covering each critical AI journey SLO"
+  - "Alert test or documented fire proving notification path"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-slo-burn-alerts"
+      params:
+        hint: >
+          Discover burn-rate/SLO alert policies for critical AI journeys and
+          proof the notification path was tested or documented as firing.
     - id: "manual-attest"
       params:
-        hint: "Burn-rate or SLO alert policies"
-manualVerification: "For this Check (Alerting must exist when SLOs burn beyond defined thresholds):
-  inspect current evidence for [Burn-rate or SLO alert policies] and confirm the pass condition
-  holds — Alert policies exist for each critical journey SLO; alert test or documented fire
-  demonstrates notification path works"
-falsePositiveGuidance: "(Performance & SLO Engineering): re-verify against a current artifact for
-  this specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest alert policies exist for
+          each critical journey SLO and a test or documented fire proves the
+          notify path (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm critical AI journeys with SLOs are in scope. If none, score
+  NOT_APPLICABLE. 2) Confirm burn-rate or SLO alert policies cover each
+  critical journey SLO. 3) Confirm a synthetic alert test or documented real
+  fire proves notification reaches the owned channel. 4) PASS only if coverage
+  + notify proof hold with measuredAt ≤90 days. PERF-M1 catalog alone does not
+  prove alerts. PERF-R4 dashboards alone do not prove paging. OBS-R3 recommended
+  burn dashboards alone do not replace this mandatory notify proof. CHG-R3
+  quality auto-rollback alone does not prove journey SLO burn alerts. COST-M2
+  spend alerts do not satisfy latency/availability SLO burn.
+falsePositiveGuidance: >
+  Do not pass alert YAML stubs without journey SLO linkage. Do not pass
+  dashboards without notify destinations. Do not pass untested alert rules.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Alerting must exist when SLOs burn beyond defined thresholds"
-  - "Retain evidence artifacts required by this Check, starting with: Burn-rate or SLO alert
-    policies"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Wire burn-rate/SLO alerts for every critical AI journey SLO"
+  - "Run a synthetic fire (or retain a documented real fire) proving notify path"
+  - "Retain evidence under imports/ai-slo-burn-alerts/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE — Service Level Objectives"
     url: "https://sre.google/sre-book/service-level-objectives/"
@@ -41,14 +63,18 @@ relatedRules:
   - "PERF-R1"
   - "PERF-R2"
   - "PERF-R3"
+  - "PERF-R4"
+  - "OBS-R3"
+  - "CHG-R3"
+  - "COST-M2"
 tags:
   - "performance-slo"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "burn-rate"
+  - "alerting"
 applicability:
-  technologies:
-    - "cicd"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

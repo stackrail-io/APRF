@@ -4183,28 +4183,28 @@
       "mandatoryChecks": [
         {
           "id": "PERF-M1",
-          "requirement": "Critical AI user journeys shall have documented latency and availability SLOs",
-          "artifact": "SLO catalog with numeric targets per journey",
-          "passCondition": "100% of journeys marked critical have availability % and latency percentile targets recorded",
-          "method": "manual",
+          "requirement": "Every journey marked critical must have documented numeric availability and latency-percentile SLO targets in a maintained catalog.",
+          "artifact": "SLO catalog listing critical AI journeys with numeric availability and latency targets + Coverage showing 100% of marked-critical journeys have both target types",
+          "passCondition": "100% of journeys marked critical have availability % and latency percentile targets recorded in an SLO catalog (catalog evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "PERF-M2",
-          "requirement": "Online dashboards shall track AI latency, error, and at least one quality or task-success signal",
-          "artifact": "Dashboard URLs/config showing latency, error, and quality/task-success panels",
-          "passCondition": "Dashboard panels for latency, error rate, and \u22651 quality/task-success signal are live with freshness \u2264 15 minutes",
-          "method": "manual",
+          "requirement": "Production AI services must collect and make available operational metrics for latency, error rate, and at least one AI-specific quality or task-success indicator.",
+          "artifact": "Metric definitions or exporters covering latency, error rate, and \u22651 AI quality/task-success signal + Proof metrics are queryable/available for operational monitoring",
+          "passCondition": "Metrics for latency, error rate, and at least one AI-specific quality or task-success indicator are collected and available for operational monitoring (metrics evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "PERF-M3",
-          "requirement": "Alerting shall exist when SLOs burn beyond defined thresholds",
-          "artifact": "Burn-rate or SLO alert policies",
-          "passCondition": "Alert policies exist for each critical journey SLO; alert test or documented fire demonstrates notification path works",
-          "method": "manual",
+          "requirement": "Every critical AI journey SLO must have burn-rate (or equivalent) alert policies, and a test or documented fire must prove the notification path works.",
+          "artifact": "Burn-rate or SLO alert policies covering each critical AI journey SLO + Alert test or documented fire proving notification path",
+          "passCondition": "Alert policies exist for each critical journey SLO; an alert test or documented fire demonstrates the notification path works (alert evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -4212,28 +4212,37 @@
       "recommendedChecks": [
         {
           "id": "PERF-R1",
-          "requirement": "Error budgets formally gate release velocity for AI features",
-          "artifact": "Error-budget policy linking AI SLOs to release freezes + last budget burn report that gated a release",
-          "passCondition": "When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; \u22651 gated event or drill in 90 days",
-          "method": "manual",
+          "requirement": "When a critical AI journey's error budget is exhausted, release velocity should be blocked or require explicit risk acceptance, with \u22651 gated event or drill in the last 90 days.",
+          "artifact": "Error-budget policy linking AI SLOs to release freezes or risk acceptance + Last budget-burn gated release or drill \u226490 days",
+          "passCondition": "When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; \u22651 gated event or drill in 90 days (gate evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "PERF-R2",
-          "requirement": "Capacity and load tests include adversarial long-prompt and agent-loop scenarios",
-          "artifact": "Load-test plan including long-prompt and agent-loop scenarios + latest capacity test report",
-          "passCondition": "Last capacity test \u226490 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurrency",
-          "method": "manual",
+          "requirement": "Capacity and load tests should include adversarial long-prompt and multi-step agent-loop scenarios within 90 days, with p95 latency and error rate staying within SLO under documented concurrency.",
+          "artifact": "Load-test plan including long-prompt and agent-loop scenarios + Latest capacity test report \u226490 days showing p95/error within SLO at documented concurrency",
+          "passCondition": "Last capacity test \u226490 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurrency (capacity evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "PERF-R3",
-          "requirement": "Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs",
-          "artifact": "Streaming SLI dashboard for TTFT and inter-token latency + alert config for streaming UIs",
-          "passCondition": "TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained \u226530 days",
-          "method": "manual",
+          "requirement": "Each streaming AI surface should expose TTFT and inter-token latency SLIs, with alerts on documented thresholds and metric series retained \u226530 days.",
+          "artifact": "Streaming SLI definitions/dashboard for TTFT and inter-token latency + Alert config on documented thresholds + retention \u226530 days",
+          "passCondition": "TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained \u226530 days (streaming evidence measuredAt \u226490 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 4,
+          "minCriticality": 2
+        },
+        {
+          "id": "PERF-R4",
+          "requirement": "Near-real-time operational dashboards should visualize latency, error rate, throughput, resource utilization, and AI quality metrics for production services.",
+          "artifact": "Dashboard URL/config covering latency, error rate, throughput, resource utilization, and AI quality + Near-real-time refresh evidence (e.g. panel freshness \u226415 minutes)",
+          "passCondition": "Near-real-time operational dashboards visualize latency, error rate, throughput, resource utilization, and AI quality metrics for production services (dashboard evidence measuredAt \u226490 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }

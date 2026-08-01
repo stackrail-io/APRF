@@ -1,0 +1,25 @@
+id: ai-journey-slo-catalog
+title: Critical AI journey SLO catalog (PERF-M1)
+version: "0.2.0"
+executor: collectors/ai-journey-slo-catalog.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-journey-slo-catalog]
+inputs:
+  - "Target repo (SLO catalog, critical journeys, availability + latency targets)"
+  - "Optional suite: aprf-assessment/imports/ai-journey-slo-catalog/*.{json}"
+collect:
+  - "Detect AI journey SLO catalog signals"
+  - "Ingest coverage; write ai-journey-slo-catalog-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-journey-slo-catalog/*"
+  signals: [ai-journey-slo-catalog, perf-m1, repo-ai-journey-slo-catalog]
+mapsToChecks: [PERF-M1]
+whenUnavailable: >
+  Catalog signals alone are PARTIAL. PERF-M1 PASS needs
+  sloCatalogConfigured, criticalAiJourneyCount≥1,
+  journeysWithAvailabilityAndLatencyTargetsPct=100, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline SLO-catalog heuristics + optional imported JSON.

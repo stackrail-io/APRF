@@ -60,7 +60,7 @@ npm install @stackrail-io/aprf-engine @stackrail-io/aprf-framework-definition
 | `@stackrail-io/aprf-engine` | YAML Checks as the source of truth; JSON Schema; generated TypeScript catalog; index/evaluate helpers |
 | `@stackrail-io/aprf-framework-definition` | Core (39) / Regulated (57) profiles, lenses (RAG/Agents/Voice/Coding), Policy overlays, Check applicability |
 
-Today the catalog holds **177 Checks** across **27 categories** (pillars). New Checks are data files — no engine code changes required.
+Today the catalog holds **178 Checks** across **27 categories** (pillars). New Checks are data files — no engine code changes required.
 
 ## Quick start
 

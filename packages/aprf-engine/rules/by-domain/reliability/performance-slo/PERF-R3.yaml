@@ -1,38 +1,57 @@
 id: "PERF-R3"
 category: "performance-slo"
-title: "Production systems should have streaming-specific SLIs (TTFT, inter-token latency) for
-  streaming UIs"
-description: "Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs"
-whyItMatters: "Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs Failing this
-  leaves a production gap against: TTFT and inter-token latency SLIs exist for each streaming AI
-  surface; alerts fire on documented thresholds; series retained ≥30 days"
+title: "Production systems should have streaming-specific SLIs (TTFT, inter-token latency)"
+description: >
+  Each streaming AI surface should expose TTFT and inter-token latency SLIs,
+  with alerts on documented thresholds and metric series retained ≥30 days.
+whyItMatters: >
+  End-to-end request latency hides streaming UX failures—slow first tokens and
+  stalling token streams. TTFT and inter-token SLIs with alerts make those
+  stalls operable before users abandon the session.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire
-  on documented thresholds; series retained ≥30 days"
+passCondition: >
+  TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts
+  fire on documented thresholds; series retained ≥30 days (streaming evidence
+  measuredAt ≤90 days).
 evidenceRequired:
-  - "Streaming SLI dashboard for TTFT and inter-token latency + alert config for streaming UIs"
+  - "Streaming SLI definitions/dashboard for TTFT and inter-token latency"
+  - "Alert config on documented thresholds + retention ≥30 days"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-streaming-slis"
+      params:
+        hint: >
+          Discover TTFT and inter-token latency SLIs, alerts, and ≥30-day
+          retention for streaming AI surfaces.
     - id: "manual-attest"
       params:
-        hint: "Streaming SLI dashboard for TTFT and inter-token latency + alert config for streaming UIs"
-manualVerification: "For this Check (PERF: Streaming-specific SLIs (TTFT, inter-token latency) for
-  streaming UIs): inspect current evidence for [Streaming SLI dashboard for TTFT and inter-token
-  latency + alert config for streaming UIs] and confirm the pass condition holds — TTFT and
-  inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented
-  thresholds; series retained ≥30 days"
-falsePositiveGuidance: "(Performance & SLO Engineering): re-verify against a current artifact for
-  this specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest TTFT and inter-token
+          latency SLIs exist for each streaming AI surface with alerts on
+          documented thresholds and series retained ≥30 days (measuredAt ≤90
+          days).
+manualVerification: >
+  1) Confirm streaming AI surfaces (SSE/WebSocket/token streams) are in scope.
+  If none, score NOT_APPLICABLE. 2) Confirm TTFT SLIs exist per streaming
+  surface. 3) Confirm inter-token (or time-between-tokens) latency SLIs exist.
+  4) Confirm alerts fire on documented thresholds. 5) Confirm series retention
+  ≥30 days. 6) PASS only if SLIs + alerts + retention hold with measuredAt ≤90
+  days. PERF-M2 generic latency metrics alone do not prove TTFT/inter-token.
+  PERF-R4 ops dashboards alone do not prove streaming-specific SLIs. PERF-R2
+  capacity tests alone do not prove ongoing streaming SLIs.
+falsePositiveGuidance: >
+  Do not pass total request latency as TTFT. Do not pass token-count metrics as
+  inter-token latency. Do not pass alerts without documented thresholds. Do not
+  pass retention shorter than 30 days. Named exceptions need owner and expiry
+  ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Streaming-specific SLIs (TTFT, inter-token latency)
-    for streaming UIs"
-  - "Retain evidence artifacts required by this Check, starting with: Streaming SLI dashboard for
-    TTFT and inter-token latency + alert config for streaming UIs"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Instrument TTFT and inter-token latency SLIs for every streaming AI surface"
+  - "Wire alerts to documented thresholds; retain series ≥30 days"
+  - "Retain evidence under imports/ai-streaming-slis/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE — Service Level Objectives"
     url: "https://sre.google/sre-book/service-level-objectives/"
@@ -44,14 +63,17 @@ relatedRules:
   - "PERF-M3"
   - "PERF-R1"
   - "PERF-R2"
+  - "PERF-R4"
+  - "OBS-M1"
 tags:
   - "performance-slo"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "streaming"
+  - "ttft"
+  - "inter-token"
 applicability:
-  technologies:
-    - "cicd"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

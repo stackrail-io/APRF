@@ -6,8 +6,8 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:172b4b7034b3530ba435c602cbb3c70b1c5d721a290bcb2ec1d741edaf401718",
-  "ruleCount": 177,
+  "generatedAt": "sha256:223303b36395963ea441909a6c6ce5a76bdcafac0fcfd3d3dbb8eed7a25524ab",
+  "ruleCount": 178,
   "domains": [
     {
       "id": "security",
@@ -8994,26 +8994,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "PERF-M1",
       "category": "performance-slo",
       "title": "Critical AI user journeys must have documented latency and availability SLOs",
-      "description": "Critical AI user journeys shall have documented latency and availability SLOs",
-      "whyItMatters": "Critical AI user journeys shall have documented latency and availability SLOs Failing this leaves a production gap against: 100% of journeys marked critical have availability % and latency percentile targets recorded",
+      "description": "Every journey marked critical must have documented numeric availability and latency-percentile SLO targets in a maintained catalog.\n",
+      "whyItMatters": "Without written latency and availability targets, AI journeys cannot hold an error budget, page on burn, or prove readiness. Operators guess at “slow” instead of measuring against a shared contract.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of journeys marked critical have availability % and latency percentile targets recorded",
+      "passCondition": "100% of journeys marked critical have availability % and latency percentile targets recorded in an SLO catalog (catalog evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "SLO catalog with numeric targets per journey"
+        "SLO catalog listing critical AI journeys with numeric availability and latency targets",
+        "Coverage showing 100% of marked-critical journeys have both target types"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-journey-slo-catalog",
+            "params": {
+              "hint": "Discover an SLO catalog for critical AI journeys with availability % and latency percentile targets, plus 100% coverage evidence.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest 100% of journeys marked critical have availability % and latency percentile targets in a catalog (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (Critical AI user journeys must have documented latency and availability SLOs): inspect current evidence for [SLO catalog with numeric targets per journey] and confirm the pass condition holds — 100% of journeys marked critical have availability % and latency percentile targets recorded",
-      "falsePositiveGuidance": "(Performance & SLO Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm at least one AI journey is marked critical. If none, score NOT_APPLICABLE. 2) Confirm an SLO catalog (or equivalent registry) lists those journeys. 3) Confirm each critical journey has a numeric availability % and a latency percentile target (e.g. p95/p99). 4) PASS only if coverage is 100% with measuredAt ≤90 days. OBS-R3 dashboards/burn alerts alone do not prove a catalog. PERF-M2 emitted metrics alone do not prove written targets. PERF-R4 dashboards alone do not prove a catalog. Infra-only SLOs without AI journey scope do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a blank template catalog. Do not pass latency targets without availability (or the reverse). Do not pass partial coverage as 100%. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Critical AI user journeys must have documented latency and availability SLOs",
-        "Retain evidence artifacts required by this Check, starting with: SLO catalog with numeric targets per journey",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish an SLO catalog with availability % and latency percentile targets per critical AI journey",
+        "Close coverage gaps until 100% of marked-critical journeys are documented",
+        "Retain evidence under imports/ai-journey-slo-catalog/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -9030,18 +9044,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "PERF-M3",
         "PERF-R1",
         "PERF-R2",
-        "PERF-R3"
+        "PERF-R3",
+        "PERF-R4",
+        "OBS-R3"
       ],
       "tags": [
         "performance-slo",
         "mandatory",
-        "manual"
+        "hybrid",
+        "slo-catalog",
+        "latency",
+        "availability"
       ],
       "applicability": {
-        "technologies": [
-          "cicd",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -9051,34 +9067,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PERF-M2",
       "category": "performance-slo",
-      "title": "Online dashboards must track AI latency, error, and at least one quality or task-success signal",
-      "description": "Online dashboards shall track AI latency, error, and at least one quality or task-success signal",
-      "whyItMatters": "Online dashboards shall track AI latency, error, and at least one quality or task-success signal Failing this leaves a production gap against: Dashboard panels for latency, error rate, and ≥1 quality/task-success signal are live with freshness ≤ 15 minutes",
+      "title": "Production AI services must expose latency, error, and AI quality metrics",
+      "description": "Production AI services must collect and make available operational metrics for latency, error rate, and at least one AI-specific quality or task-success indicator.\n",
+      "whyItMatters": "Without emitted latency, error, and AI quality metrics, operators cannot monitor journeys, burn error budgets, or feed dashboards and alerts. Written SLOs (PERF-M1) stay aspirational until the underlying time series exist.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Dashboard panels for latency, error rate, and ≥1 quality/task-success signal are live with freshness ≤ 15 minutes",
+      "passCondition": "Metrics for latency, error rate, and at least one AI-specific quality or task-success indicator are collected and available for operational monitoring (metrics evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Dashboard URLs/config showing latency, error, and quality/task-success panels"
+        "Metric definitions or exporters covering latency, error rate, and ≥1 AI quality/task-success signal",
+        "Proof metrics are queryable/available for operational monitoring"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-ops-metrics",
+            "params": {
+              "hint": "Discover latency, error-rate, and AI quality/task-success metric definitions or exporters available for operational monitoring.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Dashboard URLs/config showing latency, error, and quality/task-success panels"
+              "hint": "If automation cannot prove coverage, attest latency, error rate, and ≥1 AI quality/task-success metric are collected and available for operational monitoring (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Online dashboards must track AI latency, error, and at least one quality or task-success signal): inspect current evidence for [Dashboard URLs/config showing latency, error, and quality/task-success panels] and confirm the pass condition holds — Dashboard panels for latency, error rate, and ≥1 quality/task-success signal are live with freshness ≤ 15 minutes",
-      "falsePositiveGuidance": "(Performance & SLO Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI services are in scope. If none, score NOT_APPLICABLE. 2) Confirm latency metrics are collected and queryable. 3) Confirm error-rate metrics are collected and queryable. 4) Confirm at least one AI-specific quality or task-success metric is collected and queryable. 5) PASS only if all three classes are available with measuredAt ≤90 days. PERF-R4 near-real-time dashboards alone do not prove collection. PERF-M1 SLO catalog alone does not prove emitted metrics. EVL-M3 covers online eval/refusal signals but does not replace latency/error ops metrics.\n",
+      "falsePositiveGuidance": "Do not pass infra CPU metrics as AI latency. Do not pass a single quality metric without latency and error. Do not pass metric stubs that are not queryable in an ops tool. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Online dashboards must track AI latency, error, and at least one quality or task-success signal",
-        "Retain evidence artifacts required by this Check, starting with: Dashboard URLs/config showing latency, error, and quality/task-success panels",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Emit latency, error-rate, and ≥1 AI quality/task-success metrics from production AI paths",
+        "Expose them in the ops metrics backend used for monitoring",
+        "Retain evidence under imports/ai-ops-metrics/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -9095,18 +9118,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "PERF-M3",
         "PERF-R1",
         "PERF-R2",
-        "PERF-R3"
+        "PERF-R3",
+        "PERF-R4",
+        "EVL-M3",
+        "OBS-R3"
       ],
       "tags": [
         "performance-slo",
         "mandatory",
-        "manual"
+        "hybrid",
+        "metrics",
+        "latency",
+        "error-rate",
+        "quality"
       ],
       "applicability": {
-        "technologies": [
-          "cicd",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -9117,33 +9144,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "PERF-M3",
       "category": "performance-slo",
       "title": "Alerting must exist when SLOs burn beyond defined thresholds",
-      "description": "Alerting shall exist when SLOs burn beyond defined thresholds",
-      "whyItMatters": "Alerting shall exist when SLOs burn beyond defined thresholds Failing this leaves a production gap against: Alert policies exist for each critical journey SLO; alert test or documented fire demonstrates notification path works",
+      "description": "Every critical AI journey SLO must have burn-rate (or equivalent) alert policies, and a test or documented fire must prove the notification path works.\n",
+      "whyItMatters": "Written SLOs (PERF-M1) and emitted metrics (PERF-M2) still fail operators if burn never pages anyone. Alert policies with a proven notify path turn error budgets into incidents before customers escalate.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Alert policies exist for each critical journey SLO; alert test or documented fire demonstrates notification path works",
+      "passCondition": "Alert policies exist for each critical journey SLO; an alert test or documented fire demonstrates the notification path works (alert evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Burn-rate or SLO alert policies"
+        "Burn-rate or SLO alert policies covering each critical AI journey SLO",
+        "Alert test or documented fire proving notification path"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-slo-burn-alerts",
+            "params": {
+              "hint": "Discover burn-rate/SLO alert policies for critical AI journeys and proof the notification path was tested or documented as firing.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Burn-rate or SLO alert policies"
+              "hint": "If automation cannot prove coverage, attest alert policies exist for each critical journey SLO and a test or documented fire proves the notify path (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Alerting must exist when SLOs burn beyond defined thresholds): inspect current evidence for [Burn-rate or SLO alert policies] and confirm the pass condition holds — Alert policies exist for each critical journey SLO; alert test or documented fire demonstrates notification path works",
-      "falsePositiveGuidance": "(Performance & SLO Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm critical AI journeys with SLOs are in scope. If none, score NOT_APPLICABLE. 2) Confirm burn-rate or SLO alert policies cover each critical journey SLO. 3) Confirm a synthetic alert test or documented real fire proves notification reaches the owned channel. 4) PASS only if coverage + notify proof hold with measuredAt ≤90 days. PERF-M1 catalog alone does not prove alerts. PERF-R4 dashboards alone do not prove paging. OBS-R3 recommended burn dashboards alone do not replace this mandatory notify proof. CHG-R3 quality auto-rollback alone does not prove journey SLO burn alerts. COST-M2 spend alerts do not satisfy latency/availability SLO burn.\n",
+      "falsePositiveGuidance": "Do not pass alert YAML stubs without journey SLO linkage. Do not pass dashboards without notify destinations. Do not pass untested alert rules. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Alerting must exist when SLOs burn beyond defined thresholds",
-        "Retain evidence artifacts required by this Check, starting with: Burn-rate or SLO alert policies",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Wire burn-rate/SLO alerts for every critical AI journey SLO",
+        "Run a synthetic fire (or retain a documented real fire) proving notify path",
+        "Retain evidence under imports/ai-slo-burn-alerts/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -9160,18 +9194,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "PERF-M2",
         "PERF-R1",
         "PERF-R2",
-        "PERF-R3"
+        "PERF-R3",
+        "PERF-R4",
+        "OBS-R3",
+        "CHG-R3",
+        "COST-M2"
       ],
       "tags": [
         "performance-slo",
         "mandatory",
-        "manual"
+        "hybrid",
+        "burn-rate",
+        "alerting"
       ],
       "applicability": {
-        "technologies": [
-          "cicd",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -9182,33 +9219,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "PERF-R1",
       "category": "performance-slo",
       "title": "Production systems should have error budgets formally gate release velocity for AI features",
-      "description": "Error budgets formally gate release velocity for AI features",
-      "whyItMatters": "Error budgets formally gate release velocity for AI features Failing this leaves a production gap against: When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days",
+      "description": "When a critical AI journey's error budget is exhausted, release velocity should be blocked or require explicit risk acceptance, with ≥1 gated event or drill in the last 90 days.\n",
+      "whyItMatters": "Alerts (PERF-M3) without a release consequence let teams ship into a burned budget. Formal freeze-or-accept gates turn error budgets into change control so AI features recover SLOs before the next experiment lands.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days",
+      "passCondition": "When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days (gate evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Error-budget policy linking AI SLOs to release freezes + last budget burn report that gated a release"
+        "Error-budget policy linking AI SLOs to release freezes or risk acceptance",
+        "Last budget-burn gated release or drill ≤90 days"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-error-budget-release-gate",
+            "params": {
+              "hint": "Discover error-budget policy linking AI SLOs to release freeze/risk acceptance plus a gated event or drill ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Error-budget policy linking AI SLOs to release freezes + last budget burn report that gated a release"
+              "hint": "If automation cannot prove coverage, attest exhausted critical-journey error budgets block releases or require risk acceptance, with ≥1 gated event or drill in 90 days (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Error budgets formally gate release velocity for AI features): inspect current evidence for [Error-budget policy linking AI SLOs to release freezes + last budget burn report that gated a release] and confirm the pass condition holds — When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days",
-      "falsePositiveGuidance": "(Performance & SLO Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm critical AI journeys with error budgets are in scope. If none, score NOT_APPLICABLE. 2) Confirm a written policy links exhausted budgets to release freeze or explicit risk acceptance. 3) Confirm ≥1 real gated release or drill in the last 90 days. 4) PASS only if policy + recent gate hold with measuredAt ≤90 days. PERF-M3 burn alerts alone do not prove release gating. PERF-R4 dashboards alone do not prove freeze policy. CHG-R3 quality auto-rollback alone does not prove error-budget release velocity gates.\n",
+      "falsePositiveGuidance": "Do not pass aspirational policy without a gated event/drill ≤90 days. Do not pass infra-only freezes without AI journey SLO linkage. Do not pass risk acceptances without named owner/expiry. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Error budgets formally gate release velocity for AI features",
-        "Retain evidence artifacts required by this Check, starting with: Error-budget policy linking AI SLOs to release freezes + last budget burn report that gated a release",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish an error-budget policy that freezes AI releases or requires risk acceptance when burned",
+        "Run or retain ≥1 gated event/drill ≤90 days",
+        "Retain evidence under imports/ai-error-budget-release-gate/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -9225,18 +9269,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "PERF-M2",
         "PERF-M3",
         "PERF-R2",
-        "PERF-R3"
+        "PERF-R3",
+        "PERF-R4",
+        "CHG-R3",
+        "CHG-M1"
       ],
       "tags": [
         "performance-slo",
         "recommended",
-        "manual"
+        "hybrid",
+        "error-budget",
+        "release-gate"
       ],
       "applicability": {
-        "technologies": [
-          "cicd",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -9246,34 +9292,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PERF-R2",
       "category": "performance-slo",
-      "title": "Production systems should have capacity and load tests include adversarial long-prompt and agent-loop scenarios",
-      "description": "Capacity and load tests include adversarial long-prompt and agent-loop scenarios",
-      "whyItMatters": "Capacity and load tests include adversarial long-prompt and agent-loop scenarios Failing this leaves a production gap against: Last capacity test ≤90 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurrency",
+      "title": "Production systems should include adversarial long-prompt and agent-loop capacity tests",
+      "description": "Capacity and load tests should include adversarial long-prompt and multi-step agent-loop scenarios within 90 days, with p95 latency and error rate staying within SLO under documented concurrency.\n",
+      "whyItMatters": "Generic HTTP load tests miss AI failure modes—context blow-ups, long prompts, and recursive agent tool loops—that burn latency and error budgets. Adversarial capacity scenarios prove journeys still meet SLOs under realistic AI stress.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Last capacity test ≤90 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurrency",
+      "passCondition": "Last capacity test ≤90 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurrency (capacity evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Load-test plan including long-prompt and agent-loop scenarios + latest capacity test report"
+        "Load-test plan including long-prompt and agent-loop scenarios",
+        "Latest capacity test report ≤90 days showing p95/error within SLO at documented concurrency"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-adversarial-capacity-tests",
+            "params": {
+              "hint": "Discover capacity/load-test plans and reports covering adversarial long prompts, multi-step agent loops, and SLO compliance under documented concurrency.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Load-test plan including long-prompt and agent-loop scenarios + latest capacity test report"
+              "hint": "If automation cannot prove coverage, attest last capacity test ≤90 days included adversarial long prompts and multi-step agent loops with p95/error within SLO under documented concurrency (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Capacity and load tests include adversarial long-prompt and agent-loop scenarios): inspect current evidence for [Load-test plan including long-prompt and agent-loop scenarios + latest capacity test report] and confirm the pass condition holds — Last capacity test ≤90 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurrency",
-      "falsePositiveGuidance": "(Performance & SLO Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production AI paths with capacity risk are in scope. If none, score NOT_APPLICABLE. 2) Confirm a load/capacity plan includes adversarial long-prompt scenarios. 3) Confirm multi-step agent-loop scenarios are included (or N/A only if no agents). 4) Confirm latest run ≤90 days kept p95 latency and error rate within SLO at documented concurrency. 5) PASS only if scenarios + SLO result + freshness hold with measuredAt ≤90 days. PERF-R1 error-budget freezes alone do not prove capacity tests. PERF-R3 streaming SLIs alone do not prove adversarial load. Generic k6/JMeter without AI scenarios do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass plans without a report ≤90 days. Do not pass short-prompt-only load as adversarial long-prompt coverage. Do not pass concurrency docs without measured p95/error vs SLO. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Capacity and load tests include adversarial long-prompt and agent-loop scenarios",
-        "Retain evidence artifacts required by this Check, starting with: Load-test plan including long-prompt and agent-loop scenarios + latest capacity test report",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Add adversarial long-prompt and multi-step agent-loop scenarios to capacity/load tests",
+        "Run ≤90 days and retain p95/error vs SLO at documented concurrency",
+        "Retain evidence under imports/ai-adversarial-capacity-tests/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -9290,18 +9343,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "PERF-M2",
         "PERF-M3",
         "PERF-R1",
-        "PERF-R3"
+        "PERF-R3",
+        "PERF-R4",
+        "AGN-M2"
       ],
       "tags": [
         "performance-slo",
         "recommended",
-        "manual"
+        "hybrid",
+        "capacity",
+        "load-test",
+        "adversarial"
       ],
       "applicability": {
-        "technologies": [
-          "cicd",
-          "kubernetes"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -9311,34 +9366,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "PERF-R3",
       "category": "performance-slo",
-      "title": "Production systems should have streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs",
-      "description": "Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs",
-      "whyItMatters": "Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs Failing this leaves a production gap against: TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained ≥30 days",
+      "title": "Production systems should have streaming-specific SLIs (TTFT, inter-token latency)",
+      "description": "Each streaming AI surface should expose TTFT and inter-token latency SLIs, with alerts on documented thresholds and metric series retained ≥30 days.\n",
+      "whyItMatters": "End-to-end request latency hides streaming UX failures—slow first tokens and stalling token streams. TTFT and inter-token SLIs with alerts make those stalls operable before users abandon the session.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained ≥30 days",
+      "passCondition": "TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained ≥30 days (streaming evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Streaming SLI dashboard for TTFT and inter-token latency + alert config for streaming UIs"
+        "Streaming SLI definitions/dashboard for TTFT and inter-token latency",
+        "Alert config on documented thresholds + retention ≥30 days"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-streaming-slis",
+            "params": {
+              "hint": "Discover TTFT and inter-token latency SLIs, alerts, and ≥30-day retention for streaming AI surfaces.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Streaming SLI dashboard for TTFT and inter-token latency + alert config for streaming UIs"
+              "hint": "If automation cannot prove coverage, attest TTFT and inter-token latency SLIs exist for each streaming AI surface with alerts on documented thresholds and series retained ≥30 days (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (PERF: Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs): inspect current evidence for [Streaming SLI dashboard for TTFT and inter-token latency + alert config for streaming UIs] and confirm the pass condition holds — TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained ≥30 days",
-      "falsePositiveGuidance": "(Performance & SLO Engineering): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm streaming AI surfaces (SSE/WebSocket/token streams) are in scope. If none, score NOT_APPLICABLE. 2) Confirm TTFT SLIs exist per streaming surface. 3) Confirm inter-token (or time-between-tokens) latency SLIs exist. 4) Confirm alerts fire on documented thresholds. 5) Confirm series retention ≥30 days. 6) PASS only if SLIs + alerts + retention hold with measuredAt ≤90 days. PERF-M2 generic latency metrics alone do not prove TTFT/inter-token. PERF-R4 ops dashboards alone do not prove streaming-specific SLIs. PERF-R2 capacity tests alone do not prove ongoing streaming SLIs.\n",
+      "falsePositiveGuidance": "Do not pass total request latency as TTFT. Do not pass token-count metrics as inter-token latency. Do not pass alerts without documented thresholds. Do not pass retention shorter than 30 days. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Streaming-specific SLIs (TTFT, inter-token latency) for streaming UIs",
-        "Retain evidence artifacts required by this Check, starting with: Streaming SLI dashboard for TTFT and inter-token latency + alert config for streaming UIs",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Instrument TTFT and inter-token latency SLIs for every streaming AI surface",
+        "Wire alerts to documented thresholds; retain series ≥30 days",
+        "Retain evidence under imports/ai-streaming-slis/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -9355,18 +9417,94 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "PERF-M2",
         "PERF-M3",
         "PERF-R1",
-        "PERF-R2"
+        "PERF-R2",
+        "PERF-R4",
+        "OBS-M1"
       ],
       "tags": [
         "performance-slo",
         "recommended",
-        "manual"
+        "hybrid",
+        "streaming",
+        "ttft",
+        "inter-token"
       ],
       "applicability": {
-        "technologies": [
-          "cicd",
-          "kubernetes"
-        ],
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 4
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "PERF-R4",
+      "category": "performance-slo",
+      "title": "Online dashboards should present latency, error, throughput, and AI quality metrics near real time",
+      "description": "Near-real-time operational dashboards should visualize latency, error rate, throughput, resource utilization, and AI quality metrics for production services.\n",
+      "whyItMatters": "Collected metrics (PERF-M2) still fail operators if nobody can see them under incident pressure. Near-real-time dashboards turn latency, error, throughput, resource, and quality series into a shared operational picture.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "recommended",
+      "passCondition": "Near-real-time operational dashboards visualize latency, error rate, throughput, resource utilization, and AI quality metrics for production services (dashboard evidence measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Dashboard URL/config covering latency, error rate, throughput, resource utilization, and AI quality",
+        "Near-real-time refresh evidence (e.g. panel freshness ≤15 minutes)"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-ops-dashboards",
+            "params": {
+              "hint": "Discover near-real-time dashboards covering latency, error, throughput, resource utilization, and AI quality metrics.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest near-real-time dashboards visualize latency, error rate, throughput, resource utilization, and AI quality metrics (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm production AI services with ops metrics are in scope. If none, score NOT_APPLICABLE. 2) Confirm dashboards show latency and error rate. 3) Confirm throughput and resource-utilization panels. 4) Confirm ≥1 AI quality panel. 5) Confirm near-real-time refresh (e.g. freshness ≤15 minutes). 6) PASS only if coverage + freshness hold with measuredAt ≤90 days. PERF-M2 metric exporters alone do not prove dashboards. OBS-R3 SLO burn alerts alone do not prove throughput/resource panels. EVL-M3 eval dashboards alone do not prove full ops coverage.\n",
+      "falsePositiveGuidance": "Do not pass static weekly PDF exports as near-real-time. Do not pass latency-only boards missing throughput/resource/quality. Do not pass dashboards older than the freshness window. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Build near-real-time dashboards covering latency, error, throughput, resource utilization, and AI quality",
+        "Keep panel freshness appropriate for incident response (e.g. ≤15 minutes)",
+        "Retain evidence under imports/ai-ops-dashboards/",
+        "Time-box gaps with owner and expiry ≤90 days"
+      ],
+      "references": [
+        {
+          "title": "Google SRE — Service Level Objectives",
+          "url": "https://sre.google/sre-book/service-level-objectives/"
+        },
+        {
+          "title": "AWS Well-Architected — Performance Efficiency",
+          "url": "https://aws.amazon.com/architecture/well-architected/"
+        }
+      ],
+      "relatedRules": [
+        "PERF-M1",
+        "PERF-M2",
+        "PERF-M3",
+        "PERF-R1",
+        "PERF-R2",
+        "PERF-R3",
+        "OBS-R3",
+        "EVL-M3"
+      ],
+      "tags": [
+        "performance-slo",
+        "recommended",
+        "hybrid",
+        "dashboard",
+        "near-real-time"
+      ],
+      "applicability": {
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },

@@ -1,37 +1,56 @@
 id: "PERF-M2"
 category: "performance-slo"
-title: "Online dashboards must track AI latency, error, and at least one quality or task-success signal"
-description: "Online dashboards shall track AI latency, error, and at least one quality or task-success signal"
-whyItMatters: "Online dashboards shall track AI latency, error, and at least one quality or
-  task-success signal Failing this leaves a production gap against: Dashboard panels for latency,
-  error rate, and ≥1 quality/task-success signal are live with freshness ≤ 15 minutes"
+title: "Production AI services must expose latency, error, and AI quality metrics"
+description: >
+  Production AI services must collect and make available operational metrics
+  for latency, error rate, and at least one AI-specific quality or task-success
+  indicator.
+whyItMatters: >
+  Without emitted latency, error, and AI quality metrics, operators cannot
+  monitor journeys, burn error budgets, or feed dashboards and alerts. Written
+  SLOs (PERF-M1) stay aspirational until the underlying time series exist.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Dashboard panels for latency, error rate, and ≥1 quality/task-success signal are
-  live with freshness ≤ 15 minutes"
+passCondition: >
+  Metrics for latency, error rate, and at least one AI-specific quality or
+  task-success indicator are collected and available for operational monitoring
+  (metrics evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Dashboard URLs/config showing latency, error, and quality/task-success panels"
+  - "Metric definitions or exporters covering latency, error rate, and ≥1 AI quality/task-success signal"
+  - "Proof metrics are queryable/available for operational monitoring"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-ops-metrics"
+      params:
+        hint: >
+          Discover latency, error-rate, and AI quality/task-success metric
+          definitions or exporters available for operational monitoring.
     - id: "manual-attest"
       params:
-        hint: "Dashboard URLs/config showing latency, error, and quality/task-success panels"
-manualVerification: "For this Check (Online dashboards must track AI latency, error, and at least
-  one quality or task-success signal): inspect current evidence for [Dashboard URLs/config showing
-  latency, error, and quality/task-success panels] and confirm the pass condition holds — Dashboard
-  panels for latency, error rate, and ≥1 quality/task-success signal are live with freshness ≤ 15
-  minutes"
-falsePositiveGuidance: "(Performance & SLO Engineering): re-verify against a current artifact for
-  this specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest latency, error rate, and
+          ≥1 AI quality/task-success metric are collected and available for
+          operational monitoring (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI services are in scope. If none, score
+  NOT_APPLICABLE. 2) Confirm latency metrics are collected and queryable.
+  3) Confirm error-rate metrics are collected and queryable. 4) Confirm at
+  least one AI-specific quality or task-success metric is collected and
+  queryable. 5) PASS only if all three classes are available with measuredAt
+  ≤90 days. PERF-R4 near-real-time dashboards alone do not prove collection.
+  PERF-M1 SLO catalog alone does not prove emitted metrics. EVL-M3 covers
+  online eval/refusal signals but does not replace latency/error ops metrics.
+falsePositiveGuidance: >
+  Do not pass infra CPU metrics as AI latency. Do not pass a single quality
+  metric without latency and error. Do not pass metric stubs that are not
+  queryable in an ops tool. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Online dashboards must track AI latency, error, and at least one
-    quality or task-success signal"
-  - "Retain evidence artifacts required by this Check, starting with: Dashboard URLs/config showing
-    latency, error, and quality/task-success panels"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Emit latency, error-rate, and ≥1 AI quality/task-success metrics from production AI paths"
+  - "Expose them in the ops metrics backend used for monitoring"
+  - "Retain evidence under imports/ai-ops-metrics/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE — Service Level Objectives"
     url: "https://sre.google/sre-book/service-level-objectives/"
@@ -43,14 +62,19 @@ relatedRules:
   - "PERF-R1"
   - "PERF-R2"
   - "PERF-R3"
+  - "PERF-R4"
+  - "EVL-M3"
+  - "OBS-R3"
 tags:
   - "performance-slo"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "metrics"
+  - "latency"
+  - "error-rate"
+  - "quality"
 applicability:
-  technologies:
-    - "cicd"
-    - "kubernetes"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

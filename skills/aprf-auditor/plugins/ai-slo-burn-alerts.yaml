@@ -1,0 +1,25 @@
+id: ai-slo-burn-alerts
+title: Critical-journey SLO burn alerts + notify proof (PERF-M3)
+version: "0.2.0"
+executor: collectors/ai-slo-burn-alerts.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-slo-burn-alerts]
+inputs:
+  - "Target repo (burn-rate/SLO alert policies + notify/test-fire evidence)"
+  - "Optional suite: aprf-assessment/imports/ai-slo-burn-alerts/*.{json}"
+collect:
+  - "Detect AI SLO burn-alert and notify-proof signals"
+  - "Ingest coverage; write ai-slo-burn-alerts-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-slo-burn-alerts/*"
+  signals: [ai-slo-burn-alerts, perf-m3, repo-ai-slo-burn-alerts]
+mapsToChecks: [PERF-M3]
+whenUnavailable: >
+  Alert signals alone are PARTIAL. PERF-M3 PASS needs
+  alertPoliciesCoverCriticalJourneySlos,
+  notificationPathProvenByTestOrDocumentedFire, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline burn-alert heuristics + optional imported JSON.

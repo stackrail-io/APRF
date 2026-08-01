@@ -1,0 +1,27 @@
+id: ai-streaming-slis
+title: Streaming TTFT + inter-token SLIs (PERF-R3)
+version: "0.2.0"
+executor: collectors/ai-streaming-slis.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-streaming-slis]
+inputs:
+  - "Target repo (TTFT/inter-token SLIs, alerts, ≥30d retention for streaming surfaces)"
+  - "Optional suite: aprf-assessment/imports/ai-streaming-slis/*.{json}"
+collect:
+  - "Detect streaming AI SLI signals"
+  - "Ingest coverage; write ai-streaming-slis-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-streaming-slis/*"
+  signals: [ai-streaming-slis, perf-r3, repo-ai-streaming-slis]
+mapsToChecks: [PERF-R3]
+whenUnavailable: >
+  Streaming signals alone are PARTIAL. PERF-R3 PASS needs
+  ttftSliConfiguredForStreamingSurfaces,
+  interTokenLatencySliConfiguredForStreamingSurfaces,
+  streamingSliAlertsConfigured, streamingSeriesRetainedAtLeast30Days,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline streaming-SLI heuristics + optional imported JSON.

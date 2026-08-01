@@ -1,0 +1,25 @@
+id: ai-error-budget-release-gate
+title: Error-budget gates AI release velocity (PERF-R1)
+version: "0.2.0"
+executor: collectors/ai-error-budget-release-gate.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-error-budget-release-gate]
+inputs:
+  - "Target repo (error-budget policy → freeze/risk acceptance + gated event/drill)"
+  - "Optional suite: aprf-assessment/imports/ai-error-budget-release-gate/*.{json}"
+collect:
+  - "Detect AI error-budget release-gate signals"
+  - "Ingest coverage; write ai-error-budget-release-gate-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-error-budget-release-gate/*"
+  signals: [ai-error-budget-release-gate, perf-r1, repo-ai-error-budget-release-gate]
+mapsToChecks: [PERF-R1]
+whenUnavailable: >
+  Gate signals alone are PARTIAL. PERF-R1 PASS needs
+  errorBudgetPolicyLinksAiSlosToReleaseFreezeOrRiskAcceptance,
+  gatedEventOrDrillWithin90Days, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline error-budget gate heuristics + optional imported JSON.
