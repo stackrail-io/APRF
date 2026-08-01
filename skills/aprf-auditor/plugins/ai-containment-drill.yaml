@@ -1,0 +1,26 @@
+id: ai-containment-drill
+title: AI containment drill — pause, disable tools, rollback (INC-M2)
+version: "0.2.0"
+executor: collectors/ai-containment-drill.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-containment-drill]
+inputs:
+  - "Target repo (containment runbooks + drill records)"
+  - "Optional suite: aprf-assessment/imports/ai-containment-drill/*.{json}"
+collect:
+  - "Detect pause/disable/rollback containment + drill/time-budget signals"
+  - "Ingest coverage; write ai-containment-drill-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-containment-drill/*"
+  signals: [ai-containment-drill, inc-m2, repo-ai-containment-drill]
+mapsToChecks: [INC-M2]
+whenUnavailable: >
+  Containment signals alone are PARTIAL. INC-M2 PASS needs
+  pauseAgentsDemonstrated, disableToolsDemonstrated,
+  rollbackPromptOrModelDemonstrated, withinDocumentedTimeBudgets,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline containment heuristics + optional imported JSON.

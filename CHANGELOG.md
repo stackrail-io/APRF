@@ -8,6 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
+- Rewrote **incident-readiness** **INC-M1**–**INC-M2** and **INC-R1**/**INC-R3**; demoted **INC-M3 → INC-R2** and **INC-M4 → INC-R4** (regulated 56→55, tier3-only 17→16); hybrid collectors; synced `aprf-spec.json`.
 - Rewrote **change management** from template stub to hybrid Check + collectors; cleared `technologies` filter; synced `aprf-spec.json`.
 - Rewrote **prompt-engineering** from template stub to hybrid Check + collectors; cleared `technologies` filter; synced `aprf-spec.json`.
 - Rewrote **model-governance** from template stub to hybrid Check + collector; cleared cloud-only `technologies`; synced `aprf-spec.json`.

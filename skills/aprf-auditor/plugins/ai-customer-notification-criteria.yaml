@@ -1,0 +1,30 @@
+id: ai-customer-notification-criteria
+title: AI customer notification criteria (INC-R3)
+version: "0.2.0"
+executor: collectors/ai-customer-notification-criteria.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-customer-notification-criteria]
+inputs:
+  - "Target repo (customer notification criteria + drill/incident samples)"
+  - "Optional suite: aprf-assessment/imports/ai-customer-notification-criteria/*.{json}"
+collect:
+  - "Detect AI notify/no-notify criteria + followed samples"
+  - "Ingest coverage; write ai-customer-notification-criteria-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-customer-notification-criteria/*"
+  signals:
+    [
+      ai-customer-notification-criteria,
+      inc-r3,
+      repo-ai-customer-notification-criteria,
+    ]
+mapsToChecks: [INC-R3]
+whenUnavailable: >
+  Notification signals alone are PARTIAL. INC-R3 PASS needs
+  criteriaMapEventTypesToNotifyDecision,
+  lastDrillOrIncidentFollowedCriteriaWithin12Months, measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline notification heuristics + optional imported JSON.

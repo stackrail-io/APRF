@@ -1,0 +1,25 @@
+id: ai-incident-tabletop
+title: AI-focused incident tabletop ≤180 days (INC-R4)
+version: "0.2.0"
+executor: collectors/ai-incident-tabletop.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds: [repo-ai-incident-tabletop]
+inputs:
+  - "Target repo (AI tabletop plans + after-action reports)"
+  - "Optional suite: aprf-assessment/imports/ai-incident-tabletop/*.{json}"
+collect:
+  - "Detect AI-focused tabletop + after-action signals"
+  - "Ingest coverage; write ai-incident-tabletop-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-incident-tabletop/*"
+  signals: [ai-incident-tabletop, inc-r4, repo-ai-incident-tabletop]
+mapsToChecks: [INC-R4]
+whenUnavailable: >
+  Tabletop signals alone are PARTIAL. INC-R4 PASS needs
+  aiFocusedTabletopCompletedWithin180Days, retainedActionsWithOwners,
+  measuredAt ≤90 days.
+live:
+  required: false
+  note: Offline tabletop heuristics + optional imported JSON.

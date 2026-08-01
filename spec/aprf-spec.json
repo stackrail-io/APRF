@@ -621,8 +621,7 @@
         "EVL-M4",
         "HUM-M4",
         "REL-M7",
-        "REL-M8",
-        "INC-M4"
+        "REL-M8"
       ],
       "rationale": [
         "Includes every Core gate — regulated systems must still clear production minimums.",
@@ -4653,59 +4652,59 @@
       "mandatoryChecks": [
         {
           "id": "INC-M1",
-          "requirement": "AI-specific incident playbooks shall exist for abuse, leakage, bad actions, and provider outage",
-          "artifact": "Playbook set covering the four scenarios with owners",
-          "passCondition": "Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date ≤ 12 months",
+          "requirement": "Production AI systems must maintain incident playbooks for abuse, data leakage, bad agent/tool actions, and provider outage—each with a named owner and a review date within the last 12 months.",
+          "artifact": "Playbook set covering abuse, leakage, bad actions, and provider outage with owners + Review dates ≤12 months for each of the four playbooks",
+          "passCondition": "Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date ≤12 months (playbook evidence measuredAt ≤90 days).",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "INC-M2",
-          "requirement": "On-call shall be able to execute containment: pause agents, disable tools, roll back prompts/models",
-          "artifact": "Containment runbook + drill record exercising pause, disable, and rollback",
-          "passCondition": "Drill in last 90 days successfully demonstrated pause agents, disable tools, and roll back prompt/model within documented time budgets",
-          "method": "manual",
+          "requirement": "On-call must be able to pause agents, disable tools, and roll back prompts or models, proven by a drill in the last 90 days completed within documented time budgets.",
+          "artifact": "Containment runbook covering pause agents, disable tools, and prompt/model rollback + Drill record ≤90 days showing all three actions within documented time budgets",
+          "passCondition": "Drill in last 90 days successfully demonstrated pause agents, disable tools, and roll back prompt/model within documented time budgets (drill evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
-        },
-        {
-          "id": "INC-M3",
-          "requirement": "Post-incident reviews shall produce tracked actions against APRF pillars",
-          "artifact": "Post-incident review template + sample reviews with linked actions",
-          "passCondition": "100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale",
-          "method": "manual",
-          "requiredFromLevel": 3,
-          "minCriticality": 2
-        },
-        {
-          "id": "INC-M4",
-          "requirement": "Regular tabletop exercises shall cover AI-specific incidents",
-          "artifact": "Tabletop plan + dated after-action report for an AI incident scenario",
-          "passCondition": "PASS if an AI-focused tabletop completed ≤180 days with retained actions and owners",
-          "method": "manual",
-          "requiredFromLevel": 4,
-          "minCriticality": 3
         }
       ],
       "recommendedChecks": [
         {
           "id": "INC-R1",
-          "requirement": "Page-worthy alerts for safety and quality signals, not only infra",
-          "artifact": "On-call alert policy export listing safety/quality pages + last 90 days of triggered incidents (or drill tickets)",
-          "passCondition": "At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and owner; policy reviewed ≤90 days ago",
-          "method": "manual",
+          "requirement": "On-call should receive page-worthy alerts for at least two non-infra AI safety/quality signals, each with a documented threshold and owner, and a policy reviewed within 90 days.",
+          "artifact": "On-call alert policy export listing safety/quality pages + Last 90 days of triggered incidents or drill tickets for those pages",
+          "passCondition": "At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and owner; policy reviewed ≤90 days ago (alert evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
+          "id": "INC-R2",
+          "requirement": "SEV-eligible AI incidents should receive a post-incident review with at least one tracked action mapped to an APRF pillar—or an explicit no-action rationale.",
+          "artifact": "Post-incident review template requiring APRF pillar mapping + Last-90-day coverage: SEV-eligible AI reviews with tracked actions or no-action rationale",
+          "passCondition": "100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale (review evidence measuredAt ≤90 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 3,
+          "minCriticality": 2
+        },
+        {
           "id": "INC-R3",
-          "requirement": "Customer notification criteria for AI-related events",
-          "artifact": "Customer notification criteria for AI-related events + last drill or real notification sample",
-          "passCondition": "Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps",
-          "method": "manual",
+          "requirement": "Teams should maintain criteria that map AI event types to notify / no-notify decisions, and show a drill or real notification ≤12 months that followed those criteria with timestamps.",
+          "artifact": "Customer notification criteria for AI-related events + Last drill or real notification sample ≤12 months with timestamps",
+          "passCondition": "Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps (notification evidence measuredAt ≤90 days).",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
+        },
+        {
+          "id": "INC-R4",
+          "requirement": "Teams should complete an AI-focused incident tabletop at least every 180 days and retain an after-action report with actions and owners.",
+          "artifact": "Tabletop plan for an AI-specific incident scenario + Dated after-action report ≤180 days with retained actions and owners",
+          "passCondition": "An AI-focused tabletop completed ≤180 days with retained actions and owners (tabletop evidence measuredAt ≤90 days).",
+          "method": "hybrid",
+          "requiredFromLevel": 4,
+          "minCriticality": 3
         }
       ],
       "evidenceRequired": [

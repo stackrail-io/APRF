@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:97b7754b721e5fc7db654ea33460c2a220d1dc6ee9b33b2cea9880e2c64ee37c",
+  "generatedAt": "sha256:39fd54009ea4e4efcbf4b92c3bdeea8b9b3d00de6279eb1169d3392d0c1bf461",
   "ruleCount": 177,
   "domains": [
     {
@@ -6324,37 +6324,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "INC-M1",
       "category": "incident-readiness",
       "title": "AI-specific incident playbooks must exist for abuse, leakage, bad actions, and provider outage",
-      "description": "AI-specific incident playbooks shall exist for abuse, leakage, bad actions, and provider outage",
-      "whyItMatters": "AI-specific incident playbooks shall exist for abuse, leakage, bad actions, and provider outage Failing this leaves a production gap against: Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date ≤ 12 months",
+      "description": "Production AI systems must maintain incident playbooks for abuse, data leakage, bad agent/tool actions, and provider outage—each with a named owner and a review date within the last 12 months.\n",
+      "whyItMatters": "Generic outage runbooks do not cover AI-specific failure modes. Without owned, recently reviewed playbooks for abuse, leakage, bad actions, and provider loss, on-call improvises under pressure and containment is slow or incomplete.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date ≤ 12 months",
+      "passCondition": "Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date ≤12 months (playbook evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Playbook set covering the four scenarios with owners"
+        "Playbook set covering abuse, leakage, bad actions, and provider outage with owners",
+        "Review dates ≤12 months for each of the four playbooks"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
             "id": "repo-incident-playbooks",
-            "params": {}
+            "params": {
+              "hint": "Discover AI-specific incident playbooks for abuse, leakage, bad actions, and provider outage, plus owner and review-date coverage.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Playbook set covering the four scenarios with owners"
+              "hint": "If automation cannot prove coverage, attest all four playbooks exist with owners and review dates ≤12 months (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (AI-specific incident playbooks must exist for abuse, leakage, bad actions, and provider outage): inspect current evidence for [Playbook set covering the four scenarios with owners] and confirm the pass condition holds — Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date ≤ 12 months",
-      "falsePositiveGuidance": "(Incident Readiness): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm a production AI system is in scope. If none, score NOT_APPLICABLE. 2) Confirm playbooks exist for abuse, leakage, bad actions, and provider outage. 3) Confirm each has a named owner. 4) Confirm each was reviewed within the last 12 months. 5) PASS only if all four + owners + fresh reviews hold with measuredAt ≤90 days. INC-M2 containment drills alone do not prove the four playbooks. Generic SRE incident docs that omit AI scenarios do not satisfy. A single combined doc may pass only if it clearly covers all four scenarios with owners and review dates.\n",
+      "falsePositiveGuidance": "Do not pass placeholder stubs without owners or review dates. Do not pass reviews older than 12 months. Do not pass a provider-outage playbook that only covers non-AI infrastructure. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: AI-specific incident playbooks must exist for abuse, leakage, bad actions, and provider outage",
-        "Retain evidence artifacts required by this Check, starting with: Playbook set covering the four scenarios with owners",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Author and own playbooks for abuse, leakage, bad actions, and provider outage",
+        "Review each playbook on a ≤12-month cadence and retain dates",
+        "Retain evidence under imports/incident-playbooks/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -6368,20 +6371,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "relatedRules": [
         "INC-M2",
-        "INC-M3",
-        "INC-M4",
+        "INC-R2",
+        "INC-R4",
         "INC-R1",
-        "INC-R3"
+        "INC-R3",
+        "AGN-M3",
+        "CHG-M2"
       ],
       "tags": [
         "incident-readiness",
         "mandatory",
-        "hybrid"
+        "hybrid",
+        "playbooks",
+        "ai-incidents"
       ],
       "applicability": {
-        "technologies": [
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -6392,33 +6397,40 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "INC-M2",
       "category": "incident-readiness",
       "title": "On-call must be able to execute containment: pause agents, disable tools, roll back prompts/models",
-      "description": "On-call shall be able to execute containment: pause agents, disable tools, roll back prompts/models",
-      "whyItMatters": "On-call shall be able to execute containment: pause agents, disable tools, roll back prompts/models Failing this leaves a production gap against: Drill in last 90 days successfully demonstrated pause agents, disable tools, and roll back prompt/model within documented time budgets",
+      "description": "On-call must be able to pause agents, disable tools, and roll back prompts or models, proven by a drill in the last 90 days completed within documented time budgets.\n",
+      "whyItMatters": "Playbooks alone do not stop a live AI incident. On-call needs practiced containment—pause, disable tools, roll back—within known time budgets so blast radius shrinks before customers absorb more damage.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Drill in last 90 days successfully demonstrated pause agents, disable tools, and roll back prompt/model within documented time budgets",
+      "passCondition": "Drill in last 90 days successfully demonstrated pause agents, disable tools, and roll back prompt/model within documented time budgets (drill evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Containment runbook + drill record exercising pause, disable, and rollback"
+        "Containment runbook covering pause agents, disable tools, and prompt/model rollback",
+        "Drill record ≤90 days showing all three actions within documented time budgets"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-containment-drill",
+            "params": {
+              "hint": "Discover containment runbooks and drill evidence for pause agents, disable tools, and prompt/model rollback within time budgets.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Containment runbook + drill record exercising pause, disable, and rollback"
+              "hint": "If automation cannot prove coverage, attest a drill ≤90 days demonstrated pause agents, disable tools, and prompt/model rollback within documented time budgets (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (On-call must be able to execute containment: pause agents, disable tools, roll back prompts/models): inspect current evidence for [Containment runbook + drill record exercising pause, disable, and rollback] and confirm the pass condition holds — Drill in last 90 days successfully demonstrated pause agents, disable tools, and roll back prompt/model within documented time budgets",
-      "falsePositiveGuidance": "(Incident Readiness): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production agents, tools, or prompt/model release units exist. If none, score NOT_APPLICABLE. 2) Confirm a containment runbook covers pause agents, disable tools, and prompt/model rollback with documented time budgets. 3) Confirm a drill in the last 90 days successfully exercised all three within those budgets. 4) PASS only if drill + all three actions + time budgets hold with measuredAt ≤90 days. INC-M1 playbooks alone do not prove executed containment. AGN kill-switch Checks alone do not prove tool disable and prompt/model rollback. CHG rollback Checks alone do not prove pause + disable.\n",
+      "falsePositiveGuidance": "Do not pass tabletop discussion without executing pause/disable/rollback. Do not pass a drill older than 90 days. Do not pass actions that missed documented time budgets. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: On-call must be able to execute containment: pause agents, disable tools, roll back prompts/models",
-        "Retain evidence artifacts required by this Check, starting with: Containment runbook + drill record exercising pause, disable, and rollback",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Document containment steps for pause, disable tools, and prompt/model rollback with time budgets",
+        "Run and retain a ≤90-day drill exercising all three within budgets",
+        "Retain evidence under imports/ai-containment-drill/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -6432,143 +6444,26 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "relatedRules": [
         "INC-M1",
-        "INC-M3",
-        "INC-M4",
+        "INC-R2",
+        "INC-R4",
         "INC-R1",
-        "INC-R3"
+        "INC-R3",
+        "AGN-M3",
+        "CHG-M2",
+        "CHG-M3",
+        "PRM-M3"
       ],
       "tags": [
         "incident-readiness",
         "mandatory",
-        "manual"
+        "hybrid",
+        "containment",
+        "drill"
       ],
       "applicability": {
-        "technologies": [
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "INC-M3",
-      "category": "incident-readiness",
-      "title": "Post-incident reviews must produce tracked actions against APRF pillars",
-      "description": "Post-incident reviews shall produce tracked actions against APRF pillars",
-      "whyItMatters": "Post-incident reviews shall produce tracked actions against APRF pillars Failing this leaves a production gap against: 100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale",
-      "severity": "high",
-      "weight": 3,
-      "gate": "mandatory",
-      "passCondition": "100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale",
-      "evidenceRequired": [
-        "Post-incident review template + sample reviews with linked actions"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": []
-      },
-      "manualVerification": "For this Check (Post-incident reviews must produce tracked actions against APRF pillars): inspect current evidence for [Post-incident review template + sample reviews with linked actions] and confirm the pass condition holds — 100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale",
-      "falsePositiveGuidance": "(Incident Readiness): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: Post-incident reviews must produce tracked actions against APRF pillars",
-        "Retain evidence artifacts required by this Check, starting with: Post-incident review template + sample reviews with linked actions",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "Google SRE — Managing Incidents",
-          "url": "https://sre.google/sre-book/managing-incidents/"
-        },
-        {
-          "title": "NIST AI RMF — Manage",
-          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
-        }
-      ],
-      "relatedRules": [
-        "INC-M1",
-        "INC-M2",
-        "INC-M4",
-        "INC-R1",
-        "INC-R3"
-      ],
-      "tags": [
-        "incident-readiness",
-        "mandatory",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [
-          "cicd"
-        ],
-        "minCriticality": 2,
-        "requiredFromLevel": 3
-      },
-      "status": "active",
-      "introducedIn": "0.10.0"
-    },
-    {
-      "id": "INC-M4",
-      "category": "incident-readiness",
-      "title": "Regular tabletop exercises must cover AI-specific incidents",
-      "description": "Regular tabletop exercises shall cover AI-specific incidents",
-      "whyItMatters": "Regular tabletop exercises shall cover AI-specific incidents Failing this leaves a production gap against: PASS if an AI-focused tabletop completed ≤180 days with retained actions and owners",
-      "severity": "high",
-      "weight": 3,
-      "gate": "mandatory",
-      "passCondition": "PASS if an AI-focused tabletop completed ≤180 days with retained actions and owners",
-      "evidenceRequired": [
-        "Tabletop plan + dated after-action report for an AI incident scenario"
-      ],
-      "detection": {
-        "capability": "manual",
-        "detectors": [
-          {
-            "id": "manual-attest",
-            "params": {
-              "hint": "Tabletop plan + dated after-action report for an AI incident scenario"
-            }
-          }
-        ]
-      },
-      "manualVerification": "For this Check (Regular tabletop exercises must cover AI-specific incidents): inspect current evidence for [Tabletop plan + dated after-action report for an AI incident scenario] and confirm the pass condition holds — PASS if an AI-focused tabletop completed ≤180 days with retained actions and owners",
-      "falsePositiveGuidance": "(Incident Readiness): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
-      "recommendedFixes": [
-        "Implement and operationalize: Regular tabletop exercises must cover AI-specific incidents",
-        "Retain evidence artifacts required by this Check, starting with: Tabletop plan + dated after-action report for an AI incident scenario",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
-      ],
-      "references": [
-        {
-          "title": "Google SRE — Managing Incidents",
-          "url": "https://sre.google/sre-book/managing-incidents/"
-        },
-        {
-          "title": "NIST AI RMF — Manage",
-          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
-        }
-      ],
-      "relatedRules": [
-        "INC-M1",
-        "INC-M2",
-        "INC-M3",
-        "INC-R1",
-        "INC-R3"
-      ],
-      "tags": [
-        "incident-readiness",
-        "mandatory",
-        "manual"
-      ],
-      "applicability": {
-        "technologies": [
-          "cicd"
-        ],
-        "minCriticality": 3,
-        "requiredFromLevel": 4
       },
       "status": "active",
       "introducedIn": "0.10.0"
@@ -6576,39 +6471,46 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "INC-R1",
       "category": "incident-readiness",
-      "title": "Production systems should have page-worthy alerts for safety and quality signals, not only infra",
-      "description": "Page-worthy alerts for safety and quality signals, not only infra",
-      "whyItMatters": "Page-worthy alerts for safety and quality signals, not only infra Failing this leaves a production gap against: At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and owner; policy reviewed ≤90 days ago",
+      "title": "Production systems should page on safety and quality signals, not only infra",
+      "description": "On-call should receive page-worthy alerts for at least two non-infra AI safety/quality signals, each with a documented threshold and owner, and a policy reviewed within 90 days.\n",
+      "whyItMatters": "Infra pages alone miss AI failure modes—refusal spikes, eval drops, toxicity/jailbreak hits—until customers or regulators notice. Paging with owned thresholds turns those signals into incidents before blast radius grows.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and owner; policy reviewed ≤90 days ago",
+      "passCondition": "At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and owner; policy reviewed ≤90 days ago (alert evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "On-call alert policy export listing safety/quality pages + last 90 days of triggered incidents (or drill tickets)"
+        "On-call alert policy export listing safety/quality pages",
+        "Last 90 days of triggered incidents or drill tickets for those pages"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-safety-quality-alerts",
+            "params": {
+              "hint": "Discover on-call alert policies for non-infra AI safety/quality signals with thresholds and owners.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "On-call alert policy export listing safety/quality pages + last 90 days of triggered incidents (or drill tickets)"
+              "hint": "If automation cannot prove coverage, attest ≥2 non-infra safety/ quality signals page on-call, each with threshold and owner, and policy reviewed ≤90 days (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Page-worthy alerts for safety and quality signals, not only infra): inspect current evidence for [On-call alert policy export listing safety/quality pages + last 90 days of triggered incidents (or drill tickets)] and confirm the pass condition holds — At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and owner; policy reviewed ≤90 days ago",
-      "falsePositiveGuidance": "(Incident Readiness): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm a production AI system is in scope. If none, score NOT_APPLICABLE. 2) Confirm an on-call alert policy lists ≥2 non-infra safety/quality signals that page (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate). 3) Confirm each signal has a documented threshold and owner. 4) Confirm policy review ≤90 days ago (or triggered incidents/drill tickets in last 90 days). 5) PASS only if all hold with measuredAt ≤90 days. Infra-only CPU/memory/latency pages do not satisfy. COST spend alerts alone do not satisfy. OBS dashboards without paging do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass dashboards that do not page. Do not pass a single signal. Do not pass thresholds without owners. Do not pass policy older than 90 days. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Page-worthy alerts for safety and quality signals, not only infra",
-        "Retain evidence artifacts required by this Check, starting with: On-call alert policy export listing safety/quality pages + last 90 days of triggered incidents (or drill tickets)",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Define ≥2 non-infra AI safety/quality paging signals with thresholds and owners",
+        "Wire those signals to on-call and retain policy export + recent pages/drills",
+        "Retain evidence under imports/ai-safety-quality-alerts/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
-          "title": "Google SRE — Managing Incidents",
-          "url": "https://sre.google/sre-book/managing-incidents/"
+          "title": "Google SRE — Monitoring Distributed Systems",
+          "url": "https://sre.google/sre-book/monitoring-distributed-systems/"
         },
         {
           "title": "NIST AI RMF — Manage",
@@ -6618,19 +6520,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "INC-M1",
         "INC-M2",
-        "INC-M3",
-        "INC-M4",
-        "INC-R3"
+        "INC-R2",
+        "INC-R3",
+        "INC-R4",
+        "OBS-M1"
       ],
       "tags": [
         "incident-readiness",
         "recommended",
-        "manual"
+        "hybrid",
+        "paging",
+        "safety-quality"
       ],
       "applicability": {
-        "technologies": [
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -6638,36 +6541,43 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "introducedIn": "0.10.0"
     },
     {
-      "id": "INC-R3",
+      "id": "INC-R2",
       "category": "incident-readiness",
-      "title": "Production systems should have customer notification criteria for AI-related events",
-      "description": "Customer notification criteria for AI-related events",
-      "whyItMatters": "Customer notification criteria for AI-related events Failing this leaves a production gap against: Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps",
+      "title": "Post-incident reviews should produce tracked actions against APRF pillars",
+      "description": "SEV-eligible AI incidents should receive a post-incident review with at least one tracked action mapped to an APRF pillar—or an explicit no-action rationale.\n",
+      "whyItMatters": "Reviews without pillar-mapped actions do not harden the system. Tracking remediation (or documenting why none is needed) turns incidents into APRF control improvements instead of one-off war stories.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps",
+      "passCondition": "100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale (review evidence measuredAt ≤90 days).\n",
       "evidenceRequired": [
-        "Customer notification criteria for AI-related events + last drill or real notification sample"
+        "Post-incident review template requiring APRF pillar mapping",
+        "Last-90-day coverage: SEV-eligible AI reviews with tracked actions or no-action rationale"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-post-incident-aprf-actions",
+            "params": {
+              "hint": "Discover post-incident review templates and coverage showing APRF-pillar-mapped actions (or no-action rationale).\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Customer notification criteria for AI-related events + last drill or real notification sample"
+              "hint": "If automation cannot prove coverage, attest 100% of SEV-eligible AI incidents in the last 90 days have a review with ≥1 tracked APRF-pillar action or explicit no-action rationale (measuredAt ≤90 days). Score N/A if sevEligibleIncidentCount=0.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Customer notification criteria for AI-related events): inspect current evidence for [Customer notification criteria for AI-related events + last drill or real notification sample] and confirm the pass condition holds — Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps",
-      "falsePositiveGuidance": "(Incident Readiness): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm SEV-eligible AI incidents exist in the last 90 days. If none, score NOT_APPLICABLE with retained attestation. 2) Confirm a post-incident review template requires APRF pillar mapping (or equivalent). 3) Confirm 100% of those incidents have a review with ≥1 tracked action mapped to an APRF pillar or an explicit no-action rationale. 4) PASS only if coverage holds with measuredAt ≤90 days. INC-M1/M2 playbooks and containment alone do not prove pillar-mapped actions. Generic postmortems without APRF pillar linkage do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass reviews that list actions without owners or tickets. Do not pass “no action” without a written rationale. Do not pass coverage older than 90 days. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Customer notification criteria for AI-related events",
-        "Retain evidence artifacts required by this Check, starting with: Customer notification criteria for AI-related events + last drill or real notification sample",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Require APRF pillar mapping (or no-action rationale) on every SEV-eligible AI review",
+        "Track actions to tickets/owners and retain last-90-day coverage",
+        "Retain evidence under imports/post-incident-aprf-actions/",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -6682,20 +6592,165 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "relatedRules": [
         "INC-M1",
         "INC-M2",
-        "INC-M3",
-        "INC-M4",
-        "INC-R1"
+        "INC-R4",
+        "INC-R1",
+        "INC-R3",
+        "ORG-R4"
       ],
       "tags": [
         "incident-readiness",
         "recommended",
-        "manual"
+        "hybrid",
+        "post-incident",
+        "aprf-actions"
       ],
       "applicability": {
-        "technologies": [
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
+        "requiredFromLevel": 3
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "INC-R3",
+      "category": "incident-readiness",
+      "title": "Production systems should define customer notification criteria for AI-related events",
+      "description": "Teams should maintain criteria that map AI event types to notify / no-notify decisions, and show a drill or real notification ≤12 months that followed those criteria with timestamps.\n",
+      "whyItMatters": "Without clear notify/no-notify rules for safety incidents, widespread quality failures, and data exposure, teams either over-notify customers or stay silent when disclosure is required—both erode trust and invite regulatory risk.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "recommended",
+      "passCondition": "Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps (notification evidence measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Customer notification criteria for AI-related events",
+        "Last drill or real notification sample ≤12 months with timestamps"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-customer-notification-criteria",
+            "params": {
+              "hint": "Discover AI customer notification criteria and drill/incident samples that followed notify/no-notify decisions with timestamps.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest criteria map safety, quality-fail, and data-exposure events to notify/no-notify, and a drill or incident ≤12 months followed them with timestamps (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm a customer-facing or externally disclosed AI system is in scope. If none, score NOT_APPLICABLE. 2) Confirm criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify. 3) Confirm a drill or real notification ≤12 months followed those criteria with timestamps. 4) PASS only if criteria + followed sample hold with measuredAt ≤90 days. INC-R2 internal post-incident reviews alone do not prove customer notification. Generic PR/comms playbooks without AI event-type mapping do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass criteria without notify/no-notify decisions. Do not pass a sample older than 12 months. Do not pass a sample without timestamps. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Publish AI event-type → notify/no-notify criteria covering safety, quality fail, and data exposure",
+        "Run a notification drill (or retain a real sample) ≤12 months with timestamps",
+        "Retain evidence under imports/ai-customer-notification-criteria/",
+        "Time-box gaps with owner and expiry ≤90 days"
+      ],
+      "references": [
+        {
+          "title": "Google SRE — Managing Incidents",
+          "url": "https://sre.google/sre-book/managing-incidents/"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        }
+      ],
+      "relatedRules": [
+        "INC-M1",
+        "INC-M2",
+        "INC-R1",
+        "INC-R2",
+        "INC-R4",
+        "PRI-M1"
+      ],
+      "tags": [
+        "incident-readiness",
+        "recommended",
+        "hybrid",
+        "customer-notification",
+        "disclosure"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 4
+      },
+      "status": "active",
+      "introducedIn": "0.10.0"
+    },
+    {
+      "id": "INC-R4",
+      "category": "incident-readiness",
+      "title": "Production systems should run regular tabletop exercises covering AI-specific incidents",
+      "description": "Teams should complete an AI-focused incident tabletop at least every 180 days and retain an after-action report with actions and owners.\n",
+      "whyItMatters": "Containment drills prove mechanics; tabletops prove decision-making under AI-specific scenarios. Without a recent exercise and owned follow-ups, on-call discovers coordination gaps only during a real SEV.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "recommended",
+      "passCondition": "An AI-focused tabletop completed ≤180 days with retained actions and owners (tabletop evidence measuredAt ≤90 days).\n",
+      "evidenceRequired": [
+        "Tabletop plan for an AI-specific incident scenario",
+        "Dated after-action report ≤180 days with retained actions and owners"
+      ],
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-ai-incident-tabletop",
+            "params": {
+              "hint": "Discover AI-focused tabletop plans and after-action reports with retained actions and owners.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest an AI-focused tabletop completed ≤180 days with retained actions and owners (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm a production AI system is in scope. If none, score NOT_APPLICABLE. 2) Confirm a tabletop plan covers an AI-specific incident scenario. 3) Confirm a dated after-action report shows completion ≤180 days ago. 4) Confirm retained actions have owners. 5) PASS only if plan + completion + owned actions hold with measuredAt ≤90 days. INC-M2 containment drills alone do not prove tabletop decision exercises. INC-R2 post-incident reviews alone do not prove proactive tabletops. Generic non-AI tabletops do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass a slide deck without an after-action report. Do not pass actions without owners. Do not pass a tabletop older than 180 days. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Schedule AI-specific tabletops on a ≤180-day cadence",
+        "Retain after-action reports with owned actions",
+        "Retain evidence under imports/ai-incident-tabletop/",
+        "Time-box gaps with owner and expiry ≤90 days"
+      ],
+      "references": [
+        {
+          "title": "Google SRE — Managing Incidents",
+          "url": "https://sre.google/sre-book/managing-incidents/"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        }
+      ],
+      "relatedRules": [
+        "INC-M1",
+        "INC-M2",
+        "INC-R1",
+        "INC-R2",
+        "INC-R3",
+        "REL-M7"
+      ],
+      "tags": [
+        "incident-readiness",
+        "recommended",
+        "hybrid",
+        "tabletop",
+        "ai-incidents"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 3,
         "requiredFromLevel": 4
       },
       "status": "active",

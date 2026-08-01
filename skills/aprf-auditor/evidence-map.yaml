@@ -251,7 +251,9 @@ categoryDefaults:
       - "**/*incident*"
       - "**/oncall*"
       - "**/pager*"
-    signals: [runbook, severity, postmortem]
+      - "**/*playbook*"
+    plugins: [incident-playbooks, ai-containment-drill, post-incident-aprf-actions, ai-incident-tabletop, ai-safety-quality-alerts, ai-customer-notification-criteria, repo-filesystem]
+    signals: [runbook, severity, postmortem, playbook, abuse, leakage, bad actions, provider outage, containment, pause agent, disable tools, rollback, APRF pillar action, tabletop, safety quality paging, refusal-rate, eval-score, toxicity, jailbreak, customer notification, notify/no-notify, disclosure]
   cost-optimization:
     search:
       - "**/*budget*"
@@ -1746,6 +1748,105 @@ checks:
       PASS if embedding-index-migration statusHint=pass (automatedMigrationWithValidationGates + lastUpgradeWithin12Months + lastUpgradeSucceededWithoutDualWriteGaps + measuredAt ≤90d).
       PARTIAL if migration signals without complete import.
       NOT_APPLICABLE when no embedding/index signals or noUpgradeInWindowAttested. Distinct from DEP-M3 and DEP-R2.
+  INC-M1:
+    requiredEvidence:
+      - "Playbook set covering abuse, leakage, bad actions, and provider outage with owners"
+      - "fourPlaybooksPresent + allPlaybooksHaveOwner + allPlaybooksReviewedWithin12Months under imports/incident-playbooks/"
+    searchExtra:
+      - "**/*playbook*"
+      - "**/*runbook*"
+      - "**/*incident*"
+      - "**/*abuse*"
+      - "**/*leak*"
+      - "**/*provider*outage*"
+    plugins: [incident-playbooks, repo-filesystem]
+    naWhen: "No production AI system in scope"
+    evaluation: |
+      PASS if incident-playbooks statusHint=pass (fourPlaybooksPresent + allPlaybooksHaveOwner + allPlaybooksReviewedWithin12Months + measuredAt ≤90d).
+      PARTIAL if playbook signals without complete import.
+      NOT_APPLICABLE when no playbook signals. Distinct from INC-M2 containment drills.
+  INC-M2:
+    requiredEvidence:
+      - "Containment runbook covering pause agents, disable tools, and prompt/model rollback"
+      - "pauseAgentsDemonstrated + disableToolsDemonstrated + rollbackPromptOrModelDemonstrated + withinDocumentedTimeBudgets under imports/ai-containment-drill/"
+    searchExtra:
+      - "**/*containment*"
+      - "**/*pause*agent*"
+      - "**/*disable*tool*"
+      - "**/*prompt*rollback*"
+      - "**/*model*rollback*"
+      - "**/*drill*"
+    plugins: [ai-containment-drill, repo-filesystem]
+    naWhen: "No production agents/tools/prompt-model units"
+    evaluation: |
+      PASS if ai-containment-drill statusHint=pass (pause + disable tools + rollback within time budgets + measuredAt ≤90d).
+      PARTIAL if containment signals without complete import.
+      NOT_APPLICABLE when no containment signals. Distinct from INC-M1 playbooks and CHG/AGN rollback/kill-switch alone.
+  INC-R2:
+    requiredEvidence:
+      - "Post-incident review template requiring APRF pillar mapping"
+      - "reviewsWithTrackedActionOrRationalePct=100 under imports/post-incident-aprf-actions/"
+    searchExtra:
+      - "**/*postmortem*"
+      - "**/*post-incident*"
+      - "**/*after*action*"
+      - "**/*pir*"
+      - "**/*aprf*pillar*"
+    plugins: [post-incident-aprf-actions, repo-filesystem]
+    naWhen: "No SEV-eligible AI incidents (sevEligibleIncidentCount=0)"
+    evaluation: |
+      PASS if post-incident-aprf-actions statusHint=pass (reviewsWithTrackedActionOrRationalePct=100 or reviewsMissingTrackedActionOrRationale=0 + measuredAt ≤90d).
+      PARTIAL if review signals without complete import.
+      NOT_APPLICABLE when sevEligibleIncidentCount=0 or no review signals. Distinct from INC-M1/M2.
+  INC-R1:
+    requiredEvidence:
+      - "On-call alert policy export listing safety/quality pages"
+      - "atLeastTwoNonInfraPagingSignals + eachSignalHasThresholdAndOwner + policyReviewedWithin90Days under imports/ai-safety-quality-alerts/"
+    searchExtra:
+      - "**/*refusal*"
+      - "**/*toxicity*"
+      - "**/*jailbreak*"
+      - "**/*eval*score*"
+      - "**/*pager*"
+      - "**/*on*call*alert*"
+    plugins: [ai-safety-quality-alerts, repo-filesystem]
+    naWhen: "No production AI system in scope"
+    evaluation: |
+      PASS if ai-safety-quality-alerts statusHint=pass (≥2 non-infra paging signals + threshold/owner + policy reviewed ≤90d + measuredAt ≤90d).
+      PARTIAL if alert signals without complete import.
+      NOT_APPLICABLE when no alert signals. Distinct from infra-only OBS pages and COST spend alerts.
+  INC-R3:
+    requiredEvidence:
+      - "Customer notification criteria for AI-related events"
+      - "criteriaMapEventTypesToNotifyDecision + lastDrillOrIncidentFollowedCriteriaWithin12Months under imports/ai-customer-notification-criteria/"
+    searchExtra:
+      - "**/*customer*notif*"
+      - "**/*disclosure*"
+      - "**/*notify*"
+      - "**/*comms*drill*"
+      - "**/*status*page*"
+    plugins: [ai-customer-notification-criteria, repo-filesystem]
+    naWhen: "No customer-facing / externally disclosed AI system in scope"
+    evaluation: |
+      PASS if ai-customer-notification-criteria statusHint=pass (criteria map + followed sample ≤12 months + measuredAt ≤90d).
+      PARTIAL if notification signals without complete import.
+      NOT_APPLICABLE when no notification signals. Distinct from INC-R2 internal post-incident reviews and generic PR playbooks without AI event-type mapping.
+  INC-R4:
+    requiredEvidence:
+      - "Tabletop plan for an AI-specific incident scenario"
+      - "aiFocusedTabletopCompletedWithin180Days + retainedActionsWithOwners under imports/ai-incident-tabletop/"
+    searchExtra:
+      - "**/*tabletop*"
+      - "**/*table-top*"
+      - "**/*war*game*"
+      - "**/*game*day*"
+      - "**/*after*action*"
+    plugins: [ai-incident-tabletop, repo-filesystem]
+    naWhen: "No production AI system in scope"
+    evaluation: |
+      PASS if ai-incident-tabletop statusHint=pass (aiFocusedTabletopCompletedWithin180Days or tabletopAgeDays≤180 + retainedActionsWithOwners + measuredAt ≤90d).
+      PARTIAL if tabletop signals without complete import.
+      NOT_APPLICABLE when no tabletop signals. Distinct from INC-M2 containment drills and INC-R2 post-incident reviews.
 
 # Global fail-closed patterns (support FAIL with high confidence when matched in scope)
 globalFailSignals:

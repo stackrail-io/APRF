@@ -1,0 +1,78 @@
+id: "INC-R2"
+category: "incident-readiness"
+title: "Post-incident reviews should produce tracked actions against APRF pillars"
+description: >
+  SEV-eligible AI incidents should receive a post-incident review with at least
+  one tracked action mapped to an APRF pillar—or an explicit no-action
+  rationale.
+whyItMatters: >
+  Reviews without pillar-mapped actions do not harden the system. Tracking
+  remediation (or documenting why none is needed) turns incidents into APRF
+  control improvements instead of one-off war stories.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  100% of SEV-eligible AI incidents in last 90 days have a review with ≥1
+  tracked action mapped to an APRF pillar or explicit “no action” rationale
+  (review evidence measuredAt ≤90 days).
+evidenceRequired:
+  - "Post-incident review template requiring APRF pillar mapping"
+  - "Last-90-day coverage: SEV-eligible AI reviews with tracked actions or no-action rationale"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-post-incident-aprf-actions"
+      params:
+        hint: >
+          Discover post-incident review templates and coverage showing
+          APRF-pillar-mapped actions (or no-action rationale).
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest 100% of SEV-eligible AI
+          incidents in the last 90 days have a review with ≥1 tracked
+          APRF-pillar action or explicit no-action rationale (measuredAt ≤90
+          days). Score N/A if sevEligibleIncidentCount=0.
+manualVerification: >
+  1) Confirm SEV-eligible AI incidents exist in the last 90 days. If none,
+  score NOT_APPLICABLE with retained attestation. 2) Confirm a post-incident
+  review template requires APRF pillar mapping (or equivalent). 3) Confirm
+  100% of those incidents have a review with ≥1 tracked action mapped to an
+  APRF pillar or an explicit no-action rationale. 4) PASS only if coverage
+  holds with measuredAt ≤90 days. INC-M1/M2 playbooks and containment alone
+  do not prove pillar-mapped actions. Generic postmortems without APRF pillar
+  linkage do not satisfy.
+falsePositiveGuidance: >
+  Do not pass reviews that list actions without owners or tickets. Do not pass
+  “no action” without a written rationale. Do not pass coverage older than 90
+  days. Named exceptions need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Require APRF pillar mapping (or no-action rationale) on every SEV-eligible AI review"
+  - "Track actions to tickets/owners and retain last-90-day coverage"
+  - "Retain evidence under imports/post-incident-aprf-actions/"
+  - "Time-box gaps with owner and expiry ≤90 days"
+references:
+  - title: "Google SRE — Managing Incidents"
+    url: "https://sre.google/sre-book/managing-incidents/"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "INC-M1"
+  - "INC-M2"
+  - "INC-R4"
+  - "INC-R1"
+  - "INC-R3"
+  - "ORG-R4"
+tags:
+  - "incident-readiness"
+  - "recommended"
+  - "hybrid"
+  - "post-incident"
+  - "aprf-actions"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.10.0"

@@ -1,0 +1,74 @@
+id: "INC-R4"
+category: "incident-readiness"
+title: "Production systems should run regular tabletop exercises covering AI-specific incidents"
+description: >
+  Teams should complete an AI-focused incident tabletop at least every 180 days
+  and retain an after-action report with actions and owners.
+whyItMatters: >
+  Containment drills prove mechanics; tabletops prove decision-making under
+  AI-specific scenarios. Without a recent exercise and owned follow-ups,
+  on-call discovers coordination gaps only during a real SEV.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  An AI-focused tabletop completed ≤180 days with retained actions and owners
+  (tabletop evidence measuredAt ≤90 days).
+evidenceRequired:
+  - "Tabletop plan for an AI-specific incident scenario"
+  - "Dated after-action report ≤180 days with retained actions and owners"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-incident-tabletop"
+      params:
+        hint: >
+          Discover AI-focused tabletop plans and after-action reports with
+          retained actions and owners.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest an AI-focused tabletop
+          completed ≤180 days with retained actions and owners (measuredAt ≤90
+          days).
+manualVerification: >
+  1) Confirm a production AI system is in scope. If none, score NOT_APPLICABLE.
+  2) Confirm a tabletop plan covers an AI-specific incident scenario. 3)
+  Confirm a dated after-action report shows completion ≤180 days ago. 4)
+  Confirm retained actions have owners. 5) PASS only if plan + completion +
+  owned actions hold with measuredAt ≤90 days. INC-M2 containment drills alone
+  do not prove tabletop decision exercises. INC-R2 post-incident reviews alone
+  do not prove proactive tabletops. Generic non-AI tabletops do not satisfy.
+falsePositiveGuidance: >
+  Do not pass a slide deck without an after-action report. Do not pass actions
+  without owners. Do not pass a tabletop older than 180 days. Named exceptions
+  need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Schedule AI-specific tabletops on a ≤180-day cadence"
+  - "Retain after-action reports with owned actions"
+  - "Retain evidence under imports/ai-incident-tabletop/"
+  - "Time-box gaps with owner and expiry ≤90 days"
+references:
+  - title: "Google SRE — Managing Incidents"
+    url: "https://sre.google/sre-book/managing-incidents/"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "INC-M1"
+  - "INC-M2"
+  - "INC-R1"
+  - "INC-R2"
+  - "INC-R3"
+  - "REL-M7"
+tags:
+  - "incident-readiness"
+  - "recommended"
+  - "hybrid"
+  - "tabletop"
+  - "ai-incidents"
+applicability:
+  technologies: []
+  minCriticality: 3
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

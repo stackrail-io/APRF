@@ -1,39 +1,56 @@
 id: "INC-M1"
 category: "incident-readiness"
 title: "AI-specific incident playbooks must exist for abuse, leakage, bad actions, and provider outage"
-description: "AI-specific incident playbooks shall exist for abuse, leakage, bad actions, and provider outage"
-whyItMatters: "AI-specific incident playbooks shall exist for abuse, leakage, bad actions, and
-  provider outage Failing this leaves a production gap against: Four playbooks present (abuse,
-  leakage, bad actions, provider outage), each with owner and review date ≤ 12 months"
+description: >
+  Production AI systems must maintain incident playbooks for abuse, data
+  leakage, bad agent/tool actions, and provider outage—each with a named owner
+  and a review date within the last 12 months.
+whyItMatters: >
+  Generic outage runbooks do not cover AI-specific failure modes. Without
+  owned, recently reviewed playbooks for abuse, leakage, bad actions, and
+  provider loss, on-call improvises under pressure and containment is slow or
+  incomplete.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Four playbooks present (abuse, leakage, bad actions, provider outage), each with
-  owner and review date ≤ 12 months"
+passCondition: >
+  Four playbooks present (abuse, leakage, bad actions, provider outage), each
+  with owner and review date ≤12 months (playbook evidence measuredAt ≤90
+  days).
 evidenceRequired:
-  - "Playbook set covering the four scenarios with owners"
+  - "Playbook set covering abuse, leakage, bad actions, and provider outage with owners"
+  - "Review dates ≤12 months for each of the four playbooks"
 detection:
   capability: "hybrid"
   detectors:
     - id: "repo-incident-playbooks"
-      params: {}
+      params:
+        hint: >
+          Discover AI-specific incident playbooks for abuse, leakage, bad
+          actions, and provider outage, plus owner and review-date coverage.
     - id: "manual-attest"
       params:
-        hint: "Playbook set covering the four scenarios with owners"
-manualVerification: "For this Check (AI-specific incident playbooks must exist for abuse, leakage,
-  bad actions, and provider outage): inspect current evidence for [Playbook set covering the four
-  scenarios with owners] and confirm the pass condition holds — Four playbooks present (abuse,
-  leakage, bad actions, provider outage), each with owner and review date ≤ 12 months"
-falsePositiveGuidance: "(Incident Readiness): when automation and attestation disagree, prefer the
-  stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the
-  gap."
+        hint: >
+          If automation cannot prove coverage, attest all four playbooks exist
+          with owners and review dates ≤12 months (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm a production AI system is in scope. If none, score NOT_APPLICABLE.
+  2) Confirm playbooks exist for abuse, leakage, bad actions, and provider
+  outage. 3) Confirm each has a named owner. 4) Confirm each was reviewed
+  within the last 12 months. 5) PASS only if all four + owners + fresh reviews
+  hold with measuredAt ≤90 days. INC-M2 containment drills alone do not prove
+  the four playbooks. Generic SRE incident docs that omit AI scenarios do not
+  satisfy. A single combined doc may pass only if it clearly covers all four
+  scenarios with owners and review dates.
+falsePositiveGuidance: >
+  Do not pass placeholder stubs without owners or review dates. Do not pass
+  reviews older than 12 months. Do not pass a provider-outage playbook that only
+  covers non-AI infrastructure. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: AI-specific incident playbooks must exist for abuse, leakage, bad
-    actions, and provider outage"
-  - "Retain evidence artifacts required by this Check, starting with: Playbook set covering the four
-    scenarios with owners"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Author and own playbooks for abuse, leakage, bad actions, and provider outage"
+  - "Review each playbook on a ≤12-month cadence and retain dates"
+  - "Retain evidence under imports/incident-playbooks/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE — Managing Incidents"
     url: "https://sre.google/sre-book/managing-incidents/"
@@ -41,17 +58,20 @@ references:
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "INC-M2"
-  - "INC-M3"
-  - "INC-M4"
+  - "INC-R2"
+  - "INC-R4"
   - "INC-R1"
   - "INC-R3"
+  - "AGN-M3"
+  - "CHG-M2"
 tags:
   - "incident-readiness"
   - "mandatory"
   - "hybrid"
+  - "playbooks"
+  - "ai-incidents"
 applicability:
-  technologies:
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

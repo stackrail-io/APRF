@@ -1,40 +1,57 @@
 id: "INC-M2"
 category: "incident-readiness"
-title: "On-call must be able to execute containment: pause agents, disable tools, roll back
-  prompts/models"
-description: "On-call shall be able to execute containment: pause agents, disable tools, roll back
-  prompts/models"
-whyItMatters: "On-call shall be able to execute containment: pause agents, disable tools, roll back
-  prompts/models Failing this leaves a production gap against: Drill in last 90 days successfully
-  demonstrated pause agents, disable tools, and roll back prompt/model within documented time
-  budgets"
+title: "On-call must be able to execute containment: pause agents, disable tools, roll back prompts/models"
+description: >
+  On-call must be able to pause agents, disable tools, and roll back prompts or
+  models, proven by a drill in the last 90 days completed within documented
+  time budgets.
+whyItMatters: >
+  Playbooks alone do not stop a live AI incident. On-call needs practiced
+  containment—pause, disable tools, roll back—within known time budgets so
+  blast radius shrinks before customers absorb more damage.
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Drill in last 90 days successfully demonstrated pause agents, disable tools, and
-  roll back prompt/model within documented time budgets"
+passCondition: >
+  Drill in last 90 days successfully demonstrated pause agents, disable tools,
+  and roll back prompt/model within documented time budgets (drill evidence
+  measuredAt ≤90 days).
 evidenceRequired:
-  - "Containment runbook + drill record exercising pause, disable, and rollback"
+  - "Containment runbook covering pause agents, disable tools, and prompt/model rollback"
+  - "Drill record ≤90 days showing all three actions within documented time budgets"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-containment-drill"
+      params:
+        hint: >
+          Discover containment runbooks and drill evidence for pause agents,
+          disable tools, and prompt/model rollback within time budgets.
     - id: "manual-attest"
       params:
-        hint: "Containment runbook + drill record exercising pause, disable, and rollback"
-manualVerification: "For this Check (On-call must be able to execute containment: pause agents,
-  disable tools, roll back prompts/models): inspect current evidence for [Containment runbook +
-  drill record exercising pause, disable, and rollback] and confirm the pass condition holds — Drill
-  in last 90 days successfully demonstrated pause agents, disable tools, and roll back prompt/model
-  within documented time budgets"
-falsePositiveGuidance: "(Incident Readiness): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest a drill ≤90 days
+          demonstrated pause agents, disable tools, and prompt/model rollback
+          within documented time budgets (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production agents, tools, or prompt/model release units exist. If
+  none, score NOT_APPLICABLE. 2) Confirm a containment runbook covers pause
+  agents, disable tools, and prompt/model rollback with documented time
+  budgets. 3) Confirm a drill in the last 90 days successfully exercised all
+  three within those budgets. 4) PASS only if drill + all three actions + time
+  budgets hold with measuredAt ≤90 days. INC-M1 playbooks alone do not prove
+  executed containment. AGN kill-switch Checks alone do not prove tool disable
+  and prompt/model rollback. CHG rollback Checks alone do not prove pause +
+  disable.
+falsePositiveGuidance: >
+  Do not pass tabletop discussion without executing pause/disable/rollback. Do
+  not pass a drill older than 90 days. Do not pass actions that missed
+  documented time budgets. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: On-call must be able to execute containment: pause agents,
-    disable tools, roll back prompts/models"
-  - "Retain evidence artifacts required by this Check, starting with: Containment runbook + drill
-    record exercising pause, disable, and rollback"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Document containment steps for pause, disable tools, and prompt/model rollback with time budgets"
+  - "Run and retain a ≤90-day drill exercising all three within budgets"
+  - "Retain evidence under imports/ai-containment-drill/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE — Managing Incidents"
     url: "https://sre.google/sre-book/managing-incidents/"
@@ -42,17 +59,22 @@ references:
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "INC-M1"
-  - "INC-M3"
-  - "INC-M4"
+  - "INC-R2"
+  - "INC-R4"
   - "INC-R1"
   - "INC-R3"
+  - "AGN-M3"
+  - "CHG-M2"
+  - "CHG-M3"
+  - "PRM-M3"
 tags:
   - "incident-readiness"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "containment"
+  - "drill"
 applicability:
-  technologies:
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

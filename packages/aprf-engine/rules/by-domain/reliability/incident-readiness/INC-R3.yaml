@@ -1,37 +1,57 @@
 id: "INC-R3"
 category: "incident-readiness"
-title: "Production systems should have customer notification criteria for AI-related events"
-description: "Customer notification criteria for AI-related events"
-whyItMatters: "Customer notification criteria for AI-related events Failing this leaves a production
-  gap against: Criteria map event types (safety incident, widespread quality fail, data exposure) to
-  notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps"
+title: "Production systems should define customer notification criteria for AI-related events"
+description: >
+  Teams should maintain criteria that map AI event types to notify / no-notify
+  decisions, and show a drill or real notification ≤12 months that followed
+  those criteria with timestamps.
+whyItMatters: >
+  Without clear notify/no-notify rules for safety incidents, widespread quality
+  failures, and data exposure, teams either over-notify customers or stay silent
+  when disclosure is required—both erode trust and invite regulatory risk.
 severity: "high"
 weight: 3
 gate: "recommended"
-passCondition: "Criteria map event types (safety incident, widespread quality fail, data exposure)
-  to notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps"
+passCondition: >
+  Criteria map event types (safety incident, widespread quality fail, data
+  exposure) to notify / no-notify; last drill or incident ≤12 months followed
+  the criteria with timestamps (notification evidence measuredAt ≤90 days).
 evidenceRequired:
-  - "Customer notification criteria for AI-related events + last drill or real notification sample"
+  - "Customer notification criteria for AI-related events"
+  - "Last drill or real notification sample ≤12 months with timestamps"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-customer-notification-criteria"
+      params:
+        hint: >
+          Discover AI customer notification criteria and drill/incident samples
+          that followed notify/no-notify decisions with timestamps.
     - id: "manual-attest"
       params:
-        hint: "Customer notification criteria for AI-related events + last drill or real notification
-          sample"
-manualVerification: "For this Check (Customer notification criteria for AI-related events): inspect
-  current evidence for [Customer notification criteria for AI-related events + last drill or real
-  notification sample] and confirm the pass condition holds — Criteria map event types (safety
-  incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident
-  ≤12 months followed the criteria with timestamps"
-falsePositiveGuidance: "(Incident Readiness): re-verify against a current artifact for this specific
-  Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest criteria map safety,
+          quality-fail, and data-exposure events to notify/no-notify, and a
+          drill or incident ≤12 months followed them with timestamps
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm a customer-facing or externally disclosed AI system is in scope.
+  If none, score NOT_APPLICABLE. 2) Confirm criteria map event types (safety
+  incident, widespread quality fail, data exposure) to notify / no-notify. 3)
+  Confirm a drill or real notification ≤12 months followed those criteria with
+  timestamps. 4) PASS only if criteria + followed sample hold with measuredAt
+  ≤90 days. INC-R2 internal post-incident reviews alone do not prove customer
+  notification. Generic PR/comms playbooks without AI event-type mapping do not
+  satisfy.
+falsePositiveGuidance: >
+  Do not pass criteria without notify/no-notify decisions. Do not pass a sample
+  older than 12 months. Do not pass a sample without timestamps. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Customer notification criteria for AI-related events"
-  - "Retain evidence artifacts required by this Check, starting with: Customer notification criteria
-    for AI-related events + last drill or real notification sample"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish AI event-type → notify/no-notify criteria covering safety, quality fail, and data exposure"
+  - "Run a notification drill (or retain a real sample) ≤12 months with timestamps"
+  - "Retain evidence under imports/ai-customer-notification-criteria/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Google SRE — Managing Incidents"
     url: "https://sre.google/sre-book/managing-incidents/"
@@ -40,16 +60,18 @@ references:
 relatedRules:
   - "INC-M1"
   - "INC-M2"
-  - "INC-M3"
-  - "INC-M4"
   - "INC-R1"
+  - "INC-R2"
+  - "INC-R4"
+  - "PRI-M1"
 tags:
   - "incident-readiness"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "customer-notification"
+  - "disclosure"
 applicability:
-  technologies:
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"
