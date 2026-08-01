@@ -78,7 +78,12 @@ def authorize_tool(user, tool_name):
   mkdirSync(join(out2, "imports", "injection-policy-gate"), { recursive: true });
   writeFileSync(
     join(out2, "imports", "injection-policy-gate", "suite.json"),
-    JSON.stringify({ denyRatePct: 80, modelTextPrivilegeGrants: 0, caseCount: 20 }),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      denyRatePct: 80,
+      modelTextPrivilegeGrants: 0,
+      caseCount: 20,
+    }),
     "utf8",
   );
   await injectionPolicyGateCollector.collect({ ...baseCtx, outputDir: out2 });
@@ -97,12 +102,15 @@ def authorize_tool(user, tool_name):
     throw new Error(`expected fail, got ${JSON.stringify(r2.summary)}`);
   }
 
-  // Pass
+  // Pass requires corpus + CI gate attest (metrics alone are not enough)
   const out3 = mkdtempSync(join(tmpdir(), "aprf-inj3-"));
   mkdirSync(join(out3, "imports", "injection-policy-gate"), { recursive: true });
   writeFileSync(
     join(out3, "imports", "injection-policy-gate", "suite.json"),
     JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      versionedCorpusPresent: true,
+      ciGateConfigured: true,
       denyRatePct: 97,
       modelTextPrivilegeGrants: 0,
       cases: Array.from({ length: 20 }, (_, i) => ({
@@ -128,8 +136,124 @@ def authorize_tool(user, tool_name):
     throw new Error(`expected pass, got ${JSON.stringify(r3.summary)}`);
   }
 
+  // Metrics-only import + policy must stay partial (no corpus/CI attest)
+  const outMetrics = mkdtempSync(join(tmpdir(), "aprf-inj-metrics-"));
+  mkdirSync(join(outMetrics, "imports", "injection-policy-gate"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(outMetrics, "imports", "injection-policy-gate", "suite.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      denyRatePct: 97,
+      modelTextPrivilegeGrants: 0,
+      caseCount: 20,
+    }),
+    "utf8",
+  );
+  await injectionPolicyGateCollector.collect({
+    ...baseCtx,
+    outputDir: outMetrics,
+  });
+  const rMetrics = JSON.parse(
+    readFileSync(
+      join(
+        outMetrics,
+        "imports",
+        "injection-policy-gate",
+        "injection-policy-gate-report.json",
+      ),
+      "utf8",
+    ),
+  ) as InjectionPolicyReport;
+  if (
+    rMetrics.summary.statusHint !== "partial" ||
+    rMetrics.summary.corpusPresent ||
+    rMetrics.summary.ciGatePresent
+  ) {
+    throw new Error(
+      `expected partial without corpus/CI from metrics-only import, got ${JSON.stringify(rMetrics.summary)}`,
+    );
+  }
+
+  // Partial: deny rate OK but modelTextPrivilegeGrants omitted — must not PASS
+  const out4 = mkdtempSync(join(tmpdir(), "aprf-inj4-"));
+  mkdirSync(join(out4, "imports", "injection-policy-gate"), { recursive: true });
+  writeFileSync(
+    join(out4, "imports", "injection-policy-gate", "suite.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      versionedCorpusPresent: true,
+      ciGateConfigured: true,
+      denyRatePct: 97,
+      caseCount: 20,
+    }),
+    "utf8",
+  );
+  await injectionPolicyGateCollector.collect({ ...baseCtx, outputDir: out4 });
+  const r4 = JSON.parse(
+    readFileSync(
+      join(
+        out4,
+        "imports",
+        "injection-policy-gate",
+        "injection-policy-gate-report.json",
+      ),
+      "utf8",
+    ),
+  ) as InjectionPolicyReport;
+  if (r4.summary.statusHint !== "partial" || r4.summary.secM1Satisfied !== false) {
+    throw new Error(
+      `expected partial without grants, got ${JSON.stringify(r4.summary)}`,
+    );
+  }
+
+  // N/A: explicit scope flag
+  const emptyTarget = mkdtempSync(join(tmpdir(), "aprf-inj-empty-"));
+  const outNa = mkdtempSync(join(tmpdir(), "aprf-inj-na-"));
+  mkdirSync(join(outNa, "imports", "injection-policy-gate"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(outNa, "imports", "injection-policy-gate", "suite.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      productionAiToolsOrPrivilegedSideEffectsPresent: false,
+    }),
+    "utf8",
+  );
+  await injectionPolicyGateCollector.collect({
+    ...baseCtx,
+    outputDir: outNa,
+    targetPath: emptyTarget,
+  });
+  const rNa = JSON.parse(
+    readFileSync(
+      join(
+        outNa,
+        "imports",
+        "injection-policy-gate",
+        "injection-policy-gate-report.json",
+      ),
+      "utf8",
+    ),
+  ) as InjectionPolicyReport;
+  if (rNa.summary.statusHint !== "not_applicable") {
+    throw new Error(`expected not_applicable, got ${JSON.stringify(rNa.summary)}`);
+  }
+
   console.log("aprf-auditor injection-policy-gate smoke OK");
-  for (const d of [outDir, out1, out2, out3, targetDir]) {
+  for (const d of [
+    outDir,
+    out1,
+    out2,
+    out3,
+    outMetrics,
+    out4,
+    outNa,
+    emptyTarget,
+    targetDir,
+  ]) {
     rmSync(d, { recursive: true, force: true });
   }
 }

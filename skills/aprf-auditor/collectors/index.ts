@@ -47,6 +47,12 @@ import { crossTenantTestsCollector } from "./cross-tenant-tests.ts";
 import { secretsHygieneCollector } from "./secrets-hygiene.ts";
 import { secretRedactionCollector } from "./secret-redaction.ts";
 import { injectionPolicyGateCollector } from "./injection-policy-gate.ts";
+import { highRiskOutputGateCollector } from "./high-risk-output-gate.ts";
+import { abuseInjectionReleaseGateCollector } from "./abuse-injection-release-gate.ts";
+import { modelPathEgressBoundaryCollector } from "./model-path-egress-boundary.ts";
+import { aiExfilDetectionCollector } from "./ai-exfil-detection.ts";
+import { multiTurnIndirectInjectionRedteamCollector } from "./multi-turn-indirect-injection-redteam.ts";
+import { multimodalInputScanCollector } from "./multimodal-input-scan.ts";
 import { agentLoopLimitsCollector } from "./agent-loop-limits.ts";
 import { a2aPeerAuthCollector } from "./a2a-peer-auth.ts";
 import { agentCharterInventoryCollector } from "./agent-charter-inventory.ts";
@@ -203,6 +209,12 @@ export const COLLECTORS: Collector[] = [
   secretsHygieneCollector,
   secretRedactionCollector,
   injectionPolicyGateCollector,
+  highRiskOutputGateCollector,
+  abuseInjectionReleaseGateCollector,
+  modelPathEgressBoundaryCollector,
+  aiExfilDetectionCollector,
+  multiTurnIndirectInjectionRedteamCollector,
+  multimodalInputScanCollector,
   agentCharterInventoryCollector,
   agentLoopLimitsCollector,
   agentKillSwitchCollector,

@@ -1,0 +1,28 @@
+id: ai-exfil-detection
+title: Sensitive AI exfiltration detection (SEC-R3)
+version: "0.2.0"
+executor: collectors/ai-exfil-detection.ts
+evidenceClass: runtime
+alsoEmits: []
+detectorIds: [repo-ai-exfil-detection]
+inputs:
+  - "Target repo (canary/honeytoken, DLP, SIEM/UEBA, or equivalent AI exfil detection)"
+  - "Optional coverage: aprf-assessment/imports/ai-exfil-detection/*.{json}"
+collect:
+  - "Detect canary/honeytoken and/or DLP/SIEM/UEBA/equivalent signals for sensitive AI contexts"
+  - "Ingest validation; write ai-exfil-detection-report.json"
+emits:
+  nodeClass: runtime
+  refPattern: "aprf-assessment/imports/ai-exfil-detection/*"
+  signals: [ai-exfil-detection, sec-r3, repo-ai-exfil-detection]
+mapsToChecks: [SEC-R3]
+whenUnavailable: >
+  Detection signals alone are PARTIAL. SEC-R3 PASS needs
+  sensitiveAiContextsExfilDetectionConfigured,
+  detectionMechanismCoversSensitiveAiPaths,
+  latestDetectionValidationWithin90DaysWithExpectedAlertsOrZeroSilentMisses,
+  measuredAt ≤90 days. Canaries are optional if an equivalent mechanism is validated.
+  Set sensitiveAiContextsPresent=false for NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline ai-exfil-detection heuristics + optional imported JSON.

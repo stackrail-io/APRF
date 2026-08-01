@@ -1,0 +1,96 @@
+id: "SEC-R3"
+category: "ai-security"
+title: "Sensitive AI contexts should detect data exfiltration attempts"
+description: >
+  Sensitive AI contexts should have mechanisms to detect data exfiltration
+  attempts—so operators learn of prompt/tool/corpus leakage paths before they
+  become silent incidents. Canary tokens and tripwires are one strong
+  implementation; equivalent DLP, SIEM/UEBA, egress monitoring, or similar
+  controls also satisfy when validated.
+whyItMatters: >
+  Mandating canary tokens alone fails production systems that already detect
+  exfiltration via DLP, SIEM, UEBA, CloudTrail/GuardDuty-class monitoring, or
+  Purview-style insider risk—without honeytokens. The outcome that matters is
+  detection coverage for sensitive AI contexts, not a single technology.
+  Distinct from SEC-M1 injection privilege mediation, SEC-M4 model-path egress
+  boundaries, and PRI classification controls that reduce surface without
+  proving detection.
+severity: "high"
+weight: 3
+gate: "recommended"
+passCondition: >
+  Sensitive AI contexts have a documented exfiltration-detection mechanism
+  (canary/honeytoken, DLP, SIEM/UEBA, egress monitoring, or equivalent);
+  latest validation ≤90 days shows expected detection/alerts for covered
+  paths with 0 silent misses in the validation suite or review
+  (measuredAt ≤90 days). If no sensitive AI contexts exist, score
+  NOT_APPLICABLE.
+evidenceRequired:
+  - "Documented exfiltration-detection mechanism for sensitive AI contexts (mechanism class named)"
+  - "Coverage of production-sensitive AI paths (inventory or mapping)"
+  - "Latest validation ≤90 days (detection test, alert-rule exercise, or equivalent) with expected alerts / 0 silent misses"
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-ai-exfil-detection"
+      params:
+        hint: >
+          Discover canary/honeytoken, DLP, SIEM/UEBA, or equivalent AI
+          exfiltration-detection signals; ingest validation under
+          imports/ai-exfil-detection/.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest a named exfil-detection
+          mechanism covers sensitive AI contexts and latest validation ≤90 days
+          shows expected alerts with 0 silent misses (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm sensitive AI contexts exist (prompts/tools/corpora with secrets,
+  regulated data, or high-value IP). If none, score NOT_APPLICABLE. 2) Identify
+  the detection mechanism class (canary/honeytoken, DLP, SIEM/UEBA, egress
+  monitoring, or equivalent)—do not require canaries specifically. 3) Confirm
+  coverage of production-sensitive AI paths. 4) Review latest validation ≤90
+  days: expected detections/alerts fire; silent misses in the suite/review =
+  0. 5) PASS only if mechanism + coverage + validation hold with measuredAt ≤90
+  days. SEC-M1 injection suites alone do not prove exfil detection. SEC-M4
+  egress allowlists alone do not prove detection. PRI classification alone
+  does not prove detection alerts.
+falsePositiveGuidance: >
+  Do not fail systems that use DLP/SIEM/UEBA without canaries when validation
+  evidence is present. Do not pass canary designs never deployed to sensitive
+  paths. Do not pass SIEM rules never exercised ≤90 days. Do not pass generic
+  infra IDS with no AI-context mapping. Sibling SEC-M1, SEC-M4, and PRI do not
+  substitute. Named exceptions need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Document an exfil-detection mechanism for sensitive AI contexts (canary, DLP, SIEM/UEBA, or equivalent)"
+  - "Map coverage to production-sensitive AI paths"
+  - "Run validation ≤90 days; retain expected-alert / 0-silent-miss evidence under imports/ai-exfil-detection/"
+  - "Time-box gaps with owner and expiry ≤90 days"
+references:
+  - title: "OWASP Top 10 for Large Language Model Applications — LLM06 Sensitive Information Disclosure"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI Risk Management Framework"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "CIS Controls (select mappings for AI workloads)"
+    url: "https://www.cisecurity.org/controls"
+relatedRules:
+  - "SEC-M1"
+  - "SEC-M2"
+  - "SEC-M3"
+  - "SEC-M4"
+  - "SEC-R1"
+  - "SEC-R2"
+  - "PRI-M1"
+tags:
+  - "ai-security"
+  - "recommended"
+  - "hybrid"
+  - "exfiltration"
+  - "detection"
+  - "dlp"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 4
+status: "active"
+introducedIn: "0.10.0"

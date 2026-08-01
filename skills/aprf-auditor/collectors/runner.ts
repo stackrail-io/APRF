@@ -435,6 +435,34 @@ DX-R3 DX metrics (TTSP + bypass rate):
   npm run aprf:dx-metrics -- --target <app> --out <app>/aprf-assessment
   # PASS needs formulas + ≥30d series + bypass alert/owner under imports/platform-dx-metrics/
 
+SEC-M1 injection/privilege-escalation policy gate (≥95% deny, 0 model-text grants):
+  npm run aprf:injection-gate -- --target <app> --out <app>/aprf-assessment
+  # PASS needs server-side policy + corpus/CI + denyRatePct≥95 + modelTextPrivilegeGrants=0 + measuredAt ≤90d under imports/injection-policy-gate/
+
+SEC-M2 high-risk output schema/policy gate (100% paths reject non-conforming):
+  npm run aprf:high-risk-output-gate -- --target <app> --out <app>/aprf-assessment
+  # PASS needs highRiskSideEffectPathInventoryComplete + highRiskPathsRejectingNonConformingOutputPct=100 + measuredAt ≤90d under imports/high-risk-output-gate/
+
+SEC-M3 abuse/jailbreak/injection release gate (100% last 30d + ≤30d waivers):
+  npm run aprf:abuse-injection-release-gate -- --target <app> --out <app>/aprf-assessment
+  # PASS needs abuseJailbreakInjectionSuiteConfigured + productionReleasesWithSecuritySuiteGatePassPct=100 + failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d + measuredAt ≤90d under imports/abuse-injection-release-gate/
+
+SEC-M4 model-path egress / trust boundary (allowlisted-only + 0 unrestricted internal routes):
+  npm run aprf:model-path-egress-boundary -- --target <app> --out <app>/aprf-assessment
+  # PASS needs trustBoundaryArchitectureDocumented + modelToolRuntimeEgressAllowlistConfigured + unrestrictedInternalAdminOrDataStoreRoutesFromModelIdentity=0 + probeShowsOnlyAllowlistedDestinations + measuredAt ≤90d under imports/model-path-egress-boundary/
+
+SEC-R1 multi-turn + indirect RAG/MCP injection red-team (≥10/≥10 + scored run ≤90d):
+  npm run aprf:multi-turn-indirect-injection-redteam -- --target <app> --out <app>/aprf-assessment
+  # PASS needs multiTurnInjectionCaseCount≥10 + indirectRagOrMcpInjectionCaseCount≥10 + latestRunWithin90DaysMeetsPassThresholds + reportRetainedAtLeast90Days + measuredAt ≤90d under imports/multi-turn-indirect-injection-redteam/
+
+SEC-R2 multimodal input safety/malware scan before model ingest:
+  npm run aprf:multimodal-input-scan -- --target <app> --out <app>/aprf-assessment
+  # PASS needs multimodalInputsAccepted=true + scannerRunsBeforeModelIngest + imageFileTypesInUseCoveredInLastReport + unscannedProductionMultimodalPaths=0 + measuredAt ≤90d under imports/multimodal-input-scan/
+
+SEC-R3 sensitive AI exfil detection (canary optional; DLP/SIEM/UEBA OK):
+  npm run aprf:ai-exfil-detection -- --target <app> --out <app>/aprf-assessment
+  # PASS needs sensitiveAiContextsExfilDetectionConfigured + detectionMechanismCoversSensitiveAiPaths + latestDetectionValidationWithin90DaysWithExpectedAlertsOrZeroSilentMisses + measuredAt ≤90d under imports/ai-exfil-detection/
+
 SAF-M1 domain-specific AI safety policy (versioned, owned, reviewed ≤12 months):
   npm run aprf:ai-harm-policy -- --target <app> --out <app>/aprf-assessment
   # PASS needs hasVersion + hasOwner + domainMinimumHarmCategoriesWithRefuseEscalateMapped + reviewAgeDays≤365 under imports/ai-harm-policy/

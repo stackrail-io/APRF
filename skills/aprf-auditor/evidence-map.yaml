@@ -55,7 +55,8 @@ categoryDefaults:
       - "**/policy/**"
       - "**/openai*/**"
       - "**/anthropic*/**"
-    signals: [input validation, allowlist, tool mediation, content filter]
+    plugins: [injection-policy-gate, high-risk-output-gate, abuse-injection-release-gate, model-path-egress-boundary, ai-exfil-detection, multi-turn-indirect-injection-redteam, multimodal-input-scan, promptfoo, repo-filesystem]
+    signals: [input validation, allowlist, tool mediation, content filter, injection corpus, privilege escalation, output schema, policy filter, high-risk path, abuse suite, jailbreak, release gate, trust boundary, egress, model path, exfiltration detection, dlp, canary]
   authentication:
     search:
       - "**/*auth*"
@@ -313,6 +314,136 @@ categoryDefaults:
 
 # Optional Check-level overrides (extend over time; Core profile examples)
 checks:
+  SEC-M1:
+    requiredEvidence:
+      - "Server-side policy mediating privileged tool/actions (not prompt-only)"
+      - "denyRatePct≥95 + modelTextPrivilegeGrants=0 + versionedCorpusPresent + ciGateConfigured + measuredAt≤90d under imports/injection-policy-gate/"
+    searchExtra:
+      - "**/*injection*"
+      - "**/*privilege*escalat*"
+      - "**/*tool*policy*"
+      - "**/*policy*engine*"
+      - "**/promptfoo*"
+      - "**/redteam/**"
+    plugins: [injection-policy-gate, promptfoo, github-actions, repo-filesystem]
+    naWhen: "No production AI tools or privileged side effects"
+    evaluation: |
+      PASS if injection-policy-gate statusHint=pass (server-side policy + corpus/CI + denyRatePct≥95 + 0 model-text privilege grants + measuredAt ≤90d).
+      NOT_APPLICABLE if productionAiToolsOrPrivilegedSideEffectsPresent=false.
+      PARTIAL if policy/corpus signals without measured import, or metrics-only import without versionedCorpusPresent/ciGateConfigured.
+      FAIL if denyRatePct<95 or any model-text privilege grant.
+      Distinct from SAF-M2 content-safety gates and SAF-R2 jailbreak-to-harm red teams.
+  SEC-M2:
+    requiredEvidence:
+      - "Coverage inventory of high-risk side-effect paths (write/irreversible/financial)"
+      - "highRiskSideEffectPathInventoryComplete + highRiskPathsRejectingNonConformingOutputPct=100 + measuredAt≤90d under imports/high-risk-output-gate/"
+    searchExtra:
+      - "**/*output*schema*"
+      - "**/*response*schema*"
+      - "**/*contract*test*"
+      - "**/*high*risk*path*"
+      - "**/*policy*filter*"
+      - "**/*structured*output*"
+    plugins: [high-risk-output-gate, promptfoo, github-actions, repo-filesystem]
+    naWhen: "No write/irreversible/financial AI side-effect paths"
+    evaluation: |
+      PASS if high-risk-output-gate statusHint=pass (inventory complete + 100% reject non-conforming + measuredAt ≤90d).
+      PARTIAL if schema/policy/contract/inventory signals without complete import.
+      FAIL if inventory incomplete or reject coverage <100%.
+      Distinct from SEC-M1 injection gates, TOL-M4 tool-argument schemas, and SAF-M2 safety eval gates.
+  SEC-M3:
+    requiredEvidence:
+      - "Abuse/jailbreak/injection suite covering those case classes"
+      - "abuseJailbreakInjectionSuiteConfigured + productionReleasesWithSecuritySuiteGatePassPct=100 + coverageWindowDays=30 + failingGateBlocksPromoteUnlessOwnedWaiverExpiry30d + measuredAt≤90d under imports/abuse-injection-release-gate/"
+    searchExtra:
+      - "**/*injection*"
+      - "**/*jailbreak*"
+      - "**/*abuse*"
+      - "**/*redteam*"
+      - "**/promptfoo*"
+      - "**/.github/workflows/**"
+    plugins: [abuse-injection-release-gate, promptfoo, github-actions, repo-filesystem]
+    naWhen: "No customer-facing / production AI releases"
+    evaluation: |
+      PASS if abuse-injection-release-gate statusHint=pass (suite configured + 100% releases last 30d gate=pass/waiver + coverageWindowDays=30 + blocking ≤30d waivers + measuredAt ≤90d).
+      PARTIAL if suite/gate signals without complete import (including missing 30-day window).
+      FAIL if coverage <100%, wrong window, or non-blocking without owned ≤30d waivers.
+      Distinct from SEC-M1 deny rates, SAF-M2 content-safety gates, SAF-R2 harm red teams, and SEC-R1 multi-turn/RAG depth.
+  SEC-M4:
+    requiredEvidence:
+      - "Architecture diagram of model/tool trust boundaries"
+      - "trustBoundaryArchitectureDocumented + modelToolRuntimeEgressAllowlistConfigured + unrestrictedInternalAdminOrDataStoreRoutesFromModelIdentity=0 + probeShowsOnlyAllowlistedDestinations + measuredAt≤90d under imports/model-path-egress-boundary/"
+    searchExtra:
+      - "**/*network*policy*"
+      - "**/*egress*"
+      - "**/*trust*boundar*"
+      - "**/*security*group*"
+      - "**/*allowlist*"
+      - "**/*.tf"
+    plugins: [model-path-egress-boundary, iac-cloud, repo-filesystem]
+    naWhen: "Model/tool runtime cannot initiate network calls"
+    evaluation: |
+      PASS if model-path-egress-boundary statusHint=pass (trust boundary + egress allowlist + 0 unrestricted internal admin/data-store routes + allowlisted-only probe + measuredAt ≤90d).
+      PARTIAL if boundary signals without complete import.
+      FAIL if unrestricted routes >0 or probe fails allowlisted-only.
+      Distinct from INF-M3 dependency-inventory segmentation, SEC-M1 injection gates, and AUTHZ RBAC.
+  SEC-R1:
+    requiredEvidence:
+      - "Versioned red-team suite covering multi-turn and indirect RAG/MCP injection"
+      - "multiTurnInjectionCaseCount≥10 + indirectRagOrMcpInjectionCaseCount≥10 + latestRunWithin90DaysMeetsPassThresholds + reportRetainedAtLeast90Days + measuredAt≤90d under imports/multi-turn-indirect-injection-redteam/"
+    searchExtra:
+      - "**/*multi*turn*"
+      - "**/*indirect*inject*"
+      - "**/*rag*inject*"
+      - "**/*mcp*inject*"
+      - "**/*redteam*"
+      - "**/promptfoo*"
+    plugins: [multi-turn-indirect-injection-redteam, promptfoo, repo-filesystem]
+    naWhen: "No multi-turn, RAG, or MCP surfaces"
+    evaluation: |
+      PASS if multi-turn-indirect-injection-redteam statusHint=pass (≥10 multi-turn + ≥10 indirect RAG/MCP + thresholds + retention + measuredAt ≤90d).
+      PARTIAL if red-team signals without complete import.
+      FAIL if case counts <10 or thresholds/retention fail.
+      Distinct from SEC-M1 deny rates, SEC-M3 release gates, and SAF-R2 harm red teams.
+  SEC-R2:
+    requiredEvidence:
+      - "Multimodal input content-safety and/or malware scanner config (pre-model-ingest)"
+      - "multimodalInputsAccepted + scannerRunsBeforeModelIngest + imageFileTypesInUseCoveredInLastReport + unscannedProductionMultimodalPaths=0 + measuredAt≤90d under imports/multimodal-input-scan/"
+    searchExtra:
+      - "**/*multimodal*"
+      - "**/*image*upload*"
+      - "**/*malware*scan*"
+      - "**/*content*safety*"
+      - "**/*clamav*"
+      - "**/*vision*"
+    plugins: [multimodal-input-scan, promptfoo, repo-filesystem]
+    naWhen: "Multimodal inputs not accepted"
+    evaluation: |
+      PASS if multimodal-input-scan statusHint=pass (pre-ingest scanner + types covered + 0 unscanned + measuredAt ≤90d).
+      NOT_APPLICABLE if multimodalInputsAccepted=false.
+      PARTIAL if scanner signals without complete import.
+      FAIL if unscanned paths >0 or types uncovered.
+      Distinct from SAF-M2 text safety gates, SEC-M2 output schemas, and SEC-R1 injection red teams.
+  SEC-R3:
+    requiredEvidence:
+      - "Documented exfiltration-detection mechanism for sensitive AI contexts (mechanism class named)"
+      - "sensitiveAiContextsExfilDetectionConfigured + detectionMechanismCoversSensitiveAiPaths + latestDetectionValidationWithin90DaysWithExpectedAlertsOrZeroSilentMisses + measuredAt≤90d under imports/ai-exfil-detection/"
+    searchExtra:
+      - "**/*canary*"
+      - "**/*honeytoken*"
+      - "**/*dlp*"
+      - "**/*exfil*"
+      - "**/*siem*"
+      - "**/*ueba*"
+    plugins: [ai-exfil-detection, repo-filesystem]
+    naWhen: "No sensitive AI contexts"
+    evaluation: |
+      PASS if ai-exfil-detection statusHint=pass (configured + covers sensitive paths + validated ≤90d + measuredAt ≤90d).
+      NOT_APPLICABLE if sensitiveAiContextsPresent=false.
+      Canaries optional when DLP/SIEM/UEBA/equivalent is validated.
+      PARTIAL if detection signals without complete import.
+      FAIL if coverage missing or validation fails.
+      Distinct from SEC-M1 injection gates, SEC-M4 egress boundaries, and PRI classification.
   AUTHN-M1:
     requiredEvidence:
       - "Automated auth probe report covering all production AI HTTP/RPC routes"

@@ -1,42 +1,68 @@
 id: "SEC-R1"
 category: "ai-security"
-title: "Production systems should have red-team exercises cover multi-turn and indirect injection
-  via RAG/MCP"
-description: "Red-team exercises cover multi-turn and indirect injection via RAG/MCP"
-whyItMatters: "Red-team exercises cover multi-turn and indirect injection via RAG/MCP Failing this
-  leaves a production gap against: Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection
-  cases; latest run ≤90 days meets documented pass thresholds; report retained ≥90 days"
-severity: "critical"
-weight: 4
+title: "Red-team exercises should cover multi-turn and indirect injection via RAG/MCP"
+description: >
+  Production systems that use multi-turn dialogue, RAG, or MCP should run a
+  versioned red-team suite with ≥10 multi-turn and ≥10 indirect RAG/MCP
+  injection cases—so single-turn jailbreak tests alone cannot claim coverage.
+whyItMatters: >
+  Indirect injection through retrieved documents or MCP payloads, and
+  multi-turn priming, bypass suites that only fire one-shot prompts. Requiring
+  depth counts plus a recent scored run turns red-teaming into a measurable
+  control. Distinct from SEC-M1 privilege-mediation deny rates, SEC-M3
+  customer-facing release gates, and SAF-R2 jailbreak-to-harm (content-safety)
+  red teams.
+severity: "high"
+weight: 3
 gate: "recommended"
-passCondition: "Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases; latest run
-  ≤90 days meets documented pass thresholds; report retained ≥90 days"
+passCondition: >
+  Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases;
+  latest run ≤90 days meets documented pass thresholds; report retained ≥90
+  days (measuredAt ≤90 days). If the system has no multi-turn, RAG, or MCP
+  surfaces, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Versioned red-team suite covering multi-turn and indirect injection via RAG/MCP + latest scored
-    run report"
+  - "Versioned red-team suite covering multi-turn and indirect RAG/MCP injection"
+  - "Case counts (≥10 multi-turn, ≥10 indirect RAG/MCP) with documented pass thresholds"
+  - "Latest scored run report ≤90 days with retention ≥90 days"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-multi-turn-indirect-injection-redteam"
+      params:
+        hint: >
+          Discover multi-turn and indirect RAG/MCP injection red-team suites
+          and scored runs; ingest counts under
+          imports/multi-turn-indirect-injection-redteam/.
     - id: "manual-attest"
       params:
-        hint: "Versioned red-team suite covering multi-turn and indirect injection via RAG/MCP + latest
-          scored run report"
-manualVerification: "For this Check (Red-team exercises cover multi-turn and indirect injection via
-  RAG/MCP): inspect current evidence for [Versioned red-team suite covering multi-turn and indirect
-  injection via RAG/MCP + latest scored run report] and confirm the pass condition holds — Suite
-  includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases; latest run ≤90 days meets
-  documented pass thresholds; report retained ≥90 days"
-falsePositiveGuidance: "(Adversarial Security): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest ≥10 multi-turn and ≥10
+          indirect RAG/MCP cases, latest run ≤90 days meeting thresholds, and
+          report retention ≥90 days (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI uses multi-turn dialogue, RAG retrieval, or MCP
+  tool bridges. If none, score NOT_APPLICABLE. 2) Locate a versioned red-team
+  suite that includes multi-turn and indirect RAG/MCP injection case classes.
+  3) Confirm counts: ≥10 multi-turn and ≥10 indirect RAG/MCP cases. 4) Confirm
+  the latest scored run is ≤90 days old, meets documented pass thresholds, and
+  the report is retained ≥90 days. 5) PASS only if suite depth + recent scored
+  run + retention hold with measuredAt ≤90 days. SEC-M1 deny-rate corpora alone
+  do not prove multi-turn/RAG depth. SEC-M3 release-gate pass alone does not
+  prove ≥10/≥10 case classes. SAF-R2 harm red teams alone do not prove
+  security injection depth via RAG/MCP.
+falsePositiveGuidance: >
+  Do not pass single-turn-only jailbreak suites. Do not pass quality evals
+  without injection case classes. Do not pass runs older than 90 days. Do not
+  pass suites missing either multi-turn or indirect RAG/MCP tracks. Sibling
+  SEC-M1, SEC-M3, and SAF-R2 do not substitute. Named exceptions need owner
+  and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Red-team exercises cover multi-turn and indirect
-    injection via RAG/MCP"
-  - "Retain evidence artifacts required by this Check, starting with: Versioned red-team suite
-    covering multi-turn and indirect injection via RAG/MCP + latest scored run report"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Add ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases to a versioned red-team suite"
+  - "Document pass thresholds and run the suite at least every 90 days"
+  - "Retain scored reports ≥90 days under imports/multi-turn-indirect-injection-redteam/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
-  - title: "OWASP Top 10 for Large Language Model Applications"
+  - title: "OWASP Top 10 for Large Language Model Applications — LLM01 Prompt Injection"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
   - title: "NIST AI Risk Management Framework"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -47,16 +73,20 @@ relatedRules:
   - "SEC-M2"
   - "SEC-M3"
   - "SEC-M4"
-  - "SEC-M5"
+  - "SEC-R2"
+  - "SEC-R3"
+  - "SAF-R2"
 tags:
   - "ai-security"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "red-team"
+  - "multi-turn"
+  - "rag"
+  - "mcp"
+  - "injection"
 applicability:
-  technologies:
-    - "openapi"
-    - "prompt-templates"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

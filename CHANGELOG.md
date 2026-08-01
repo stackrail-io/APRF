@@ -8,6 +8,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
+- Rewrote **ai-security** **SEC-R2** (hybrid multimodal pre-ingest content-safety/malware scan; `multimodal-input-scan` collector + measuredAt ≤90d); cleared `technologies`; synced `aprf-spec.json`.
+- Rewrote **ai-security** **SEC-R1** (hybrid multi-turn + indirect RAG/MCP injection red-team; `multi-turn-indirect-injection-redteam` collector + measuredAt ≤90d); cleared `technologies`; synced `aprf-spec.json`.
+- Demoted **ai-security** former **SEC-M5 → SEC-R3** (recommended exfiltration detection for sensitive AI contexts; canaries optional among DLP/SIEM/UEBA/equivalents) per [APRF-RFC-0009](rfcs/0009-adversarial-security-sec-m5-to-recommended.md) (regulated 51→50, tier3-only 13→12); vacated `SEC-M5`; synced `aprf-spec.json`.
+- Rewrote **ai-security** **SEC-M4** (hybrid model-path egress/trust boundary; `model-path-egress-boundary` collector + measuredAt ≤90d; distinct from INF-M3); cleared `technologies`; synced `aprf-spec.json`.
+- Rewrote **ai-security** **SEC-M3** (hybrid abuse/jailbreak/injection release gate; `abuse-injection-release-gate` collector + measuredAt ≤90d); cleared `technologies`; synced `aprf-spec.json`.
+- Rewrote **ai-security** **SEC-M2** (hybrid high-risk output schema/policy gate before side effects; `high-risk-output-gate` collector + measuredAt ≤90d); cleared `technologies`; synced `aprf-spec.json`.
+- Rewrote **ai-security** **SEC-M1** (hybrid injection/privilege-escalation policy gate; aligned with `injection-policy-gate` collector + measuredAt ≤90d); cleared `technologies`; synced `aprf-spec.json`.
 - Reframed **SAF-M1** around a **domain-specific AI safety policy** (harm categories + refuse/escalate as policy contents, not a standalone “harm taxonomy”); synced `aprf-spec.json`.
 - Rewrote **safety-responsible-ai** former **SAF-R3 → SAF-R1** (hybrid human safety edge-case sampling); vacated `SAF-R3` under pre-release exception in `id-gaps.md`; synced `aprf-spec.json`.
 - Rewrote **safety-responsible-ai** **SAF-R2** (hybrid jailbreak-to-harm red-team, distinct from SEC-M1); cleared `technologies`; synced `aprf-spec.json`.

@@ -1,42 +1,66 @@
 id: "SEC-M1"
 category: "ai-security"
 title: "Untrusted input must never authorize privileged actions without server-side policy"
-description: "Untrusted input shall never authorize privileged actions without server-side policy"
-whyItMatters: "Untrusted input shall never authorize privileged actions without server-side policy
-  Failing this leaves a production gap against: ≥95% of corpus cases that attempt privilege
-  escalation via untrusted input are denied; 0 cases where model text alone granted a privileged
-  tool call in the suite"
+description: >
+  Untrusted input (including model-generated text) shall never authorize
+  privileged tool or side-effect actions without server-side policy—so
+  prompt injection and privilege escalation cannot bypass the control plane.
+whyItMatters: >
+  Letting the model decide which privileged tools to run turns injection into
+  remote code/action. A versioned corpus plus CI gate proving ≥95% deny and
+  0 model-text-alone privilege grants makes the boundary measurable. Distinct
+  from SAF-M2 content-safety gates and SAF-R2 jailbreak-to-harm red teams.
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "≥95% of corpus cases that attempt privilege escalation via untrusted input are
-  denied; 0 cases where model text alone granted a privileged tool call in the suite"
+passCondition: >
+  ≥95% of corpus cases that attempt privilege escalation via untrusted input
+  are denied; 0 cases where model text alone granted a privileged tool call
+  in the suite (measuredAt ≤90 days).
 evidenceRequired:
-  - "Injection/privilege-escalation corpus (versioned) + CI gate report + policy-engine deny sample
-    logs"
+  - "Server-side policy mediating privileged tool/actions (not prompt-only)"
+  - "Versioned injection/privilege-escalation corpus + CI gate report"
+  - "Policy-engine deny sample logs or harness results (denyRatePct + modelTextPrivilegeGrants)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-injection-policy-gate"
+      params:
+        hint: >
+          Discover server-side tool/policy mediation, versioned
+          injection/privilege-escalation corpora, and CI gate wiring;
+          ingest deny-rate harness results under imports/injection-policy-gate/.
     - id: "manual-attest"
       params:
-        hint: "Injection/privilege-escalation corpus (versioned) + CI gate report + policy-engine deny
-          sample logs"
-manualVerification: "For this Check (Untrusted input must never authorize privileged actions without
-  server-side policy): inspect current evidence for [Injection/privilege-escalation corpus
-  (versioned) + CI gate report + policy-engine deny sample logs] and confirm the pass condition
-  holds — ≥95% of corpus cases that attempt privilege escalation via untrusted input are denied; 0
-  cases where model text alone granted a privileged tool call in the suite"
-falsePositiveGuidance: "(Adversarial Security): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest ≥95% deny on the
+          privilege-escalation corpus and 0 model-text-alone privileged
+          grants (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production AI can invoke tools or privileged side effects. If
+  none, score NOT_APPLICABLE. 2) Locate server-side policy that authorizes
+  privileged actions independent of model text. 3) Locate a versioned
+  injection/privilege-escalation corpus and CI gate. 4) Confirm latest suite
+  results: deny rate ≥95% and 0 cases where model text alone granted a
+  privileged tool call. 5) PASS only if policy + corpus/gate + measured
+  results hold with measuredAt ≤90 days. Content filters or “ignore jailbreak”
+  prompts alone do not satisfy. SAF-M2 safety eval gates alone do not prove
+  privilege mediation. SAF-R2 harm red teams alone do not prove server-side
+  tool authorization. AUTHZ Checks alone do not prove injection corpus
+  coverage.
+falsePositiveGuidance: >
+  Do not pass prompt-only instructions as server-side policy. Do not pass
+  corpora without measured denyRatePct ≥95. Do not pass suites with any
+  model-text-alone privilege grant. Do not pass content moderation as
+  privilege gating. Sibling SAF-M2, SAF-R2, and AUTHZ Checks do not
+  substitute. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Untrusted input must never authorize privileged actions without
-    server-side policy"
-  - "Retain evidence artifacts required by this Check, starting with: Injection/privilege-escalation
-    corpus (versioned) + CI gate report + policy-engine deny sample logs"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Authorize privileged tools only via server-side policy (never model text alone)"
+  - "Maintain a versioned injection/privilege-escalation corpus with CI gate"
+  - "Retain ≥95% deny / 0 model-text grants under imports/injection-policy-gate/"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
-  - title: "OWASP Top 10 for Large Language Model Applications"
+  - title: "OWASP Top 10 for Large Language Model Applications — LLM01 Prompt Injection"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
   - title: "NIST AI Risk Management Framework"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
@@ -46,17 +70,20 @@ relatedRules:
   - "SEC-M2"
   - "SEC-M3"
   - "SEC-M4"
-  - "SEC-M5"
+  - "SEC-R3"
   - "SEC-R1"
+  - "SAF-M2"
+  - "SAF-R2"
+  - "AUTHZ-M1"
 tags:
   - "ai-security"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "injection"
+  - "privilege-escalation"
+  - "policy-engine"
 applicability:
-  technologies:
-    - "openapi"
-    - "prompt-templates"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

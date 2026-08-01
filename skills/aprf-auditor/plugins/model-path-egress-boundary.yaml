@@ -1,0 +1,28 @@
+id: model-path-egress-boundary
+title: Model-path egress / trust boundary (SEC-M4)
+version: "0.2.0"
+executor: collectors/model-path-egress-boundary.ts
+evidenceClass: iac
+alsoEmits: []
+detectorIds: [repo-model-path-egress-boundary]
+inputs:
+  - "Target repo (trust-boundary docs, network/egress policy, reachability probes)"
+  - "Optional coverage: aprf-assessment/imports/model-path-egress-boundary/*.{json}"
+collect:
+  - "Detect trust-boundary, egress allowlist, probe, and internal admin/data-store signals"
+  - "Ingest coverage; write model-path-egress-boundary-report.json"
+emits:
+  nodeClass: iac
+  refPattern: "aprf-assessment/imports/model-path-egress-boundary/*"
+  signals: [model-path-egress-boundary, sec-m4, repo-model-path-egress-boundary]
+mapsToChecks: [SEC-M4]
+whenUnavailable: >
+  Boundary signals alone are PARTIAL. SEC-M4 PASS needs
+  trustBoundaryArchitectureDocumented,
+  modelToolRuntimeEgressAllowlistConfigured,
+  unrestrictedInternalAdminOrDataStoreRoutesFromModelIdentity=0,
+  probeShowsOnlyAllowlistedDestinations, measuredAt ≤90 days.
+  Set modelToolRuntimeCanInitiateNetworkCalls=false for NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline model-path-egress-boundary heuristics + optional imported JSON.
