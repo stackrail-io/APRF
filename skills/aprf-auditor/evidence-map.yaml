@@ -329,6 +329,7 @@ checks:
     naWhen: "No production AI tools or privileged side effects"
     evaluation: |
       PASS if injection-policy-gate statusHint=pass (server-side policy + corpus/CI + denyRatePct≥95 + 0 model-text privilege grants + measuredAt ≤90d).
+      NOT_APPLICABLE if productionAiToolsOrPrivilegedSideEffectsPresent=false.
       PARTIAL if policy/corpus signals without measured import.
       FAIL if denyRatePct<95 or any model-text privilege grant.
       Distinct from SAF-M2 content-safety gates and SAF-R2 jailbreak-to-harm red teams.
@@ -438,6 +439,7 @@ checks:
     naWhen: "No sensitive AI contexts"
     evaluation: |
       PASS if ai-exfil-detection statusHint=pass (configured + covers sensitive paths + validated ≤90d + measuredAt ≤90d).
+      NOT_APPLICABLE if sensitiveAiContextsPresent=false.
       Canaries optional when DLP/SIEM/UEBA/equivalent is validated.
       PARTIAL if detection signals without complete import.
       FAIL if coverage missing or validation fails.

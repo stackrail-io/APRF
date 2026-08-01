@@ -29,6 +29,7 @@ whenUnavailable: >
   a versioned injection/privilege-escalation corpus + CI gate with ≥95% deny rate, 0 cases
   where model text alone granted a privileged tool call, and measuredAt ≤90 days — drop results under
   imports/injection-policy-gate/ if the suite lives elsewhere.
+  Set productionAiToolsOrPrivilegedSideEffectsPresent=false for NOT_APPLICABLE.
 live:
   required: false
   note: Offline discovery + optional imported corpus/CI results.

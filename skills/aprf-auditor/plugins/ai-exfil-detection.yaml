@@ -22,6 +22,7 @@ whenUnavailable: >
   detectionMechanismCoversSensitiveAiPaths,
   latestDetectionValidationWithin90DaysWithExpectedAlertsOrZeroSilentMisses,
   measuredAt ≤90 days. Canaries are optional if an equivalent mechanism is validated.
+  Set sensitiveAiContextsPresent=false for NOT_APPLICABLE.
 live:
   required: false
   note: Offline ai-exfil-detection heuristics + optional imported JSON.

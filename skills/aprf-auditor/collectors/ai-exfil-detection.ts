@@ -63,6 +63,7 @@ export interface AiExfilDetectionReport {
   };
   importedResults: {
     found: boolean;
+    sensitiveAiContextsPresent: boolean | null;
     sensitiveAiContextsExfilDetectionConfigured: boolean | null;
     detectionMechanismCoversSensitiveAiPaths: boolean | null;
     latestDetectionValidationWithin90DaysWithExpectedAlertsOrZeroSilentMisses:
@@ -137,6 +138,7 @@ function loadImported(
   ctx: CollectorContext,
 ): AiExfilDetectionReport["importedResults"] {
   const sources: string[] = [];
+  let sensitiveAiContextsPresent: boolean | null = null;
   let sensitiveAiContextsExfilDetectionConfigured: boolean | null = null;
   let detectionMechanismCoversSensitiveAiPaths: boolean | null = null;
   let latestDetectionValidationWithin90DaysWithExpectedAlertsOrZeroSilentMisses:
@@ -160,6 +162,11 @@ function loadImported(
         asStr(data.mechanism_class) ??
         asStr(data.detectionMechanismClass) ??
         mechanismClass;
+      sensitiveAiContextsPresent =
+        asBool(data.sensitiveAiContextsPresent) ??
+        asBool(data.sensitive_ai_contexts_present) ??
+        asBool(data.hasSensitiveAiContexts) ??
+        sensitiveAiContextsPresent;
       sensitiveAiContextsExfilDetectionConfigured =
         asBool(data.sensitiveAiContextsExfilDetectionConfigured) ??
         asBool(data.sensitive_ai_contexts_exfil_detection_configured) ??
@@ -187,6 +194,7 @@ function loadImported(
 
   return {
     found: sources.length > 0,
+    sensitiveAiContextsPresent,
     sensitiveAiContextsExfilDetectionConfigured,
     detectionMechanismCoversSensitiveAiPaths,
     latestDetectionValidationWithin90DaysWithExpectedAlertsOrZeroSilentMisses,
@@ -214,7 +222,7 @@ export function buildAiExfilDetectionReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No AI exfil-detection signals — SEC-R3 may be NOT_APPLICABLE if there are no sensitive AI contexts.",
+      "No AI exfil-detection signals — SEC-R3 remains not demonstrated until detection evidence or an explicit N/A attest (sensitiveAiContextsPresent=false) is imported.",
     );
   }
   if (opts.canary.found) {
@@ -234,11 +242,11 @@ export function buildAiExfilDetectionReport(opts: {
   }
   if (opts.imported.found) {
     notes.push(
-      `Imported: ${opts.imported.sources.join(", ")} (configured=${opts.imported.sensitiveAiContextsExfilDetectionConfigured}, covers=${opts.imported.detectionMechanismCoversSensitiveAiPaths}, validated=${opts.imported.latestDetectionValidationWithin90DaysWithExpectedAlertsOrZeroSilentMisses}, class=${opts.imported.mechanismClass})`,
+      `Imported: ${opts.imported.sources.join(", ")} (contextsPresent=${opts.imported.sensitiveAiContextsPresent}, configured=${opts.imported.sensitiveAiContextsExfilDetectionConfigured}, covers=${opts.imported.detectionMechanismCoversSensitiveAiPaths}, validated=${opts.imported.latestDetectionValidationWithin90DaysWithExpectedAlertsOrZeroSilentMisses}, class=${opts.imported.mechanismClass})`,
     );
   } else if (gateSignalsPresent) {
     notes.push(
-      "Detection signals alone are PARTIAL — import sensitiveAiContextsExfilDetectionConfigured=true + detectionMechanismCoversSensitiveAiPaths=true + latestDetectionValidationWithin90DaysWithExpectedAlertsOrZeroSilentMisses=true (measuredAt ≤90d) under imports/ai-exfil-detection/ to PASS. mechanismClass may name canary, dlp, siem, ueba, or equivalent.",
+      "Detection signals alone are PARTIAL — import sensitiveAiContextsExfilDetectionConfigured=true + detectionMechanismCoversSensitiveAiPaths=true + latestDetectionValidationWithin90DaysWithExpectedAlertsOrZeroSilentMisses=true (measuredAt ≤90d) under imports/ai-exfil-detection/ to PASS. Set sensitiveAiContextsPresent=false for NOT_APPLICABLE. mechanismClass may name canary, dlp, siem, ueba, or equivalent.",
     );
   }
 
@@ -254,12 +262,14 @@ export function buildAiExfilDetectionReport(opts: {
       .latestDetectionValidationWithin90DaysWithExpectedAlertsOrZeroSilentMisses ===
     true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
+  const scopeAbsent = opts.imported.sensitiveAiContextsPresent === false;
 
   let statusHint: AiExfilDetectionReport["summary"]["statusHint"];
   let secR3Satisfied: boolean | null = null;
 
   const explicitFail =
     opts.imported.found &&
+    !scopeAbsent &&
     (opts.imported.sensitiveAiContextsExfilDetectionConfigured === false ||
       opts.imported.detectionMechanismCoversSensitiveAiPaths === false ||
       opts.imported
@@ -268,7 +278,13 @@ export function buildAiExfilDetectionReport(opts: {
       (opts.imported.ageDays !== null &&
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
-  if (!gateSignalsPresent && !opts.imported.found) {
+  if (opts.imported.found && scopeAbsent) {
+    statusHint = "not_applicable";
+    secR3Satisfied = null;
+    notes.push(
+      "Imported sensitiveAiContextsPresent=false — SEC-R3 NOT_APPLICABLE.",
+    );
+  } else if (!gateSignalsPresent && !opts.imported.found) {
     statusHint = "not_demonstrated";
     secR3Satisfied = null;
   } else if (explicitFail) {

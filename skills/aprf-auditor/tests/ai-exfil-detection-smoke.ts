@@ -105,6 +105,24 @@ async function main() {
       throw new Error(`fail expected: ${JSON.stringify(r3.summary)}`);
     }
 
+    const tEmpty = join(root, "t-empty");
+    mkdirSync(tEmpty, { recursive: true });
+    const outNa = join(root, "ona");
+    mkdirSync(join(outNa, "imports", "ai-exfil-detection"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNa, "imports", "ai-exfil-detection", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        sensitiveAiContextsPresent: false,
+      }),
+    );
+    const rNa = await run(tEmpty, outNa);
+    if (rNa.summary.statusHint !== "not_applicable") {
+      throw new Error(`n/a expected: ${JSON.stringify(rNa.summary)}`);
+    }
+
     console.log("ai-exfil-detection smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

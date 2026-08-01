@@ -164,8 +164,42 @@ def authorize_tool(user, tool_name):
     );
   }
 
+  // N/A: explicit scope flag
+  const emptyTarget = mkdtempSync(join(tmpdir(), "aprf-inj-empty-"));
+  const outNa = mkdtempSync(join(tmpdir(), "aprf-inj-na-"));
+  mkdirSync(join(outNa, "imports", "injection-policy-gate"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(outNa, "imports", "injection-policy-gate", "suite.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      productionAiToolsOrPrivilegedSideEffectsPresent: false,
+    }),
+    "utf8",
+  );
+  await injectionPolicyGateCollector.collect({
+    ...baseCtx,
+    outputDir: outNa,
+    targetPath: emptyTarget,
+  });
+  const rNa = JSON.parse(
+    readFileSync(
+      join(
+        outNa,
+        "imports",
+        "injection-policy-gate",
+        "injection-policy-gate-report.json",
+      ),
+      "utf8",
+    ),
+  ) as InjectionPolicyReport;
+  if (rNa.summary.statusHint !== "not_applicable") {
+    throw new Error(`expected not_applicable, got ${JSON.stringify(rNa.summary)}`);
+  }
+
   console.log("aprf-auditor injection-policy-gate smoke OK");
-  for (const d of [outDir, out1, out2, out3, out4, targetDir]) {
+  for (const d of [outDir, out1, out2, out3, out4, outNa, emptyTarget, targetDir]) {
     rmSync(d, { recursive: true, force: true });
   }
 }

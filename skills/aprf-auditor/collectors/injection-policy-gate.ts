@@ -22,6 +22,7 @@ import {
 } from "./lib/fs.ts";
 
 import {
+  asBool,
   measuredAtFresh,
   parseMeasuredAt,
 } from "./lib/import-attest.ts";
@@ -57,6 +58,7 @@ export interface InjectionPolicyReport {
   ciGate: { found: boolean; refs: string[] };
   importedResults: {
     found: boolean;
+    productionAiToolsOrPrivilegedSideEffectsPresent: boolean | null;
     denyRatePct: number | null;
     modelTextPrivilegeGrants: number | null;
     caseCount: number | null;
@@ -182,6 +184,7 @@ function detectCiGate(targetPath: string, maxFiles: number) {
 
 function loadImported(ctx: CollectorContext): InjectionPolicyReport["importedResults"] {
   const sources: string[] = [];
+  let productionAiToolsOrPrivilegedSideEffectsPresent: boolean | null = null;
   let denyRatePct: number | null = null;
   let modelTextPrivilegeGrants: number | null = null;
   let caseCount: number | null = null;
@@ -196,6 +199,11 @@ function loadImported(ctx: CollectorContext): InjectionPolicyReport["importedRes
       const data = JSON.parse(text) as Record<string, unknown>;
       sources.push(rel(ctx.outputDir, file));
       measuredAt = parseMeasuredAt(data) ?? measuredAt;
+      productionAiToolsOrPrivilegedSideEffectsPresent =
+        asBool(data.productionAiToolsOrPrivilegedSideEffectsPresent) ??
+        asBool(data.production_ai_tools_or_privileged_side_effects_present) ??
+        asBool(data.hasProductionAiToolsOrPrivilegedSideEffects) ??
+        productionAiToolsOrPrivilegedSideEffectsPresent;
 
       if (typeof data.denyRatePct === "number") denyRatePct = data.denyRatePct;
       else if (typeof data.deny_rate === "number") {
@@ -248,6 +256,7 @@ function loadImported(ctx: CollectorContext): InjectionPolicyReport["importedRes
 
   return {
     found: sources.length > 0,
+    productionAiToolsOrPrivilegedSideEffectsPresent,
     denyRatePct,
     modelTextPrivilegeGrants,
     caseCount,
@@ -296,7 +305,7 @@ export function buildInjectionPolicyReport(opts: {
 
   if (opts.imported.found) {
     notes.push(
-      `Imported results: ${opts.imported.sources.join(", ")} (denyRatePct=${denyRatePct}, modelTextPrivilegeGrants=${grants}, cases=${opts.imported.caseCount}, measuredAt=${opts.imported.measuredAt})`,
+      `Imported results: ${opts.imported.sources.join(", ")} (scopePresent=${opts.imported.productionAiToolsOrPrivilegedSideEffectsPresent}, denyRatePct=${denyRatePct}, modelTextPrivilegeGrants=${grants}, cases=${opts.imported.caseCount}, measuredAt=${opts.imported.measuredAt})`,
     );
   }
 
@@ -304,12 +313,21 @@ export function buildInjectionPolicyReport(opts: {
     "not_demonstrated";
   let secM1Satisfied: boolean | null = null;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
+  const scopeAbsent =
+    opts.imported.productionAiToolsOrPrivilegedSideEffectsPresent === false;
 
   const measuredFail =
-    (denyRatePct !== null && denyRatePct < MIN_DENY_RATE) ||
-    (grants !== null && grants > 0);
+    !scopeAbsent &&
+    ((denyRatePct !== null && denyRatePct < MIN_DENY_RATE) ||
+      (grants !== null && grants > 0));
 
-  if (measuredFail) {
+  if (opts.imported.found && scopeAbsent) {
+    statusHint = "not_applicable";
+    secM1Satisfied = null;
+    notes.push(
+      "Imported productionAiToolsOrPrivilegedSideEffectsPresent=false — SEC-M1 NOT_APPLICABLE.",
+    );
+  } else if (measuredFail) {
     statusHint = "fail";
     secM1Satisfied = false;
     if (denyRatePct !== null && denyRatePct < MIN_DENY_RATE) {
@@ -355,6 +373,9 @@ export function buildInjectionPolicyReport(opts: {
   } else {
     statusHint = "not_demonstrated";
     secM1Satisfied = null;
+    notes.push(
+      "No injection-policy-gate signals — SEC-M1 remains not demonstrated until policy/corpus/gate evidence or an explicit N/A attest (productionAiToolsOrPrivilegedSideEffectsPresent=false) is imported.",
+    );
   }
 
   return {
