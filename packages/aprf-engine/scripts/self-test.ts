@@ -17,8 +17,8 @@ function assert(cond: unknown, msg: string): asserts cond {
 }
 
 const catalog = getGeneratedCatalog();
-assert(catalog.ruleCount === 177, `expected 177 rules, got ${catalog.ruleCount}`);
-assert(catalog.rules.length === 177, "rules array length");
+assert(catalog.ruleCount === 178, `expected 178 rules, got ${catalog.ruleCount}`);
+assert(catalog.rules.length === 178, "rules array length");
 assert(
   catalog.generatedAt.startsWith("sha256:"),
   "generatedAt should be content hash",
@@ -59,7 +59,7 @@ for (const rule of catalog.rules) {
 }
 
 const index = getGeneratedRuleIndex();
-assert(index.byId.size === 177, "index size");
+assert(index.byId.size === 178, "index size");
 assert(getRuleById(index, "SEC-M1")?.id === "SEC-M1", "getRuleById SEC-M1");
 
 const allowlist = new Set(listCatalogDetectorIds());
