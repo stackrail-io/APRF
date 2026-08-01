@@ -165,6 +165,30 @@ async function main() {
       );
     }
 
+    const outDouble = join(root, "o-double");
+    mkdirSync(join(outDouble, "imports", "identity-propagation"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outDouble, "imports", "identity-propagation", "both.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        identityPropagationDesignDocumented: true,
+        privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct: 100,
+        anonymousPrivilegedHops: 2,
+        samples: [
+          { hasEndUserSubject: true },
+          { anonymous: true },
+        ],
+      }),
+    );
+    const rDouble = await run(t2, outDouble);
+    if ((rDouble.importedResults.anonymousPrivilegedHops ?? 0) !== 2) {
+      throw new Error(
+        `scalar+samples must not double-count anon hops, got ${rDouble.importedResults.anonymousPrivilegedHops}`,
+      );
+    }
+
     const tEmpty = join(root, "t-empty");
     mkdirSync(tEmpty, { recursive: true });
     const outNa = join(root, "ona");

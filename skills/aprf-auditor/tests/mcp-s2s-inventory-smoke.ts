@@ -111,6 +111,58 @@ if auth_type == 'bearer':
     throw new Error("secret key leaked into report");
   }
 
+  // OAuth/OIDC with an embedded static key must fail
+  const oauthKeyOut = mkdtempSync(join(tmpdir(), "aprf-mcp-s2s-oauth-key-"));
+  mkdirSync(join(oauthKeyOut, "imports", "mcp-s2s-inventory"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(oauthKeyOut, "imports", "mcp-s2s-inventory", "oauth-key.json"),
+    JSON.stringify({
+      measuredAt: assessedAt.toISOString(),
+      TOOL_SERVER_CONNECTIONS: [
+        {
+          url: "http://mcp.local/oauth",
+          type: "mcp",
+          auth_type: "oauth_2.1",
+          key: "sk-still-static",
+          info: { id: "oauth-with-key", name: "oauth-with-key" },
+        },
+      ],
+    }),
+  );
+  const oauthKeyRan = await mcpS2sInventoryCollector.collect({
+    targetPath: targetDir,
+    outputDir: oauthKeyOut,
+    assessedAt,
+    live: false,
+    maxFiles: 100,
+  });
+  if (oauthKeyRan.status !== "ran") {
+    throw new Error(`oauth+key expected ran: ${oauthKeyRan.status}`);
+  }
+  const oauthKeyReport = JSON.parse(
+    readFileSync(
+      join(
+        oauthKeyOut,
+        "imports",
+        "mcp-s2s-inventory",
+        "mcp-s2s-inventory-report.json",
+      ),
+      "utf8",
+    ),
+  ) as McpS2sReport;
+  if (
+    oauthKeyReport.summary.statusHint !== "fail" ||
+    oauthKeyReport.summary.authnM2Satisfied !== false ||
+    oauthKeyReport.summary.pass !== 0
+  ) {
+    throw new Error(
+      `oauth+static key must fail: ${JSON.stringify(oauthKeyReport.summary)}`,
+    );
+  }
+  rmSync(oauthKeyOut, { recursive: true, force: true });
+
   // Empty inventory without N/A → partial (not vacuous PASS)
   const emptyReport = buildReport(baseCtx, {
     connections: [],

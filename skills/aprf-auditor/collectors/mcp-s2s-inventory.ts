@@ -263,7 +263,11 @@ function scoreConnection(c: S2SConnection, index: number): ScoredConnection {
     reason =
       "auth_type=session uses end-user session, not a named machine identity for S2S/MCP";
   } else if (STRONG_AUTH.has(auth)) {
-    if (namedIdentity) {
+    if (hasStaticKey) {
+      ok = false;
+      reason =
+        `auth_type=${auth} still carries a static shared key — remove embedded keys; use short-lived OAuth/OIDC/mTLS/workload credentials only`;
+    } else if (namedIdentity) {
       ok = true;
       reason = `auth_type=${auth} with named identity "${name}"`;
     } else {

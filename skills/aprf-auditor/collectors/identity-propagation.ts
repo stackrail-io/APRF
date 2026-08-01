@@ -202,7 +202,8 @@ function loadImported(
         (data.calls as Array<Record<string, unknown>>) ||
         [];
       if (samples.length) {
-        sampleSize = (sampleSize ?? 0) + samples.length;
+        // Samples are authoritative for this file — do not add on top of a
+        // top-level anonymousPrivilegedHops scalar (avoids double-counting).
         const withSubject = samples.filter(
           (s) =>
             s.hasEndUserSubject === true ||
@@ -227,7 +228,8 @@ function loadImported(
             privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct,
             pct,
           );
-        anonymousPrivilegedHops = (anonymousPrivilegedHops ?? 0) + anon;
+        anonymousPrivilegedHops = mergeMaxNum(anonymousPrivilegedHops, anon);
+        sampleSize = mergeMaxNum(sampleSize, samples.length);
       }
     } catch {
       /* skip */
