@@ -163,6 +163,61 @@ if auth_type == 'bearer':
   }
   rmSync(oauthKeyOut, { recursive: true, force: true });
 
+  // Bare {} must not count as inventory (needs-user, not perpetual partial)
+  const bareOut = mkdtempSync(join(tmpdir(), "aprf-mcp-s2s-bare-"));
+  mkdirSync(join(bareOut, "imports", "mcp-s2s-inventory"), { recursive: true });
+  writeFileSync(
+    join(bareOut, "imports", "mcp-s2s-inventory", "empty-object.json"),
+    JSON.stringify({}),
+  );
+  const bareRan = await mcpS2sInventoryCollector.collect({
+    targetPath: targetDir,
+    outputDir: bareOut,
+    assessedAt,
+    live: false,
+    maxFiles: 100,
+  });
+  if (bareRan.status !== "needs-user") {
+    throw new Error(
+      `bare {} import must stay needs-user, got ${bareRan.status}: ${bareRan.detail}`,
+    );
+  }
+  // Explicit N/A must still work when a bare {} sibling is present
+  writeFileSync(
+    join(bareOut, "imports", "mcp-s2s-inventory", "scope.json"),
+    JSON.stringify({
+      measuredAt: assessedAt.toISOString(),
+      productionMcpOrAiS2sConnectionsPresent: false,
+    }),
+  );
+  const bareNaRan = await mcpS2sInventoryCollector.collect({
+    targetPath: targetDir,
+    outputDir: bareOut,
+    assessedAt,
+    live: false,
+    maxFiles: 100,
+  });
+  if (bareNaRan.status !== "ran") {
+    throw new Error(`bare {} + N/A expected ran: ${bareNaRan.status}`);
+  }
+  const bareNaReport = JSON.parse(
+    readFileSync(
+      join(
+        bareOut,
+        "imports",
+        "mcp-s2s-inventory",
+        "mcp-s2s-inventory-report.json",
+      ),
+      "utf8",
+    ),
+  ) as McpS2sReport;
+  if (bareNaReport.summary.statusHint !== "not_applicable") {
+    throw new Error(
+      `bare {} must not block N/A attest: ${bareNaReport.summary.statusHint}`,
+    );
+  }
+  rmSync(bareOut, { recursive: true, force: true });
+
   // Empty inventory without N/A → partial (not vacuous PASS)
   const emptyReport = buildReport(baseCtx, {
     connections: [],

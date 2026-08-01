@@ -417,6 +417,26 @@ function normalizeInventoryPayload(
   return out;
 }
 
+function hasInventoryArrayOrMapShape(data: Record<string, unknown>): boolean {
+  for (const key of [
+    "TOOL_SERVER_CONNECTIONS",
+    "tool_server.connections",
+    "TERMINAL_SERVER_CONNECTIONS",
+    "terminal_server.connections",
+    "connections",
+    "mcpServers",
+    "mcp_servers",
+    "servers",
+  ]) {
+    if (Array.isArray(data[key])) return true;
+  }
+  return (
+    data.mcpServers !== null &&
+    typeof data.mcpServers === "object" &&
+    !Array.isArray(data.mcpServers)
+  );
+}
+
 function loadImportInventories(ctx: CollectorContext): {
   connections: S2SConnection[];
   sources: string[];
@@ -438,31 +458,34 @@ function loadImportInventories(ctx: CollectorContext): {
     try {
       const data = JSON.parse(text) as Record<string, unknown>;
       const src = rel(ctx.outputDir, file);
-      measuredAt = mergeOldestMeasuredAt(measuredAt, parseMeasuredAt(data));
+      const fileMeasuredAt = parseMeasuredAt(data);
+      const filePresent =
+        asBool(data.productionMcpOrAiS2sConnectionsPresent) ??
+        asBool(data.production_mcp_or_ai_s2s_connections_present) ??
+        asBool(data.hasProductionMcpOrAiS2sConnections);
+      const normalized = normalizeInventoryPayload(data, src);
+      const meaningful =
+        normalized.length > 0 ||
+        filePresent !== null ||
+        fileMeasuredAt !== null ||
+        hasInventoryArrayOrMapShape(data);
+      // Ignore bare/inert JSON (e.g. {}) — it must not skip needs-user or
+      // force perpetual partial / block a later explicit N/A attest.
+      if (!meaningful) continue;
+
+      measuredAt = mergeOldestMeasuredAt(measuredAt, fileMeasuredAt);
       productionMcpOrAiS2sConnectionsPresent = mergeOrBool(
         productionMcpOrAiS2sConnectionsPresent,
-        asBool(data.productionMcpOrAiS2sConnectionsPresent) ??
-          asBool(data.production_mcp_or_ai_s2s_connections_present) ??
-          asBool(data.hasProductionMcpOrAiS2sConnections),
+        filePresent,
       );
-      const normalized = normalizeInventoryPayload(data, src);
       if (normalized.length > 0) {
         connections.push(...normalized);
-        sources.push(src);
         productionMcpOrAiS2sConnectionsPresent = mergeOrBool(
           productionMcpOrAiS2sConnectionsPresent,
           true,
         );
-      } else if (
-        productionMcpOrAiS2sConnectionsPresent !== null ||
-        parseMeasuredAt(data)
-      ) {
-        // Scope/attest-only import still counts as an inventory source for N/A.
-        sources.push(src);
-      } else {
-        // Empty connection file still proves an inventory export was provided.
-        sources.push(src);
       }
+      sources.push(src);
     } catch {
       /* skip invalid json */
     }
