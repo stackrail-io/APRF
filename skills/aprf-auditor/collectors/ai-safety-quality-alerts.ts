@@ -215,7 +215,7 @@ export function buildAiSafetyQualityAlertsReport(opts: {
   const reviewedOk = opts.imported.policyReviewedWithin90Days === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AiSafetyQualityAlertsReport["summary"]["statusHint"] ;
+  let statusHint: AiSafetyQualityAlertsReport["summary"]["statusHint"];
   let incR1Satisfied: boolean | null = null;
 
   const explicitFail =

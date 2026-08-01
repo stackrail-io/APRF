@@ -221,7 +221,7 @@ export function buildAiCustomerNotificationCriteriaReport(opts: {
   const timestampsOk = opts.imported.timestampsPresent === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AiCustomerNotificationCriteriaReport["summary"]["statusHint"] ;
+  let statusHint: AiCustomerNotificationCriteriaReport["summary"]["statusHint"];
   let incR3Satisfied: boolean | null = null;
 
   const explicitFail =

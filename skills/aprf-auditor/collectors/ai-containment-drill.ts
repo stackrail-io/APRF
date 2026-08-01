@@ -256,7 +256,7 @@ export function buildAiContainmentDrillReport(opts: {
   const budgetOk = opts.imported.withinDocumentedTimeBudgets === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
 
-  let statusHint: AiContainmentDrillReport["summary"]["statusHint"] ;
+  let statusHint: AiContainmentDrillReport["summary"]["statusHint"];
   let incM2Satisfied: boolean | null = null;
 
   const explicitFail =

@@ -215,7 +215,7 @@ export function buildPostIncidentAprfActionsReport(opts: {
     typeof opts.imported.sevEligibleIncidentCount === "number" &&
     opts.imported.sevEligibleIncidentCount > 0;
 
-  let statusHint: PostIncidentAprfActionsReport["summary"]["statusHint"] ;
+  let statusHint: PostIncidentAprfActionsReport["summary"]["statusHint"];
   let incR2Satisfied: boolean | null = null;
 
   const explicitFail =
