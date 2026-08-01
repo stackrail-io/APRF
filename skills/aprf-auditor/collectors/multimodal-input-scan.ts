@@ -266,7 +266,7 @@ export function buildMultimodalInputScanReport(opts: {
       "Imported multimodalInputsAccepted=false — SEC-R2 NOT_APPLICABLE.",
     );
   } else if (!gateSignalsPresent && !opts.imported.found) {
-    statusHint = "not_applicable";
+    statusHint = "not_demonstrated";
     secR2Satisfied = null;
   } else if (explicitFail) {
     statusHint = "fail";

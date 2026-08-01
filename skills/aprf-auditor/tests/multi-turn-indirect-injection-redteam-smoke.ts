@@ -155,6 +155,36 @@ async function main() {
       );
     }
 
+    // Empty repo → not_demonstrated (N/A requires explicit import)
+    const t5 = join(root, "t5");
+    mkdirSync(t5, { recursive: true });
+    const r5 = await run(t5, join(root, "o5"));
+    if (r5.summary.statusHint !== "not_demonstrated") {
+      throw new Error(`empty not_demonstrated expected: ${JSON.stringify(r5.summary)}`);
+    }
+
+    // Explicit N/A via import
+    const out6 = join(root, "o6");
+    mkdirSync(join(out6, "imports", "multi-turn-indirect-injection-redteam"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(
+        out6,
+        "imports",
+        "multi-turn-indirect-injection-redteam",
+        "coverage.json",
+      ),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        multiTurnRagOrMcpSurfacesPresent: false,
+      }),
+    );
+    const r6 = await run(t5, out6);
+    if (r6.summary.statusHint !== "not_applicable") {
+      throw new Error(`explicit N/A expected: ${JSON.stringify(r6.summary)}`);
+    }
+
     console.log("multi-turn-indirect-injection-redteam smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

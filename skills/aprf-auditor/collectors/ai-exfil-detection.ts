@@ -269,7 +269,7 @@ export function buildAiExfilDetectionReport(opts: {
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
   if (!gateSignalsPresent && !opts.imported.found) {
-    statusHint = "not_applicable";
+    statusHint = "not_demonstrated";
     secR3Satisfied = null;
   } else if (explicitFail) {
     statusHint = "fail";

@@ -23,7 +23,8 @@ whenUnavailable: >
   Red-team signals alone are PARTIAL. SEC-R1 PASS needs
   multiTurnInjectionCaseCount≥10, indirectRagOrMcpInjectionCaseCount≥10,
   latestRunWithin90DaysMeetsPassThresholds, reportRetainedAtLeast90Days,
-  measuredAt ≤90 days.
+  measuredAt ≤90 days. Set multiTurnRagOrMcpSurfacesPresent=false for NOT_APPLICABLE
+  (empty scans stay not_demonstrated).
 live:
   required: false
   note: Offline multi-turn/indirect injection red-team heuristics + optional imported JSON.

@@ -65,6 +65,7 @@ export interface MultiTurnIndirectInjectionRedteamReport {
   };
   importedResults: {
     found: boolean;
+    multiTurnRagOrMcpSurfacesPresent: boolean | null;
     multiTurnInjectionCaseCount: number | null;
     indirectRagOrMcpInjectionCaseCount: number | null;
     latestRunWithin90DaysMeetsPassThresholds: boolean | null;
@@ -133,6 +134,7 @@ function loadImported(
   ctx: CollectorContext,
 ): MultiTurnIndirectInjectionRedteamReport["importedResults"] {
   const sources: string[] = [];
+  let multiTurnRagOrMcpSurfacesPresent: boolean | null = null;
   let multiTurnInjectionCaseCount: number | null = null;
   let indirectRagOrMcpInjectionCaseCount: number | null = null;
   let latestRunWithin90DaysMeetsPassThresholds: boolean | null = null;
@@ -149,6 +151,11 @@ function loadImported(
       sources.push(basename(f));
       measuredAt = parseMeasuredAt(data) ?? measuredAt;
       ageDays = asNum(data.ageDays) ?? asNum(data.age_days) ?? ageDays;
+      multiTurnRagOrMcpSurfacesPresent =
+        asBool(data.multiTurnRagOrMcpSurfacesPresent) ??
+        asBool(data.multi_turn_rag_or_mcp_surfaces_present) ??
+        asBool(data.hasMultiTurnRagOrMcpSurfaces) ??
+        multiTurnRagOrMcpSurfacesPresent;
       multiTurnInjectionCaseCount =
         asNum(data.multiTurnInjectionCaseCount) ??
         asNum(data.multi_turn_injection_case_count) ??
@@ -184,6 +191,7 @@ function loadImported(
 
   return {
     found: sources.length > 0,
+    multiTurnRagOrMcpSurfacesPresent,
     multiTurnInjectionCaseCount,
     indirectRagOrMcpInjectionCaseCount,
     latestRunWithin90DaysMeetsPassThresholds,
@@ -211,7 +219,7 @@ export function buildMultiTurnIndirectInjectionRedteamReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No multi-turn/indirect RAG/MCP red-team signals — SEC-R1 may be NOT_APPLICABLE if there are no multi-turn, RAG, or MCP surfaces.",
+      "No multi-turn/indirect RAG/MCP red-team signals — SEC-R1 remains not demonstrated until suite evidence or an explicit N/A attest (multiTurnRagOrMcpSurfacesPresent=false) is imported.",
     );
   }
   if (opts.multiTurn.found) {
@@ -229,11 +237,11 @@ export function buildMultiTurnIndirectInjectionRedteamReport(opts: {
   }
   if (opts.imported.found) {
     notes.push(
-      `Imported: ${opts.imported.sources.join(", ")} (multiTurn=${opts.imported.multiTurnInjectionCaseCount}, indirect=${opts.imported.indirectRagOrMcpInjectionCaseCount}, thresholdsMet=${opts.imported.latestRunWithin90DaysMeetsPassThresholds}, retained=${opts.imported.reportRetainedAtLeast90Days})`,
+      `Imported: ${opts.imported.sources.join(", ")} (surfacesPresent=${opts.imported.multiTurnRagOrMcpSurfacesPresent}, multiTurn=${opts.imported.multiTurnInjectionCaseCount}, indirect=${opts.imported.indirectRagOrMcpInjectionCaseCount}, thresholdsMet=${opts.imported.latestRunWithin90DaysMeetsPassThresholds}, retained=${opts.imported.reportRetainedAtLeast90Days})`,
     );
   } else if (gateSignalsPresent) {
     notes.push(
-      `Red-team signals alone are PARTIAL — import multiTurnInjectionCaseCount≥${MIN_CASES} + indirectRagOrMcpInjectionCaseCount≥${MIN_CASES} + latestRunWithin90DaysMeetsPassThresholds=true + reportRetainedAtLeast90Days=true (measuredAt ≤90d) under imports/multi-turn-indirect-injection-redteam/ to PASS.`,
+      `Red-team signals alone are PARTIAL — import multiTurnInjectionCaseCount≥${MIN_CASES} + indirectRagOrMcpInjectionCaseCount≥${MIN_CASES} + latestRunWithin90DaysMeetsPassThresholds=true + reportRetainedAtLeast90Days=true (measuredAt ≤90d) under imports/multi-turn-indirect-injection-redteam/ to PASS. Set multiTurnRagOrMcpSurfacesPresent=false for NOT_APPLICABLE.`,
     );
   }
 
@@ -250,12 +258,15 @@ export function buildMultiTurnIndirectInjectionRedteamReport(opts: {
     opts.imported.latestRunWithin90DaysMeetsPassThresholds === true;
   const retainedOk = opts.imported.reportRetainedAtLeast90Days === true;
   const importFresh = measuredAtFresh(opts.imported.measuredAt);
+  const surfacesAbsent =
+    opts.imported.multiTurnRagOrMcpSurfacesPresent === false;
 
   let statusHint: MultiTurnIndirectInjectionRedteamReport["summary"]["statusHint"];
   let secR1Satisfied: boolean | null = null;
 
   const explicitFail =
     opts.imported.found &&
+    !surfacesAbsent &&
     ((opts.imported.multiTurnInjectionCaseCount !== null &&
       opts.imported.multiTurnInjectionCaseCount < MIN_CASES) ||
       (opts.imported.indirectRagOrMcpInjectionCaseCount !== null &&
@@ -265,8 +276,14 @@ export function buildMultiTurnIndirectInjectionRedteamReport(opts: {
       (opts.imported.ageDays !== null &&
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
-  if (!gateSignalsPresent && !opts.imported.found) {
+  if (opts.imported.found && surfacesAbsent) {
     statusHint = "not_applicable";
+    secR1Satisfied = null;
+    notes.push(
+      "Imported multiTurnRagOrMcpSurfacesPresent=false — SEC-R1 NOT_APPLICABLE.",
+    );
+  } else if (!gateSignalsPresent && !opts.imported.found) {
+    statusHint = "not_demonstrated";
     secR1Satisfied = null;
   } else if (explicitFail) {
     statusHint = "fail";
