@@ -217,6 +217,12 @@ function loadImported(
           agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct,
           pct,
         );
+        // Credential inventory proves the production surface exists — cannot
+        // be wiped by a sibling present=false N/A attest.
+        agentToolCredentialsInProductionPromptsOrConfigPresent = mergeOrBool(
+          agentToolCredentialsInProductionPromptsOrConfigPresent,
+          true,
+        );
       }
     } catch {
       /* skip */
@@ -296,7 +302,7 @@ export function buildShortLivedAgentTokensReport(opts: {
   );
   const scopeAbsent =
     opts.imported.agentToolCredentialsInProductionPromptsOrConfigPresent ===
-    false;
+      false && !gateSignalsPresent;
   const scopePresent =
     opts.imported.agentToolCredentialsInProductionPromptsOrConfigPresent ===
     true;
@@ -319,6 +325,17 @@ export function buildShortLivedAgentTokensReport(opts: {
       opts.imported.ownedExceptionsWithin30Days === false ||
       (opts.imported.ageDays !== null &&
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
+
+  if (
+    opts.imported.found &&
+    opts.imported.agentToolCredentialsInProductionPromptsOrConfigPresent ===
+      false &&
+    gateSignalsPresent
+  ) {
+    notes.push(
+      "Imported agentToolCredentialsInProductionPromptsOrConfigPresent=false ignored — in-repo TTL/scan/credential signals prove the surface exists.",
+    );
+  }
 
   if (opts.imported.found && scopeAbsent) {
     statusHint = "not_applicable";

@@ -269,7 +269,9 @@ export function buildAiAdminMfaReport(opts: {
     opts.imported.measuredAt,
     new Date(opts.assessedAt),
   );
-  const scopeAbsent = opts.imported.aiControlPlaneAdminAccessPresent === false;
+  const scopeAbsent =
+    opts.imported.aiControlPlaneAdminAccessPresent === false &&
+    !gateSignalsPresent;
   const scopePresent = opts.imported.aiControlPlaneAdminAccessPresent === true;
   const surfaceOk = gateSignalsPresent || scopePresent;
 

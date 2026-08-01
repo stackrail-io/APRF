@@ -288,7 +288,9 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
     opts.imported.measuredAt,
     new Date(opts.assessedAt),
   );
-  const scopeAbsent = opts.imported.selfHostedModelRuntimesPresent === false;
+  const scopeAbsent =
+    opts.imported.selfHostedModelRuntimesPresent === false &&
+    !gateSignalsPresent;
   const scopePresent = opts.imported.selfHostedModelRuntimesPresent === true;
   const surfaceOk = gateSignalsPresent || scopePresent;
 

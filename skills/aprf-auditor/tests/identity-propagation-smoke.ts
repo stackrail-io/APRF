@@ -271,6 +271,108 @@ async function main() {
       );
     }
 
+    // design=false import must not FAIL when in-repo design exists
+    const tDesign = join(root, "t-design");
+    mkdirSync(join(tDesign, "docs"), { recursive: true });
+    writeFileSync(
+      join(tDesign, "docs", "identity-propagation.md"),
+      "identity_propagation design subject_binding for privileged tool_call hops\n",
+    );
+    const outDesignFalse = join(root, "o-design-false");
+    mkdirSync(join(outDesignFalse, "imports", "identity-propagation"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outDesignFalse, "imports", "identity-propagation", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        toolsAgentsWorkflowsOrDelegatedActionsPresent: true,
+        identityPropagationDesignDocumented: false,
+        privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct: 100,
+        anonymousPrivilegedHops: 0,
+        sampleSize: 10,
+      }),
+    );
+    const rDesignFalse = await run(tDesign, outDesignFalse);
+    if (
+      rDesignFalse.summary.statusHint !== "pass" ||
+      rDesignFalse.summary.authnM4Satisfied !== true
+    ) {
+      throw new Error(
+        `in-repo design must override import design=false: ${JSON.stringify(rDesignFalse.summary)}`,
+      );
+    }
+
+    // present=false must not N/A when in-repo tool-chain signals exist
+    const outPresentFalse = join(root, "o-present-false");
+    mkdirSync(join(outPresentFalse, "imports", "identity-propagation"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outPresentFalse, "imports", "identity-propagation", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        toolsAgentsWorkflowsOrDelegatedActionsPresent: false,
+        identityPropagationDesignDocumented: true,
+        privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct: 100,
+        anonymousPrivilegedHops: 0,
+        sampleSize: 10,
+      }),
+    );
+    const rPresentFalse = await run(t2, outPresentFalse);
+    if (rPresentFalse.summary.statusHint === "not_applicable") {
+      throw new Error(
+        `in-repo signals must override present=false N/A: ${JSON.stringify(rPresentFalse.summary)}`,
+      );
+    }
+    if (
+      rPresentFalse.summary.statusHint !== "pass" ||
+      rPresentFalse.summary.authnM4Satisfied !== true
+    ) {
+      throw new Error(
+        `present=false + in-repo signals + metrics should pass: ${JSON.stringify(rPresentFalse.summary)}`,
+      );
+    }
+
+    // present=false + samples inventory → samples prove surface (not N/A)
+    const outNaSamples = join(root, "o-na-samples");
+    mkdirSync(join(outNaSamples, "imports", "identity-propagation"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNaSamples, "imports", "identity-propagation", "a-na.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        toolsAgentsWorkflowsOrDelegatedActionsPresent: false,
+      }),
+    );
+    writeFileSync(
+      join(outNaSamples, "imports", "identity-propagation", "b-samples.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        identityPropagationDesignDocumented: true,
+        samples: [
+          { hasEndUserSubject: true },
+          { hasDocumentedServiceSubject: true },
+        ],
+      }),
+    );
+    const rNaSamples = await run(tEmpty, outNaSamples);
+    if (rNaSamples.summary.statusHint === "not_applicable") {
+      throw new Error(
+        `samples inventory must clear present=false N/A: ${JSON.stringify(rNaSamples.summary)}`,
+      );
+    }
+    if (
+      rNaSamples.summary.statusHint !== "pass" ||
+      rNaSamples.importedResults.toolsAgentsWorkflowsOrDelegatedActionsPresent !==
+        true
+    ) {
+      throw new Error(
+        `samples should prove present and pass: ${JSON.stringify(rNaSamples.summary)} present=${rNaSamples.importedResults.toolsAgentsWorkflowsOrDelegatedActionsPresent}`,
+      );
+    }
+
     const outNa = join(root, "ona");
     mkdirSync(join(outNa, "imports", "identity-propagation"), {
       recursive: true,

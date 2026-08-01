@@ -26,7 +26,6 @@ import {
 import {
   asBool,
   measuredAtFresh,
-  mergeAndBool,
   mergeMaxNum,
   mergeMinNum,
   mergeOldestMeasuredAt,
@@ -166,7 +165,7 @@ function loadImported(
           asBool(data.hasToolsAgentsWorkflowsOrDelegatedActions) ??
           asBool(data.agenticSurfacesPresent),
       );
-      identityPropagationDesignDocumented = mergeAndBool(
+      identityPropagationDesignDocumented = mergeOrBool(
         identityPropagationDesignDocumented,
         asBool(data.identityPropagationDesignDocumented) ??
           asBool(data.identity_propagation_design_documented) ??
@@ -223,6 +222,12 @@ function loadImported(
           );
         anonymousPrivilegedHops = mergeMaxNum(anonymousPrivilegedHops, anon);
         sampleSize = mergeMaxNum(sampleSize, samples.length);
+        // Inventory of privileged calls proves the agentic surface exists —
+        // cannot be wiped by a sibling present=false N/A attest.
+        toolsAgentsWorkflowsOrDelegatedActionsPresent = mergeOrBool(
+          toolsAgentsWorkflowsOrDelegatedActionsPresent,
+          true,
+        );
       } else {
         privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct =
           mergeMinNum(
@@ -309,7 +314,8 @@ export function buildIdentityPropagationReport(opts: {
     new Date(opts.assessedAt),
   );
   const scopeAbsent =
-    opts.imported.toolsAgentsWorkflowsOrDelegatedActionsPresent === false;
+    opts.imported.toolsAgentsWorkflowsOrDelegatedActionsPresent === false &&
+    !gateSignalsPresent;
   const scopePresent =
     opts.imported.toolsAgentsWorkflowsOrDelegatedActionsPresent === true;
   // Metrics alone with present=null cannot unlock PASS — need in-repo signals
@@ -328,9 +334,21 @@ export function buildIdentityPropagationReport(opts: {
         .privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct < 100) ||
       (opts.imported.anonymousPrivilegedHops !== null &&
         opts.imported.anonymousPrivilegedHops > 0) ||
-      opts.imported.identityPropagationDesignDocumented === false ||
+      // In-repo design docs override a negative import design attest.
+      (opts.imported.identityPropagationDesignDocumented === false &&
+        !opts.design.found) ||
       (opts.imported.ageDays !== null &&
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
+
+  if (
+    opts.imported.found &&
+    opts.imported.toolsAgentsWorkflowsOrDelegatedActionsPresent === false &&
+    gateSignalsPresent
+  ) {
+    notes.push(
+      "Imported toolsAgentsWorkflowsOrDelegatedActionsPresent=false ignored — in-repo design/tool/trace signals prove the surface exists.",
+    );
+  }
 
   if (opts.imported.found && scopeAbsent) {
     statusHint = "not_applicable";

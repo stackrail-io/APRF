@@ -173,6 +173,76 @@ async function main() {
       );
     }
 
+    // present=false must not N/A when in-repo secret-scan signals exist
+    const outPresentFalse = join(root, "o-present-false");
+    mkdirSync(join(outPresentFalse, "imports", "short-lived-agent-tokens"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(
+        outPresentFalse,
+        "imports",
+        "short-lived-agent-tokens",
+        "coverage.json",
+      ),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        agentToolCredentialsInProductionPromptsOrConfigPresent: false,
+        agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct: 100,
+        longLivedStaticApiKeysInPromptsOrConfig: 0,
+      }),
+    );
+    const rPresentFalse = await run(t2, outPresentFalse);
+    if (rPresentFalse.summary.statusHint === "not_applicable") {
+      throw new Error(
+        `in-repo signals must override present=false N/A: ${JSON.stringify(rPresentFalse.summary)}`,
+      );
+    }
+    if (
+      rPresentFalse.summary.statusHint !== "pass" ||
+      rPresentFalse.summary.authnR1Satisfied !== true
+    ) {
+      throw new Error(
+        `present=false + in-repo signals + metrics should pass: ${JSON.stringify(rPresentFalse.summary)}`,
+      );
+    }
+
+    // present=false + credentials inventory → inventory proves surface
+    const outNaCreds = join(root, "o-na-creds");
+    mkdirSync(join(outNaCreds, "imports", "short-lived-agent-tokens"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNaCreds, "imports", "short-lived-agent-tokens", "a-na.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        agentToolCredentialsInProductionPromptsOrConfigPresent: false,
+      }),
+    );
+    writeFileSync(
+      join(outNaCreds, "imports", "short-lived-agent-tokens", "b-creds.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        longLivedStaticApiKeysInPromptsOrConfig: 0,
+        credentials: [{ ttlMinutes: 30 }, { ttlMinutes: 15 }],
+      }),
+    );
+    const rNaCreds = await run(tEmpty, outNaCreds);
+    if (rNaCreds.summary.statusHint === "not_applicable") {
+      throw new Error(
+        `credentials inventory must clear present=false N/A: ${JSON.stringify(rNaCreds.summary)}`,
+      );
+    }
+    if (
+      rNaCreds.summary.statusHint !== "pass" ||
+      rNaCreds.importedResults
+        .agentToolCredentialsInProductionPromptsOrConfigPresent !== true
+    ) {
+      throw new Error(
+        `credentials should prove present and pass: ${JSON.stringify(rNaCreds.summary)}`,
+      );
+    }
+
     const outNa = join(root, "ona");
     mkdirSync(join(outNa, "imports", "short-lived-agent-tokens"), {
       recursive: true,
