@@ -8,6 +8,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
+- Rewrote **infrastructure** **INF-M1**–**INF-M4** (hybrid; inventory-gated PASS; measuredAt ≤90d; sibling distinctions; cleared `technologies`) and collectors (`ai-public-exposure-scan`, `ai-runtime-patching`, `agent-tool-connectivity`, `shared-accelerator-isolation`); M1 private-only path; M2 org-documented SLA (not fixed 14d); M3 vs SEC-M4 sharpened; M4 N/A for managed-API/CPU-only/single-tenant/dedicated GPU; synced `aprf-spec.json`.
+- Rewrote **infrastructure** **INF-R3** (manual IaC + CIS-aligned policy checks with N/A + measuredAt ≤90d); cleaned deprecated **INF-R1** stub toward SCI-R1; cleared `technologies`; synced `aprf-spec.json`.
 - Added CI gate `npm run aprf:collectors:unused` (TypeScript `noUnusedLocals`/`noUnusedParameters` + path-sensitive useless non-nullish initializers) so collector dead defaults like `statusHint = "not_demonstrated"` fail the build; removed those dead initializers across collectors.
 - Rewrote **authorization** + collectors; synced `aprf-spec.json`.
 - Added **AUTHN-M3** to Core and Regulated profiles (core 38→39, regulated 50→51); aligned AUTHN-M1/M2/M3 `passCondition` N/A clauses and AUTHN-R2 sample-call requirement with collectors; tightened AUTHN-M2 sibling distinction vs M4/R2; reduced AUTHN-R1↔SEC2-M1 substitute risk in evidence-map + SEC2-M1 FP guidance; minor consistency (http-auth-probe `detectorIds`, M1 advisory-GET wording, R1 30d vs 90d exception windows, relatedRules / M3–M4 sibling prose).

@@ -133,6 +133,10 @@ userInputRequiredWhen:
   - AUTHZ-M4: no sensitive document-class ABAC inventory + deny tests (run sensitive-doc-abac or import coverage; N/A via sensitiveDocumentClassesPresent=false)
   - AUTHZ-R1: no tool/model policy-as-code + CI/admission deny evidence (run policy-as-code or import coverage; N/A via toolOrModelAccessControlPresent=false)
   - AUTHZ-R2: no high-privilege agent ≤90d access review + revoke/none-warranted (run high-priv-agent-review or import coverage; N/A via highPrivilegeAgentIdentitiesPresent=false)
+  - INF-M1: no CSPM/network scan proving 0 unauthenticated public AI data-store/control-plane endpoints (run ai-public-exposure-scan or import coverage; N/A via aiDataStoresOrControlPlanesPresent=false)
+  - INF-M2: no documented patching SLA + inventory/scan proving 100% of production AI runtimes within org SLA (run ai-runtime-patching or import coverage; N/A via productionAiRuntimeEnvironmentsPresent=false)
+  - INF-M3: no dependency inventory + least-privilege network/identity connectivity + unauthorized-access deny probe for agent/tool runtimes (run agent-tool-connectivity or import coverage; N/A via agentOrToolRuntimesPresent=false)
+  - INF-M4: no shared-accelerator isolation design + ≤90d capacity/isolation test (run shared-accelerator-isolation or import coverage; N/A via sharedAiAcceleratorInfrastructurePresent=false for managed-API/CPU-only/single-tenant/dedicated GPU)
   - SEC2-M1: no secrets-manager wiring and/or CI secret-scan report (run secrets-hygiene or import SARIF)
   - SEC2-M2: no log/trace redaction config + 100% canary harness (run secret-redaction or import results)
   - SEC-M1: no injection/privilege-escalation corpus + CI gate at ≥95% deny (run injection-policy-gate or import results)
@@ -156,6 +160,10 @@ limitations:
   - sensitive-doc-abac needs sensitiveDocumentClassesEnumerated + inventoryMatchesProductionClasses + unauthorizedClassAccessDeniedInTests + measuredAt ≤90d; ABAC docs alone are not a PASS
   - policy-as-code needs toolAndModelAccessRulesAsCode + ciOrAdmissionEnforcementPresent + lastFailingToPassingPolicyChangeShowsDenyWithin90Days + measuredAt ≤90d; OPA files alone are not a PASS
   - high-priv-agent-review needs everyHighPrivilegeAgentReviewedWithin90Days + revokeOrScopeReductionInLastTwoCyclesOrAttestedNoneWarranted + measuredAt ≤90d; inventory docs alone are not a PASS
+  - ai-public-exposure-scan needs publiclyReachableUnauthenticatedCount=0 + openHighOrCriticalFindingsUnwaived=0 + authenticatedEdgeControlsConfigured + cspmOrNetworkScanPresent + measuredAt ≤90d; private-subnet docs alone are not a PASS
+  - ai-runtime-patching needs patchingSlaDocumented + productionAiRuntimesWithinDocumentedPatchingSlaPct=100 + openSlaBreachesWithoutApprovedWaiver=0 + vulnerabilityOrImageAgeReportPresent + measuredAt ≤90d; image-tag pinning alone is not a PASS
+  - agent-tool-connectivity needs dependencyInventoryDocumented + leastPrivilegeConnectivityControlsConfigured + connectivityControlsMatchDependencyInventory + unauthorizedInternalServiceAccessBlockedInProbe + measuredAt ≤90d; NetworkPolicy files alone are not a PASS; SEC-M4 alone is not a PASS
+  - shared-accelerator-isolation needs isolationControlsDocumented + isolationOrCapacityTestMeetsStatedLimits + measuredAt ≤90d; GPU mentions alone are not a PASS; managed-API-only stacks should N/A
   - secrets-hygiene needs secrets-manager refs + clean secret-scan evidence; GitHub Actions secrets alone are not a production secrets manager
   - secret-redaction needs redaction config + canary harness at 100% detection; config alone is not a PASS
   - injection-policy-gate needs versioned corpus + CI gate with ≥95% deny and 0 model-text privilege grants; filters alone are not a PASS

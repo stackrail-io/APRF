@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:f99df3e1fb365947e7da5344de6b5767c5e131853fb07bcc40435e7f26ed338c",
+  "generatedAt": "sha256:3080266e72dc03da46ab8080369ddc5031f3a03ec3fb018c97f05bd718e1e26b",
   "ruleCount": 178,
   "domains": [
     {
@@ -6993,34 +6993,43 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "INF-M1",
       "category": "infrastructure",
-      "title": "AI data stores and control planes must not be publicly exposed without authenticated edge controls",
-      "description": "AI data stores and control planes shall not be publicly exposed without authenticated edge controls",
-      "whyItMatters": "AI data stores and control planes shall not be publicly exposed without authenticated edge controls Failing this leaves a production gap against: 0 AI data stores or control-plane endpoints publicly reachable without authentication in the latest scan; findings severity ≥ high closed or waived with expiry",
+      "title": "AI data stores and control planes must not be publicly reachable without authentication",
+      "description": "AI data stores and control planes shall not be publicly reachable without authentication—proven by a current CSPM or network scan plus authenticated edge controls or private-only exposure, not by private-subnet intent alone.\n",
+      "whyItMatters": "Vector DBs, object stores, admin consoles, and orchestrator APIs exposed without edge auth become direct exfiltration and takeover paths. A fresh inventory and scan showing 0 unauthenticated public endpoints and high findings closed or time-boxed makes exposure measurable. Distinct from SEC-M4 (model-path universal-proxy prevention), INF-M3 (agent/tool least-privilege connectivity), INF-M4 (shared accelerator isolation), and AUTHN-M1 (customer-facing AI HTTP unauthenticated rejection).\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "0 AI data stores or control-plane endpoints publicly reachable without authentication in the latest scan; findings severity ≥ high closed or waived with expiry",
+      "passCondition": "Inventory of in-scope AI data stores and control-plane endpoints exists; 0 of those endpoints are publicly reachable without authentication in the latest CSPM/network scan; findings severity ≥ high are closed or waived with owner and expiry; authenticated edge controls are configured or private-only exposure is proven by the scan (measuredAt ≤90 days). If no AI data stores or control planes exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "CSPM/network scan of AI data stores and control planes + edge auth config"
+        "Inventory of in-scope AI data stores and control-plane endpoints",
+        "CSPM/network scan covering those surfaces (measuredAt ≤90 days)",
+        "Authenticated edge-control config, or private-only exposure proven by the scan",
+        "Open high/critical public-exposure findings closed or waived with owner and expiry"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-public-exposure-scan",
+            "params": {
+              "hint": "Discover AI data-store / control-plane inventory (required for PASS) plus edge-auth / CSPM signals; ingest coverage under imports/ai-public-exposure-scan/; require inventory (or present=true), 0 publicly reachable unauthenticated endpoints, 0 open unwaived high/critical findings, edge auth or privateOnlyExposureProvenByScan, measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "CSPM/network scan of AI data stores and control planes + edge auth config"
+              "hint": "If automation cannot prove coverage, attest inventory plus a fresh CSPM/network scan with 0 unauthenticated public endpoints, high findings closed/waived, and edge auth or private-only exposure proven by the scan (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (AI data stores and control planes must not be publicly exposed without authenticated edge controls): inspect current evidence for [CSPM/network scan of AI data stores and control planes + edge auth config] and confirm the pass condition holds — 0 AI data stores or control-plane endpoints publicly reachable without authentication in the latest scan; findings severity ≥ high closed or waived with expiry",
-      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm AI data stores or control-plane endpoints exist. If none, score NOT_APPLICABLE. 2) Inventory those surfaces (required—do not PASS from edge-auth/CSPM docs alone). 3) Review a CSPM or network scan covering them (measuredAt ≤90 days). 4) Confirm 0 endpoints are publicly reachable without authentication. 5) Confirm findings severity ≥ high are closed or waived with owner and expiry. 6) Confirm authenticated edge controls or private-only exposure proven by the scan. PASS only if inventory + scan + zero unauthenticated public reachability + high findings disposition + edge-auth/private-only hold. SEC-M4 model-path egress allowlists alone do not prove inbound public exposure is closed. INF-M3 agent/tool least-privilege connectivity alone does not prove data-store/control-plane edge auth. AUTHN-M1 customer-facing HTTP probes alone do not prove store/control-plane exposure. Private-subnet docs without a scan do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass IaC “private” intent without a current scan. Do not pass edge-auth or CSPM signals without an inventory of AI data stores or control planes (or present=true). Do not pass empty inventories without an explicit N/A attest. Do not score SEC-M4, INF-M3, INF-M4, or AUTHN-M1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: AI data stores and control planes must not be publicly exposed without authenticated edge controls",
-        "Retain evidence artifacts required by this Check, starting with: CSPM/network scan of AI data stores and control planes + edge auth config",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Inventory AI data stores and control planes; remove public listeners or place them behind authenticated edge controls",
+        "Run CSPM/network scans covering those surfaces and close or time-box ≥ high findings",
+        "Retain scored report under imports/ai-public-exposure-scan/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -7028,12 +7037,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cisecurity.org/cis-benchmarks"
         },
         {
-          "title": "CNCF security technical advisory guidance",
-          "url": "https://www.cncf.io/"
+          "title": "OWASP Cloud-Native Application Security Top 10",
+          "url": "https://owasp.org/www-project-cloud-native-application-security-top-10/"
         },
         {
           "title": "AWS Well-Architected — Security",
           "url": "https://aws.amazon.com/architecture/well-architected/"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -7041,22 +7054,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "INF-M3",
         "INF-M4",
         "INF-R1",
-        "INF-R3"
+        "INF-R3",
+        "SEC-M4",
+        "AUTHN-M1",
+        "AUTHN-M3"
       ],
       "tags": [
         "infrastructure",
         "mandatory",
-        "manual"
+        "hybrid",
+        "public-exposure",
+        "cspm",
+        "edge-auth"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes",
-          "terraform",
-          "docker"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -7066,38 +7078,43 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "INF-M2",
       "category": "infrastructure",
-      "title": "Base images and runtimes must follow documented patching SLAs",
-      "description": "Base images and runtimes shall follow documented patching SLAs",
-      "whyItMatters": "Base images and runtimes shall follow documented patching SLAs Failing this leaves a production gap against: 100% of production AI runtime images are within patching SLA (e.g. critical fixes ≤ 14 days); report shows 0 SLA breaches or open waivers with expiry",
+      "title": "Production AI runtime environments must follow documented patching SLAs",
+      "description": "Production AI runtime environments shall comply with the organization's documented patching SLA—or hold approved time-boxed waivers—proven by inventory plus vulnerability/age evidence, not by image-tag pinning alone.\n",
+      "whyItMatters": "Stale containers, VMs, and managed AI runtimes accumulate known CVEs and unsupported bases. Measuring against the org's written SLA (not a fixed calendar) keeps APRF compatible with enterprise policy while still requiring 100% coverage or owned waivers. Distinct from INF-M1 (public exposure of data stores/control planes), INF-M3 (agent/tool least-privilege connectivity), INF-M4 (shared accelerator isolation), SCI-M2 (dependency lock/pin), and image-tag pinning checks that do not prove patch age or CVE disposition.\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production AI runtime images are within patching SLA (e.g. critical fixes ≤ 14 days); report shows 0 SLA breaches or open waivers with expiry",
+      "passCondition": "Inventory of production AI runtime environments exists; a documented patching SLA covers those environments; 100% comply with that SLA or approved time-boxed waivers exist with owner and expiry; report shows 0 SLA breaches without such waivers and vulnerability/age evidence covers the inventory (measuredAt ≤90 days). If no production AI runtime environments exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Patching SLA policy + image age/CVE backlog report for AI runtimes"
+        "Documented patching SLA for production AI runtime environments",
+        "Inventory of production AI runtime environments (containers, VMs, serverless, managed AI platforms, or equivalent)",
+        "Vulnerability scan and/or image/runtime age report covering that inventory (measuredAt ≤90 days)",
+        "CVE/patch backlog disposition + waiver register for any SLA exceptions (owner and expiry)"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
-            "id": "docker-no-latest-tag",
-            "params": {}
+            "id": "repo-ai-runtime-patching",
+            "params": {
+              "hint": "Discover patching-SLA, runtime-inventory (required for PASS), CVE/age-scan, and waiver signals; ingest coverage under imports/ai-runtime-patching/; require inventory (or present=true), documented SLA, 100% within SLA (or waived), 0 unwaived breaches, vulnerability/age report, measuredAt ≤90 days.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Patching SLA policy + image age/CVE backlog report for AI runtimes"
+              "hint": "If automation cannot prove coverage, attest inventory plus a documented patching SLA and scan/age evidence showing 100% of production AI runtimes within SLA or approved time-boxed waivers (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Base images and runtimes must follow documented patching SLAs): inspect current evidence for [Patching SLA policy + image age/CVE backlog report for AI runtimes] and confirm the pass condition holds — 100% of production AI runtime images are within patching SLA (e.g. critical fixes ≤ 14 days); report shows 0 SLA breaches or open waivers with expiry",
-      "falsePositiveGuidance": "when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm production AI runtime environments exist (containers, VMs, serverless, managed AI platforms, or equivalent). If none, score NOT_APPLICABLE. 2) Inventory those runtimes (required—do not PASS from SLA, CVE, or waiver docs alone). 3) Locate the organization's documented patching SLA (critical/high windows may differ by org—do not require a fixed day count). 4) Review vulnerability scan and/or image/runtime age evidence covering that inventory (measuredAt ≤90 days). 5) Confirm 100% comply with the documented SLA, or each breach has an approved waiver with owner and expiry. 6) PASS only if inventory + SLA + scan/age evidence + zero unwaived breaches hold. Image pinning without :latest alone does not prove patch compliance. INF-M1 public-exposure scans alone do not prove patching SLA. SCI-M2 lockfiles alone do not prove runtime image age/CVE disposition.\n",
+      "falsePositiveGuidance": "Do not pass image-tag pinning (absence of :latest) as this Check. Do not hardcode a universal critical-fix window (e.g. 14 days)—use the org's documented SLA. Do not pass SLA, CVE/age-scan, or waiver signals without an inventory of production AI runtimes (or present=true). Do not pass empty inventories without an explicit N/A attest. Do not score INF-M1, INF-M3, INF-M4, or SCI-M2 as substitutes. Named exceptions need owner and expiry ≤90 days (or the SLA's waiver window, if stricter).\n",
       "recommendedFixes": [
-        "Implement and operationalize: Base images and runtimes must follow documented patching SLAs",
-        "Retain evidence artifacts required by this Check, starting with: Patching SLA policy + image age/CVE backlog report for AI runtimes",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Document a patching SLA for production AI runtime environments and inventory those runtimes",
+        "Run vulnerability/age scans (Trivy, Grype, Scout, cloud registry/inspector, or equivalent) against the inventory",
+        "Close or time-box SLA breaches with owner and expiry; retain under imports/ai-runtime-patching/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -7105,12 +7122,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cisecurity.org/cis-benchmarks"
         },
         {
-          "title": "CNCF security technical advisory guidance",
-          "url": "https://www.cncf.io/"
+          "title": "NIST SP 800-40 — Guide to Enterprise Patch Management Technologies",
+          "url": "https://csrc.nist.gov/publications/detail/sp/800-40/rev-4/final"
         },
         {
           "title": "AWS Well-Architected — Security",
           "url": "https://aws.amazon.com/architecture/well-architected/"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -7118,22 +7139,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "INF-M3",
         "INF-M4",
         "INF-R1",
-        "INF-R3"
+        "INF-R3",
+        "SCI-M2",
+        "SCI-R1"
       ],
       "tags": [
         "infrastructure",
         "mandatory",
-        "hybrid"
+        "hybrid",
+        "patching",
+        "runtime",
+        "cve"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes",
-          "terraform",
-          "docker"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -7143,38 +7162,42 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "INF-M3",
       "category": "infrastructure",
-      "title": "Network segmentation must limit agent/tool reachability to required dependencies",
-      "description": "Network segmentation shall limit agent/tool reachability to required dependencies",
-      "whyItMatters": "Network segmentation shall limit agent/tool reachability to required dependencies Failing this leaves a production gap against: Egress/east-west allowlists for agent/tool identities match the documented dependency inventory; probe from agent identity to a non-allowlisted internal service fails at 100%",
+      "title": "Agent and tool runtimes must reach only authorized dependencies",
+      "description": "Agent and tool runtimes shall communicate only with documented dependencies required for their intended function—enforced by least- privilege network and/or identity controls, not by open east-west access inside the environment.\n",
+      "whyItMatters": "A compromised or prompt-injected agent with unrestricted internal reachability can laterally move across services. Documented dependencies plus controls (NetworkPolicy, security groups, service mesh authZ, workload identity, egress gateways, private endpoints, or equivalent) and a probe that unauthorized internal access is blocked make least-privilege connectivity measurable. Distinct from SEC-M4 (model-path must not become a universal proxy to internal admin APIs or data stores), INF-M1 (inbound public exposure of data stores/control planes), INF-M2 (runtime patching SLA), and INF-M4 (shared accelerator isolation).\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Egress/east-west allowlists for agent/tool identities match the documented dependency inventory; probe from agent identity to a non-allowlisted internal service fails at 100%",
+      "passCondition": "Inventory of agent/tool runtimes and their documented required dependencies exists; those runtimes can communicate only with those dependencies; attempts to access unauthorized internal services are blocked by network and/or identity controls (measuredAt ≤90 days). If no agent or tool runtimes exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Network policy / security-group export for agent and tool runtimes + dependency allowlist"
+        "Inventory of agent/tool runtimes and their documented required dependencies",
+        "Least-privilege connectivity controls for those runtimes (network policy, security groups, service mesh, workload identity, egress gateway, private endpoints, or equivalent)",
+        "Probe or reviewed test showing unauthorized internal-service access is blocked (measuredAt ≤90 days)"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
-            "id": "repo-network-policy",
-            "params": {}
+            "id": "repo-agent-tool-connectivity",
+            "params": {
+              "hint": "Discover agent/tool runtime inventory (required for PASS) plus dependency inventory and network/identity connectivity controls; ingest coverage under imports/agent-tool-connectivity/; require runtime inventory (or present=true), documented dependencies, least-privilege controls, unauthorized-access probe denied, measuredAt ≤90 days.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Network policy / security-group export for agent and tool runtimes + dependency allowlist"
+              "hint": "If automation cannot prove coverage, attest inventory plus that agent/tool runtimes reach only documented dependencies and unauthorized internal access is blocked by network and/or identity controls (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Network segmentation must limit agent/tool reachability to required dependencies): inspect current evidence for [Network policy / security-group export for agent and tool runtimes + dependency allowlist] and confirm the pass condition holds — Egress/east-west allowlists for agent/tool identities match the documented dependency inventory; probe from agent identity to a non-allowlisted internal service fails at 100%",
-      "falsePositiveGuidance": "when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm agent or tool runtimes exist. If none, score NOT_APPLICABLE. 2) Inventory those runtimes and document required dependencies (required—do not PASS from NetworkPolicy/SG files or probe docs alone). 3) Confirm least-privilege connectivity controls bind each runtime (network and/or identity—not docs alone). 4) Review a probe or reviewed test: attempts to reach unauthorized internal services are blocked. 5) PASS only if inventory + controls + blocked unauthorized access hold with measuredAt ≤90 days. SEC-M4 model-path proxy probes alone do not prove dependency-inventory least-privilege for all agent/tool runtimes. INF-M1 public-exposure scans alone do not prove east-west/identity segmentation. Open cluster egress with “deny in docs only” does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass NetworkPolicy/security-group files that omit agent/tool identities. Do not pass dependency docs without enforced controls. Do not pass controls or probes without an inventory of agent/tool runtimes (or present=true). Do not pass probes that never attempt unauthorized internal destinations. Do not score SEC-M4, INF-M1, INF-M2, or INF-M4 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Network segmentation must limit agent/tool reachability to required dependencies",
-        "Retain evidence artifacts required by this Check, starting with: Network policy / security-group export for agent and tool runtimes + dependency allowlist",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Document required dependencies for each agent/tool runtime",
+        "Enforce least-privilege connectivity via network and/or identity controls (NetworkPolicy, SGs, mesh, WI, egress gateway, private endpoints)",
+        "Probe unauthorized internal access and retain deny evidence under imports/agent-tool-connectivity/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -7182,12 +7205,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cisecurity.org/cis-benchmarks"
         },
         {
-          "title": "CNCF security technical advisory guidance",
-          "url": "https://www.cncf.io/"
+          "title": "Kubernetes Network Policies",
+          "url": "https://kubernetes.io/docs/concepts/services-networking/network-policies/"
         },
         {
           "title": "AWS Well-Architected — Security",
           "url": "https://aws.amazon.com/architecture/well-architected/"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -7195,22 +7222,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "INF-M2",
         "INF-M4",
         "INF-R1",
-        "INF-R3"
+        "INF-R3",
+        "SEC-M4",
+        "AUTHN-R2",
+        "AUTHZ-M1"
       ],
       "tags": [
         "infrastructure",
         "mandatory",
-        "hybrid"
+        "hybrid",
+        "least-privilege",
+        "connectivity",
+        "agent",
+        "tool"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes",
-          "terraform",
-          "docker"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -7220,47 +7247,59 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "INF-M4",
       "category": "infrastructure",
-      "title": "GPU/accelerator isolation and noisy-neighbor controls must protect multi-tenant inference",
-      "description": "GPU/accelerator isolation and noisy-neighbor controls shall protect multi-tenant inference",
-      "whyItMatters": "GPU/accelerator isolation and noisy-neighbor controls shall protect multi-tenant inference Failing this leaves a production gap against: PASS if isolation controls are documented and the latest isolation/capacity test (≤90 days) meets stated limits",
+      "title": "Shared AI accelerator infrastructure must enforce tenant isolation and noisy-neighbor controls",
+      "description": "Shared AI accelerator infrastructure shall enforce tenant isolation and noisy-neighbor controls—proven by documented isolation design plus a fresh isolation/capacity test meeting stated limits—not by GPU presence alone.\n",
+      "whyItMatters": "On shared GPU/accelerator clusters, one tenant’s load or escape can starve or interfere with others. Scheduling policy, MIG/vGPU/resource quotas, QoS, and a ≤90-day isolation/capacity test make the control measurable. Not applicable when inference is CPU-only, single-tenant/dedicated accelerators, or consumed only via managed model APIs (OpenAI, Anthropic, Bedrock, Azure OpenAI, Vertex managed endpoints, and equivalents) where the organization does not operate shared accelerator infrastructure. Distinct from INF-M1 (public exposure of data stores/control planes), INF-M2 (runtime patching SLA), and INF-M3 (agent/tool network/identity connectivity).\n",
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "PASS if isolation controls are documented and the latest isolation/capacity test (≤90 days) meets stated limits",
+      "passCondition": "Inventory or explicit scope confirms shared AI accelerator infrastructure; isolation and noisy-neighbor controls are documented; and the latest isolation/capacity test (measuredAt ≤90 days) meets stated limits. If the organization does not operate shared AI accelerator infrastructure (e.g. managed-API-only, CPU-only, single-tenant, or dedicated GPU per workload), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Isolation design + capacity/isolation test report for shared accelerators"
+        "Scope note: shared AI accelerator infrastructure present (or explicit N/A for managed-API/CPU-only/single-tenant/dedicated)",
+        "Isolation design (GPU scheduling, MIG/vGPU, resource quotas, tenant QoS, or equivalent)",
+        "Isolation and/or capacity test report meeting stated limits (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-shared-accelerator-isolation",
+            "params": {
+              "hint": "Discover shared GPU/accelerator inventory (required for PASS) plus MIG/vGPU, scheduling/QoS, and isolation/capacity-test signals; ingest coverage under imports/shared-accelerator-isolation/; require inventory (or present=true), isolation design + test meeting limits with measuredAt ≤90 days; N/A when sharedAiAcceleratorInfrastructurePresent=false.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Isolation design + capacity/isolation test report for shared accelerators"
+              "hint": "If automation cannot prove coverage, attest shared-accelerator scope plus isolation design and a ≤90-day isolation/capacity test meeting stated limits—or attest sharedAiAcceleratorInfrastructurePresent=false for managed-API, CPU-only, single-tenant, or dedicated-GPU deployments.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (GPU/accelerator isolation and noisy-neighbor controls must protect multi-tenant inference): inspect current evidence for [Isolation design + capacity/isolation test report for shared accelerators] and confirm the pass condition holds — PASS if isolation controls are documented and the latest isolation/capacity test (≤90 days) meets stated limits",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the organization operates shared AI accelerator infrastructure (multi-tenant GPU clusters, internal model-serving platforms, MIG/vGPU, Triton/Ray/vLLM multi-tenant serving, or equivalent). If inference is only via managed model APIs, CPU-only, single-tenant, or dedicated GPU per workload, score NOT_APPLICABLE. 2) Confirm shared-accelerator inventory or present=true (required—do not PASS from isolation-design or test docs alone). 3) Review isolation design (scheduling, MIG/vGPU, resource quotas, tenant QoS). 4) Review the latest isolation/capacity test (measuredAt ≤90 days) against stated limits. 5) PASS only if inventory/scope + design + passing test hold. Managed-API usage alone is N/A, not a vacuous FAIL. INF-M2 patching reports alone do not prove accelerator isolation. INF-M3 connectivity controls alone do not prove GPU tenant isolation.\n",
+      "falsePositiveGuidance": "Do not fail managed-API-only or CPU-only stacks without an explicit shared- accelerator inventory. Do not pass isolation-design or capacity-test signals without shared-accelerator inventory (or present=true). Do not pass GPU mentions without isolation design and a fresh test. Do not pass empty inventories without an explicit N/A attest. Do not score INF-M1, INF-M2, or INF-M3 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: GPU/accelerator isolation and noisy-neighbor controls must protect multi-tenant inference",
-        "Retain evidence artifacts required by this Check, starting with: Isolation design + capacity/isolation test report for shared accelerators",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Document shared-accelerator isolation (scheduling, MIG/vGPU, quotas, tenant QoS)",
+        "Run isolation/capacity tests that meet stated limits and retain under imports/shared-accelerator-isolation/ (measuredAt ≤90 days)",
+        "If out of scope, attest sharedAiAcceleratorInfrastructurePresent=false with rationale",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
-          "title": "CIS Benchmarks",
-          "url": "https://www.cisecurity.org/cis-benchmarks"
+          "title": "NVIDIA Multi-Instance GPU (MIG)",
+          "url": "https://www.nvidia.com/en-us/technologies/multi-instance-gpu/"
         },
         {
-          "title": "CNCF security technical advisory guidance",
-          "url": "https://www.cncf.io/"
+          "title": "Kubernetes Device Plugins / Resource Management",
+          "url": "https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/"
         },
         {
-          "title": "AWS Well-Architected — Security",
+          "title": "AWS Well-Architected — Performance Efficiency",
           "url": "https://aws.amazon.com/architecture/well-architected/"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -7268,22 +7307,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "INF-M2",
         "INF-M3",
         "INF-R1",
-        "INF-R3"
+        "INF-R3",
+        "PERF-M1"
       ],
       "tags": [
         "infrastructure",
         "mandatory",
-        "manual"
+        "hybrid",
+        "gpu",
+        "accelerator",
+        "multi-tenant",
+        "isolation"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes",
-          "terraform",
-          "docker"
-        ],
+        "technologies": [],
         "minCriticality": 3,
         "requiredFromLevel": 5
       },
@@ -7294,12 +7331,12 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "INF-R1",
       "category": "infrastructure",
       "title": "Production systems should have signed model and container artifacts with verify-on-deploy",
-      "description": "Signed model and container artifacts with verify-on-deploy",
-      "whyItMatters": "Signed model and container artifacts with verify-on-deploy Failing this leaves a production gap against: Unsigned model/container images cannot schedule in production namespaces; policy verified by a failed admission test within 90 days",
+      "description": "Deprecated: superseded by SCI-R1 (SLSA-aligned signed model/container verify-on-deploy). Retained for N−1 readers; new assessments should use the supply-chain successor Check.\n",
+      "whyItMatters": "Unsigned model and container images can be substituted in production. Prefer SCI-R1 for the active supply-chain outcome. This Check remains only for historical assessments that still reference the infrastructure predecessor.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Unsigned model/container images cannot schedule in production namespaces; policy verified by a failed admission test within 90 days",
+      "passCondition": "Unsigned model/container images cannot schedule in production namespaces; policy verified by a failed admission test within 90 days. Prefer scoring SCI-R1 instead.\n",
       "evidenceRequired": [
         "Cluster/admission controller config requiring signed images + last failed-unsigned admission event or drill"
       ],
@@ -7309,27 +7346,25 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Cluster/admission controller config requiring signed images + last failed-unsigned admission event or drill"
+              "hint": "Prefer SCI-R1. If scoring this deprecated Check for N−1 continuity, attest admission policy requiring signed images plus a failed-unsigned admission event or drill within 90 days.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Signed model and container artifacts with verify-on-deploy): inspect current evidence for [Cluster/admission controller config requiring signed images + last failed-unsigned admission event or drill] and confirm the pass condition holds — Unsigned model/container images cannot schedule in production namespaces; policy verified by a failed admission test within 90 days",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "Prefer SCI-R1. If this deprecated Check must be scored: 1) Confirm admission/verify-on-deploy requires signed model/container images. 2) Confirm an unsigned artifact was rejected in a recorded test or event within 90 days. 3) PASS only if policy + rejection evidence hold.\n",
+      "falsePositiveGuidance": "Do not score this Check when SCI-R1 already covers the outcome. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Signed model and container artifacts with verify-on-deploy",
-        "Retain evidence artifacts required by this Check, starting with: Cluster/admission controller config requiring signed images + last failed-unsigned admission event or drill",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Migrate assessments to SCI-R1 (SLSA-aligned signed model/container verify-on-deploy)",
+        "If still scoring this deprecated Check, retain admission config plus a failed-unsigned admission drill within 90 days"
       ],
       "references": [
         {
-          "title": "CIS Benchmarks",
-          "url": "https://www.cisecurity.org/cis-benchmarks"
+          "title": "SLSA — Supply-chain Levels for Software Artifacts",
+          "url": "https://slsa.dev/"
         },
         {
-          "title": "CNCF security technical advisory guidance",
-          "url": "https://www.cncf.io/"
+          "title": "CIS Benchmarks",
+          "url": "https://www.cisecurity.org/cis-benchmarks"
         },
         {
           "title": "AWS Well-Architected — Security",
@@ -7337,6 +7372,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         }
       ],
       "relatedRules": [
+        "SCI-R1",
         "INF-M1",
         "INF-M2",
         "INF-M3",
@@ -7346,17 +7382,11 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "infrastructure",
         "recommended",
-        "manual"
+        "manual",
+        "deprecated"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes",
-          "terraform",
-          "docker"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -7369,27 +7399,36 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "INF-R3",
       "category": "infrastructure",
-      "title": "Production systems should have infrastructure-as-code with policy checks (CIS-aligned)",
-      "description": "Infrastructure-as-code with policy checks (CIS-aligned)",
-      "whyItMatters": "Infrastructure-as-code with policy checks (CIS-aligned) Failing this leaves a production gap against: Production AI infra is declared in IaC; CIS (or equivalent) policy checks run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions ≤90 days",
+      "title": "Production AI infrastructure should be declared as code with CIS-aligned policy checks",
+      "description": "Production AI infrastructure shall be declared in infrastructure-as-code with CIS-aligned (or equivalent) policy checks on every apply/PR—proven by IaC modules, policy-scan config, and a fresh production-stack report—not by console-built stacks alone.\n",
+      "whyItMatters": "Click-ops AI infra drifts from reviewable baselines and accumulates misconfigurations. Declaring production AI stacks in IaC and gating merges with CIS-aligned policy scans (critical findings closed or time-boxed) makes posture measurable. Distinct from INF-M1 (public exposure scans of data stores/control planes), INF-M2 (runtime patching SLA), and SCI-R1 (signed artifact verify-on-deploy).\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Production AI infra is declared in IaC; CIS (or equivalent) policy checks run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions ≤90 days",
+      "passCondition": "Production AI infrastructure is declared in IaC; CIS-aligned (or equivalent) policy checks run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions with owner and expiry (measuredAt ≤90 days). If no production AI infrastructure is managed by the organization, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "IaC modules for AI infra + CIS-aligned policy scan config + latest scan report for production stacks"
+        "IaC modules covering production AI infrastructure",
+        "CIS-aligned (or equivalent) policy-scan config wired to apply/PR",
+        "Latest policy-scan report for production stacks (measuredAt ≤90 days)",
+        "Critical findings closed or waived with owner and expiry"
       ],
       "detection": {
         "capability": "manual",
-        "detectors": []
+        "detectors": [
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "Attest IaC for production AI infra plus CIS-aligned (or equivalent) policy checks on apply/PR with 0 open unwaived critical findings (measuredAt ≤90 days)—or attest no production AI infrastructure.\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (INF: Infrastructure-as-code with policy checks (CIS-aligned)): inspect current evidence for [IaC modules for AI infra + CIS-aligned policy scan config + latest scan report for production stacks] and confirm the pass condition holds — Production AI infra is declared in IaC; CIS (or equivalent) policy checks run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions ≤90 days",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the organization manages production AI infrastructure. If none, score NOT_APPLICABLE. 2) Confirm those stacks are declared in IaC. 3) Confirm CIS-aligned (or equivalent) policy checks run on every apply/PR. 4) Review the latest production-stack scan (measuredAt ≤90 days): critical findings are 0 or waived with owner and expiry. 5) PASS only if IaC + policy gate + disposition hold. INF-M1 CSPM public-exposure scans alone do not prove IaC policy-as-code. Console-only changes without IaC do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass sample Terraform without production AI coverage. Do not pass policy configs that never run on apply/PR. Do not pass empty inventories without an explicit N/A attest. Do not score INF-M1 or SCI-R1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Infrastructure-as-code with policy checks (CIS-aligned)",
-        "Retain evidence artifacts required by this Check, starting with: IaC modules for AI infra + CIS-aligned policy scan config + latest scan report for production stacks",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Declare production AI infrastructure in IaC and wire CIS-aligned (or equivalent) policy checks to apply/PR",
+        "Close or time-box critical findings; retain the latest report (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -7397,12 +7436,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cisecurity.org/cis-benchmarks"
         },
         {
-          "title": "CNCF security technical advisory guidance",
-          "url": "https://www.cncf.io/"
+          "title": "Open Policy Agent / Conftest",
+          "url": "https://www.openpolicyagent.org/"
         },
         {
           "title": "AWS Well-Architected — Security",
           "url": "https://aws.amazon.com/architecture/well-architected/"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -7410,22 +7453,18 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "INF-M2",
         "INF-M3",
         "INF-M4",
-        "INF-R1"
+        "INF-R1",
+        "SCI-R1"
       ],
       "tags": [
         "infrastructure",
         "recommended",
-        "manual"
+        "manual",
+        "iac",
+        "policy-as-code"
       ],
       "applicability": {
-        "technologies": [
-          "aws",
-          "gcp",
-          "azure",
-          "kubernetes",
-          "terraform",
-          "docker"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -12751,7 +12790,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "ai-security",
       "title": "Network and identity boundaries must prevent the model path from becoming a universal proxy to internal systems",
       "description": "Network and identity boundaries shall prevent the model/tool runtime path from becoming a universal proxy to internal systems—so the model identity reaches only allowlisted destinations and has 0 unrestricted routes to internal admin APIs or data stores.\n",
-      "whyItMatters": "An unbounded model or tool identity turns every prompt into lateral movement: admin APIs and data stores become reachable through natural language. A documented trust boundary, egress allowlist, and probe proving only allowlisted destinations (with 0 unrestricted internal admin/data-store routes) makes the boundary measurable. Distinct from INF-M3 agent/tool dependency-inventory segmentation, SEC-M1 injection privilege mediation, and AUTHZ Checks on application RBAC alone.\n",
+      "whyItMatters": "An unbounded model or tool identity turns every prompt into lateral movement: admin APIs and data stores become reachable through natural language. A documented trust boundary, egress allowlist, and probe proving only allowlisted destinations (with 0 unrestricted internal admin/data-store routes) makes the boundary measurable. Distinct from INF-M3 (infra least-privilege connectivity of agent/tool runtimes to documented dependencies via network and/or identity controls), SEC-M1 injection privilege mediation, and AUTHZ Checks on application RBAC alone.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -12778,7 +12817,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm production AI uses a model or tool runtime that can initiate network calls. If none, score NOT_APPLICABLE. 2) Locate an architecture diagram of model/tool trust boundaries. 3) Locate network policy or egress allowlist for that runtime identity. 4) Review automated or reviewed probe results: only allowlisted destinations are reachable; unrestricted routes from the model identity to internal admin APIs or data stores = 0. 5) PASS only if trust boundary + allowlist + probe results hold with measuredAt ≤90 days. INF-M3 dependency-inventory match alone does not prove model-path proxy prevention. SEC-M1 injection suites alone do not prove egress boundaries. AUTHZ application RBAC alone does not prove network/identity isolation of the model path.\n",
+      "manualVerification": "1) Confirm production AI uses a model or tool runtime that can initiate network calls. If none, score NOT_APPLICABLE. 2) Locate an architecture diagram of model/tool trust boundaries. 3) Locate network policy or egress allowlist for that runtime identity. 4) Review automated or reviewed probe results: only allowlisted destinations are reachable; unrestricted routes from the model identity to internal admin APIs or data stores = 0. 5) PASS only if trust boundary + allowlist + probe results hold with measuredAt ≤90 days. INF-M3 least-privilege connectivity to documented dependencies alone does not prove the model path cannot proxy to admin APIs/data stores. SEC-M1 injection suites alone do not prove egress boundaries. AUTHZ application RBAC alone does not prove network/identity isolation of the model path.\n",
       "falsePositiveGuidance": "Do not pass open egress with “deny in docs only.” Do not pass cluster-wide NetworkPolicies that omit the model/tool identity. Do not pass probes that never attempt internal admin or data-store destinations. Sibling INF-M3, SEC-M1, and AUTHZ Checks do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Document model/tool trust boundaries and bind the runtime to a dedicated identity",

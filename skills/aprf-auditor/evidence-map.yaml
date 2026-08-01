@@ -386,7 +386,7 @@ checks:
       PASS if model-path-egress-boundary statusHint=pass (trust boundary + egress allowlist + 0 unrestricted internal admin/data-store routes + allowlisted-only probe + measuredAt ≤90d).
       PARTIAL if boundary signals without complete import.
       FAIL if unrestricted routes >0 or probe fails allowlisted-only.
-      Distinct from INF-M3 dependency-inventory segmentation, SEC-M1 injection gates, and AUTHZ RBAC.
+      Distinct from INF-M1 public exposure of data stores/control planes, INF-M3 agent/tool least-privilege connectivity to documented dependencies, SEC-M1 injection gates, and AUTHZ RBAC.
   SEC-R1:
     requiredEvidence:
       - "Versioned red-team suite covering multi-turn and indirect RAG/MCP injection"
@@ -704,6 +704,114 @@ checks:
       PARTIAL if inventory/review signals without complete import.
       FAIL if review coverage or revoke/none-warranted are attested false.
       AUTHZ-M3, AUTHZ-R1, and AGN-R3 do not substitute.
+  INF-M1:
+    requiredEvidence:
+      - "Inventory of in-scope AI data stores and control-plane endpoints"
+      - "CSPM/network scan covering those surfaces (measuredAt ≤90 days)"
+      - "Authenticated edge-control config (or private-only exposure with scan proof)"
+      - "inventory (or present=true) + publiclyReachableUnauthenticatedCount=0 + openHighOrCriticalFindingsUnwaived=0 + (authenticatedEdgeControlsConfigured OR privateOnlyExposureProvenByScan) + cspmOrNetworkScanPresent under imports/ai-public-exposure-scan/"
+    plugins: [ai-public-exposure-scan, iac-cloud, repo-filesystem]
+    searchExtra:
+      - "**/*cspm*"
+      - "**/*public*access*"
+      - "**/*private*endpoint*"
+      - "**/*vector*"
+      - "**/*control*plane*"
+      - "**/*security*group*"
+      - "**/*.tf"
+    naWhen: "No AI data stores or control planes"
+    evaluation: |
+      Prefer collectors/ai-public-exposure-scan or imports/ai-public-exposure-scan/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / infM1Satisfied === true
+      (inventory in-repo or aiDataStoresOrControlPlanesPresent=true +
+      publiclyReachableUnauthenticatedCount=0 + openHighOrCriticalFindingsUnwaived=0 +
+      (authenticatedEdgeControlsConfigured=true OR privateOnlyExposureProvenByScan=true) +
+      cspmOrNetworkScanPresent=true + measuredAt ≤90d).
+      NOT_APPLICABLE if aiDataStoresOrControlPlanesPresent=false and no in-repo store/control-plane inventory.
+      PARTIAL if edge-auth/CSPM signals without inventory, or incomplete import.
+      FAIL if public unauthenticated endpoints >0, open high findings >0, edge auth false without private-only proof, or scan attested false.
+      SEC-M4, INF-M3, INF-M4, and AUTHN-M1 do not substitute.
+  INF-M2:
+    requiredEvidence:
+      - "Documented patching SLA for production AI runtime environments"
+      - "Inventory of production AI runtime environments (containers, VMs, serverless, managed AI platforms, or equivalent)"
+      - "Vulnerability scan and/or image/runtime age report covering that inventory (measuredAt ≤90 days)"
+      - "inventory (or present=true) + patchingSlaDocumented + productionAiRuntimesWithinDocumentedPatchingSlaPct=100 + openSlaBreachesWithoutApprovedWaiver=0 + vulnerabilityOrImageAgeReportPresent under imports/ai-runtime-patching/"
+    plugins: [ai-runtime-patching, repo-filesystem]
+    searchExtra:
+      - "**/*patch*sla*"
+      - "**/*trivy*"
+      - "**/*grype*"
+      - "**/*cve*"
+      - "**/*image*age*"
+      - "**/*runtime*inventory*"
+      - "**/Dockerfile*"
+    naWhen: "No production AI runtime environments"
+    evaluation: |
+      Prefer collectors/ai-runtime-patching or imports/ai-runtime-patching/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / infM2Satisfied === true
+      (inventory in-repo or productionAiRuntimeEnvironmentsPresent=true +
+      patchingSlaDocumented + withinSlaPct=100 + openSlaBreachesWithoutApprovedWaiver=0 +
+      vulnerabilityOrImageAgeReportPresent + measuredAt ≤90d).
+      NOT_APPLICABLE if productionAiRuntimeEnvironmentsPresent=false and no in-repo runtime inventory
+      (SLA/CVE/waiver docs alone do not block N/A).
+      PARTIAL if SLA/CVE/waiver signals without inventory, or incomplete import.
+      FAIL if withinSlaPct<100, unwaived breaches >0, or SLA/report attested false.
+      Do not PASS from image-tag pinning alone. INF-M1, INF-M3, INF-M4, and SCI-M2 do not substitute.
+  INF-M3:
+    requiredEvidence:
+      - "Inventory of agent/tool runtimes and their documented required dependencies"
+      - "Least-privilege connectivity controls (network and/or identity) for those runtimes"
+      - "Probe showing unauthorized internal-service access is blocked (measuredAt ≤90d under imports/agent-tool-connectivity/)"
+    plugins: [agent-tool-connectivity, iac-cloud, repo-filesystem]
+    searchExtra:
+      - "**/*network*polic*"
+      - "**/*security*group*"
+      - "**/*egress*"
+      - "**/*service*mesh*"
+      - "**/*workload*identity*"
+      - "**/*dependenc*"
+      - "**/*.tf"
+    naWhen: "No agent or tool runtimes"
+    evaluation: |
+      Prefer collectors/agent-tool-connectivity or imports/agent-tool-connectivity/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / infM3Satisfied === true
+      (agent/tool runtime inventory in-repo or agentOrToolRuntimesPresent=true +
+      dependencyInventoryDocumented or in-repo dependency inventory +
+      leastPrivilegeConnectivityControlsConfigured or in-repo controls +
+      connectivityControlsMatchDependencyInventory + unauthorizedInternalServiceAccessBlockedInProbe + measuredAt ≤90d).
+      NOT_APPLICABLE if agentOrToolRuntimesPresent=false and no in-repo agent/tool runtime inventory
+      (dependency/control/probe docs alone do not block N/A).
+      PARTIAL if dependency/control/probe signals without runtime inventory, or incomplete import.
+      FAIL if match or unauthorized-access deny attested false; negative design attests FAIL only when
+      matching in-repo dependency/control signals are also absent.
+      SEC-M4 model-path proxy prevention alone does not substitute. INF-M1/M2/M4 do not substitute.
+  INF-M4:
+    requiredEvidence:
+      - "Scope note: shared AI accelerator infrastructure present (or explicit N/A for managed-API/CPU-only/single-tenant/dedicated)"
+      - "Isolation design (GPU scheduling, MIG/vGPU, resource quotas, tenant QoS, or equivalent)"
+      - "inventory (or present=true) + isolationControlsDocumented + isolationOrCapacityTestMeetsStatedLimits + measuredAt≤90d under imports/shared-accelerator-isolation/"
+    plugins: [shared-accelerator-isolation, repo-filesystem]
+    searchExtra:
+      - "**/*gpu*"
+      - "**/*mig*"
+      - "**/*vgpu*"
+      - "**/*triton*"
+      - "**/*vllm*"
+      - "**/*ray*serve*"
+      - "**/*noisy*neighbor*"
+      - "**/*accelerator*"
+    naWhen: "No shared AI accelerator infrastructure (managed API / CPU-only / single-tenant / dedicated GPU)"
+    evaluation: |
+      Prefer collectors/shared-accelerator-isolation or imports/shared-accelerator-isolation/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / infM4Satisfied === true
+      (shared-accelerator inventory in-repo or sharedAiAcceleratorInfrastructurePresent=true +
+      isolationControlsDocumented + isolationOrCapacityTestMeetsStatedLimits + measuredAt ≤90d).
+      NOT_APPLICABLE if sharedAiAcceleratorInfrastructurePresent=false and no in-repo shared-accelerator inventory
+      (isolation/test docs alone do not block N/A).
+      PARTIAL if isolation/test signals without inventory, or incomplete import.
+      FAIL if isolation design or capacity/isolation test attested false.
+      Managed-API-only stacks should N/A, not FAIL. INF-M1/M2/M3 do not substitute.
   SEC2-M1:
     requiredEvidence:
       - "Secrets manager / sealed-secrets / cloud secret refs in runtime config"

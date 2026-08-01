@@ -1,65 +1,105 @@
 id: "INF-M1"
 category: "infrastructure"
-title: "AI data stores and control planes must not be publicly exposed without authenticated edge
-  controls"
-description: "AI data stores and control planes shall not be publicly exposed without authenticated
-  edge controls"
-whyItMatters: "AI data stores and control planes shall not be publicly exposed without authenticated
-  edge controls Failing this leaves a production gap against: 0 AI data stores or control-plane
-  endpoints publicly reachable without authentication in the latest scan; findings severity ≥ high
-  closed or waived with expiry"
+title: "AI data stores and control planes must not be publicly reachable without authentication"
+description: >
+  AI data stores and control planes shall not be publicly reachable without
+  authentication—proven by a current CSPM or network scan plus authenticated
+  edge controls or private-only exposure, not by private-subnet intent alone.
+whyItMatters: >
+  Vector DBs, object stores, admin consoles, and orchestrator APIs exposed
+  without edge auth become direct exfiltration and takeover paths. A fresh
+  inventory and scan showing 0 unauthenticated public endpoints and high
+  findings closed or time-boxed makes exposure measurable. Distinct from
+  SEC-M4 (model-path universal-proxy prevention), INF-M3 (agent/tool
+  least-privilege connectivity), INF-M4 (shared accelerator isolation), and
+  AUTHN-M1 (customer-facing AI HTTP unauthenticated rejection).
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "0 AI data stores or control-plane endpoints publicly reachable without
-  authentication in the latest scan; findings severity ≥ high closed or waived with expiry"
+passCondition: >
+  Inventory of in-scope AI data stores and control-plane endpoints exists;
+  0 of those endpoints are publicly reachable without authentication in the
+  latest CSPM/network scan; findings severity ≥ high are closed or waived
+  with owner and expiry; authenticated edge controls are configured or
+  private-only exposure is proven by the scan (measuredAt ≤90 days). If no
+  AI data stores or control planes exist, score NOT_APPLICABLE.
 evidenceRequired:
-  - "CSPM/network scan of AI data stores and control planes + edge auth config"
+  - "Inventory of in-scope AI data stores and control-plane endpoints"
+  - "CSPM/network scan covering those surfaces (measuredAt ≤90 days)"
+  - "Authenticated edge-control config, or private-only exposure proven by the scan"
+  - "Open high/critical public-exposure findings closed or waived with owner and expiry"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-public-exposure-scan"
+      params:
+        hint: >
+          Discover AI data-store / control-plane inventory (required for
+          PASS) plus edge-auth / CSPM signals; ingest coverage under
+          imports/ai-public-exposure-scan/; require inventory (or
+          present=true), 0 publicly reachable unauthenticated endpoints,
+          0 open unwaived high/critical findings, edge auth or
+          privateOnlyExposureProvenByScan, measuredAt ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "CSPM/network scan of AI data stores and control planes + edge auth config"
-manualVerification: "For this Check (AI data stores and control planes must not be publicly exposed
-  without authenticated edge controls): inspect current evidence for [CSPM/network scan of AI data
-  stores and control planes + edge auth config] and confirm the pass condition holds — 0 AI data
-  stores or control-plane endpoints publicly reachable without authentication in the latest scan;
-  findings severity ≥ high closed or waived with expiry"
-falsePositiveGuidance: "confirm the detector target matches the production path for this Check
-  before waiving. Named exceptions need an owner and expiry ≤90 days."
+        hint: >
+          If automation cannot prove coverage, attest inventory plus a
+          fresh CSPM/network scan with 0 unauthenticated public endpoints,
+          high findings closed/waived, and edge auth or private-only
+          exposure proven by the scan (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm AI data stores or control-plane endpoints exist. If none, score
+  NOT_APPLICABLE. 2) Inventory those surfaces (required—do not PASS from
+  edge-auth/CSPM docs alone). 3) Review a CSPM or network scan covering
+  them (measuredAt ≤90 days). 4) Confirm 0 endpoints are publicly reachable
+  without authentication. 5) Confirm findings severity ≥ high are closed or
+  waived with owner and expiry. 6) Confirm authenticated edge controls or
+  private-only exposure proven by the scan. PASS only if inventory + scan +
+  zero unauthenticated public reachability + high findings disposition +
+  edge-auth/private-only hold. SEC-M4 model-path egress allowlists alone do
+  not prove inbound public exposure is closed. INF-M3 agent/tool
+  least-privilege connectivity alone does not prove data-store/control-plane
+  edge auth. AUTHN-M1 customer-facing HTTP probes alone do not prove
+  store/control-plane exposure. Private-subnet docs without a scan do not
+  satisfy.
+falsePositiveGuidance: >
+  Do not pass IaC “private” intent without a current scan. Do not pass
+  edge-auth or CSPM signals without an inventory of AI data stores or
+  control planes (or present=true). Do not pass empty inventories without
+  an explicit N/A attest. Do not score SEC-M4, INF-M3, INF-M4, or AUTHN-M1
+  as substitutes. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: AI data stores and control planes must not be publicly exposed
-    without authenticated edge controls"
-  - "Retain evidence artifacts required by this Check, starting with: CSPM/network scan of AI data
-    stores and control planes + edge auth config"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Inventory AI data stores and control planes; remove public listeners or place them behind authenticated edge controls"
+  - "Run CSPM/network scans covering those surfaces and close or time-box ≥ high findings"
+  - "Retain scored report under imports/ai-public-exposure-scan/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "CIS Benchmarks"
     url: "https://www.cisecurity.org/cis-benchmarks"
-  - title: "CNCF security technical advisory guidance"
-    url: "https://www.cncf.io/"
+  - title: "OWASP Cloud-Native Application Security Top 10"
+    url: "https://owasp.org/www-project-cloud-native-application-security-top-10/"
   - title: "AWS Well-Architected — Security"
     url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "INF-M2"
   - "INF-M3"
   - "INF-M4"
   - "INF-R1"
   - "INF-R3"
+  - "SEC-M4"
+  - "AUTHN-M1"
+  - "AUTHN-M3"
 tags:
   - "infrastructure"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "public-exposure"
+  - "cspm"
+  - "edge-auth"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
-    - "terraform"
-    - "docker"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

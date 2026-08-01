@@ -1,66 +1,106 @@
 id: "INF-M3"
 category: "infrastructure"
-title: "Network segmentation must limit agent/tool reachability to required dependencies"
-description: "Network segmentation shall limit agent/tool reachability to required dependencies"
-whyItMatters: "Network segmentation shall limit agent/tool reachability to required dependencies
-  Failing this leaves a production gap against: Egress/east-west allowlists for agent/tool
-  identities match the documented dependency inventory; probe from agent identity to a
-  non-allowlisted internal service fails at 100%"
+title: "Agent and tool runtimes must reach only authorized dependencies"
+description: >
+  Agent and tool runtimes shall communicate only with documented
+  dependencies required for their intended function—enforced by least-
+  privilege network and/or identity controls, not by open east-west access
+  inside the environment.
+whyItMatters: >
+  A compromised or prompt-injected agent with unrestricted internal
+  reachability can laterally move across services. Documented dependencies
+  plus controls (NetworkPolicy, security groups, service mesh authZ,
+  workload identity, egress gateways, private endpoints, or equivalent) and
+  a probe that unauthorized internal access is blocked make least-privilege
+  connectivity measurable. Distinct from SEC-M4 (model-path must not become
+  a universal proxy to internal admin APIs or data stores), INF-M1 (inbound
+  public exposure of data stores/control planes), INF-M2 (runtime patching
+  SLA), and INF-M4 (shared accelerator isolation).
 severity: "high"
 weight: 3
 gate: "mandatory"
-passCondition: "Egress/east-west allowlists for agent/tool identities match the documented
-  dependency inventory; probe from agent identity to a non-allowlisted internal service fails at
-  100%"
+passCondition: >
+  Inventory of agent/tool runtimes and their documented required
+  dependencies exists; those runtimes can communicate only with those
+  dependencies; attempts to access unauthorized internal services are
+  blocked by network and/or identity controls (measuredAt ≤90 days). If no
+  agent or tool runtimes exist, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Network policy / security-group export for agent and tool runtimes + dependency allowlist"
+  - "Inventory of agent/tool runtimes and their documented required dependencies"
+  - "Least-privilege connectivity controls for those runtimes (network policy, security groups, service mesh, workload identity, egress gateway, private endpoints, or equivalent)"
+  - "Probe or reviewed test showing unauthorized internal-service access is blocked (measuredAt ≤90 days)"
 detection:
   capability: "hybrid"
   detectors:
-    - id: "repo-network-policy"
-      params: {}
+    - id: "repo-agent-tool-connectivity"
+      params:
+        hint: >
+          Discover agent/tool runtime inventory (required for PASS) plus
+          dependency inventory and network/identity connectivity controls;
+          ingest coverage under imports/agent-tool-connectivity/; require
+          runtime inventory (or present=true), documented dependencies,
+          least-privilege controls, unauthorized-access probe denied,
+          measuredAt ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "Network policy / security-group export for agent and tool runtimes + dependency allowlist"
-manualVerification: "For this Check (Network segmentation must limit agent/tool reachability to
-  required dependencies): inspect current evidence for [Network policy / security-group export for
-  agent and tool runtimes + dependency allowlist] and confirm the pass condition holds —
-  Egress/east-west allowlists for agent/tool identities match the documented dependency inventory;
-  probe from agent identity to a non-allowlisted internal service fails at 100%"
-falsePositiveGuidance: "when automation and attestation disagree, prefer the stricter outcome until
-  reconciled. Waive only with owner, expiry, and which signal covers the gap."
+        hint: >
+          If automation cannot prove coverage, attest inventory plus that
+          agent/tool runtimes reach only documented dependencies and
+          unauthorized internal access is blocked by network and/or identity
+          controls (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm agent or tool runtimes exist. If none, score NOT_APPLICABLE.
+  2) Inventory those runtimes and document required dependencies
+  (required—do not PASS from NetworkPolicy/SG files or probe docs alone).
+  3) Confirm least-privilege connectivity controls bind each runtime
+  (network and/or identity—not docs alone). 4) Review a probe or reviewed
+  test: attempts to reach unauthorized internal services are blocked.
+  5) PASS only if inventory + controls + blocked unauthorized access hold
+  with measuredAt ≤90 days. SEC-M4 model-path proxy probes alone do not
+  prove dependency-inventory least-privilege for all agent/tool runtimes.
+  INF-M1 public-exposure scans alone do not prove east-west/identity
+  segmentation. Open cluster egress with “deny in docs only” does not
+  satisfy.
+falsePositiveGuidance: >
+  Do not pass NetworkPolicy/security-group files that omit agent/tool
+  identities. Do not pass dependency docs without enforced controls. Do not
+  pass controls or probes without an inventory of agent/tool runtimes (or
+  present=true). Do not pass probes that never attempt unauthorized internal
+  destinations. Do not score SEC-M4, INF-M1, INF-M2, or INF-M4 as
+  substitutes. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Network segmentation must limit agent/tool reachability to
-    required dependencies"
-  - "Retain evidence artifacts required by this Check, starting with: Network policy /
-    security-group export for agent and tool runtimes + dependency allowlist"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Document required dependencies for each agent/tool runtime"
+  - "Enforce least-privilege connectivity via network and/or identity controls (NetworkPolicy, SGs, mesh, WI, egress gateway, private endpoints)"
+  - "Probe unauthorized internal access and retain deny evidence under imports/agent-tool-connectivity/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "CIS Benchmarks"
     url: "https://www.cisecurity.org/cis-benchmarks"
-  - title: "CNCF security technical advisory guidance"
-    url: "https://www.cncf.io/"
+  - title: "Kubernetes Network Policies"
+    url: "https://kubernetes.io/docs/concepts/services-networking/network-policies/"
   - title: "AWS Well-Architected — Security"
     url: "https://aws.amazon.com/architecture/well-architected/"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "INF-M1"
   - "INF-M2"
   - "INF-M4"
   - "INF-R1"
   - "INF-R3"
+  - "SEC-M4"
+  - "AUTHN-R2"
+  - "AUTHZ-M1"
 tags:
   - "infrastructure"
   - "mandatory"
   - "hybrid"
+  - "least-privilege"
+  - "connectivity"
+  - "agent"
+  - "tool"
 applicability:
-  technologies:
-    - "aws"
-    - "gcp"
-    - "azure"
-    - "kubernetes"
-    - "terraform"
-    - "docker"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

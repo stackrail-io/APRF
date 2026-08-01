@@ -2690,37 +2690,37 @@
       "mandatoryChecks": [
         {
           "id": "INF-M1",
-          "requirement": "AI data stores and control planes shall not be publicly exposed without authenticated edge controls",
-          "artifact": "CSPM/network scan of AI data stores and control planes + edge auth config",
-          "passCondition": "0 AI data stores or control-plane endpoints publicly reachable without authentication in the latest scan; findings severity \u2265 high closed or waived with expiry",
-          "method": "automated",
+          "requirement": "AI data stores and control planes shall not be publicly reachable without authentication\u2014proven by a current CSPM or network scan plus authenticated edge controls or private-only exposure, not by private-subnet intent alone.",
+          "artifact": "Inventory of in-scope AI data stores and control-plane endpoints; CSPM/network scan covering those surfaces (measuredAt \u226490 days); Authenticated edge-control config, or private-only exposure proven by the scan; Open high/critical public-exposure findings closed or waived with owner and expiry",
+          "passCondition": "Inventory of in-scope AI data stores and control-plane endpoints exists; 0 of those endpoints are publicly reachable without authentication in the latest CSPM/network scan; findings severity \u2265 high are closed or waived with owner and expiry; authenticated edge controls are configured or private-only exposure is proven by the scan (measuredAt \u226490 days). If no AI data stores or control planes exist, score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "INF-M2",
-          "requirement": "Base images and runtimes shall follow documented patching SLAs",
-          "artifact": "Patching SLA policy + image age/CVE backlog report for AI runtimes",
-          "passCondition": "100% of production AI runtime images are within patching SLA (e.g. critical fixes \u2264 14 days); report shows 0 SLA breaches or open waivers with expiry",
+          "requirement": "Production AI runtime environments shall comply with the organization's documented patching SLA\u2014or hold approved time-boxed waivers\u2014proven by inventory plus vulnerability/age evidence, not by image-tag pinning alone.",
+          "artifact": "Documented patching SLA for production AI runtime environments; Inventory of production AI runtime environments (containers, VMs, serverless, managed AI platforms, or equivalent); Vulnerability scan and/or image/runtime age report covering that inventory (measuredAt \u226490 days); CVE/patch backlog disposition + waiver register for any SLA exceptions (owner and expiry)",
+          "passCondition": "Inventory of production AI runtime environments exists; a documented patching SLA covers those environments; 100% comply with that SLA or approved time-boxed waivers exist with owner and expiry; report shows 0 SLA breaches without such waivers and vulnerability/age evidence covers the inventory (measuredAt \u226490 days). If no production AI runtime environments exist, score NOT_APPLICABLE.",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "INF-M3",
-          "requirement": "Network segmentation shall limit agent/tool reachability to required dependencies",
-          "artifact": "Network policy / security-group export for agent and tool runtimes + dependency allowlist",
-          "passCondition": "Egress/east-west allowlists for agent/tool identities match the documented dependency inventory; probe from agent identity to a non-allowlisted internal service fails at 100%",
+          "requirement": "Agent and tool runtimes shall communicate only with documented dependencies required for their intended function\u2014enforced by least-privilege network and/or identity controls, not by open east-west access inside the environment.",
+          "artifact": "Inventory of agent/tool runtimes and their documented required dependencies; Least-privilege connectivity controls for those runtimes (network policy, security groups, service mesh, workload identity, egress gateway, private endpoints, or equivalent); Probe or reviewed test showing unauthorized internal-service access is blocked (measuredAt \u226490 days)",
+          "passCondition": "Inventory of agent/tool runtimes and their documented required dependencies exists; those runtimes can communicate only with those dependencies; attempts to access unauthorized internal services are blocked by network and/or identity controls (measuredAt \u226490 days). If no agent or tool runtimes exist, score NOT_APPLICABLE.",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "INF-M4",
-          "requirement": "GPU/accelerator isolation and noisy-neighbor controls shall protect multi-tenant inference",
-          "artifact": "Isolation design + capacity/isolation test report for shared accelerators",
-          "passCondition": "PASS if isolation controls are documented and the latest isolation/capacity test (\u226490 days) meets stated limits",
-          "method": "manual",
+          "requirement": "Shared AI accelerator infrastructure shall enforce tenant isolation and noisy-neighbor controls\u2014proven by documented isolation design plus a fresh isolation/capacity test meeting stated limits\u2014not by GPU presence alone.",
+          "artifact": "Scope note: shared AI accelerator infrastructure present (or explicit N/A for managed-API/CPU-only/single-tenant/dedicated); Isolation design (GPU scheduling, MIG/vGPU, resource quotas, tenant QoS, or equivalent); Isolation and/or capacity test report meeting stated limits (measuredAt \u226490 days)",
+          "passCondition": "Inventory or explicit scope confirms shared AI accelerator infrastructure; isolation and noisy-neighbor controls are documented; and the latest isolation/capacity test (measuredAt \u226490 days) meets stated limits. If the organization does not operate shared AI accelerator infrastructure (e.g. managed-API-only, CPU-only, single-tenant, or dedicated GPU per workload), score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -2728,9 +2728,9 @@
       "recommendedChecks": [
         {
           "id": "INF-R1",
-          "requirement": "Signed model and container artifacts with verify-on-deploy",
+          "requirement": "Deprecated: superseded by SCI-R1 (SLSA-aligned signed model/container verify-on-deploy). Retained for N\u22121 readers; new assessments should use the supply-chain successor Check.",
           "artifact": "Cluster/admission controller config requiring signed images + last failed-unsigned admission event or drill",
-          "passCondition": "Unsigned model/container images cannot schedule in production namespaces; policy verified by a failed admission test within 90 days",
+          "passCondition": "Unsigned model/container images cannot schedule in production namespaces; policy verified by a failed admission test within 90 days. Prefer scoring SCI-R1 instead.",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2,
@@ -2740,9 +2740,9 @@
         },
         {
           "id": "INF-R3",
-          "requirement": "Infrastructure-as-code with policy checks (CIS-aligned)",
-          "artifact": "IaC modules for AI infra + CIS-aligned policy scan config + latest scan report for production stacks",
-          "passCondition": "Production AI infra is declared in IaC; CIS (or equivalent) policy checks run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions \u226490 days",
+          "requirement": "Production AI infrastructure shall be declared in infrastructure-as-code with CIS-aligned (or equivalent) policy checks on every apply/PR\u2014proven by IaC modules, policy-scan config, and a fresh production-stack report\u2014not by console-built stacks alone.",
+          "artifact": "IaC modules covering production AI infrastructure; CIS-aligned (or equivalent) policy-scan config wired to apply/PR; Latest policy-scan report for production stacks (measuredAt \u226490 days); Critical findings closed or waived with owner and expiry",
+          "passCondition": "Production AI infrastructure is declared in IaC; CIS-aligned (or equivalent) policy checks run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions with owner and expiry (measuredAt \u226490 days). If no production AI infrastructure is managed by the organization, score NOT_APPLICABLE.",
           "method": "manual",
           "requiredFromLevel": 4,
           "minCriticality": 2
