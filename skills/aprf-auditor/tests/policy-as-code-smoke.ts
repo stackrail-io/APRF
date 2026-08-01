@@ -118,6 +118,65 @@ async function main() {
       );
     }
 
+    // Bare OPA mention + N/A + coverage (incl. weak policyAsCodePresent alias)
+    // must not unlock AUTHZ-R1 PASS.
+    const weak = join(root, "weak");
+    mkdirSync(join(weak, "docs"), { recursive: true });
+    writeFileSync(
+      join(weak, "docs", "infra.md"),
+      "We run OPA and conftest in some pipelines.\n",
+      "utf8",
+    );
+    const outWeak = join(root, "out-weak-na");
+    mkdirSync(join(outWeak, "imports", "policy-as-code"), { recursive: true });
+    writeFileSync(
+      join(outWeak, "imports", "policy-as-code", "na.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        toolOrModelAccessControlPresent: false,
+      }),
+      "utf8",
+    );
+    writeFileSync(
+      join(outWeak, "imports", "policy-as-code", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        policyAsCodePresent: true,
+        ciOrAdmissionEnforcementPresent: true,
+        lastFailingToPassingPolicyChangeShowsDenyWithin90Days: true,
+      }),
+      "utf8",
+    );
+    dirs.push(outWeak);
+    const rWeak = await run(weak, outWeak);
+    if (rWeak.summary.statusHint !== "not_applicable") {
+      throw new Error(
+        `weak OPA/N/A must not override to PASS: ${JSON.stringify(rWeak.summary)}`,
+      );
+    }
+
+    // policyAsCodePresent alone (no toolAndModelAccessRulesAsCode) must not PASS.
+    const outAlias = join(root, "out-alias");
+    mkdirSync(join(outAlias, "imports", "policy-as-code"), { recursive: true });
+    writeFileSync(
+      join(outAlias, "imports", "policy-as-code", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        toolOrModelAccessControlPresent: true,
+        policyAsCodePresent: true,
+        ciOrAdmissionEnforcementPresent: true,
+        lastFailingToPassingPolicyChangeShowsDenyWithin90Days: true,
+      }),
+      "utf8",
+    );
+    dirs.push(outAlias);
+    const rAlias = await run(empty, outAlias);
+    if (rAlias.summary.statusHint === "pass") {
+      throw new Error(
+        "policyAsCodePresent alias must not unlock AUTHZ-R1 PASS without toolAndModelAccessRulesAsCode",
+      );
+    }
+
     console.log("aprf-auditor policy-as-code smoke OK");
   } finally {
     for (const d of dirs) {

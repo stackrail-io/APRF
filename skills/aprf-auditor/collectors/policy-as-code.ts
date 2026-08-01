@@ -144,10 +144,11 @@ function loadImported(
         asBool(data.toolOrModelAccessControlPresent) ??
         asBool(data.tool_or_model_access_control_present) ??
         asBool(data.hasToolOrModelAccessControl);
+      // Do not accept generic policyAsCodePresent as a substitute for
+      // tool-and-model access rules as code (too weak for AUTHZ-R1 PASS).
       const rulesAsCode =
         asBool(data.toolAndModelAccessRulesAsCode) ??
-        asBool(data.tool_and_model_access_rules_as_code) ??
-        asBool(data.policyAsCodePresent);
+        asBool(data.tool_and_model_access_rules_as_code);
       const ciEnforcement =
         asBool(data.ciOrAdmissionEnforcementPresent) ??
         asBool(data.ci_or_admission_enforcement_present) ??
@@ -212,6 +213,9 @@ export function buildPolicyAsCodeReport(opts: {
     opts.policyAsCode.found ||
     opts.toolModelAccess.found ||
     opts.ciOrAdmission.found;
+  // Only tool/model access-control signals prove the R1 surface for N/A
+  // override — bare OPA/conftest mentions must not launder present=false → PASS.
+  const surfaceProvedForNaOverride = opts.toolModelAccess.found;
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
@@ -250,7 +254,7 @@ export function buildPolicyAsCodeReport(opts: {
   );
   const scopeAbsent =
     opts.imported.toolOrModelAccessControlPresent === false &&
-    !gateSignalsPresent;
+    !surfaceProvedForNaOverride;
   const scopePresent = opts.imported.toolOrModelAccessControlPresent === true;
   const surfaceOk = gateSignalsPresent || scopePresent;
 
@@ -274,7 +278,7 @@ export function buildPolicyAsCodeReport(opts: {
   if (
     opts.imported.found &&
     opts.imported.toolOrModelAccessControlPresent === false &&
-    !gateSignalsPresent
+    !surfaceProvedForNaOverride
   ) {
     statusHint = "not_applicable";
     authzR1Satisfied = null;
@@ -283,10 +287,10 @@ export function buildPolicyAsCodeReport(opts: {
     );
   } else if (
     opts.imported.toolOrModelAccessControlPresent === false &&
-    gateSignalsPresent
+    surfaceProvedForNaOverride
   ) {
     notes.push(
-      "Imported toolOrModelAccessControlPresent=false ignored — in-repo policy/CI signals prove the surface exists.",
+      "Imported toolOrModelAccessControlPresent=false ignored — in-repo tool/model access-control signals prove the surface exists.",
     );
     if (explicitFail) {
       statusHint = "fail";

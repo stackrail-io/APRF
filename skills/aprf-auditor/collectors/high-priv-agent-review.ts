@@ -44,7 +44,7 @@ const ACCESS_REVIEW_RE =
   /\b(access[_-]?review|privilege[_-]?review|entitlement[_-]?review|keep[_/]?revoke|scope[_-]?reduction|role[_-]?review)\b/i;
 
 const REVOKE_EVIDENCE_RE =
-  /\b(revoke|scope[_-]?reduc(e|tion)|deprivileg|none[_-]?warranted|reviewer[_-]?sign[_-]?off)\b/i;
+  /\b(revoke[_-]?(access|privilege|role|grant)|scope[_-]?reduc(e|tion)|deprivileg|none[_-]?warranted|reviewer[_-]?sign[_-]?off)\b/i;
 
 export interface HighPrivAgentReviewReport {
   schemaVersion: "0.2.0";
@@ -207,6 +207,9 @@ export function buildHighPrivAgentReviewReport(opts: {
     opts.highPrivInventory.found ||
     opts.accessReview.found ||
     opts.revokeEvidence.found;
+  // Only high-priv inventory proves the R2 surface for N/A override — bare
+  // review/revoke mentions must not launder present=false → PASS.
+  const surfaceProvedForNaOverride = opts.highPrivInventory.found;
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
@@ -245,7 +248,7 @@ export function buildHighPrivAgentReviewReport(opts: {
   );
   const scopeAbsent =
     opts.imported.highPrivilegeAgentIdentitiesPresent === false &&
-    !gateSignalsPresent;
+    !surfaceProvedForNaOverride;
   const scopePresent =
     opts.imported.highPrivilegeAgentIdentitiesPresent === true;
   const surfaceOk = gateSignalsPresent || scopePresent;
@@ -270,7 +273,7 @@ export function buildHighPrivAgentReviewReport(opts: {
   if (
     opts.imported.found &&
     opts.imported.highPrivilegeAgentIdentitiesPresent === false &&
-    !gateSignalsPresent
+    !surfaceProvedForNaOverride
   ) {
     statusHint = "not_applicable";
     authzR2Satisfied = null;
@@ -279,10 +282,10 @@ export function buildHighPrivAgentReviewReport(opts: {
     );
   } else if (
     opts.imported.highPrivilegeAgentIdentitiesPresent === false &&
-    gateSignalsPresent
+    surfaceProvedForNaOverride
   ) {
     notes.push(
-      "Imported highPrivilegeAgentIdentitiesPresent=false ignored — in-repo high-priv/review signals prove the surface exists.",
+      "Imported highPrivilegeAgentIdentitiesPresent=false ignored — in-repo high-privilege agent inventory proves the surface exists.",
     );
     if (explicitFail) {
       statusHint = "fail";

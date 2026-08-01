@@ -260,14 +260,17 @@ function loadImportedSuite(ctx: CollectorContext): {
           result === "leak" ||
           result === "fail" ||
           result === "breach";
+        // Explicit denial evidence required — empty result/status is not enough,
+        // and ok:false must not be treated as a passing denial assertion.
         const expectsDenial =
-          c.expectsDenial !== false &&
           !unauthorizedSuccess &&
-          (result === "pass" ||
-            result === "denied" ||
-            result === "ok" ||
+          c.expectsDenial !== false &&
+          c.ok !== false &&
+          (c.expectsDenial === true ||
             c.ok === true ||
-            result === "");
+            result === "pass" ||
+            result === "denied" ||
+            result === "ok");
         cases.push({
           id: String(c.id || c.name || `import-${i + 1}`),
           source: src,
@@ -330,8 +333,14 @@ export function buildCrossTenantReport(
 ): CrossTenantReport {
   const notes: string[] = [];
   const usedImport = opts.importedCases.length > 0;
-  // Prefer explicit imported suite; else repo-discovered cases
-  const cases = usedImport ? opts.importedCases : opts.repoCases;
+  // Merge import + repo cases so a vacuous/passing import cannot mask in-repo
+  // leak or missing-denial evidence.
+  const cases =
+    opts.importedCases.length > 0 && opts.repoCases.length > 0
+      ? [...opts.importedCases, ...opts.repoCases]
+      : opts.importedCases.length > 0
+        ? opts.importedCases
+        : opts.repoCases;
 
   const unauthorizedSuccesses = cases.filter((c) => c.unauthorizedSuccess)
     .length;

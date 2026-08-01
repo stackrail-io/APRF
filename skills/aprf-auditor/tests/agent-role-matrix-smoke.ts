@@ -155,6 +155,48 @@ async function main() {
       throw new Error("alias-only import must appear in sources");
     }
 
+    // Weak non-inventory signals (service_account / access-review alone) + N/A
+    // + sibling coverage must not launder AUTHZ-M3 PASS.
+    const weak = join(root, "weak");
+    mkdirSync(join(weak, "docs"), { recursive: true });
+    writeFileSync(
+      join(weak, "docs", "iam.md"),
+      "CI runners use a service_account. Quarterly access review notes.\n",
+      "utf8",
+    );
+    const outWeak = join(root, "out-weak-na");
+    mkdirSync(join(outWeak, "imports", "agent-role-matrix"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outWeak, "imports", "agent-role-matrix", "na.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionAgentOrAutomationIdentitiesPresent: false,
+      }),
+      "utf8",
+    );
+    writeFileSync(
+      join(outWeak, "imports", "agent-role-matrix", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        identitiesInRoleMatrixWithNonAdminDefaultPct: 100,
+        accessReviewWithin90Days: true,
+        unexplainedPrivilegeEscalations: 0,
+      }),
+      "utf8",
+    );
+    dirs.push(outWeak);
+    const rWeak = await run(weak, outWeak);
+    if (rWeak.summary.statusHint !== "not_applicable") {
+      throw new Error(
+        `weak signals must not override N/A / PASS: ${JSON.stringify(rWeak.summary)}`,
+      );
+    }
+    if (rWeak.summary.authzM3Satisfied === true) {
+      throw new Error("weak N/A+coverage must not satisfy AUTHZ-M3");
+    }
+
     console.log("aprf-auditor agent-role-matrix smoke OK");
   } finally {
     for (const d of dirs) {

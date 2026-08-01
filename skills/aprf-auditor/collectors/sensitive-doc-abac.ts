@@ -38,7 +38,7 @@ const SKIP_DIR_HINT =
   /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const CLASS_INVENTORY_RE =
-  /\b(sensitive[_-]?(document|doc|class|corpus|label)|document[_-]?class(ification)?|data[_-]?classification|confidential|restricted[_-]?corpus|pii[_-]?class)\b/i;
+  /\b(sensitive[_-]?(document|doc|class|corpus|label)|document[_-]?class(ification)?|data[_-]?classification|restricted[_-]?corpus|pii[_-]?class|confidential[_-]?(doc|document|class|corpus|label))\b/i;
 
 const ABAC_POLICY_RE =
   /\b(abac|attribute[_-]?based|cedar|opa|open[_-]?policy|subject[_-]?attribute|resource[_-]?attribute|policy[_-]?as[_-]?code)\b/i;
@@ -207,6 +207,9 @@ export function buildSensitiveDocAbacReport(opts: {
     opts.classInventory.found ||
     opts.abacPolicy.found ||
     opts.denyTests.found;
+  // Only class inventory proves the M4 surface for N/A override — bare OPA /
+  // deny-test mentions must not launder present=false → PASS.
+  const surfaceProvedForNaOverride = opts.classInventory.found;
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
@@ -245,7 +248,7 @@ export function buildSensitiveDocAbacReport(opts: {
   );
   const scopeAbsent =
     opts.imported.sensitiveDocumentClassesPresent === false &&
-    !gateSignalsPresent;
+    !surfaceProvedForNaOverride;
   const scopePresent = opts.imported.sensitiveDocumentClassesPresent === true;
   const surfaceOk = gateSignalsPresent || scopePresent;
 
@@ -267,7 +270,7 @@ export function buildSensitiveDocAbacReport(opts: {
   if (
     opts.imported.found &&
     opts.imported.sensitiveDocumentClassesPresent === false &&
-    !gateSignalsPresent
+    !surfaceProvedForNaOverride
   ) {
     statusHint = "not_applicable";
     authzM4Satisfied = null;
@@ -276,10 +279,10 @@ export function buildSensitiveDocAbacReport(opts: {
     );
   } else if (
     opts.imported.sensitiveDocumentClassesPresent === false &&
-    gateSignalsPresent
+    surfaceProvedForNaOverride
   ) {
     notes.push(
-      "Imported sensitiveDocumentClassesPresent=false ignored — in-repo class/ABAC/deny-test signals prove the surface exists.",
+      "Imported sensitiveDocumentClassesPresent=false ignored — in-repo sensitive-document class inventory proves the surface exists.",
     );
     if (explicitFail) {
       statusHint = "fail";

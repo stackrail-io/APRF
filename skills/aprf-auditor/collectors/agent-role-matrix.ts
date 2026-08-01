@@ -40,7 +40,7 @@ const SKIP_DIR_HINT =
   /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const AGENT_IDENTITY_RE =
-  /\b(agent[_-]?(id|identity|role|service[_-]?account)|automation[_-]?(identity|role|principal)|service[_-]?account|workload[_-]?identity|bot[_-]?user)\b/i;
+  /\b(agent[_-]?(id|identity|role|service[_-]?account)|automation[_-]?(identity|role|principal)|agent[_-]?service[_-]?account|workload[_-]?identity|bot[_-]?user)\b/i;
 
 const ROLE_MATRIX_RE =
   /\b(role[_-]?matrix|iam[_-]?(role|policy)|permission[_-]?matrix|agent[_-]?roles|least[_-]?privilege|non[_-]?admin[_-]?default|rbac[_-]?(matrix|export))\b/i;
@@ -215,6 +215,9 @@ export function buildAgentRoleMatrixReport(opts: {
     opts.agentIdentities.found ||
     opts.roleMatrix.found ||
     opts.accessReview.found;
+  // Only primary inventory proves the M3 surface for N/A override — bare
+  // access-review / role-matrix mentions must not launder present=false → PASS.
+  const surfaceProvedForNaOverride = opts.agentIdentities.found;
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
@@ -253,7 +256,7 @@ export function buildAgentRoleMatrixReport(opts: {
   );
   const scopeAbsent =
     opts.imported.productionAgentOrAutomationIdentitiesPresent === false &&
-    !gateSignalsPresent;
+    !surfaceProvedForNaOverride;
   const scopePresent =
     opts.imported.productionAgentOrAutomationIdentitiesPresent === true;
   const surfaceOk = gateSignalsPresent || scopePresent;
@@ -278,7 +281,7 @@ export function buildAgentRoleMatrixReport(opts: {
   if (
     opts.imported.found &&
     opts.imported.productionAgentOrAutomationIdentitiesPresent === false &&
-    !gateSignalsPresent
+    !surfaceProvedForNaOverride
   ) {
     statusHint = "not_applicable";
     authzM3Satisfied = null;
@@ -287,10 +290,10 @@ export function buildAgentRoleMatrixReport(opts: {
     );
   } else if (
     opts.imported.productionAgentOrAutomationIdentitiesPresent === false &&
-    gateSignalsPresent
+    surfaceProvedForNaOverride
   ) {
     notes.push(
-      "Imported productionAgentOrAutomationIdentitiesPresent=false ignored — in-repo agent/role/review signals prove the surface exists.",
+      "Imported productionAgentOrAutomationIdentitiesPresent=false ignored — in-repo agent/automation identity inventory proves the surface exists.",
     );
     if (explicitFail) {
       statusHint = "fail";

@@ -259,6 +259,134 @@ def get_chat(chat_id, user_id):
     throw new Error("expectsDenial=false suite expected satisfied≠true");
   }
 
+  // Bare imported cases (missing result/status) must not default to denial PASS.
+  const outBare = mkdtempSync(join(tmpdir(), "aprf-xtenant-bare-"));
+  mkdirSync(join(outBare, "imports", "cross-tenant-tests"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(outBare, "imports", "cross-tenant-tests", "suite.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      cases: Array.from({ length: 12 }, (_, i) => ({ id: `case-${i + 1}` })),
+    }),
+    "utf8",
+  );
+  await crossTenantTestsCollector.collect({
+    ...baseCtx,
+    outputDir: outBare,
+  });
+  const reportBare = JSON.parse(
+    readFileSync(
+      join(
+        outBare,
+        "imports",
+        "cross-tenant-tests",
+        "cross-tenant-report.json",
+      ),
+      "utf8",
+    ),
+  ) as CrossTenantReport;
+  if (reportBare.summary.statusHint === "pass") {
+    throw new Error("bare imported cases (no result/status) must not PASS");
+  }
+  if (reportBare.summary.authzM2Satisfied === true) {
+    throw new Error("bare imported cases expected satisfied≠true");
+  }
+
+  // Explicit ok:false must not be treated as denial PASS.
+  const outOkFalse = mkdtempSync(join(tmpdir(), "aprf-xtenant-okf-"));
+  mkdirSync(join(outOkFalse, "imports", "cross-tenant-tests"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(outOkFalse, "imports", "cross-tenant-tests", "suite.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      cases: Array.from({ length: 12 }, (_, i) => ({
+        id: `case-${i + 1}`,
+        ok: false,
+      })),
+    }),
+    "utf8",
+  );
+  await crossTenantTestsCollector.collect({
+    ...baseCtx,
+    outputDir: outOkFalse,
+  });
+  const reportOkFalse = JSON.parse(
+    readFileSync(
+      join(
+        outOkFalse,
+        "imports",
+        "cross-tenant-tests",
+        "cross-tenant-report.json",
+      ),
+      "utf8",
+    ),
+  ) as CrossTenantReport;
+  if (reportOkFalse.summary.statusHint === "pass") {
+    throw new Error("imported ok:false cases must not PASS AUTHZ-M2");
+  }
+
+  // Vacuous import must not mask in-repo unauthorizedSuccess leaks.
+  const leakTarget = mkdtempSync(join(tmpdir(), "aprf-xtenant-leak-tgt-"));
+  mkdirSync(join(leakTarget, "tests"), { recursive: true });
+  writeFileSync(
+    join(leakTarget, "tests", "test_cross_tenant_memory.py"),
+    `
+def test_cross_tenant_memory_leak():
+    # attacker reads other_user memories — isolation test
+    assert got_other_user_memory  # leaked
+    expect(response).toHaveLength(3)
+`,
+    "utf8",
+  );
+  const outMask = mkdtempSync(join(tmpdir(), "aprf-xtenant-mask-"));
+  mkdirSync(join(outMask, "imports", "cross-tenant-tests"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(outMask, "imports", "cross-tenant-tests", "suite.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      cases: Array.from({ length: 12 }, (_, i) => ({
+        id: `case-${i + 1}`,
+        result: "pass",
+        aiDataPathHint: "memories",
+      })),
+    }),
+    "utf8",
+  );
+  await crossTenantTestsCollector.collect({
+    targetPath: leakTarget,
+    outputDir: outMask,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 200,
+  });
+  const reportMask = JSON.parse(
+    readFileSync(
+      join(
+        outMask,
+        "imports",
+        "cross-tenant-tests",
+        "cross-tenant-report.json",
+      ),
+      "utf8",
+    ),
+  ) as CrossTenantReport;
+  if (reportMask.summary.statusHint === "pass") {
+    throw new Error(
+      "passing import must not mask in-repo cross-tenant leak evidence",
+    );
+  }
+  if (reportMask.summary.unauthorizedSuccesses < 1) {
+    throw new Error(
+      `expected in-repo leak to count unauthorizedSuccesses, got ${reportMask.summary.unauthorizedSuccesses}`,
+    );
+  }
+
   console.log("aprf-auditor cross-tenant-tests smoke OK");
   for (const d of [
     outDir,
@@ -269,6 +397,10 @@ def get_chat(chat_id, user_id):
     emptyTarget,
     targetDir,
     outNoDenial,
+    outBare,
+    outOkFalse,
+    leakTarget,
+    outMask,
   ]) {
     rmSync(d, { recursive: true, force: true });
   }

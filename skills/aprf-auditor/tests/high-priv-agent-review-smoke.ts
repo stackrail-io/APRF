@@ -122,6 +122,43 @@ async function main() {
       );
     }
 
+    // Bare "revoke" / access-review mention must not override N/A + coverage → PASS.
+    const weak = join(root, "weak");
+    mkdirSync(join(weak, "docs"), { recursive: true });
+    writeFileSync(
+      join(weak, "docs", "ops.md"),
+      "Remember to revoke unused tokens after the access review.\n",
+      "utf8",
+    );
+    const outWeak = join(root, "out-weak-na");
+    mkdirSync(join(outWeak, "imports", "high-priv-agent-review"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outWeak, "imports", "high-priv-agent-review", "na.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        highPrivilegeAgentIdentitiesPresent: false,
+      }),
+      "utf8",
+    );
+    writeFileSync(
+      join(outWeak, "imports", "high-priv-agent-review", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        everyHighPrivilegeAgentReviewedWithin90Days: true,
+        revokeOrScopeReductionInLastTwoCyclesOrAttestedNoneWarranted: true,
+      }),
+      "utf8",
+    );
+    dirs.push(outWeak);
+    const rWeak = await run(weak, outWeak);
+    if (rWeak.summary.statusHint !== "not_applicable") {
+      throw new Error(
+        `weak revoke/review must not override N/A / PASS: ${JSON.stringify(rWeak.summary)}`,
+      );
+    }
+
     console.log("aprf-auditor high-priv-agent-review smoke OK");
   } finally {
     for (const d of dirs) {

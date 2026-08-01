@@ -118,6 +118,44 @@ async function main() {
       );
     }
 
+    // Bare "confidential" / OPA mention must not override N/A + coverage → PASS.
+    const weak = join(root, "weak");
+    mkdirSync(join(weak, "docs"), { recursive: true });
+    writeFileSync(
+      join(weak, "docs", "notes.md"),
+      "Keep confidential customer notes. We evaluate OPA elsewhere.\n",
+      "utf8",
+    );
+    const outWeak = join(root, "out-weak-na");
+    mkdirSync(join(outWeak, "imports", "sensitive-doc-abac"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outWeak, "imports", "sensitive-doc-abac", "na.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        sensitiveDocumentClassesPresent: false,
+      }),
+      "utf8",
+    );
+    writeFileSync(
+      join(outWeak, "imports", "sensitive-doc-abac", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        sensitiveDocumentClassesEnumerated: true,
+        inventoryMatchesProductionClasses: true,
+        unauthorizedClassAccessDeniedInTests: true,
+      }),
+      "utf8",
+    );
+    dirs.push(outWeak);
+    const rWeak = await run(weak, outWeak);
+    if (rWeak.summary.statusHint !== "not_applicable") {
+      throw new Error(
+        `weak signals must not override N/A / PASS: ${JSON.stringify(rWeak.summary)}`,
+      );
+    }
+
     console.log("aprf-auditor sensitive-doc-abac smoke OK");
   } finally {
     for (const d of dirs) {
