@@ -446,40 +446,127 @@ checks:
       Distinct from SEC-M1 injection gates, SEC-M4 egress boundaries, and PRI classification.
   AUTHN-M1:
     requiredEvidence:
-      - "Automated auth probe report covering all production AI HTTP/RPC routes"
+      - "Production AI HTTP/RPC route catalog (OpenAPI, framework routers, or equivalent)"
+      - "Unauthenticated auth-probe report covering those declared AI routes (401/403)"
+      - "Confirmation the probe inventory matches the production route catalog (measuredAt ≤90d under imports/http-auth-probe/)"
     plugins: [http-auth-probe]
     searchExtra:
       - "**/openapi.json"
       - "**/swagger.json"
       - "**/*auth*"
+    naWhen: "No customer-facing AI HTTP/RPC APIs"
     evaluation: |
       Prefer runtime: run collectors/http-auth-probe with --base-url against a running app
       (or ingest imports/http-auth-probe/auth-probe-report.json).
       Discover HTTP methods from FastAPI @router.get/post/… (not GET-only guessing).
-      PASS if report.summary.authnM1Satisfied === true (declared AI methods → 401/403).
-      GET returning 405 on paths without a declared GET is advisory only — note that GET
-      should also return 401/403; it does not alone fail AUTHN-M1 when declared methods pass.
-      FAIL if any scored declared method (or advisory GET) returns 2xx without credentials.
-      PARTIAL if auth middleware exists in code but no probe report.
+      PASS if report.summary.statusHint=pass / authnM1Satisfied === true (declared AI methods → 401/403, catalog matched, measuredAt ≤90d).
+      NOT_APPLICABLE if customerFacingAiHttpApisPresent=false.
+      Advisory GET on paths with no declared GET: 405 is note-only (does not fail AUTHN-M1 when
+      declared methods pass); advisory GET 2xx without credentials does fail.
+      FAIL if any scored declared method returns 2xx without credentials (or advisory GET 2xx).
+      PARTIAL if auth middleware exists in code but no fresh probe report.
       NOT_DEMONSTRATED if no base URL, unreachable target, and no prior report — ask user to start the app or provide URL.
-      Do not PASS from code review alone.
+      Do not PASS from code review alone. AUTHZ-M1 and AUTHN-M2 do not substitute.
   AUTHN-M2:
     requiredEvidence:
-      - "MCP/S2S connection inventory + auth config export"
+      - "Production MCP/AI S2S connection inventory (tool servers, MCP servers, or equivalent)"
+      - "Auth config per connection (auth_type / identity binding; secrets redacted)"
+      - "Scoring report showing 0 anonymous and 0 shared static-key connections (measuredAt ≤90d under imports/mcp-s2s-inventory/)"
     plugins: [mcp-s2s-inventory]
     searchExtra:
       - "**/mcp*"
       - "**/*tool_server*"
       - "**/mcp.json"
+    naWhen: "No production MCP or AI S2S connections"
     evaluation: |
       Prefer runtime inventory: imports/mcp-s2s-inventory/*.json or live GET
       /api/v1/configs/tool_servers with --base-url + --admin-token, or email/password sign-in.
-      PASS if report.summary.authnM2Satisfied === true (every connection has named machine
-      identity; no auth_type=none; no shared static bearer keys).
-      Empty inventory (no connections) is a vacuous PASS with a note to confirm production.
+      PASS if report.summary.statusHint=pass / authnM2Satisfied === true (every connection has named
+      machine identity; no auth_type=none; no shared static bearer keys; measuredAt ≤90d).
+      NOT_APPLICABLE if productionMcpOrAiS2sConnectionsPresent=false.
+      Empty inventory without N/A attest is PARTIAL (not a vacuous PASS).
       FAIL if any connection is anonymous, session-as-S2S, or static shared key.
       PARTIAL if code allows auth_type=none but no production inventory yet.
       NOT_DEMONSTRATED without inventory/export — ask user; do not PASS from OAuth support in code alone.
+      AUTHN-M1 and AUTHN-R1 do not substitute.
+  AUTHN-M3:
+    requiredEvidence:
+      - "IdP MFA policy export covering AI control-plane admin roles"
+      - "Break-glass account inventory with documented maximum"
+      - "aiControlPlaneAdminRolesMfaEnforcedPct=100 + breakGlassAccountCount≤documentedBreakGlassMaximum + breakGlassMonitoringEnabled + measuredAt≤90d under imports/ai-admin-mfa/"
+    plugins: [ai-admin-mfa]
+    searchExtra:
+      - "**/*mfa*"
+      - "**/*break*glass*"
+      - "**/*idp*"
+      - "**/*admin*role*"
+    naWhen: "No AI control-plane admin access"
+    evaluation: |
+      PASS if ai-admin-mfa statusHint=pass (MFA=100% on AI control-plane admin roles + break-glass ≤ max with monitoring + measuredAt ≤90d).
+      NOT_APPLICABLE if aiControlPlaneAdminAccessPresent=false.
+      PARTIAL if MFA/break-glass signals without complete import.
+      FAIL if MFA <100%, break-glass over max, or monitoring disabled.
+      Distinct from AUTHN-M1 HTTP probes and AUTHN-M2 MCP/S2S identity.
+  AUTHN-M4:
+    requiredEvidence:
+      - "Identity-propagation design for agent/tool/workflow chains (subject carried or re-asserted)"
+      - "Sample traces or harness results showing end-user or documented service subject on privileged calls"
+      - "identityPropagationDesignDocumented + privilegedToolCallsWithEndUserOrDocumentedServiceSubjectPct=100 + anonymousPrivilegedHops=0 + measuredAt≤90d under imports/identity-propagation/"
+    plugins: [identity-propagation]
+    searchExtra:
+      - "**/*identity*propagat*"
+      - "**/*on*behalf*"
+      - "**/*token*exchange*"
+      - "**/*tool*call*"
+      - "**/*agent*chain*"
+    naWhen: "No tools, agents, workflows, or delegated actions"
+    evaluation: |
+      PASS if identity-propagation statusHint=pass (design + 100% subject-bound privileged sample + 0 anonymous hops + measuredAt ≤90d).
+      NOT_APPLICABLE if toolsAgentsWorkflowsOrDelegatedActionsPresent=false.
+      PARTIAL if design/tool-chain signals without complete sample import.
+      FAIL if subject coverage <100% or anonymous privileged hops >0.
+      This is identity propagation / authorization-context continuity—not edge login.
+      AUTHN-M1, AUTHN-M2, and AUTHZ-M1 do not substitute.
+  AUTHN-R1:
+    requiredEvidence:
+      - "Inventory of agent/tool credentials used in production prompts/config (with TTL or exception metadata)"
+      - "IdP/token TTL policy (or equivalent) covering those credentials"
+      - "agentToolCredentialsWithTtlAtMost1hOrOwnedExceptionPct=100 + longLivedStaticApiKeysInPromptsOrConfig=0 + measuredAt≤90d under imports/short-lived-agent-tokens/"
+    plugins: [short-lived-agent-tokens, repo-filesystem]
+    searchExtra:
+      - "**/*token*ttl*"
+      - "**/*short*lived*"
+      - "**/*prompt*"
+      - "**/gitleaks*"
+      - "**/*secret*scan*"
+    naWhen: "No agent/tool credentials in production prompts/config"
+    evaluation: |
+      PASS if short-lived-agent-tokens statusHint=pass (100% TTL≤1h or owned ≤30d exception + 0 static keys in prompts/config + measuredAt ≤90d).
+      NOT_APPLICABLE if agentToolCredentialsInProductionPromptsOrConfigPresent=false.
+      PARTIAL if TTL/scan signals without complete import.
+      FAIL if TTL coverage <100% or long-lived static keys found in prompts/config.
+      Distinct from AUTHN-M2 connection identity, AUTHN-M4 subject propagation, and SEC2-M1 secrets-manager wiring.
+      secrets-hygiene / SEC2-M1 alone do not prove agent/tool TTL coverage.
+  AUTHN-R2:
+    requiredEvidence:
+      - "Inventory of self-hosted model runtimes in production"
+      - "Workload-identity binding config per runtime (SPIFFE, IAM role, or equivalent)"
+      - "selfHostedModelRuntimesWithWorkloadIdentityPct=100 + staticSharedKeysInRuntimeInventory=0 + sampleAuthenticatedCallsPresent + measuredAt≤90d under imports/workload-identity-runtimes/"
+    plugins: [workload-identity-runtimes, iac-cloud, repo-filesystem]
+    searchExtra:
+      - "**/*vllm*"
+      - "**/*triton*"
+      - "**/*spiffe*"
+      - "**/*workload*identity*"
+      - "**/*irsa*"
+      - "**/*inference*"
+    naWhen: "No self-hosted model runtimes"
+    evaluation: |
+      PASS if workload-identity-runtimes statusHint=pass (100% WI coverage + 0 static shared keys + sample calls + measuredAt ≤90d).
+      NOT_APPLICABLE if selfHostedModelRuntimesPresent=false.
+      PARTIAL if runtime/WI signals without complete import.
+      FAIL if WI coverage <100% or static shared keys >0.
+      Distinct from AUTHN-M2 MCP/S2S identity, AUTHN-R1 prompt-token TTL, and REL-R6 warm standby.
   SEC2-M1:
     requiredEvidence:
       - "Secrets manager / sealed-secrets / cloud secret refs in runtime config"
@@ -493,6 +580,7 @@ checks:
       PASS if secret scan CI present AND runtime resolves secrets from manager/refs.
       PARTIAL if only one of scan or manager is present.
       NOT_DEMONSTRATED if neither found.
+      AUTHN-R1 short-lived agent/tool token inventory alone does not prove secrets-manager wiring.
   PRM-M1:
     requiredEvidence:
       - "Prompt registry with immutable version IDs on production prompts"

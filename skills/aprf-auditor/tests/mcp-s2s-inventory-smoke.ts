@@ -59,6 +59,7 @@ if auth_type == 'bearer':
   writeFileSync(
     join(imp, "tool_servers.json"),
     JSON.stringify({
+      measuredAt: assessedAt.toISOString(),
       TOOL_SERVER_CONNECTIONS: [
         {
           url: "http://mcp.local/anon",
@@ -96,18 +97,21 @@ if auth_type == 'bearer':
   if (report.summary.pass !== 1 || report.summary.fail !== 2) {
     throw new Error(`expected pass=1 fail=2, got ${JSON.stringify(report.summary)}`);
   }
-  if (report.summary.authnM2Satisfied !== false) {
-    throw new Error("expected authnM2Satisfied=false");
+  if (
+    report.summary.authnM2Satisfied !== false ||
+    report.summary.statusHint !== "fail"
+  ) {
+    throw new Error(`expected fail, got ${JSON.stringify(report.summary)}`);
   }
-  if (!ran.nodes.some((n) => n.signals?.includes("authn-m2-fail-or-incomplete"))) {
-    throw new Error("missing fail signal");
+  if (ran.nodes.some((n) => n.signals?.includes("authn-m2-fail-or-incomplete"))) {
+    throw new Error("fail-or-incomplete signal should not be emitted");
   }
   const dumped = readFileSync(reportPath, "utf8");
   if (dumped.includes("sk-should-be-redacted")) {
     throw new Error("secret key leaked into report");
   }
 
-  // Vacuous empty inventory
+  // Empty inventory without N/A → partial (not vacuous PASS)
   const emptyReport = buildReport(baseCtx, {
     connections: [],
     inventorySource: ["imports/mcp-s2s-inventory/empty.json"],
@@ -117,9 +121,60 @@ if auth_type == 'bearer':
       refs: [],
     },
     baseUrl: null,
+    measuredAt: assessedAt.toISOString(),
   });
-  if (emptyReport.summary.authnM2Satisfied !== true) {
-    throw new Error("empty inventory should vacuously satisfy");
+  if (
+    emptyReport.summary.statusHint !== "partial" ||
+    emptyReport.summary.authnM2Satisfied !== false
+  ) {
+    throw new Error(
+      `empty inventory without N/A should be partial, got ${JSON.stringify(emptyReport.summary)}`,
+    );
+  }
+
+  // Explicit N/A
+  const naReport = buildReport(baseCtx, {
+    connections: [],
+    inventorySource: ["imports/mcp-s2s-inventory/scope.json"],
+    codePolicy: {
+      allowsAnonymousAuthType: false,
+      authTypesMentioned: [],
+      refs: [],
+    },
+    baseUrl: null,
+    measuredAt: assessedAt.toISOString(),
+    productionMcpOrAiS2sConnectionsPresent: false,
+  });
+  if (naReport.summary.statusHint !== "not_applicable") {
+    throw new Error(`n/a expected: ${JSON.stringify(naReport.summary)}`);
+  }
+
+  // All-good inventory → PASS
+  const passReport = buildReport(baseCtx, {
+    connections: [
+      {
+        id: "ok",
+        name: "ok",
+        url: "http://mcp.local/oauth",
+        type: "mcp",
+        auth_type: "oauth_2.1",
+        source: "test",
+      },
+    ],
+    inventorySource: ["imports/mcp-s2s-inventory/good.json"],
+    codePolicy: {
+      allowsAnonymousAuthType: false,
+      authTypesMentioned: [],
+      refs: [],
+    },
+    baseUrl: null,
+    measuredAt: assessedAt.toISOString(),
+  });
+  if (
+    passReport.summary.statusHint !== "pass" ||
+    passReport.summary.authnM2Satisfied !== true
+  ) {
+    throw new Error(`pass expected: ${JSON.stringify(passReport.summary)}`);
   }
 
   // Password sign-in → live tool_servers (mock Open WebUI)
@@ -193,7 +248,10 @@ if auth_type == 'bearer':
       "utf8",
     ),
   ) as McpS2sReport;
-  if (liveReport.summary.total < 1 || liveReport.summary.pass < 1) {
+  if (
+    liveReport.summary.statusHint !== "pass" ||
+    liveReport.summary.authnM2Satisfied !== true
+  ) {
     throw new Error(`live password login report unexpected: ${JSON.stringify(liveReport.summary)}`);
   }
   if (JSON.stringify(liveReport).includes("secret")) {
@@ -201,7 +259,7 @@ if auth_type == 'bearer':
   }
   rmSync(liveOut, { recursive: true, force: true });
 
-  // Empty live inventory still records sources → vacuous pass
+  // Empty live inventory → partial (not vacuous PASS)
   const emptyMock = createServer((req, res) => {
     const url = req.url ?? "";
     if (req.method === "POST" && url.includes("/auths/signin")) {
@@ -247,12 +305,45 @@ if auth_type == 'bearer':
   if (emptyLiveReport.inventorySource.length === 0) {
     throw new Error("empty live fetch should still record inventorySource");
   }
-  if (emptyLiveReport.summary.authnM2Satisfied !== true) {
+  if (emptyLiveReport.summary.statusHint !== "partial") {
     throw new Error(
-      `empty live inventory should vacuously satisfy, got ${emptyLiveReport.summary.authnM2Satisfied}`,
+      `empty live without N/A should be partial, got ${JSON.stringify(emptyLiveReport.summary)}`,
     );
   }
   rmSync(emptyOut, { recursive: true, force: true });
+
+  // Collector N/A via import
+  const naOut = mkdtempSync(join(tmpdir(), "aprf-mcp-s2s-na-"));
+  mkdirSync(join(naOut, "imports", "mcp-s2s-inventory"), { recursive: true });
+  writeFileSync(
+    join(naOut, "imports", "mcp-s2s-inventory", "scope.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      productionMcpOrAiS2sConnectionsPresent: false,
+    }),
+  );
+  const naRan = await mcpS2sInventoryCollector.collect({
+    targetPath: targetDir,
+    outputDir: naOut,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 100,
+  });
+  if (naRan.status !== "ran") {
+    throw new Error(`n/a collect expected ran: ${naRan.status}`);
+  }
+  const naCollectorReport = JSON.parse(
+    readFileSync(
+      join(naOut, "imports", "mcp-s2s-inventory", "mcp-s2s-inventory-report.json"),
+      "utf8",
+    ),
+  ) as McpS2sReport;
+  if (naCollectorReport.summary.statusHint !== "not_applicable") {
+    throw new Error(
+      `collector n/a expected: ${JSON.stringify(naCollectorReport.summary)}`,
+    );
+  }
+  rmSync(naOut, { recursive: true, force: true });
 
   console.log("aprf-auditor mcp-s2s-inventory smoke OK");
   rmSync(outDir, { recursive: true, force: true });

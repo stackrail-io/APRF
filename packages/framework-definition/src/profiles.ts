@@ -20,6 +20,7 @@ export const PROFILE_CORE: AprfProfile = {
   mandatoryCheckIds: [
     "AUTHN-M1",
     "AUTHN-M2",
+    "AUTHN-M3",
     "AUTHZ-M1",
     "AUTHZ-M2",
     "SEC2-M1",

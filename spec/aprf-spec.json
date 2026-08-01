@@ -537,6 +537,7 @@
       "mandatoryCheckIds": [
         "AUTHN-M1",
         "AUTHN-M2",
+        "AUTHN-M3",
         "AUTHZ-M1",
         "AUTHZ-M2",
         "SEC2-M1",
@@ -592,6 +593,7 @@
       "mandatoryCheckIds": [
         "AUTHN-M1",
         "AUTHN-M2",
+        "AUTHN-M3",
         "AUTHZ-M1",
         "AUTHZ-M2",
         "SEC2-M1",
@@ -2115,37 +2117,37 @@
       "mandatoryChecks": [
         {
           "id": "AUTHN-M1",
-          "requirement": "Customer-facing AI APIs shall reject unauthenticated callers",
-          "artifact": "Automated auth probe report covering all production AI HTTP/RPC routes",
-          "passCondition": "100% of probed production AI endpoints return 401/403 without valid credentials; probe inventory matches production route catalog",
-          "method": "automated",
+          "requirement": "Customer-facing AI HTTP/RPC APIs shall reject callers that present no valid credentials\u2014so anonymous traffic cannot invoke model, tool, retrieval, or other privileged AI surfaces.",
+          "artifact": "Production AI HTTP/RPC route catalog + unauthenticated auth-probe report (401/403) matching the catalog",
+          "passCondition": "100% of declared production AI HTTP/RPC routes in the probe inventory return 401/403 without credentials; every declared AI route in the production route catalog was probed (measuredAt \u226490 days). NOT_APPLICABLE if no customer-facing AI HTTP/RPC APIs.",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "AUTHN-M2",
-          "requirement": "Service-to-service and MCP connections shall use strong machine identity",
-          "artifact": "MCP/S2S connection inventory + auth config export",
-          "passCondition": "0 production MCP or AI S2S connections accept anonymous access or shared long-lived static keys; each connection has a named machine identity",
+          "requirement": "Production MCP and AI service-to-service connections shall authenticate with a named machine identity\u2014so anonymous access and shared long-lived static keys cannot stand in for workload or federated identity.",
+          "artifact": "Production MCP/AI S2S connection inventory + auth config (secrets redacted) + scored report",
+          "passCondition": "0 production MCP or AI S2S connections accept anonymous access or shared long-lived static keys; each connection has a named machine identity (measuredAt \u226490 days). NOT_APPLICABLE if no production MCP or AI S2S connections.",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "AUTHN-M3",
-          "requirement": "Administrative access to AI control planes shall require strong authentication including MFA",
-          "artifact": "IdP policy export for AI admin roles + break-glass account inventory",
-          "passCondition": "100% of AI control-plane admin roles enforce MFA; break-glass accounts \u2264 documented maximum and have monitoring enabled",
-          "method": "manual",
+          "requirement": "Administrative access to AI control planes shall require strong authentication including MFA\u2014so operators who can change prompts, tools, models, or deployments cannot rely on password-only or shared credentials.",
+          "artifact": "IdP MFA policy export for AI control-plane admin roles + break-glass inventory with monitoring",
+          "passCondition": "100% of AI control-plane admin roles enforce MFA; break-glass accounts \u2264 documented maximum and have monitoring enabled (measuredAt \u226490 days). NOT_APPLICABLE if no AI control-plane admin access.",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "AUTHN-M4",
-          "requirement": "End-user identity shall remain bound through agent and tool chains",
-          "artifact": "Identity-propagation design + sample traces showing end-user subject on tool calls",
-          "passCondition": "PASS if 100% of sampled privileged tool calls in the latest review carry an end-user (or documented service) subject; 0 anonymous privileged hops",
-          "method": "manual",
+          "requirement": "Where AI systems execute tools, agents, workflows, or delegated actions, the end-user (or documented service) subject shall remain bound through every privileged hop\u2014so agentic chains cannot act as anonymous or ambient privilege.",
+          "artifact": "Identity-propagation design + sample traces showing end-user/service subject on privileged tool/agent/workflow calls",
+          "passCondition": "100% of sampled privileged tool/agent/workflow calls in the latest review carry an end-user (or documented service) subject; 0 anonymous privileged hops (measuredAt \u226490 days). NOT_APPLICABLE if no tools, agents, workflows, or delegated actions.",
+          "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -2153,19 +2155,19 @@
       "recommendedChecks": [
         {
           "id": "AUTHN-R1",
-          "requirement": "Short-lived tokens for agents and tools; no long-lived static keys in prompts",
-          "artifact": "IdP/token TTL policy export + inventory of agent/tool credentials used in production prompts/config",
-          "passCondition": "100% of inventoried agent/tool credentials have TTL \u22641h (or a named exception \u226430 days); secret scan of prompts/config finds 0 long-lived static API keys",
+          "requirement": "Agent and tool credentials used in production should be short-lived (TTL \u22641h, or a named exception \u226430 days), and production prompts/config should embed 0 long-lived static API keys\u2014so leaked prompts and agent configs cannot mint durable privileged access.",
+          "artifact": "Agent/tool credential inventory with TTL/exceptions + secret-scan of prompts/config (0 long-lived static API keys)",
+          "passCondition": "100% of inventoried agent/tool credentials have TTL \u22641h (or a named exception with owner and expiry \u226430 days); secret scan of production prompts/config finds 0 long-lived static API keys (measuredAt \u226490 days). NOT_APPLICABLE if no agent/tool credentials in production prompts/config.",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "AUTHN-R2",
-          "requirement": "Workload identity for self-hosted model runtimes",
-          "artifact": "Workload-identity binding config for self-hosted model runtimes + sample authenticated call traces",
-          "passCondition": "Every self-hosted model runtime in production authenticates via workload identity (SPIFFE/IAM role/equivalent); 0 static shared keys in the runtime inventory",
-          "method": "manual",
+          "requirement": "Every self-hosted model runtime in production should authenticate via workload identity (SPIFFE, cloud IAM role, or equivalent)\u2014so inference nodes and model servers do not rely on shared static keys.",
+          "artifact": "Self-hosted model runtime inventory + workload-identity bindings + sample authenticated call traces (0 static shared keys)",
+          "passCondition": "Every self-hosted model runtime in production authenticates via workload identity (SPIFFE/IAM role/equivalent); 0 static shared keys in the runtime inventory; sample authenticated calls (or harness) present (measuredAt \u226490 days). NOT_APPLICABLE if no self-hosted model runtimes.",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }

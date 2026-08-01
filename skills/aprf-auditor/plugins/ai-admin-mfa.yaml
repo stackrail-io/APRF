@@ -1,0 +1,27 @@
+id: ai-admin-mfa
+title: AI control-plane admin MFA + break-glass (AUTHN-M3)
+version: "0.2.0"
+executor: collectors/ai-admin-mfa.ts
+evidenceClass: runtime
+alsoEmits: []
+detectorIds: [repo-ai-admin-mfa]
+inputs:
+  - "Target repo (IdP/MFA policy, AI admin roles, break-glass inventory/monitoring)"
+  - "Optional coverage: aprf-assessment/imports/ai-admin-mfa/*.{json}"
+collect:
+  - "Detect MFA, AI control-plane admin role, break-glass, and monitoring signals"
+  - "Ingest MFA % + break-glass bound/monitoring; write ai-admin-mfa-report.json"
+emits:
+  nodeClass: runtime
+  refPattern: "aprf-assessment/imports/ai-admin-mfa/*"
+  signals: [ai-admin-mfa, authn-m3, repo-ai-admin-mfa]
+mapsToChecks: [AUTHN-M3]
+whenUnavailable: >
+  Signals alone are PARTIAL. AUTHN-M3 PASS needs
+  aiControlPlaneAdminRolesMfaEnforcedPct=100,
+  breakGlassAccountCount ≤ documentedBreakGlassMaximum,
+  breakGlassMonitoringEnabled=true, measuredAt ≤90 days.
+  Set aiControlPlaneAdminAccessPresent=false for NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline ai-admin-mfa heuristics + optional imported JSON.

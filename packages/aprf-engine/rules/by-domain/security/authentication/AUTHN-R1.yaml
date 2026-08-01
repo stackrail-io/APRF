@@ -1,47 +1,75 @@
 id: "AUTHN-R1"
 category: "authentication"
-title: "Production systems should have short-lived tokens for agents and tools; no long-lived static
-  keys in prompts"
-description: "Short-lived tokens for agents and tools; no long-lived static keys in prompts"
-whyItMatters: "Short-lived tokens for agents and tools; no long-lived static keys in prompts Failing
-  this leaves a production gap against: 100% of inventoried agent/tool credentials have TTL ≤1h (or
-  a named exception ≤30 days); secret scan of prompts/config finds 0 long-lived static API keys"
-severity: "critical"
-weight: 4
+title: "Agent and tool credentials should be short-lived; prompts must not embed long-lived static keys"
+description: >
+  Agent and tool credentials used in production should be short-lived (TTL
+  ≤1h, or a named exception ≤30 days), and production prompts/config should
+  embed 0 long-lived static API keys—so leaked prompts and agent configs
+  cannot mint durable privileged access.
+whyItMatters: >
+  Long-lived static keys in prompts, agent configs, or tool bindings turn
+  every prompt leak into a standing credential. Short TTLs plus a clean
+  secret scan of prompts/config make agent/tool credential hygiene
+  measurable. Distinct from AUTHN-M2 (MCP/S2S connection machine identity),
+  AUTHN-M4 (end-user subject propagation through hops), and SEC2-M1
+  (secrets-manager wiring for runtime secrets generally).
+severity: "high"
+weight: 3
 gate: "recommended"
-passCondition: "100% of inventoried agent/tool credentials have TTL ≤1h (or a named exception ≤30
-  days); secret scan of prompts/config finds 0 long-lived static API keys"
+passCondition: >
+  100% of inventoried agent/tool credentials have TTL ≤1h (or a named
+  exception with owner and expiry ≤30 days); secret scan of production
+  prompts/config finds 0 long-lived static API keys (measuredAt ≤90 days).
+  If no agent/tool credentials appear in production prompts/config, score
+  NOT_APPLICABLE.
 evidenceRequired:
-  - "IdP/token TTL policy export + inventory of agent/tool credentials used in production
-    prompts/config"
+  - "Inventory of agent/tool credentials used in production prompts/config (with TTL or exception metadata)"
+  - "IdP/token TTL policy (or equivalent) covering those credentials"
+  - "Secret-scan report of prompts/config showing 0 long-lived static API keys"
 detection:
   capability: "hybrid"
   detectors:
-    - id: "mcp-no-secrets-in-env"
-      params: {}
-    - id: "secrets-not-embedded"
-      params: {}
+    - id: "repo-short-lived-agent-tokens"
+      params:
+        hint: >
+          Discover TTL/token-policy and prompt/config secret-scan signals;
+          ingest inventory coverage under imports/short-lived-agent-tokens/;
+          require measuredAt ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "IdP/token TTL policy export + inventory of agent/tool credentials used in production
-          prompts/config"
-manualVerification: "For this Check (Short-lived tokens for agents and tools; no long-lived static
-  keys in prompts): inspect current evidence for [IdP/token TTL policy export + inventory of
-  agent/tool credentials used in production prompts/config] and confirm the pass condition holds —
-  100% of inventoried agent/tool credentials have TTL ≤1h (or a named exception ≤30 days); secret
-  scan of prompts/config finds 0 long-lived static API keys"
-falsePositiveGuidance: "when automation and attestation disagree, prefer the stricter outcome until
-  reconciled. Waive only with owner, expiry, and which signal covers the gap."
+        hint: >
+          If automation cannot prove coverage, attest 100% of inventoried
+          agent/tool credentials have TTL ≤1h (or owned exception ≤30 days)
+          and prompts/config secret scan finds 0 long-lived static API keys
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm agent/tool credentials appear in production prompts or config.
+  If none, score NOT_APPLICABLE. 2) Inventory those credentials and their
+  TTL (or named exception with owner and expiry ≤30 days). 3) Confirm TTL
+  ≤1h for 100% (exceptions counted only when owned and ≤30 days). 4) Review
+  a secret scan of production prompts/config: 0 long-lived static API keys.
+  5) PASS only if inventory + TTL/exceptions + clean scan hold with
+  measuredAt ≤90 days. AUTHN-M2 connection identity alone does not prove
+  short TTLs in prompts. SEC2-M1 secrets-manager wiring alone does not prove
+  prompt/config scans find 0 static keys. AUTHN-M4 subject propagation alone
+  does not prove credential TTL.
+falsePositiveGuidance: >
+  Do not pass CI OIDC as agent/tool credential TTL. Do not pass open-ended
+  “exceptions” without owner and expiry ≤30 days (credential TTL exceptions
+  only—≤30 days is stricter than the ≤90-day window for named Check gaps /
+  waivers below). Do not pass scans that exclude prompts/fixtures. Do not
+  score AUTHN-M2, AUTHN-M4, or SEC2-M1 as substitutes. Named Check gaps need
+  owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Short-lived tokens for agents and tools; no
-    long-lived static keys in prompts"
-  - "Retain evidence artifacts required by this Check, starting with: IdP/token TTL policy export +
-    inventory of agent/tool credentials used in production prompts/config"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Issue short-lived (≤1h) tokens for agents and tools; ban long-lived static keys in prompts"
+  - "Time-box remaining static credentials with owner and expiry ≤30 days"
+  - "Retain inventory + TTL + secret-scan evidence under imports/short-lived-agent-tokens/ (measuredAt ≤90 days)"
+  - "Time-box Check gaps with owner and expiry ≤90 days"
 references:
   - title: "OWASP Authentication Cheat Sheet"
     url: "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+  - title: "OWASP Top 10 for Large Language Model Applications — LLM06 Sensitive Information Disclosure"
+    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
   - title: "CIS Benchmarks — Identity controls"
     url: "https://www.cisecurity.org/cis-benchmarks"
 relatedRules:
@@ -50,16 +78,17 @@ relatedRules:
   - "AUTHN-M3"
   - "AUTHN-M4"
   - "AUTHN-R2"
+  - "SEC2-M1"
+  - "SEC2-M2"
 tags:
   - "authentication"
   - "recommended"
   - "hybrid"
+  - "short-lived-tokens"
+  - "agent-credentials"
+  - "prompt-secrets"
 applicability:
-  technologies:
-    - "openapi"
-    - "mcp"
-    - "a2a"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

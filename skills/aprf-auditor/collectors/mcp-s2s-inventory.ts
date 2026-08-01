@@ -29,9 +29,16 @@ import {
   rel,
   walkFiles,
 } from "./lib/fs.ts";
+import {
+  asBool,
+  measuredAtFresh,
+  parseMeasuredAt,
+} from "./lib/import-attest.ts";
 
 const PLUGIN_ID = "mcp-s2s-inventory";
 const RELATED = ["AUTHN-M2"] as const;
+const DETECTOR_ID = "mcp-s2s-inventory";
+const IMPORT_MAX_AGE_DAYS = 90;
 
 /** Auth types that count as strong machine / federated identity. */
 const STRONG_AUTH = new Set([
@@ -75,8 +82,10 @@ export interface ScoredConnection {
 export interface McpS2sReport {
   schemaVersion: "0.2.0";
   pluginId: typeof PLUGIN_ID;
+  detectorId: typeof DETECTOR_ID;
   relatedCheckIds: string[];
   assessedAt: string;
+  measuredAt: string | null;
   baseUrl: string | null;
   inventorySource: string[];
   codePolicy: {
@@ -84,13 +93,22 @@ export interface McpS2sReport {
     authTypesMentioned: string[];
     refs: string[];
   };
+  importedScope: {
+    productionMcpOrAiS2sConnectionsPresent: boolean | null;
+  };
   connections: ScoredConnection[];
   summary: {
     total: number;
     pass: number;
     fail: number;
-    /** true when inventory present and every connection ok (empty inventory = vacuous pass) */
+    /** true when inventory has connections, all ok, and measuredAt fresh */
     authnM2Satisfied: boolean | null;
+    statusHint:
+      | "pass"
+      | "partial"
+      | "fail"
+      | "not_demonstrated"
+      | "not_applicable";
   };
   notes: string[];
 }
@@ -396,6 +414,8 @@ function normalizeInventoryPayload(
 function loadImportInventories(ctx: CollectorContext): {
   connections: S2SConnection[];
   sources: string[];
+  measuredAt: string | null;
+  productionMcpOrAiS2sConnectionsPresent: boolean | null;
 } {
   const files = listImportFiles(ctx.outputDir, PLUGIN_ID).filter(
     (f) =>
@@ -404,19 +424,44 @@ function loadImportInventories(ctx: CollectorContext): {
   );
   const connections: S2SConnection[] = [];
   const sources: string[] = [];
+  let measuredAt: string | null = null;
+  let productionMcpOrAiS2sConnectionsPresent: boolean | null = null;
   for (const file of files) {
     const text = readText(file, 2_000_000);
     if (!text) continue;
     try {
-      const data = JSON.parse(text);
+      const data = JSON.parse(text) as Record<string, unknown>;
       const src = rel(ctx.outputDir, file);
-      connections.push(...normalizeInventoryPayload(data, src));
-      sources.push(src);
+      measuredAt = parseMeasuredAt(data) ?? measuredAt;
+      productionMcpOrAiS2sConnectionsPresent =
+        asBool(data.productionMcpOrAiS2sConnectionsPresent) ??
+        asBool(data.production_mcp_or_ai_s2s_connections_present) ??
+        asBool(data.hasProductionMcpOrAiS2sConnections) ??
+        productionMcpOrAiS2sConnectionsPresent;
+      const normalized = normalizeInventoryPayload(data, src);
+      if (normalized.length > 0) {
+        connections.push(...normalized);
+        sources.push(src);
+      } else if (
+        productionMcpOrAiS2sConnectionsPresent !== null ||
+        parseMeasuredAt(data)
+      ) {
+        // Scope/attest-only import still counts as an inventory source for N/A.
+        sources.push(src);
+      } else {
+        // Empty connection file still proves an inventory export was provided.
+        sources.push(src);
+      }
     } catch {
       /* skip invalid json */
     }
   }
-  return { connections, sources };
+  return {
+    connections,
+    sources,
+    measuredAt,
+    productionMcpOrAiS2sConnectionsPresent,
+  };
 }
 
 async function fetchLiveInventory(
@@ -488,6 +533,8 @@ export function buildReport(
     inventorySource: string[];
     codePolicy: McpS2sReport["codePolicy"];
     baseUrl: string | null;
+    measuredAt?: string | null;
+    productionMcpOrAiS2sConnectionsPresent?: boolean | null;
   },
 ): McpS2sReport {
   const scored = opts.connections.map((c, i) =>
@@ -496,15 +543,33 @@ export function buildReport(
   const pass = scored.filter((c) => c.ok).length;
   const fail = scored.filter((c) => !c.ok).length;
   const notes: string[] = [];
+  const measuredAt =
+    opts.measuredAt ??
+    (opts.inventorySource.length > 0 ? ctx.assessedAt.toISOString() : null);
+  const importFresh = measuredAtFresh(
+    measuredAt,
+    ctx.assessedAt,
+    IMPORT_MAX_AGE_DAYS,
+  );
+  const scopeAbsent = opts.productionMcpOrAiS2sConnectionsPresent === false;
+  const scope = {
+    productionMcpOrAiS2sConnectionsPresent:
+      opts.productionMcpOrAiS2sConnectionsPresent ?? null,
+  };
 
   if (opts.codePolicy.allowsAnonymousAuthType) {
     notes.push(
       "Code allows auth_type=none (or defaults to none) for MCP/tool servers — production configs must not use anonymous connections.",
     );
   }
-  if (scored.length === 0) {
+  if (opts.inventorySource.length > 0) {
     notes.push(
-      "Inventory is empty (no MCP/S2S connections configured). Vacuous pass for AUTHN-M2 only if this matches production; re-export if connections exist elsewhere.",
+      `Inventory sources: ${opts.inventorySource.join(", ")} (connections=${scored.length}, measuredAt=${measuredAt}, scopePresent=${scope.productionMcpOrAiS2sConnectionsPresent})`,
+    );
+  }
+  if (scored.length === 0 && opts.inventorySource.length > 0 && !scopeAbsent) {
+    notes.push(
+      "Inventory is empty (no MCP/S2S connections). AUTHN-M2 remains not demonstrated until connections are listed or productionMcpOrAiS2sConnectionsPresent=false is imported for NOT_APPLICABLE.",
     );
   }
   if (fail > 0) {
@@ -513,27 +578,60 @@ export function buildReport(
     );
   }
 
-  const authnM2Satisfied =
-    // No inventory obtained at all (neither import nor successful live fetch)
-    opts.inventorySource.length === 0 && scored.length === 0
-      ? null
-      : // Empty-but-fetched inventory = vacuous pass; otherwise all connections must pass
-        fail === 0;
+  let authnM2Satisfied: boolean | null = null;
+  let statusHint: McpS2sReport["summary"]["statusHint"];
+
+  if (scopeAbsent && opts.inventorySource.length > 0) {
+    statusHint = "not_applicable";
+    authnM2Satisfied = null;
+    notes.push(
+      "Imported productionMcpOrAiS2sConnectionsPresent=false — AUTHN-M2 NOT_APPLICABLE.",
+    );
+  } else if (opts.inventorySource.length === 0 && scored.length === 0) {
+    statusHint = "not_demonstrated";
+    authnM2Satisfied = null;
+  } else if (fail > 0) {
+    statusHint = "fail";
+    authnM2Satisfied = false;
+  } else if (scored.length > 0 && fail === 0 && importFresh) {
+    statusHint = "pass";
+    authnM2Satisfied = true;
+  } else if (opts.inventorySource.length > 0 || scored.length > 0) {
+    statusHint = "partial";
+    authnM2Satisfied = false;
+    if (scored.length === 0) {
+      notes.push(
+        "Empty inventory without N/A attest cannot unlock PASS — import productionMcpOrAiS2sConnectionsPresent=false if none exist in production.",
+      );
+    }
+    if (scored.length > 0 && !importFresh) {
+      notes.push(
+        "Import missing fresh measuredAt (≤90 days) — required to unlock AUTHN-M2 PASS.",
+      );
+    }
+  } else {
+    statusHint = "not_demonstrated";
+    authnM2Satisfied = null;
+  }
 
   return {
     schemaVersion: "0.2.0",
     pluginId: PLUGIN_ID,
+    detectorId: DETECTOR_ID,
     relatedCheckIds: [...RELATED],
     assessedAt: ctx.assessedAt.toISOString(),
+    measuredAt,
     baseUrl: opts.baseUrl,
     inventorySource: opts.inventorySource,
     codePolicy: opts.codePolicy,
+    importedScope: scope,
     connections: scored,
     summary: {
       total: scored.length,
       pass,
       fail,
       authnM2Satisfied,
+      statusHint,
     },
     notes,
   };
@@ -549,6 +647,9 @@ export const mcpS2sInventoryCollector: Collector = {
     const nodes: EvidenceNode[] = [];
     const inventorySource = [...imported.sources];
     let connections = [...imported.connections];
+    let measuredAt = imported.measuredAt;
+    let productionMcpOrAiS2sConnectionsPresent =
+      imported.productionMcpOrAiS2sConnectionsPresent;
     let liveError: string | undefined;
     let authVia: string | undefined;
 
@@ -596,6 +697,7 @@ export const mcpS2sInventoryCollector: Collector = {
       // Record sources even when the inventory is empty — proves we fetched live config.
       connections = [...connections, ...live.connections];
       inventorySource.push(...live.sources);
+      measuredAt = ctx.assessedAt.toISOString();
       if (live.error) {
         liveError = liveError
           ? `${liveError}; ${live.error}`
@@ -623,6 +725,14 @@ export const mcpS2sInventoryCollector: Collector = {
           inventorySource.push(
             "imports/mcp-s2s-inventory/mcp-s2s-inventory-report.json",
           );
+          measuredAt =
+            prev.measuredAt ??
+            parseMeasuredAt(prev as unknown as Record<string, unknown>) ??
+            prev.assessedAt ??
+            measuredAt;
+          productionMcpOrAiS2sConnectionsPresent =
+            prev.importedScope?.productionMcpOrAiS2sConnectionsPresent ??
+            productionMcpOrAiS2sConnectionsPresent;
         }
       } catch {
         /* ignore */
@@ -637,7 +747,7 @@ export const mcpS2sInventoryCollector: Collector = {
       return {
         pluginId: PLUGIN_ID,
         status: "needs-user",
-        detail: `No MCP/S2S inventory yet. Code ${codePolicy.allowsAnonymousAuthType ? "ALLOWS auth_type=none" : "scanned"}. Provide imports/mcp-s2s-inventory/*.json, or --base-url with --admin-token / APRF_ADMIN_TOKEN, or --admin-email + --admin-password (APRF_ADMIN_EMAIL / APRF_ADMIN_PASSWORD) to sign in and GET /api/v1/configs/tool_servers.${liveError ? ` (${liveError})` : ""}`,
+        detail: `No MCP/S2S inventory yet. Code ${codePolicy.allowsAnonymousAuthType ? "ALLOWS auth_type=none" : "scanned"}. Provide imports/mcp-s2s-inventory/*.json, or --base-url with --admin-token / APRF_ADMIN_TOKEN, or --admin-email + --admin-password (APRF_ADMIN_EMAIL / APRF_ADMIN_PASSWORD) to sign in and GET /api/v1/configs/tool_servers. Set productionMcpOrAiS2sConnectionsPresent=false for NOT_APPLICABLE.${liveError ? ` (${liveError})` : ""}`,
         nodes,
       };
     }
@@ -665,6 +775,8 @@ export const mcpS2sInventoryCollector: Collector = {
       inventorySource,
       codePolicy,
       baseUrl: baseUrl ?? null,
+      measuredAt,
+      productionMcpOrAiS2sConnectionsPresent,
     });
     if (authVia) {
       report.notes.push(
@@ -683,7 +795,7 @@ export const mcpS2sInventoryCollector: Collector = {
       class: "runtime",
       ref: rel(ctx.outputDir, reportPath),
       excerpt: redact(
-        `AUTHN-M2 inventory: total=${report.summary.total} pass=${report.summary.pass} fail=${report.summary.fail} satisfied=${satisfied}; sources=${inventorySource.join(",")}`,
+        `AUTHN-M2 inventory: status=${report.summary.statusHint} total=${report.summary.total} pass=${report.summary.pass} fail=${report.summary.fail} satisfied=${satisfied}; sources=${inventorySource.join(",")}`,
       ),
       pluginId: PLUGIN_ID,
       lastModified: new Date().toISOString(),
@@ -693,7 +805,7 @@ export const mcpS2sInventoryCollector: Collector = {
         "mcp-s2s-inventory",
         "authn-m2",
         "machine-identity",
-        satisfied === true ? "authn-m2-pass-signal" : "authn-m2-fail-or-incomplete",
+        ...(satisfied === true ? ["authn-m2-pass-signal"] : []),
       ],
       relatedCheckIds: [...RELATED],
     });
@@ -720,7 +832,7 @@ export const mcpS2sInventoryCollector: Collector = {
     return {
       pluginId: PLUGIN_ID,
       status: "ran",
-      detail: `AUTHN-M2 inventory total=${report.summary.total} pass=${report.summary.pass} fail=${report.summary.fail} satisfied=${satisfied}; report=${rel(ctx.outputDir, reportPath)}`,
+      detail: `AUTHN-M2 status=${report.summary.statusHint} total=${report.summary.total} pass=${report.summary.pass} fail=${report.summary.fail} satisfied=${satisfied}; report=${rel(ctx.outputDir, reportPath)}`,
       nodes,
     };
   },

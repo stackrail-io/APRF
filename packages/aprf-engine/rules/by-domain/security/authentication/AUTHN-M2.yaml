@@ -1,39 +1,75 @@
 id: "AUTHN-M2"
 category: "authentication"
 title: "Service-to-service and MCP connections must use strong machine identity"
-description: "Service-to-service and MCP connections shall use strong machine identity"
-whyItMatters: "Service-to-service and MCP connections shall use strong machine identity Failing this
-  leaves a production gap against: 0 production MCP or AI S2S connections accept anonymous access or
-  shared long-lived static keys; each connection has a named machine identity"
+description: >
+  Production MCP and AI service-to-service connections shall authenticate
+  with a named machine identity—so anonymous access and shared long-lived
+  static keys cannot stand in for workload or federated identity.
+whyItMatters: >
+  Anonymous or static-key MCP/S2S links turn tool bridges into impersonation
+  and lateral-movement paths. A fresh connection inventory proving every
+  link uses named OAuth/OIDC/mTLS/workload identity makes the control
+  measurable. Distinct from AUTHN-M1 (customer-facing HTTP unauthenticated
+  rejection), AUTHN-M4 (end-user subject propagation through agent/tool hops),
+  AUTHN-R1 (short-lived agent/tool tokens in prompts), and AUTHN-R2
+  (workload identity on self-hosted model runtimes).
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "0 production MCP or AI S2S connections accept anonymous access or shared long-lived
-  static keys; each connection has a named machine identity"
+passCondition: >
+  0 production MCP or AI S2S connections accept anonymous access or shared
+  long-lived static keys; each connection has a named machine identity
+  (measuredAt ≤90 days). If no production MCP or AI S2S connections exist,
+  score NOT_APPLICABLE.
 evidenceRequired:
-  - "MCP/S2S connection inventory + auth config export"
+  - "Production MCP/AI S2S connection inventory (tool servers, MCP servers, or equivalent)"
+  - "Auth config per connection (auth_type / identity binding; secrets redacted)"
+  - "Scoring report showing 0 anonymous and 0 shared static-key connections"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "mcp-s2s-inventory"
+      params:
+        hint: >
+          Discover MCP/tool-server auth policy in code; ingest connection
+          inventory under imports/mcp-s2s-inventory/ or live-fetch admin
+          tool_servers with --base-url + admin credentials; require
+          measuredAt ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "MCP/S2S connection inventory + auth config export"
-manualVerification: "For this Check (Service-to-service and MCP connections must use strong machine
-  identity): inspect current evidence for [MCP/S2S connection inventory + auth config export] and
-  confirm the pass condition holds — 0 production MCP or AI S2S connections accept anonymous access
-  or shared long-lived static keys; each connection has a named machine identity"
-falsePositiveGuidance: "re-verify against a current MCP/S2S inventory artifact for this Check , not
-  CI OIDC alone. Named exceptions need an owner and expiry ≤90 days."
+        hint: >
+          If automation cannot prove coverage, attest a complete production
+          MCP/AI S2S inventory with 0 anonymous and 0 shared static-key
+          connections, each with a named machine identity (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production MCP or AI S2S connections exist. If none, score
+  NOT_APPLICABLE. 2) Obtain a current connection inventory (export or live
+  admin config). 3) For each connection, confirm a named machine identity
+  (OAuth/OIDC/mTLS/workload identity or equivalent)—reject auth_type=none,
+  session-as-S2S, and shared long-lived static bearer keys. 4) PASS only if
+  inventory + 0 anonymous/static-key + named identity hold with measuredAt
+  ≤90 days. Do not PASS from OAuth support in code alone. AUTHN-M1 HTTP
+  probes alone do not prove MCP/S2S identity. CI OIDC for pipelines alone
+  does not prove runtime MCP/tool-server identity. AUTHN-R1 token TTL
+  alone does not prove per-connection machine identity. AUTHN-M4 subject
+  propagation alone does not prove MCP/S2S machine identity. AUTHN-R2
+  inference-runtime workload identity alone does not prove MCP/S2S link
+  identity.
+falsePositiveGuidance: >
+  Do not pass empty inventories without an explicit N/A attest. Do not pass
+  code that merely lists oauth_2.1 as an option. Do not pass CI OIDC as
+  runtime MCP identity. Do not score AUTHN-M1, AUTHN-M4, AUTHN-R1, or
+  AUTHN-R2 as substitutes. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Service-to-service and MCP connections must use strong machine
-    identity"
-  - "Retain evidence artifacts required by this Check, starting with: MCP/S2S connection inventory +
-    auth config export"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Require named machine identity (OAuth/OIDC/mTLS/workload) on every MCP/AI S2S connection"
+  - "Disable auth_type=none and shared static bearer keys in production"
+  - "Retain scored inventory under imports/mcp-s2s-inventory/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "OWASP Authentication Cheat Sheet"
     url: "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+  - title: "Model Context Protocol — Authorization"
+    url: "https://modelcontextprotocol.io/specification/2025-03-26/basic/authorization"
   - title: "CIS Benchmarks — Identity controls"
     url: "https://www.cisecurity.org/cis-benchmarks"
 relatedRules:
@@ -42,16 +78,16 @@ relatedRules:
   - "AUTHN-M4"
   - "AUTHN-R1"
   - "AUTHN-R2"
+  - "AUTHZ-M1"
 tags:
   - "authentication"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "mcp"
+  - "s2s"
+  - "machine-identity"
 applicability:
-  technologies:
-    - "openapi"
-    - "mcp"
-    - "a2a"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

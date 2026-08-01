@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:8c3124cea299b99491cc5f21acd40c3ef8b8c41e6b5a5b8d29e5de6c6b788df8",
+  "generatedAt": "sha256:42c4f1ec57af41698d8fed41e0e372f47510aaff99010aa408ea06c6e5de19e2",
   "ruleCount": 178,
   "domains": [
     {
@@ -1100,41 +1100,50 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "AUTHN-M1",
       "category": "authentication",
       "title": "Customer-facing AI APIs must reject unauthenticated callers",
-      "description": "Customer-facing AI APIs shall reject unauthenticated callers",
-      "whyItMatters": "Customer-facing AI APIs shall reject unauthenticated callers Failing this leaves a production gap against: 100% of probed production AI endpoints return 401/403 without valid credentials; probe inventory matches production route catalog",
+      "description": "Customer-facing AI HTTP/RPC APIs shall reject callers that present no valid credentials—so anonymous traffic cannot invoke model, tool, retrieval, or other privileged AI surfaces.\n",
+      "whyItMatters": "Unauthenticated AI endpoints become public compute and data-exfiltration oracles. A fresh unauthenticated probe of the declared production route catalog makes rejection measurable. Distinct from AUTHZ-M1 (authenticated but unauthorized callers) and AUTHN-M2 (machine identity on MCP/S2S links).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of probed production AI endpoints return 401/403 without valid credentials; probe inventory matches production route catalog",
+      "passCondition": "100% of declared production AI HTTP/RPC routes in the probe inventory return 401/403 without credentials; every declared AI route in the production route catalog was probed (measuredAt ≤90 days). If no customer-facing AI HTTP/RPC APIs exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Automated auth probe report covering all production AI HTTP/RPC routes"
+        "Production AI HTTP/RPC route catalog (OpenAPI, framework routers, or equivalent)",
+        "Unauthenticated auth-probe report covering those declared AI routes (401/403)",
+        "Confirmation the probe inventory matches the production route catalog"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
             "id": "http-auth-probe",
             "params": {
-              "expectStatus": [
-                401,
-                403
-              ]
+              "hint": "Discover declared AI HTTP routes; with --base-url (or ingested auth-probe-report.json under imports/http-auth-probe/) probe each without credentials expecting 401/403; require measuredAt/probedAt ≤90 days.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest 100% of declared production AI routes return 401/403 without credentials and the probe inventory matches the production catalog (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Customer-facing AI APIs must reject unauthenticated callers): inspect current evidence for [Automated auth probe report covering all production AI HTTP/RPC routes] and confirm the pass condition holds — 100% of probed production AI endpoints return 401/403 without valid credentials; probe inventory matches production route catalog",
-      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm customer-facing AI HTTP/RPC APIs exist. If none, score NOT_APPLICABLE. 2) Obtain the production AI route catalog (OpenAPI, framework routers, or equivalent). 3) Run or review an unauthenticated probe covering every declared AI route—expect 401/403; do not pass from auth middleware code alone. 4) Confirm the probe inventory matches the catalog (no silently omitted privileged routes). 5) PASS only if catalog + full probe + 401/403 hold with measuredAt ≤90 days. AUTHZ-M1 suites (authenticated-but-unauthorized) alone do not prove unauthenticated rejection. AUTHN-M2 MCP/S2S inventories alone do not prove customer-facing HTTP rejection. Public health/docs/signin routes are out of AI-surface scope.\n",
+      "falsePositiveGuidance": "Do not pass auth middleware presence without a fresh probe report. Do not pass partial catalogs that omit privileged AI routes. Do not fail public health, docs, or sign-in paths that are not AI surfaces. Do not score AUTHZ-M1 or AUTHN-M2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Customer-facing AI APIs must reject unauthenticated callers",
-        "Retain evidence artifacts required by this Check, starting with: Automated auth probe report covering all production AI HTTP/RPC routes",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Require authentication on every customer-facing AI HTTP/RPC route",
+        "Maintain a production AI route catalog and probe it without credentials",
+        "Retain 401/403 results under imports/http-auth-probe/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "OWASP Authentication Cheat Sheet",
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+        },
+        {
+          "title": "OWASP API Security Top 10 — API2 Broken Authentication",
+          "url": "https://owasp.org/API-Security/"
         },
         {
           "title": "CIS Benchmarks — Identity controls",
@@ -1146,20 +1155,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AUTHN-M3",
         "AUTHN-M4",
         "AUTHN-R1",
-        "AUTHN-R2"
+        "AUTHN-R2",
+        "AUTHZ-M1"
       ],
       "tags": [
         "authentication",
         "mandatory",
-        "automated"
+        "hybrid",
+        "http",
+        "api",
+        "unauthenticated-probe"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "mcp",
-          "a2a",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -1170,38 +1178,50 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "AUTHN-M2",
       "category": "authentication",
       "title": "Service-to-service and MCP connections must use strong machine identity",
-      "description": "Service-to-service and MCP connections shall use strong machine identity",
-      "whyItMatters": "Service-to-service and MCP connections shall use strong machine identity Failing this leaves a production gap against: 0 production MCP or AI S2S connections accept anonymous access or shared long-lived static keys; each connection has a named machine identity",
+      "description": "Production MCP and AI service-to-service connections shall authenticate with a named machine identity—so anonymous access and shared long-lived static keys cannot stand in for workload or federated identity.\n",
+      "whyItMatters": "Anonymous or static-key MCP/S2S links turn tool bridges into impersonation and lateral-movement paths. A fresh connection inventory proving every link uses named OAuth/OIDC/mTLS/workload identity makes the control measurable. Distinct from AUTHN-M1 (customer-facing HTTP unauthenticated rejection), AUTHN-M4 (end-user subject propagation through agent/tool hops), AUTHN-R1 (short-lived agent/tool tokens in prompts), and AUTHN-R2 (workload identity on self-hosted model runtimes).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "0 production MCP or AI S2S connections accept anonymous access or shared long-lived static keys; each connection has a named machine identity",
+      "passCondition": "0 production MCP or AI S2S connections accept anonymous access or shared long-lived static keys; each connection has a named machine identity (measuredAt ≤90 days). If no production MCP or AI S2S connections exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "MCP/S2S connection inventory + auth config export"
+        "Production MCP/AI S2S connection inventory (tool servers, MCP servers, or equivalent)",
+        "Auth config per connection (auth_type / identity binding; secrets redacted)",
+        "Scoring report showing 0 anonymous and 0 shared static-key connections"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "mcp-s2s-inventory",
+            "params": {
+              "hint": "Discover MCP/tool-server auth policy in code; ingest connection inventory under imports/mcp-s2s-inventory/ or live-fetch admin tool_servers with --base-url + admin credentials; require measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "MCP/S2S connection inventory + auth config export"
+              "hint": "If automation cannot prove coverage, attest a complete production MCP/AI S2S inventory with 0 anonymous and 0 shared static-key connections, each with a named machine identity (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Service-to-service and MCP connections must use strong machine identity): inspect current evidence for [MCP/S2S connection inventory + auth config export] and confirm the pass condition holds — 0 production MCP or AI S2S connections accept anonymous access or shared long-lived static keys; each connection has a named machine identity",
-      "falsePositiveGuidance": "re-verify against a current MCP/S2S inventory artifact for this Check , not CI OIDC alone. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm production MCP or AI S2S connections exist. If none, score NOT_APPLICABLE. 2) Obtain a current connection inventory (export or live admin config). 3) For each connection, confirm a named machine identity (OAuth/OIDC/mTLS/workload identity or equivalent)—reject auth_type=none, session-as-S2S, and shared long-lived static bearer keys. 4) PASS only if inventory + 0 anonymous/static-key + named identity hold with measuredAt ≤90 days. Do not PASS from OAuth support in code alone. AUTHN-M1 HTTP probes alone do not prove MCP/S2S identity. CI OIDC for pipelines alone does not prove runtime MCP/tool-server identity. AUTHN-R1 token TTL alone does not prove per-connection machine identity. AUTHN-M4 subject propagation alone does not prove MCP/S2S machine identity. AUTHN-R2 inference-runtime workload identity alone does not prove MCP/S2S link identity.\n",
+      "falsePositiveGuidance": "Do not pass empty inventories without an explicit N/A attest. Do not pass code that merely lists oauth_2.1 as an option. Do not pass CI OIDC as runtime MCP identity. Do not score AUTHN-M1, AUTHN-M4, AUTHN-R1, or AUTHN-R2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Service-to-service and MCP connections must use strong machine identity",
-        "Retain evidence artifacts required by this Check, starting with: MCP/S2S connection inventory + auth config export",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Require named machine identity (OAuth/OIDC/mTLS/workload) on every MCP/AI S2S connection",
+        "Disable auth_type=none and shared static bearer keys in production",
+        "Retain scored inventory under imports/mcp-s2s-inventory/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "OWASP Authentication Cheat Sheet",
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+        },
+        {
+          "title": "Model Context Protocol — Authorization",
+          "url": "https://modelcontextprotocol.io/specification/2025-03-26/basic/authorization"
         },
         {
           "title": "CIS Benchmarks — Identity controls",
@@ -1213,20 +1233,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AUTHN-M3",
         "AUTHN-M4",
         "AUTHN-R1",
-        "AUTHN-R2"
+        "AUTHN-R2",
+        "AUTHZ-M1"
       ],
       "tags": [
         "authentication",
         "mandatory",
-        "manual"
+        "hybrid",
+        "mcp",
+        "s2s",
+        "machine-identity"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "mcp",
-          "a2a",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -1237,38 +1256,50 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "AUTHN-M3",
       "category": "authentication",
       "title": "Administrative access to AI control planes must require strong authentication including MFA",
-      "description": "Administrative access to AI control planes shall require strong authentication including MFA",
-      "whyItMatters": "Administrative access to AI control planes shall require strong authentication including MFA Failing this leaves a production gap against: 100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled",
+      "description": "Administrative access to AI control planes shall require strong authentication including MFA—so operators who can change prompts, tools, models, or deployments cannot rely on password-only or shared credentials.\n",
+      "whyItMatters": "Control-plane admin roles without MFA are a single stolen password away from rewriting production AI behavior. A fresh IdP MFA export plus a bounded, monitored break-glass inventory makes the assurance measurable. Distinct from AUTHN-M1 (customer-facing API unauthenticated rejection), AUTHN-M2 (MCP/S2S machine identity), and AUTHN-M4 (end-user subject propagation through agent/tool hops).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled",
+      "passCondition": "100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled (measuredAt ≤90 days). If no AI control-plane admin access exists, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring"
+        "IdP MFA policy export covering AI control-plane admin roles",
+        "Break-glass account inventory with documented maximum",
+        "Evidence break-glass accounts have monitoring/alerting enabled"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-admin-mfa",
+            "params": {
+              "hint": "Discover IdP/MFA policy and break-glass inventory signals; ingest MFA coverage + break-glass counts/monitoring under imports/ai-admin-mfa/; require measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring"
+              "hint": "If automation cannot prove coverage, attest 100% of AI control-plane admin roles enforce MFA and break-glass accounts are ≤ documented maximum with monitoring enabled (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Administrative access to AI control planes must require strong authentication including MFA): inspect current evidence for [IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring] and confirm the pass condition holds — 100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm AI control-plane admin access exists (prompt/model/tool/deploy consoles or equivalent). If none, score NOT_APPLICABLE. 2) Obtain an IdP MFA policy export for those admin roles—password-only fails. 3) Inventory break-glass accounts: count ≤ documented maximum; each has monitoring or alerting enabled. 4) PASS only if MFA=100% on admin roles + break-glass bound + monitoring hold with measuredAt ≤90 days. AUTHN-M1 HTTP probes alone do not prove admin MFA. AUTHN-M2 MCP inventories alone do not prove human admin MFA. AUTHN-M4 subject propagation alone does not prove admin MFA. Org-wide MFA without AI control-plane role mapping does not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass generic org MFA without AI control-plane role coverage. Do not pass unlimited or unmonitored break-glass accounts. Do not pass code comments about MFA without an IdP export or equivalent. Do not score AUTHN-M1, AUTHN-M2, or AUTHN-M4 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Administrative access to AI control planes must require strong authentication including MFA",
-        "Retain evidence artifacts required by this Check, starting with: IdP MFA policy export for AI admin roles + break-glass account inventory with monitoring",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Enforce MFA on every AI control-plane admin role in the IdP",
+        "Cap break-glass accounts at a documented maximum with monitoring/alerting",
+        "Retain MFA + break-glass evidence under imports/ai-admin-mfa/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "OWASP Authentication Cheat Sheet",
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+        },
+        {
+          "title": "NIST SP 800-63B — Digital Identity Guidelines (Authentication)",
+          "url": "https://pages.nist.gov/800-63-3/sp800-63b.html"
         },
         {
           "title": "CIS Benchmarks — Identity controls",
@@ -1280,20 +1311,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AUTHN-M2",
         "AUTHN-M4",
         "AUTHN-R1",
-        "AUTHN-R2"
+        "AUTHN-R2",
+        "AUTHZ-M1"
       ],
       "tags": [
         "authentication",
         "mandatory",
-        "manual"
+        "hybrid",
+        "mfa",
+        "control-plane",
+        "break-glass"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "mcp",
-          "a2a",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -1304,42 +1334,58 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "AUTHN-M4",
       "category": "authentication",
       "title": "End-user identity must remain bound through agent and tool chains",
-      "description": "End-user identity shall remain bound through agent and tool chains",
-      "whyItMatters": "End-user identity shall remain bound through agent and tool chains Failing this leaves a production gap against: PASS if 100% of sampled privileged tool calls in the latest review carry an end-user (or documented service) subject; 0 anonymous privileged hops",
+      "description": "Where AI systems execute tools, agents, workflows, or delegated actions, the end-user (or documented service) subject shall remain bound through every privileged hop—so agentic chains cannot act as anonymous or ambient privilege.\n",
+      "whyItMatters": "Agentic AI introduces identity-loss hops unique to tool and workflow chains: a user-authenticated request can become an unattributed tool call, MCP invocation, or child-agent action. That is not a traditional login failure—it is lost authorization context. Binding the subject through the chain and proving 0 anonymous privileged hops closes that class of abuse. Distinct from AUTHN-M1 (HTTP unauthenticated rejection), AUTHN-M2 (MCP/S2S machine identity), and AUTHZ-M1 (server-side permission checks on entry points).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "PASS if 100% of sampled privileged tool calls in the latest review carry an end-user (or documented service) subject; 0 anonymous privileged hops",
+      "passCondition": "100% of sampled privileged tool/agent/workflow calls in the latest review carry an end-user (or documented service) subject; 0 anonymous privileged hops (measuredAt ≤90 days). If the system has no tools, agents, workflows, or delegated actions, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Identity-propagation design + sample traces showing end-user subject on tool calls"
+        "Identity-propagation design for agent/tool/workflow chains (subject carried or re-asserted)",
+        "Sample traces or harness results showing end-user or documented service subject on privileged calls",
+        "Review showing 0 anonymous privileged hops in the sample"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-identity-propagation",
+            "params": {
+              "hint": "Discover identity-propagation design and subject-on-tool-call signals; ingest sample coverage under imports/identity-propagation/; require measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Identity-propagation design + sample traces showing end-user subject on tool calls"
+              "hint": "If automation cannot prove coverage, attest a design plus a sample where 100% of privileged tool/agent/workflow calls carry an end-user or documented service subject and 0 anonymous privileged hops (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (End-user identity must remain bound through agent and tool chains): inspect current evidence for [Identity-propagation design + sample traces showing end-user subject on tool calls] and confirm the pass condition holds — PASS if 100% of sampled privileged tool calls in the latest review carry an end-user (or documented service) subject; 0 anonymous privileged hops",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm the system executes tools, agents, workflows, or delegated actions. If none, score NOT_APPLICABLE. 2) Locate the identity-propagation design: how the end-user (or documented service) subject is carried or re-asserted across hops (tokens, claims, signed context, or equivalent)—not prompt text alone. 3) Review a recent sample of privileged calls (traces or harness): 100% carry that subject; count anonymous privileged hops = 0. 4) PASS only if design + sample + 0 anonymous hops hold with measuredAt ≤90 days. AUTHN-M1 edge probes alone do not prove mid-chain subject binding. AUTHN-M2 machine identity on MCP links alone does not prove end-user subject propagation. AUTHZ-M1 entry-point permission checks alone do not prove identity survives multi-hop agent/tool execution. AGN-M1 agent charters and HUM-M1 human-approval gates alone do not prove subject binding on privileged hops. AUTHN-R2 runtime workload identity alone does not prove end-user subject propagation.\n",
+      "falsePositiveGuidance": "Do not pass systems that only authenticate the outer HTTP request. Do not pass “the model knows the user” prompt instructions as propagation. Do not pass service-account-only chains without documenting that service as the intended subject. Do not score AUTHN-M1, AUTHN-M2, AUTHN-R2, AUTHZ-M1, AGN-M1, or HUM-M1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: End-user identity must remain bound through agent and tool chains",
-        "Retain evidence artifacts required by this Check, starting with: Identity-propagation design + sample traces showing end-user subject on tool calls",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Carry or re-assert end-user/service subject on every privileged tool, agent, and workflow hop",
+        "Forbid anonymous privileged tool calls; fail closed when subject is missing",
+        "Retain design + sample traces under imports/identity-propagation/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
-          "title": "OWASP Authentication Cheat Sheet",
-          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM01 / agent risks",
+          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
-          "title": "CIS Benchmarks — Identity controls",
-          "url": "https://www.cisecurity.org/cis-benchmarks"
+          "title": "RFC 8693 — OAuth 2.0 Token Exchange",
+          "url": "https://datatracker.ietf.org/doc/html/rfc8693"
+        },
+        {
+          "title": "Model Context Protocol — Authorization",
+          "url": "https://modelcontextprotocol.io/specification/2025-03-26/basic/authorization"
+        },
+        {
+          "title": "NIST AI Risk Management Framework",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -1347,20 +1393,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AUTHN-M2",
         "AUTHN-M3",
         "AUTHN-R1",
-        "AUTHN-R2"
+        "AUTHN-R2",
+        "AUTHZ-M1",
+        "AGN-M1",
+        "HUM-M1"
       ],
       "tags": [
         "authentication",
         "mandatory",
-        "manual"
+        "hybrid",
+        "identity-propagation",
+        "agentic",
+        "tool-chains",
+        "authorization-context"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "mcp",
-          "a2a",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 3,
         "requiredFromLevel": 5
       },
@@ -1370,47 +1418,51 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "AUTHN-R1",
       "category": "authentication",
-      "title": "Production systems should have short-lived tokens for agents and tools; no long-lived static keys in prompts",
-      "description": "Short-lived tokens for agents and tools; no long-lived static keys in prompts",
-      "whyItMatters": "Short-lived tokens for agents and tools; no long-lived static keys in prompts Failing this leaves a production gap against: 100% of inventoried agent/tool credentials have TTL ≤1h (or a named exception ≤30 days); secret scan of prompts/config finds 0 long-lived static API keys",
-      "severity": "critical",
-      "weight": 4,
+      "title": "Agent and tool credentials should be short-lived; prompts must not embed long-lived static keys",
+      "description": "Agent and tool credentials used in production should be short-lived (TTL ≤1h, or a named exception ≤30 days), and production prompts/config should embed 0 long-lived static API keys—so leaked prompts and agent configs cannot mint durable privileged access.\n",
+      "whyItMatters": "Long-lived static keys in prompts, agent configs, or tool bindings turn every prompt leak into a standing credential. Short TTLs plus a clean secret scan of prompts/config make agent/tool credential hygiene measurable. Distinct from AUTHN-M2 (MCP/S2S connection machine identity), AUTHN-M4 (end-user subject propagation through hops), and SEC2-M1 (secrets-manager wiring for runtime secrets generally).\n",
+      "severity": "high",
+      "weight": 3,
       "gate": "recommended",
-      "passCondition": "100% of inventoried agent/tool credentials have TTL ≤1h (or a named exception ≤30 days); secret scan of prompts/config finds 0 long-lived static API keys",
+      "passCondition": "100% of inventoried agent/tool credentials have TTL ≤1h (or a named exception with owner and expiry ≤30 days); secret scan of production prompts/config finds 0 long-lived static API keys (measuredAt ≤90 days). If no agent/tool credentials appear in production prompts/config, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "IdP/token TTL policy export + inventory of agent/tool credentials used in production prompts/config"
+        "Inventory of agent/tool credentials used in production prompts/config (with TTL or exception metadata)",
+        "IdP/token TTL policy (or equivalent) covering those credentials",
+        "Secret-scan report of prompts/config showing 0 long-lived static API keys"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
-            "id": "mcp-no-secrets-in-env",
-            "params": {}
-          },
-          {
-            "id": "secrets-not-embedded",
-            "params": {}
+            "id": "repo-short-lived-agent-tokens",
+            "params": {
+              "hint": "Discover TTL/token-policy and prompt/config secret-scan signals; ingest inventory coverage under imports/short-lived-agent-tokens/; require measuredAt ≤90 days.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "IdP/token TTL policy export + inventory of agent/tool credentials used in production prompts/config"
+              "hint": "If automation cannot prove coverage, attest 100% of inventoried agent/tool credentials have TTL ≤1h (or owned exception ≤30 days) and prompts/config secret scan finds 0 long-lived static API keys (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Short-lived tokens for agents and tools; no long-lived static keys in prompts): inspect current evidence for [IdP/token TTL policy export + inventory of agent/tool credentials used in production prompts/config] and confirm the pass condition holds — 100% of inventoried agent/tool credentials have TTL ≤1h (or a named exception ≤30 days); secret scan of prompts/config finds 0 long-lived static API keys",
-      "falsePositiveGuidance": "when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm agent/tool credentials appear in production prompts or config. If none, score NOT_APPLICABLE. 2) Inventory those credentials and their TTL (or named exception with owner and expiry ≤30 days). 3) Confirm TTL ≤1h for 100% (exceptions counted only when owned and ≤30 days). 4) Review a secret scan of production prompts/config: 0 long-lived static API keys. 5) PASS only if inventory + TTL/exceptions + clean scan hold with measuredAt ≤90 days. AUTHN-M2 connection identity alone does not prove short TTLs in prompts. SEC2-M1 secrets-manager wiring alone does not prove prompt/config scans find 0 static keys. AUTHN-M4 subject propagation alone does not prove credential TTL.\n",
+      "falsePositiveGuidance": "Do not pass CI OIDC as agent/tool credential TTL. Do not pass open-ended “exceptions” without owner and expiry ≤30 days (credential TTL exceptions only—≤30 days is stricter than the ≤90-day window for named Check gaps / waivers below). Do not pass scans that exclude prompts/fixtures. Do not score AUTHN-M2, AUTHN-M4, or SEC2-M1 as substitutes. Named Check gaps need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Short-lived tokens for agents and tools; no long-lived static keys in prompts",
-        "Retain evidence artifacts required by this Check, starting with: IdP/token TTL policy export + inventory of agent/tool credentials used in production prompts/config",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Issue short-lived (≤1h) tokens for agents and tools; ban long-lived static keys in prompts",
+        "Time-box remaining static credentials with owner and expiry ≤30 days",
+        "Retain inventory + TTL + secret-scan evidence under imports/short-lived-agent-tokens/ (measuredAt ≤90 days)",
+        "Time-box Check gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "OWASP Authentication Cheat Sheet",
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+        },
+        {
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM06 Sensitive Information Disclosure",
+          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
           "title": "CIS Benchmarks — Identity controls",
@@ -1422,20 +1474,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AUTHN-M2",
         "AUTHN-M3",
         "AUTHN-M4",
-        "AUTHN-R2"
+        "AUTHN-R2",
+        "SEC2-M1",
+        "SEC2-M2"
       ],
       "tags": [
         "authentication",
         "recommended",
-        "hybrid"
+        "hybrid",
+        "short-lived-tokens",
+        "agent-credentials",
+        "prompt-secrets"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "mcp",
-          "a2a",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -1445,36 +1497,48 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "AUTHN-R2",
       "category": "authentication",
-      "title": "Production systems should have workload identity for self-hosted model runtimes",
-      "description": "Workload identity for self-hosted model runtimes",
-      "whyItMatters": "Workload identity for self-hosted model runtimes Failing this leaves a production gap against: Every self-hosted model runtime in production authenticates via workload identity (SPIFFE/IAM role/equivalent); 0 static shared keys in the runtime inventory",
-      "severity": "critical",
-      "weight": 4,
+      "title": "Self-hosted model runtimes should authenticate with workload identity",
+      "description": "Every self-hosted model runtime in production should authenticate via workload identity (SPIFFE, cloud IAM role, or equivalent)—so inference nodes and model servers do not rely on shared static keys.\n",
+      "whyItMatters": "Self-hosted runtimes that share static API keys or service passwords create a single stolen secret that impersonates the entire model plane. Binding each runtime to workload identity and proving 0 static shared keys in the inventory makes that assurance measurable. Distinct from AUTHN-M2 (MCP/S2S connection identity), AUTHN-R1 (short-lived agent/tool tokens in prompts), and REL-R6 (warm-standby capacity for self-hosted inference).\n",
+      "severity": "high",
+      "weight": 3,
       "gate": "recommended",
-      "passCondition": "Every self-hosted model runtime in production authenticates via workload identity (SPIFFE/IAM role/equivalent); 0 static shared keys in the runtime inventory",
+      "passCondition": "Every self-hosted model runtime in production authenticates via workload identity (SPIFFE/IAM role/equivalent); 0 static shared keys in the runtime inventory; sample authenticated calls (or harness) present (measuredAt ≤90 days). If no self-hosted model runtimes exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Workload-identity binding config for self-hosted model runtimes + sample authenticated call traces"
+        "Inventory of self-hosted model runtimes in production",
+        "Workload-identity binding config per runtime (SPIFFE, IAM role, or equivalent)",
+        "Sample authenticated call traces (or harness) showing workload identity; 0 static shared keys"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-workload-identity-runtimes",
+            "params": {
+              "hint": "Discover self-hosted runtime and workload-identity binding signals; ingest coverage under imports/workload-identity-runtimes/; require measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Workload-identity binding config for self-hosted model runtimes + sample authenticated call traces"
+              "hint": "If automation cannot prove coverage, attest every self-hosted model runtime uses workload identity and the inventory has 0 static shared keys (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Workload identity for self-hosted model runtimes): inspect current evidence for [Workload-identity binding config for self-hosted model runtimes + sample authenticated call traces] and confirm the pass condition holds — Every self-hosted model runtime in production authenticates via workload identity (SPIFFE/IAM role/equivalent); 0 static shared keys in the runtime inventory",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm self-hosted model runtimes exist in production (vLLM, TGI, Triton, custom inference pods, or equivalent). If none (fully hosted providers only), score NOT_APPLICABLE. 2) Inventory those runtimes. 3) Confirm each binds to workload identity (SPIFFE/SPIRE, cloud IAM role, K8s service account + IRSA/Workload Identity, or equivalent)—not a shared static key. 4) Review sample authenticated calls or harness output; count static shared keys in the inventory = 0. 5) PASS only if inventory + workload identity + 0 static keys hold with measuredAt ≤90 days. AUTHN-M2 MCP inventories alone do not prove inference-runtime identity. AUTHN-R1 prompt-token TTL alone does not prove runtime workload identity. REL-R6 warm-standby alone does not prove authentication binding.\n",
+      "falsePositiveGuidance": "Do not pass shared cluster secrets labeled “for the model.” Do not pass node IAM when the model process still presents a static API key to callers. Do not fail fully hosted (non-self-hosted) estates—use N/A. Do not score AUTHN-M2, AUTHN-R1, or REL-R6 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Workload identity for self-hosted model runtimes",
-        "Retain evidence artifacts required by this Check, starting with: Workload-identity binding config for self-hosted model runtimes + sample authenticated call traces",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Bind every self-hosted model runtime to workload identity (SPIFFE/IAM role/equivalent)",
+        "Remove static shared keys from the runtime inventory",
+        "Retain inventory + binding + sample traces under imports/workload-identity-runtimes/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
+        {
+          "title": "SPIFFE — Secure Production Identity Framework For Everyone",
+          "url": "https://spiffe.io/"
+        },
         {
           "title": "OWASP Authentication Cheat Sheet",
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
@@ -1489,20 +1553,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "AUTHN-M2",
         "AUTHN-M3",
         "AUTHN-M4",
-        "AUTHN-R1"
+        "AUTHN-R1",
+        "REL-R6",
+        "INF-M3"
       ],
       "tags": [
         "authentication",
         "recommended",
-        "manual"
+        "hybrid",
+        "workload-identity",
+        "self-hosted",
+        "model-runtime"
       ],
       "applicability": {
-        "technologies": [
-          "openapi",
-          "mcp",
-          "a2a",
-          "cicd"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -12971,7 +13035,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         ]
       },
       "manualVerification": "For this Check (Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks): inspect current evidence for [Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths] and confirm the pass condition holds — 0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the secrets manager",
-      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Do not score AUTHN-R1 (short-lived agent/tool tokens in prompts) as a substitute for secrets-manager wiring and repo/prompt secret scans. Named exceptions need an owner and expiry ≤90 days.",
       "recommendedFixes": [
         "Implement and operationalize: Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks",
         "Retain evidence artifacts required by this Check, starting with: Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths",
@@ -12993,7 +13057,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SEC2-M3",
         "SEC2-R1",
         "SEC2-R2",
-        "SEC2-R3"
+        "SEC2-R3",
+        "AUTHN-R1"
       ],
       "tags": [
         "secrets",

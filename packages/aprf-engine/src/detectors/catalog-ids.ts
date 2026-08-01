@@ -6,6 +6,11 @@
 export const CATALOG_DETECTOR_IDS = [
   "manual-attest",
   "http-auth-probe",
+  "mcp-s2s-inventory",
+  "repo-ai-admin-mfa",
+  "repo-identity-propagation",
+  "repo-short-lived-agent-tokens",
+  "repo-workload-identity-runtimes",
   "iam-least-privilege",
   "otel-services-present",
   "docker-nonroot-user",

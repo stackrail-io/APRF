@@ -1,40 +1,71 @@
 id: "AUTHN-M1"
 category: "authentication"
 title: "Customer-facing AI APIs must reject unauthenticated callers"
-description: "Customer-facing AI APIs shall reject unauthenticated callers"
-whyItMatters: "Customer-facing AI APIs shall reject unauthenticated callers Failing this leaves a
-  production gap against: 100% of probed production AI endpoints return 401/403 without valid
-  credentials; probe inventory matches production route catalog"
+description: >
+  Customer-facing AI HTTP/RPC APIs shall reject callers that present no
+  valid credentials—so anonymous traffic cannot invoke model, tool,
+  retrieval, or other privileged AI surfaces.
+whyItMatters: >
+  Unauthenticated AI endpoints become public compute and data-exfiltration
+  oracles. A fresh unauthenticated probe of the declared production route
+  catalog makes rejection measurable. Distinct from AUTHZ-M1 (authenticated
+  but unauthorized callers) and AUTHN-M2 (machine identity on MCP/S2S links).
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "100% of probed production AI endpoints return 401/403 without valid credentials;
-  probe inventory matches production route catalog"
+passCondition: >
+  100% of declared production AI HTTP/RPC routes in the probe inventory
+  return 401/403 without credentials; every declared AI route in the
+  production route catalog was probed (measuredAt ≤90 days). If no
+  customer-facing AI HTTP/RPC APIs exist, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Automated auth probe report covering all production AI HTTP/RPC routes"
+  - "Production AI HTTP/RPC route catalog (OpenAPI, framework routers, or equivalent)"
+  - "Unauthenticated auth-probe report covering those declared AI routes (401/403)"
+  - "Confirmation the probe inventory matches the production route catalog"
 detection:
-  capability: "automated"
+  capability: "hybrid"
   detectors:
     - id: "http-auth-probe"
       params:
-        expectStatus:
-          - 401
-          - 403
-manualVerification: "For this Check (Customer-facing AI APIs must reject unauthenticated callers):
-  inspect current evidence for [Automated auth probe report covering all production AI HTTP/RPC
-  routes] and confirm the pass condition holds — 100% of probed production AI endpoints return
-  401/403 without valid credentials; probe inventory matches production route catalog"
-falsePositiveGuidance: "confirm the detector target matches the production path for this Check
-  before waiving. Named exceptions need an owner and expiry ≤90 days."
+        hint: >
+          Discover declared AI HTTP routes; with --base-url (or ingested
+          auth-probe-report.json under imports/http-auth-probe/) probe each
+          without credentials expecting 401/403; require measuredAt/probedAt
+          ≤90 days.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest 100% of declared
+          production AI routes return 401/403 without credentials and the
+          probe inventory matches the production catalog (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm customer-facing AI HTTP/RPC APIs exist. If none, score
+  NOT_APPLICABLE. 2) Obtain the production AI route catalog (OpenAPI,
+  framework routers, or equivalent). 3) Run or review an unauthenticated
+  probe covering every declared AI route—expect 401/403; do not pass from
+  auth middleware code alone. 4) Confirm the probe inventory matches the
+  catalog (no silently omitted privileged routes). 5) PASS only if catalog
+  + full probe + 401/403 hold with measuredAt ≤90 days. AUTHZ-M1 suites
+  (authenticated-but-unauthorized) alone do not prove unauthenticated
+  rejection. AUTHN-M2 MCP/S2S inventories alone do not prove customer-facing
+  HTTP rejection. Public health/docs/signin routes are out of AI-surface
+  scope.
+falsePositiveGuidance: >
+  Do not pass auth middleware presence without a fresh probe report. Do not
+  pass partial catalogs that omit privileged AI routes. Do not fail public
+  health, docs, or sign-in paths that are not AI surfaces. Do not score
+  AUTHZ-M1 or AUTHN-M2 as substitutes. Named exceptions need owner and
+  expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Customer-facing AI APIs must reject unauthenticated callers"
-  - "Retain evidence artifacts required by this Check, starting with: Automated auth probe report
-    covering all production AI HTTP/RPC routes"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Require authentication on every customer-facing AI HTTP/RPC route"
+  - "Maintain a production AI route catalog and probe it without credentials"
+  - "Retain 401/403 results under imports/http-auth-probe/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "OWASP Authentication Cheat Sheet"
     url: "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+  - title: "OWASP API Security Top 10 — API2 Broken Authentication"
+    url: "https://owasp.org/API-Security/"
   - title: "CIS Benchmarks — Identity controls"
     url: "https://www.cisecurity.org/cis-benchmarks"
 relatedRules:
@@ -43,16 +74,16 @@ relatedRules:
   - "AUTHN-M4"
   - "AUTHN-R1"
   - "AUTHN-R2"
+  - "AUTHZ-M1"
 tags:
   - "authentication"
   - "mandatory"
-  - "automated"
+  - "hybrid"
+  - "http"
+  - "api"
+  - "unauthenticated-probe"
 applicability:
-  technologies:
-    - "openapi"
-    - "mcp"
-    - "a2a"
-    - "cicd"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

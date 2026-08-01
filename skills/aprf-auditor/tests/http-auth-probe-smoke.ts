@@ -107,10 +107,18 @@ async def signin():
     const report = JSON.parse(
       readFileSync(reportPath, "utf8"),
     ) as AuthProbeReport;
-    if (report.summary.authnM1Satisfied !== true) {
+    if (report.summary.authnM1Satisfied !== true || report.summary.statusHint !== "pass") {
       throw new Error(
-        `expected authnM1Satisfied=true, got ${JSON.stringify(report.summary)} results=${JSON.stringify(report.results)}`,
+        `expected pass/authnM1Satisfied=true, got ${JSON.stringify(report.summary)} results=${JSON.stringify(report.results)}`,
       );
+    }
+    if (report.summary.probeInventoryMatchesRouteCatalog !== true) {
+      throw new Error(
+        `expected catalog match, got ${report.summary.probeInventoryMatchesRouteCatalog}`,
+      );
+    }
+    if (!report.measuredAt) {
+      throw new Error("expected measuredAt on report");
     }
     if ((report.summary.advisoryGet405 ?? 0) < 1) {
       throw new Error(
@@ -140,6 +148,34 @@ async def signin():
       throw new Error(`ingest prior report expected ran, got ${ingested.status}`);
     }
     rmSync(out2, { recursive: true, force: true });
+
+    const emptyTarget = mkdtempSync(join(tmpdir(), "aprf-auth-empty-"));
+    const outNa = mkdtempSync(join(tmpdir(), "aprf-auth-na-"));
+    mkdirSync(join(outNa, "imports", "http-auth-probe"), { recursive: true });
+    writeFileSync(
+      join(outNa, "imports", "http-auth-probe", "scope.json"),
+      JSON.stringify({ customerFacingAiHttpApisPresent: false }),
+    );
+    const na = await httpAuthProbeCollector.collect({
+      targetPath: emptyTarget,
+      outputDir: outNa,
+      assessedAt,
+      live: false,
+    });
+    if (na.status !== "ran") {
+      throw new Error(`n/a expected ran, got ${na.status}`);
+    }
+    const naReport = JSON.parse(
+      readFileSync(
+        join(outNa, "imports", "http-auth-probe", "auth-probe-report.json"),
+        "utf8",
+      ),
+    ) as AuthProbeReport;
+    if (naReport.summary.statusHint !== "not_applicable") {
+      throw new Error(`n/a expected: ${JSON.stringify(naReport.summary)}`);
+    }
+    rmSync(outNa, { recursive: true, force: true });
+    rmSync(emptyTarget, { recursive: true, force: true });
   } finally {
     await fixture.close();
   }

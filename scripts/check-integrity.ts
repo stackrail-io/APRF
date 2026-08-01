@@ -79,12 +79,12 @@ assert(
 );
 
 assert(
-  PROFILE_CORE.mandatoryCheckIds.length === 38,
-  `Core profile expected 38, got ${PROFILE_CORE.mandatoryCheckIds.length}`,
+  PROFILE_CORE.mandatoryCheckIds.length === 39,
+  `Core profile expected 39, got ${PROFILE_CORE.mandatoryCheckIds.length}`,
 );
 assert(
-  PROFILE_REGULATED.mandatoryCheckIds.length === 50,
-  `Regulated profile expected 50, got ${PROFILE_REGULATED.mandatoryCheckIds.length}`,
+  PROFILE_REGULATED.mandatoryCheckIds.length === 51,
+  `Regulated profile expected 51, got ${PROFILE_REGULATED.mandatoryCheckIds.length}`,
 );
 assert(getTier3OnlyMandatoryIds().length === 12, "tier3-only count");
 
