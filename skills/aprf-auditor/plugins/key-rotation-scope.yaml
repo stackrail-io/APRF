@@ -21,8 +21,9 @@ whenUnavailable: >
   plus privilegedProviderOrCloudKeysInClientApps=0,
   productionKeysWithDocumentedLeastPrivilegeScopePct=100,
   productionKeysWithinRotationPolicyPct=100, measuredAt ≤90 days under
-  imports/key-rotation-scope/. Set productionProviderOrCloudKeysPresent=false
-  for NOT_APPLICABLE.
+  imports/key-rotation-scope/. Rotation/client-key docs alone ≠ PASS but block
+  N/A launder. Set productionProviderOrCloudKeysPresent=false for
+  NOT_APPLICABLE only when no in-repo gate signals.
 live:
   required: false
   note: Offline discovery + optional imported inventory/coverage results.

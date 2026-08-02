@@ -252,8 +252,8 @@ B) NO — we do not have it
 C) DON'T KNOW / unsure
 
 1. SEC2-M1 — Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks
-   Required to pass: Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths
-   Pass condition: Secrets-manager wiring covers production runtime secrets; 100% resolve from the secrets manager; latest secret scan finds 0 privileged production secrets (measuredAt ≤90 days)
+   Required to pass: Secrets-manager / sealed-secrets / cloud secret-ref wiring for production runtime; CI/repo secret-scan config covering prompts and fixtures; latest secret-scan report with 0 privileged findings (measuredAt ≤90 days); attest or inventory showing 100% of production runtime secrets resolve from the secrets manager
+   Pass condition: Secrets-manager wiring covers production runtime secrets; 100% of those secrets resolve from the secrets manager; the latest secret scan covering repos, prompt registries, and client bundles finds 0 privileged production secrets (measuredAt ≤90 days). If no production runtime secrets exist, score NOT_APPLICABLE.
 2. …
 ```
 

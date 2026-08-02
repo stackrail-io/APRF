@@ -40,7 +40,7 @@ Project → Evidence Collectors (npm run aprf:collect) → Evidence Graph
         → Rule Engine (Check YAML) → Assessment → Remediation → Report
 ```
 
-Local by default; drop runtime exports under `aprf-assessment/imports/<plugin>/`; live APIs only with `APRF_AUDITOR_LIVE=1`.
+Local by default; drop runtime exports under `aprf-assessment/imports/<plugin>/`; live APIs only with `APRF_AUDITOR_LIVE=1`. Hybrid secrets / supply-chain collectors (`secrets-hygiene`, `secret-redaction`, `key-rotation-scope`, `precommit-ci-secret-scan`, `credential-egress-controls`, `dataset-secret-scan-gate`, `artifact-provenance-integrity`) need measured imports — see `capabilities.yaml` and `workflow.md`.
 
 1. Read `capabilities.yaml` to know supported CI/cloud/frameworks and evidence classes.
 2. Collect into `evidence-graph.json` (do not rescan ad hoc per Check when graph exists).

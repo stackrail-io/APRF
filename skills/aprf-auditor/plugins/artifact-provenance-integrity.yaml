@@ -37,8 +37,10 @@ whenUnavailable: >
   (cosign/Notation/SLSA/OCI/checksum) plus
   productionPullsVerifiedAgainstDigestOrSignaturePct=100 and
   unverifiedPullsBlocked=true, measuredAt ≤90 days under
-  imports/artifact-provenance-integrity/. Digest pins alone are not a PASS.
-  Set productionModelOrContainerArtifactsPresent=false for NOT_APPLICABLE.
+  imports/artifact-provenance-integrity/. Digest pins / block-unverified text
+  alone are not a PASS but block N/A launder. Set
+  productionModelOrContainerArtifactsPresent=false for NOT_APPLICABLE only when
+  no in-repo gate signals.
 live:
   required: false
   note: Offline discovery + optional imported verify/block coverage.

@@ -103,6 +103,13 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **ai-multi-provider-continuity** | `ai-multi-provider-continuity.ts` | Level-5 multi-provider contractual + technical continuity (REL-R7) | `imports/ai-multi-provider-continuity/` | — |
 | **ai-rto-rpo-catalog** | `ai-rto-rpo-catalog.ts` | business-critical AI service RTO/RPO in BCP/service-catalog/DR + tested restore/failover (REL-M5) | `imports/ai-rto-rpo-catalog/` | — |
 | **http-auth-probe** | `http-auth-probe.ts` | route catalog | `imports/http-auth-probe/` | **`--base-url` probe** |
+| **secrets-hygiene** | `secrets-hygiene.ts` | secrets-manager + scan + embeds (SEC2-M1) | `imports/secrets-hygiene/` | — |
+| **secret-redaction** | `secret-redaction.ts` | log/trace redaction canary (SEC2-M2) | `imports/secret-redaction/` | — |
+| **key-rotation-scope** | `key-rotation-scope.ts` | key inventory/scope/rotation (SEC2-M3) | `imports/key-rotation-scope/` | — |
+| **precommit-ci-secret-scan** | `precommit-ci-secret-scan.ts` | pre-commit + CI secret scan ≤7d (SEC2-R1) | `imports/precommit-ci-secret-scan/` | — |
+| **credential-egress-controls** | `credential-egress-controls.ts` | credential egress allowlist + deny (SEC2-R2) | `imports/credential-egress-controls/` | — |
+| **dataset-secret-scan-gate** | `dataset-secret-scan-gate.ts` | dataset secret/PII publish gate (SEC2-R3) | `imports/dataset-secret-scan-gate/` | — |
+| **artifact-provenance-integrity** | `artifact-provenance-integrity.ts` | cosign/SLSA/verify + block unverified (SCI-M1) | `imports/artifact-provenance-integrity/` | — |
 | promptfoo | `promptfoo.ts` | eval configs | `imports/promptfoo/` | — |
 | aws / azure / gcp | `iac-cloud.ts` | Terraform/Bicep signals | `imports/<cloud>/` | — |
 | langsmith, phoenix, … | `import-ingest.ts` | — | `imports/<id>/` | — |
@@ -329,7 +336,7 @@ npm run aprf:secrets -- \
   --out /path/to/app/aprf-assessment
 ```
 
-Detects secrets-manager refs, CI secret-scan config, and high-confidence embedded secrets (values never stored). Writes `imports/secrets-hygiene/secrets-hygiene-report.json`.
+Detects secrets-manager refs, CI secret-scan config, and high-confidence embedded secrets (values never stored). PASS needs explicit coverage import (`privilegedSecrets…=0`, 100% resolve, prompts covered, measuredAt ≤90d) — empty SARIF alone ≠ clean scan. Writes `imports/secrets-hygiene/secrets-hygiene-report.json`.
 
 ### SEC2-M2 — Log/trace secret redaction
 
@@ -339,7 +346,7 @@ npm run aprf:secret-redaction -- \
   --out /path/to/app/aprf-assessment
 ```
 
-Detects redaction config and canary tests; PASS needs measured 100% detection. Writes `imports/secret-redaction/secret-redaction-report.json`.
+Detects redaction config and canary tests; PASS needs non-empty `cases`/`results` at 100% detection (bare `detectionRatePct` alone ≠ PASS). Writes `imports/secret-redaction/secret-redaction-report.json`.
 
 ### SEC2-M3 — Provider/cloud key rotation + scope
 
@@ -359,7 +366,7 @@ npm run aprf:precommit-ci-secret-scan -- \
   --out /path/to/app/aprf-assessment
 ```
 
-Detects pre-commit and CI secret-scan configs; PASS needs both + prompt/fixture coverage + blocking + ≤7d green main/PR-merge scan. Writes `imports/precommit-ci-secret-scan/precommit-ci-secret-scan-report.json`.
+Detects pre-commit and CI secret-scan configs (root `gitleaks.toml` → PARTIAL); PASS needs both + prompt/fixture coverage + blocking + ≤7d green main/PR-merge scan with `measuredAt` (not `generatedAt`). Writes `imports/precommit-ci-secret-scan/precommit-ci-secret-scan-report.json`.
 
 ### SEC2-R2 — Credential egress controls
 
@@ -389,7 +396,7 @@ npm run aprf:artifact-provenance-integrity -- \
   --out /path/to/app/aprf-assessment
 ```
 
-Detects cosign, Notation, SLSA, OCI provenance, model-checksum, and digest-pin signals; PASS needs verification + 100% verified pulls + blocked unverified (measuredAt ≤90d). Writes `imports/artifact-provenance-integrity/artifact-provenance-integrity-report.json`.
+Detects cosign, Notation, SLSA, OCI provenance, model-checksum, and digest-pin signals; PASS needs verification + 100% verified pulls + blocked unverified (measuredAt ≤90d). Digest pins alone ≠ PASS but block N/A launder. Writes `imports/artifact-provenance-integrity/artifact-provenance-integrity-report.json`.
 
 ### SEC-M1 — Injection / privilege-escalation policy gate
 

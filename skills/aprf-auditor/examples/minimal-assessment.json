@@ -167,7 +167,7 @@
     "found": ["README.md", "src/"],
     "notObserved": ["k8s/helm", "Dockerfile"],
     "requiredEvidenceMissing": [
-      "Secrets-manager config + CI secret-scan report (SEC2-M1)"
+      "Secrets-manager wiring + clean secret-scan coverage import (SEC2-M1)"
     ],
     "pluginsRan": ["repo-filesystem"],
     "pluginsNeedsUser": ["langsmith", "otel"]
