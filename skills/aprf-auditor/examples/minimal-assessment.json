@@ -55,17 +55,20 @@
       "title": "Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks",
       "category": "secrets",
       "domain": "security",
-      "passCondition": "0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the secrets manager",
+      "passCondition": "Secrets-manager wiring covers production runtime secrets; 100% of those secrets resolve from the secrets manager; the latest secret scan covering repos, prompt registries, and client bundles finds 0 privileged production secrets (measuredAt ≤90 days). If no production runtime secrets exist, score NOT_APPLICABLE.",
       "evidenceRequired": [
-        "Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths"
+        "Secrets-manager / sealed-secrets / cloud secret-ref wiring for production runtime",
+        "CI/repo secret-scan config covering prompts and fixtures",
+        "Latest secret-scan report with 0 privileged findings (measuredAt ≤90 days)",
+        "Attest or inventory showing 100% of production runtime secrets resolve from the secrets manager"
       ],
       "recommendedFixes": [
-        "Implement and operationalize: Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks (SEC2-M1)",
-        "Retain evidence artifacts required by this Check, starting with: Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths",
-        "Wire or verify detectors declared on SEC2-M1 so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until SEC2-M1 passes"
+        "Move production secrets into a secrets manager (External Secrets, Vault, cloud SM, sealed-secrets, or equivalent) and wire runtime resolution",
+        "Add CI secret scanning covering prompts/fixtures; close privileged findings",
+        "Retain scored report under imports/secrets-hygiene/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
-      "manualVerification": "For SEC2-M1 (Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks): inspect current evidence for [Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths] and confirm the pass condition holds — 0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the secrets manager",
+      "manualVerification": "1) Confirm production runtime secrets exist. If none, score NOT_APPLICABLE. 2) Confirm secrets-manager / sealed-secrets / cloud secret-ref wiring (CI ${{ secrets.* }} alone does not count). 3) Confirm 100% of production runtime secrets resolve from that manager. 4) Review a secret scan covering repos, prompt registries, and client bundles (measuredAt ≤90 days): 0 privileged findings. 5) PASS only if manager + 100% resolve + clean scan hold.",
       "gate": "mandatory",
       "severity": "critical",
       "status": "NOT_DEMONSTRATED",
@@ -74,14 +77,16 @@
       "confidenceScore": 0,
       "evidenceFound": [],
       "requiredEvidenceMissing": [
-        "Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths"
+        "Secrets-manager / sealed-secrets / cloud secret-ref wiring for production runtime",
+        "CI/repo secret-scan config covering prompts and fixtures",
+        "Latest secret-scan report with 0 privileged findings (measuredAt ≤90 days)"
       ],
-      "reasoning": "Pass condition requires 0 privileged production secrets in repos/prompts/client bundles and 100% of production runtime secrets from a secrets manager. Manual verification: inspect secrets-manager config + CI/repo secret-scan covering prompts/fixtures. Assessment: no iac/ci/runtime-config nodes after search; user skipped evidence ask.",
-      "recommendedAction": "1) Implement and operationalize: Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks (SEC2-M1). 2) Retain evidence artifacts required by this Check, starting with: Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths. 3) Wire or verify detectors declared on SEC2-M1 so automation matches the pass condition. 4) Block release (or open a time-boxed waiver with owner and expiry) until SEC2-M1 passes.",
+      "reasoning": "Pass condition requires secrets-manager wiring, 100% runtime resolve, and 0 privileged production secrets in repos/prompts/client bundles (measuredAt ≤90 days). Assessment: no iac/ci/runtime-config nodes after search; user skipped evidence ask.",
+      "recommendedAction": "1) Move production secrets into a secrets manager and wire runtime resolution. 2) Add CI secret scanning covering prompts/fixtures. 3) Retain scored report under imports/secrets-hygiene/ (measuredAt ≤90 days). 4) Time-box gaps with owner and expiry ≤90 days.",
       "priority": "P1",
       "remediation": {
-        "fix": "Implement and operationalize: Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks (SEC2-M1)",
-        "example": "Add gitleaks (or equivalent) workflow + ExternalSecrets/SealedSecrets refs.",
+        "fix": "Move production secrets into a secrets manager and wire runtime resolution",
+        "example": "Add gitleaks (or equivalent) workflow + ExternalSecrets/SealedSecrets refs; import coverage under imports/secrets-hygiene/.",
         "reference": "SEC2-M1",
         "owner": "unassigned",
         "priority": "P1",

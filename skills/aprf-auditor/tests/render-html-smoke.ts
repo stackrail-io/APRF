@@ -46,7 +46,7 @@ for (const needle of [
   "Pass condition",
   "Recommended fixes",
   "This assessment",
-  "0 privileged production secrets found in repos",
+  "0 privileged production secrets",
   "DM Sans",
   "gate-badge",
 ]) {
