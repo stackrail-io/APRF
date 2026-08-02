@@ -8,6 +8,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
+- Rewrote **secrets** + collectors; synced `aprf-spec.json`.
+- Rewrote **supply-chain** **SCI-M1** (hybrid artifact provenance/integrity; detectors for cosign, Notation, SLSA, OCI provenance, model checksum, artifact signature, digest pins; `repo-artifact-provenance-integrity` / `artifact-provenance-integrity` requires 100% verified pulls + unverifiedPullsBlocked + measuredAt ≤90d—no vacuous PASS from digest pins alone; N/A via `productionModelOrContainerArtifactsPresent=false`; cleared `technologies`); synced `aprf-spec.json`.
 - Rewrote **infrastructure** **INF-M1**–**INF-M4** (hybrid; inventory-gated PASS; measuredAt ≤90d; sibling distinctions; cleared `technologies`) and collectors (`ai-public-exposure-scan`, `ai-runtime-patching`, `agent-tool-connectivity`, `shared-accelerator-isolation`); M1 private-only path; M2 org-documented SLA (not fixed 14d); M3 vs SEC-M4 sharpened; M4 N/A for managed-API/CPU-only/single-tenant/dedicated GPU; synced `aprf-spec.json`.
 - Rewrote **infrastructure** **INF-R3** (manual IaC + CIS-aligned policy checks with N/A + measuredAt ≤90d); cleaned deprecated **INF-R1** stub toward SCI-R1; cleared `technologies`; synced `aprf-spec.json`.
 - Added CI gate `npm run aprf:collectors:unused` (TypeScript `noUnusedLocals`/`noUnusedParameters` + path-sensitive useless non-nullish initializers) so collector dead defaults like `statusHint = "not_demonstrated"` fail the build; removed those dead initializers across collectors.
@@ -88,6 +90,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 - Auditor **Phase 2b attestation**: for Checks that would be `NOT_DEMONSTRATED`, ask the customer **YES / NO / DON'T KNOW** before finalizing; map YES (no artifact)→PARTIAL, NO→FAIL, DON'T KNOW→NOT_DEMONSTRATED; persist `userAttestation` on controls.
 
 ### Fixed
+- Secrets / SCI-M1 collectors: N/A surface overrides key inventory/client-key (SEC2-M3) and corpus-publish/scan-gate (SEC2-R3); contradicting fail metrics (e.g. privileged findings > 0) beat `present=false` N/A while vacuous control=false fields do not; SEC2-R1 counts root `gitleaks.toml` and ignores `generatedAt` for ≤7d freshness; SEC2-M2 requires measured canary `cases`/`results`; accurate SEC2-M1 N/A-override notes.
 - `@stackrail-io/aprf-engine` no longer advertises a published disk loader; `src/loader.ts` remains repo-script tooling only. Moved `ajv` / `ajv-formats` / `yaml` to `devDependencies` (patch **0.10.1**).
 - Attestation schema 0.6: N/A is not a pass (`passed` must be `false` when `notApplicable` is true); removed “gate-satisfied” wording that contradicted evaluate helpers.
 - Package README `validate` script description now matches root `package.json` (includes both packages’ `test:unit`).

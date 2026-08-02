@@ -80,6 +80,46 @@ npm run aprf:secret-redaction -- --target <app> --out <app>/aprf-assessment
 
 Needs redaction config + canary harness at 100% detection in logs/traces.
 
+## Built-in highlight: `key-rotation-scope` (SEC2-M3)
+
+```bash
+npm run aprf:key-rotation-scope -- --target <app> --out <app>/aprf-assessment
+```
+
+Needs key inventory + least-privilege scope + rotation/short-lived coverage + 0 privileged keys in client apps (inventory/coverage measuredAt ≤90d). Rotation docs alone are not enough.
+
+## Built-in highlight: `precommit-ci-secret-scan` (SEC2-R1)
+
+```bash
+npm run aprf:precommit-ci-secret-scan -- --target <app> --out <app>/aprf-assessment
+```
+
+Needs pre-commit + CI secret scanning covering prompts/fixtures, blocking on high-confidence secrets, and a ≤7-day green main/PR-merge scan. Config alone is not enough.
+
+## Built-in highlight: `credential-egress-controls` (SEC2-R2)
+
+```bash
+npm run aprf:credential-egress-controls -- --target <app> --out <app>/aprf-assessment
+```
+
+Needs egress allowlist/policy for credential-holding runtimes, documented destinations, and ≥1 deny event ≤90 days. Allowlist docs alone are not enough. Distinct from SEC-M4 model-path egress.
+
+## Built-in highlight: `dataset-secret-scan-gate` (SEC2-R3)
+
+```bash
+npm run aprf:dataset-secret-scan-gate -- --target <app> --out <app>/aprf-assessment
+```
+
+Needs a secret/PII scan gate before fine-tune/eval corpus publish, blocking on critical findings, and 100% linked scan reports ≤90 days. Dataset cards alone are not enough.
+
+## Built-in highlight: `artifact-provenance-integrity` (SCI-M1)
+
+```bash
+npm run aprf:artifact-provenance-integrity -- --target <app> --out <app>/aprf-assessment
+```
+
+Needs cosign/Notation/SLSA/OCI/checksum verification + 100% verified production pulls + blocked unverified pulls (verification/enforcement measuredAt ≤90d). Digest pins alone are not enough.
+
 ## Built-in highlight: `injection-policy-gate` (SEC-M1)
 
 ```bash

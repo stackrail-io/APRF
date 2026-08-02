@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:3080266e72dc03da46ab8080369ddc5031f3a03ec3fb018c97f05bd718e1e26b",
+  "generatedAt": "sha256:5147e1790b6042257f68cb693bf3628e550552ef0e4cd2e57c80298d74fc3dba",
   "ruleCount": 178,
   "domains": [
     {
@@ -12100,42 +12100,96 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SCI-M1",
       "category": "supply-chain",
       "title": "Production model and container artifacts must have verified provenance/integrity",
-      "description": "Production model and container artifacts shall have verified provenance/integrity",
-      "whyItMatters": "Production model and container artifacts shall have verified provenance/integrity Failing this leaves a production gap against: 100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked",
+      "description": "Production model and container artifacts shall have verified provenance/integrity—proven by signature, attestation, or digest verification with unverified pulls blocked, not by digest pins in Dockerfiles alone.\n",
+      "whyItMatters": "Unsigned or unattested model weights and container images let supply-chain tampering reach production silently. Cosign/Notation signatures, SLSA/OCI provenance, and model checksum validation—with measured 100% verified pulls and blocked unverified pulls—make integrity enforceable. Distinct from SCI-M2 (MCP/tool inventory pins), SCI-M3 (dependency/update hygiene), and MOD-R1 (model license/provenance review—policy review, not pull-time verify/block).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked",
+      "passCondition": "Provenance/integrity verification is configured for production model and/or container artifacts (signature, attestation, OCI provenance, and/or checksum/ digest); 100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked (measuredAt ≤90 days). If no production model or container artifacts are pulled, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Digest/signature verification logs for last production deploy"
+        "Signature / attestation / provenance / checksum verification config (cosign, Notation, SLSA, OCI, or equivalent)",
+        "Digest or signature verification logs for production model/container pulls in the sample window",
+        "Proof unverified pulls are blocked (admission policy, registry policy, or deploy gate; measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
+            "id": "repo-artifact-provenance-integrity",
+            "params": {
+              "hint": "Discover cosign/Notation/SLSA/OCI/checksum/digest-pin signals; ingest coverage under imports/artifact-provenance-integrity/; require verification config (or present=true), productionPullsVerifiedAgainstDigestOrSignaturePct=100, unverifiedPullsBlocked=true, measuredAt ≤90 days.\n"
+            }
+          },
+          {
+            "id": "artifact-signature-verification",
+            "params": {
+              "hint": "Generic artifact signature verification policy or verify logs for production pulls."
+            }
+          },
+          {
+            "id": "cosign-verification",
+            "params": {
+              "hint": "Cosign sign/verify, keyless OIDC, or policy-controller evidence for images/models."
+            }
+          },
+          {
+            "id": "notation-verification",
+            "params": {
+              "hint": "Notation / ORAS signature verification trust policy for OCI artifacts."
+            }
+          },
+          {
+            "id": "slsa-attestation",
+            "params": {
+              "hint": "SLSA provenance attestations verified at deploy/admit (in-toto / SLSA verifier)."
+            }
+          },
+          {
+            "id": "oci-provenance",
+            "params": {
+              "hint": "OCI referrers / provenance artifacts attached and verified for production images."
+            }
+          },
+          {
+            "id": "model-checksum-validation",
+            "params": {
+              "hint": "Model weight/artifact checksum or digest validation before load or promote."
+            }
+          },
+          {
             "id": "docker-image-digest-pinned",
-            "params": {}
+            "params": {
+              "hint": "Supporting signal — digest-pinned image refs; alone does not satisfy verify+block."
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Digest/signature verification logs for last production deploy"
+              "hint": "If automation cannot prove coverage, attest verification config plus 100% verified production pulls and blocked unverified pulls (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Production model and container artifacts must have verified provenance/integrity): inspect current evidence for [Digest/signature verification logs for last production deploy] and confirm the pass condition holds — 100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked",
-      "falsePositiveGuidance": "(Supply Chain Integrity): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm production pulls model weights and/or container images. If none, score NOT_APPLICABLE. 2) Locate verification config (cosign, Notation, SLSA attestation, OCI provenance, model checksum, or equivalent). 3) Review verification logs for the sample window: 100% of production pulls verify against expected digest or signature. 4) Confirm unverified pulls are blocked (admission/registry/deploy gate). 5) PASS only if config + 100% verified + block hold with measuredAt ≤90 days. Dockerfile digest pins alone do not prove runtime verification. SCI-M2 MCP pins alone do not prove artifact signatures. MOD-R1 license reviews alone do not prove pull-time verify/block.\n",
+      "falsePositiveGuidance": "Do not pass digest pins without verification logs and a block on unverified pulls. Do not pass signing in CI without admit/deploy verification. Do not pass SBOM generation alone as provenance verification. Do not score SCI-M2, SCI-M3, or MOD-R1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Production model and container artifacts must have verified provenance/integrity",
-        "Retain evidence artifacts required by this Check, starting with: Digest/signature verification logs for last production deploy",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Sign model/container artifacts (cosign, Notation, or equivalent) and verify at pull/admit",
+        "Attach and verify SLSA/OCI provenance; validate model checksums before load",
+        "Block unverified pulls; retain coverage under imports/artifact-provenance-integrity/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "SLSA — Supply-chain Levels for Software Artifacts",
           "url": "https://slsa.dev/"
+        },
+        {
+          "title": "Sigstore Cosign",
+          "url": "https://docs.sigstore.dev/cosign/overview/"
+        },
+        {
+          "title": "Notary Project — Notation",
+          "url": "https://notaryproject.dev/"
         },
         {
           "title": "CNCF Software Supply Chain Best Practices",
@@ -12151,20 +12205,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SCI-M3",
         "SCI-M4",
         "SCI-R1",
-        "SCI-R2"
+        "SCI-R2",
+        "MOD-R1",
+        "INF-M2"
       ],
       "tags": [
         "supply-chain",
         "mandatory",
-        "automated"
+        "hybrid",
+        "provenance",
+        "cosign",
+        "slsa",
+        "oci"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "cicd",
-          "docker"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -13107,45 +13162,42 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SEC2-M1",
       "category": "secrets",
       "title": "Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks",
-      "description": "Production secrets shall live in a secrets manager and not in prompts, repos, or prod notebooks",
-      "whyItMatters": "Production secrets shall live in a secrets manager and not in prompts, repos, or prod notebooks Failing this leaves a production gap against: 0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the secrets manager",
+      "description": "Production secrets shall resolve from a secrets manager at runtime and must not appear in repos, prompt registries, or client bundles—proven by secrets-manager wiring plus a fresh secret-scan covering prompts/fixtures, not by CI ${{ secrets.* }} alone.\n",
+      "whyItMatters": "Hardcoded API keys and cloud credentials in prompts, notebooks, or image env turn every leak into standing privileged access. Secrets-manager wiring for 100% of production runtime secrets, plus a ≤90-day scan with 0 privileged findings in repos/prompts/client bundles, makes hygiene measurable. Distinct from AUTHN-R1 (short-lived agent/tool credentials in prompts/config), SEC2-M2 (log/trace redaction of secret-like patterns), and SEC2-M3 (rotation).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the secrets manager",
+      "passCondition": "Secrets-manager wiring covers production runtime secrets; 100% of those secrets resolve from the secrets manager; the latest secret scan covering repos, prompt registries, and client bundles finds 0 privileged production secrets (measuredAt ≤90 days). If no production runtime secrets exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths"
+        "Secrets-manager / sealed-secrets / cloud secret-ref wiring for production runtime",
+        "CI/repo secret-scan config covering prompts and fixtures",
+        "Latest secret-scan report with 0 privileged findings (measuredAt ≤90 days)",
+        "Attest or inventory showing 100% of production runtime secrets resolve from the secrets manager"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
-            "id": "secrets-not-embedded",
-            "params": {}
-          },
-          {
-            "id": "docker-no-secrets-in-env",
-            "params": {}
-          },
-          {
-            "id": "repo-secret-scan-config",
-            "params": {}
+            "id": "repo-secrets-hygiene",
+            "params": {
+              "hint": "Discover secrets-manager wiring and CI secret-scan signals; run high-confidence embedded-secret heuristics (values never stored); ingest coverage under imports/secrets-hygiene/; require manager wiring (or present=true), secretScanCoversPromptsAndFixtures, privilegedSecretsInReposPromptsOrClientBundles=0, productionRuntimeSecretsResolvedFromSecretsManagerPct=100, measuredAt ≤90 days.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths"
+              "hint": "If automation cannot prove coverage, attest secrets-manager wiring for production runtime secrets, 100% resolve from the manager, and a ≤90-day secret scan covering prompts/fixtures with 0 privileged findings.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks): inspect current evidence for [Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths] and confirm the pass condition holds — 0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the secrets manager",
-      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Do not score AUTHN-R1 (short-lived agent/tool tokens in prompts) as a substitute for secrets-manager wiring and repo/prompt secret scans. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm production runtime secrets exist. If none, score NOT_APPLICABLE. 2) Confirm secrets-manager / sealed-secrets / cloud secret-ref wiring (CI ${{ secrets.* }} alone does not count). 3) Confirm 100% of production runtime secrets resolve from that manager. 4) Review a secret scan covering repos, prompt registries, and client bundles (measuredAt ≤90 days): 0 privileged findings. 5) PASS only if manager + 100% resolve + clean scan hold. AUTHN-R1 agent/tool TTL inventory alone does not prove secrets-manager wiring. SEC2-M2 log redaction alone does not prove secrets are not embedded in source.\n",
+      "falsePositiveGuidance": "Do not pass GitHub Actions / CI auth secrets as a production secrets manager. Do not pass secret-scan CI config without a fresh clean report (or equivalent import). Do not pass manager docs without 100% runtime resolve attest. Do not score AUTHN-R1 or SEC2-M2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks",
-        "Retain evidence artifacts required by this Check, starting with: Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Move production secrets into a secrets manager (External Secrets, Vault, cloud SM, sealed-secrets, or equivalent) and wire runtime resolution",
+        "Add CI secret scanning covering prompts/fixtures; close privileged findings",
+        "Retain scored report under imports/secrets-hygiene/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -13155,6 +13207,10 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "CIS Benchmarks — credential hygiene",
           "url": "https://www.cisecurity.org/cis-benchmarks"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -13168,14 +13224,12 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "secrets",
         "mandatory",
-        "automated"
+        "hybrid",
+        "secrets-manager",
+        "secret-scan"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "cicd",
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 1,
         "requiredFromLevel": 2
       },
@@ -13186,33 +13240,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SEC2-M2",
       "category": "secrets",
       "title": "Logging and tracing pipelines must redact secret-like patterns",
-      "description": "Logging and tracing pipelines shall redact secret-like patterns",
-      "whyItMatters": "Logging and tracing pipelines shall redact secret-like patterns Failing this leaves a production gap against: Synthetic secrets (API key/bearer/AWS-key patterns) injected into a canary request are redacted in persisted logs/traces at 100% detection in the test harness",
+      "description": "Logging and tracing pipelines shall redact secret-like patterns—proven by redaction/masking config plus a fresh canary harness that injects API key/bearer/AWS-key patterns and shows 100% redaction in persisted logs/traces, not by filter code alone.\n",
+      "whyItMatters": "Secrets that reach logs and traces become durable exfiltration via observability backends. A canary that injects synthetic privileged patterns and measures 100% redaction makes the control measurable. Distinct from SEC2-M1 (secrets-manager wiring and source/prompt scans), OBS-M2 / AI trace-sensitive redaction (AI payload redaction in traces), and SEC2-M3 (rotation/scoping of provider keys).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Synthetic secrets (API key/bearer/AWS-key patterns) injected into a canary request are redacted in persisted logs/traces at 100% detection in the test harness",
+      "passCondition": "Logging/tracing secret-redaction config is present; a canary harness injects synthetic API key/bearer/AWS-key patterns and shows 100% redaction in persisted logs/traces (measuredAt ≤90 days). If no production logging or tracing pipelines exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Redaction config + sample of redacted traces + synthetic secret-injection test results"
+        "Redaction/masking config for logging and/or tracing pipelines",
+        "Synthetic secret-injection canary harness covering API key/bearer/AWS-key patterns",
+        "Canary results showing 100% detection/redaction in persisted logs/traces (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-secret-redaction",
+            "params": {
+              "hint": "Discover log/trace redaction config and canary-test signals; ingest harness coverage under imports/secret-redaction/; require redaction config, detectionRatePct=100, canary covering API key/bearer/AWS-key patterns, measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Redaction config + sample of redacted traces + synthetic secret-injection test results"
+              "hint": "If automation cannot prove coverage, attest redaction config plus a ≤90-day canary showing 100% redaction of synthetic API key/bearer/ AWS-key patterns in persisted logs/traces.\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Logging and tracing pipelines must redact secret-like patterns): inspect current evidence for [Redaction config + sample of redacted traces + synthetic secret-injection test results] and confirm the pass condition holds — Synthetic secrets (API key/bearer/AWS-key patterns) injected into a canary request are redacted in persisted logs/traces at 100% detection in the test harness",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production logging or tracing pipelines exist. If none, score NOT_APPLICABLE. 2) Confirm redaction/masking config for those pipelines (required—do not PASS from canary docs alone). 3) Review a canary harness that injects synthetic API key/bearer/AWS-key patterns. 4) Confirm 100% are redacted in persisted logs/traces (measuredAt ≤90 days). 5) PASS only if config + 100% canary hold. SEC2-M1 secret scans alone do not prove log/trace redaction. Filter helpers without a measured canary do not satisfy.\n",
+      "falsePositiveGuidance": "Do not pass redaction helpers without a measured canary at 100%. Do not pass canary rate imports without redaction config (in-repo or attested). Do not pass LLM “redacted_thinking” or UI censoring as log/trace redaction. Do not score SEC2-M1 or OBS AI-trace redaction as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Logging and tracing pipelines must redact secret-like patterns",
-        "Retain evidence artifacts required by this Check, starting with: Redaction config + sample of redacted traces + synthetic secret-injection test results",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Add secret-pattern redaction to logging and tracing pipelines (filters, OTel processors, or equivalent)",
+        "Run a canary that injects API key/bearer/AWS-key patterns and asserts 100% redaction in persisted outputs",
+        "Retain harness results under imports/secret-redaction/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -13220,8 +13282,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
         },
         {
+          "title": "OWASP Logging Cheat Sheet",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html"
+        },
+        {
           "title": "CIS Benchmarks — credential hygiene",
           "url": "https://www.cisecurity.org/cis-benchmarks"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -13229,19 +13299,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SEC2-M3",
         "SEC2-R1",
         "SEC2-R2",
-        "SEC2-R3"
+        "SEC2-R3",
+        "OBS-M2"
       ],
       "tags": [
         "secrets",
         "mandatory",
-        "manual"
+        "hybrid",
+        "redaction",
+        "logging",
+        "tracing"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "cicd",
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -13252,33 +13322,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SEC2-M3",
       "category": "secrets",
       "title": "Provider and cloud keys must be rotatable and scoped; client apps must not hold privileged keys",
-      "description": "Provider and cloud keys shall be rotatable and scoped; client apps shall not hold privileged keys",
-      "whyItMatters": "Provider and cloud keys shall be rotatable and scoped; client apps shall not hold privileged keys Failing this leaves a production gap against: 0 privileged provider/cloud keys embedded in client apps; every production key has a documented least-privilege scope and a rotation date within policy (≤90 days or provider-managed short-lived credentials)",
+      "description": "Provider and cloud keys shall be rotatable and least-privilege scoped, and client apps shall not hold privileged keys—proven by a key inventory with scope and rotation evidence plus a client-bundle/scan report, not by secrets-manager presence alone.\n",
+      "whyItMatters": "Long-lived, over-scoped keys in mobile/SPA/desktop clients or unmanaged server configs are standing credentials. An inventory showing 0 privileged keys in client apps and 100% of production keys with documented scope and rotation within policy (≤90 days or provider-managed short-lived credentials) makes hygiene measurable. Distinct from SEC2-M1 (secrets- manager wiring and source/prompt scans), SEC2-M2 (log/trace redaction), and AUTHN-R1 (short-lived agent/tool credentials in prompts/config).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "0 privileged provider/cloud keys embedded in client apps; every production key has a documented least-privilege scope and a rotation date within policy (≤90 days or provider-managed short-lived credentials)",
+      "passCondition": "Inventory of production provider/cloud keys exists; 0 privileged provider/cloud keys are embedded in client apps; 100% of production keys have a documented least-privilege scope and are within rotation policy (≤90 days or provider-managed short-lived credentials) (measuredAt ≤90 days). If no production provider/cloud keys exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Key inventory with least-privilege scope + rotation dates + client bundle/scan report"
+        "Inventory of production provider/cloud keys with least-privilege scope",
+        "Rotation dates or provider-managed short-lived credential evidence within policy",
+        "Client bundle/scan report showing 0 privileged provider/cloud keys (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-key-rotation-scope",
+            "params": {
+              "hint": "Discover key-inventory, rotation-policy, scope/IAM, and client-bundle/scan signals; ingest coverage under imports/key-rotation-scope/; require inventory (or present=true), privilegedProviderOrCloudKeysInClientApps=0, productionKeysWithDocumentedLeastPrivilegeScopePct=100, productionKeysWithinRotationPolicyPct=100, measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Key inventory with least-privilege scope + rotation dates + client bundle/scan report"
+              "hint": "If automation cannot prove coverage, attest a production key inventory with least-privilege scope, rotation within policy (or provider-managed short-lived credentials), and 0 privileged keys in client apps (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Provider and cloud keys must be rotatable and scoped; client apps must not hold privileged keys): inspect current evidence for [Key inventory with least-privilege scope + rotation dates + client bundle/scan report] and confirm the pass condition holds — 0 privileged provider/cloud keys embedded in client apps; every production key has a documented least-privilege scope and a rotation date within policy (≤90 days or provider-managed short-lived credentials)",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production provider/cloud keys exist. If none, score NOT_APPLICABLE. 2) Inventory those keys and document least-privilege scope (required—do not PASS from rotation docs alone). 3) Confirm each key is within rotation policy (≤90 days) or uses provider-managed short-lived credentials. 4) Review a client bundle/scan report: 0 privileged provider/cloud keys embedded in client apps (measuredAt ≤90 days). 5) PASS only if inventory + scope + rotation/short-lived + zero client embeds hold. SEC2-M1 secrets-manager wiring alone does not prove scope/rotation. AUTHN-R1 agent/tool TTL alone does not prove provider/ cloud key inventory for all production keys.\n",
+      "falsePositiveGuidance": "Do not pass secrets-manager presence without a key inventory and scope/rotation evidence. Do not pass rotation calendars without client bundle/scan proof of 0 privileged embeds. Do not score SEC2-M1, SEC2-M2, or AUTHN-R1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Provider and cloud keys must be rotatable and scoped; client apps must not hold privileged keys",
-        "Retain evidence artifacts required by this Check, starting with: Key inventory with least-privilege scope + rotation dates + client bundle/scan report",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Inventory production provider/cloud keys; document least-privilege scopes and rotation (or move to short-lived provider credentials)",
+        "Remove privileged keys from client apps; prefer backend proxy or scoped public tokens",
+        "Retain coverage under imports/key-rotation-scope/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -13288,6 +13366,14 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "CIS Benchmarks — credential hygiene",
           "url": "https://www.cisecurity.org/cis-benchmarks"
+        },
+        {
+          "title": "NIST SP 800-57 — Recommendation for Key Management",
+          "url": "https://csrc.nist.gov/publications/detail/sp/800-57-part-1/rev-5/final"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -13295,19 +13381,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SEC2-M2",
         "SEC2-R1",
         "SEC2-R2",
-        "SEC2-R3"
+        "SEC2-R3",
+        "AUTHN-R1"
       ],
       "tags": [
         "secrets",
         "mandatory",
-        "manual"
+        "hybrid",
+        "rotation",
+        "least-privilege",
+        "client-keys"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "cicd",
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -13318,41 +13404,42 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SEC2-R1",
       "category": "secrets",
       "title": "Production systems should have pre-commit and CI secret scanning including prompt/fixture files",
-      "description": "Pre-commit and CI secret scanning including prompt/fixture files",
-      "whyItMatters": "Pre-commit and CI secret scanning including prompt/fixture files Failing this leaves a production gap against: Secret scanning covers application code, prompts, and fixtures; blocking on high-confidence secrets; last green main-branch scan ≤7 days (or last PR merge evidence)",
+      "description": "Pre-commit and CI secret scanning shall cover application code, prompts, and fixtures and block on high-confidence secrets—proven by scanner config plus a fresh green main-branch (or PR-merge) scan ≤7 days, not by a secrets-manager or a single ≤90-day content scan alone.\n",
+      "whyItMatters": "Secret scanners that skip prompts/fixtures or never block allow credentials to land on main. Dual pre-commit + CI gates with prompt/fixture coverage and a ≤7-day green scan make the control operational. Distinct from SEC2-M1 (secrets-manager wiring + 0 privileged findings ≤90 days), DX-M2 (AI paved-road pipeline gates including auth/eval), and PRM-R2 (prompt-lint rules, not secret scanners).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Secret scanning covers application code, prompts, and fixtures; blocking on high-confidence secrets; last green main-branch scan ≤7 days (or last PR merge evidence)",
+      "passCondition": "Pre-commit and CI secret scanning are configured; both cover application code, prompts, and fixtures; scanning blocks on high-confidence secrets; the latest green main-branch scan (or last PR-merge scan evidence) is ≤7 days (measuredAt ≤7 days). If no application code, prompts, or fixtures exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Pre-commit + CI secret-scan config including prompt/fixture globs + latest scan report with findings disposition"
+        "Pre-commit secret-scan hook/config covering prompts and fixtures",
+        "CI secret-scan workflow covering prompts and fixtures",
+        "Proof scanning blocks on high-confidence secrets",
+        "Latest green main-branch or PR-merge secret-scan evidence (measuredAt ≤7 days)"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
-            "id": "repo-secret-scan-config",
-            "params": {}
-          },
-          {
-            "id": "repo-pre-commit-config",
-            "params": {}
+            "id": "repo-precommit-ci-secret-scan",
+            "params": {
+              "hint": "Discover pre-commit and CI secret-scan configs (prompt/fixture coverage, blocking); ingest coverage under imports/precommit-ci-secret-scan/; require pre-commit + CI configured (or present=true), secretScanCoversPromptsAndFixtures, blocksOnHighConfidenceSecrets, lastGreenMainBranchOrPrMergeScanWithin7Days, measuredAt ≤7 days.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Pre-commit + CI secret-scan config including prompt/fixture globs + latest scan report with findings disposition"
+              "hint": "If automation cannot prove coverage, attest pre-commit + CI secret scanning covering prompts/fixtures, blocking on high-confidence secrets, and a green main-branch or PR-merge scan ≤7 days (measuredAt ≤7 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Pre-commit and CI secret scanning including prompt/fixture files): inspect current evidence for [Pre-commit + CI secret-scan config including prompt/fixture globs + latest scan report with findings disposition] and confirm the pass condition holds — Secret scanning covers application code, prompts, and fixtures; blocking on high-confidence secrets; last green main-branch scan ≤7 days (or last PR merge evidence)",
-      "falsePositiveGuidance": "confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm application code, prompts, or fixtures exist. If none, score NOT_APPLICABLE. 2) Confirm a pre-commit secret-scan hook/config. 3) Confirm a CI secret-scan workflow. 4) Confirm both cover prompts and fixtures (required—do not PASS from app-code-only globs). 5) Confirm the scanner blocks on high-confidence secrets. 6) Review the latest green main-branch (or PR-merge) scan ≤7 days. 7) PASS only if pre-commit + CI + coverage + blocking + fresh green scan hold. SEC2-M1 secrets-manager / ≤90-day content scan alone does not prove dual gates or ≤7-day freshness. DX-M2 AI pipeline gates alone do not prove prompt/fixture secret-scan coverage.\n",
+      "falsePositiveGuidance": "Do not pass CI secret-scan config without a ≤7-day green main/PR-merge report. Do not pass pre-commit alone without CI (or vice versa). Do not pass scanners that exclude prompts/fixtures. Do not score SEC2-M1, DX-M2, or PRM-R2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Pre-commit and CI secret scanning including prompt/fixture files",
-        "Retain evidence artifacts required by this Check, starting with: Pre-commit + CI secret-scan config including prompt/fixture globs + latest scan report with findings disposition",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Add pre-commit and CI secret scanning (gitleaks, trufflehog, detect-secrets, or equivalent) covering prompts and fixtures",
+        "Configure blocking on high-confidence secrets; retain last green main/PR-merge evidence ≤7 days",
+        "Retain coverage under imports/precommit-ci-secret-scan/ (measuredAt ≤7 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -13362,6 +13449,14 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "CIS Benchmarks — credential hygiene",
           "url": "https://www.cisecurity.org/cis-benchmarks"
+        },
+        {
+          "title": "gitleaks",
+          "url": "https://github.com/gitleaks/gitleaks"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -13369,19 +13464,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SEC2-M2",
         "SEC2-M3",
         "SEC2-R2",
-        "SEC2-R3"
+        "SEC2-R3",
+        "DX-M2",
+        "PRM-R2"
       ],
       "tags": [
         "secrets",
         "recommended",
-        "automated"
+        "hybrid",
+        "secret-scan",
+        "pre-commit",
+        "ci"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "cicd",
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -13392,33 +13488,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SEC2-R2",
       "category": "secrets",
       "title": "Production systems should have egress controls limiting where runtime credentials can be used",
-      "description": "Egress controls limiting where runtime credentials can be used",
-      "whyItMatters": "Egress controls limiting where runtime credentials can be used Failing this leaves a production gap against: Runtime credentials can only call documented destinations; ≥1 deny event is observed in test or production logs proving enforcement in the last 90 days",
+      "description": "Egress controls shall limit where runtime credentials can be used—proven by an allowlist/policy for runtimes that hold credentials plus ≥1 observed deny event in test or production logs within 90 days, not by secrets-manager presence or model-path trust-boundary docs alone.\n",
+      "whyItMatters": "Stolen or over-scoped runtime credentials that can call arbitrary destinations become standing exfiltration paths. Documented destinations plus a fresh deny event proving enforcement make credential egress measurable. Distinct from SEC-M4 (model/tool identity trust boundary to internal admin/data stores), INF-M3 (agent/tool least-privilege connectivity to documented dependencies), and SEC2-M1 (secrets-manager wiring / content scans).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Runtime credentials can only call documented destinations; ≥1 deny event is observed in test or production logs proving enforcement in the last 90 days",
+      "passCondition": "Egress allowlist/policy is configured for production runtimes that hold credentials; destinations are documented; ≥1 deny event is observed in test or production logs proving enforcement (measuredAt ≤90 days). If no production runtimes hold credentials, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Egress allowlist/policy config for runtimes that hold credentials + sample deny/allow logs (24h)"
+        "Egress allowlist/policy config for runtimes that hold credentials",
+        "Documented allowed destinations for those credentials",
+        "Sample deny (and optionally allow) logs proving enforcement (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-credential-egress-controls",
+            "params": {
+              "hint": "Discover credential egress allowlist/policy and deny-log signals; ingest coverage under imports/credential-egress-controls/; require allowlist/policy (or present=true), credentialEgressDestinationsDocumented, denyEventCountProvingEnforcementInLast90Days≥1, measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Egress allowlist/policy config for runtimes that hold credentials + sample deny/allow logs (24h)"
+              "hint": "If automation cannot prove coverage, attest egress allowlist/policy for credential-holding runtimes, documented destinations, and ≥1 deny event proving enforcement (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Egress controls limiting where runtime credentials can be used): inspect current evidence for [Egress allowlist/policy config for runtimes that hold credentials + sample deny/allow logs (24h)] and confirm the pass condition holds — Runtime credentials can only call documented destinations; ≥1 deny event is observed in test or production logs proving enforcement in the last 90 days",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production runtimes hold credentials (API keys, cloud tokens, or equivalent). If none, score NOT_APPLICABLE. 2) Locate egress allowlist/policy for those runtimes (required—do not PASS from deny-log snippets alone). 3) Confirm allowed destinations are documented. 4) Review test or production logs showing ≥1 deny event proving enforcement (measuredAt ≤90 days). 5) PASS only if allowlist/policy + documented destinations + ≥1 deny event hold. SEC-M4 model-path probes alone do not prove credential-use egress controls. INF-M3 dependency connectivity alone does not prove credential destination allowlisting. SEC2-M1 secrets-manager wiring alone does not prove egress enforcement.\n",
+      "falsePositiveGuidance": "Do not pass open egress with “deny in docs only.” Do not pass allowlists without a ≤90-day deny event proving enforcement. Do not pass cluster-wide NetworkPolicies that omit credential-holding runtime identities. Do not score SEC-M4, INF-M3, or SEC2-M1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Egress controls limiting where runtime credentials can be used",
-        "Retain evidence artifacts required by this Check, starting with: Egress allowlist/policy config for runtimes that hold credentials + sample deny/allow logs (24h)",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Define egress allowlists for runtimes that hold credentials; document allowed destinations",
+        "Enforce deny-by-default; retain ≥1 deny event from test or production (measuredAt ≤90 days)",
+        "Retain coverage under imports/credential-egress-controls/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -13428,6 +13532,14 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "CIS Benchmarks — credential hygiene",
           "url": "https://www.cisecurity.org/cis-benchmarks"
+        },
+        {
+          "title": "NIST SP 800-207 — Zero Trust Architecture",
+          "url": "https://csrc.nist.gov/publications/detail/sp/800-207/final"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -13435,19 +13547,19 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SEC2-M2",
         "SEC2-M3",
         "SEC2-R1",
-        "SEC2-R3"
+        "SEC2-R3",
+        "SEC-M4",
+        "INF-M3"
       ],
       "tags": [
         "secrets",
         "recommended",
-        "manual"
+        "hybrid",
+        "egress",
+        "credentials"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "cicd",
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -13458,33 +13570,41 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SEC2-R3",
       "category": "secrets",
       "title": "Production systems should have dataset scanning before fine-tuning or eval corpus publish",
-      "description": "Dataset scanning before fine-tuning or eval corpus publish",
-      "whyItMatters": "Dataset scanning before fine-tuning or eval corpus publish Failing this leaves a production gap against: 100% of fine-tune/eval corpora published in the last 90 days have a linked scan report; publish is blocked when critical findings are open",
+      "description": "Fine-tune and eval corpora shall be scanned for secrets/PII before publish— proven by a publish-blocking scan gate plus linked scan reports for 100% of corpora published in the last 90 days, not by dataset cards or repo secret scanning alone.\n",
+      "whyItMatters": "Fine-tune and eval corpora that ship with embedded secrets or PII poison models and leak credentials into training/eval artifacts. A gate that blocks publish on critical findings, with linked scan reports for every recent publish, makes hygiene measurable. Distinct from SEC2-R1 (pre-commit/CI scan of code/prompts/fixtures), SEC2-M1 (secrets-manager + source/prompt content scans), DG-M2 (provenance/quality criteria), and DG-R3 (dataset cards with purpose/source/PII handling fields—documentation, not a scan gate).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "100% of fine-tune/eval corpora published in the last 90 days have a linked scan report; publish is blocked when critical findings are open",
+      "passCondition": "A secret/PII scan gate is configured before fine-tune or eval corpus publish; publish is blocked when critical findings are open; 100% of fine-tune/eval corpora published in the last 90 days have a linked scan report (measuredAt ≤90 days). If no fine-tune or eval corpus publish exists, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Dataset secret/PII scan gate config before fine-tune or eval corpus publish + last scan report for a published corpus"
+        "Dataset secret/PII scan gate config before fine-tune or eval corpus publish",
+        "Proof publish is blocked when critical findings are open",
+        "Linked scan reports covering 100% of fine-tune/eval corpora published in the last 90 days (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-dataset-secret-scan-gate",
+            "params": {
+              "hint": "Discover dataset secret/PII scan-gate and publish-block signals; ingest coverage under imports/dataset-secret-scan-gate/; require gate config (or present=true), publishBlockedWhenCriticalFindingsOpen, fineTuneOrEvalCorporaPublishedInLast90DaysWithLinkedScanReportPct=100, measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Dataset secret/PII scan gate config before fine-tune or eval corpus publish + last scan report for a published corpus"
+              "hint": "If automation cannot prove coverage, attest a secret/PII scan gate before fine-tune/eval corpus publish, blocking on critical findings, and linked scan reports for 100% of corpora published in the last 90 days (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Dataset scanning before fine-tuning or eval corpus publish): inspect current evidence for [Dataset secret/PII scan gate config before fine-tune or eval corpus publish + last scan report for a published corpus] and confirm the pass condition holds — 100% of fine-tune/eval corpora published in the last 90 days have a linked scan report; publish is blocked when critical findings are open",
-      "falsePositiveGuidance": "re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm fine-tune or eval corpus publish exists. If none, score NOT_APPLICABLE. 2) Locate a secret/PII scan gate before publish (required—do not PASS from a single sample scan report alone). 3) Confirm publish is blocked when critical findings are open. 4) Inventory corpora published in the last 90 days; confirm 100% have a linked scan report (measuredAt ≤90 days). 5) PASS only if gate + blocking + 100% linked reports hold. SEC2-R1 code/prompt scanners alone do not prove corpus publish gates. DG-M2 provenance cards alone do not prove secret/PII scanning. DG-R3 PII-handling fields on cards alone do not prove a blocking scan gate.\n",
+      "falsePositiveGuidance": "Do not pass dataset cards without a scan gate and linked reports. Do not pass a gate config without 100% coverage of recent publishes. Do not pass scanners that only cover application code/prompts (SEC2-R1) as corpus publish gates. Do not score DG-M2, DG-R3, SEC2-R1, or SEC2-M1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Dataset scanning before fine-tuning or eval corpus publish",
-        "Retain evidence artifacts required by this Check, starting with: Dataset secret/PII scan gate config before fine-tune or eval corpus publish + last scan report for a published corpus",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Add a secret/PII scan gate before fine-tune and eval corpus publish; block on critical findings",
+        "Link a scan report to every published corpus; close gaps for the last 90 days",
+        "Retain coverage under imports/dataset-secret-scan-gate/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -13494,6 +13614,10 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "CIS Benchmarks — credential hygiene",
           "url": "https://www.cisecurity.org/cis-benchmarks"
+        },
+        {
+          "title": "NIST AI RMF — Manage / Map (data)",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -13501,19 +13625,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SEC2-M2",
         "SEC2-M3",
         "SEC2-R1",
-        "SEC2-R2"
+        "SEC2-R2",
+        "DG-M2",
+        "DG-R3"
       ],
       "tags": [
         "secrets",
         "recommended",
-        "manual"
+        "hybrid",
+        "dataset-scan",
+        "fine-tune",
+        "eval"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "cicd",
-          "prompt-templates"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },

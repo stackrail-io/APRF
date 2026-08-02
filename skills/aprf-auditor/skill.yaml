@@ -12,6 +12,8 @@ status: working-draft
 description: >
   Local, evidence-based AI Production Readiness Framework assessment.
   Collectors → evidence graph → Checks → remediation → report.
+  Hybrid secrets (SEC2-*) and SCI-M1 collectors require measured import
+  coverage (see capabilities.yaml / workflow.md) — config or docs alone ≠ PASS.
   Any LLM or coding agent can load this skill without StackRail services.
 
 triggers:

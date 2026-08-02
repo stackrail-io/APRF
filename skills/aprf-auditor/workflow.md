@@ -140,10 +140,11 @@ PASS only with ≥10 automated cross-tenant attack cases and 0 successful unauth
 ```bash
 npm run aprf:secrets -- \
   --target <project> --out <project>/aprf-assessment
-# or drop gitleaks/trufflehog SARIF under imports/secrets-hygiene/
+# or drop coverage JSON under imports/secrets-hygiene/
+# (explicit privilegedSecretsInReposPromptsOrClientBundles=0; empty SARIF alone ≠ clean scan)
 ```
 
-PASS only with secrets-manager runtime wiring AND a clean secret-scan (0 privileged secrets in repos/prompts/fixtures).
+PASS only with secrets-manager runtime wiring AND a clean secret-scan import (0 privileged secrets in repos, prompt registries, and client bundles — include fixtures when present; measuredAt ≤90d). Heuristic embeds fail even when `productionRuntimeSecretsPresent=false`.
 
 **SEC2-M2 (secret-redaction):** log scrubbers in code are **supporting** only. Prefer:
 
@@ -153,7 +154,57 @@ npm run aprf:secret-redaction -- \
 # or drop canary harness JSON under imports/secret-redaction/
 ```
 
-PASS only with redaction config + canary results showing 100% detection of synthetic API/bearer/AWS-key patterns in persisted logs/traces.
+PASS only with redaction config + non-empty canary `cases`/`results` showing 100% detection of synthetic API/bearer/AWS-key patterns in persisted logs/traces (measuredAt ≤90d). Bare `detectionRatePct=100` without cases is not a PASS.
+
+**SEC2-M3 (key-rotation-scope):** rotation calendars alone are **supporting** only. Prefer:
+
+```bash
+npm run aprf:key-rotation-scope -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop inventory/coverage JSON under imports/key-rotation-scope/
+```
+
+PASS only with a production key inventory + 100% documented least-privilege scope + 100% within rotation policy (or provider short-lived credentials) + 0 privileged keys in client apps (measuredAt ≤90d).
+
+**SEC2-R1 (precommit-ci-secret-scan):** scanner config alone is **supporting** only. Prefer:
+
+```bash
+npm run aprf:precommit-ci-secret-scan -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop green-scan coverage JSON under imports/precommit-ci-secret-scan/
+```
+
+PASS only with pre-commit + CI secret scanning covering prompts/fixtures, blocking on high-confidence secrets, and a green main-branch or PR-merge scan ≤7 days (`measuredAt` ≤7d — `generatedAt` is ignored). Root `gitleaks.toml` alone is PARTIAL, not not_demonstrated. SEC2-M1 ≤90d content scans do not satisfy this freshness gate.
+
+**SEC2-R2 (credential-egress-controls):** allowlist docs alone are **supporting** only. Prefer:
+
+```bash
+npm run aprf:credential-egress-controls -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop deny-event coverage JSON under imports/credential-egress-controls/
+```
+
+PASS only with egress allowlist/policy for credential-holding runtimes + documented destinations + ≥1 deny event proving enforcement (measuredAt ≤90d). SEC-M4 model-path probes do not substitute.
+
+**SEC2-R3 (dataset-secret-scan-gate):** dataset cards alone are **supporting** only. Prefer:
+
+```bash
+npm run aprf:dataset-secret-scan-gate -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop linked-scan coverage JSON under imports/dataset-secret-scan-gate/
+```
+
+PASS only with a secret/PII scan gate before fine-tune/eval publish + blocking on critical findings + 100% linked scan reports for corpora published in the last 90 days (measuredAt ≤90d). SEC2-R1 code/prompt scanners and DG dataset cards do not substitute.
+
+**SCI-M1 (artifact-provenance-integrity):** Dockerfile digest pins alone are **supporting** only. Prefer:
+
+```bash
+npm run aprf:artifact-provenance-integrity -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop verify/block coverage JSON under imports/artifact-provenance-integrity/
+```
+
+PASS only with cosign/Notation/SLSA/OCI/checksum verification configured + 100% of production model/container pulls verified + unverified pulls blocked (measuredAt ≤90d).
 
 **SEC-M1 (injection-policy-gate):** content-filter warnings are **supporting** only. Prefer:
 
@@ -201,8 +252,8 @@ B) NO — we do not have it
 C) DON'T KNOW / unsure
 
 1. SEC2-M1 — Production secrets must live in a secrets manager and not in prompts, repos, or prod notebooks
-   Required to pass: Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths
-   Pass condition: 0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the secrets manager
+   Required to pass: Secrets-manager / sealed-secrets / cloud secret-ref wiring for production runtime; CI/repo secret-scan config covering prompts and fixtures; latest secret-scan report with 0 privileged findings (measuredAt ≤90 days); attest or inventory showing 100% of production runtime secrets resolve from the secrets manager
+   Pass condition: Secrets-manager wiring covers production runtime secrets; 100% of those secrets resolve from the secrets manager; the latest secret scan covering repos, prompt registries, and client bundles finds 0 privileged production secrets (measuredAt ≤90 days). If no production runtime secrets exist, score NOT_APPLICABLE.
 2. …
 ```
 
@@ -219,7 +270,7 @@ Batch in one message; allow replies like `all C`, `SEC2-M1:A`, or a full A/B/C m
 | User says NO | **`FAIL`** |
 | Don't know / nothing found | **`NOT_DEMONSTRATED`** |
 
-Same bar for `automated` / `hybrid`: chat YES alone never upgrades to PASS. SEC2-M1 is `automated` — it expects scan/config evidence (detectors + `evidenceRequired`), not a verbal attestation.
+Same bar for `automated` / `hybrid`: chat YES alone never upgrades to PASS. SEC2-M1 is `hybrid` — it expects secrets-manager + scan/import evidence (detectors + `evidenceRequired`), not a verbal attestation.
 
 **Answer → status mapping** (record on the control as `userAttestation`):
 

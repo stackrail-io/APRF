@@ -3,13 +3,10 @@
  * PASS unlocks require a measuredAt timestamp ≤ maxAgeDays (default 90).
  */
 export function parseMeasuredAt(data: Record<string, unknown>): string | null {
-  // Do not fall back to assessedAt — that is wall-clock for the collector run,
-  // not evidence freshness, and would launder undated inventories into PASS.
-  const raw =
-    data.measuredAt ??
-    data.measured_at ??
-    data.generatedAt ??
-    data.generated_at;
+  // Prefer measuredAt only. Do not fall back to assessedAt (collector wall-clock)
+  // or generatedAt (report packaging time) — those launder undated evidence into
+  // PASS, especially under short freshness windows (e.g. SEC2-R1 ≤7d).
+  const raw = data.measuredAt ?? data.measured_at;
   return typeof raw === "string" && raw.trim() ? raw.trim() : null;
 }
 

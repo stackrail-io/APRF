@@ -34,7 +34,22 @@ npm run aprf:report-html -- \
 
    Valid `REPORT.html` must include `stackrail.io` links and a **Visual overview** section (donut / bars / gauge). If missing, re-run the command above.
 
-Collectors: local by default; `aprf-assessment/imports/<plugin>/` for runtime exports; `imports/custom/` for out-of-plugin evidence; live APIs only with `APRF_AUDITOR_LIVE=1`. For **AUTHN-M1**, run `http-auth-probe` with `--base-url` (or ingest `imports/http-auth-probe/auth-probe-report.json`) — do not PASS from auth middleware code alone. For **AUTHN-M2**, run `mcp-s2s-inventory` with an inventory export or `--base-url` + `--admin-token` (or `--admin-email` + `--admin-password` to sign in) — do not PASS from OAuth support in code alone. For **AUTHZ-M1**, run `authz-entry-tests` — do not PASS from `has_permission` code alone; need automated denial tests for AI entry points. For **AUTHZ-M2**, run `cross-tenant-tests` — do not PASS from `user_id` filters alone; need ≥10 cross-tenant attack cases with 0 unauthorized successes. For **SEC2-M1**, run `secrets-hygiene` — do not PASS from `${{ secrets.* }}` CI vars alone; need secrets-manager wiring + clean secret-scan covering prompts/fixtures. For **SEC2-M2**, run `secret-redaction` — do not PASS from redact helpers alone; need a canary harness with 100% detection in persisted logs/traces. For **SEC-M1**, run `injection-policy-gate` — do not PASS from prompt-injection warnings alone; need a versioned corpus + CI gate with ≥95% deny and 0 model-text privilege grants.
+Collectors: local by default; `aprf-assessment/imports/<plugin>/` for runtime exports; `imports/custom/` for out-of-plugin evidence; live APIs only with `APRF_AUDITOR_LIVE=1`. Full plugin bars: `capabilities.yaml` + `workflow.md`. Do **not** PASS from code/docs alone for:
+
+| Check | Collector | Needs (short) |
+| --- | --- | --- |
+| AUTHN-M1 | `http-auth-probe` | live `--base-url` or probe import — not middleware alone |
+| AUTHN-M2 | `mcp-s2s-inventory` | inventory export or admin token — not OAuth support alone |
+| AUTHZ-M1 | `authz-entry-tests` | automated denial tests for AI entry points |
+| AUTHZ-M2 | `cross-tenant-tests` | ≥10 attack cases, 0 unauthorized successes |
+| SEC2-M1 | `secrets-hygiene` | manager wiring + explicit clean-scan coverage (empty SARIF ≠ clean) |
+| SEC2-M2 | `secret-redaction` | non-empty canary `cases`/`results` at 100% — not bare `detectionRatePct` |
+| SEC2-M3 | `key-rotation-scope` | inventory + 100% scope/rotation + 0 client privileged keys |
+| SEC2-R1 | `precommit-ci-secret-scan` | pre-commit + CI + blocking + `measuredAt` ≤7d (not `generatedAt`) |
+| SEC2-R2 | `credential-egress-controls` | allowlist + destinations + ≥1 deny ≤90d |
+| SEC2-R3 | `dataset-secret-scan-gate` | publish scan gate + blocking + 100% linked reports |
+| SCI-M1 | `artifact-provenance-integrity` | verify + 100% verified pulls + block unverified (pins alone ≠ PASS) |
+| SEC-M1 | `injection-policy-gate` | versioned corpus + CI gate ≥95% deny |
 
 ## Hard rules
 

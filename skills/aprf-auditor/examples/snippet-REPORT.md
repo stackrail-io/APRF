@@ -37,4 +37,4 @@ Illustrative fixture: SEC2-M1 NOT_DEMONSTRATED; AGN-M1 NOT_APPLICABLE.
 | Recommended Action | Wire secrets manager + CI secret scanning; re-assess. |
 | Priority | P1 |
 
-**Evidence required to pass:** Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths.
+**Evidence required to pass:** Secrets-manager / sealed-secrets / cloud secret-ref wiring for production runtime; CI/repo secret-scan config covering prompts and fixtures; latest secret-scan report with 0 privileged findings (measuredAt ≤90 days); attest or inventory showing 100% of production runtime secrets resolve from the secrets manager.

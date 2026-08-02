@@ -1,8 +1,10 @@
 /**
- * secrets-hygiene — SEC2-M1 detector executor.
+ * secrets-hygiene — SEC2-M1 / repo-secrets-hygiene.
  *
- * Looks for secrets-manager wiring, CI/repo secret-scan config, and high-confidence
- * embedded privileged secrets. Never writes secret values into the report.
+ * Discovers secrets-manager wiring, CI/repo secret-scan config, and
+ * high-confidence embedded privileged secrets (values never stored).
+ * Import coverage under imports/secrets-hygiene/ unlocks PASS (measuredAt ≤90d).
+ * CI ${{ secrets.* }} alone ≠ production secrets manager.
  */
 import { writeFileSync, existsSync } from "node:fs";
 import { join, basename } from "node:path";
@@ -20,9 +22,21 @@ import {
   rel,
   walkFiles,
 } from "./lib/fs.ts";
+import {
+  asBool,
+  measuredAtFresh,
+  mergeAndBool,
+  mergeMaxNum,
+  mergeMinNum,
+  mergeOldestMeasuredAt,
+  mergeOrBool,
+  parseMeasuredAt,
+} from "./lib/import-attest.ts";
 
 const PLUGIN_ID = "secrets-hygiene";
 const RELATED = ["SEC2-M1"] as const;
+const DETECTOR_ID = "repo-secrets-hygiene";
+const IMPORT_MAX_AGE_DAYS = 90;
 
 const MANAGER_FILE_RE =
   /(external-?secrets|sealed-?secrets|secretproviderclass|vault|doppler|1password|aws.?secrets.?manager|secretsmanager|azure.?key.?vault|gcp.?secret|google.?secret.?manager)/i;
@@ -39,7 +53,10 @@ const SCAN_CONFIG_NAMES =
 /** High-confidence privileged patterns — capture groups unused; values never logged. */
 const EMBEDDED_PATTERNS: Array<{ id: string; re: RegExp }> = [
   { id: "aws-access-key", re: /\bAKIA[0-9A-Z]{16}\b/g },
-  { id: "aws-secret-assign", re: /aws_secret_access_key\s*[=:]\s*['"][A-Za-z0-9/+=]{30,}['"]/gi },
+  {
+    id: "aws-secret-assign",
+    re: /aws_secret_access_key\s*[=:]\s*['"][A-Za-z0-9/+=]{30,}['"]/gi,
+  },
   { id: "openai-sk", re: /\bsk-[A-Za-z0-9]{20,}\b/g },
   { id: "github-pat", re: /\bghp_[A-Za-z0-9]{30,}\b/g },
   { id: "slack-token", re: /\bxox[baprs]-[A-Za-z0-9-]{10,}\b/g },
@@ -70,6 +87,7 @@ export interface EmbeddedFinding {
 export interface SecretsHygieneReport {
   schemaVersion: "0.2.0";
   pluginId: typeof PLUGIN_ID;
+  detectorId: typeof DETECTOR_ID;
   relatedCheckIds: string[];
   assessedAt: string;
   secretsManager: {
@@ -84,14 +102,29 @@ export interface SecretsHygieneReport {
     importedSources: string[];
   };
   embeddedFindings: EmbeddedFinding[];
+  importedResults: {
+    found: boolean;
+    productionRuntimeSecretsPresent: boolean | null;
+    secretsManagerWiringPresent: boolean | null;
+    productionRuntimeSecretsResolvedFromSecretsManagerPct: number | null;
+    privilegedSecretsInReposPromptsOrClientBundles: number | null;
+    secretScanCoversPromptsAndFixtures: boolean | null;
+    measuredAt: string | null;
+    sources: string[];
+  };
   summary: {
     embeddedCount: number;
     embeddedInPromptsOrFixtures: number;
     secretsManagerPresent: boolean;
     secretScanPresent: boolean;
-    /** PASS criteria: manager + scan + 0 embedded (and imported findings 0 if present) */
+    gateSignalsPresent: boolean;
     sec2M1Satisfied: boolean | null;
-    statusHint: "pass" | "partial" | "fail" | "not_demonstrated";
+    statusHint:
+      | "pass"
+      | "partial"
+      | "fail"
+      | "not_demonstrated"
+      | "not_applicable";
   };
   notes: string[];
 }
@@ -101,7 +134,14 @@ function importDir(ctx: CollectorContext): string {
 }
 
 function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path) || /\.(min\.js|map|lock|png|jpg|gif|webp|woff2?)$/i.test(path);
+  return (
+    SKIP_DIR_HINT.test(path) ||
+    /\.(min\.js|map|lock|png|jpg|gif|webp|woff2?)$/i.test(path)
+  );
+}
+
+function asNum(v: unknown): number | null {
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
 
 function detectSecretsManager(
@@ -175,7 +215,6 @@ function detectSecretScanConfig(
     }
     if (refs.length >= 16) break;
   }
-  // de-dupe
   return { found: refs.length > 0, refs: [...new Set(refs)].slice(0, 16) };
 }
 
@@ -207,7 +246,6 @@ function heuristicEmbeddedScan(
       ".Dockerfile",
     ],
   });
-  // Also plain Dockerfile without extension
   const extras = ["Dockerfile", "Dockerfile.dev", ".env", ".env.example"].map(
     (n) => join(targetPath, n),
   );
@@ -216,7 +254,6 @@ function heuristicEmbeddedScan(
   for (const f of all) {
     const r = rel(targetPath, f);
     if (isSkippable(r)) continue;
-    // Skip docs examples that are clearly placeholders often — still scan .env.example lightly
     const text = readText(f, 300_000);
     if (!text) continue;
     const inPrompt = PROMPT_FIXTURE_HINT.test(r);
@@ -226,7 +263,6 @@ function heuristicEmbeddedScan(
       let m: RegExpExecArray | null;
       while ((m = re.exec(text))) {
         const matched = m[0];
-        // Skip obvious placeholders
         if (
           /your[_-]?api[_-]?key|changeme|example|xxx+|placeholder|<.*>|\$\{|process\.env|os\.environ|secrets\./i.test(
             matched,
@@ -234,7 +270,6 @@ function heuristicEmbeddedScan(
         ) {
           continue;
         }
-        // .env.example with empty/short values — generic pattern may false-positive; require length
         if (/\.env\.example$/i.test(r) && id === "generic-api-key-assign") {
           continue;
         }
@@ -251,13 +286,18 @@ function heuristicEmbeddedScan(
   return findings;
 }
 
-function loadImportedScan(ctx: CollectorContext): {
-  found: boolean;
-  findingCount: number | null;
-  sources: string[];
-} {
+function loadImported(
+  ctx: CollectorContext,
+): SecretsHygieneReport["importedResults"] {
   const sources: string[] = [];
-  let findingCount: number | null = null;
+  let productionRuntimeSecretsPresent: boolean | null = null;
+  let secretsManagerWiringPresent: boolean | null = null;
+  let productionRuntimeSecretsResolvedFromSecretsManagerPct: number | null =
+    null;
+  let privilegedSecretsInReposPromptsOrClientBundles: number | null = null;
+  let secretScanCoversPromptsAndFixtures: boolean | null = null;
+  let measuredAt: string | null = null;
+
   for (const file of listImportFiles(ctx.outputDir, PLUGIN_ID)) {
     if (!/\.(json|sarif)$/i.test(file)) continue;
     if (/secrets-hygiene-report\.json$/i.test(file)) continue;
@@ -265,75 +305,134 @@ function loadImportedScan(ctx: CollectorContext): {
     if (!text) continue;
     try {
       const data = JSON.parse(text) as Record<string, unknown>;
-      sources.push(rel(ctx.outputDir, file));
-      let n = 0;
+      sources.push(basename(file));
+      measuredAt = mergeOldestMeasuredAt(measuredAt, parseMeasuredAt(data));
+
+      productionRuntimeSecretsPresent = mergeOrBool(
+        productionRuntimeSecretsPresent,
+        asBool(data.productionRuntimeSecretsPresent) ??
+          asBool(data.production_runtime_secrets_present) ??
+          asBool(data.productionSecretsPresent),
+      );
+      secretsManagerWiringPresent = mergeAndBool(
+        secretsManagerWiringPresent,
+        asBool(data.secretsManagerWiringPresent) ??
+          asBool(data.secrets_manager_wiring_present) ??
+          asBool(data.secretsManagerPresent),
+      );
+      productionRuntimeSecretsResolvedFromSecretsManagerPct = mergeMinNum(
+        productionRuntimeSecretsResolvedFromSecretsManagerPct,
+        asNum(data.productionRuntimeSecretsResolvedFromSecretsManagerPct) ??
+          asNum(
+            data.production_runtime_secrets_resolved_from_secrets_manager_pct,
+          ) ??
+          asNum(data.resolvedFromSecretsManagerPct),
+      );
+      privilegedSecretsInReposPromptsOrClientBundles = mergeMaxNum(
+        privilegedSecretsInReposPromptsOrClientBundles,
+        asNum(data.privilegedSecretsInReposPromptsOrClientBundles) ??
+          asNum(data.privileged_secrets_in_repos_prompts_or_client_bundles) ??
+          asNum(data.privilegedSecretsFoundInScan),
+      );
+      secretScanCoversPromptsAndFixtures = mergeAndBool(
+        secretScanCoversPromptsAndFixtures,
+        asBool(data.secretScanCoversPromptsAndFixtures) ??
+          asBool(data.secret_scan_covers_prompts_and_fixtures) ??
+          asBool(data.scanCoversPromptsAndFixtures),
+      );
+
+      // Structural scan payloads (SARIF runs / findings / results arrays) only
+      // raise the privileged-secrets metric when they contain findings.
+      // Empty runs/results must not attest privilegedSecrets…=0 — that requires
+      // the explicit field above.
+      let structuralFindingCount: number | null = null;
       if (Array.isArray(data.runs)) {
-        // SARIF
+        let n = 0;
         for (const run of data.runs as Array<{ results?: unknown[] }>) {
           n += run.results?.length ?? 0;
         }
-      } else if (typeof data.findings === "number") {
-        n = data.findings;
-      } else if (Array.isArray(data.findings)) {
-        n = data.findings.length;
-      } else if (typeof data.embeddedCount === "number") {
-        n = data.embeddedCount;
-      } else if (Array.isArray(data.results)) {
-        n = data.results.length;
+        if (n > 0) structuralFindingCount = n;
+      } else if (Array.isArray(data.findings) && data.findings.length > 0) {
+        structuralFindingCount = data.findings.length;
+      } else if (Array.isArray(data.results) && data.results.length > 0) {
+        structuralFindingCount = data.results.length;
+      } else if (
+        typeof data.embeddedCount === "number" &&
+        data.embeddedCount > 0
+      ) {
+        structuralFindingCount = data.embeddedCount;
+      } else if (typeof data.findings === "number" && data.findings > 0) {
+        structuralFindingCount = data.findings;
       }
-      findingCount = (findingCount ?? 0) + n;
+      if (structuralFindingCount !== null) {
+        privilegedSecretsInReposPromptsOrClientBundles = mergeMaxNum(
+          privilegedSecretsInReposPromptsOrClientBundles,
+          structuralFindingCount,
+        );
+      }
     } catch {
       /* skip */
     }
   }
+
   return {
     found: sources.length > 0,
-    findingCount,
+    productionRuntimeSecretsPresent,
+    secretsManagerWiringPresent,
+    productionRuntimeSecretsResolvedFromSecretsManagerPct,
+    privilegedSecretsInReposPromptsOrClientBundles,
+    secretScanCoversPromptsAndFixtures,
+    measuredAt,
     sources,
   };
 }
 
-export function buildSecretsReport(
-  opts: {
-    assessedAt: string;
-    manager: { found: boolean; refs: string[] };
-    scan: { found: boolean; refs: string[] };
-    embedded: EmbeddedFinding[];
-    imported: {
-      found: boolean;
-      findingCount: number | null;
-      sources: string[];
-    };
-  },
-): SecretsHygieneReport {
+export function buildSecretsReport(opts: {
+  assessedAt: string;
+  manager: { found: boolean; refs: string[] };
+  scan: { found: boolean; refs: string[] };
+  embedded: EmbeddedFinding[];
+  imported: SecretsHygieneReport["importedResults"];
+}): SecretsHygieneReport {
   const notes: string[] = [];
+  const gateSignalsPresent = opts.manager.found || opts.scan.found;
+  // Heuristic embeds prove privileged secrets exist — never allow N/A launder.
+  const surfaceProvedForNaOverride =
+    opts.manager.found || opts.embedded.length > 0;
+  const secretsManagerPresent =
+    opts.manager.found ||
+    opts.imported.secretsManagerWiringPresent === true;
   const secretScanPresent = opts.scan.found || opts.imported.found;
-  const secretsManagerPresent = opts.manager.found;
   const embeddedCount = opts.embedded.length;
   const embeddedInPrompts = opts.embedded.filter((f) => f.inPromptOrFixture)
     .length;
-  const importedFindings = opts.imported.findingCount;
 
+  if (!gateSignalsPresent && !opts.imported.found) {
+    notes.push(
+      "No secrets-hygiene signals — SEC2-M1 remains not demonstrated until secrets-manager wiring + secret-scan evidence or an explicit N/A attest (productionRuntimeSecretsPresent=false) is imported.",
+    );
+  }
   if (!secretsManagerPresent) {
     notes.push(
       "No secrets-manager / sealed-secrets / cloud secret-ref wiring found. CI ${{ secrets.* }} alone does not count as production runtime secrets manager.",
     );
-  } else {
+  } else if (opts.manager.found) {
     notes.push(
       `Secrets-manager-like refs: ${opts.manager.refs.slice(0, 3).join(", ")}`,
     );
   }
-
-  if (!secretScanPresent) {
+  if (opts.scan.found) {
     notes.push(
-      "No CI/repo secret-scan config (gitleaks/trufflehog/detect-secrets) and no imported scan report.",
+      `Secret-scan config: ${opts.scan.refs.slice(0, 3).join(", ")}; CI config alone does not prove a clean latest scan.`,
     );
-  } else if (opts.scan.found) {
-    notes.push(`Secret-scan config: ${opts.scan.refs.slice(0, 3).join(", ")}`);
   }
   if (opts.imported.found) {
     notes.push(
-      `Imported scan report(s): ${opts.imported.sources.join(", ")} (findings=${importedFindings})`,
+      `Imported: ${opts.imported.sources.join(", ")} (scopePresent=${opts.imported.productionRuntimeSecretsPresent}, manager=${opts.imported.secretsManagerWiringPresent}, resolvedPct=${opts.imported.productionRuntimeSecretsResolvedFromSecretsManagerPct}, privilegedFindings=${opts.imported.privilegedSecretsInReposPromptsOrClientBundles}, coversPrompts=${opts.imported.secretScanCoversPromptsAndFixtures}, measuredAt=${opts.imported.measuredAt})`,
+    );
+  } else if (gateSignalsPresent) {
+    notes.push(
+      "Signals alone are PARTIAL — import privilegedSecretsInReposPromptsOrClientBundles=0 + productionRuntimeSecretsResolvedFromSecretsManagerPct=100 + secretScanCoversPromptsAndFixtures=true (measuredAt ≤90d) under imports/secrets-hygiene/ to PASS. Set productionRuntimeSecretsPresent=false for NOT_APPLICABLE.",
     );
   }
   if (embeddedCount > 0) {
@@ -342,22 +441,152 @@ export function buildSecretsReport(
     );
   }
 
+  const importFresh = measuredAtFresh(
+    opts.imported.measuredAt,
+    new Date(opts.assessedAt),
+    IMPORT_MAX_AGE_DAYS,
+  );
+  // PASS needs manager wiring — scan config / present=true alone must not unlock.
+  const managerOk = secretsManagerPresent;
+
+  const privilegedCount =
+    opts.imported.privilegedSecretsInReposPromptsOrClientBundles;
+  const privilegedOk = privilegedCount === 0;
+  const resolvedOk =
+    opts.imported.productionRuntimeSecretsResolvedFromSecretsManagerPct ===
+    100;
+  const coversOk = opts.imported.secretScanCoversPromptsAndFixtures === true;
+
   let statusHint: SecretsHygieneReport["summary"]["statusHint"];
   let sec2M1Satisfied: boolean | null = null;
 
-  const scanClean =
-    embeddedCount === 0 &&
-    (importedFindings === null || importedFindings === 0);
+  const naCandidate =
+    opts.imported.found &&
+    opts.imported.productionRuntimeSecretsPresent === false &&
+    !surfaceProvedForNaOverride;
+  // Positive findings contradict N/A; vacuous control=false fields under N/A do not.
+  const contradictingFail =
+    privilegedCount !== null && privilegedCount > 0;
+  const explicitFail =
+    opts.imported.found &&
+    (!naCandidate || contradictingFail) &&
+    ((privilegedCount !== null && privilegedCount > 0) ||
+      (opts.imported.productionRuntimeSecretsResolvedFromSecretsManagerPct !==
+        null &&
+        opts.imported.productionRuntimeSecretsResolvedFromSecretsManagerPct <
+          100) ||
+      opts.imported.secretScanCoversPromptsAndFixtures === false ||
+      (opts.imported.secretsManagerWiringPresent === false &&
+        !opts.manager.found));
 
-  if (embeddedCount > 0 || (importedFindings !== null && importedFindings > 0)) {
+  const naOverrideReasons: string[] = [];
+  if (opts.manager.found) naOverrideReasons.push("secrets-manager wiring");
+  if (embeddedCount > 0) {
+    naOverrideReasons.push("heuristic embedded privileged secrets");
+  }
+  const naOverrideNote =
+    naOverrideReasons.length > 0
+      ? `Imported productionRuntimeSecretsPresent=false ignored — in-repo ${naOverrideReasons.join(" / ")} prove the surface exists.`
+      : "Imported productionRuntimeSecretsPresent=false ignored — in-repo signals prove the surface exists.";
+
+  // Heuristic embeds + contradicting fail metrics beat N/A.
+  if (embeddedCount > 0) {
     statusHint = "fail";
     sec2M1Satisfied = false;
-  } else if (secretsManagerPresent && secretScanPresent && scanClean) {
+    if (
+      opts.imported.found &&
+      opts.imported.productionRuntimeSecretsPresent === false
+    ) {
+      notes.push(naOverrideNote);
+    }
+    if (!opts.imported.found) {
+      notes.push(
+        "Heuristic embedded privileged secret patterns — SEC2-M1 fail.",
+      );
+    }
+  } else if (explicitFail) {
+    statusHint = "fail";
+    sec2M1Satisfied = false;
+    if (
+      opts.imported.productionRuntimeSecretsPresent === false &&
+      surfaceProvedForNaOverride
+    ) {
+      notes.push(naOverrideNote);
+    }
+    notes.push(
+      "Imported evidence shows privileged findings, unresolved runtime secrets, missing prompt/fixture scan coverage, or missing manager wiring — SEC2-M1 fail.",
+    );
+  } else if (
+    opts.imported.found &&
+    opts.imported.productionRuntimeSecretsPresent === false &&
+    !surfaceProvedForNaOverride
+  ) {
+    statusHint = "not_applicable";
+    sec2M1Satisfied = null;
+    notes.push(
+      "Imported productionRuntimeSecretsPresent=false — SEC2-M1 NOT_APPLICABLE.",
+    );
+  } else if (
+    opts.imported.productionRuntimeSecretsPresent === false &&
+    surfaceProvedForNaOverride
+  ) {
+    notes.push(naOverrideNote);
+    if (
+      managerOk &&
+      privilegedOk &&
+      resolvedOk &&
+      coversOk &&
+      importFresh &&
+      opts.imported.found
+    ) {
+      statusHint = "pass";
+      sec2M1Satisfied = true;
+    } else {
+      statusHint = "partial";
+      sec2M1Satisfied = false;
+    }
+  } else if (!gateSignalsPresent && !opts.imported.found) {
+    statusHint = "not_demonstrated";
+    sec2M1Satisfied = null;
+  } else if (
+    managerOk &&
+    privilegedOk &&
+    resolvedOk &&
+    coversOk &&
+    importFresh &&
+    opts.imported.found &&
+    embeddedCount === 0
+  ) {
     statusHint = "pass";
     sec2M1Satisfied = true;
-  } else if (secretsManagerPresent || secretScanPresent) {
+  } else if (gateSignalsPresent || opts.imported.found) {
     statusHint = "partial";
     sec2M1Satisfied = false;
+    if (opts.imported.found && !managerOk) {
+      notes.push(
+        "PASS requires secrets-manager wiring (in-repo or secretsManagerWiringPresent=true).",
+      );
+    }
+    if (opts.imported.found && !privilegedOk) {
+      notes.push(
+        "Import must show privilegedSecretsInReposPromptsOrClientBundles=0 (empty SARIF alone does not attest a clean scan).",
+      );
+    }
+    if (opts.imported.found && !resolvedOk) {
+      notes.push(
+        "Import must show productionRuntimeSecretsResolvedFromSecretsManagerPct=100.",
+      );
+    }
+    if (opts.imported.found && !coversOk) {
+      notes.push(
+        "Import must show secretScanCoversPromptsAndFixtures=true.",
+      );
+    }
+    if (opts.imported.found && !importFresh) {
+      notes.push(
+        "Import missing fresh measuredAt (≤90 days) — required to unlock SEC2-M1 PASS.",
+      );
+    }
   } else {
     statusHint = "not_demonstrated";
     sec2M1Satisfied = null;
@@ -366,6 +595,7 @@ export function buildSecretsReport(
   return {
     schemaVersion: "0.2.0",
     pluginId: PLUGIN_ID,
+    detectorId: DETECTOR_ID,
     relatedCheckIds: [...RELATED],
     assessedAt: opts.assessedAt,
     secretsManager: {
@@ -376,15 +606,18 @@ export function buildSecretsReport(
       ciConfigFound: opts.scan.found,
       configRefs: opts.scan.refs,
       importedReportFound: opts.imported.found,
-      importedFindingCount: importedFindings,
+      importedFindingCount:
+        opts.imported.privilegedSecretsInReposPromptsOrClientBundles,
       importedSources: opts.imported.sources,
     },
     embeddedFindings: opts.embedded.slice(0, 40),
+    importedResults: opts.imported,
     summary: {
       embeddedCount,
       embeddedInPromptsOrFixtures: embeddedInPrompts,
       secretsManagerPresent,
       secretScanPresent,
+      gateSignalsPresent,
       sec2M1Satisfied,
       statusHint,
     },
@@ -397,8 +630,11 @@ export const secretsHygieneCollector: Collector = {
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
     const manager = detectSecretsManager(ctx.targetPath, ctx.maxFiles ?? 4000);
     const scan = detectSecretScanConfig(ctx.targetPath, ctx.maxFiles ?? 4000);
-    const embedded = heuristicEmbeddedScan(ctx.targetPath, ctx.maxFiles ?? 4000);
-    const imported = loadImportedScan(ctx);
+    const embedded = heuristicEmbeddedScan(
+      ctx.targetPath,
+      ctx.maxFiles ?? 4000,
+    );
+    const imported = loadImported(ctx);
 
     const report = buildSecretsReport({
       assessedAt: ctx.assessedAt.toISOString(),
@@ -437,6 +673,7 @@ export const secretsHygieneCollector: Collector = {
         signals: [
           "secrets-hygiene",
           "sec2-m1",
+          DETECTOR_ID,
           ...(report.secretsManager.found ? ["secrets-manager"] : []),
           ...(report.secretScan.ciConfigFound ||
           report.secretScan.importedReportFound
@@ -456,7 +693,9 @@ export const secretsHygieneCollector: Collector = {
         id: `${PLUGIN_ID}:manager`,
         class: "iac",
         ref: manager.refs[0],
-        excerpt: redact(`Secrets manager refs: ${manager.refs.slice(0, 6).join(", ")}`),
+        excerpt: redact(
+          `Secrets manager refs: ${manager.refs.slice(0, 6).join(", ")}`,
+        ),
         pluginId: PLUGIN_ID,
         gitCommit: ctx.gitCommit,
         evidenceAgeDays: 0,

@@ -46,10 +46,13 @@
       "confidence": "low",
       "evidenceFound": [],
       "requiredEvidenceMissing": [
-        "Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths"
+        "Secrets-manager / sealed-secrets / cloud secret-ref wiring for production runtime",
+        "CI/repo secret-scan config covering prompts and fixtures",
+        "Latest secret-scan report with 0 privileged findings (measuredAt ≤90 days)",
+        "Attest or inventory showing 100% of production runtime secrets resolve from the secrets manager"
       ],
-      "reasoning": "No secrets-manager references or secret-scan workflow observed in the assessed tree.",
-      "recommendedAction": "Add a CI secret scan covering prompts/fixtures and wire runtime secrets to a manager.",
+      "reasoning": "Secrets-manager wiring covers production runtime secrets; 100% of those secrets resolve from the secrets manager; the latest secret scan covering repos, prompt registries, and client bundles finds 0 privileged production secrets (measuredAt ≤90 days). If no production runtime secrets exist, score NOT_APPLICABLE. Assessment: no secrets-manager wiring or measured secret-scan coverage observed in the assessed tree.",
+      "recommendedAction": "Move production secrets into a secrets manager (External Secrets, Vault, cloud SM, sealed-secrets, or equivalent) and wire runtime resolution; Add CI secret scanning covering prompts/fixtures; close privileged findings; Retain scored report under imports/secrets-hygiene/ (measuredAt ≤90 days); Time-box gaps with owner and expiry ≤90 days.",
       "priority": "P1"
     }
   ],

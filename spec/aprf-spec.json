@@ -2341,28 +2341,28 @@
       "mandatoryChecks": [
         {
           "id": "SEC2-M1",
-          "requirement": "Production secrets shall live in a secrets manager and not in prompts, repos, or prod notebooks",
-          "artifact": "Secrets-manager config + CI/repo secret-scan report including prompt and fixture paths",
-          "passCondition": "0 privileged production secrets found in repos, prompt registries, or client bundles in the latest scan; 100% of production runtime secrets resolve from the secrets manager",
-          "method": "automated",
+          "requirement": "Production secrets shall resolve from a secrets manager at runtime and must not appear in repos, prompt registries, or client bundles\u2014proven by secrets-manager wiring plus a fresh secret-scan covering prompts/fixtures, not by CI ${{ secrets.* }} alone.",
+          "artifact": "Secrets-manager / sealed-secrets / cloud secret-ref wiring for production runtime; CI/repo secret-scan config covering prompts and fixtures; Latest secret-scan report with 0 privileged findings (measuredAt \u226490 days); Attest or inventory showing 100% of production runtime secrets resolve from the secrets manager",
+          "passCondition": "Secrets-manager wiring covers production runtime secrets; 100% of those secrets resolve from the secrets manager; the latest secret scan covering repos, prompt registries, and client bundles finds 0 privileged production secrets (measuredAt \u226490 days). If no production runtime secrets exist, score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 2,
           "minCriticality": 1
         },
         {
           "id": "SEC2-M2",
-          "requirement": "Logging and tracing pipelines shall redact secret-like patterns",
-          "artifact": "Redaction config + sample of redacted traces + synthetic secret-injection test results",
-          "passCondition": "Synthetic secrets (API key/bearer/AWS-key patterns) injected into a canary request are redacted in persisted logs/traces at 100% detection in the test harness",
-          "method": "manual",
+          "requirement": "Logging and tracing pipelines shall redact secret-like patterns\u2014proven by redaction/masking config plus a fresh canary harness that injects API key/bearer/AWS-key patterns and shows 100% redaction in persisted logs/traces, not by filter code alone.",
+          "artifact": "Redaction/masking config for logging and/or tracing pipelines; Synthetic secret-injection canary harness covering API key/bearer/AWS-key patterns; Canary results showing 100% detection/redaction in persisted logs/traces (measuredAt \u226490 days)",
+          "passCondition": "Logging/tracing secret-redaction config is present; a canary harness injects synthetic API key/bearer/AWS-key patterns and shows 100% redaction in persisted logs/traces (measuredAt \u226490 days). If no production logging or tracing pipelines exist, score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "SEC2-M3",
-          "requirement": "Provider and cloud keys shall be rotatable and scoped; client apps shall not hold privileged keys",
-          "artifact": "Key inventory with rotation dates + client bundle/scan report",
-          "passCondition": "0 privileged provider/cloud keys embedded in client apps; every production key has a rotation date within policy (\u226490 days or provider-managed short-lived credentials)",
-          "method": "manual",
+          "requirement": "Provider and cloud keys shall be rotatable and least-privilege scoped, and client apps shall not hold privileged keys\u2014proven by a key inventory with scope and rotation evidence plus a client-bundle/scan report, not by secrets-manager presence alone.",
+          "artifact": "Inventory of production provider/cloud keys with least-privilege scope; Rotation dates or provider-managed short-lived credential evidence within policy; Client bundle/scan report showing 0 privileged provider/cloud keys (measuredAt \u226490 days)",
+          "passCondition": "Inventory of production provider/cloud keys exists; 0 privileged provider/cloud keys are embedded in client apps; 100% of production keys have a documented least-privilege scope and are within rotation policy (\u226490 days or provider-managed short-lived credentials) (measuredAt \u226490 days). If no production provider/cloud keys exist, score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -2370,28 +2370,28 @@
       "recommendedChecks": [
         {
           "id": "SEC2-R1",
-          "requirement": "Pre-commit and CI secret scanning including prompt/fixture files",
-          "artifact": "Pre-commit + CI secret-scan config including prompt/fixture globs + latest scan report with findings disposition",
-          "passCondition": "Secret scanning covers application code, prompts, and fixtures; blocking on high-confidence secrets; last green main-branch scan \u22647 days (or last PR merge evidence)",
-          "method": "automated",
+          "requirement": "Pre-commit and CI secret scanning shall cover application code, prompts, and fixtures and block on high-confidence secrets\u2014proven by scanner config plus a fresh green main-branch (or PR-merge) scan \u22647 days, not by a secrets-manager or a single \u226490-day content scan alone.",
+          "artifact": "Pre-commit secret-scan hook/config covering prompts and fixtures; CI secret-scan workflow covering prompts and fixtures; Proof scanning blocks on high-confidence secrets; Latest green main-branch or PR-merge secret-scan evidence (measuredAt \u22647 days)",
+          "passCondition": "Pre-commit and CI secret scanning are configured; both cover application code, prompts, and fixtures; scanning blocks on high-confidence secrets; the latest green main-branch scan (or last PR-merge scan evidence) is \u22647 days (measuredAt \u22647 days). If no application code, prompts, or fixtures exist, score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "SEC2-R2",
-          "requirement": "Egress controls limiting where runtime credentials can be used",
-          "artifact": "Egress allowlist/policy config for runtimes that hold credentials + sample deny/allow logs (24h)",
-          "passCondition": "Runtime credentials can only call documented destinations; \u22651 deny event is observed in test or production logs proving enforcement in the last 90 days",
-          "method": "manual",
+          "requirement": "Egress controls shall limit where runtime credentials can be used\u2014proven by an allowlist/policy for runtimes that hold credentials plus \u22651 observed deny event in test or production logs within 90 days, not by secrets-manager presence or model-path trust-boundary docs alone.",
+          "artifact": "Egress allowlist/policy config for runtimes that hold credentials; Documented allowed destinations for those credentials; Sample deny (and optionally allow) logs proving enforcement (measuredAt \u226490 days)",
+          "passCondition": "Egress allowlist/policy is configured for production runtimes that hold credentials; destinations are documented; \u22651 deny event is observed in test or production logs proving enforcement (measuredAt \u226490 days). If no production runtimes hold credentials, score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "SEC2-R3",
-          "requirement": "Dataset scanning before fine-tuning or eval corpus publish",
-          "artifact": "Dataset secret/PII scan gate config before fine-tune or eval corpus publish + last scan report for a published corpus",
-          "passCondition": "100% of fine-tune/eval corpora published in the last 90 days have a linked scan report; publish is blocked when critical findings are open",
-          "method": "manual",
+          "requirement": "Fine-tune and eval corpora shall be scanned for secrets/PII before publish\u2014proven by a publish-blocking scan gate plus linked scan reports for 100% of corpora published in the last 90 days, not by dataset cards or repo secret scanning alone.",
+          "artifact": "Dataset secret/PII scan gate config before fine-tune or eval corpus publish; Proof publish is blocked when critical findings are open; Linked scan reports covering 100% of fine-tune/eval corpora published in the last 90 days (measuredAt \u226490 days)",
+          "passCondition": "A secret/PII scan gate is configured before fine-tune or eval corpus publish; publish is blocked when critical findings are open; 100% of fine-tune/eval corpora published in the last 90 days have a linked scan report (measuredAt \u226490 days). If no fine-tune or eval corpus publish exists, score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -2574,10 +2574,10 @@
       "mandatoryChecks": [
         {
           "id": "SCI-M1",
-          "requirement": "Production model and container artifacts shall have verified provenance/integrity",
-          "artifact": "Digest/signature verification logs for last production deploy",
-          "passCondition": "100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked",
-          "method": "automated",
+          "requirement": "Production model and container artifacts shall have verified provenance/integrity\u2014proven by signature, attestation, or digest verification with unverified pulls blocked, not by digest pins in Dockerfiles alone.",
+          "artifact": "Signature / attestation / provenance / checksum verification config (cosign, Notation, SLSA, OCI, or equivalent); Digest or signature verification logs for production model/container pulls in the sample window; Proof unverified pulls are blocked (admission policy, registry policy, or deploy gate; measuredAt \u226490 days)",
+          "passCondition": "Provenance/integrity verification is configured for production model and/or container artifacts (signature, attestation, OCI provenance, and/or checksum/digest); 100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked (measuredAt \u226490 days). If no production model or container artifacts are pulled, score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },

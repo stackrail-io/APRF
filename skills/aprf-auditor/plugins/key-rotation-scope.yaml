@@ -1,0 +1,29 @@
+id: key-rotation-scope
+title: Provider/cloud key rotation + scope + no client privileged keys (SEC2-M3)
+version: "0.2.0"
+executor: collectors/key-rotation-scope.ts
+evidenceClass: code
+alsoEmits: []
+detectorIds: [repo-key-rotation-scope]
+inputs:
+  - "Target repo (key inventory, IAM/scope, rotation policy, client apps)"
+  - "Optional coverage: aprf-assessment/imports/key-rotation-scope/*.json"
+collect:
+  - "Detect key-inventory, rotation-policy, least-privilege/scope, and client-key risk signals"
+  - "Ingest imported coverage; write key-rotation-scope-report.json"
+emits:
+  nodeClass: code
+  refPattern: "aprf-assessment/imports/key-rotation-scope/*"
+  signals: [key-rotation-scope, sec2-m3, repo-key-rotation-scope]
+mapsToChecks: [SEC2-M3]
+whenUnavailable: >
+  Signals alone are PARTIAL. SEC2-M3 PASS needs key inventory (or present=true)
+  plus privilegedProviderOrCloudKeysInClientApps=0,
+  productionKeysWithDocumentedLeastPrivilegeScopePct=100,
+  productionKeysWithinRotationPolicyPct=100, measuredAt ≤90 days under
+  imports/key-rotation-scope/. Rotation/client-key docs alone ≠ PASS but block
+  N/A launder. Set productionProviderOrCloudKeysPresent=false for
+  NOT_APPLICABLE only when no in-repo gate signals.
+live:
+  required: false
+  note: Offline discovery + optional imported inventory/coverage results.

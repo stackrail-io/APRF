@@ -1,5 +1,6 @@
 /**
- * Smoke: secrets-hygiene needs manager + scan + 0 embedded findings for PASS.
+ * Smoke: secrets-hygiene needs manager + coverage import (0 privileged,
+ * 100% resolved, prompts covered, measuredAt ≤90d); CI config alone ≠ PASS.
  */
 import {
   mkdtempSync,
@@ -16,35 +17,50 @@ import {
 } from "../collectors/secrets-hygiene.ts";
 import type { CollectorContext } from "../collectors/types.ts";
 
-const outDir = mkdtempSync(join(tmpdir(), "aprf-secrets-"));
-const targetDir = mkdtempSync(join(tmpdir(), "aprf-secrets-target-"));
-
-async function main() {
-  // Empty target → not_demonstrated
-  const baseCtx: CollectorContext = {
-    targetPath: targetDir,
+async function run(
+  target: string,
+  outDir: string,
+): Promise<SecretsHygieneReport> {
+  await secretsHygieneCollector.collect({
+    targetPath: target,
     outputDir: outDir,
     assessedAt: new Date(),
     live: false,
     maxFiles: 200,
-  };
-  const empty = await secretsHygieneCollector.collect(baseCtx);
-  if (empty.status !== "ran") throw new Error(`expected ran: ${empty.status}`);
-  const r0 = JSON.parse(
+  } as CollectorContext);
+  return JSON.parse(
     readFileSync(
       join(outDir, "imports", "secrets-hygiene", "secrets-hygiene-report.json"),
       "utf8",
     ),
-  ) as SecretsHygieneReport;
-  if (r0.summary.statusHint !== "not_demonstrated") {
-    throw new Error(`expected not_demonstrated, got ${r0.summary.statusHint}`);
-  }
+  );
+}
 
-  // Partial: scan only
-  mkdirSync(join(targetDir, ".github", "workflows"), { recursive: true });
-  writeFileSync(
-    join(targetDir, ".github", "workflows", "secrets.yml"),
-    `
+function coverage(extra: Record<string, unknown> = {}) {
+  return JSON.stringify({
+    measuredAt: new Date().toISOString(),
+    privilegedSecretsInReposPromptsOrClientBundles: 0,
+    productionRuntimeSecretsResolvedFromSecretsManagerPct: 100,
+    secretScanCoversPromptsAndFixtures: true,
+    ...extra,
+  });
+}
+
+async function main() {
+  const root = mkdtempSync(join(tmpdir(), "aprf-sec2-m1-"));
+  try {
+    const tEmpty = join(root, "t-empty");
+    mkdirSync(tEmpty, { recursive: true });
+    const r0 = await run(tEmpty, join(root, "o0"));
+    if (r0.summary.statusHint !== "not_demonstrated") {
+      throw new Error(`expected not_demonstrated, got ${r0.summary.statusHint}`);
+    }
+
+    const tScan = join(root, "t-scan");
+    mkdirSync(join(tScan, ".github", "workflows"), { recursive: true });
+    writeFileSync(
+      join(tScan, ".github", "workflows", "secrets.yml"),
+      `
 name: secrets
 on: push
 jobs:
@@ -53,76 +69,182 @@ jobs:
     steps:
       - uses: gitleaks/gitleaks-action@v2
 `,
-    "utf8",
-  );
-  const out1 = mkdtempSync(join(tmpdir(), "aprf-secrets1-"));
-  await secretsHygieneCollector.collect({ ...baseCtx, outputDir: out1 });
-  const r1 = JSON.parse(
-    readFileSync(
-      join(out1, "imports", "secrets-hygiene", "secrets-hygiene-report.json"),
-      "utf8",
-    ),
-  ) as SecretsHygieneReport;
-  if (r1.summary.statusHint !== "partial") {
-    throw new Error(`expected partial, got ${JSON.stringify(r1.summary)}`);
-  }
+    );
+    const r1 = await run(tScan, join(root, "o1"));
+    if (r1.summary.statusHint !== "partial") {
+      throw new Error(`expected partial, got ${JSON.stringify(r1.summary)}`);
+    }
 
-  // Fail: embedded key
-  writeFileSync(
-    join(targetDir, "leak.py"),
-    `KEY = "AKIAJTESTKEYNOTREAL0"\n`,
-    "utf8",
-  );
-  const out2 = mkdtempSync(join(tmpdir(), "aprf-secrets2-"));
-  await secretsHygieneCollector.collect({ ...baseCtx, outputDir: out2 });
-  const r2 = JSON.parse(
-    readFileSync(
-      join(out2, "imports", "secrets-hygiene", "secrets-hygiene-report.json"),
-      "utf8",
-    ),
-  ) as SecretsHygieneReport;
-  if (r2.summary.statusHint !== "fail" || r2.summary.embeddedCount < 1) {
-    throw new Error(`expected fail with findings, got ${JSON.stringify(r2.summary)}`);
-  }
-  if (JSON.stringify(r2).includes("AKIAJTESTKEYNOTREAL0")) {
-    throw new Error("secret value leaked into report");
-  }
+    const tLeak = join(root, "t-leak");
+    mkdirSync(tLeak, { recursive: true });
+    // Assembled at runtime so this source file does not match secret scanners.
+    const fakeAwsKey = ["AKIA", "JTESTKEYNOTREAL0"].join("");
+    writeFileSync(join(tLeak, "leak.py"), `KEY = "${fakeAwsKey}"\n`);
+    const r2 = await run(tLeak, join(root, "o2"));
+    if (r2.summary.statusHint !== "fail" || r2.summary.embeddedCount < 1) {
+      throw new Error(
+        `expected fail with findings, got ${JSON.stringify(r2.summary)}`,
+      );
+    }
+    if (JSON.stringify(r2).includes(fakeAwsKey)) {
+      throw new Error("secret value leaked into report");
+    }
 
-  // Pass: manager + scan, no embedded (fresh target)
-  const passTarget = mkdtempSync(join(tmpdir(), "aprf-secrets-pass-"));
-  mkdirSync(join(passTarget, ".github", "workflows"), { recursive: true });
-  mkdirSync(join(passTarget, "deploy"), { recursive: true });
-  writeFileSync(
-    join(passTarget, ".github", "workflows", "secrets.yml"),
-    `jobs:\n  scan:\n    steps:\n      - run: gitleaks detect\n`,
-    "utf8",
-  );
-  writeFileSync(
-    join(passTarget, "deploy", "external-secret.yaml"),
-    `apiVersion: external-secrets.io/v1beta1\nkind: ExternalSecret\nmetadata:\n  name: app\n`,
-    "utf8",
-  );
-  const out3 = mkdtempSync(join(tmpdir(), "aprf-secrets3-"));
-  await secretsHygieneCollector.collect({
-    targetPath: passTarget,
-    outputDir: out3,
-    assessedAt: new Date(),
-    live: false,
-    maxFiles: 200,
-  });
-  const r3 = JSON.parse(
-    readFileSync(
-      join(out3, "imports", "secrets-hygiene", "secrets-hygiene-report.json"),
-      "utf8",
-    ),
-  ) as SecretsHygieneReport;
-  if (r3.summary.sec2M1Satisfied !== true || r3.summary.statusHint !== "pass") {
-    throw new Error(`expected pass, got ${JSON.stringify(r3.summary)}`);
-  }
+    // Manager + scan config alone must stay PARTIAL (no vacuous PASS).
+    const tPartial = join(root, "t-partial");
+    mkdirSync(join(tPartial, ".github", "workflows"), { recursive: true });
+    mkdirSync(join(tPartial, "deploy"), { recursive: true });
+    writeFileSync(
+      join(tPartial, ".github", "workflows", "secrets.yml"),
+      `jobs:\n  scan:\n    steps:\n      - run: gitleaks detect\n`,
+    );
+    writeFileSync(
+      join(tPartial, "deploy", "external-secret.yaml"),
+      `apiVersion: external-secrets.io/v1beta1\nkind: ExternalSecret\nmetadata:\n  name: app\n`,
+    );
+    const rPartial = await run(tPartial, join(root, "o-partial"));
+    if (rPartial.summary.statusHint !== "partial") {
+      throw new Error(
+        `manager+scan-config without import expected partial: ${JSON.stringify(rPartial.summary)}`,
+      );
+    }
 
-  console.log("aprf-auditor secrets-hygiene smoke OK");
-  for (const d of [outDir, out1, out2, out3, targetDir, passTarget]) {
-    rmSync(d, { recursive: true, force: true });
+    // PASS with manager + fresh coverage import.
+    const outPass = join(root, "o-pass");
+    mkdirSync(join(outPass, "imports", "secrets-hygiene"), { recursive: true });
+    writeFileSync(
+      join(outPass, "imports", "secrets-hygiene", "coverage.json"),
+      coverage(),
+    );
+    const rPass = await run(tPartial, outPass);
+    if (
+      rPass.summary.sec2M1Satisfied !== true ||
+      rPass.summary.statusHint !== "pass"
+    ) {
+      throw new Error(`expected pass, got ${JSON.stringify(rPass.summary)}`);
+    }
+
+    // Over-age measuredAt must not PASS.
+    const outAged = join(root, "o-aged");
+    mkdirSync(join(outAged, "imports", "secrets-hygiene"), { recursive: true });
+    const aged = new Date();
+    aged.setUTCDate(aged.getUTCDate() - 120);
+    writeFileSync(
+      join(outAged, "imports", "secrets-hygiene", "coverage.json"),
+      coverage({ measuredAt: aged.toISOString() }),
+    );
+    const rAged = await run(tPartial, outAged);
+    if (rAged.summary.statusHint === "pass") {
+      throw new Error(
+        `over-age measuredAt must not PASS: ${JSON.stringify(rAged.summary)}`,
+      );
+    }
+
+    // N/A when no production runtime secrets.
+    const outNa = join(root, "ona");
+    mkdirSync(join(outNa, "imports", "secrets-hygiene"), { recursive: true });
+    writeFileSync(
+      join(outNa, "imports", "secrets-hygiene", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionRuntimeSecretsPresent: false,
+      }),
+    );
+    const rNa = await run(tEmpty, outNa);
+    if (rNa.summary.statusHint !== "not_applicable") {
+      throw new Error(`N/A expected: ${JSON.stringify(rNa.summary)}`);
+    }
+
+    // In-repo manager blocks N/A launder.
+    const outOverride = join(root, "o-override");
+    mkdirSync(join(outOverride, "imports", "secrets-hygiene"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outOverride, "imports", "secrets-hygiene", "coverage.json"),
+      coverage({ productionRuntimeSecretsPresent: false }),
+    );
+    const rOverride = await run(tPartial, outOverride);
+    if (rOverride.summary.statusHint === "not_applicable") {
+      throw new Error("in-repo manager must block N/A launder");
+    }
+    if (rOverride.summary.statusHint !== "pass") {
+      throw new Error(
+        `override+metrics expected pass: ${JSON.stringify(rOverride.summary)}`,
+      );
+    }
+
+    // Heuristic embeds + present=false must FAIL (not N/A).
+    const outEmbedNa = join(root, "o-embed-na");
+    mkdirSync(join(outEmbedNa, "imports", "secrets-hygiene"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outEmbedNa, "imports", "secrets-hygiene", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionRuntimeSecretsPresent: false,
+      }),
+    );
+    const rEmbedNa = await run(tLeak, outEmbedNa);
+    if (rEmbedNa.summary.statusHint !== "fail") {
+      throw new Error(
+        `embeds+present=false expected fail, got ${JSON.stringify(rEmbedNa.summary)}`,
+      );
+    }
+
+    // Empty SARIF runs must not attest privilegedSecrets…=0 / unlock PASS.
+    const outSarif = join(root, "o-sarif");
+    mkdirSync(join(outSarif, "imports", "secrets-hygiene"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outSarif, "imports", "secrets-hygiene", "scan.sarif.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionRuntimeSecretsResolvedFromSecretsManagerPct: 100,
+        secretScanCoversPromptsAndFixtures: true,
+        runs: [],
+      }),
+    );
+    const rSarif = await run(tPartial, outSarif);
+    if (rSarif.summary.statusHint === "pass") {
+      throw new Error(
+        `empty SARIF runs must not unlock PASS: ${JSON.stringify(rSarif.summary)}`,
+      );
+    }
+    if (
+      rSarif.importedResults
+        .privilegedSecretsInReposPromptsOrClientBundles === 0
+    ) {
+      throw new Error(
+        "empty SARIF must not set privilegedSecretsInReposPromptsOrClientBundles=0",
+      );
+    }
+
+    // Failing privileged count beats N/A with no in-repo surface.
+    const outFailNa = join(root, "o-fail-na");
+    mkdirSync(join(outFailNa, "imports", "secrets-hygiene"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outFailNa, "imports", "secrets-hygiene", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionRuntimeSecretsPresent: false,
+        privilegedSecretsInReposPromptsOrClientBundles: 2,
+      }),
+    );
+    const rFailNa = await run(tEmpty, outFailNa);
+    if (rFailNa.summary.statusHint !== "fail") {
+      throw new Error(
+        `failing privileged count must beat N/A: ${JSON.stringify(rFailNa.summary)}`,
+      );
+    }
+
+    console.log("aprf-auditor secrets-hygiene smoke OK");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
   }
 }
 
