@@ -270,6 +270,26 @@ function formatEvidenceItem(e: { ref: string; excerpt?: string }): string {
   return `<li class="evidence-item"><code>${esc(e.ref)}</code>${excerptHtml}</li>`;
 }
 
+/** Split catalog prose like "1) … 2) … 3) …" into ordered-list items. */
+function splitNumberedSteps(text: string): string[] | null {
+  const trimmed = text.trim().replace(/\s+/g, " ");
+  if (!/^\d+\)\s/.test(trimmed)) return null;
+  const chunks = trimmed.split(/\s+(?=\d+\)\s)/);
+  if (chunks.length < 2) return null;
+  if (!chunks.every((c) => /^\d+\)\s+\S/.test(c))) return null;
+  return chunks.map((c) => c.replace(/^\d+\)\s*/, "").trim());
+}
+
+function formatManualVerification(text: string): string {
+  const steps = splitNumberedSteps(text);
+  if (!steps) {
+    return `<p><strong>Manual verification:</strong> ${esc(text)}</p>`;
+  }
+  return `<p><strong>Manual verification:</strong></p><ol class="manual-steps">${steps
+    .map((s) => `<li>${esc(s)}</li>`)
+    .join("")}</ol>`;
+}
+
 function statusClass(status: string): string {
   switch (status) {
     case "PASS":
@@ -670,7 +690,7 @@ function controlDetailBody(c: Control): string {
   ${refs}
   ${c.passCondition ? `<p><strong>Pass condition:</strong> ${esc(c.passCondition)}</p>` : ""}
   ${evidenceRequired}
-  ${c.manualVerification ? `<p><strong>Manual verification:</strong> ${esc(c.manualVerification)}</p>` : ""}
+  ${c.manualVerification ? formatManualVerification(c.manualVerification) : ""}
   ${c.falsePositiveGuidance ? `<p><strong>False-positive guidance:</strong> ${esc(c.falsePositiveGuidance)}</p>` : ""}
   ${recommendedFixes}`;
 
@@ -1076,6 +1096,10 @@ function render(a: Assessment): string {
       background: transparent; padding: 0; border-radius: 0;
       font-size: inherit; color: inherit;
     }
+    .manual-steps {
+      margin: 0.35rem 0 0.75rem; padding-left: 1.35rem;
+    }
+    .manual-steps li { margin: 0.35rem 0; }
     .help { margin: 0.65rem 0 0; font-size: 0.82rem; color: var(--muted); }
     .roadmap-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -1122,6 +1146,7 @@ function render(a: Assessment): string {
     .flyout-body {
       padding: 1.15rem 1.25rem 2.25rem; overflow-y: auto; overflow-x: hidden; flex: 1;
       font-family: var(--serif); font-size: 0.98rem; min-width: 0;
+      overflow-wrap: anywhere;
     }
     .flyout-body .meta { font-family: var(--sans); font-size: 0.82rem; }
     .flyout-body h4 {
