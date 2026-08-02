@@ -82,6 +82,21 @@ async function main() {
       throw new Error(`expected fail, got ${JSON.stringify(r2.summary)}`);
     }
 
+    const outBypass = join(root, "o-bypass");
+    mkdirSync(join(outBypass, "imports", "tool-gateway-authz"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outBypass, "imports", "tool-gateway-authz", "coverage.json"),
+      coverage({ modelOutputAloneCannotBypassGateway: false }),
+    );
+    const rBypass = await run(tSig, outBypass);
+    if (rBypass.summary.statusHint !== "fail") {
+      throw new Error(
+        `model-output bypass must fail: ${JSON.stringify(rBypass.summary)}`,
+      );
+    }
+
     const outAged = join(root, "o-aged");
     mkdirSync(join(outAged, "imports", "tool-gateway-authz"), { recursive: true });
     const aged = new Date();

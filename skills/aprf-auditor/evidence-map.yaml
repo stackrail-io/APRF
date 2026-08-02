@@ -128,7 +128,17 @@ categoryDefaults:
       - "**/*mcp*"
       - "**/*tool*catalog*"
       - "**/*agent*plugin*"
-    plugins: [artifact-provenance-integrity, github-actions, repo-filesystem]
+    plugins:
+      [
+        artifact-provenance-integrity,
+        ai-external-tool-inventory,
+        ai-vuln-scan-gate,
+        ai-deploy-policy-enforcement,
+        ai-verify-on-deploy,
+        ai-model-mbom,
+        github-actions,
+        repo-filesystem,
+      ]
     signals: [pin digests, signed images, cosign, Notation, SLSA, OCI provenance, model checksum, dependency lockfile, MCP/tool/plugin inventory pins]
   infrastructure:
     search:
@@ -858,7 +868,7 @@ checks:
       (failing import metrics beat present=false N/A).
       Detector hits may include cosign-verification, notation-verification, slsa-attestation,
       oci-provenance, model-checksum-validation, artifact-signature-verification, docker-image-digest-pinned.
-      SCI-M2, SCI-M3, and MOD-R1 do not substitute.
+      SCI-M2, SCI-M3, and MOD-R3 do not substitute.
   SCI-M2:
     requiredEvidence:
       - "Inventory of production external AI tools, MCP servers, agent plugins, and high-impact integrations"
@@ -1004,6 +1014,8 @@ checks:
       (unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway + measuredAt ≤90d).
       NOT_APPLICABLE if productionToolsOrAgentsPresent=false and no in-repo gateway/authz signals.
       PARTIAL if gateway signals without complete import. AUTHZ-M1, TOL-M2, AUTHZ-R1 do not substitute.
+      FAIL if unauthorizedToolCallsDeniedPct<100 or modelOutputAloneCannotBypassGateway=false
+      (failing import metrics beat present=false N/A).
   TOL-M2:
     requiredEvidence:
       - "Per-agent/workload tool allowlist covering production agents"
@@ -1020,7 +1032,9 @@ checks:
       PASS if statusHint=pass / tolM2Satisfied === true
       (agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 + measuredAt ≤90d).
       NOT_APPLICABLE if productionAgentsOrToolWorkloadsPresent=false and no in-repo allowlist signals.
-      PARTIAL if allowlist config without deny tests (open “all tools” ≠ PASS).
+      PARTIAL if allowlist config without deny tests (open "all tools" != PASS).
+      FAIL if agentsWithExplicitToolAllowlistPct<100 or unknownToolRequestsDeniedPct<100
+      (failing import metrics beat present=false N/A).
       TOL-M1, SCI-M2, AUTHN-M2, TOL-M5 do not substitute.
   TOL-M3:
     requiredEvidence:
@@ -1040,6 +1054,8 @@ checks:
       (highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests + measuredAt ≤90d).
       NOT_APPLICABLE if highImpactToolsPresent=false and no in-repo gate signals.
       PARTIAL if inventory/docs without bypass tests. TOL-M1/M2, HUM-M1/M3, SEC-M2 do not substitute.
+      FAIL if highImpactToolsWithConfiguredGatePct<100 or ungatedExecutionImpossibleInTests=false
+      (failing import metrics beat present=false N/A).
   TOL-M4:
     requiredEvidence:
       - "JSON Schema (or equivalent) per production tool"
@@ -1057,6 +1073,8 @@ checks:
       (toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 + measuredAt ≤90d).
       NOT_APPLICABLE if productionToolsPresent=false and no in-repo schema signals.
       PARTIAL if schemas without contract rejection. SEC-M2, TOL-M1/M2 do not substitute.
+      FAIL if toolsWithDeclaredArgumentSchemaPct<100 or invalidArgumentFixturesRejectedPct<100
+      (failing import metrics beat present=false N/A).
   TOL-M5:
     requiredEvidence:
       - "Signed (or integrity-verified) MCP/agent tool catalog + verify-on-load"
@@ -1075,6 +1093,8 @@ checks:
       (unsignedOrUnapprovedCatalogsRejected + supplyChainReviewWithin90DaysOrSinceLastChange + measuredAt ≤90d).
       NOT_APPLICABLE if productionToolCatalogsPresent=false and no in-repo signed-catalog signals.
       PARTIAL if catalog docs without reject-unsigned. SCI-M1/M2, TOL-M2 do not substitute.
+      FAIL if unsignedOrUnapprovedCatalogsRejected=false or supplyChainReviewWithin90DaysOrSinceLastChange=false
+      (failing import metrics beat present=false N/A).
   TOL-R1:
     requiredEvidence:
       - "Destructive-tool catalog marking dry-run/simulation support"
@@ -1092,6 +1112,8 @@ checks:
       (destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days + measuredAt ≤90d).
       NOT_APPLICABLE if destructiveToolsPresent=false and no in-repo dry-run signals.
       PARTIAL if dry-run docs without promotion evidence. TOL-M3 / agent-sandbox do not substitute.
+      FAIL if destructiveToolsWithDryRunInNonProdPct<100 or lastDestructivePromotionHasDryRunEvidenceWithin90Days=false
+      (failing import metrics beat present=false N/A).
   TOL-R2:
     requiredEvidence:
       - "Per-tool rate-limit and blast-radius budgets for high-impact tools"
@@ -1109,6 +1131,8 @@ checks:
       (highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days + measuredAt ≤90d).
       NOT_APPLICABLE if highImpactToolsPresent=false and no in-repo rate/blast signals.
       PARTIAL if global rate limits without per-tool blast budgets. AGN-M2, COST-M*, TOL-M3 do not substitute.
+      FAIL if highImpactToolsWithRateAndBlastBudgetPct<100 or enforcementProvenWithin30Days=false
+      (failing import metrics beat present=false N/A).
   SEC2-M1:
     requiredEvidence:
       - "Secrets manager / sealed-secrets / cloud secret refs in runtime config"

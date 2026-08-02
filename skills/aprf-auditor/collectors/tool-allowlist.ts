@@ -31,7 +31,7 @@ const IMPORT_MAX_AGE_DAYS = 90;
 const ALLOWLIST_RE =
   /\b(tool[_-]?allowlist|allowed[_-]?tools|per[_-]?agent[_-]?tools|explicit[_-]?tool[_-]?list)\b/i;
 const MCP_ALLOWLIST_RE =
-  /\b(mcp[_-]?allowlist|mcp[_-]?tool[_-]?allow|allowedMcpTools|tools:\s*\[)\b/i;
+  /\b(?:mcp[_-]?allowlist|mcp[_-]?tool[_-]?allow|allowedMcpTools)\b|\btools:\s*\[/i;
 
 export interface ToolAllowlistReport {
   schemaVersion: "0.2.0";
@@ -173,10 +173,7 @@ export function buildToolAllowlistReport(opts: {
       opts.imported.agentsWithExplicitToolAllowlistPct < 100) ||
     (opts.imported.unknownToolRequestsDeniedPct !== null &&
       opts.imported.unknownToolRequestsDeniedPct < 100);
-  const explicitFail =
-    opts.imported.found &&
-    (!naCandidate || contradictingFail) &&
-    contradictingFail;
+  const explicitFail = opts.imported.found && contradictingFail;
 
   let statusHint: ToolAllowlistReport["summary"]["statusHint"];
   let tolM2Satisfied: boolean | null = null;

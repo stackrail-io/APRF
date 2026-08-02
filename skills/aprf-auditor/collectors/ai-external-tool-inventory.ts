@@ -190,10 +190,7 @@ export function buildAiExternalToolInventoryReport(opts: {
       opts.imported.unpinnedLatestOrFloatingEntries > 0) ||
     (opts.imported.entriesWithPinOwnerReviewPct !== null &&
       opts.imported.entriesWithPinOwnerReviewPct < 100);
-  const explicitFail =
-    opts.imported.found &&
-    (!naCandidate || contradictingFail) &&
-    contradictingFail;
+  const explicitFail = opts.imported.found && contradictingFail;
 
   let statusHint: AiExternalToolInventoryReport["summary"]["statusHint"];
   let sciM2Satisfied: boolean | null = null;
@@ -325,7 +322,9 @@ export const aiExternalToolInventoryCollector: Collector = {
           PLUGIN_ID,
           "sci-m2",
           DETECTOR_ID,
-          "mcp-package-pinned",
+          ...(report.signals.mcp.found && report.signals.versionPin.found
+            ? ["mcp-package-pinned"]
+            : []),
           ...(report.summary.sciM2Satisfied ? ["sci-m2-satisfied"] : []),
         ],
         excerpt: redact(report.notes.slice(0, 3).join(" | ").slice(0, 400)),

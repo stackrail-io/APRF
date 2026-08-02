@@ -30,7 +30,7 @@ const DETECTOR_ID = "repo-ai-model-mbom";
 const IMPORT_MAX_AGE_DAYS = 90;
 
 const MBOM_RE =
-  /\b(mbom|ml[_-]?bom|model[_-]?bom|machine[_-]?learning[_-]?bill[_-]?of[_-]?materials|cyclonedx.{0,40}ml)\b/i;
+  /\b(mbom|ml[_-]?bom|model[_-]?bom|machine[_-]?learning[_-]?bill[_-]?of[_-]?materials|cyclonedx[_-]?(ml|mlbom|ml[_-]bom))\b/i;
 const MODEL_REGISTRY_RE =
   /\b(model[_-]?registry|mlflow|sagemaker[_-]?model[_-]?package|vertex[_-]?model|huggingface[_-]?hub)\b/i;
 const SBOM_RE =
@@ -183,10 +183,7 @@ export function buildAiModelMbomReport(opts: {
     (opts.imported.pinsWithLinkedMbomPct !== null &&
       opts.imported.pinsWithLinkedMbomPct < 100) ||
     opts.imported.retentionDaysSatisfied === false;
-  const explicitFail =
-    opts.imported.found &&
-    (!naCandidate || contradictingFail) &&
-    contradictingFail;
+  const explicitFail = opts.imported.found && contradictingFail;
 
   let statusHint: AiModelMbomReport["summary"]["statusHint"];
   let sciR2Satisfied: boolean | null = null;

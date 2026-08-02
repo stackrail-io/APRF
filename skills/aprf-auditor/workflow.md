@@ -256,7 +256,7 @@ npm run aprf:ai-model-mbom -- \
 
 PASS only with 100% registry-linked MBOM (or SBOM+model metadata) per production model pin + retention ≥90d (measuredAt ≤90d).
 
-**TOL-M1–M5 / R1–R2 (tool-safety):** prompt allowlists and open MCP “all tools” bindings are **supporting** only. Prefer:
+**TOL-M1–M5 / R1–R2 (tool-safety):** prompt allowlists and open MCP "all tools" bindings are **supporting** only. Prefer:
 
 ```bash
 npm run aprf:tool-gateway-authz -- --target <project> --out <project>/aprf-assessment

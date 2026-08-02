@@ -174,10 +174,7 @@ export function buildToolRateLimitsReport(opts: {
     (opts.imported.highImpactToolsWithRateAndBlastBudgetPct !== null &&
       opts.imported.highImpactToolsWithRateAndBlastBudgetPct < 100) ||
     opts.imported.enforcementProvenWithin30Days === false;
-  const explicitFail =
-    opts.imported.found &&
-    (!naCandidate || contradictingFail) &&
-    contradictingFail;
+  const explicitFail = opts.imported.found && contradictingFail;
 
   let statusHint: ToolRateLimitsReport["summary"]["statusHint"];
   let tolR2Satisfied: boolean | null = null;

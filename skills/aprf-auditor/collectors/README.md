@@ -438,7 +438,7 @@ npm run aprf:ai-deploy-policy-enforcement -- \
   --out /path/to/app/aprf-assessment
 ```
 
-Detects admission / deploy-policy / cloud-gate signals; PASS needs enforced + unsigned/unapproved/revoked blocked (measuredAt ≤90d). Writes `imports/ai-deploy-policy-enforcement/ai-deploy-policy-enforcement-report.json`.
+Detects admission / deploy-policy / cloud-gate signals; PASS needs `deploymentPolicyEnforced` + unsigned/unapproved/revoked blocked (measuredAt ≤90d). Writes `imports/ai-deploy-policy-enforcement/ai-deploy-policy-enforcement-report.json`.
 
 ### SCI-R1 — Verify-on-deploy
 
@@ -459,6 +459,76 @@ npm run aprf:ai-model-mbom -- \
 ```
 
 Detects MBOM / model-registry / SBOM signals; PASS needs 100% linked MBOM + retention ≥90d (measuredAt ≤90d). Container-only SBOM ≠ PASS. Writes `imports/ai-model-mbom/ai-model-mbom-report.json`.
+
+### TOL-M1 — Tool gateway authz
+
+```bash
+npm run aprf:tool-gateway-authz -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects tool-gateway / deny-suite signals; PASS needs `unauthorizedToolCallsDeniedPct=100` + `modelOutputAloneCannotBypassGateway=true` (measuredAt ≤90d). Writes `imports/tool-gateway-authz/tool-gateway-authz-report.json`.
+
+### TOL-M2 — Per-agent tool allowlist
+
+```bash
+npm run aprf:tool-allowlist -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects allowlist / MCP allowlist signals; PASS needs `agentsWithExplicitToolAllowlistPct=100` + `unknownToolRequestsDeniedPct=100` (measuredAt ≤90d). Writes `imports/tool-allowlist/tool-allowlist-report.json`.
+
+### TOL-M3 — High-impact tool gates
+
+```bash
+npm run aprf:high-impact-tool-gates -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects impact-tier / approval / dual-control / policy-engine signals; PASS needs `highImpactToolsWithConfiguredGatePct=100` + `ungatedExecutionImpossibleInTests=true` (measuredAt ≤90d). Writes `imports/high-impact-tool-gates/high-impact-tool-gates-report.json`.
+
+### TOL-M4 — Tool argument schema
+
+```bash
+npm run aprf:tool-argument-schema -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects inputSchema / contract-test signals; PASS needs `toolsWithDeclaredArgumentSchemaPct=100` + `invalidArgumentFixturesRejectedPct=100` (measuredAt ≤90d). Writes `imports/tool-argument-schema/tool-argument-schema-report.json`.
+
+### TOL-M5 — Signed tool catalog
+
+```bash
+npm run aprf:signed-tool-catalog -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects signed-catalog / verify-on-load signals; PASS needs `unsignedOrUnapprovedCatalogsRejected` + `supplyChainReviewWithin90DaysOrSinceLastChange` (measuredAt ≤90d; Level-5). Writes `imports/signed-tool-catalog/signed-tool-catalog-report.json`.
+
+### TOL-R1 — Destructive tool dry-run
+
+```bash
+npm run aprf:destructive-tool-dry-run -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects dry-run / destructive-tool signals; PASS needs `destructiveToolsWithDryRunInNonProdPct=100` + `lastDestructivePromotionHasDryRunEvidenceWithin90Days` (measuredAt ≤90d). Writes `imports/destructive-tool-dry-run/destructive-tool-dry-run-report.json`.
+
+### TOL-R2 — Tool rate / blast-radius limits
+
+```bash
+npm run aprf:tool-rate-limits -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects rate-limit / blast-radius signals; PASS needs `highImpactToolsWithRateAndBlastBudgetPct=100` + `enforcementProvenWithin30Days` (measuredAt ≤90d). Writes `imports/tool-rate-limits/tool-rate-limits-report.json`.
 
 ### SEC-M1 — Injection / privilege-escalation policy gate
 

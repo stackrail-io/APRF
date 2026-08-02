@@ -10,7 +10,7 @@ description: >
 whyItMatters: >
   Destructive tools promoted without a lower-env dry-run create avoidable
   outages and data loss when allowlists and gates are first exercised in prod.
-  Distinct from TOL-M3 (production high-impact gates), AGN-R* sandbox/sim
+  Distinct from TOL-M3 (production high-impact gates), AGN-R2 sandbox/sim
   before prod for agents, and CHG promotion records without dry-run linkage.
 severity: "high"
 weight: 3
@@ -67,7 +67,7 @@ relatedRules:
   - "TOL-M3"
   - "TOL-M1"
   - "TOL-R2"
-  - "AGN-M3"
+  - "AGN-R2"
 tags:
   - "tool-safety"
   - "recommended"

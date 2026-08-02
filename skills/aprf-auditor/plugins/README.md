@@ -144,7 +144,7 @@ npm run aprf:destructive-tool-dry-run -- --target <app> --out <app>/aprf-assessm
 npm run aprf:tool-rate-limits -- --target <app> --out <app>/aprf-assessment
 ```
 
-Hybrid collectors: signals → PARTIAL; measured imports (≤90d) unlock PASS. Open MCP “all tools” / prompt-only allowlists alone are not enough.
+Hybrid collectors: signals → PARTIAL; measured imports (≤90d) unlock PASS. Open MCP "all tools" / prompt-only allowlists alone are not enough.
 
 ## Built-in highlight: `injection-policy-gate` (SEC-M1)
 

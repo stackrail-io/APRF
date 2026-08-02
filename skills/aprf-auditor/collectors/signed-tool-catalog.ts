@@ -173,10 +173,7 @@ export function buildSignedToolCatalogReport(opts: {
   const contradictingFail =
     opts.imported.unsignedOrUnapprovedCatalogsRejected === false ||
     opts.imported.supplyChainReviewWithin90DaysOrSinceLastChange === false;
-  const explicitFail =
-    opts.imported.found &&
-    (!naCandidate || contradictingFail) &&
-    contradictingFail;
+  const explicitFail = opts.imported.found && contradictingFail;
 
   let statusHint: SignedToolCatalogReport["summary"]["statusHint"];
   let tolM5Satisfied: boolean | null = null;

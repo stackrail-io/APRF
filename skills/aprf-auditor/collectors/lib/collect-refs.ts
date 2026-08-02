@@ -28,7 +28,7 @@ export function collectRefs(
 ): string[] {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: DEFAULT_EXTENSIONS,
   });
   for (const f of files) {

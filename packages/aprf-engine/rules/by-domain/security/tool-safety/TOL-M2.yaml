@@ -7,8 +7,8 @@ description: >
   100% of production agents plus automated negative tests, not by open MCP
   “all tools” bindings or prompt-only restrictions.
 whyItMatters: >
-  Inventable tools at runtime expand agency beyond the intended blast radius
-  and turn prompt injection into arbitrary capability. Distinct from TOL-M1
+  Tool names invented at runtime expand agency beyond the intended blast
+  radius and turn prompt injection into arbitrary capability. Distinct from TOL-M1
   (per-invocation server-side authz), SCI-M2 (external AI tool/MCP/plugin
   inventory+pin+review), AUTHN-M2 (MCP/AI S2S machine identity), and TOL-M5
   (signed tool catalogs / reject unsigned).

@@ -167,7 +167,7 @@ userInputRequiredWhen:
   - SCI-R1: no last-deploy verify + unsigned reject in test/canary (run ai-verify-on-deploy or import results)
   - SCI-R2: no registry-linked MBOM coverage 100% + retention ≥90d (run ai-model-mbom or import results; container-only SBOM ≠ PASS)
   - TOL-M1: no server-side tool-gateway authz deny suite at 100% + no model-output bypass (run tool-gateway-authz or import results)
-  - TOL-M2: no per-agent tool allowlist 100% + unknown-tool deny 100% (run tool-allowlist or import results; open “all tools” ≠ PASS)
+  - TOL-M2: no per-agent tool allowlist 100% + unknown-tool deny 100% (run tool-allowlist or import results; open "all tools" != PASS)
   - TOL-M3: no high-impact tool gates 100% + ungated execution impossible in tests (run high-impact-tool-gates or import results)
   - TOL-M4: no tool argument schema 100% + invalid fixture reject 100% (run tool-argument-schema or import results)
   - TOL-M5: no signed MCP/agent tool catalog reject-unsigned + review ≤90d (run signed-tool-catalog or import results; Level-5)
@@ -212,7 +212,7 @@ limitations:
   - ai-model-mbom needs pinsWithLinkedMbomPct=100 + retentionDaysSatisfied + measuredAt ≤90d; MBOM/registry signals alone are not a PASS but block N/A launder; container-only SBOM ≠ PASS
   - tool-gateway-authz needs unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway + measuredAt ≤90d; gateway docs alone are not a PASS but block N/A launder
   - tool-allowlist needs agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 + measuredAt ≤90d; allowlist files alone are not a PASS but block N/A launder
-  - high-impact-tool-gates needs highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests + measuredAt ≤90d; inventory alone is not a PASS but block N/A launder
+  - high-impact-tool-gates needs highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests + measuredAt ≤90d; inventory alone is not a PASS but blocks N/A launder
   - tool-argument-schema needs toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 + measuredAt ≤90d; schema files alone are not a PASS but block N/A launder
   - signed-tool-catalog needs unsignedOrUnapprovedCatalogsRejected + supplyChainReviewWithin90DaysOrSinceLastChange + measuredAt ≤90d; Level-5; catalog docs alone are not a PASS
   - destructive-tool-dry-run needs destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days + measuredAt ≤90d; dry-run flags alone are not a PASS

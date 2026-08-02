@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:3e9c395e17d10b519370e9582942ddcc6036d1b4bbf2e8f43cda8699bb94a11e",
+  "generatedAt": "sha256:93856df984ce869fdd259aaa93f1485641ec017f00203fd7f9fe0f8d71454934",
   "ruleCount": 178,
   "domains": [
     {
@@ -12101,7 +12101,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "supply-chain",
       "title": "Production model and container artifacts must have verified provenance/integrity",
       "description": "Production model and container artifacts shall have verified provenance/integrity—proven by signature, attestation, or digest verification with unverified pulls blocked, not by digest pins in Dockerfiles alone.\n",
-      "whyItMatters": "Unsigned or unattested model weights and container images let supply-chain tampering reach production silently. Cosign/Notation signatures, SLSA/OCI provenance, and model checksum validation—with measured 100% verified pulls and blocked unverified pulls—make integrity enforceable. Distinct from SCI-M2 (external AI tool / MCP / plugin inventory pins + review), SCI-M3 (vuln scan gates on production AI artifacts/deps/runtimes), and MOD-R1 (model license/provenance review—policy review, not pull-time verify/block).\n",
+      "whyItMatters": "Unsigned or unattested model weights and container images let supply-chain tampering reach production silently. Cosign/Notation signatures, SLSA/OCI provenance, and model checksum validation—with measured 100% verified pulls and blocked unverified pulls—make integrity enforceable. Distinct from SCI-M2 (external AI tool / MCP / plugin inventory pins + review), SCI-M3 (vuln scan gates on production AI artifacts/deps/runtimes), and MOD-R3 (model license/provenance review—policy review, not pull-time verify/block).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -12170,8 +12170,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm production pulls model weights and/or container images. If none, score NOT_APPLICABLE. 2) Locate verification config (cosign, Notation, SLSA attestation, OCI provenance, model checksum, or equivalent). 3) Review verification logs for the sample window: 100% of production pulls verify against expected digest or signature. 4) Confirm unverified pulls are blocked (admission/registry/deploy gate). 5) PASS only if config + 100% verified + block hold with measuredAt ≤90 days. Dockerfile digest pins alone do not prove runtime verification. SCI-M2 AI-tool/MCP/plugin inventory pins alone do not prove artifact signatures. MOD-R1 license reviews alone do not prove pull-time verify/block.\n",
-      "falsePositiveGuidance": "Do not pass digest pins without verification logs and a block on unverified pulls. Do not pass signing in CI without admit/deploy verification. Do not pass SBOM generation alone as provenance verification. Do not score SCI-M2, SCI-M3, or MOD-R1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
+      "manualVerification": "1) Confirm production pulls model weights and/or container images. If none, score NOT_APPLICABLE. 2) Locate verification config (cosign, Notation, SLSA attestation, OCI provenance, model checksum, or equivalent). 3) Review verification logs for the sample window: 100% of production pulls verify against expected digest or signature. 4) Confirm unverified pulls are blocked (admission/registry/deploy gate). 5) PASS only if config + 100% verified + block hold with measuredAt ≤90 days. Dockerfile digest pins alone do not prove runtime verification. SCI-M2 AI-tool/MCP/plugin inventory pins alone do not prove artifact signatures. MOD-R3 license reviews alone do not prove pull-time verify/block.\n",
+      "falsePositiveGuidance": "Do not pass digest pins without verification logs and a block on unverified pulls. Do not pass signing in CI without admit/deploy verification. Do not pass SBOM generation alone as provenance verification. Do not score SCI-M2, SCI-M3, or MOD-R3 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Sign model/container artifacts (cosign, Notation, or equivalent) and verify at pull/admit",
         "Attach and verify SLSA/OCI provenance; validate model checksums before load",
@@ -12206,7 +12206,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SCI-M4",
         "SCI-R1",
         "SCI-R2",
-        "MOD-R1",
+        "MOD-R3",
         "INF-M2"
       ],
       "tags": [
@@ -13829,7 +13829,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "tool-safety",
       "title": "Tools must be allowlisted per agent/workload; unknown tools must not be inventable at runtime",
       "description": "Production agents and workloads shall have an explicit tool allowlist, and requests for unknown tools shall be denied—proven by allowlist coverage for 100% of production agents plus automated negative tests, not by open MCP “all tools” bindings or prompt-only restrictions.\n",
-      "whyItMatters": "Inventable tools at runtime expand agency beyond the intended blast radius and turn prompt injection into arbitrary capability. Distinct from TOL-M1 (per-invocation server-side authz), SCI-M2 (external AI tool/MCP/plugin inventory+pin+review), AUTHN-M2 (MCP/AI S2S machine identity), and TOL-M5 (signed tool catalogs / reject unsigned).\n",
+      "whyItMatters": "Tool names invented at runtime expand agency beyond the intended blast radius and turn prompt injection into arbitrary capability. Distinct from TOL-M1 (per-invocation server-side authz), SCI-M2 (external AI tool/MCP/plugin inventory+pin+review), AUTHN-M2 (MCP/AI S2S machine identity), and TOL-M5 (signed tool catalogs / reject unsigned).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -14155,7 +14155,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "tool-safety",
       "title": "Production systems should have dry-run or simulation mode for destructive tools in lower environments",
       "description": "Destructive tools should expose dry-run or simulation in non-production environments, and the last promotion of a destructive tool should include a dry-run evidence link ≤90 days old—so operators rehearse blast radius before production.\n",
-      "whyItMatters": "Destructive tools promoted without a lower-env dry-run create avoidable outages and data loss when allowlists and gates are first exercised in prod. Distinct from TOL-M3 (production high-impact gates), AGN-R* sandbox/sim before prod for agents, and CHG promotion records without dry-run linkage.\n",
+      "whyItMatters": "Destructive tools promoted without a lower-env dry-run create avoidable outages and data loss when allowlists and gates are first exercised in prod. Distinct from TOL-M3 (production high-impact gates), AGN-R2 sandbox/sim before prod for agents, and CHG promotion records without dry-run linkage.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
@@ -14204,7 +14204,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "TOL-M3",
         "TOL-M1",
         "TOL-R2",
-        "AGN-M3"
+        "AGN-R2"
       ],
       "tags": [
         "tool-safety",

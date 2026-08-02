@@ -33,7 +33,7 @@ const IMPORT_MAX_AGE_DAYS = 90;
 const DRY_RUN_RE =
   /\b(dry[_-]?run|simulation[_-]?mode|simulate[_-]?tool|dryRun)\b/i;
 const DESTRUCTIVE_RE =
-  /\b(destructive[_-]?tool|delete[_-]?tool|irreversible.*tool|destructive.*catalog)\b/i;
+  /\b(destructive[_-]?tool|delete[_-]?tool|irreversible.{0,40}tool|destructive.{0,40}catalog)\b/i;
 
 export interface DestructiveToolDryRunReport {
   schemaVersion: "0.2.0";
@@ -177,10 +177,7 @@ export function buildDestructiveToolDryRunReport(opts: {
       opts.imported.destructiveToolsWithDryRunInNonProdPct < 100) ||
     opts.imported.lastDestructivePromotionHasDryRunEvidenceWithin90Days ===
       false;
-  const explicitFail =
-    opts.imported.found &&
-    (!naCandidate || contradictingFail) &&
-    contradictingFail;
+  const explicitFail = opts.imported.found && contradictingFail;
 
   let statusHint: DestructiveToolDryRunReport["summary"]["statusHint"];
   let tolR1Satisfied: boolean | null = null;

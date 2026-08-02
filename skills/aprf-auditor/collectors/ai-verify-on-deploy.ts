@@ -172,10 +172,7 @@ export function buildAiVerifyOnDeployReport(opts: {
   const contradictingFail =
     opts.imported.lastDeployVerified === false ||
     opts.imported.unsignedRejectedInTestOrCanary === false;
-  const explicitFail =
-    opts.imported.found &&
-    (!naCandidate || contradictingFail) &&
-    contradictingFail;
+  const explicitFail = opts.imported.found && contradictingFail;
 
   let statusHint: AiVerifyOnDeployReport["summary"]["statusHint"];
   let sciR1Satisfied: boolean | null = null;

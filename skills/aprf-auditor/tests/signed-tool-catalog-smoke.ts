@@ -95,8 +95,32 @@ async function main() {
       coverage({ measuredAt: aged.toISOString() }),
     );
     const rAged = await run(tSig, outAged);
-    if (rAged.summary.statusHint === "pass") {
-      throw new Error(`over-age measuredAt must not PASS: ${JSON.stringify(rAged.summary)}`);
+    if (
+      rAged.summary.statusHint !== "partial" ||
+      rAged.summary.tolM5Satisfied !== false
+    ) {
+      throw new Error(
+        `over-age measuredAt expected partial: ${JSON.stringify(rAged.summary)}`,
+      );
+    }
+
+    const outNoMeasured = join(root, "o-no-measured");
+    mkdirSync(join(outNoMeasured, "imports", "signed-tool-catalog"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNoMeasured, "imports", "signed-tool-catalog", "coverage.json"),
+      JSON.stringify({
+        productionToolCatalogsPresent: true,
+        unsignedOrUnapprovedCatalogsRejected: true,
+        supplyChainReviewWithin90DaysOrSinceLastChange: true,
+      }),
+    );
+    const rNoMeasured = await run(tSig, outNoMeasured);
+    if (rNoMeasured.summary.statusHint !== "partial") {
+      throw new Error(
+        `missing measuredAt expected partial: ${JSON.stringify(rNoMeasured.summary)}`,
+      );
     }
 
     const outPass = join(root, "o-pass");

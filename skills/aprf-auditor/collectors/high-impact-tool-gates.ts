@@ -33,7 +33,7 @@ const IMPORT_MAX_AGE_DAYS = 90;
 const IMPACT_TIER_RE =
   /\b(impact[_-]?(tier|level)|high[_-]?impact[_-]?tool|write[_-]?tool|irreversible|financial[_-]?tool)\b/i;
 const GATE_RE =
-  /\b(approval[_-]?gate|dual[_-]?control|policy[_-]?engine|human[_-]?approval.*tool|tool[_-]?gate|ungated[_-]?execution)\b/i;
+  /\b(approval[_-]?gate|dual[_-]?control|policy[_-]?engine|human[_-]?approval.{0,40}tool|tool[_-]?gate|ungated[_-]?execution)\b/i;
 
 export interface HighImpactToolGatesReport {
   schemaVersion: "0.2.0";
@@ -170,10 +170,7 @@ export function buildHighImpactToolGatesReport(opts: {
     (opts.imported.highImpactToolsWithConfiguredGatePct !== null &&
       opts.imported.highImpactToolsWithConfiguredGatePct < 100) ||
     opts.imported.ungatedExecutionImpossibleInTests === false;
-  const explicitFail =
-    opts.imported.found &&
-    (!naCandidate || contradictingFail) &&
-    contradictingFail;
+  const explicitFail = opts.imported.found && contradictingFail;
 
   let statusHint: HighImpactToolGatesReport["summary"]["statusHint"];
   let tolM3Satisfied: boolean | null = null;

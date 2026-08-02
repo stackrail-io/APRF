@@ -143,7 +143,9 @@ export function buildAiDeployPolicyEnforcementReport(opts: {
   const notes: string[] = [];
   const gateSignalsPresent =
     opts.admission.found || opts.deployPolicy.found || opts.cloudGate.found;
-  const surfaceProvedForNaOverride = gateSignalsPresent;
+  // Exclude weak cloudGate (bare platform names) from N/A override.
+  const surfaceProvedForNaOverride =
+    opts.admission.found || opts.deployPolicy.found;
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
@@ -192,10 +194,7 @@ export function buildAiDeployPolicyEnforcementReport(opts: {
     opts.imported.unsignedBlocked === false ||
     opts.imported.unapprovedBlocked === false ||
     opts.imported.revokedOrUntrustedRejected === false;
-  const explicitFail =
-    opts.imported.found &&
-    (!naCandidate || contradictingFail) &&
-    contradictingFail;
+  const explicitFail = opts.imported.found && contradictingFail;
 
   let statusHint: AiDeployPolicyEnforcementReport["summary"]["statusHint"];
   let sciM4Satisfied: boolean | null = null;

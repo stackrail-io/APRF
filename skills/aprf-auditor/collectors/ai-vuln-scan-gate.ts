@@ -201,10 +201,7 @@ export function buildAiVulnScanGateReport(opts: {
     opts.imported.criticalFindingsBlockPromotion === false ||
     (opts.imported.skippedScans !== null && opts.imported.skippedScans > 0) ||
     opts.imported.retainedResults === false;
-  const explicitFail =
-    opts.imported.found &&
-    (!naCandidate || contradictingFail) &&
-    contradictingFail;
+  const explicitFail = opts.imported.found && contradictingFail;
 
   let statusHint: AiVulnScanGateReport["summary"]["statusHint"];
   let sciM3Satisfied: boolean | null = null;

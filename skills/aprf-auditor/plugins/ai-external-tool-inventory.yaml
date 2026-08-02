@@ -22,11 +22,11 @@ emits:
 mapsToChecks: [SCI-M2]
 whenUnavailable: >
   Signals alone are PARTIAL. SCI-M2 PASS needs inventory coverage with
-  entriesWithPinOwnerReviewPct=100 and unpinnedLatestOrFloatingEntries=0,
-  measuredAt ≤90 days under imports/ai-external-tool-inventory/. Package
-  lockfiles / CI Action SHA pins alone are not a PASS. Set
-  productionAiExternalToolsOrIntegrationsPresent=false for NOT_APPLICABLE only
-  when no in-repo MCP/plugin/tool-registry signals.
+  entriesWithPinOwnerReviewPct=100 (pin + owner + review date ≤180 days) and
+  unpinnedLatestOrFloatingEntries=0, measuredAt ≤90 days under
+  imports/ai-external-tool-inventory/. Package lockfiles / CI Action SHA pins
+  alone are not a PASS. Set productionAiExternalToolsOrIntegrationsPresent=false
+  for NOT_APPLICABLE only when no in-repo MCP/plugin/tool-registry signals.
 live:
   required: false
   note: Offline discovery + optional imported inventory coverage.

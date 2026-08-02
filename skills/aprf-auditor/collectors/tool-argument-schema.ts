@@ -30,9 +30,9 @@ const DETECTOR_ID = "repo-tool-argument-schema";
 const IMPORT_MAX_AGE_DAYS = 90;
 
 const SCHEMA_RE =
-  /\b(inputSchema|argument[_-]?schema|tool[_-]?schema|json[_-]?schema.*tool|parameters.*schema)\b/i;
+  /\b(inputSchema|argument[_-]?schema|tool[_-]?schema|json[_-]?schema.{0,40}tool|parameters.{0,40}schema)\b/i;
 const CONTRACT_RE =
-  /\b(contract[_-]?test|invalid[_-]?argument|malicious[_-]?payload|schema[_-]?validat|fixture[_-]?reject)\b/i;
+  /\b(?:contract[_-]?tests?\b|invalid[_-]?argument\b|malicious[_-]?payload\b|schema[_-]?validat(?:e|ion|or|ed|ing)?\b|fixture[_-]?reject(?:ed|ion|s)?\b)/i;
 
 export interface ToolArgumentSchemaReport {
   schemaVersion: "0.2.0";
@@ -174,10 +174,7 @@ export function buildToolArgumentSchemaReport(opts: {
       opts.imported.toolsWithDeclaredArgumentSchemaPct < 100) ||
     (opts.imported.invalidArgumentFixturesRejectedPct !== null &&
       opts.imported.invalidArgumentFixturesRejectedPct < 100);
-  const explicitFail =
-    opts.imported.found &&
-    (!naCandidate || contradictingFail) &&
-    contradictingFail;
+  const explicitFail = opts.imported.found && contradictingFail;
 
   let statusHint: ToolArgumentSchemaReport["summary"]["statusHint"];
   let tolM4Satisfied: boolean | null = null;

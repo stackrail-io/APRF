@@ -33,7 +33,7 @@ const IMPORT_MAX_AGE_DAYS = 90;
 const GATEWAY_AUTHZ_RE =
   /\b(tool[_-]?(gateway|runtime)|tool[_-]?authz|tool[_-]?authorization|server[_-]?side[_-]?authz)\b/i;
 const DENY_SUITE_RE =
-  /\b(deny[_-]?(suite|test|log)|unauthorized[_-]?tool|forged[_-]?authz|missing[_-]?authz|model[_-]?output.*bypass)\b/i;
+  /\b(deny[_-]?(suite|test|log)s?|unauthorized[_-]?tool|forged[_-]?authz|missing[_-]?authz|model[_-]?output.{0,40}bypass)\b/i;
 
 export interface ToolGatewayAuthzReport {
   schemaVersion: "0.2.0";
@@ -172,10 +172,7 @@ export function buildToolGatewayAuthzReport(opts: {
     (opts.imported.unauthorizedToolCallsDeniedPct !== null &&
       opts.imported.unauthorizedToolCallsDeniedPct < 100) ||
     opts.imported.modelOutputAloneCannotBypassGateway === false;
-  const explicitFail =
-    opts.imported.found &&
-    (!naCandidate || contradictingFail) &&
-    contradictingFail;
+  const explicitFail = opts.imported.found && contradictingFail;
 
   let statusHint: ToolGatewayAuthzReport["summary"]["statusHint"];
   let tolM1Satisfied: boolean | null = null;
