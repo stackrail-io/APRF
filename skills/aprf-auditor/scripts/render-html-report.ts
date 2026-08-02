@@ -227,6 +227,69 @@ function esc(s: unknown): string {
     .replace(/"/g, "&quot;");
 }
 
+/** Pretty-print JSON inside an evidence excerpt when present; otherwise escape as text. */
+function formatEvidenceExcerpt(excerpt: string): string {
+  const trimmed = excerpt.trim();
+  if (!trimmed) return "";
+
+  const tryParse = (raw: string): string | null => {
+    try {
+      return JSON.stringify(JSON.parse(raw), null, 2);
+    } catch {
+      return null;
+    }
+  };
+
+  // Whole excerpt is JSON
+  const whole = tryParse(trimmed);
+  if (whole != null) {
+    return `<pre class="evidence-json" tabindex="0"><code>${esc(whole)}</code></pre>`;
+  }
+
+  // Common collector shape: "statusHint=fail; {…}" (or any prefix before first { / [)
+  const objStart = trimmed.search(/[\[{]/);
+  if (objStart >= 0) {
+    const prefix = trimmed.slice(0, objStart).replace(/[;\s]+$/, "").trim();
+    const jsonRaw = trimmed.slice(objStart);
+    const pretty = tryParse(jsonRaw);
+    if (pretty != null) {
+      const lead = prefix ? `<span class="evidence-lead">${esc(prefix)}</span>` : "";
+      return `${lead}<pre class="evidence-json" tabindex="0"><code>${esc(pretty)}</code></pre>`;
+    }
+  }
+
+  return ` — ${esc(excerpt)}`;
+}
+
+function formatEvidenceItem(e: { ref: string; excerpt?: string }): string {
+  const excerptHtml = e.excerpt ? formatEvidenceExcerpt(e.excerpt) : "";
+  const hasBlock = excerptHtml.includes('class="evidence-json"');
+  if (hasBlock) {
+    return `<li class="evidence-item"><div class="evidence-ref"><code>${esc(e.ref)}</code></div>${excerptHtml}</li>`;
+  }
+  return `<li class="evidence-item"><code>${esc(e.ref)}</code>${excerptHtml}</li>`;
+}
+
+/** Split catalog prose like "1) … 2) … 3) …" into ordered-list items. */
+function splitNumberedSteps(text: string): string[] | null {
+  const trimmed = text.trim().replace(/\s+/g, " ");
+  if (!/^\d+\)\s/.test(trimmed)) return null;
+  const chunks = trimmed.split(/\s+(?=\d+\)\s)/);
+  if (chunks.length < 2) return null;
+  if (!chunks.every((c) => /^\d+\)\s+\S/.test(c))) return null;
+  return chunks.map((c) => c.replace(/^\d+\)\s*/, "").trim());
+}
+
+function formatManualVerification(text: string): string {
+  const steps = splitNumberedSteps(text);
+  if (!steps) {
+    return `<p><strong>Manual verification:</strong> ${esc(text)}</p>`;
+  }
+  return `<p><strong>Manual verification:</strong></p><ol class="manual-steps">${steps
+    .map((s) => `<li>${esc(s)}</li>`)
+    .join("")}</ol>`;
+}
+
 function statusClass(status: string): string {
   switch (status) {
     case "PASS":
@@ -586,7 +649,7 @@ function tagPills(tags: string[]): string {
 function controlDetailBody(c: Control): string {
   const evidence =
     c.evidenceFound?.length ?
-      `<ul>${c.evidenceFound.map((e) => `<li><code>${esc(e.ref)}</code>${e.excerpt ? ` — ${esc(e.excerpt)}` : ""}</li>`).join("")}</ul>`
+      `<ul class="evidence-list">${c.evidenceFound.map(formatEvidenceItem).join("")}</ul>`
     : `<p class="empty">None</p>`;
   const missing =
     c.requiredEvidenceMissing?.length ?
@@ -627,7 +690,7 @@ function controlDetailBody(c: Control): string {
   ${refs}
   ${c.passCondition ? `<p><strong>Pass condition:</strong> ${esc(c.passCondition)}</p>` : ""}
   ${evidenceRequired}
-  ${c.manualVerification ? `<p><strong>Manual verification:</strong> ${esc(c.manualVerification)}</p>` : ""}
+  ${c.manualVerification ? formatManualVerification(c.manualVerification) : ""}
   ${c.falsePositiveGuidance ? `<p><strong>False-positive guidance:</strong> ${esc(c.falsePositiveGuidance)}</p>` : ""}
   ${recommendedFixes}`;
 
@@ -1015,6 +1078,28 @@ function render(a: Assessment): string {
     .prio { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
     code { font-family: var(--mono); font-size: 0.84em; background: #f0f4f7; padding: 0.08em 0.35em; border-radius: 4px; }
     ul { padding-left: 1.15rem; }
+    .evidence-list { margin: 0.35rem 0 0.65rem; padding-left: 1.15rem; }
+    .evidence-item { margin: 0.45rem 0; word-break: break-word; }
+    .evidence-ref { margin-bottom: 0.3rem; }
+    .evidence-lead {
+      display: block; font-family: var(--sans); font-size: 0.84rem;
+      color: var(--muted); margin: 0.15rem 0 0.35rem;
+    }
+    .evidence-json {
+      margin: 0.25rem 0 0; padding: 0.65rem 0.75rem;
+      background: #f3f6f8; border: 1px solid var(--line); border-radius: 8px;
+      font-family: var(--mono); font-size: 0.78rem; line-height: 1.45;
+      overflow-x: auto; max-width: 100%; white-space: pre;
+      color: var(--ink);
+    }
+    .evidence-json code {
+      background: transparent; padding: 0; border-radius: 0;
+      font-size: inherit; color: inherit;
+    }
+    .manual-steps {
+      margin: 0.35rem 0 0.75rem; padding-left: 1.35rem;
+    }
+    .manual-steps li { margin: 0.35rem 0; }
     .help { margin: 0.65rem 0 0; font-size: 0.82rem; color: var(--muted); }
     .roadmap-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -1059,8 +1144,9 @@ function render(a: Assessment): string {
     }
     .flyout-close:hover { background: var(--bg); }
     .flyout-body {
-      padding: 1.15rem 1.25rem 2.25rem; overflow-y: auto; flex: 1;
-      font-family: var(--serif); font-size: 0.98rem;
+      padding: 1.15rem 1.25rem 2.25rem; overflow-y: auto; overflow-x: hidden; flex: 1;
+      font-family: var(--serif); font-size: 0.98rem; min-width: 0;
+      overflow-wrap: anywhere;
     }
     .flyout-body .meta { font-family: var(--sans); font-size: 0.82rem; }
     .flyout-body h4 {
