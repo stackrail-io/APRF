@@ -1,68 +1,116 @@
 id: "SCI-M2"
 category: "supply-chain"
-title: "MCP servers and high-impact tools must be inventoried, version-pinned, and reviewed before
-  production use"
-description: "MCP servers and high-impact tools shall be inventoried, version-pinned, and reviewed
-  before production use"
-whyItMatters: "MCP servers and high-impact tools shall be inventoried, version-pinned, and reviewed
-  before production use Failing this leaves a production gap against: 100% of production MCP servers
-  and high-impact tools have pin + owner + review date ≤ 180 days; 0 unpinned “latest” entries in
-  production"
+title: "External AI tools, MCP servers, agent plugins, and high-impact integrations
+  must be inventoried, version-pinned, and reviewed before production use"
+description: >
+  Production external AI tools, MCP servers, agent plugins, and high-impact
+  integrations shall be inventoried with version pins, named owners, and
+  recurring review—proven by an inventory covering those surfaces with 0
+  unpinned “latest”/floating entries, not by CI Action SHA pins or package
+  lockfiles alone.
+whyItMatters: >
+  Unpinned MCP servers, agent plugins, and third-party AI integrations can
+  rug-pull tool definitions, expand privilege, or ship malicious code without
+  a deploy. An inventory with version pin, owner, and review date ≤180 days
+  makes the AI tool supply chain reviewable. Distinct from SCI-M1 (model/
+  container provenance verify+block), SCI-M3 (vuln scan gates on production
+  AI artifacts including model-serving runtimes), TOL-M2 (per-agent tool
+  allowlists), TOL-M5 (signed MCP tool catalogs /
+  reject unsigned), and AUTHN-M2 (MCP/AI S2S machine-identity inventory—auth,
+  not version/review hygiene).
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "100% of production MCP servers and high-impact tools have pin + owner + review date
-  ≤ 180 days; 0 unpinned “latest” entries in production"
+passCondition: >
+  100% of production external AI tools, MCP servers, agent plugins, and
+  high-impact integrations have version pin + owner + review date ≤180 days;
+  0 unpinned “latest” (or floating) entries in production (inventory evidence
+  measuredAt ≤90 days). If none of those surfaces exist in production, score
+  NOT_APPLICABLE.
 evidenceRequired:
-  - "MCP/tool inventory with version pins, owners, and review dates"
+  - "Inventory of production external AI tools, MCP servers, agent plugins, and high-impact integrations"
+  - "Version pins (commit SHA, package version, image digest, or equivalent—not latest/floating tags)"
+  - "Named owner and review date ≤180 days per inventory entry"
+  - "Attest or scan showing 0 unpinned latest/floating entries in production (measuredAt ≤90 days)"
 detection:
   capability: "hybrid"
   detectors:
+    - id: "repo-ai-external-tool-inventory"
+      params:
+        hint: >
+          Discover MCP server configs, agent plugin/tool registries, and
+          high-impact AI integration pins; ingest coverage under
+          imports/ai-external-tool-inventory/; require inventory (or
+          present=true), pin+owner+reviewDate≤180d for 100% of entries,
+          unpinnedLatestOrFloatingEntries=0, measuredAt ≤90 days.
     - id: "mcp-package-pinned"
-      params: {}
-    - id: "cicd-actions-sha-pinned"
-      params: {}
+      params:
+        hint: >
+          Supporting signal — MCP server/package version pins in config or
+          lockfiles; alone does not prove full inventory + owner + review.
     - id: "manual-attest"
       params:
-        hint: "MCP/tool inventory with version pins, owners, and review dates"
-manualVerification: "For this Check (MCP servers and high-impact tools must be inventoried,
-  version-pinned, and reviewed before production use): inspect current evidence for [MCP/tool
-  inventory with version pins, owners, and review dates] and confirm the pass condition holds — 100%
-  of production MCP servers and high-impact tools have pin + owner + review date ≤ 180 days; 0
-  unpinned “latest” entries in production"
-falsePositiveGuidance: "(Supply Chain Integrity): when automation and attestation disagree, prefer
-  the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the
-  gap."
+        hint: >
+          If automation cannot prove coverage, attest a production inventory
+          of external AI tools, MCP servers, agent plugins, and high-impact
+          integrations with pin + owner + review ≤180 days and 0 unpinned
+          latest/floating entries (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production uses external AI tools, MCP servers, agent plugins,
+  and/or high-impact integrations. If none, score NOT_APPLICABLE. 2) Open the
+  inventory covering those surfaces (required—do not PASS from CI Action SHA
+  pins or dependency lockfiles alone). 3) Confirm each entry has a version
+  pin (commit/package/digest—not latest/floating), a named owner, and a
+  review date ≤180 days. 4) Confirm 0 unpinned latest/floating entries in
+  production (measuredAt ≤90 days). 5) PASS only if inventory + 100% pin/
+  owner/review + 0 floating hold. TOL-M2 allowlists alone do not prove
+  version pins or review dates. TOL-M5 signed catalogs alone do not prove
+  owner/review inventory coverage. SCI-M1 model/container verify+block does
+  not substitute for AI-tool inventory hygiene. AUTHN-M2 S2S identity
+  inventory alone does not prove pins or review cadence.
+falsePositiveGuidance: >
+  Do not pass GitHub Actions SHA pins as the AI-tool inventory. Do not pass
+  npm/pip lockfiles without MCP/plugin/integration entries in scope. Do not
+  pass an inventory missing owners or with review dates older than 180 days.
+  Do not pass “latest” tags with a waiver note instead of a pin. Do not score
+  SCI-M1, SCI-M3, TOL-M2, TOL-M5, or AUTHN-M2 as substitutes. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: MCP servers and high-impact tools must be inventoried,
-    version-pinned, and reviewed before production use"
-  - "Retain evidence artifacts required by this Check, starting with: MCP/tool inventory with
-    version pins, owners, and review dates"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish an inventory of production external AI tools, MCP servers, agent plugins, and high-impact integrations"
+  - "Pin each entry (commit SHA, package version, or digest); remove latest/floating tags from production"
+  - "Assign owners and re-review on a ≤180-day cadence; retain coverage under imports/ai-external-tool-inventory/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
+  - title: "Model Context Protocol — security considerations"
+    url: "https://modelcontextprotocol.io/"
   - title: "SLSA — Supply-chain Levels for Software Artifacts"
     url: "https://slsa.dev/"
   - title: "CNCF Software Supply Chain Best Practices"
     url: "https://www.cncf.io/"
   - title: "OWASP LLM — Supply Chain Vulnerabilities"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "SCI-M1"
   - "SCI-M3"
   - "SCI-M4"
   - "SCI-R1"
   - "SCI-R2"
+  - "TOL-M2"
+  - "TOL-M5"
+  - "AUTHN-M2"
 tags:
   - "supply-chain"
   - "mandatory"
   - "hybrid"
+  - "mcp"
+  - "tools"
+  - "plugins"
+  - "inventory"
+  - "version-pin"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "cicd"
-    - "docker"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

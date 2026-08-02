@@ -1,0 +1,30 @@
+id: tool-gateway-authz
+title: Tool gateway server-side authz (TOL-M1)
+version: "0.2.0"
+executor: collectors/tool-gateway-authz.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds:
+  - repo-tool-gateway-authz
+inputs:
+  - "Target repo (tool gateway/runtime authz, deny-suite tests)"
+  - "Optional coverage: aprf-assessment/imports/tool-gateway-authz/*.json"
+collect:
+  - "Detect tool-gateway authz and deny-suite signals"
+  - "Ingest imported deny coverage; write tool-gateway-authz-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/tool-gateway-authz/*"
+  signals:
+    - tool-gateway-authz
+    - tol-m1
+    - repo-tool-gateway-authz
+mapsToChecks: [TOL-M1]
+whenUnavailable: >
+  Signals alone are PARTIAL. TOL-M1 PASS needs unauthorizedToolCallsDeniedPct=100
+  and modelOutputAloneCannotBypassGateway=true, measuredAt ≤90 days under
+  imports/tool-gateway-authz/. Set productionToolsOrAgentsPresent=false for
+  NOT_APPLICABLE only when no in-repo gateway/deny signals.
+live:
+  required: false
+  note: Offline discovery + optional imported deny coverage.

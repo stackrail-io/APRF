@@ -1,0 +1,30 @@
+id: signed-tool-catalog
+title: Signed MCP/agent tool catalog (TOL-M5)
+version: "0.2.0"
+executor: collectors/signed-tool-catalog.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds:
+  - repo-signed-tool-catalog
+inputs:
+  - "Target repo (signed catalog, verify-on-load, MCP catalog signing)"
+  - "Optional coverage: aprf-assessment/imports/signed-tool-catalog/*.json"
+collect:
+  - "Detect signed-catalog and verify-on-load signals"
+  - "Ingest imported reject/review coverage; write signed-tool-catalog-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/signed-tool-catalog/*"
+  signals:
+    - signed-tool-catalog
+    - tol-m5
+    - repo-signed-tool-catalog
+mapsToChecks: [TOL-M5]
+whenUnavailable: >
+  Signals alone are PARTIAL. TOL-M5 PASS needs unsignedOrUnapprovedCatalogsRejected=true
+  and supplyChainReviewWithin90DaysOrSinceLastChange=true, measuredAt ≤90 days under
+  imports/signed-tool-catalog/. Set productionToolCatalogsPresent=false for
+  NOT_APPLICABLE only when no in-repo signed/verify signals.
+live:
+  required: false
+  note: Offline discovery + optional imported catalog integrity coverage.

@@ -1,63 +1,108 @@
 id: "SCI-R1"
 category: "supply-chain"
-title: "Production systems should have signed model/container artifacts with verify-on-deploy
-  (SLSA-aligned)"
-description: "Signed model/container artifacts with verify-on-deploy (SLSA-aligned)"
-whyItMatters: "Signed model/container artifacts with verify-on-deploy (SLSA-aligned) Failing this
-  leaves a production gap against: Last production model/container deploy shows signature
-  verification success; unsigned artifact is rejected in a recorded test or canary within 90 days"
+title: "Production systems should verify signed model/container artifacts on
+  deploy (SLSA-aligned)"
+description: >
+  Production model and container (or equivalent AI package) deploys should
+  verify signatures or attestations at deploy/promote time and reject unsigned
+  artifacts—proven by the last successful verified deploy plus a recorded
+  unsigned-reject test or canary, not by CI signing or digest pins alone.
+whyItMatters: >
+  Signing in CI without verify-on-deploy still lets an unsigned image or model
+  package reach production. A measured last deploy that verified the signature
+  (or attestation) plus a recorded reject of an unsigned artifact closes that
+  gap for Level-4 maturity. Distinct from SCI-M1 (mandatory pull-time
+  provenance/integrity verify+block), SCI-M4 (Level-5 deploy-path policy that
+  also blocks unapproved and revoked/untrusted signatures with full deny
+  logs), SCI-M3 (vuln scan gates), and SCI-R2 (MBOM retention).
 severity: "critical"
 weight: 4
 gate: "recommended"
-passCondition: "Last production model/container deploy shows signature verification success;
-  unsigned artifact is rejected in a recorded test or canary within 90 days"
+passCondition: >
+  The last production model/container (or equivalent AI package) deploy
+  verified a signature or attestation successfully; an unsigned artifact is
+  rejected in a recorded test, canary, or deny log within 90 days (evidence
+  measuredAt ≤90 days). If no production model/container AI artifacts are
+  deployed, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Admission/verify-on-deploy policy for signed model and container artifacts + last deploy
-    verification log"
+  - "Verify-on-deploy / promote-path policy or gate for signed model/container (or equivalent AI package) artifacts"
+  - "Last production deploy verification log showing signature or attestation success"
+  - "Recorded test, canary, or deny log showing an unsigned artifact was rejected (within 90 days; measuredAt ≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-verify-on-deploy"
+      params:
+        hint: >
+          Discover verify-on-deploy / promote-path signature or attestation
+          checks (pipeline gates, registry policies, cloud deploy policies,
+          admission controllers, or AI-platform gates); ingest coverage under
+          imports/ai-verify-on-deploy/; require lastDeployVerified=true,
+          unsignedRejectedInTestOrCanary=true, measuredAt ≤90 days.
+    - id: "cosign-verification"
+      params:
+        hint: >
+          Supporting signal — Cosign verify/policy evidence; alone does not
+          prove last production deploy verified or unsigned reject test.
     - id: "manual-attest"
       params:
-        hint: "Admission/verify-on-deploy policy for signed model and container artifacts + last deploy
-          verification log"
-manualVerification: "For this Check (SCI: Signed model/container artifacts with verify-on-deploy
-  (SLSA-aligned)): inspect current evidence for [Admission/verify-on-deploy policy for signed model
-  and container artifacts + last deploy verification log] and confirm the pass condition holds —
-  Last production model/container deploy shows signature verification success; unsigned artifact is
-  rejected in a recorded test or canary within 90 days"
-falsePositiveGuidance: "(Supply Chain Integrity): re-verify against a current artifact for this
-  specific Check , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest last production deploy
+          verified signature/attestation and an unsigned reject test or deny
+          log within 90 days (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production deploys model/container (or equivalent AI package)
+  artifacts. If none, score NOT_APPLICABLE. 2) Locate verify-on-deploy or
+  promote-path policy (pipeline gate, registry policy, cloud deploy policy,
+  admission controller, or AI-platform gate)—not CI signing alone. 3) Review
+  the last production deploy log: signature or attestation verification
+  succeeded. 4) Confirm an unsigned artifact was rejected in a recorded test,
+  canary, or deny log within 90 days (measuredAt ≤90 days). 5) PASS only if
+  last verified deploy + unsigned reject hold. SCI-M1 pull-time verify metrics
+  alone do not prove deploy-path verification. Digest pins alone do not
+  satisfy. SCI-M4 Level-5 unapproved/revoked matrix is stronger and
+  substitutes for this recommended Check when fully met; do not require
+  Kyverno specifically.
+falsePositiveGuidance: >
+  Do not pass CI cosign/sign jobs without deploy-path verification. Do not
+  pass Dockerfile digest pins as verify-on-deploy. Do not pass SCI-M1
+  pull-sample metrics as a substitute for last-deploy verification. Do not
+  require Kubernetes admission when an equivalent pipeline/cloud/registry/
+  platform gate is proven. Do not score SCI-M3 or SCI-R2 as substitutes. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Signed model/container artifacts with
-    verify-on-deploy (SLSA-aligned)"
-  - "Retain evidence artifacts required by this Check, starting with: Admission/verify-on-deploy
-    policy for signed model and container artifacts + last deploy verification log"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Add verify-on-deploy / promote-path checks for signed model/container (or equivalent AI package) artifacts"
+  - "Record last successful verified production deploy; run an unsigned-reject test or canary"
+  - "Retain evidence under imports/ai-verify-on-deploy/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days; plan Level-5 SCI-M4 when ready for full deploy-policy enforcement"
 references:
   - title: "SLSA — Supply-chain Levels for Software Artifacts"
     url: "https://slsa.dev/"
+  - title: "Sigstore Cosign"
+    url: "https://docs.sigstore.dev/cosign/overview/"
   - title: "CNCF Software Supply Chain Best Practices"
     url: "https://www.cncf.io/"
   - title: "OWASP LLM — Supply Chain Vulnerabilities"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "SCI-M1"
   - "SCI-M2"
   - "SCI-M3"
   - "SCI-M4"
   - "SCI-R2"
+  - "INF-R1"
+  - "CHG-M1"
 tags:
   - "supply-chain"
   - "recommended"
-  - "manual"
+  - "hybrid"
+  - "verify-on-deploy"
+  - "slsa"
+  - "signed-artifacts"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "cicd"
-    - "docker"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

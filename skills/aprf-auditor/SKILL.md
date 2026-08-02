@@ -49,6 +49,18 @@ Collectors: local by default; `aprf-assessment/imports/<plugin>/` for runtime ex
 | SEC2-R2 | `credential-egress-controls` | allowlist + destinations + ≥1 deny ≤90d |
 | SEC2-R3 | `dataset-secret-scan-gate` | publish scan gate + blocking + 100% linked reports |
 | SCI-M1 | `artifact-provenance-integrity` | verify + 100% verified pulls + block unverified (pins alone ≠ PASS) |
+| SCI-M2 | `ai-external-tool-inventory` | pin+owner+review 100% + 0 unpinned (lockfiles alone ≠ PASS) |
+| SCI-M3 | `ai-vuln-scan-gate` | scan coverage 100% + critical block + 0 skipped + retained |
+| SCI-M4 | `ai-deploy-policy-enforcement` | Level-5 deploy-path unsigned/unapproved/revoked blocks |
+| SCI-R1 | `ai-verify-on-deploy` | last deploy verified + unsigned reject test/canary |
+| SCI-R2 | `ai-model-mbom` | registry-linked MBOM 100% + retention ≥90d (container SBOM ≠ PASS) |
+| TOL-M1 | `tool-gateway-authz` | server-side tool authz deny 100% + no model-output bypass |
+| TOL-M2 | `tool-allowlist` | per-agent allowlist 100% + unknown-tool deny 100% |
+| TOL-M3 | `high-impact-tool-gates` | high-impact gates 100% + ungated execution impossible |
+| TOL-M4 | `tool-argument-schema` | argument schema 100% + invalid fixture reject 100% |
+| TOL-M5 | `signed-tool-catalog` | Level-5 signed catalog reject-unsigned + review ≤90d |
+| TOL-R1 | `destructive-tool-dry-run` | dry-run in non-prod 100% + promotion evidence ≤90d |
+| TOL-R2 | `tool-rate-limits` | rate + blast budgets 100% + ≤30d enforcement proof |
 | SEC-M1 | `injection-policy-gate` | versioned corpus + CI gate ≥95% deny |
 
 ## Hard rules

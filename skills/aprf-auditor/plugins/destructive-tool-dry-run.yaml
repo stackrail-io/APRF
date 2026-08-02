@@ -1,0 +1,30 @@
+id: destructive-tool-dry-run
+title: Destructive tool dry-run in non-prod (TOL-R1)
+version: "0.2.0"
+executor: collectors/destructive-tool-dry-run.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds:
+  - repo-destructive-tool-dry-run
+inputs:
+  - "Target repo (dry-run/simulation flags, destructive-tool catalog)"
+  - "Optional coverage: aprf-assessment/imports/destructive-tool-dry-run/*.json"
+collect:
+  - "Detect dry-run and destructive-tool signals"
+  - "Ingest imported dry-run coverage; write destructive-tool-dry-run-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/destructive-tool-dry-run/*"
+  signals:
+    - destructive-tool-dry-run
+    - tol-r1
+    - repo-destructive-tool-dry-run
+mapsToChecks: [TOL-R1]
+whenUnavailable: >
+  Signals alone are PARTIAL. TOL-R1 PASS needs destructiveToolsWithDryRunInNonProdPct=100
+  and lastDestructivePromotionHasDryRunEvidenceWithin90Days=true, measuredAt ≤90 days under
+  imports/destructive-tool-dry-run/. Set destructiveToolsPresent=false for
+  NOT_APPLICABLE only when no in-repo dry-run/destructive signals.
+live:
+  required: false
+  note: Offline discovery + optional imported dry-run coverage.

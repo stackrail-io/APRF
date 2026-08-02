@@ -1,0 +1,30 @@
+id: tool-rate-limits
+title: Per-tool rate limits and blast-radius budgets (TOL-R2)
+version: "0.2.0"
+executor: collectors/tool-rate-limits.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds:
+  - repo-tool-rate-limits
+inputs:
+  - "Target repo (rate limits, blast radius, QPS, max-affected configs)"
+  - "Optional coverage: aprf-assessment/imports/tool-rate-limits/*.json"
+collect:
+  - "Detect rate-limit and blast-radius budget signals"
+  - "Ingest imported budget/enforcement coverage; write tool-rate-limits-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/tool-rate-limits/*"
+  signals:
+    - tool-rate-limits
+    - tol-r2
+    - repo-tool-rate-limits
+mapsToChecks: [TOL-R2]
+whenUnavailable: >
+  Signals alone are PARTIAL. TOL-R2 PASS needs highImpactToolsWithRateAndBlastBudgetPct=100
+  and enforcementProvenWithin30Days=true, measuredAt ≤90 days under
+  imports/tool-rate-limits/. Set highImpactToolsPresent=false for
+  NOT_APPLICABLE only when no in-repo rate/blast signals.
+live:
+  required: false
+  note: Offline discovery + optional imported rate/blast coverage.

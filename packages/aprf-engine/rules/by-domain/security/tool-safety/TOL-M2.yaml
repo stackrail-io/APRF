@@ -1,64 +1,95 @@
 id: "TOL-M2"
 category: "tool-safety"
 title: "Tools must be allowlisted per agent/workload; unknown tools must not be inventable at runtime"
-description: "Tools shall be allowlisted per agent/workload; unknown tools shall not be inventable at runtime"
-whyItMatters: "Tools shall be allowlisted per agent/workload; unknown tools shall not be inventable
-  at runtime Failing this leaves a production gap against: 100% of production agents have an
-  explicit tool allowlist; requests for tools outside the allowlist are denied at 100% in automated
-  tests"
+description: >
+  Production agents and workloads shall have an explicit tool allowlist, and
+  requests for unknown tools shall be denied—proven by allowlist coverage for
+  100% of production agents plus automated negative tests, not by open MCP
+  “all tools” bindings or prompt-only restrictions.
+whyItMatters: >
+  Inventable tools at runtime expand agency beyond the intended blast radius
+  and turn prompt injection into arbitrary capability. Distinct from TOL-M1
+  (per-invocation server-side authz), SCI-M2 (external AI tool/MCP/plugin
+  inventory+pin+review), AUTHN-M2 (MCP/AI S2S machine identity), and TOL-M5
+  (signed tool catalogs / reject unsigned).
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "100% of production agents have an explicit tool allowlist; requests for tools
-  outside the allowlist are denied at 100% in automated tests"
+passCondition: >
+  100% of production agents/workloads that can invoke tools have an explicit
+  tool allowlist; requests for tools outside the allowlist are denied at 100%
+  in automated tests (measuredAt ≤90 days). If no production agents/workloads
+  invoke tools, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Per-agent tool allowlist config + negative tests for unknown tool names"
+  - "Per-agent/workload tool allowlist configuration covering production agents"
+  - "Negative tests for unknown / inventable tool names"
+  - "Attest or results: agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 (measuredAt ≤90 days)"
 detection:
-  capability: "automated"
+  capability: "hybrid"
   detectors:
+    - id: "repo-tool-allowlist"
+      params:
+        hint: >
+          Discover per-agent tool allowlists and unknown-tool deny tests;
+          ingest coverage under imports/tool-allowlist/; require
+          agentsWithExplicitToolAllowlistPct=100 +
+          unknownToolRequestsDeniedPct=100 + measuredAt ≤90 days.
     - id: "mcp-tool-allowlist"
-      params: {}
+      params:
+        hint: >
+          Supporting signal — MCP/tool allowlist config present; alone does
+          not prove 100% agent coverage or deny tests.
     - id: "mcp-no-unrestricted-shell"
-      params: {}
+      params:
+        hint: Supporting signal — no unrestricted shell tool bindings.
     - id: "mcp-no-unrestricted-network"
-      params: {}
+      params:
+        hint: Supporting signal — no unrestricted network tool bindings.
     - id: "manual-attest"
       params:
-        hint: "Per-agent tool allowlist config + negative tests for unknown tool names"
-manualVerification: "For this Check (Tools must be allowlisted per agent/workload; unknown tools
-  must not be inventable at runtime): inspect current evidence for [Per-agent tool allowlist config
-  + negative tests for unknown tool names] and confirm the pass condition holds — 100% of production
-  agents have an explicit tool allowlist; requests for tools outside the allowlist are denied at
-  100% in automated tests"
-falsePositiveGuidance: "(Tool Safety): confirm the detector target matches the production path for
-  this Check before waiving. Named exceptions need an owner and expiry ≤90 days."
+        hint: >
+          If automation cannot prove coverage, attest 100% agent allowlist
+          coverage and 100% unknown-tool deny in tests (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production agents/workloads can invoke tools. If none, score
+  NOT_APPLICABLE. 2) Open per-agent/workload allowlists covering 100% of those
+  agents. 3) Review negative tests: unknown/inventable tool names are denied
+  at 100%. 4) PASS only if coverage + deny hold with measuredAt ≤90 days. Do
+  not PASS from “tools: *” MCP bindings. TOL-M1 authz alone does not prove
+  allowlists. SCI-M2 inventory/pin alone does not prove per-agent allowlists.
+  TOL-M5 signed catalogs alone do not prove unknown-tool denial.
+falsePositiveGuidance: >
+  Do not pass open “all tools” MCP configs. Do not pass prompt-only “only use
+  these tools” instructions. Do not pass a single shared allowlist that omits
+  agents. Do not score TOL-M1, SCI-M2, AUTHN-M2, or TOL-M5 as substitutes.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Tools must be allowlisted per agent/workload; unknown tools must
-    not be inventable at runtime"
-  - "Retain evidence artifacts required by this Check, starting with: Per-agent tool allowlist
-    config + negative tests for unknown tool names"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish per-agent/workload tool allowlists for every production agent that can invoke tools"
+  - "Deny unknown/inventable tool names in the gateway; add automated negative tests at 100%"
+  - "Retain coverage under imports/tool-allowlist/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
-  - title: "Model Context Protocol security considerations"
+  - title: "Model Context Protocol — security considerations"
     url: "https://modelcontextprotocol.io/"
   - title: "OWASP LLM — Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "TOL-M1"
   - "TOL-M3"
-  - "TOL-M4"
   - "TOL-M5"
-  - "TOL-R1"
+  - "SCI-M2"
+  - "AUTHN-M2"
+  - "AGN-M2"
 tags:
   - "tool-safety"
   - "mandatory"
-  - "automated"
+  - "hybrid"
+  - "allowlist"
+  - "mcp"
 applicability:
-  technologies:
-    - "mcp"
-    - "a2a"
-    - "openapi"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

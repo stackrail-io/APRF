@@ -206,6 +206,70 @@ npm run aprf:artifact-provenance-integrity -- \
 
 PASS only with cosign/Notation/SLSA/OCI/checksum verification configured + 100% of production model/container pulls verified + unverified pulls blocked (measuredAt ≤90d).
 
+**SCI-M2 (ai-external-tool-inventory):** lockfiles / CI Action SHA pins alone are **supporting** only. Prefer:
+
+```bash
+npm run aprf:ai-external-tool-inventory -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop pin/owner/review coverage JSON under imports/ai-external-tool-inventory/
+```
+
+PASS only with 100% pin+owner+review (≤180d) and 0 unpinned latest/floating entries (measuredAt ≤90d).
+
+**SCI-M3 (ai-vuln-scan-gate):** Dependabot / app-deps-only scans alone are **supporting** only. Prefer:
+
+```bash
+npm run aprf:ai-vuln-scan-gate -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop scan-gate coverage JSON under imports/ai-vuln-scan-gate/
+```
+
+PASS only with 100% coverage (deps + containers/serverless + model-serving) + org-policy critical block + 0 skipped + retained results (measuredAt ≤90d).
+
+**SCI-M4 (ai-deploy-policy-enforcement):** CI signing alone is **supporting** only (Level-5 / regulated advanced). Prefer:
+
+```bash
+npm run aprf:ai-deploy-policy-enforcement -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop enforce/block coverage JSON under imports/ai-deploy-policy-enforcement/
+```
+
+PASS only with deploy-path policy enforced + unsigned/unapproved/revoked blocked (measuredAt ≤90d).
+
+**SCI-R1 (ai-verify-on-deploy):** SCI-M1 pull verify alone is **supporting** only. Prefer:
+
+```bash
+npm run aprf:ai-verify-on-deploy -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop last-deploy verify coverage JSON under imports/ai-verify-on-deploy/
+```
+
+PASS only with lastDeployVerified + unsignedRejectedInTestOrCanary (measuredAt ≤90d).
+
+**SCI-R2 (ai-model-mbom):** container-only SBOM is **supporting** only. Prefer:
+
+```bash
+npm run aprf:ai-model-mbom -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop MBOM coverage JSON under imports/ai-model-mbom/
+```
+
+PASS only with 100% registry-linked MBOM (or SBOM+model metadata) per production model pin + retention ≥90d (measuredAt ≤90d).
+
+**TOL-M1–M5 / R1–R2 (tool-safety):** prompt allowlists and open MCP “all tools” bindings are **supporting** only. Prefer:
+
+```bash
+npm run aprf:tool-gateway-authz -- --target <project> --out <project>/aprf-assessment
+npm run aprf:tool-allowlist -- --target <project> --out <project>/aprf-assessment
+npm run aprf:high-impact-tool-gates -- --target <project> --out <project>/aprf-assessment
+npm run aprf:tool-argument-schema -- --target <project> --out <project>/aprf-assessment
+npm run aprf:signed-tool-catalog -- --target <project> --out <project>/aprf-assessment
+npm run aprf:destructive-tool-dry-run -- --target <project> --out <project>/aprf-assessment
+npm run aprf:tool-rate-limits -- --target <project> --out <project>/aprf-assessment
+```
+
+PASS needs measured imports (≤90d) per Check — gateway deny suite, allowlist+unknown deny, high-impact gates, argument schemas, signed catalogs (Level-5), dry-run promotion evidence, or rate/blast enforcement proof.
+
 **SEC-M1 (injection-policy-gate):** content-filter warnings are **supporting** only. Prefer:
 
 ```bash

@@ -120,6 +120,32 @@ npm run aprf:artifact-provenance-integrity -- --target <app> --out <app>/aprf-as
 
 Needs cosign/Notation/SLSA/OCI/checksum verification + 100% verified production pulls + blocked unverified pulls (verification/enforcement measuredAt ≤90d). Digest pins alone are not enough.
 
+## Built-in highlight: supply-chain SCI-M2–M4 / R1–R2
+
+```bash
+npm run aprf:ai-external-tool-inventory -- --target <app> --out <app>/aprf-assessment
+npm run aprf:ai-vuln-scan-gate -- --target <app> --out <app>/aprf-assessment
+npm run aprf:ai-deploy-policy-enforcement -- --target <app> --out <app>/aprf-assessment
+npm run aprf:ai-verify-on-deploy -- --target <app> --out <app>/aprf-assessment
+npm run aprf:ai-model-mbom -- --target <app> --out <app>/aprf-assessment
+```
+
+Hybrid collectors: signals → PARTIAL; measured imports (≤90d) unlock PASS. Lockfiles / Dependabot / CI signing / container-only SBOM alone are not enough.
+
+## Built-in highlight: tool-safety TOL-M1–M5 / R1–R2
+
+```bash
+npm run aprf:tool-gateway-authz -- --target <app> --out <app>/aprf-assessment
+npm run aprf:tool-allowlist -- --target <app> --out <app>/aprf-assessment
+npm run aprf:high-impact-tool-gates -- --target <app> --out <app>/aprf-assessment
+npm run aprf:tool-argument-schema -- --target <app> --out <app>/aprf-assessment
+npm run aprf:signed-tool-catalog -- --target <app> --out <app>/aprf-assessment
+npm run aprf:destructive-tool-dry-run -- --target <app> --out <app>/aprf-assessment
+npm run aprf:tool-rate-limits -- --target <app> --out <app>/aprf-assessment
+```
+
+Hybrid collectors: signals → PARTIAL; measured imports (≤90d) unlock PASS. Open MCP “all tools” / prompt-only allowlists alone are not enough.
+
 ## Built-in highlight: `injection-policy-gate` (SEC-M1)
 
 ```bash

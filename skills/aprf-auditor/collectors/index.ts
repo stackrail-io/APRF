@@ -58,6 +58,18 @@ import { agentToolConnectivityCollector } from "./agent-tool-connectivity.ts";
 import { sharedAcceleratorIsolationCollector } from "./shared-accelerator-isolation.ts";
 import { secretsHygieneCollector } from "./secrets-hygiene.ts";
 import { artifactProvenanceIntegrityCollector } from "./artifact-provenance-integrity.ts";
+import { aiExternalToolInventoryCollector } from "./ai-external-tool-inventory.ts";
+import { aiVulnScanGateCollector } from "./ai-vuln-scan-gate.ts";
+import { aiDeployPolicyEnforcementCollector } from "./ai-deploy-policy-enforcement.ts";
+import { aiVerifyOnDeployCollector } from "./ai-verify-on-deploy.ts";
+import { aiModelMbomCollector } from "./ai-model-mbom.ts";
+import { toolGatewayAuthzCollector } from "./tool-gateway-authz.ts";
+import { toolAllowlistCollector } from "./tool-allowlist.ts";
+import { highImpactToolGatesCollector } from "./high-impact-tool-gates.ts";
+import { toolArgumentSchemaCollector } from "./tool-argument-schema.ts";
+import { signedToolCatalogCollector } from "./signed-tool-catalog.ts";
+import { destructiveToolDryRunCollector } from "./destructive-tool-dry-run.ts";
+import { toolRateLimitsCollector } from "./tool-rate-limits.ts";
 import { secretRedactionCollector } from "./secret-redaction.ts";
 import { keyRotationScopeCollector } from "./key-rotation-scope.ts";
 import { precommitCiSecretScanCollector } from "./precommit-ci-secret-scan.ts";
@@ -237,6 +249,18 @@ export const COLLECTORS: Collector[] = [
   sharedAcceleratorIsolationCollector,
   secretsHygieneCollector,
   artifactProvenanceIntegrityCollector,
+  aiExternalToolInventoryCollector,
+  aiVulnScanGateCollector,
+  aiDeployPolicyEnforcementCollector,
+  aiVerifyOnDeployCollector,
+  aiModelMbomCollector,
+  toolGatewayAuthzCollector,
+  toolAllowlistCollector,
+  highImpactToolGatesCollector,
+  toolArgumentSchemaCollector,
+  signedToolCatalogCollector,
+  destructiveToolDryRunCollector,
+  toolRateLimitsCollector,
   secretRedactionCollector,
   keyRotationScopeCollector,
   precommitCiSecretScanCollector,

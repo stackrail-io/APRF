@@ -1,0 +1,30 @@
+id: tool-allowlist
+title: Per-agent tool allowlist (TOL-M2)
+version: "0.2.0"
+executor: collectors/tool-allowlist.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds:
+  - repo-tool-allowlist
+inputs:
+  - "Target repo (tool allowlists, MCP allowlist configs, deny tests)"
+  - "Optional coverage: aprf-assessment/imports/tool-allowlist/*.json"
+collect:
+  - "Detect tool-allowlist and MCP-allowlist signals"
+  - "Ingest imported allowlist/deny coverage; write tool-allowlist-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/tool-allowlist/*"
+  signals:
+    - tool-allowlist
+    - tol-m2
+    - repo-tool-allowlist
+mapsToChecks: [TOL-M2]
+whenUnavailable: >
+  Signals alone are PARTIAL. TOL-M2 PASS needs agentsWithExplicitToolAllowlistPct=100
+  and unknownToolRequestsDeniedPct=100, measuredAt ≤90 days under
+  imports/tool-allowlist/. Set productionAgentsOrToolWorkloadsPresent=false for
+  NOT_APPLICABLE only when no in-repo allowlist signals.
+live:
+  required: false
+  note: Offline discovery + optional imported allowlist coverage.

@@ -100,7 +100,19 @@ categoryDefaults:
       - "**/tools/**"
       - "**/*allowlist*"
       - "**/openai*functions*"
-    signals: [tool allowlist, sandbox, confirmation, side-effect flags]
+      - "**/*dry-run*"
+      - "**/*inputSchema*"
+    plugins:
+      [
+        tool-gateway-authz,
+        tool-allowlist,
+        high-impact-tool-gates,
+        tool-argument-schema,
+        signed-tool-catalog,
+        destructive-tool-dry-run,
+        tool-rate-limits,
+      ]
+    signals: [tool gateway authz, allowlist, high-impact gates, argument schema, signed catalog, dry-run, rate/blast budgets]
   supply-chain:
     search:
       - "**/sbom*"
@@ -113,8 +125,11 @@ categoryDefaults:
       - "**/package-lock.json"
       - "**/pnpm-lock.yaml"
       - "**/go.sum"
+      - "**/*mcp*"
+      - "**/*tool*catalog*"
+      - "**/*agent*plugin*"
     plugins: [artifact-provenance-integrity, github-actions, repo-filesystem]
-    signals: [pin digests, signed images, cosign, Notation, SLSA, OCI provenance, model checksum, dependency lockfile]
+    signals: [pin digests, signed images, cosign, Notation, SLSA, OCI provenance, model checksum, dependency lockfile, MCP/tool/plugin inventory pins]
   infrastructure:
     search:
       - "**/Dockerfile*"
@@ -844,6 +859,256 @@ checks:
       Detector hits may include cosign-verification, notation-verification, slsa-attestation,
       oci-provenance, model-checksum-validation, artifact-signature-verification, docker-image-digest-pinned.
       SCI-M2, SCI-M3, and MOD-R1 do not substitute.
+  SCI-M2:
+    requiredEvidence:
+      - "Inventory of production external AI tools, MCP servers, agent plugins, and high-impact integrations"
+      - "Version pin + owner + review date ≤180 days per entry; 0 unpinned latest/floating under imports/ai-external-tool-inventory/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*mcp*"
+      - "**/.cursor/mcp*"
+      - "**/mcp.json"
+      - "**/*tool*catalog*"
+      - "**/*agent*plugin*"
+      - "**/*tool*server*"
+      - "**/*integration*registry*"
+    plugins: [ai-external-tool-inventory, repo-filesystem]
+    naWhen: "No production external AI tools, MCP servers, agent plugins, or high-impact integrations"
+    evaluation: |
+      Prefer collectors/ai-external-tool-inventory or imports/ai-external-tool-inventory/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / sciM2Satisfied === true
+      (entriesWithPinOwnerReviewPct=100 + unpinnedLatestOrFloatingEntries=0 + measuredAt ≤90d).
+      NOT_APPLICABLE if productionAiExternalToolsOrIntegrationsPresent=false and no in-repo
+      MCP/plugin/tool-registry signals (version-pin text alone does not block N/A).
+      PARTIAL if MCP/plugin/registry signals without complete pin+owner+review coverage
+      (CI Action SHA pins / lockfiles alone ≠ PASS).
+      FAIL if unpinned>0 or pinOwnerReviewPct<100 (failing import metrics beat present=false N/A).
+      SCI-M1, SCI-M3, TOL-M2, TOL-M5, and AUTHN-M2 do not substitute.
+  SCI-M3:
+    requiredEvidence:
+      - "Vuln scanner config covering deps, containers/serverless packages, and model-serving runtimes"
+      - "Org-policy critical block on promote + retained results 100% coverage / 0 skipped under imports/ai-vuln-scan-gate/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*trivy*"
+      - "**/*grype*"
+      - "**/*snyk*"
+      - "**/*vuln*"
+      - "**/*vllm*"
+      - "**/*triton*"
+      - "**/*ollama*"
+      - "**/*tensorrt*"
+      - "**/*llama.cpp*"
+      - "**/.github/workflows/**"
+    plugins: [ai-vuln-scan-gate, repo-filesystem, github-actions]
+    naWhen: "No production AI artifacts built or deployed"
+    evaluation: |
+      Prefer collectors/ai-vuln-scan-gate or imports/ai-vuln-scan-gate/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / sciM3Satisfied === true
+      (scanCoveragePct=100 + criticalFindingsBlockPromotion + skippedScans=0 +
+      retainedResults + measuredAt ≤90d).
+      NOT_APPLICABLE if productionAiArtifactsPresent=false and no in-repo
+      scan/model-serving/block signals (Dependabot alone does not block N/A).
+      PARTIAL if scan signals without complete coverage or block policy
+      (app-deps-only scans that omit inference servers ≠ PASS).
+      FAIL if skipped scans, missing retention, coverage<100, or block=false
+      (failing import metrics beat present=false N/A).
+      Do not require hardcoded CVSS ≥9.0 when org policy uses EPSS/KEV/reachability.
+      SCI-M1, SCI-M2, SCI-M4, and SCI-R1 do not substitute.
+  SCI-M4:
+    requiredEvidence:
+      - "Deployment policy (admission, pipeline, cloud deploy, registry, or AI-platform gate)"
+      - "Deny/verification logs: unsigned blocked + unapproved blocked + revoked/untrusted rejected under imports/ai-deploy-policy-enforcement/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*gatekeeper*"
+      - "**/*kyverno*"
+      - "**/*policy-controller*"
+      - "**/*ratify*"
+      - "**/*connaisseur*"
+      - "**/*ClusterImagePolicy*"
+      - "**/*admission*"
+      - "**/*deploy*policy*"
+    plugins: [ai-deploy-policy-enforcement, repo-filesystem, github-actions, iac-cloud]
+    naWhen: "No production AI artifacts deployed (or assessment below Level 5 / out of regulated advanced scope)"
+    evaluation: |
+      Prefer collectors/ai-deploy-policy-enforcement or imports/ai-deploy-policy-enforcement/*.json with measuredAt ≤90d.
+      Level-5 / regulated advanced mandatory — not Core/Tier-2 baseline.
+      PASS if statusHint=pass / sciM4Satisfied === true
+      (deploymentPolicyEnforced + unsignedBlocked + unapprovedBlocked +
+      revokedOrUntrustedRejected + measuredAt ≤90d).
+      NOT_APPLICABLE if productionAiArtifactsDeployed=false and no in-repo
+      deploy-policy signals, or assessment not in Level-5/regulated scope.
+      PARTIAL if policy docs without deny logs; CI signing alone ≠ PASS.
+      Non-Kubernetes controls (pipeline/cloud/registry/platform gates) are valid.
+      FAIL if any block/enforce flag is false (beats present=false N/A).
+      SCI-M1, SCI-M3, and SCI-R1 do not substitute.
+  SCI-R1:
+    requiredEvidence:
+      - "Verify-on-deploy / promote-path policy for signed model/container (or equivalent AI package) artifacts"
+      - "Last deploy verification success + unsigned reject test/canary/deny under imports/ai-verify-on-deploy/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*cosign*"
+      - "**/*notation*"
+      - "**/*verify*deploy*"
+      - "**/*policy-controller*"
+      - "**/*admission*"
+      - "**/.github/workflows/**"
+    plugins: [ai-verify-on-deploy, repo-filesystem, github-actions, artifact-provenance-integrity]
+    naWhen: "No production model/container AI artifacts deployed"
+    evaluation: |
+      Prefer collectors/ai-verify-on-deploy or imports/ai-verify-on-deploy/*.json with measuredAt ≤90d.
+      Recommended Level-4 stepping stone to SCI-M4.
+      PASS if statusHint=pass / sciR1Satisfied === true
+      (lastDeployVerified + unsignedRejectedInTestOrCanary + measuredAt ≤90d).
+      NOT_APPLICABLE if productionModelOrContainerArtifactsDeployed=false and no
+      in-repo verify-on-deploy / promote-gate signals.
+      PARTIAL if CI signing or SCI-M1 pull verify without deploy-path last-deploy proof.
+      SCI-M4 full deploy-policy PASS can satisfy this recommended Check.
+      FAIL if lastDeployVerified or unsignedRejected is false (beats present=false N/A).
+      SCI-M1, SCI-M3, and SCI-R2 do not substitute.
+  SCI-R2:
+    requiredEvidence:
+      - "Machine-readable MBOM (or SBOM + model metadata) per production model pin, linked from registry"
+      - "Retention ≥90d + 100% pin coverage under imports/ai-model-mbom/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*mbom*"
+      - "**/*ml-bom*"
+      - "**/*sbom*"
+      - "**/*cyclonedx*"
+      - "**/*spdx*"
+      - "**/*model*registry*"
+    plugins: [ai-model-mbom, repo-filesystem]
+    naWhen: "No production model pins"
+    evaluation: |
+      Prefer collectors/ai-model-mbom or imports/ai-model-mbom/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / sciR2Satisfied === true
+      (pinsWithLinkedMbomPct=100 + retentionDaysSatisfied + measuredAt ≤90d).
+      NOT_APPLICABLE if productionModelPinsPresent=false and no in-repo
+      MBOM/model-registry signals (container-only SBOM does not block N/A).
+      PARTIAL if repo-sbom-config / container SBOM without per-model linkage
+      or model-specific metadata (container-only SBOM ≠ PASS).
+      FAIL if linkedPct<100 or retentionDaysSatisfied=false (beats present=false N/A).
+      SCI-M1, SCI-R1, MOD-M1, MOD-R3, and DG-R3 do not substitute.
+  TOL-M1:
+    requiredEvidence:
+      - "Tool gateway / tool-runtime authz enforcement config (server-side)"
+      - "unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway under imports/tool-gateway-authz/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*tool*gateway*"
+      - "**/*tool*authz*"
+      - "**/*mcp*"
+      - "**/*deny*"
+    plugins: [tool-gateway-authz, repo-filesystem]
+    naWhen: "No production tools/agents invoke tools"
+    evaluation: |
+      Prefer collectors/tool-gateway-authz or imports/tool-gateway-authz/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / tolM1Satisfied === true
+      (unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway + measuredAt ≤90d).
+      NOT_APPLICABLE if productionToolsOrAgentsPresent=false and no in-repo gateway/authz signals.
+      PARTIAL if gateway signals without complete import. AUTHZ-M1, TOL-M2, AUTHZ-R1 do not substitute.
+  TOL-M2:
+    requiredEvidence:
+      - "Per-agent/workload tool allowlist covering production agents"
+      - "agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 under imports/tool-allowlist/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*allowlist*"
+      - "**/*tool*allow*"
+      - "**/*mcp*"
+      - "**/tools/**"
+    plugins: [tool-allowlist, repo-filesystem]
+    naWhen: "No production agents/workloads invoke tools"
+    evaluation: |
+      Prefer collectors/tool-allowlist or imports/tool-allowlist/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / tolM2Satisfied === true
+      (agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 + measuredAt ≤90d).
+      NOT_APPLICABLE if productionAgentsOrToolWorkloadsPresent=false and no in-repo allowlist signals.
+      PARTIAL if allowlist config without deny tests (open “all tools” ≠ PASS).
+      TOL-M1, SCI-M2, AUTHN-M2, TOL-M5 do not substitute.
+  TOL-M3:
+    requiredEvidence:
+      - "Impact-tiered tool inventory (write/irreversible/financial)"
+      - "highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests under imports/high-impact-tool-gates/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*impact*tier*"
+      - "**/*high*impact*tool*"
+      - "**/*dual*control*"
+      - "**/*approval*tool*"
+      - "**/*policy*engine*"
+    plugins: [high-impact-tool-gates, repo-filesystem]
+    naWhen: "No write/irreversible/financial tools in production"
+    evaluation: |
+      Prefer collectors/high-impact-tool-gates or imports/high-impact-tool-gates/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / tolM3Satisfied === true
+      (highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests + measuredAt ≤90d).
+      NOT_APPLICABLE if highImpactToolsPresent=false and no in-repo gate signals.
+      PARTIAL if inventory/docs without bypass tests. TOL-M1/M2, HUM-M1/M3, SEC-M2 do not substitute.
+  TOL-M4:
+    requiredEvidence:
+      - "JSON Schema (or equivalent) per production tool"
+      - "toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 under imports/tool-argument-schema/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*inputSchema*"
+      - "**/*tool*schema*"
+      - "**/*argument*schema*"
+      - "**/*contract*test*"
+    plugins: [tool-argument-schema, repo-filesystem]
+    naWhen: "No production tools"
+    evaluation: |
+      Prefer collectors/tool-argument-schema or imports/tool-argument-schema/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / tolM4Satisfied === true
+      (toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 + measuredAt ≤90d).
+      NOT_APPLICABLE if productionToolsPresent=false and no in-repo schema signals.
+      PARTIAL if schemas without contract rejection. SEC-M2, TOL-M1/M2 do not substitute.
+  TOL-M5:
+    requiredEvidence:
+      - "Signed (or integrity-verified) MCP/agent tool catalog + verify-on-load"
+      - "unsignedOrUnapprovedCatalogsRejected + supplyChainReviewWithin90DaysOrSinceLastChange under imports/signed-tool-catalog/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*tool*catalog*"
+      - "**/*signed*catalog*"
+      - "**/*verify*on*load*"
+      - "**/*mcp*catalog*"
+    plugins: [signed-tool-catalog, repo-filesystem]
+    naWhen: "No production MCP/agent tool catalogs loaded (or assessment below Level 5)"
+    evaluation: |
+      Prefer collectors/signed-tool-catalog or imports/signed-tool-catalog/*.json with measuredAt ≤90d.
+      Level-5 / regulated advanced mandatory — not Core baseline.
+      PASS if statusHint=pass / tolM5Satisfied === true
+      (unsignedOrUnapprovedCatalogsRejected + supplyChainReviewWithin90DaysOrSinceLastChange + measuredAt ≤90d).
+      NOT_APPLICABLE if productionToolCatalogsPresent=false and no in-repo signed-catalog signals.
+      PARTIAL if catalog docs without reject-unsigned. SCI-M1/M2, TOL-M2 do not substitute.
+  TOL-R1:
+    requiredEvidence:
+      - "Destructive-tool catalog marking dry-run/simulation support"
+      - "destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days under imports/destructive-tool-dry-run/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*dry-run*"
+      - "**/*dry_run*"
+      - "**/*simulation*"
+      - "**/*destructive*tool*"
+    plugins: [destructive-tool-dry-run, repo-filesystem]
+    naWhen: "No destructive tools"
+    evaluation: |
+      Prefer collectors/destructive-tool-dry-run or imports/destructive-tool-dry-run/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / tolR1Satisfied === true
+      (destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days + measuredAt ≤90d).
+      NOT_APPLICABLE if destructiveToolsPresent=false and no in-repo dry-run signals.
+      PARTIAL if dry-run docs without promotion evidence. TOL-M3 / agent-sandbox do not substitute.
+  TOL-R2:
+    requiredEvidence:
+      - "Per-tool rate-limit and blast-radius budgets for high-impact tools"
+      - "highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days under imports/tool-rate-limits/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*rate*limit*"
+      - "**/*blast*radius*"
+      - "**/*qps*"
+      - "**/*max*affected*"
+    plugins: [tool-rate-limits, repo-filesystem]
+    naWhen: "No high-impact tools"
+    evaluation: |
+      Prefer collectors/tool-rate-limits or imports/tool-rate-limits/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / tolR2Satisfied === true
+      (highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days + measuredAt ≤90d).
+      NOT_APPLICABLE if highImpactToolsPresent=false and no in-repo rate/blast signals.
+      PARTIAL if global rate limits without per-tool blast budgets. AGN-M2, COST-M*, TOL-M3 do not substitute.
   SEC2-M1:
     requiredEvidence:
       - "Secrets manager / sealed-secrets / cloud secret refs in runtime config"

@@ -1,66 +1,112 @@
 id: "SCI-R2"
 category: "supply-chain"
-title: "Production systems should have machine-readable model bill of materials (MBOM) for
-  production models"
-description: "Machine-readable model bill of materials (MBOM) for production models"
-whyItMatters: "Machine-readable model bill of materials (MBOM) for production models Failing this
-  leaves a production gap against: 100% of production model pins have an MBOM/SBOM artifact retained
-  ≥90 days and linked from the model registry entry"
+title: "Production systems should retain a machine-readable model bill of
+  materials (MBOM) for each production model pin"
+description: >
+  Each production model pin should have a machine-readable MBOM (or SBOM plus
+  model-specific metadata) retained ≥90 days and linked from the model
+  registry—proven by registry linkage and retained artifacts, not by a
+  container-image SBOM that omits model weights and serving components.
+whyItMatters: >
+  Without an MBOM, teams cannot answer what weights, adapters, tokenizers,
+  serving binaries, and licenses shipped with a production pin during an
+  incident or audit. Linking a retained machine-readable BOM from the registry
+  makes model supply-chain inventory reviewable. Distinct from SCI-M1
+  (signature/provenance verify+block), SCI-R1 (verify-on-deploy), MOD-R3
+  (license/provenance policy review), MOD-M1 (model pin inventory), and DG-R3
+  (dataset cards for eval/fine-tune sets—not model BOMs).
 severity: "critical"
 weight: 4
 gate: "recommended"
-passCondition: "100% of production model pins have an MBOM/SBOM artifact retained ≥90 days and
-  linked from the model registry entry"
+passCondition: >
+  100% of production model pins have a machine-readable MBOM (or SBOM plus
+  model-specific metadata covering weights/adapters/tokenizers and serving
+  stack as applicable) retained ≥90 days and linked from the model registry
+  entry (coverage evidence measuredAt ≤90 days). If no production model pins
+  exist, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Machine-readable MBOM (or SBOM+model metadata) for each production model pin + retention
-    location"
+  - "Machine-readable MBOM (preferred) or SBOM + model-specific metadata per production model pin"
+  - "Model registry (or equivalent) entries linking each pin to its MBOM/SBOM artifact"
+  - "Retention location proving artifacts are kept ≥90 days"
+  - "Coverage attest or inventory export showing 100% of production pins linked (measuredAt ≤90 days)"
 detection:
   capability: "hybrid"
   detectors:
+    - id: "repo-ai-model-mbom"
+      params:
+        hint: >
+          Discover MBOM/SBOM artifacts and model-registry links for production
+          model pins; ingest coverage under imports/ai-model-mbom/; require
+          100% of pins linked, retention ≥90 days, measuredAt ≤90 days.
+          Container-image SBOM alone without model metadata is insufficient.
     - id: "repo-sbom-config"
-      params: {}
+      params:
+        hint: >
+          Supporting signal — SBOM generation config (Syft, Trivy, CycloneDX,
+          SPDX); alone does not prove per-model MBOM linkage or ≥90-day
+          retention from the model registry.
     - id: "manual-attest"
       params:
-        hint: "Machine-readable MBOM (or SBOM+model metadata) for each production model pin + retention
-          location"
-manualVerification: "For this Check (SCI: Machine-readable model bill of materials (MBOM) for
-  production models): inspect current evidence for [Machine-readable MBOM (or SBOM+model metadata)
-  for each production model pin + retention location] and confirm the pass condition holds — 100% of
-  production model pins have an MBOM/SBOM artifact retained ≥90 days and linked from the model
-  registry entry"
-falsePositiveGuidance: "(Supply Chain Integrity): when automation and attestation disagree, prefer
-  the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the
-  gap."
+        hint: >
+          If automation cannot prove coverage, attest 100% of production model
+          pins have linked MBOM (or SBOM+model metadata) retained ≥90 days
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production model pins exist (self-hosted weights, fine-tunes,
+  adapters, or pinned hosted-model IDs in a registry). If none, score
+  NOT_APPLICABLE. 2) For each pin, locate a machine-readable MBOM or SBOM
+  plus model-specific metadata (weights/adapters/tokenizers and serving
+  components as applicable—not only the app container). 3) Confirm the model
+  registry entry links to that artifact. 4) Confirm retention ≥90 days and
+  coverage evidence measuredAt ≤90 days. 5) PASS only if 100% of pins are
+  linked with retention. A generic CI image SBOM that omits model artifacts
+  does not satisfy. MOD-R3 license reviews alone do not produce an MBOM.
+  DG-R3 dataset cards alone do not satisfy. Hosted API pins without vendor
+  weight BOMs may use registry-linked machine-readable model identity +
+  provider provenance/metadata packages that meet the same retention and
+  linkage bar.
+falsePositiveGuidance: >
+  Do not pass container-only SBOMs that omit model weights, adapters, or
+  serving runtimes in scope. Do not pass an MBOM file that is not linked from
+  the model registry. Do not pass retention “policy” without artifacts kept
+  ≥90 days. Do not score SCI-M1, SCI-R1, MOD-M1, MOD-R3, or DG-R3 as
+  substitutes. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: this Check: Machine-readable model bill of materials (MBOM) for
-    production models"
-  - "Retain evidence artifacts required by this Check, starting with: Machine-readable MBOM (or
-    SBOM+model metadata) for each production model pin + retention location"
-  - "Wire or verify detectors declared on this Check so automation matches the pass condition"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Generate a machine-readable MBOM (or SBOM + model metadata) for every production model pin"
+  - "Link each BOM from the model registry entry; retain artifacts ≥90 days"
+  - "Export coverage under imports/ai-model-mbom/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "SLSA — Supply-chain Levels for Software Artifacts"
     url: "https://slsa.dev/"
+  - title: "CycloneDX — Machine Learning Bill of Materials (ML-BOM)"
+    url: "https://cyclonedx.org/capabilities/mlbom/"
+  - title: "SPDX"
+    url: "https://spdx.dev/"
   - title: "CNCF Software Supply Chain Best Practices"
     url: "https://www.cncf.io/"
   - title: "OWASP LLM — Supply Chain Vulnerabilities"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "SCI-M1"
   - "SCI-M2"
   - "SCI-M3"
   - "SCI-M4"
   - "SCI-R1"
+  - "MOD-M1"
+  - "MOD-R3"
+  - "DG-R3"
 tags:
   - "supply-chain"
   - "recommended"
   - "hybrid"
+  - "mbom"
+  - "sbom"
+  - "model-registry"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "cicd"
-    - "docker"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 4
 status: "active"

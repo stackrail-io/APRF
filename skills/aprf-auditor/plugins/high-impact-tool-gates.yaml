@@ -1,0 +1,30 @@
+id: high-impact-tool-gates
+title: High-impact tool gates (TOL-M3)
+version: "0.2.0"
+executor: collectors/high-impact-tool-gates.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds:
+  - repo-high-impact-tool-gates
+inputs:
+  - "Target repo (impact-tier inventory, approval/dual/policy gates)"
+  - "Optional coverage: aprf-assessment/imports/high-impact-tool-gates/*.json"
+collect:
+  - "Detect impact-tier and gate-configuration signals"
+  - "Ingest imported gate coverage; write high-impact-tool-gates-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/high-impact-tool-gates/*"
+  signals:
+    - high-impact-tool-gates
+    - tol-m3
+    - repo-high-impact-tool-gates
+mapsToChecks: [TOL-M3]
+whenUnavailable: >
+  Signals alone are PARTIAL. TOL-M3 PASS needs highImpactToolsWithConfiguredGatePct=100
+  and ungatedExecutionImpossibleInTests=true, measuredAt ≤90 days under
+  imports/high-impact-tool-gates/. Set highImpactToolsPresent=false for
+  NOT_APPLICABLE only when no in-repo impact/gate signals.
+live:
+  required: false
+  note: Offline discovery + optional imported gate coverage.

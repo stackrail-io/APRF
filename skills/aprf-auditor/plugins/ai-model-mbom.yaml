@@ -1,0 +1,33 @@
+id: ai-model-mbom
+title: Registry-linked model MBOM (SCI-R2)
+version: "0.2.0"
+executor: collectors/ai-model-mbom.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds:
+  - repo-ai-model-mbom
+  - repo-sbom-config
+inputs:
+  - "Target repo (MBOM, ML-BOM, model registry, SBOM)"
+  - "Optional coverage: aprf-assessment/imports/ai-model-mbom/*.json"
+collect:
+  - "Detect MBOM, model-registry, and SBOM signals"
+  - "Ingest imported pin/MBOM coverage; write ai-model-mbom-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-model-mbom/*"
+  signals:
+    - ai-model-mbom
+    - sci-r2
+    - repo-ai-model-mbom
+    - repo-sbom-config
+mapsToChecks: [SCI-R2]
+whenUnavailable: >
+  Signals alone are PARTIAL. SCI-R2 PASS needs pinsWithLinkedMbomPct=100 +
+  retentionDaysSatisfied=true, measuredAt ≤90 days under
+  imports/ai-model-mbom/. Container-only SBOM without model metadata is not a
+  PASS. Set productionModelPinsPresent=false for NOT_APPLICABLE only when no
+  in-repo MBOM/model-registry signals.
+live:
+  required: false
+  note: Offline discovery + optional imported MBOM coverage.

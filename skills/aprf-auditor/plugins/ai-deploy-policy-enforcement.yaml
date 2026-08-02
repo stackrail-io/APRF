@@ -1,0 +1,32 @@
+id: ai-deploy-policy-enforcement
+title: AI deploy-path policy enforcement (SCI-M4)
+version: "0.2.0"
+executor: collectors/ai-deploy-policy-enforcement.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds:
+  - repo-ai-deploy-policy-enforcement
+inputs:
+  - "Target repo (admission, deploy policy, cloud/registry/platform gates)"
+  - "Optional coverage: aprf-assessment/imports/ai-deploy-policy-enforcement/*.json"
+collect:
+  - "Detect admission, deploy-policy, and cloud-gate signals"
+  - "Ingest imported enforce/block coverage; write ai-deploy-policy-enforcement-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-deploy-policy-enforcement/*"
+  signals:
+    - ai-deploy-policy-enforcement
+    - sci-m4
+    - repo-ai-deploy-policy-enforcement
+mapsToChecks: [SCI-M4]
+whenUnavailable: >
+  Signals alone are PARTIAL. SCI-M4 PASS (Level-5 / regulated advanced) needs
+  deploymentPolicyEnforced + unsignedBlocked + unapprovedBlocked +
+  revokedOrUntrustedRejected, measuredAt ≤90 days under
+  imports/ai-deploy-policy-enforcement/. CI signing alone is not a PASS.
+  Non-Kubernetes controls are valid. Set productionAiArtifactsDeployed=false
+  for NOT_APPLICABLE only when no in-repo deploy-policy signals.
+live:
+  required: false
+  note: Offline discovery + optional imported deploy-policy coverage.

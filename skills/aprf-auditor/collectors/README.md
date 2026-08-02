@@ -110,6 +110,18 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **credential-egress-controls** | `credential-egress-controls.ts` | credential egress allowlist + deny (SEC2-R2) | `imports/credential-egress-controls/` | — |
 | **dataset-secret-scan-gate** | `dataset-secret-scan-gate.ts` | dataset secret/PII publish gate (SEC2-R3) | `imports/dataset-secret-scan-gate/` | — |
 | **artifact-provenance-integrity** | `artifact-provenance-integrity.ts` | cosign/SLSA/verify + block unverified (SCI-M1) | `imports/artifact-provenance-integrity/` | — |
+| **ai-external-tool-inventory** | `ai-external-tool-inventory.ts` | MCP/plugin/tool inventory + pin/review (SCI-M2) | `imports/ai-external-tool-inventory/` | — |
+| **ai-vuln-scan-gate** | `ai-vuln-scan-gate.ts` | vuln scan + critical promote block (SCI-M3) | `imports/ai-vuln-scan-gate/` | — |
+| **ai-deploy-policy-enforcement** | `ai-deploy-policy-enforcement.ts` | deploy-path unsigned/unapproved/revoked (SCI-M4) | `imports/ai-deploy-policy-enforcement/` | — |
+| **ai-verify-on-deploy** | `ai-verify-on-deploy.ts` | last-deploy verify + unsigned reject (SCI-R1) | `imports/ai-verify-on-deploy/` | — |
+| **ai-model-mbom** | `ai-model-mbom.ts` | registry-linked model MBOM (SCI-R2) | `imports/ai-model-mbom/` | — |
+| **tool-gateway-authz** | `tool-gateway-authz.ts` | server-side tool authz deny (TOL-M1) | `imports/tool-gateway-authz/` | — |
+| **tool-allowlist** | `tool-allowlist.ts` | per-agent allowlist + unknown deny (TOL-M2) | `imports/tool-allowlist/` | — |
+| **high-impact-tool-gates** | `high-impact-tool-gates.ts` | high-impact extra gates (TOL-M3) | `imports/high-impact-tool-gates/` | — |
+| **tool-argument-schema** | `tool-argument-schema.ts` | tool argument schemas (TOL-M4) | `imports/tool-argument-schema/` | — |
+| **signed-tool-catalog** | `signed-tool-catalog.ts` | signed MCP/agent catalogs (TOL-M5) | `imports/signed-tool-catalog/` | — |
+| **destructive-tool-dry-run** | `destructive-tool-dry-run.ts` | destructive dry-run non-prod (TOL-R1) | `imports/destructive-tool-dry-run/` | — |
+| **tool-rate-limits** | `tool-rate-limits.ts` | rate + blast budgets (TOL-R2) | `imports/tool-rate-limits/` | — |
 | promptfoo | `promptfoo.ts` | eval configs | `imports/promptfoo/` | — |
 | aws / azure / gcp | `iac-cloud.ts` | Terraform/Bicep signals | `imports/<cloud>/` | — |
 | langsmith, phoenix, … | `import-ingest.ts` | — | `imports/<id>/` | — |
@@ -397,6 +409,56 @@ npm run aprf:artifact-provenance-integrity -- \
 ```
 
 Detects cosign, Notation, SLSA, OCI provenance, model-checksum, and digest-pin signals; PASS needs verification + 100% verified pulls + blocked unverified (measuredAt ≤90d). Digest pins alone ≠ PASS but block N/A launder. Writes `imports/artifact-provenance-integrity/artifact-provenance-integrity-report.json`.
+
+### SCI-M2 — External AI tool / MCP / plugin inventory
+
+```bash
+npm run aprf:ai-external-tool-inventory -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects MCP, agent-plugin, and tool-registry signals; PASS needs `entriesWithPinOwnerReviewPct=100` + `unpinnedLatestOrFloatingEntries=0` (measuredAt ≤90d). Writes `imports/ai-external-tool-inventory/ai-external-tool-inventory-report.json`.
+
+### SCI-M3 — Vuln-scan promote gate
+
+```bash
+npm run aprf:ai-vuln-scan-gate -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects vuln-scan / model-serving / block-promote signals; PASS needs 100% coverage + critical block + 0 skipped + retained (measuredAt ≤90d). Writes `imports/ai-vuln-scan-gate/ai-vuln-scan-gate-report.json`.
+
+### SCI-M4 — Deploy-path policy enforcement
+
+```bash
+npm run aprf:ai-deploy-policy-enforcement -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects admission / deploy-policy / cloud-gate signals; PASS needs enforced + unsigned/unapproved/revoked blocked (measuredAt ≤90d). Writes `imports/ai-deploy-policy-enforcement/ai-deploy-policy-enforcement-report.json`.
+
+### SCI-R1 — Verify-on-deploy
+
+```bash
+npm run aprf:ai-verify-on-deploy -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects verify-on-deploy / unsigned-reject signals; PASS needs `lastDeployVerified` + `unsignedRejectedInTestOrCanary` (measuredAt ≤90d). Writes `imports/ai-verify-on-deploy/ai-verify-on-deploy-report.json`.
+
+### SCI-R2 — Registry-linked model MBOM
+
+```bash
+npm run aprf:ai-model-mbom -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects MBOM / model-registry / SBOM signals; PASS needs 100% linked MBOM + retention ≥90d (measuredAt ≤90d). Container-only SBOM ≠ PASS. Writes `imports/ai-model-mbom/ai-model-mbom-report.json`.
 
 ### SEC-M1 — Injection / privilege-escalation policy gate
 
