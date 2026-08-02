@@ -341,32 +341,33 @@ function loadImported(
           asBool(data.scanCoversPromptsAndFixtures),
       );
 
-      let n = 0;
-      let sawFindings = false;
+      // Structural scan payloads (SARIF runs / findings / results arrays) only
+      // raise the privileged-secrets metric when they contain findings.
+      // Empty runs/results must not attest privilegedSecrets…=0 — that requires
+      // the explicit field above.
+      let structuralFindingCount: number | null = null;
       if (Array.isArray(data.runs)) {
-        sawFindings = true;
+        let n = 0;
         for (const run of data.runs as Array<{ results?: unknown[] }>) {
           n += run.results?.length ?? 0;
         }
-      } else if (typeof data.findings === "number") {
-        sawFindings = true;
-        n = data.findings;
-      } else if (Array.isArray(data.findings)) {
-        sawFindings = true;
-        n = data.findings.length;
-      } else if (typeof data.embeddedCount === "number") {
-        sawFindings = true;
-        n = data.embeddedCount;
-      } else if (Array.isArray(data.results)) {
-        sawFindings = true;
-        n = data.results.length;
+        if (n > 0) structuralFindingCount = n;
+      } else if (Array.isArray(data.findings) && data.findings.length > 0) {
+        structuralFindingCount = data.findings.length;
+      } else if (Array.isArray(data.results) && data.results.length > 0) {
+        structuralFindingCount = data.results.length;
+      } else if (
+        typeof data.embeddedCount === "number" &&
+        data.embeddedCount > 0
+      ) {
+        structuralFindingCount = data.embeddedCount;
+      } else if (typeof data.findings === "number" && data.findings > 0) {
+        structuralFindingCount = data.findings;
       }
-      if (sawFindings) {
-        // SARIF/result counts also feed the privileged-secrets metric when
-        // the explicit field is absent.
+      if (structuralFindingCount !== null) {
         privilegedSecretsInReposPromptsOrClientBundles = mergeMaxNum(
           privilegedSecretsInReposPromptsOrClientBundles,
-          n,
+          structuralFindingCount,
         );
       }
     } catch {
@@ -395,7 +396,9 @@ export function buildSecretsReport(opts: {
 }): SecretsHygieneReport {
   const notes: string[] = [];
   const gateSignalsPresent = opts.manager.found || opts.scan.found;
-  const surfaceProvedForNaOverride = opts.manager.found;
+  // Heuristic embeds prove privileged secrets exist — never allow N/A launder.
+  const surfaceProvedForNaOverride =
+    opts.manager.found || opts.embedded.length > 0;
   const secretsManagerPresent =
     opts.manager.found ||
     opts.imported.secretsManagerWiringPresent === true;
@@ -473,10 +476,18 @@ export function buildSecretsReport(opts: {
       (opts.imported.secretsManagerWiringPresent === false &&
         !opts.manager.found));
 
-  // Heuristic embeds fail even without import coverage.
-  if (embeddedCount > 0 && !scopeAbsent) {
+  // Heuristic embeds fail even without import coverage, and always beat N/A.
+  if (embeddedCount > 0) {
     statusHint = "fail";
     sec2M1Satisfied = false;
+    if (
+      opts.imported.found &&
+      opts.imported.productionRuntimeSecretsPresent === false
+    ) {
+      notes.push(
+        "Imported productionRuntimeSecretsPresent=false ignored — heuristic embedded privileged secrets prove the surface exists.",
+      );
+    }
     if (!opts.imported.found) {
       notes.push(
         "Heuristic embedded privileged secret patterns — SEC2-M1 fail.",
@@ -549,7 +560,7 @@ export function buildSecretsReport(opts: {
     }
     if (opts.imported.found && !privilegedOk) {
       notes.push(
-        "Import must show privilegedSecretsInReposPromptsOrClientBundles=0 (or clean SARIF).",
+        "Import must show privilegedSecretsInReposPromptsOrClientBundles=0 (empty SARIF alone does not attest a clean scan).",
       );
     }
     if (opts.imported.found && !resolvedOk) {

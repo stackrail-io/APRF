@@ -173,6 +173,51 @@ jobs:
       throw new Error(`N/A expected: ${JSON.stringify(rNa.summary)}`);
     }
 
+    // Digest pin + present=false must not N/A-launder.
+    const outPinNa = join(root, "o-pin-na");
+    mkdirSync(join(outPinNa, "imports", "artifact-provenance-integrity"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outPinNa, "imports", "artifact-provenance-integrity", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionModelOrContainerArtifactsPresent: false,
+      }),
+    );
+    const rPinNa = await run(tPin, outPinNa);
+    if (rPinNa.summary.statusHint === "not_applicable") {
+      throw new Error("digest pin must block N/A launder");
+    }
+
+    // Block-unverified policy text + present=false must not N/A-launder.
+    const tBlock = join(root, "t-block");
+    mkdirSync(join(tBlock, "policy"), { recursive: true });
+    writeFileSync(
+      join(tBlock, "policy", "admission.md"),
+      "ClusterImagePolicy must block_unverified pulls for production images.\n",
+    );
+    const outBlockNa = join(root, "o-block-na");
+    mkdirSync(join(outBlockNa, "imports", "artifact-provenance-integrity"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(
+        outBlockNa,
+        "imports",
+        "artifact-provenance-integrity",
+        "coverage.json",
+      ),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionModelOrContainerArtifactsPresent: false,
+      }),
+    );
+    const rBlockNa = await run(tBlock, outBlockNa);
+    if (rBlockNa.summary.statusHint === "not_applicable") {
+      throw new Error("block-unverified policy must block N/A launder");
+    }
+
     console.log("aprf-auditor artifact-provenance-integrity smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

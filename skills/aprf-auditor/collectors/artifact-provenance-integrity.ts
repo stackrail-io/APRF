@@ -241,12 +241,13 @@ export function buildArtifactProvenanceIntegrityReport(opts: {
     opts.slsa.found ||
     opts.ociProvenance.found ||
     opts.modelChecksum.found;
-  // Digest pins alone are supporting — do not count as verification surface for N/A override.
-  const surfaceProvedForNaOverride = verificationSignal;
+  // Digest pins / block-unverified policy prove an artifact surface exists —
+  // they must not be N/A-laundered even though pins alone ≠ PASS.
   const gateSignalsPresent =
     verificationSignal ||
     opts.digestPin.found ||
     opts.blockUnverified.found;
+  const surfaceProvedForNaOverride = gateSignalsPresent;
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
@@ -337,7 +338,7 @@ export function buildArtifactProvenanceIntegrityReport(opts: {
     surfaceProvedForNaOverride
   ) {
     notes.push(
-      "Imported productionModelOrContainerArtifactsPresent=false ignored — in-repo verification tooling proves the surface exists.",
+      "Imported productionModelOrContainerArtifactsPresent=false ignored — in-repo digest pin, block-unverified policy, or verification tooling proves the surface exists.",
     );
     if (explicitFail) {
       statusHint = "fail";

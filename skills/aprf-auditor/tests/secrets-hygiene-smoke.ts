@@ -156,6 +156,54 @@ jobs:
       );
     }
 
+    // Heuristic embeds + present=false must FAIL (not N/A).
+    const outEmbedNa = join(root, "o-embed-na");
+    mkdirSync(join(outEmbedNa, "imports", "secrets-hygiene"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outEmbedNa, "imports", "secrets-hygiene", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionRuntimeSecretsPresent: false,
+      }),
+    );
+    const rEmbedNa = await run(tLeak, outEmbedNa);
+    if (rEmbedNa.summary.statusHint !== "fail") {
+      throw new Error(
+        `embeds+present=false expected fail, got ${JSON.stringify(rEmbedNa.summary)}`,
+      );
+    }
+
+    // Empty SARIF runs must not attest privilegedSecrets…=0 / unlock PASS.
+    const outSarif = join(root, "o-sarif");
+    mkdirSync(join(outSarif, "imports", "secrets-hygiene"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outSarif, "imports", "secrets-hygiene", "scan.sarif.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionRuntimeSecretsResolvedFromSecretsManagerPct: 100,
+        secretScanCoversPromptsAndFixtures: true,
+        runs: [],
+      }),
+    );
+    const rSarif = await run(tPartial, outSarif);
+    if (rSarif.summary.statusHint === "pass") {
+      throw new Error(
+        `empty SARIF runs must not unlock PASS: ${JSON.stringify(rSarif.summary)}`,
+      );
+    }
+    if (
+      rSarif.importedResults
+        .privilegedSecretsInReposPromptsOrClientBundles === 0
+    ) {
+      throw new Error(
+        "empty SARIF must not set privilegedSecretsInReposPromptsOrClientBundles=0",
+      );
+    }
+
     console.log("aprf-auditor secrets-hygiene smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });
