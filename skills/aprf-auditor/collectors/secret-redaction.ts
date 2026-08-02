@@ -234,6 +234,13 @@ function loadImported(
           asBool(data.coversApiKeyBearerAwsPatterns),
       );
 
+      // PASS requires measured cases/results. Bare detectionRatePct=100 does not
+      // unlock; bare rate <100 still counts as fail evidence.
+      const cases = Array.isArray(data.cases)
+        ? (data.cases as Array<Record<string, unknown>>)
+        : Array.isArray(data.results)
+          ? (data.results as Array<Record<string, unknown>>)
+          : [];
       const rate =
         asNum(data.detectionRatePct) ??
         (typeof data.detection_rate === "number"
@@ -241,12 +248,6 @@ function loadImported(
             ? data.detection_rate * 100
             : data.detection_rate
           : null);
-      detectionRatePct = mergeMinNum(detectionRatePct, rate);
-
-      const cases =
-        (data.cases as Array<Record<string, unknown>>) ||
-        (data.results as Array<Record<string, unknown>>) ||
-        [];
       if (cases.length) {
         caseCount = (caseCount ?? 0) + cases.length;
         const detected = cases.filter((c) => {
@@ -262,15 +263,9 @@ function loadImported(
         }).length;
         const computed = (detected / cases.length) * 100;
         detectionRatePct = mergeMinNum(detectionRatePct, computed);
-      }
-
-      const importedCaseCount =
-        asNum(data.caseCount) ?? asNum(data.case_count);
-      if (importedCaseCount !== null) {
-        caseCount =
-          caseCount === null
-            ? importedCaseCount
-            : Math.max(caseCount, importedCaseCount);
+        detectionRatePct = mergeMinNum(detectionRatePct, rate);
+      } else if (rate !== null && rate < 100) {
+        detectionRatePct = mergeMinNum(detectionRatePct, rate);
       }
     } catch {
       /* skip */
@@ -300,7 +295,10 @@ export function buildSecretRedactionReport(opts: {
   const surfaceProvedForNaOverride = opts.config.found || opts.canary.found;
   const redactionConfigPresent =
     opts.config.found || opts.imported.redactionConfigPresent === true;
-  const canaryTestPresent = opts.canary.found || opts.imported.found;
+  // Any import JSON is not canary evidence — require measured cases/results
+  // (or in-repo canary harness refs).
+  const canaryTestPresent =
+    opts.canary.found || (opts.imported.caseCount ?? 0) > 0;
   const detectionRatePct = opts.imported.detectionRatePct;
 
   if (!gateSignalsPresent && !opts.imported.found) {
@@ -328,7 +326,7 @@ export function buildSecretRedactionReport(opts: {
     );
   } else if (gateSignalsPresent) {
     notes.push(
-      "Signals alone are PARTIAL — import detectionRatePct=100 + canaryCoversApiKeyBearerAndAwsKeyPatterns=true (measuredAt ≤90d) under imports/secret-redaction/ to PASS. Set productionLoggingOrTracingPipelinesPresent=false for NOT_APPLICABLE.",
+      "Signals alone are PARTIAL — import non-empty cases/results plus detectionRatePct=100 + canaryCoversApiKeyBearerAndAwsKeyPatterns=true (measuredAt ≤90d) under imports/secret-redaction/ to PASS. Set productionLoggingOrTracingPipelinesPresent=false for NOT_APPLICABLE.",
     );
   }
 
@@ -337,25 +335,36 @@ export function buildSecretRedactionReport(opts: {
     new Date(opts.assessedAt),
     IMPORT_MAX_AGE_DAYS,
   );
-  const scopeAbsent =
-    opts.imported.productionLoggingOrTracingPipelinesPresent === false &&
-    !surfaceProvedForNaOverride;
   const configOk = redactionConfigPresent;
   const rateOk = detectionRatePct === 100;
   const coversOk =
     opts.imported.canaryCoversApiKeyBearerAndAwsKeyPatterns === true;
+  const casesOk = (opts.imported.caseCount ?? 0) > 0;
 
   let statusHint: SecretRedactionReport["summary"]["statusHint"];
   let sec2M2Satisfied: boolean | null = null;
 
   const explicitFail =
     opts.imported.found &&
-    !scopeAbsent &&
     ((detectionRatePct !== null && detectionRatePct < 100) ||
       opts.imported.canaryCoversApiKeyBearerAndAwsKeyPatterns === false ||
       (opts.imported.redactionConfigPresent === false && !opts.config.found));
 
-  if (
+  if (explicitFail) {
+    statusHint = "fail";
+    sec2M2Satisfied = false;
+    if (
+      opts.imported.productionLoggingOrTracingPipelinesPresent === false &&
+      surfaceProvedForNaOverride
+    ) {
+      notes.push(
+        "Imported productionLoggingOrTracingPipelinesPresent=false ignored — in-repo redaction/canary signals prove the surface exists.",
+      );
+    }
+    notes.push(
+      "Imported evidence shows detectionRatePct<100, missing pattern coverage, or missing redaction config — SEC2-M2 fail.",
+    );
+  } else if (
     opts.imported.found &&
     opts.imported.productionLoggingOrTracingPipelinesPresent === false &&
     !surfaceProvedForNaOverride
@@ -372,15 +381,10 @@ export function buildSecretRedactionReport(opts: {
     notes.push(
       "Imported productionLoggingOrTracingPipelinesPresent=false ignored — in-repo redaction/canary signals prove the surface exists.",
     );
-    if (explicitFail) {
-      statusHint = "fail";
-      sec2M2Satisfied = false;
-      notes.push(
-        "Imported evidence shows detectionRatePct<100, missing pattern coverage, or missing redaction config — SEC2-M2 fail.",
-      );
-    } else if (
+    if (
       configOk &&
       canaryTestPresent &&
+      casesOk &&
       rateOk &&
       coversOk &&
       importFresh &&
@@ -395,15 +399,10 @@ export function buildSecretRedactionReport(opts: {
   } else if (!gateSignalsPresent && !opts.imported.found) {
     statusHint = "not_demonstrated";
     sec2M2Satisfied = null;
-  } else if (explicitFail) {
-    statusHint = "fail";
-    sec2M2Satisfied = false;
-    notes.push(
-      "Imported evidence shows detectionRatePct<100, missing pattern coverage, or missing redaction config — SEC2-M2 fail.",
-    );
   } else if (
     configOk &&
     canaryTestPresent &&
+    casesOk &&
     rateOk &&
     coversOk &&
     importFresh &&
@@ -419,8 +418,13 @@ export function buildSecretRedactionReport(opts: {
         "PASS requires redaction config (in-repo or redactionConfigPresent=true).",
       );
     }
+    if (opts.imported.found && !casesOk) {
+      notes.push(
+        "Import must include non-empty cases/results (bare detectionRatePct does not prove a measured canary).",
+      );
+    }
     if (opts.imported.found && !rateOk) {
-      notes.push("Import must show detectionRatePct=100.");
+      notes.push("Import must show detectionRatePct=100 from measured cases.");
     }
     if (opts.imported.found && !coversOk) {
       notes.push(

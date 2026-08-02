@@ -7,6 +7,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ## [Unreleased]
 
+### Fixed
+- Secrets / SCI-M1 collectors: broaden N/A surface overrides; failing import metrics beat `present=false` N/A; SEC2-R1 counts root `gitleaks.toml` and ignores `generatedAt` for ≤7d freshness; SEC2-M2 requires measured canary `cases`/`results`; accurate SEC2-M1 N/A-override notes.
+
 ### Changed
 - Rewrote **secrets** + collectors; synced `aprf-spec.json`.
 - Rewrote **supply-chain** **SCI-M1** (hybrid artifact provenance/integrity; detectors for cosign, Notation, SLSA, OCI provenance, model checksum, artifact signature, digest pins; `repo-artifact-provenance-integrity` / `artifact-provenance-integrity` requires 100% verified pulls + unverifiedPullsBlocked + measuredAt ≤90d—no vacuous PASS from digest pins alone; N/A via `productionModelOrContainerArtifactsPresent=false`; cleared `technologies`); synced `aprf-spec.json`.

@@ -54,6 +54,10 @@ const PROMPT_FIXTURE_RE =
 const BLOCKING_RE =
   /\b(fail[_-]?(on|the[_-]?build|closed)|blocking|required[_-]?check|exit[_-]?code|cannot[_-]?skip|enforce)\b/i;
 
+/** Root / dedicated scanner config files (not under pre-commit or CI paths). */
+const SCANNER_CONFIG_FILE_RE =
+  /(^|[/\\])(\.?gitleaks\.toml|\.?trufflehog\.ya?ml|\.?detect-secrets|\.?secrets\.baseline|talisman\.yml)([/\\]|$)/i;
+
 export interface PrecommitCiSecretScanReport {
   schemaVersion: "0.2.0";
   pluginId: typeof PLUGIN_ID;
@@ -63,6 +67,7 @@ export interface PrecommitCiSecretScanReport {
   signals: {
     preCommitSecretScan: { found: boolean; refs: string[] };
     ciSecretScan: { found: boolean; refs: string[] };
+    scannerConfig: { found: boolean; refs: string[] };
     promptFixtureCoverage: { found: boolean; refs: string[] };
     blocking: { found: boolean; refs: string[] };
   };
@@ -106,11 +111,13 @@ function collectScanRefs(
 ): {
   preCommit: string[];
   ci: string[];
+  scannerConfig: string[];
   promptFixture: string[];
   blocking: string[];
 } {
   const preCommit: string[] = [];
   const ci: string[] = [];
+  const scannerConfig: string[] = [];
   const promptFixture: string[] = [];
   const blocking: string[] = [];
 
@@ -145,7 +152,8 @@ function collectScanRefs(
     if (isSkippable(r)) continue;
     const text = readText(f, 80_000) || "";
     const hasScanner = SCANNER_RE.test(r) || SCANNER_RE.test(text);
-    if (!hasScanner) continue;
+    const isScannerConfigFile = SCANNER_CONFIG_FILE_RE.test(r);
+    if (!hasScanner && !isScannerConfigFile) continue;
 
     const inPre =
       PRECOMMIT_PATH_RE.test(r) ||
@@ -159,6 +167,15 @@ function collectScanRefs(
 
     if (inPre && preCommit.length < 12) preCommit.push(r);
     if (inCi && ci.length < 12) ci.push(r);
+    // Root gitleaks.toml / equivalent: scanner config without pre-commit/CI path.
+    if (
+      isScannerConfigFile &&
+      !inPre &&
+      !inCi &&
+      scannerConfig.length < 12
+    ) {
+      scannerConfig.push(r);
+    }
     if (
       (PROMPT_FIXTURE_RE.test(r) || PROMPT_FIXTURE_RE.test(text)) &&
       promptFixture.length < 12
@@ -172,6 +189,7 @@ function collectScanRefs(
   return {
     preCommit: [...new Set(preCommit)],
     ci: [...new Set(ci)],
+    scannerConfig: [...new Set(scannerConfig)],
     promptFixture: [...new Set(promptFixture)],
     blocking: [...new Set(blocking)],
   };
@@ -255,6 +273,7 @@ export function buildPrecommitCiSecretScanReport(opts: {
   assessedAt: string;
   preCommitSecretScan: { found: boolean; refs: string[] };
   ciSecretScan: { found: boolean; refs: string[] };
+  scannerConfig: { found: boolean; refs: string[] };
   promptFixtureCoverage: { found: boolean; refs: string[] };
   blocking: { found: boolean; refs: string[] };
   imported: PrecommitCiSecretScanReport["importedResults"];
@@ -263,11 +282,14 @@ export function buildPrecommitCiSecretScanReport(opts: {
   const gateSignalsPresent =
     opts.preCommitSecretScan.found ||
     opts.ciSecretScan.found ||
+    opts.scannerConfig.found ||
     opts.promptFixtureCoverage.found ||
     opts.blocking.found;
-  // Config presence proves a scan program exists for N/A override.
+  // Config / scanner-config presence proves a scan program for N/A override.
   const surfaceProvedForNaOverride =
-    opts.preCommitSecretScan.found || opts.ciSecretScan.found;
+    opts.preCommitSecretScan.found ||
+    opts.ciSecretScan.found ||
+    opts.scannerConfig.found;
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
@@ -282,6 +304,11 @@ export function buildPrecommitCiSecretScanReport(opts: {
   if (opts.ciSecretScan.found) {
     notes.push(
       `CI secret-scan refs: ${opts.ciSecretScan.refs.slice(0, 3).join(", ")}`,
+    );
+  }
+  if (opts.scannerConfig.found) {
+    notes.push(
+      `Scanner-config refs: ${opts.scannerConfig.refs.slice(0, 3).join(", ")}; root config alone ≠ PASS — still need pre-commit + CI + green scan import.`,
     );
   }
   if (opts.promptFixtureCoverage.found) {
@@ -309,10 +336,6 @@ export function buildPrecommitCiSecretScanReport(opts: {
     new Date(opts.assessedAt),
     IMPORT_MAX_AGE_DAYS,
   );
-  const scopeAbsent =
-    opts.imported.applicationCodePromptsOrFixturesPresent === false &&
-    !surfaceProvedForNaOverride;
-
   const preCommitPresent =
     opts.preCommitSecretScan.found ||
     opts.imported.preCommitSecretScanConfigured === true;
@@ -330,7 +353,6 @@ export function buildPrecommitCiSecretScanReport(opts: {
 
   const explicitFail =
     opts.imported.found &&
-    !scopeAbsent &&
     ((opts.imported.preCommitSecretScanConfigured === false &&
       !opts.preCommitSecretScan.found) ||
       (opts.imported.ciSecretScanConfigured === false &&
@@ -339,7 +361,21 @@ export function buildPrecommitCiSecretScanReport(opts: {
       opts.imported.blocksOnHighConfidenceSecrets === false ||
       opts.imported.lastGreenMainBranchOrPrMergeScanWithin7Days === false);
 
-  if (
+  if (explicitFail) {
+    statusHint = "fail";
+    sec2R1Satisfied = false;
+    if (
+      opts.imported.applicationCodePromptsOrFixturesPresent === false &&
+      surfaceProvedForNaOverride
+    ) {
+      notes.push(
+        "Imported applicationCodePromptsOrFixturesPresent=false ignored — in-repo pre-commit/CI/scanner-config proves the surface exists.",
+      );
+    }
+    notes.push(
+      "Imported evidence shows missing pre-commit/CI, incomplete prompt/fixture coverage, non-blocking scan, or stale/missing green scan — SEC2-R1 fail.",
+    );
+  } else if (
     opts.imported.found &&
     opts.imported.applicationCodePromptsOrFixturesPresent === false &&
     !surfaceProvedForNaOverride
@@ -354,15 +390,9 @@ export function buildPrecommitCiSecretScanReport(opts: {
     surfaceProvedForNaOverride
   ) {
     notes.push(
-      "Imported applicationCodePromptsOrFixturesPresent=false ignored — in-repo pre-commit/CI secret-scan config proves the surface exists.",
+      "Imported applicationCodePromptsOrFixturesPresent=false ignored — in-repo pre-commit/CI/scanner-config proves the surface exists.",
     );
-    if (explicitFail) {
-      statusHint = "fail";
-      sec2R1Satisfied = false;
-      notes.push(
-        "Imported evidence shows missing pre-commit/CI, incomplete prompt/fixture coverage, non-blocking scan, or stale/missing green scan — SEC2-R1 fail.",
-      );
-    } else if (
+    if (
       preCommitPresent &&
       ciPresent &&
       coversOk &&
@@ -380,12 +410,6 @@ export function buildPrecommitCiSecretScanReport(opts: {
   } else if (!gateSignalsPresent && !opts.imported.found) {
     statusHint = "not_demonstrated";
     sec2R1Satisfied = null;
-  } else if (explicitFail) {
-    statusHint = "fail";
-    sec2R1Satisfied = false;
-    notes.push(
-      "Imported evidence shows missing pre-commit/CI, incomplete prompt/fixture coverage, non-blocking scan, or stale/missing green scan — SEC2-R1 fail.",
-    );
   } else if (
     preCommitPresent &&
     ciPresent &&
@@ -425,7 +449,7 @@ export function buildPrecommitCiSecretScanReport(opts: {
     }
     if (opts.imported.found && !importFresh) {
       notes.push(
-        "Import missing fresh measuredAt (≤7 days) — required to unlock SEC2-R1 PASS.",
+        "Import missing fresh measuredAt (≤7 days; generatedAt is ignored) — required to unlock SEC2-R1 PASS.",
       );
     }
   } else {
@@ -442,6 +466,7 @@ export function buildPrecommitCiSecretScanReport(opts: {
     signals: {
       preCommitSecretScan: opts.preCommitSecretScan,
       ciSecretScan: opts.ciSecretScan,
+      scannerConfig: opts.scannerConfig,
       promptFixtureCoverage: opts.promptFixtureCoverage,
       blocking: opts.blocking,
     },
@@ -470,6 +495,10 @@ export const precommitCiSecretScanCollector: Collector = {
         refs: refs.preCommit,
       },
       ciSecretScan: { found: refs.ci.length > 0, refs: refs.ci },
+      scannerConfig: {
+        found: refs.scannerConfig.length > 0,
+        refs: refs.scannerConfig,
+      },
       promptFixtureCoverage: {
         found: refs.promptFixture.length > 0,
         refs: refs.promptFixture,

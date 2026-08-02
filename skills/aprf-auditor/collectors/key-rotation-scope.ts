@@ -208,8 +208,8 @@ export function buildKeyRotationScopeReport(opts: {
     opts.rotationPolicy.found ||
     opts.leastPrivilegeScope.found ||
     opts.clientKeyRisk.found;
-  // Only key inventory proves surface for N/A override.
-  const surfaceProvedForNaOverride = opts.keyInventory.found;
+  // Any in-repo key-surface signal blocks N/A launder (inventory not required).
+  const surfaceProvedForNaOverride = gateSignalsPresent;
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
@@ -251,9 +251,6 @@ export function buildKeyRotationScopeReport(opts: {
     new Date(opts.assessedAt),
     IMPORT_MAX_AGE_DAYS,
   );
-  const scopeAbsent =
-    opts.imported.productionProviderOrCloudKeysPresent === false &&
-    !surfaceProvedForNaOverride;
   const scopePresent =
     opts.imported.productionProviderOrCloudKeysPresent === true;
   const inventoryPresent = opts.keyInventory.found || scopePresent;
@@ -268,9 +265,9 @@ export function buildKeyRotationScopeReport(opts: {
   let statusHint: KeyRotationScopeReport["summary"]["statusHint"];
   let sec2M3Satisfied: boolean | null = null;
 
+  // Failing metrics beat N/A even when present=false with no in-repo override.
   const explicitFail =
     opts.imported.found &&
-    !scopeAbsent &&
     ((opts.imported.privilegedProviderOrCloudKeysInClientApps !== null &&
       opts.imported.privilegedProviderOrCloudKeysInClientApps > 0) ||
       (opts.imported.productionKeysWithDocumentedLeastPrivilegeScopePct !==
@@ -280,7 +277,21 @@ export function buildKeyRotationScopeReport(opts: {
       (opts.imported.productionKeysWithinRotationPolicyPct !== null &&
         opts.imported.productionKeysWithinRotationPolicyPct < 100));
 
-  if (
+  if (explicitFail) {
+    statusHint = "fail";
+    sec2M3Satisfied = false;
+    if (
+      opts.imported.productionProviderOrCloudKeysPresent === false &&
+      surfaceProvedForNaOverride
+    ) {
+      notes.push(
+        "Imported productionProviderOrCloudKeysPresent=false ignored — in-repo key inventory, rotation/scope, or client-key signals prove the surface exists.",
+      );
+    }
+    notes.push(
+      "Imported evidence shows privileged client keys, incomplete scope coverage, or rotation-policy breaches — SEC2-M3 fail.",
+    );
+  } else if (
     opts.imported.found &&
     opts.imported.productionProviderOrCloudKeysPresent === false &&
     !surfaceProvedForNaOverride
@@ -295,15 +306,9 @@ export function buildKeyRotationScopeReport(opts: {
     surfaceProvedForNaOverride
   ) {
     notes.push(
-      "Imported productionProviderOrCloudKeysPresent=false ignored — in-repo key inventory proves the surface exists.",
+      "Imported productionProviderOrCloudKeysPresent=false ignored — in-repo key inventory, rotation/scope, or client-key signals prove the surface exists.",
     );
-    if (explicitFail) {
-      statusHint = "fail";
-      sec2M3Satisfied = false;
-      notes.push(
-        "Imported evidence shows privileged client keys, incomplete scope coverage, or rotation-policy breaches — SEC2-M3 fail.",
-      );
-    } else if (
+    if (
       inventoryPresent &&
       clientOk &&
       scopedOk &&
@@ -320,12 +325,6 @@ export function buildKeyRotationScopeReport(opts: {
   } else if (!gateSignalsPresent && !opts.imported.found) {
     statusHint = "not_demonstrated";
     sec2M3Satisfied = null;
-  } else if (explicitFail) {
-    statusHint = "fail";
-    sec2M3Satisfied = false;
-    notes.push(
-      "Imported evidence shows privileged client keys, incomplete scope coverage, or rotation-policy breaches — SEC2-M3 fail.",
-    );
   } else if (
     inventoryPresent &&
     clientOk &&

@@ -208,8 +208,8 @@ export function buildCredentialEgressControlsReport(opts: {
     opts.credentialRuntime.found ||
     opts.documentedDestinations.found ||
     opts.denyLogs.found;
-  // Allowlist/policy proves credential-egress surface for N/A override.
-  const surfaceProvedForNaOverride = opts.egressPolicy.found;
+  // Any credential-egress surface signal blocks N/A launder.
+  const surfaceProvedForNaOverride = gateSignalsPresent;
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
@@ -251,10 +251,6 @@ export function buildCredentialEgressControlsReport(opts: {
     new Date(opts.assessedAt),
     IMPORT_MAX_AGE_DAYS,
   );
-  const scopeAbsent =
-    opts.imported.runtimesHoldingCredentialsPresent === false &&
-    !surfaceProvedForNaOverride;
-
   const allowlistPresent =
     opts.egressPolicy.found ||
     opts.imported.egressAllowlistOrPolicyConfigured === true;
@@ -269,14 +265,27 @@ export function buildCredentialEgressControlsReport(opts: {
 
   const explicitFail =
     opts.imported.found &&
-    !scopeAbsent &&
     ((opts.imported.egressAllowlistOrPolicyConfigured === false &&
       !opts.egressPolicy.found) ||
       opts.imported.credentialEgressDestinationsDocumented === false ||
       (opts.imported.denyEventCountProvingEnforcementInLast90Days !== null &&
         opts.imported.denyEventCountProvingEnforcementInLast90Days < 1));
 
-  if (
+  if (explicitFail) {
+    statusHint = "fail";
+    sec2R2Satisfied = false;
+    if (
+      opts.imported.runtimesHoldingCredentialsPresent === false &&
+      surfaceProvedForNaOverride
+    ) {
+      notes.push(
+        "Imported runtimesHoldingCredentialsPresent=false ignored — in-repo egress policy, credential-runtime, destination, or deny-log signals prove the surface exists.",
+      );
+    }
+    notes.push(
+      "Imported evidence shows missing allowlist/policy, undocumented destinations, or 0 deny events — SEC2-R2 fail.",
+    );
+  } else if (
     opts.imported.found &&
     opts.imported.runtimesHoldingCredentialsPresent === false &&
     !surfaceProvedForNaOverride
@@ -291,15 +300,9 @@ export function buildCredentialEgressControlsReport(opts: {
     surfaceProvedForNaOverride
   ) {
     notes.push(
-      "Imported runtimesHoldingCredentialsPresent=false ignored — in-repo egress allowlist/policy proves the surface exists.",
+      "Imported runtimesHoldingCredentialsPresent=false ignored — in-repo egress policy, credential-runtime, destination, or deny-log signals prove the surface exists.",
     );
-    if (explicitFail) {
-      statusHint = "fail";
-      sec2R2Satisfied = false;
-      notes.push(
-        "Imported evidence shows missing allowlist/policy, undocumented destinations, or 0 deny events — SEC2-R2 fail.",
-      );
-    } else if (
+    if (
       allowlistPresent &&
       destinationsOk &&
       denyOk &&
@@ -315,12 +318,6 @@ export function buildCredentialEgressControlsReport(opts: {
   } else if (!gateSignalsPresent && !opts.imported.found) {
     statusHint = "not_demonstrated";
     sec2R2Satisfied = null;
-  } else if (explicitFail) {
-    statusHint = "fail";
-    sec2R2Satisfied = false;
-    notes.push(
-      "Imported evidence shows missing allowlist/policy, undocumented destinations, or 0 deny events — SEC2-R2 fail.",
-    );
   } else if (
     allowlistPresent &&
     destinationsOk &&

@@ -189,6 +189,47 @@ async function main() {
       );
     }
 
+    // Root gitleaks.toml alone → partial (not not_demonstrated).
+    const tToml = join(root, "t-toml");
+    mkdirSync(tToml, { recursive: true });
+    writeFileSync(
+      join(tToml, "gitleaks.toml"),
+      "[extend]\nuseDefault = true\n",
+    );
+    const rToml = await run(tToml, join(root, "o-toml"));
+    if (rToml.summary.statusHint !== "partial") {
+      throw new Error(
+        `root gitleaks.toml expected partial, got ${JSON.stringify(rToml.summary)}`,
+      );
+    }
+    if (!rToml.signals.scannerConfig.found) {
+      throw new Error("expected scannerConfig signal for root gitleaks.toml");
+    }
+
+    // generatedAt must not unlock ≤7d PASS without measuredAt.
+    const outGen = join(root, "o-gen");
+    mkdirSync(join(outGen, "imports", "precommit-ci-secret-scan"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outGen, "imports", "precommit-ci-secret-scan", "coverage.json"),
+      JSON.stringify({
+        generatedAt: new Date().toISOString(),
+        applicationCodePromptsOrFixturesPresent: true,
+        preCommitSecretScanConfigured: true,
+        ciSecretScanConfigured: true,
+        secretScanCoversPromptsAndFixtures: true,
+        blocksOnHighConfidenceSecrets: true,
+        lastGreenMainBranchOrPrMergeScanWithin7Days: true,
+      }),
+    );
+    const rGen = await run(tCfg, outGen);
+    if (rGen.summary.statusHint === "pass") {
+      throw new Error(
+        `generatedAt must not unlock PASS: ${JSON.stringify(rGen.summary)}`,
+      );
+    }
+
     console.log("aprf-auditor precommit-ci-secret-scan smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

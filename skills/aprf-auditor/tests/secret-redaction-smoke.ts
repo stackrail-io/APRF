@@ -136,6 +136,24 @@ class SensitiveDataFilter:
       throw new Error(`N/A expected: ${JSON.stringify(rNa.summary)}`);
     }
 
+    // Bare rate=100 + covers without cases must not PASS.
+    const outBare = join(root, "o-bare");
+    mkdirSync(join(outBare, "imports", "secret-redaction"), { recursive: true });
+    writeFileSync(
+      join(outBare, "imports", "secret-redaction", "harness.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        detectionRatePct: 100,
+        canaryCoversApiKeyBearerAndAwsKeyPatterns: true,
+      }),
+    );
+    const rBare = await run(tConfig, outBare);
+    if (rBare.summary.statusHint === "pass") {
+      throw new Error(
+        `bare rate/covers without cases must not PASS: ${JSON.stringify(rBare.summary)}`,
+      );
+    }
+
     console.log("aprf-auditor secret-redaction smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

@@ -184,6 +184,49 @@ async function main() {
       );
     }
 
+    // Client-key risk alone blocks N/A launder.
+    const tClient = join(root, "t-client");
+    mkdirSync(join(tClient, "apps"), { recursive: true });
+    writeFileSync(
+      join(tClient, "apps", "client_bundle.md"),
+      "Do not ship NEXT_PUBLIC_OPENAI_API_KEY in the client app bundle.\n",
+    );
+    const outClientNa = join(root, "o-client-na");
+    mkdirSync(join(outClientNa, "imports", "key-rotation-scope"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outClientNa, "imports", "key-rotation-scope", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionProviderOrCloudKeysPresent: false,
+      }),
+    );
+    const rClientNa = await run(tClient, outClientNa);
+    if (rClientNa.summary.statusHint === "not_applicable") {
+      throw new Error("client-key risk must block N/A launder");
+    }
+
+    // Failing metrics beat N/A even with no in-repo surface.
+    const outFailNa = join(root, "o-fail-na");
+    mkdirSync(join(outFailNa, "imports", "key-rotation-scope"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outFailNa, "imports", "key-rotation-scope", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionProviderOrCloudKeysPresent: false,
+        privilegedProviderOrCloudKeysInClientApps: 3,
+      }),
+    );
+    const rFailNa = await run(tEmpty, outFailNa);
+    if (rFailNa.summary.statusHint !== "fail") {
+      throw new Error(
+        `failing metrics must beat N/A: ${JSON.stringify(rFailNa.summary)}`,
+      );
+    }
+
     console.log("aprf-auditor key-rotation-scope smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

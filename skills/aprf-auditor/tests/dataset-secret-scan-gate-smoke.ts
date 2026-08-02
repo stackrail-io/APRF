@@ -168,6 +168,49 @@ jobs:
       );
     }
 
+    // Corpus-publish alone blocks N/A launder.
+    const tCorpus = join(root, "t-corpus");
+    mkdirSync(join(tCorpus, "docs"), { recursive: true });
+    writeFileSync(
+      join(tCorpus, "docs", "corpus_publish.md"),
+      "Pipeline for fine-tune corpus publish to the training registry.\n",
+    );
+    const outCorpusNa = join(root, "o-corpus-na");
+    mkdirSync(join(outCorpusNa, "imports", "dataset-secret-scan-gate"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outCorpusNa, "imports", "dataset-secret-scan-gate", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        fineTuneOrEvalCorpusPublishPresent: false,
+      }),
+    );
+    const rCorpusNa = await run(tCorpus, outCorpusNa);
+    if (rCorpusNa.summary.statusHint === "not_applicable") {
+      throw new Error("corpus-publish must block N/A launder");
+    }
+
+    // Failing linked-pct beats N/A with no in-repo surface.
+    const outFailNa = join(root, "o-fail-na");
+    mkdirSync(join(outFailNa, "imports", "dataset-secret-scan-gate"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outFailNa, "imports", "dataset-secret-scan-gate", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        fineTuneOrEvalCorpusPublishPresent: false,
+        fineTuneOrEvalCorporaPublishedInLast90DaysWithLinkedScanReportPct: 40,
+      }),
+    );
+    const rFailNa = await run(tEmpty, outFailNa);
+    if (rFailNa.summary.statusHint !== "fail") {
+      throw new Error(
+        `failing metrics must beat N/A: ${JSON.stringify(rFailNa.summary)}`,
+      );
+    }
+
     console.log("aprf-auditor dataset-secret-scan-gate smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

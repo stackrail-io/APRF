@@ -204,6 +204,26 @@ jobs:
       );
     }
 
+    // Failing privileged count beats N/A with no in-repo surface.
+    const outFailNa = join(root, "o-fail-na");
+    mkdirSync(join(outFailNa, "imports", "secrets-hygiene"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outFailNa, "imports", "secrets-hygiene", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionRuntimeSecretsPresent: false,
+        privilegedSecretsInReposPromptsOrClientBundles: 2,
+      }),
+    );
+    const rFailNa = await run(tEmpty, outFailNa);
+    if (rFailNa.summary.statusHint !== "fail") {
+      throw new Error(
+        `failing privileged count must beat N/A: ${JSON.stringify(rFailNa.summary)}`,
+      );
+    }
+
     console.log("aprf-auditor secrets-hygiene smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

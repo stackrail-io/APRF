@@ -446,9 +446,6 @@ export function buildSecretsReport(opts: {
     new Date(opts.assessedAt),
     IMPORT_MAX_AGE_DAYS,
   );
-  const scopeAbsent =
-    opts.imported.productionRuntimeSecretsPresent === false &&
-    !surfaceProvedForNaOverride;
   // PASS needs manager wiring — scan config / present=true alone must not unlock.
   const managerOk = secretsManagerPresent;
 
@@ -465,9 +462,7 @@ export function buildSecretsReport(opts: {
 
   const explicitFail =
     opts.imported.found &&
-    !scopeAbsent &&
-    (embeddedCount > 0 ||
-      (privilegedCount !== null && privilegedCount > 0) ||
+    ((privilegedCount !== null && privilegedCount > 0) ||
       (opts.imported.productionRuntimeSecretsResolvedFromSecretsManagerPct !==
         null &&
         opts.imported.productionRuntimeSecretsResolvedFromSecretsManagerPct <
@@ -476,7 +471,17 @@ export function buildSecretsReport(opts: {
       (opts.imported.secretsManagerWiringPresent === false &&
         !opts.manager.found));
 
-  // Heuristic embeds fail even without import coverage, and always beat N/A.
+  const naOverrideReasons: string[] = [];
+  if (opts.manager.found) naOverrideReasons.push("secrets-manager wiring");
+  if (embeddedCount > 0) {
+    naOverrideReasons.push("heuristic embedded privileged secrets");
+  }
+  const naOverrideNote =
+    naOverrideReasons.length > 0
+      ? `Imported productionRuntimeSecretsPresent=false ignored — in-repo ${naOverrideReasons.join(" / ")} prove the surface exists.`
+      : "Imported productionRuntimeSecretsPresent=false ignored — in-repo signals prove the surface exists.";
+
+  // Heuristic embeds + failing import metrics beat N/A.
   if (embeddedCount > 0) {
     statusHint = "fail";
     sec2M1Satisfied = false;
@@ -484,15 +489,25 @@ export function buildSecretsReport(opts: {
       opts.imported.found &&
       opts.imported.productionRuntimeSecretsPresent === false
     ) {
-      notes.push(
-        "Imported productionRuntimeSecretsPresent=false ignored — heuristic embedded privileged secrets prove the surface exists.",
-      );
+      notes.push(naOverrideNote);
     }
     if (!opts.imported.found) {
       notes.push(
         "Heuristic embedded privileged secret patterns — SEC2-M1 fail.",
       );
     }
+  } else if (explicitFail) {
+    statusHint = "fail";
+    sec2M1Satisfied = false;
+    if (
+      opts.imported.productionRuntimeSecretsPresent === false &&
+      surfaceProvedForNaOverride
+    ) {
+      notes.push(naOverrideNote);
+    }
+    notes.push(
+      "Imported evidence shows privileged findings, unresolved runtime secrets, missing prompt/fixture scan coverage, or missing manager wiring — SEC2-M1 fail.",
+    );
   } else if (
     opts.imported.found &&
     opts.imported.productionRuntimeSecretsPresent === false &&
@@ -507,16 +522,8 @@ export function buildSecretsReport(opts: {
     opts.imported.productionRuntimeSecretsPresent === false &&
     surfaceProvedForNaOverride
   ) {
-    notes.push(
-      "Imported productionRuntimeSecretsPresent=false ignored — in-repo secrets-manager wiring proves the surface exists.",
-    );
-    if (explicitFail || embeddedCount > 0) {
-      statusHint = "fail";
-      sec2M1Satisfied = false;
-      notes.push(
-        "Imported evidence shows privileged findings, unresolved runtime secrets, missing prompt/fixture scan coverage, or missing manager wiring — SEC2-M1 fail.",
-      );
-    } else if (
+    notes.push(naOverrideNote);
+    if (
       managerOk &&
       privilegedOk &&
       resolvedOk &&
@@ -533,12 +540,6 @@ export function buildSecretsReport(opts: {
   } else if (!gateSignalsPresent && !opts.imported.found) {
     statusHint = "not_demonstrated";
     sec2M1Satisfied = null;
-  } else if (explicitFail) {
-    statusHint = "fail";
-    sec2M1Satisfied = false;
-    notes.push(
-      "Imported evidence shows privileged findings, unresolved runtime secrets, missing prompt/fixture scan coverage, or missing manager wiring — SEC2-M1 fail.",
-    );
   } else if (
     managerOk &&
     privilegedOk &&

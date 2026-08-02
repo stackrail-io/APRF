@@ -218,6 +218,31 @@ jobs:
       throw new Error("block-unverified policy must block N/A launder");
     }
 
+    // Failing verifiedPct beats N/A with no in-repo surface.
+    const outFailNa = join(root, "o-fail-na");
+    mkdirSync(join(outFailNa, "imports", "artifact-provenance-integrity"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(
+        outFailNa,
+        "imports",
+        "artifact-provenance-integrity",
+        "coverage.json",
+      ),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionModelOrContainerArtifactsPresent: false,
+        productionPullsVerifiedAgainstDigestOrSignaturePct: 50,
+      }),
+    );
+    const rFailNa = await run(tEmpty, outFailNa);
+    if (rFailNa.summary.statusHint !== "fail") {
+      throw new Error(
+        `failing verifiedPct must beat N/A: ${JSON.stringify(rFailNa.summary)}`,
+      );
+    }
+
     console.log("aprf-auditor artifact-provenance-integrity smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

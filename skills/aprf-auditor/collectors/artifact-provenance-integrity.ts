@@ -298,10 +298,6 @@ export function buildArtifactProvenanceIntegrityReport(opts: {
     new Date(opts.assessedAt),
     IMPORT_MAX_AGE_DAYS,
   );
-  const scopeAbsent =
-    opts.imported.productionModelOrContainerArtifactsPresent === false &&
-    !surfaceProvedForNaOverride;
-
   const verificationPresent =
     verificationSignal ||
     opts.imported.provenanceOrIntegrityVerificationConfigured === true;
@@ -314,7 +310,6 @@ export function buildArtifactProvenanceIntegrityReport(opts: {
 
   const explicitFail =
     opts.imported.found &&
-    !scopeAbsent &&
     ((opts.imported.provenanceOrIntegrityVerificationConfigured === false &&
       !verificationSignal) ||
       (opts.imported.productionPullsVerifiedAgainstDigestOrSignaturePct !==
@@ -323,7 +318,21 @@ export function buildArtifactProvenanceIntegrityReport(opts: {
           100) ||
       opts.imported.unverifiedPullsBlocked === false);
 
-  if (
+  if (explicitFail) {
+    statusHint = "fail";
+    sciM1Satisfied = false;
+    if (
+      opts.imported.productionModelOrContainerArtifactsPresent === false &&
+      surfaceProvedForNaOverride
+    ) {
+      notes.push(
+        "Imported productionModelOrContainerArtifactsPresent=false ignored — in-repo digest pin, block-unverified policy, or verification tooling proves the surface exists.",
+      );
+    }
+    notes.push(
+      "Imported evidence shows missing verification, verifiedPct<100, or unverified pulls not blocked — SCI-M1 fail.",
+    );
+  } else if (
     opts.imported.found &&
     opts.imported.productionModelOrContainerArtifactsPresent === false &&
     !surfaceProvedForNaOverride
@@ -340,13 +349,7 @@ export function buildArtifactProvenanceIntegrityReport(opts: {
     notes.push(
       "Imported productionModelOrContainerArtifactsPresent=false ignored — in-repo digest pin, block-unverified policy, or verification tooling proves the surface exists.",
     );
-    if (explicitFail) {
-      statusHint = "fail";
-      sciM1Satisfied = false;
-      notes.push(
-        "Imported evidence shows missing verification, verifiedPct<100, or unverified pulls not blocked — SCI-M1 fail.",
-      );
-    } else if (
+    if (
       verificationPresent &&
       verifiedOk &&
       blockedOk &&
@@ -362,12 +365,6 @@ export function buildArtifactProvenanceIntegrityReport(opts: {
   } else if (!gateSignalsPresent && !opts.imported.found) {
     statusHint = "not_demonstrated";
     sciM1Satisfied = null;
-  } else if (explicitFail) {
-    statusHint = "fail";
-    sciM1Satisfied = false;
-    notes.push(
-      "Imported evidence shows missing verification, verifiedPct<100, or unverified pulls not blocked — SCI-M1 fail.",
-    );
   } else if (
     verificationPresent &&
     verifiedOk &&
