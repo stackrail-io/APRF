@@ -208,7 +208,8 @@ type Assessment = {
     quickWins: Finding[];
     productionBlockers: Finding[];
   };
-  roadmaps: { days30: string[]; days90: string[]; longTerm: string[] };
+  /** Canonical: days30/days90/longTerm string[]. Aliases/objects normalized at render. */
+  roadmaps: Record<string, unknown>;
   discovery?: {
     found?: string[];
     notObserved?: string[];
@@ -288,6 +289,90 @@ function formatManualVerification(text: string): string {
   return `<p><strong>Manual verification:</strong></p><ol class="manual-steps">${steps
     .map((s) => `<li>${esc(s)}</li>`)
     .join("")}</ol>`;
+}
+
+type RoadmapItem =
+  | string
+  | {
+      checkId?: string;
+      title?: string;
+      action?: string;
+      priority?: string;
+    };
+
+type RoadmapRef = { checkId: string; priority?: string };
+
+/** Extract check id (+ optional priority) from schema strings or object items. */
+function parseRoadmapRef(item: RoadmapItem): RoadmapRef | null {
+  if (item && typeof item === "object") {
+    const checkId = (item.checkId ?? "").trim();
+    if (!checkId) return null;
+    const priority = (item.priority ?? "").trim() || undefined;
+    return { checkId, priority };
+  }
+  if (typeof item !== "string") return null;
+  const trimmed = item.trim();
+  // "SEC2-M1: …" / "AGN-M1 (P1) — …" / "AUTHN-M1 (P1) — Title: action"
+  const m = trimmed.match(
+    /^([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)(?:\s*\(([Pp][0-3])\))?/,
+  );
+  if (!m) return null;
+  return { checkId: m[1], priority: m[2]?.toUpperCase() };
+}
+
+function pickRoadmapBucket(
+  raw: Record<string, unknown>,
+  keys: string[],
+): RoadmapItem[] {
+  for (const k of keys) {
+    const v = raw[k];
+    if (Array.isArray(v) && v.length > 0) return v as RoadmapItem[];
+  }
+  for (const k of keys) {
+    const v = raw[k];
+    if (Array.isArray(v)) return v as RoadmapItem[];
+  }
+  return [];
+}
+
+/** Map schema + common aliases to compact check refs for the HTML roadmap. */
+function normalizeRoadmaps(raw: unknown): {
+  days30: RoadmapRef[];
+  days90: RoadmapRef[];
+  longTerm: RoadmapRef[];
+} {
+  const obj =
+    raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const toRefs = (items: RoadmapItem[]) =>
+    items
+      .map(parseRoadmapRef)
+      .filter((r): r is RoadmapRef => r != null)
+      .filter(
+        (r, i, arr) => arr.findIndex((x) => x.checkId === r.checkId) === i,
+      );
+  return {
+    days30: toRefs(pickRoadmapBucket(obj, ["days30", "30days"])),
+    // 60days is a non-schema mid bucket some assessments use; fold into days90
+    days90: toRefs(pickRoadmapBucket(obj, ["days90", "90days", "60days"])),
+    longTerm: toRefs(
+      pickRoadmapBucket(obj, ["longTerm", "longterm", "long-term", "long_term"]),
+    ),
+  };
+}
+
+function renderRoadmapBucket(label: string, items: RoadmapRef[]): string {
+  if (!items.length) {
+    return `<section class="block"><h3>${esc(label)}</h3><p class="empty">None</p></section>`;
+  }
+  const lis = items
+    .map((r) => {
+      const prio = r.priority
+        ? `<span class="prio">${esc(r.priority)}</span>`
+        : "";
+      return `<li><button type="button" class="roadmap-check" data-control-id="${esc(r.checkId)}" aria-label="Open details for ${esc(r.checkId)}"><code>${esc(r.checkId)}</code>${prio}</button></li>`;
+    })
+    .join("");
+  return `<section class="block"><h3>${esc(label)}</h3><ul class="roadmap-list">${lis}</ul></section>`;
 }
 
 function statusClass(status: string): string {
@@ -863,8 +948,7 @@ function render(a: Assessment): string {
       `<ul>${a.scope.excludedCheckIds.map((e) => `<li><strong>${esc(e.id)}</strong> — ${esc(e.reason)}</li>`).join("")}</ul>`
     : `<p class="empty">None — full profile/catalog scope.</p>`;
 
-  const roadmap = (label: string, items: string[]) =>
-    `<section class="block"><h3>${esc(label)}</h3>${items?.length ? `<ul>${items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>` : `<p class="empty">None</p>`}</section>`;
+  const roadmaps = normalizeRoadmaps(a.roadmaps);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -1076,6 +1160,27 @@ function render(a: Assessment): string {
     .ok { color: var(--ok); } .bad { color: var(--bad); } .warn { color: var(--warn); }
     .muted, .na { color: var(--na); }
     .prio { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+    .roadmap-list {
+      list-style: none; margin: 0.35rem 0 0; padding: 0;
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+    }
+    .roadmap-list li { margin: 0; }
+    .roadmap-check {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      border: 1px solid var(--line); background: #fff; color: var(--ink);
+      font-family: var(--sans); font-size: 0.82rem; font-weight: 600;
+      padding: 0.28rem 0.55rem; border-radius: 8px; cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .roadmap-check:hover, .roadmap-check:focus-visible {
+      background: var(--accent-soft); border-color: #c9dde5; outline: none;
+    }
+    .roadmap-check.active {
+      background: var(--accent); border-color: var(--accent); color: #fff;
+    }
+    .roadmap-check.active code { background: rgba(255,255,255,0.18); color: inherit; }
+    .roadmap-check.active .prio { color: rgba(255,255,255,0.85); }
+    .roadmap-check .prio { margin: 0; }
     code { font-family: var(--mono); font-size: 0.84em; background: #f0f4f7; padding: 0.08em 0.35em; border-radius: 4px; }
     ul { padding-left: 1.15rem; }
     .evidence-list { margin: 0.35rem 0 0.65rem; padding-left: 1.15rem; }
@@ -1247,9 +1352,9 @@ function render(a: Assessment): string {
 
     <h2>Roadmaps</h2>
     <div class="roadmap-grid">
-    ${roadmap("30 days", a.roadmaps.days30)}
-    ${roadmap("90 days", a.roadmaps.days90)}
-    ${roadmap("Long term", a.roadmaps.longTerm)}
+    ${renderRoadmapBucket("30 days", roadmaps.days30)}
+    ${renderRoadmapBucket("90 days", roadmaps.days90)}
+    ${renderRoadmapBucket("Long term", roadmaps.longTerm)}
     </div>
 
     <h2>Excluded checks (non-AI subset)</h2>
@@ -1291,7 +1396,7 @@ function render(a: Assessment): string {
         if (!panel) return;
         title.textContent = panel.getAttribute("data-title") || id;
         body.innerHTML = panel.innerHTML;
-        document.querySelectorAll(".control-row").forEach(function (r) {
+        document.querySelectorAll(".control-row, .roadmap-check").forEach(function (r) {
           r.classList.toggle("active", r.getAttribute("data-control-id") === id);
         });
         backdrop.hidden = false;
@@ -1307,13 +1412,13 @@ function render(a: Assessment): string {
         backdrop.classList.remove("open");
         flyout.classList.remove("open");
         flyout.setAttribute("aria-hidden", "true");
-        document.querySelectorAll(".control-row.active").forEach(function (r) {
+        document.querySelectorAll(".control-row.active, .roadmap-check.active").forEach(function (r) {
           r.classList.remove("active");
         });
         setTimeout(function () { backdrop.hidden = true; }, 220);
       }
 
-      document.querySelectorAll(".control-row").forEach(function (row) {
+      document.querySelectorAll(".control-row, .roadmap-check").forEach(function (row) {
         row.addEventListener("click", function () {
           openFlyout(row.getAttribute("data-control-id"));
         });

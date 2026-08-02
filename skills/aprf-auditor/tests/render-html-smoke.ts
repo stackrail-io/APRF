@@ -49,6 +49,8 @@ for (const needle of [
   "0 privileged production secrets",
   "DM Sans",
   "gate-badge",
+  "roadmap-check",
+  "SEC2-M1",
 ]) {
   if (!html.includes(needle)) {
     throw new Error(`HTML missing ${needle}`);
