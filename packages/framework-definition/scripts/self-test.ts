@@ -44,7 +44,7 @@ assert(
 const policy: AprfPolicy = {
   id: "policy-demo",
   name: "Demo",
-  aprfVersion: "0.10.0",
+  aprfVersion: "0.11.0",
   profileIds: [PROFILE_ID_CORE],
   checkOverlays: [
     {

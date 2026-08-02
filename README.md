@@ -1,6 +1,6 @@
 # AI Production Readiness Framework (APRF)
 
-**Status:** working-draft **v0.10.0**  
+**Status:** working-draft **v0.11.0**  
 **Publisher:** [StackRail](https://stackrail.io) (working-draft publisher)  
 **Site:** [https://stackrail.io/aprf/](https://stackrail.io/aprf/)  
 **Question:** Can this AI application safely operate in production?
@@ -88,7 +88,7 @@ npm run test:unit              # profile / policy unit tests
 npm run build                  # emit publishable dist/ for both packages
 ```
 
-**Framework SemVer** (e.g. v0.10.0) versions the catalog and gate semantics. **Schema path versions** (e.g. [spec-schema/0.7](https://stackrail.io/aprf/spec-schema/0.7)) version document *shape* independently — do not equate them.
+**Framework SemVer** (e.g. v0.11.0) versions the catalog and gate semantics. **Schema path versions** (e.g. [spec-schema/0.7](https://stackrail.io/aprf/spec-schema/0.7)) version document *shape* independently — do not equate them.
 
 ## Check (rule) model
 

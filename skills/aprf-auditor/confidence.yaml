@@ -2,7 +2,7 @@
 # confidence label is derived from confidenceScore after freshness decay.
 
 version: "0.2.0"
-aprfVersion: "0.10.1"
+aprfVersion: "0.11.0"
 
 # Base score from the PRIMARY evidence class (after precedence selection)
 baseScoreByClass:

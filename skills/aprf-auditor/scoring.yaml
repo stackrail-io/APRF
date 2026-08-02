@@ -2,7 +2,7 @@
 # Gates are binary. Recommended scores are prioritization-only (not certification).
 
 version: "0.2.0"
-aprfVersion: "0.10.1"
+aprfVersion: "0.11.0"
 
 principles:
   - "Mandatory Checks in profile ∪ lenses form the gate for ai-application assessments."
