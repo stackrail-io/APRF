@@ -152,6 +152,7 @@ async function main() {
       JSON.stringify({
         measuredAt: new Date().toISOString(),
         productionAgentsOrToolWorkloadsPresent: true,
+        agentsInventoriedPct: 100,
         agentsWithExplicitToolAllowlistPct: 100,
         unknownToolRequestsDeniedPct: 100,
       }),

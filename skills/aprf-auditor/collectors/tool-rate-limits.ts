@@ -99,6 +99,8 @@ function loadImported(
         highImpactToolsInventoriedPct,
         asNum(data.highImpactToolsInventoriedPct) ??
           asNum(data.high_impact_tools_inventoried_pct) ??
+          asNum(data.productionHighImpactToolsInventoriedPct) ??
+          asNum(data.production_high_impact_tools_inventoried_pct) ??
           asNum(data.inventoryCoveragePct),
       );
       highImpactToolsWithRateAndBlastBudgetPct = mergeMinNum(

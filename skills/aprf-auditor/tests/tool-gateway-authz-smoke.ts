@@ -99,6 +99,26 @@ async function main() {
       );
     }
 
+    const outNoPathCov = join(root, "o-no-path-cov");
+    mkdirSync(join(outNoPathCov, "imports", "tool-gateway-authz"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNoPathCov, "imports", "tool-gateway-authz", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionToolsOrAgentsPresent: true,
+        unauthorizedToolCallsDeniedPct: 100,
+        modelOutputAloneCannotBypassGateway: true,
+      }),
+    );
+    const rNoPathCov = await run(tSig, outNoPathCov);
+    if (rNoPathCov.summary.statusHint === "pass") {
+      throw new Error(
+        `deny+no-bypass without path coverage must not PASS: ${JSON.stringify(rNoPathCov.summary)}`,
+      );
+    }
+
     const outBypass = join(root, "o-bypass");
     mkdirSync(join(outBypass, "imports", "tool-gateway-authz"), {
       recursive: true,

@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:0bcc0472033e39c72e98e6e1803b228f0ace826c729e7a03f8f3e1957ba99869",
+  "generatedAt": "sha256:2a2e50af76a78faac67f719a028d94eabad18dd19a60e865c5fa3ab36e52fa59",
   "ruleCount": 178,
   "domains": [
     {
@@ -13939,7 +13939,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Impact-tiered inventory covers 100% of production write/irreversible/ financial tools; 100% of those tools have a configured additional gate (approval, dual control, or policy engine); automated tests show ungated execution is impossible for those tools (measuredAt ≤90 days). If no write/irreversible/financial tools exist in production, score NOT_APPLICABLE.\n",
+      "passCondition": "Impact-tiered inventory covers 100% of production write/irreversible/financial tools; 100% of those tools have a configured additional gate (approval, dual control, or policy engine); automated tests show ungated execution is impossible for those tools (measuredAt ≤90 days). If no write/irreversible/financial tools exist in production, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Impact-tiered tool inventory marking write/irreversible/financial tools in production",
         "Gate configuration (approval, dual control, or policy engine) for 100% of those tools",
