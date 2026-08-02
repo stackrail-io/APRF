@@ -89,6 +89,10 @@ plugins:
     - high-priv-agent-review
     - secrets-hygiene
     - secret-redaction
+    - key-rotation-scope
+    - precommit-ci-secret-scan
+    - credential-egress-controls
+    - dataset-secret-scan-gate
     - injection-policy-gate
     - custom
   optional:
@@ -139,6 +143,10 @@ userInputRequiredWhen:
   - INF-M4: no shared-accelerator isolation design + ≤90d capacity/isolation test (run shared-accelerator-isolation or import coverage; N/A via sharedAiAcceleratorInfrastructurePresent=false for managed-API/CPU-only/single-tenant/dedicated GPU)
   - SEC2-M1: no secrets-manager wiring and/or CI secret-scan report (run secrets-hygiene or import SARIF)
   - SEC2-M2: no log/trace redaction config + 100% canary harness (run secret-redaction or import results)
+  - SEC2-M3: no key inventory + scope/rotation coverage + 0 privileged client keys (run key-rotation-scope or import results)
+  - SEC2-R1: no pre-commit + CI secret-scan covering prompts/fixtures with ≤7d green scan (run precommit-ci-secret-scan or import results)
+  - SEC2-R2: no credential egress allowlist + documented destinations + ≥1 deny event ≤90d (run credential-egress-controls or import results)
+  - SEC2-R3: no dataset secret/PII scan gate before fine-tune/eval publish + 100% linked reports ≤90d (run dataset-secret-scan-gate or import results)
   - SEC-M1: no injection/privilege-escalation corpus + CI gate at ≥95% deny (run injection-policy-gate or import results)
   - evidence not found after precedence-ordered search
   - N/A applicability needs confirmation
@@ -164,8 +172,12 @@ limitations:
   - ai-runtime-patching needs patchingSlaDocumented + productionAiRuntimesWithinDocumentedPatchingSlaPct=100 + openSlaBreachesWithoutApprovedWaiver=0 + vulnerabilityOrImageAgeReportPresent + measuredAt ≤90d; image-tag pinning alone is not a PASS
   - agent-tool-connectivity needs dependencyInventoryDocumented + leastPrivilegeConnectivityControlsConfigured + connectivityControlsMatchDependencyInventory + unauthorizedInternalServiceAccessBlockedInProbe + measuredAt ≤90d; NetworkPolicy files alone are not a PASS; SEC-M4 alone is not a PASS
   - shared-accelerator-isolation needs isolationControlsDocumented + isolationOrCapacityTestMeetsStatedLimits + measuredAt ≤90d; GPU mentions alone are not a PASS; managed-API-only stacks should N/A
-  - secrets-hygiene needs secrets-manager refs + clean secret-scan evidence; GitHub Actions secrets alone are not a production secrets manager
-  - secret-redaction needs redaction config + canary harness at 100% detection; config alone is not a PASS
+  - secrets-hygiene needs secrets-manager refs + import coverage (0 privileged findings, 100% runtime resolve, prompts/fixtures covered, measuredAt ≤90d); GitHub Actions secrets / CI scan config alone are not a PASS
+  - secret-redaction needs redaction config + detectionRatePct=100 + canaryCoversApiKeyBearerAndAwsKeyPatterns + measuredAt ≤90d; config alone is not a PASS
+  - key-rotation-scope needs key inventory (or present=true) + privilegedProviderOrCloudKeysInClientApps=0 + productionKeysWithDocumentedLeastPrivilegeScopePct=100 + productionKeysWithinRotationPolicyPct=100 + measuredAt ≤90d; rotation docs alone are not a PASS
+  - precommit-ci-secret-scan needs pre-commit + CI secret-scan + secretScanCoversPromptsAndFixtures + blocksOnHighConfidenceSecrets + lastGreenMainBranchOrPrMergeScanWithin7Days + measuredAt ≤7d; config alone is not a PASS
+  - credential-egress-controls needs egress allowlist/policy + credentialEgressDestinationsDocumented + denyEventCountProvingEnforcementInLast90Days≥1 + measuredAt ≤90d; allowlist docs alone are not a PASS
+  - dataset-secret-scan-gate needs scan gate + publishBlockedWhenCriticalFindingsOpen + fineTuneOrEvalCorporaPublishedInLast90DaysWithLinkedScanReportPct=100 + measuredAt ≤90d; dataset cards alone are not a PASS
   - injection-policy-gate needs versioned corpus + CI gate with ≥95% deny and 0 model-text privilege grants; filters alone are not a PASS
   - Published aprf-spec.json is an ID/passCondition mirror; full evidenceRequired lives in Check YAML
 

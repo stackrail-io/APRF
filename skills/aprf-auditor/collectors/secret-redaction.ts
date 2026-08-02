@@ -1,8 +1,9 @@
 /**
- * secret-redaction — SEC2-M2 detector executor.
+ * secret-redaction — SEC2-M2 / repo-secret-redaction.
  *
- * Looks for log/trace redaction config and synthetic secret-injection canary
- * tests. Code filters alone ≠ PASS — passCondition requires 100% canary detection.
+ * Discovers log/trace redaction config and synthetic secret-injection canary
+ * tests. Import harness under imports/secret-redaction/ unlocks PASS
+ * (measuredAt ≤90d). Config alone ≠ PASS.
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
@@ -20,9 +21,20 @@ import {
   rel,
   walkFiles,
 } from "./lib/fs.ts";
+import {
+  asBool,
+  measuredAtFresh,
+  mergeAndBool,
+  mergeMinNum,
+  mergeOldestMeasuredAt,
+  mergeOrBool,
+  parseMeasuredAt,
+} from "./lib/import-attest.ts";
 
 const PLUGIN_ID = "secret-redaction";
 const RELATED = ["SEC2-M2"] as const;
+const DETECTOR_ID = "repo-secret-redaction";
+const IMPORT_MAX_AGE_DAYS = 90;
 
 const REDACTION_CONFIG_RE =
   /\b(redact|redaction|mask_secret|masking|sanitize_log|scrub_secret|secret.?filter|SensitiveDataFilter|AttributeProcessor|filter_span|log.?scrub|PII.?filter|credential.?mask)\b/i;
@@ -43,6 +55,7 @@ const SKIP_DIR_HINT =
 export interface SecretRedactionReport {
   schemaVersion: "0.2.0";
   pluginId: typeof PLUGIN_ID;
+  detectorId: typeof DETECTOR_ID;
   relatedCheckIds: string[];
   assessedAt: string;
   redactionConfig: {
@@ -53,19 +66,28 @@ export interface SecretRedactionReport {
     found: boolean;
     refs: string[];
   };
-  importedHarness: {
+  importedResults: {
     found: boolean;
+    productionLoggingOrTracingPipelinesPresent: boolean | null;
+    redactionConfigPresent: boolean | null;
     detectionRatePct: number | null;
     caseCount: number | null;
+    canaryCoversApiKeyBearerAndAwsKeyPatterns: boolean | null;
+    measuredAt: string | null;
     sources: string[];
   };
   summary: {
     redactionConfigPresent: boolean;
     canaryTestPresent: boolean;
     detectionRatePct: number | null;
-    /** true iff config + canary evidence with 100% detection */
+    gateSignalsPresent: boolean;
     sec2M2Satisfied: boolean | null;
-    statusHint: "pass" | "partial" | "fail" | "not_demonstrated";
+    statusHint:
+      | "pass"
+      | "partial"
+      | "fail"
+      | "not_demonstrated"
+      | "not_applicable";
   };
   notes: string[];
 }
@@ -78,19 +100,27 @@ function isSkippable(path: string): boolean {
   return SKIP_DIR_HINT.test(path);
 }
 
+function asNum(v: unknown): number | null {
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
 function looksLikeLogRedaction(text: string, path: string): boolean {
   if (!REDACTION_CONFIG_RE.test(text) && !REDACTION_CONFIG_RE.test(path)) {
     return false;
   }
-  // Skip pure LLM thinking redaction files
-  if (FALSE_POSITIVE_RE.test(text) && !/\b(log|trace|otel|span|logger)\b/i.test(text)) {
+  if (
+    FALSE_POSITIVE_RE.test(text) &&
+    !/\b(log|trace|otel|span|logger)\b/i.test(text)
+  ) {
     return false;
   }
   return (
-    /\b(log|logger|logging|trace|tracing|otel|opentelemetry|span|spanprocessor|exporter)\b/i.test(
+    /\b(log|logger|logging|trace|tracing|otel|opentelemetry|span|spanprocessor|telemetry)\b/i.test(
       text + " " + path,
     ) ||
-    /\b(redact|mask_secret|SensitiveDataFilter|AttributeProcessor)\b/i.test(text)
+    /\b(redact|mask_secret|SensitiveDataFilter|AttributeProcessor)\b/i.test(
+      text,
+    )
   );
 }
 
@@ -150,7 +180,6 @@ function detectCanaryTests(
     const text = readText(f, 300_000);
     if (!text) continue;
     if (CANARY_TEST_RE.test(text) || CANARY_TEST_RE.test(r)) {
-      // Prefer tests that also mention redact/log/trace
       if (
         REDACTION_CONFIG_RE.test(text) ||
         /\b(log|trace|span|otel)\b/i.test(text)
@@ -165,15 +194,16 @@ function detectCanaryTests(
   return { found: refs.length > 0, refs: [...new Set(refs)].slice(0, 16) };
 }
 
-function loadImportedHarness(ctx: CollectorContext): {
-  found: boolean;
-  detectionRatePct: number | null;
-  caseCount: number | null;
-  sources: string[];
-} {
+function loadImported(
+  ctx: CollectorContext,
+): SecretRedactionReport["importedResults"] {
   const sources: string[] = [];
+  let productionLoggingOrTracingPipelinesPresent: boolean | null = null;
+  let redactionConfigPresent: boolean | null = null;
   let detectionRatePct: number | null = null;
   let caseCount: number | null = null;
+  let canaryCoversApiKeyBearerAndAwsKeyPatterns: boolean | null = null;
+  let measuredAt: string | null = null;
 
   for (const file of listImportFiles(ctx.outputDir, PLUGIN_ID)) {
     if (!/\.json$/i.test(file)) continue;
@@ -182,16 +212,36 @@ function loadImportedHarness(ctx: CollectorContext): {
     if (!text) continue;
     try {
       const data = JSON.parse(text) as Record<string, unknown>;
-      sources.push(rel(ctx.outputDir, file));
+      sources.push(basename(file));
+      measuredAt = mergeOldestMeasuredAt(measuredAt, parseMeasuredAt(data));
 
-      if (typeof data.detectionRatePct === "number") {
-        detectionRatePct = data.detectionRatePct;
-      } else if (typeof data.detection_rate === "number") {
-        detectionRatePct =
-          data.detection_rate <= 1
+      productionLoggingOrTracingPipelinesPresent = mergeOrBool(
+        productionLoggingOrTracingPipelinesPresent,
+        asBool(data.productionLoggingOrTracingPipelinesPresent) ??
+          asBool(data.production_logging_or_tracing_pipelines_present) ??
+          asBool(data.loggingOrTracingPresent),
+      );
+      redactionConfigPresent = mergeAndBool(
+        redactionConfigPresent,
+        asBool(data.redactionConfigPresent) ??
+          asBool(data.redaction_config_present) ??
+          asBool(data.configPresent),
+      );
+      canaryCoversApiKeyBearerAndAwsKeyPatterns = mergeAndBool(
+        canaryCoversApiKeyBearerAndAwsKeyPatterns,
+        asBool(data.canaryCoversApiKeyBearerAndAwsKeyPatterns) ??
+          asBool(data.canary_covers_api_key_bearer_and_aws_key_patterns) ??
+          asBool(data.coversApiKeyBearerAwsPatterns),
+      );
+
+      const rate =
+        asNum(data.detectionRatePct) ??
+        (typeof data.detection_rate === "number"
+          ? data.detection_rate <= 1
             ? data.detection_rate * 100
-            : data.detection_rate;
-      }
+            : data.detection_rate
+          : null);
+      detectionRatePct = mergeMinNum(detectionRatePct, rate);
 
       const cases =
         (data.cases as Array<Record<string, unknown>>) ||
@@ -210,18 +260,17 @@ function loadImportedHarness(ctx: CollectorContext): {
             r === "ok"
           );
         }).length;
-        const rate = (detected / cases.length) * 100;
-        detectionRatePct =
-          detectionRatePct === null
-            ? rate
-            : Math.min(detectionRatePct, rate);
+        const computed = (detected / cases.length) * 100;
+        detectionRatePct = mergeMinNum(detectionRatePct, computed);
       }
 
-      if (
-        typeof data.caseCount === "number" &&
-        caseCount === null
-      ) {
-        caseCount = data.caseCount;
+      const importedCaseCount =
+        asNum(data.caseCount) ?? asNum(data.case_count);
+      if (importedCaseCount !== null) {
+        caseCount =
+          caseCount === null
+            ? importedCaseCount
+            : Math.max(caseCount, importedCaseCount);
       }
     } catch {
       /* skip */
@@ -230,8 +279,12 @@ function loadImportedHarness(ctx: CollectorContext): {
 
   return {
     found: sources.length > 0,
+    productionLoggingOrTracingPipelinesPresent,
+    redactionConfigPresent,
     detectionRatePct,
     caseCount,
+    canaryCoversApiKeyBearerAndAwsKeyPatterns,
+    measuredAt,
     sources,
   };
 }
@@ -240,64 +293,143 @@ export function buildSecretRedactionReport(opts: {
   assessedAt: string;
   config: { found: boolean; refs: string[] };
   canary: { found: boolean; refs: string[] };
-  imported: {
-    found: boolean;
-    detectionRatePct: number | null;
-    caseCount: number | null;
-    sources: string[];
-  };
+  imported: SecretRedactionReport["importedResults"];
 }): SecretRedactionReport {
   const notes: string[] = [];
-  const redactionConfigPresent = opts.config.found;
+  const gateSignalsPresent = opts.config.found || opts.canary.found;
+  const surfaceProvedForNaOverride = opts.config.found || opts.canary.found;
+  const redactionConfigPresent =
+    opts.config.found || opts.imported.redactionConfigPresent === true;
   const canaryTestPresent = opts.canary.found || opts.imported.found;
   const detectionRatePct = opts.imported.detectionRatePct;
 
-  if (redactionConfigPresent) {
+  if (!gateSignalsPresent && !opts.imported.found) {
+    notes.push(
+      "No secret-redaction signals — SEC2-M2 remains not demonstrated until redaction config + canary harness evidence or an explicit N/A attest (productionLoggingOrTracingPipelinesPresent=false) is imported.",
+    );
+  }
+  if (opts.config.found) {
     notes.push(
       `Redaction/masking config found (e.g. ${opts.config.refs.slice(0, 3).join(", ")}); config alone does not satisfy SEC2-M2.`,
     );
-  } else {
+  } else if (!redactionConfigPresent) {
     notes.push(
       "No logging/tracing secret-redaction config found (filters, scrubbers, OTel processors).",
     );
   }
-
   if (opts.canary.found) {
-    notes.push(`Canary/redaction tests: ${opts.canary.refs.slice(0, 3).join(", ")}`);
-  } else if (!opts.imported.found) {
     notes.push(
-      "No synthetic secret-injection canary tests found. SEC2-M2 needs a harness that injects API key/bearer/AWS-key patterns and asserts 100% redaction in persisted logs/traces.",
+      `Canary/redaction tests: ${opts.canary.refs.slice(0, 3).join(", ")}; tests alone do not prove measured 100% detection.`,
     );
   }
-
   if (opts.imported.found) {
     notes.push(
-      `Imported harness: ${opts.imported.sources.join(", ")} (detectionRatePct=${detectionRatePct}, cases=${opts.imported.caseCount})`,
+      `Imported: ${opts.imported.sources.join(", ")} (scopePresent=${opts.imported.productionLoggingOrTracingPipelinesPresent}, config=${opts.imported.redactionConfigPresent}, detectionRatePct=${detectionRatePct}, cases=${opts.imported.caseCount}, coversPatterns=${opts.imported.canaryCoversApiKeyBearerAndAwsKeyPatterns}, measuredAt=${opts.imported.measuredAt})`,
+    );
+  } else if (gateSignalsPresent) {
+    notes.push(
+      "Signals alone are PARTIAL — import detectionRatePct=100 + canaryCoversApiKeyBearerAndAwsKeyPatterns=true (measuredAt ≤90d) under imports/secret-redaction/ to PASS. Set productionLoggingOrTracingPipelinesPresent=false for NOT_APPLICABLE.",
     );
   }
+
+  const importFresh = measuredAtFresh(
+    opts.imported.measuredAt,
+    new Date(opts.assessedAt),
+    IMPORT_MAX_AGE_DAYS,
+  );
+  const scopeAbsent =
+    opts.imported.productionLoggingOrTracingPipelinesPresent === false &&
+    !surfaceProvedForNaOverride;
+  const configOk = redactionConfigPresent;
+  const rateOk = detectionRatePct === 100;
+  const coversOk =
+    opts.imported.canaryCoversApiKeyBearerAndAwsKeyPatterns === true;
 
   let statusHint: SecretRedactionReport["summary"]["statusHint"];
   let sec2M2Satisfied: boolean | null = null;
 
-  if (detectionRatePct !== null && detectionRatePct < 100) {
+  const explicitFail =
+    opts.imported.found &&
+    !scopeAbsent &&
+    ((detectionRatePct !== null && detectionRatePct < 100) ||
+      opts.imported.canaryCoversApiKeyBearerAndAwsKeyPatterns === false ||
+      (opts.imported.redactionConfigPresent === false && !opts.config.found));
+
+  if (
+    opts.imported.found &&
+    opts.imported.productionLoggingOrTracingPipelinesPresent === false &&
+    !surfaceProvedForNaOverride
+  ) {
+    statusHint = "not_applicable";
+    sec2M2Satisfied = null;
+    notes.push(
+      "Imported productionLoggingOrTracingPipelinesPresent=false — SEC2-M2 NOT_APPLICABLE.",
+    );
+  } else if (
+    opts.imported.productionLoggingOrTracingPipelinesPresent === false &&
+    surfaceProvedForNaOverride
+  ) {
+    notes.push(
+      "Imported productionLoggingOrTracingPipelinesPresent=false ignored — in-repo redaction/canary signals prove the surface exists.",
+    );
+    if (explicitFail) {
+      statusHint = "fail";
+      sec2M2Satisfied = false;
+      notes.push(
+        "Imported evidence shows detectionRatePct<100, missing pattern coverage, or missing redaction config — SEC2-M2 fail.",
+      );
+    } else if (
+      configOk &&
+      canaryTestPresent &&
+      rateOk &&
+      coversOk &&
+      importFresh &&
+      opts.imported.found
+    ) {
+      statusHint = "pass";
+      sec2M2Satisfied = true;
+    } else {
+      statusHint = "partial";
+      sec2M2Satisfied = false;
+    }
+  } else if (!gateSignalsPresent && !opts.imported.found) {
+    statusHint = "not_demonstrated";
+    sec2M2Satisfied = null;
+  } else if (explicitFail) {
     statusHint = "fail";
     sec2M2Satisfied = false;
     notes.push(
-      `Canary detection rate ${detectionRatePct}% < 100% required by passCondition.`,
+      "Imported evidence shows detectionRatePct<100, missing pattern coverage, or missing redaction config — SEC2-M2 fail.",
     );
   } else if (
-    redactionConfigPresent &&
+    configOk &&
     canaryTestPresent &&
-    detectionRatePct === 100
+    rateOk &&
+    coversOk &&
+    importFresh &&
+    opts.imported.found
   ) {
     statusHint = "pass";
     sec2M2Satisfied = true;
-  } else if (redactionConfigPresent || canaryTestPresent) {
+  } else if (gateSignalsPresent || opts.imported.found) {
     statusHint = "partial";
     sec2M2Satisfied = false;
-    if (canaryTestPresent && detectionRatePct === null) {
+    if (opts.imported.found && !configOk) {
       notes.push(
-        "Canary evidence present but no measured detectionRatePct: 100 — import harness JSON to PASS.",
+        "PASS requires redaction config (in-repo or redactionConfigPresent=true).",
+      );
+    }
+    if (opts.imported.found && !rateOk) {
+      notes.push("Import must show detectionRatePct=100.");
+    }
+    if (opts.imported.found && !coversOk) {
+      notes.push(
+        "Import must show canaryCoversApiKeyBearerAndAwsKeyPatterns=true.",
+      );
+    }
+    if (opts.imported.found && !importFresh) {
+      notes.push(
+        "Import missing fresh measuredAt (≤90 days) — required to unlock SEC2-M2 PASS.",
       );
     }
   } else {
@@ -308,6 +440,7 @@ export function buildSecretRedactionReport(opts: {
   return {
     schemaVersion: "0.2.0",
     pluginId: PLUGIN_ID,
+    detectorId: DETECTOR_ID,
     relatedCheckIds: [...RELATED],
     assessedAt: opts.assessedAt,
     redactionConfig: {
@@ -318,16 +451,12 @@ export function buildSecretRedactionReport(opts: {
       found: opts.canary.found,
       refs: opts.canary.refs,
     },
-    importedHarness: {
-      found: opts.imported.found,
-      detectionRatePct,
-      caseCount: opts.imported.caseCount,
-      sources: opts.imported.sources,
-    },
+    importedResults: opts.imported,
     summary: {
       redactionConfigPresent,
       canaryTestPresent,
       detectionRatePct,
+      gateSignalsPresent,
       sec2M2Satisfied,
       statusHint,
     },
@@ -340,7 +469,7 @@ export const secretRedactionCollector: Collector = {
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
     const config = detectRedactionConfig(ctx.targetPath, ctx.maxFiles ?? 4000);
     const canary = detectCanaryTests(ctx.targetPath, ctx.maxFiles ?? 4000);
-    const imported = loadImportedHarness(ctx);
+    const imported = loadImported(ctx);
 
     const report = buildSecretRedactionReport({
       assessedAt: ctx.assessedAt.toISOString(),
@@ -377,8 +506,9 @@ export const secretRedactionCollector: Collector = {
         signals: [
           "secret-redaction",
           "sec2-m2",
+          DETECTOR_ID,
           ...(report.redactionConfig.found ? ["redaction-config"] : []),
-          ...(report.canaryTests.found || report.importedHarness.found
+          ...(report.canaryTests.found || report.importedResults.found
             ? ["canary-redaction-test"]
             : []),
           ...(report.summary.sec2M2Satisfied

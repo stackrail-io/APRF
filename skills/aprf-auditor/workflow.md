@@ -155,6 +155,46 @@ npm run aprf:secret-redaction -- \
 
 PASS only with redaction config + canary results showing 100% detection of synthetic API/bearer/AWS-key patterns in persisted logs/traces.
 
+**SEC2-M3 (key-rotation-scope):** rotation calendars alone are **supporting** only. Prefer:
+
+```bash
+npm run aprf:key-rotation-scope -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop inventory/coverage JSON under imports/key-rotation-scope/
+```
+
+PASS only with a production key inventory + 100% documented least-privilege scope + 100% within rotation policy (or provider short-lived credentials) + 0 privileged keys in client apps (measuredAt ≤90d).
+
+**SEC2-R1 (precommit-ci-secret-scan):** scanner config alone is **supporting** only. Prefer:
+
+```bash
+npm run aprf:precommit-ci-secret-scan -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop green-scan coverage JSON under imports/precommit-ci-secret-scan/
+```
+
+PASS only with pre-commit + CI secret scanning covering prompts/fixtures, blocking on high-confidence secrets, and a green main-branch or PR-merge scan ≤7 days (measuredAt ≤7d). SEC2-M1 ≤90d content scans do not satisfy this freshness gate.
+
+**SEC2-R2 (credential-egress-controls):** allowlist docs alone are **supporting** only. Prefer:
+
+```bash
+npm run aprf:credential-egress-controls -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop deny-event coverage JSON under imports/credential-egress-controls/
+```
+
+PASS only with egress allowlist/policy for credential-holding runtimes + documented destinations + ≥1 deny event proving enforcement (measuredAt ≤90d). SEC-M4 model-path probes do not substitute.
+
+**SEC2-R3 (dataset-secret-scan-gate):** dataset cards alone are **supporting** only. Prefer:
+
+```bash
+npm run aprf:dataset-secret-scan-gate -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop linked-scan coverage JSON under imports/dataset-secret-scan-gate/
+```
+
+PASS only with a secret/PII scan gate before fine-tune/eval publish + blocking on critical findings + 100% linked scan reports for corpora published in the last 90 days (measuredAt ≤90d). SEC2-R1 code/prompt scanners and DG dataset cards do not substitute.
+
 **SEC-M1 (injection-policy-gate):** content-filter warnings are **supporting** only. Prefer:
 
 ```bash

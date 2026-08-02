@@ -48,6 +48,10 @@ const RUNTIME_PLUGINS = new Set([
   "shared-accelerator-isolation",
   "secrets-hygiene",
   "secret-redaction",
+  "key-rotation-scope",
+  "precommit-ci-secret-scan",
+  "credential-egress-controls",
+  "dataset-secret-scan-gate",
   "injection-policy-gate",
 ]);
 

@@ -816,16 +816,138 @@ checks:
     requiredEvidence:
       - "Secrets manager / sealed-secrets / cloud secret refs in runtime config"
       - "CI secret-scan workflow covering prompts and fixtures"
+      - "privilegedSecretsInReposPromptsOrClientBundles=0 + productionRuntimeSecretsResolvedFromSecretsManagerPct=100 + secretScanCoversPromptsAndFixtures under imports/secrets-hygiene/ (measuredAt ≤90d)"
     searchExtra:
       - "**/.github/workflows/*secret*"
       - "**/gitleaks.toml"
+      - "**/*external*secret*"
+      - "**/*sealed*secret*"
     plugins: [secrets-hygiene]
+    naWhen: "No production runtime secrets"
     evaluation: |
-      FAIL if hardcoded cloud/API keys found in tracked source.
-      PASS if secret scan CI present AND runtime resolves secrets from manager/refs.
-      PARTIAL if only one of scan or manager is present.
-      NOT_DEMONSTRATED if neither found.
-      AUTHN-R1 short-lived agent/tool token inventory alone does not prove secrets-manager wiring.
+      Prefer collectors/secrets-hygiene or imports/secrets-hygiene/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / sec2M1Satisfied === true
+      (secrets-manager wiring + privilegedSecretsInReposPromptsOrClientBundles=0 +
+      productionRuntimeSecretsResolvedFromSecretsManagerPct=100 +
+      secretScanCoversPromptsAndFixtures=true + measuredAt ≤90d).
+      NOT_APPLICABLE if productionRuntimeSecretsPresent=false and no in-repo manager wiring.
+      PARTIAL if manager/scan-config signals without complete import (CI config alone ≠ PASS).
+      FAIL if heuristic embeds found, privileged findings >0, resolvedPct<100, or covers/manager attested false.
+      AUTHN-R1 and SEC2-M2 do not substitute. CI ${{ secrets.* }} alone is not a secrets manager.
+  SEC2-M2:
+    requiredEvidence:
+      - "Redaction/masking config for logging and/or tracing pipelines"
+      - "Synthetic secret-injection canary harness covering API key/bearer/AWS-key patterns"
+      - "detectionRatePct=100 + canaryCoversApiKeyBearerAndAwsKeyPatterns + measuredAt≤90d under imports/secret-redaction/"
+    searchExtra:
+      - "**/*redact*"
+      - "**/*scrub*"
+      - "**/*mask*secret*"
+      - "**/*otel*"
+      - "**/*sensitive*data*"
+    plugins: [secret-redaction, otel, repo-filesystem]
+    naWhen: "No production logging or tracing pipelines"
+    evaluation: |
+      Prefer collectors/secret-redaction or imports/secret-redaction/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / sec2M2Satisfied === true
+      (redaction config + detectionRatePct=100 + canaryCoversApiKeyBearerAndAwsKeyPatterns=true + measuredAt ≤90d).
+      NOT_APPLICABLE if productionLoggingOrTracingPipelinesPresent=false and no in-repo redaction/canary signals.
+      PARTIAL if config/canary signals without complete import (config alone ≠ PASS).
+      FAIL if detectionRatePct<100, coversPatterns=false, or redactionConfigPresent=false without in-repo config.
+      SEC2-M1 and OBS AI-trace redaction do not substitute. LLM redacted_thinking is not log redaction.
+  SEC2-M3:
+    requiredEvidence:
+      - "Inventory of production provider/cloud keys with least-privilege scope"
+      - "Rotation dates or provider-managed short-lived credential evidence within policy"
+      - "privilegedProviderOrCloudKeysInClientApps=0 + productionKeysWithDocumentedLeastPrivilegeScopePct=100 + productionKeysWithinRotationPolicyPct=100 under imports/key-rotation-scope/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*key*inventory*"
+      - "**/*rotation*"
+      - "**/*least*privilege*"
+      - "**/*client*bundle*"
+      - "**/NEXT_PUBLIC*"
+      - "**/VITE_*"
+    plugins: [key-rotation-scope, secrets-hygiene, repo-filesystem]
+    naWhen: "No production provider/cloud keys"
+    evaluation: |
+      Prefer collectors/key-rotation-scope or imports/key-rotation-scope/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / sec2M3Satisfied === true
+      (key inventory in-repo or productionProviderOrCloudKeysPresent=true +
+      privilegedProviderOrCloudKeysInClientApps=0 +
+      productionKeysWithDocumentedLeastPrivilegeScopePct=100 +
+      productionKeysWithinRotationPolicyPct=100 + measuredAt ≤90d).
+      NOT_APPLICABLE if productionProviderOrCloudKeysPresent=false and no in-repo key inventory
+      (rotation/scope docs alone do not block N/A).
+      PARTIAL if inventory/rotation/scope signals without complete import (rotation docs alone ≠ PASS).
+      FAIL if privileged client keys >0, scopedPct<100, or rotationPct<100.
+      SEC2-M1, SEC2-M2, and AUTHN-R1 do not substitute.
+  SEC2-R1:
+    requiredEvidence:
+      - "Pre-commit secret-scan hook/config covering prompts and fixtures"
+      - "CI secret-scan workflow covering prompts and fixtures"
+      - "secretScanCoversPromptsAndFixtures + blocksOnHighConfidenceSecrets + lastGreenMainBranchOrPrMergeScanWithin7Days under imports/precommit-ci-secret-scan/ (measuredAt ≤7d)"
+    searchExtra:
+      - "**/.pre-commit-config.y*ml"
+      - "**/.github/workflows/**"
+      - "**/gitleaks*"
+      - "**/trufflehog*"
+      - "**/detect-secrets*"
+    plugins: [precommit-ci-secret-scan, github-actions, secrets-hygiene, repo-filesystem]
+    naWhen: "No application code, prompts, or fixtures"
+    evaluation: |
+      Prefer collectors/precommit-ci-secret-scan or imports/precommit-ci-secret-scan/*.json with measuredAt ≤7d.
+      PASS if statusHint=pass / sec2R1Satisfied === true
+      (pre-commit + CI secret-scan configured + secretScanCoversPromptsAndFixtures=true +
+      blocksOnHighConfidenceSecrets=true + lastGreenMainBranchOrPrMergeScanWithin7Days=true +
+      measuredAt ≤7d).
+      NOT_APPLICABLE if applicationCodePromptsOrFixturesPresent=false and no in-repo pre-commit/CI secret-scan config.
+      PARTIAL if pre-commit/CI signals without complete import (config alone ≠ PASS).
+      FAIL if covers=false, blocks=false, greenWithin7d=false, or pre-commit/CI attested absent without in-repo config.
+      SEC2-M1, DX-M2, and PRM-R2 do not substitute. ≤90d content scans do not satisfy ≤7d green-scan freshness.
+  SEC2-R2:
+    requiredEvidence:
+      - "Egress allowlist/policy config for runtimes that hold credentials"
+      - "Documented allowed destinations for those credentials"
+      - "credentialEgressDestinationsDocumented + denyEventCountProvingEnforcementInLast90Days≥1 under imports/credential-egress-controls/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*egress*"
+      - "**/*network*policy*"
+      - "**/*allowlist*"
+      - "**/*destination*"
+      - "**/NetworkPolicy*"
+    plugins: [credential-egress-controls, model-path-egress-boundary, iac-cloud, repo-filesystem]
+    naWhen: "No production runtimes hold credentials"
+    evaluation: |
+      Prefer collectors/credential-egress-controls or imports/credential-egress-controls/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / sec2R2Satisfied === true
+      (egress allowlist/policy + credentialEgressDestinationsDocumented=true +
+      denyEventCountProvingEnforcementInLast90Days≥1 + measuredAt ≤90d).
+      NOT_APPLICABLE if runtimesHoldingCredentialsPresent=false and no in-repo egress allowlist/policy.
+      PARTIAL if allowlist/destination/deny signals without complete import (allowlist alone ≠ PASS).
+      FAIL if destinations=false, denyCount=0, or allowlist attested absent without in-repo policy.
+      SEC-M4, INF-M3, and SEC2-M1 do not substitute.
+  SEC2-R3:
+    requiredEvidence:
+      - "Dataset secret/PII scan gate config before fine-tune or eval corpus publish"
+      - "Proof publish is blocked when critical findings are open"
+      - "publishBlockedWhenCriticalFindingsOpen + fineTuneOrEvalCorporaPublishedInLast90DaysWithLinkedScanReportPct=100 under imports/dataset-secret-scan-gate/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*dataset*scan*"
+      - "**/*corpus*scan*"
+      - "**/*fine*tune*"
+      - "**/*eval*corpus*"
+      - "**/*pii*scan*"
+    plugins: [dataset-secret-scan-gate, dataset-provenance-governance, dataset-cards-registry, secrets-hygiene, repo-filesystem]
+    naWhen: "No fine-tune or eval corpus publish"
+    evaluation: |
+      Prefer collectors/dataset-secret-scan-gate or imports/dataset-secret-scan-gate/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / sec2R3Satisfied === true
+      (dataset secret/PII scan gate + publishBlockedWhenCriticalFindingsOpen=true +
+      fineTuneOrEvalCorporaPublishedInLast90DaysWithLinkedScanReportPct=100 + measuredAt ≤90d).
+      NOT_APPLICABLE if fineTuneOrEvalCorpusPublishPresent=false and no in-repo scan gate.
+      PARTIAL if gate/blocking/report signals without complete import (gate config alone ≠ PASS).
+      FAIL if blocking=false, linkedPct<100, or gate attested absent without in-repo config.
+      SEC2-R1, SEC2-M1, DG-M2, and DG-R3 do not substitute.
   PRM-M1:
     requiredEvidence:
       - "Prompt registry with immutable version IDs on production prompts"
@@ -2933,8 +3055,8 @@ globalFailSignals:
   - id: plaintext-cloud-key
     category: secrets
     pattern: 'AKIA[0-9A-Z]{16}'
-    relatedChecks: [SEC2-M1, SEC2-M2]
-    plugins: [secrets-hygiene, secret-redaction]
+    relatedChecks: [SEC2-M1, SEC2-M2, SEC2-M3]
+    plugins: [secrets-hygiene, secret-redaction, key-rotation-scope]
   - id: openai-sk-prefix
     category: secrets
     pattern: 'sk-[a-zA-Z0-9]{20,}'

@@ -341,6 +341,46 @@ npm run aprf:secret-redaction -- \
 
 Detects redaction config and canary tests; PASS needs measured 100% detection. Writes `imports/secret-redaction/secret-redaction-report.json`.
 
+### SEC2-M3 — Provider/cloud key rotation + scope
+
+```bash
+npm run aprf:key-rotation-scope -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects key inventory, rotation/scope, and client-key risk signals; PASS needs inventory + 0 privileged client keys + 100% scope + 100% rotation (measuredAt ≤90d). Writes `imports/key-rotation-scope/key-rotation-scope-report.json`.
+
+### SEC2-R1 — Pre-commit + CI secret scanning
+
+```bash
+npm run aprf:precommit-ci-secret-scan -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects pre-commit and CI secret-scan configs; PASS needs both + prompt/fixture coverage + blocking + ≤7d green main/PR-merge scan. Writes `imports/precommit-ci-secret-scan/precommit-ci-secret-scan-report.json`.
+
+### SEC2-R2 — Credential egress controls
+
+```bash
+npm run aprf:credential-egress-controls -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects egress allowlist/policy for credential-holding runtimes; PASS needs allowlist + documented destinations + ≥1 deny event (measuredAt ≤90d). Writes `imports/credential-egress-controls/credential-egress-controls-report.json`.
+
+### SEC2-R3 — Dataset secret/PII scan gate
+
+```bash
+npm run aprf:dataset-secret-scan-gate -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects dataset secret/PII scan gates before fine-tune/eval publish; PASS needs gate + blocking + 100% linked reports (measuredAt ≤90d). Writes `imports/dataset-secret-scan-gate/dataset-secret-scan-gate-report.json`.
+
 ### SEC-M1 — Injection / privilege-escalation policy gate
 
 ```bash
