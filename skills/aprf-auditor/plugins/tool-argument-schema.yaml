@@ -1,0 +1,30 @@
+id: tool-argument-schema
+title: Tool argument schema validation (TOL-M4)
+version: "0.2.0"
+executor: collectors/tool-argument-schema.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds:
+  - repo-tool-argument-schema
+inputs:
+  - "Target repo (tool inputSchema/JSON Schema, contract tests)"
+  - "Optional coverage: aprf-assessment/imports/tool-argument-schema/*.json"
+collect:
+  - "Detect argument-schema and contract-test signals"
+  - "Ingest imported schema/rejection coverage; write tool-argument-schema-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/tool-argument-schema/*"
+  signals:
+    - tool-argument-schema
+    - tol-m4
+    - repo-tool-argument-schema
+mapsToChecks: [TOL-M4]
+whenUnavailable: >
+  Signals alone are PARTIAL. TOL-M4 PASS needs toolsWithDeclaredArgumentSchemaPct=100
+  and invalidArgumentFixturesRejectedPct=100, measuredAt ≤90 days under
+  imports/tool-argument-schema/. Set productionToolsPresent=false for
+  NOT_APPLICABLE only when no in-repo schema/contract signals.
+live:
+  required: false
+  note: Offline discovery + optional imported schema coverage.

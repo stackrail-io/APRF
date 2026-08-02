@@ -1,57 +1,82 @@
 id: "TOL-M4"
 category: "tool-safety"
 title: "Tool arguments must be schema-validated and sanitized before execution"
-description: "Tool arguments shall be schema-validated and sanitized before execution"
-whyItMatters: "Tool arguments shall be schema-validated and sanitized before execution Failing this
-  leaves a production gap against: 100% of production tools have a declared argument schema;
-  invalid/malicious argument fixtures are rejected at 100% before side effects"
+description: >
+  Production tools shall declare argument schemas and reject invalid or
+  malicious payloads before side effects—proven by schema coverage for 100%
+  of production tools plus contract tests, not by prompt-only “follow the
+  schema” instructions.
+whyItMatters: >
+  Unvalidated tool arguments enable path traversal, command injection, and
+  privilege escalation through tool parameters even when the tool name is
+  allowlisted. Distinct from SEC-M2 (model-output schema/policy before side
+  effects), TOL-M1 (authz decision), and TOL-M2 (tool-name allowlists).
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "100% of production tools have a declared argument schema; invalid/malicious argument
-  fixtures are rejected at 100% before side effects"
+passCondition: >
+  100% of production tools have a declared argument schema; invalid/malicious
+  argument fixtures are rejected at 100% before side effects (measuredAt ≤90
+  days). If no production tools exist, score NOT_APPLICABLE.
 evidenceRequired:
-  - "JSON Schema (or equivalent) per tool + contract tests for invalid payloads"
+  - "JSON Schema (or equivalent) per production tool"
+  - "Contract tests for invalid/malicious argument fixtures"
+  - "Attest or results: toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 (measuredAt ≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-tool-argument-schema"
+      params:
+        hint: >
+          Discover tool argument schemas and contract tests; ingest coverage
+          under imports/tool-argument-schema/; require
+          toolsWithDeclaredArgumentSchemaPct=100 +
+          invalidArgumentFixturesRejectedPct=100 + measuredAt ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "JSON Schema (or equivalent) per tool + contract tests for invalid payloads"
-manualVerification: "For this Check (Tool arguments must be schema-validated and sanitized before
-  execution): inspect current evidence for [JSON Schema (or equivalent) per tool + contract tests
-  for invalid payloads] and confirm the pass condition holds — 100% of production tools have a
-  declared argument schema; invalid/malicious argument fixtures are rejected at 100% before side
-  effects"
-falsePositiveGuidance: "(Tool Safety): re-verify against a current artifact for this specific Check
-  , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest 100% schema coverage and
+          100% rejection of invalid/malicious fixtures before side effects
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production tools exist. If none, score NOT_APPLICABLE. 2) Confirm
+  every production tool has a declared argument schema (JSON Schema, Zod,
+  Pydantic, protobuf, or equivalent). 3) Review contract tests: invalid/
+  malicious fixtures are rejected at 100% before side effects. 4) PASS only if
+  schema coverage + rejection hold with measuredAt ≤90 days. SEC-M2
+  model-output gates alone do not prove tool-argument validation. TOL-M2
+  allowlists alone do not prove argument schemas.
+falsePositiveGuidance: >
+  Do not pass prompt-only schema instructions. Do not pass OpenAPI for the
+  customer API as tool-argument schemas. Do not pass coverage under 100% of
+  production tools. Do not score SEC-M2, TOL-M1, or TOL-M2 as substitutes.
+  Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Tool arguments must be schema-validated and sanitized before
-    execution"
-  - "Retain evidence artifacts required by this Check, starting with: JSON Schema (or equivalent)
-    per tool + contract tests for invalid payloads"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Declare argument schemas for every production tool"
+  - "Reject invalid/malicious fixtures before side effects in contract tests at 100%"
+  - "Retain coverage under imports/tool-argument-schema/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
-  - title: "Model Context Protocol security considerations"
+  - title: "Model Context Protocol — security considerations"
     url: "https://modelcontextprotocol.io/"
-  - title: "OWASP LLM — Excessive Agency"
+  - title: "OWASP LLM — Insecure Output Handling / Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "JSON Schema"
+    url: "https://json-schema.org/"
 relatedRules:
   - "TOL-M1"
   - "TOL-M2"
   - "TOL-M3"
-  - "TOL-M5"
-  - "TOL-R1"
+  - "SEC-M2"
+  - "SEC-M1"
 tags:
   - "tool-safety"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "argument-schema"
+  - "contract-tests"
 applicability:
-  technologies:
-    - "mcp"
-    - "a2a"
-    - "openapi"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

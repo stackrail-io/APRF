@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:5147e1790b6042257f68cb693bf3628e550552ef0e4cd2e57c80298d74fc3dba",
+  "generatedAt": "sha256:93856df984ce869fdd259aaa93f1485641ec017f00203fd7f9fe0f8d71454934",
   "ruleCount": 178,
   "domains": [
     {
@@ -12101,7 +12101,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "category": "supply-chain",
       "title": "Production model and container artifacts must have verified provenance/integrity",
       "description": "Production model and container artifacts shall have verified provenance/integrity—proven by signature, attestation, or digest verification with unverified pulls blocked, not by digest pins in Dockerfiles alone.\n",
-      "whyItMatters": "Unsigned or unattested model weights and container images let supply-chain tampering reach production silently. Cosign/Notation signatures, SLSA/OCI provenance, and model checksum validation—with measured 100% verified pulls and blocked unverified pulls—make integrity enforceable. Distinct from SCI-M2 (MCP/tool inventory pins), SCI-M3 (dependency/update hygiene), and MOD-R1 (model license/provenance review—policy review, not pull-time verify/block).\n",
+      "whyItMatters": "Unsigned or unattested model weights and container images let supply-chain tampering reach production silently. Cosign/Notation signatures, SLSA/OCI provenance, and model checksum validation—with measured 100% verified pulls and blocked unverified pulls—make integrity enforceable. Distinct from SCI-M2 (external AI tool / MCP / plugin inventory pins + review), SCI-M3 (vuln scan gates on production AI artifacts/deps/runtimes), and MOD-R3 (model license/provenance review—policy review, not pull-time verify/block).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
@@ -12170,8 +12170,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm production pulls model weights and/or container images. If none, score NOT_APPLICABLE. 2) Locate verification config (cosign, Notation, SLSA attestation, OCI provenance, model checksum, or equivalent). 3) Review verification logs for the sample window: 100% of production pulls verify against expected digest or signature. 4) Confirm unverified pulls are blocked (admission/registry/deploy gate). 5) PASS only if config + 100% verified + block hold with measuredAt ≤90 days. Dockerfile digest pins alone do not prove runtime verification. SCI-M2 MCP pins alone do not prove artifact signatures. MOD-R1 license reviews alone do not prove pull-time verify/block.\n",
-      "falsePositiveGuidance": "Do not pass digest pins without verification logs and a block on unverified pulls. Do not pass signing in CI without admit/deploy verification. Do not pass SBOM generation alone as provenance verification. Do not score SCI-M2, SCI-M3, or MOD-R1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
+      "manualVerification": "1) Confirm production pulls model weights and/or container images. If none, score NOT_APPLICABLE. 2) Locate verification config (cosign, Notation, SLSA attestation, OCI provenance, model checksum, or equivalent). 3) Review verification logs for the sample window: 100% of production pulls verify against expected digest or signature. 4) Confirm unverified pulls are blocked (admission/registry/deploy gate). 5) PASS only if config + 100% verified + block hold with measuredAt ≤90 days. Dockerfile digest pins alone do not prove runtime verification. SCI-M2 AI-tool/MCP/plugin inventory pins alone do not prove artifact signatures. MOD-R3 license reviews alone do not prove pull-time verify/block.\n",
+      "falsePositiveGuidance": "Do not pass digest pins without verification logs and a block on unverified pulls. Do not pass signing in CI without admit/deploy verification. Do not pass SBOM generation alone as provenance verification. Do not score SCI-M2, SCI-M3, or MOD-R3 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Sign model/container artifacts (cosign, Notation, or equivalent) and verify at pull/admit",
         "Attach and verify SLSA/OCI provenance; validate model checksums before load",
@@ -12206,7 +12206,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SCI-M4",
         "SCI-R1",
         "SCI-R2",
-        "MOD-R1",
+        "MOD-R3",
         "INF-M2"
       ],
       "tags": [
@@ -12229,44 +12229,55 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SCI-M2",
       "category": "supply-chain",
-      "title": "MCP servers and high-impact tools must be inventoried, version-pinned, and reviewed before production use",
-      "description": "MCP servers and high-impact tools shall be inventoried, version-pinned, and reviewed before production use",
-      "whyItMatters": "MCP servers and high-impact tools shall be inventoried, version-pinned, and reviewed before production use Failing this leaves a production gap against: 100% of production MCP servers and high-impact tools have pin + owner + review date ≤ 180 days; 0 unpinned “latest” entries in production",
+      "title": "External AI tools, MCP servers, agent plugins, and high-impact integrations must be inventoried, version-pinned, and reviewed before production use",
+      "description": "Production external AI tools, MCP servers, agent plugins, and high-impact integrations shall be inventoried with version pins, named owners, and recurring review—proven by an inventory covering those surfaces with 0 unpinned “latest”/floating entries, not by CI Action SHA pins or package lockfiles alone.\n",
+      "whyItMatters": "Unpinned MCP servers, agent plugins, and third-party AI integrations can rug-pull tool definitions, expand privilege, or ship malicious code without a deploy. An inventory with version pin, owner, and review date ≤180 days makes the AI tool supply chain reviewable. Distinct from SCI-M1 (model/ container provenance verify+block), SCI-M3 (vuln scan gates on production AI artifacts including model-serving runtimes), TOL-M2 (per-agent tool allowlists), TOL-M5 (signed MCP tool catalogs / reject unsigned), and AUTHN-M2 (MCP/AI S2S machine-identity inventory—auth, not version/review hygiene).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production MCP servers and high-impact tools have pin + owner + review date ≤ 180 days; 0 unpinned “latest” entries in production",
+      "passCondition": "100% of production external AI tools, MCP servers, agent plugins, and high-impact integrations have version pin + owner + review date ≤180 days; 0 unpinned “latest” (or floating) entries in production (inventory evidence measuredAt ≤90 days). If none of those surfaces exist in production, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "MCP/tool inventory with version pins, owners, and review dates"
+        "Inventory of production external AI tools, MCP servers, agent plugins, and high-impact integrations",
+        "Version pins (commit SHA, package version, image digest, or equivalent—not latest/floating tags)",
+        "Named owner and review date ≤180 days per inventory entry",
+        "Attest or scan showing 0 unpinned latest/floating entries in production (measuredAt ≤90 days)"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
-            "id": "mcp-package-pinned",
-            "params": {}
+            "id": "repo-ai-external-tool-inventory",
+            "params": {
+              "hint": "Discover MCP server configs, agent plugin/tool registries, and high-impact AI integration pins; ingest coverage under imports/ai-external-tool-inventory/; require inventory (or present=true), pin+owner+reviewDate≤180d for 100% of entries, unpinnedLatestOrFloatingEntries=0, measuredAt ≤90 days.\n"
+            }
           },
           {
-            "id": "cicd-actions-sha-pinned",
-            "params": {}
+            "id": "mcp-package-pinned",
+            "params": {
+              "hint": "Supporting signal — MCP server/package version pins in config or lockfiles; alone does not prove full inventory + owner + review.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "MCP/tool inventory with version pins, owners, and review dates"
+              "hint": "If automation cannot prove coverage, attest a production inventory of external AI tools, MCP servers, agent plugins, and high-impact integrations with pin + owner + review ≤180 days and 0 unpinned latest/floating entries (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (MCP servers and high-impact tools must be inventoried, version-pinned, and reviewed before production use): inspect current evidence for [MCP/tool inventory with version pins, owners, and review dates] and confirm the pass condition holds — 100% of production MCP servers and high-impact tools have pin + owner + review date ≤ 180 days; 0 unpinned “latest” entries in production",
-      "falsePositiveGuidance": "(Supply Chain Integrity): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm production uses external AI tools, MCP servers, agent plugins, and/or high-impact integrations. If none, score NOT_APPLICABLE. 2) Open the inventory covering those surfaces (required—do not PASS from CI Action SHA pins or dependency lockfiles alone). 3) Confirm each entry has a version pin (commit/package/digest—not latest/floating), a named owner, and a review date ≤180 days. 4) Confirm 0 unpinned latest/floating entries in production (measuredAt ≤90 days). 5) PASS only if inventory + 100% pin/ owner/review + 0 floating hold. TOL-M2 allowlists alone do not prove version pins or review dates. TOL-M5 signed catalogs alone do not prove owner/review inventory coverage. SCI-M1 model/container verify+block does not substitute for AI-tool inventory hygiene. AUTHN-M2 S2S identity inventory alone does not prove pins or review cadence.\n",
+      "falsePositiveGuidance": "Do not pass GitHub Actions SHA pins as the AI-tool inventory. Do not pass npm/pip lockfiles without MCP/plugin/integration entries in scope. Do not pass an inventory missing owners or with review dates older than 180 days. Do not pass “latest” tags with a waiver note instead of a pin. Do not score SCI-M1, SCI-M3, TOL-M2, TOL-M5, or AUTHN-M2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: MCP servers and high-impact tools must be inventoried, version-pinned, and reviewed before production use",
-        "Retain evidence artifacts required by this Check, starting with: MCP/tool inventory with version pins, owners, and review dates",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish an inventory of production external AI tools, MCP servers, agent plugins, and high-impact integrations",
+        "Pin each entry (commit SHA, package version, or digest); remove latest/floating tags from production",
+        "Assign owners and re-review on a ≤180-day cadence; retain coverage under imports/ai-external-tool-inventory/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
+        {
+          "title": "Model Context Protocol — security considerations",
+          "url": "https://modelcontextprotocol.io/"
+        },
         {
           "title": "SLSA — Supply-chain Levels for Software Artifacts",
           "url": "https://slsa.dev/"
@@ -12278,6 +12289,10 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "OWASP LLM — Supply Chain Vulnerabilities",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -12285,20 +12300,23 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SCI-M3",
         "SCI-M4",
         "SCI-R1",
-        "SCI-R2"
+        "SCI-R2",
+        "TOL-M2",
+        "TOL-M5",
+        "AUTHN-M2"
       ],
       "tags": [
         "supply-chain",
         "mandatory",
-        "hybrid"
+        "hybrid",
+        "mcp",
+        "tools",
+        "plugins",
+        "inventory",
+        "version-pin"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "cicd",
-          "docker"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -12308,42 +12326,55 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SCI-M3",
       "category": "supply-chain",
-      "title": "Dependency and image vulnerability scanning gates must apply to AI runtimes",
-      "description": "Dependency and image vulnerability scanning gates shall apply to AI runtimes",
-      "whyItMatters": "Dependency and image vulnerability scanning gates shall apply to AI runtimes Failing this leaves a production gap against: 100% of AI runtime image builds in the last 30 days ran vulnerability scan; critical CVEs (CVSS ≥ 9.0 or org policy equivalent) block promote unless waived with expiry ≤ 14 days",
+      "title": "Dependency, container image, and AI runtime vulnerability scanning gates must apply before production deployment",
+      "description": "Production AI artifacts—including language dependencies, OCI/container images, serverless packages, and model-serving runtimes—shall be scanned for vulnerabilities before promotion, with organization-defined critical findings blocking deploy unless waived with owner and expiry—not by scanning app deps while skipping inference servers or CUDA stacks.\n",
+      "whyItMatters": "Unscanned AI runtimes and model-serving stacks (vLLM, TGI, Triton, Ollama, llama.cpp, TensorRT, CUDA libraries, and language deps) ship known exploits into production. Org-policy critical gates (CVSS, EPSS, CISA KEV, reachability, exploit maturity, or equivalent)—with retained scan results and no skipped scans—make promotion hygiene measurable. Distinct from SCI-M1 (provenance/signature verify+block), SCI-M2 (AI-tool/MCP/plugin inventory pins + review), SCI-M4 (Level-5 deploy-path policy blocking unsigned/unapproved/revoked artifacts), and SCI-R1 (recommended verify-on-deploy for lower maturity).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of AI runtime image builds in the last 30 days ran vulnerability scan; critical CVEs (CVSS ≥ 9.0 or org policy equivalent) block promote unless waived with expiry ≤ 14 days",
+      "passCondition": "100% of production AI artifacts in the sample window (language dependencies, OCI/container images, serverless packages, and model-serving runtimes including inference servers and accelerator libraries in scope) were vulnerability-scanned with no skipped scans; findings that are critical per organizational policy block promotion unless waived with named owner and expiry ≤14 days; scan results are retained (evidence measuredAt ≤90 days). If no production AI artifacts are built or deployed, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Scanner config + CI gate reports for AI runtime images/deps"
+        "Vulnerability scanner config covering production AI artifacts (deps, containers/serverless packages, model-serving runtimes)",
+        "CI/CD or promote-path gate that blocks critical findings per org policy (CVSS, EPSS, CISA KEV, reachability, exploit maturity, or equivalent)",
+        "Retained scan results for the sample window showing 100% coverage and 0 skipped scans (measuredAt ≤90 days)",
+        "Waiver records for any critical exceptions (owner + expiry ≤14 days), or proof none were granted"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
+            "id": "repo-ai-vuln-scan-gate",
+            "params": {
+              "hint": "Discover vuln-scan and promote-gate config for AI deps, images, serverless packages, and model-serving runtimes (vLLM, TGI, Triton, Ollama, llama.cpp, TensorRT, CUDA, etc.); ingest coverage under imports/ai-vuln-scan-gate/; require scan coverage 100%, criticalFindingsBlockPromotion=true (org policy), skippedScans=0, retainedResults=true, measuredAt ≤90 days.\n"
+            }
+          },
+          {
             "id": "repo-vuln-scan-config",
-            "params": {}
+            "params": {
+              "hint": "Supporting signal — dependency/image vuln scanner config in repo or CI; alone does not prove 100% AI-artifact coverage, model-serving runtime inclusion, or blocked critical promotes.\n"
+            }
           },
           {
             "id": "repo-dependency-update-config",
-            "params": {}
+            "params": {
+              "hint": "Supporting signal — Dependabot/Renovate/equivalent update automation; alone does not prove vuln scan gates or critical-block policy.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Scanner config + CI gate reports for AI runtime images/deps"
+              "hint": "If automation cannot prove coverage, attest 100% scan coverage of production AI artifacts (deps, containers/serverless, model-serving runtimes), org-policy critical block on promote, retained results, 0 skipped scans, and waiver owner+expiry ≤14 days where used (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Dependency and image vulnerability scanning gates must apply to AI runtimes): inspect current evidence for [Scanner config + CI gate reports for AI runtime images/deps] and confirm the pass condition holds — 100% of AI runtime image builds in the last 30 days ran vulnerability scan; critical CVEs (CVSS ≥ 9.0 or org policy equivalent) block promote unless waived with expiry ≤ 14 days",
-      "falsePositiveGuidance": "(Supply Chain Integrity): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm production AI artifacts exist (language deps, OCI/container images, serverless packages, and/or model-serving runtimes such as vLLM, TGI, Triton, Ollama, llama.cpp, TensorRT, CUDA stacks). If none, score NOT_APPLICABLE. 2) Confirm scanner config covers those artifacts—not only app deps while omitting inference servers. 3) Confirm the promote path blocks findings that are critical per organizational policy (document the policy: CVSS and/or EPSS, CISA KEV, reachability, exploit maturity, or equivalent—do not require a fixed CVSS ≥9.0). 4) Review retained scan results for the sample window: 100% coverage, 0 skipped scans; any critical waivers have owner and expiry ≤14 days (measuredAt ≤90 days). 5) PASS only if coverage + critical-block + retention + no skips hold. SCI-M1 signature verify alone does not prove vuln scanning. SCI-M2 inventory pins alone do not prove scan gates. SCI-M4 deploy-path unsigned/unapproved blocks alone do not prove CVE/policy gates.\n",
+      "falsePositiveGuidance": "Do not pass scanners that cover only application npm/pip deps while omitting model-serving runtimes or CUDA/inference images. Do not pass Dependabot/Renovate without a blocking promote gate. Do not require CVSS ≥9.0 when org policy uses EPSS/KEV/reachability instead—and do not pass “informational” scans with no block. Do not pass skipped or optional scan jobs as 100% coverage. Do not score SCI-M1, SCI-M2, SCI-M4, or SCI-R1 as substitutes. Named exceptions need owner and expiry ≤90 days (critical promote waivers ≤14 days).\n",
       "recommendedFixes": [
-        "Implement and operationalize: Dependency and image vulnerability scanning gates must apply to AI runtimes",
-        "Retain evidence artifacts required by this Check, starting with: Scanner config + CI gate reports for AI runtime images/deps",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Enable vulnerability scanning for production AI artifacts: language deps, containers/serverless packages, and model-serving runtimes (vLLM/TGI/Triton/Ollama/llama.cpp/TensorRT/CUDA as applicable)",
+        "Block promotion on org-policy critical findings; document the policy (CVSS/EPSS/KEV/reachability/exploit maturity)",
+        "Retain scan results; forbid skipped scans; time-box critical waivers (owner + expiry ≤14 days) under imports/ai-vuln-scan-gate/ (measuredAt ≤90 days)",
+        "Time-box other gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
@@ -12357,6 +12388,14 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "OWASP LLM — Supply Chain Vulnerabilities",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        },
+        {
+          "title": "CISA Known Exploited Vulnerabilities Catalog",
+          "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -12364,20 +12403,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SCI-M2",
         "SCI-M4",
         "SCI-R1",
-        "SCI-R2"
+        "SCI-R2",
+        "INF-M2"
       ],
       "tags": [
         "supply-chain",
         "mandatory",
-        "automated"
+        "hybrid",
+        "vulnerability-scan",
+        "dependencies",
+        "containers",
+        "model-serving"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "cicd",
-          "docker"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -12387,39 +12426,52 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SCI-M4",
       "category": "supply-chain",
-      "title": "Admission controls must block unsigned or unapproved AI artifacts",
-      "description": "Admission controls shall block unsigned or unapproved AI artifacts",
-      "whyItMatters": "Admission controls shall block unsigned or unapproved AI artifacts Failing this leaves a production gap against: PASS if admission is enforced in production deploy paths and the latest probe shows unsigned artifacts are blocked",
+      "title": "Production deployment controls must block unsigned or unapproved AI artifacts",
+      "description": "Production deployment policy shall enforce blocking of unsigned, unapproved, and revoked-signature AI artifacts on the deploy path—proven by policy plus deny/verification logs, not by signing in CI or digest pins alone. Applies via Kubernetes admission, pipeline gates, cloud deploy policies, artifact registry rules, or AI-platform promote gates—not Kubernetes-only.\n",
+      "whyItMatters": "Signing and provenance (SCI-M1) without deploy-time enforcement still allow an operator or broken pipeline to ship an unsigned or unapproved model/ container. Deploy-path policy (Gatekeeper, Kyverno, Sigstore Policy Controller, Ratify, OPA, cloud deploy policies, registry admission, Vertex/ SageMaker/Foundry promote gates, or equivalent) with measured deny logs makes enforcement real. This is Level-5 / advanced maturity—not a Tier 2 baseline. Distinct from SCI-M1 (provenance/signature verification capability and measured verify+block on pulls), SCI-M3 (vuln scan promote gates), and SCI-R1 (recommended verify-on-deploy for lower maturity).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "PASS if admission is enforced in production deploy paths and the latest probe shows unsigned artifacts are blocked",
+      "passCondition": "Production deployment policy is enforced on AI artifact deploy/promote paths; unsigned artifacts are blocked; unapproved artifacts are blocked; revoked or untrusted signatures are rejected; deployment or admission deny/ verification logs prove enforcement (measuredAt ≤90 days). If no production AI artifacts are deployed (models/containers/serverless AI packages), score NOT_APPLICABLE. Required from capability Level 5 (advanced mandatory)—not a Tier 2/Core baseline.\n",
       "evidenceRequired": [
-        "Admission policy config + deny logs for unsigned/unapproved artifacts"
+        "Deployment policy configuration (admission controller, pipeline gate, cloud deploy policy, registry rule, or AI-platform promote gate)",
+        "Deny or verification logs showing unsigned artifacts blocked",
+        "Deny or verification logs showing unapproved artifacts blocked",
+        "Evidence revoked/untrusted signatures are rejected (policy + logs or probe; measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-deploy-policy-enforcement",
+            "params": {
+              "hint": "Discover deploy-path policy for unsigned/unapproved AI artifacts (Gatekeeper, Kyverno, Policy Controller, Ratify, OPA, cloud deploy policies, registry rules, platform promote gates); ingest coverage under imports/ai-deploy-policy-enforcement/; require policy enforced, unsignedBlocked, unapprovedBlocked, revokedOrUntrustedRejected, measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Admission policy config + deny logs for unsigned/unapproved artifacts"
+              "hint": "If automation cannot prove coverage, attest production deployment policy plus deny/verification logs that unsigned, unapproved, and revoked/untrusted AI artifacts are blocked (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Admission controls must block unsigned or unapproved AI artifacts): inspect current evidence for [Admission policy config + deny logs for unsigned/unapproved artifacts] and confirm the pass condition holds — PASS if admission is enforced in production deploy paths and the latest probe shows unsigned artifacts are blocked",
-      "falsePositiveGuidance": "(Supply Chain Integrity): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm the assessment requires capability Level 5 / regulated advanced scope for this Check. If below Level 5, this Check is out of Core/Tier-2 baseline (still score when in Level-5/regulated profile). 2) Confirm production deploys AI artifacts (models, containers, or serverless AI packages). If none, score NOT_APPLICABLE. 3) Locate deployment policy— Kubernetes admission (Gatekeeper/Kyverno/Policy Controller/Ratify/OPA), CI/CD promote gate, cloud deploy policy (Lambda/Cloud Run/ECS/Fargate), registry admission, or AI-platform gate (Vertex/SageMaker/Azure AI Foundry) —not CI signing alone. 4) Review deny/verification logs or a probe: unsigned blocked, unapproved blocked, revoked/untrusted signatures rejected (measuredAt ≤90 days). 5) PASS only if policy + all three block outcomes + logs hold. SCI-M1 pull-time verify evidence alone does not prove deploy-path policy. Digest pins or Trivy without deploy deny do not satisfy. Lack of Kubernetes is not a fail if an equivalent non-K8s deploy control is proven.\n",
+      "falsePositiveGuidance": "Do not require Kyverno/Gatekeeper specifically—accept equivalent pipeline, cloud, registry, or platform deploy controls. Do not pass CI image signing without deploy-path enforcement. Do not pass SCI-M1 verify+block pull metrics as a substitute for production deploy policy. Do not pass “policy docs” without deny/verification logs. Do not score SCI-M3 vuln gates or SCI-R1 recommended verify-on-deploy as substitutes for this Level-5 mandatory. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Admission controls must block unsigned or unapproved AI artifacts",
-        "Retain evidence artifacts required by this Check, starting with: Admission policy config + deny logs for unsigned/unapproved artifacts",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Enforce deploy-path policy that blocks unsigned and unapproved AI artifacts (admission, pipeline, cloud deploy policy, registry, or AI-platform gate)",
+        "Reject revoked/untrusted signatures; prove with deny/verification logs or a probe",
+        "Retain enforcement evidence under imports/ai-deploy-policy-enforcement/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "SLSA — Supply-chain Levels for Software Artifacts",
           "url": "https://slsa.dev/"
+        },
+        {
+          "title": "Sigstore Policy Controller",
+          "url": "https://docs.sigstore.dev/policy-controller/overview/"
         },
         {
           "title": "CNCF Software Supply Chain Best Practices",
@@ -12428,6 +12480,10 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "OWASP LLM — Supply Chain Vulnerabilities",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -12435,20 +12491,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SCI-M2",
         "SCI-M3",
         "SCI-R1",
-        "SCI-R2"
+        "SCI-R2",
+        "CHG-M1"
       ],
       "tags": [
         "supply-chain",
         "mandatory",
-        "manual"
+        "hybrid",
+        "level-5",
+        "deployment-policy",
+        "admission",
+        "signed-artifacts"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "cicd",
-          "docker"
-        ],
+        "technologies": [],
         "minCriticality": 3,
         "requiredFromLevel": 5
       },
@@ -12458,39 +12514,57 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SCI-R1",
       "category": "supply-chain",
-      "title": "Production systems should have signed model/container artifacts with verify-on-deploy (SLSA-aligned)",
-      "description": "Signed model/container artifacts with verify-on-deploy (SLSA-aligned)",
-      "whyItMatters": "Signed model/container artifacts with verify-on-deploy (SLSA-aligned) Failing this leaves a production gap against: Last production model/container deploy shows signature verification success; unsigned artifact is rejected in a recorded test or canary within 90 days",
+      "title": "Production systems should verify signed model/container artifacts on deploy (SLSA-aligned)",
+      "description": "Production model and container (or equivalent AI package) deploys should verify signatures or attestations at deploy/promote time and reject unsigned artifacts—proven by the last successful verified deploy plus a recorded unsigned-reject test or canary, not by CI signing or digest pins alone.\n",
+      "whyItMatters": "Signing in CI without verify-on-deploy still lets an unsigned image or model package reach production. A measured last deploy that verified the signature (or attestation) plus a recorded reject of an unsigned artifact closes that gap for Level-4 maturity. Distinct from SCI-M1 (mandatory pull-time provenance/integrity verify+block), SCI-M4 (Level-5 deploy-path policy that also blocks unapproved and revoked/untrusted signatures with full deny logs), SCI-M3 (vuln scan gates), and SCI-R2 (MBOM retention).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Last production model/container deploy shows signature verification success; unsigned artifact is rejected in a recorded test or canary within 90 days",
+      "passCondition": "The last production model/container (or equivalent AI package) deploy verified a signature or attestation successfully; an unsigned artifact is rejected in a recorded test, canary, or deny log within 90 days (evidence measuredAt ≤90 days). If no production model/container AI artifacts are deployed, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Admission/verify-on-deploy policy for signed model and container artifacts + last deploy verification log"
+        "Verify-on-deploy / promote-path policy or gate for signed model/container (or equivalent AI package) artifacts",
+        "Last production deploy verification log showing signature or attestation success",
+        "Recorded test, canary, or deny log showing an unsigned artifact was rejected (within 90 days; measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-verify-on-deploy",
+            "params": {
+              "hint": "Discover verify-on-deploy / promote-path signature or attestation checks (pipeline gates, registry policies, cloud deploy policies, admission controllers, or AI-platform gates); ingest coverage under imports/ai-verify-on-deploy/; require lastDeployVerified=true, unsignedRejectedInTestOrCanary=true, measuredAt ≤90 days.\n"
+            }
+          },
+          {
+            "id": "cosign-verification",
+            "params": {
+              "hint": "Supporting signal — Cosign verify/policy evidence; alone does not prove last production deploy verified or unsigned reject test.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Admission/verify-on-deploy policy for signed model and container artifacts + last deploy verification log"
+              "hint": "If automation cannot prove coverage, attest last production deploy verified signature/attestation and an unsigned reject test or deny log within 90 days (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (SCI: Signed model/container artifacts with verify-on-deploy (SLSA-aligned)): inspect current evidence for [Admission/verify-on-deploy policy for signed model and container artifacts + last deploy verification log] and confirm the pass condition holds — Last production model/container deploy shows signature verification success; unsigned artifact is rejected in a recorded test or canary within 90 days",
-      "falsePositiveGuidance": "(Supply Chain Integrity): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production deploys model/container (or equivalent AI package) artifacts. If none, score NOT_APPLICABLE. 2) Locate verify-on-deploy or promote-path policy (pipeline gate, registry policy, cloud deploy policy, admission controller, or AI-platform gate)—not CI signing alone. 3) Review the last production deploy log: signature or attestation verification succeeded. 4) Confirm an unsigned artifact was rejected in a recorded test, canary, or deny log within 90 days (measuredAt ≤90 days). 5) PASS only if last verified deploy + unsigned reject hold. SCI-M1 pull-time verify metrics alone do not prove deploy-path verification. Digest pins alone do not satisfy. SCI-M4 Level-5 unapproved/revoked matrix is stronger and substitutes for this recommended Check when fully met; do not require Kyverno specifically.\n",
+      "falsePositiveGuidance": "Do not pass CI cosign/sign jobs without deploy-path verification. Do not pass Dockerfile digest pins as verify-on-deploy. Do not pass SCI-M1 pull-sample metrics as a substitute for last-deploy verification. Do not require Kubernetes admission when an equivalent pipeline/cloud/registry/ platform gate is proven. Do not score SCI-M3 or SCI-R2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Signed model/container artifacts with verify-on-deploy (SLSA-aligned)",
-        "Retain evidence artifacts required by this Check, starting with: Admission/verify-on-deploy policy for signed model and container artifacts + last deploy verification log",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Add verify-on-deploy / promote-path checks for signed model/container (or equivalent AI package) artifacts",
+        "Record last successful verified production deploy; run an unsigned-reject test or canary",
+        "Retain evidence under imports/ai-verify-on-deploy/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days; plan Level-5 SCI-M4 when ready for full deploy-policy enforcement"
       ],
       "references": [
         {
           "title": "SLSA — Supply-chain Levels for Software Artifacts",
           "url": "https://slsa.dev/"
+        },
+        {
+          "title": "Sigstore Cosign",
+          "url": "https://docs.sigstore.dev/cosign/overview/"
         },
         {
           "title": "CNCF Software Supply Chain Best Practices",
@@ -12499,6 +12573,10 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "OWASP LLM — Supply Chain Vulnerabilities",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -12506,20 +12584,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SCI-M2",
         "SCI-M3",
         "SCI-M4",
-        "SCI-R2"
+        "SCI-R2",
+        "INF-R1",
+        "CHG-M1"
       ],
       "tags": [
         "supply-chain",
         "recommended",
-        "manual"
+        "hybrid",
+        "verify-on-deploy",
+        "slsa",
+        "signed-artifacts"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "cicd",
-          "docker"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -12529,43 +12607,62 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "SCI-R2",
       "category": "supply-chain",
-      "title": "Production systems should have machine-readable model bill of materials (MBOM) for production models",
-      "description": "Machine-readable model bill of materials (MBOM) for production models",
-      "whyItMatters": "Machine-readable model bill of materials (MBOM) for production models Failing this leaves a production gap against: 100% of production model pins have an MBOM/SBOM artifact retained ≥90 days and linked from the model registry entry",
+      "title": "Production systems should retain a machine-readable model bill of materials (MBOM) for each production model pin",
+      "description": "Each production model pin should have a machine-readable MBOM (or SBOM plus model-specific metadata) retained ≥90 days and linked from the model registry—proven by registry linkage and retained artifacts, not by a container-image SBOM that omits model weights and serving components.\n",
+      "whyItMatters": "Without an MBOM, teams cannot answer what weights, adapters, tokenizers, serving binaries, and licenses shipped with a production pin during an incident or audit. Linking a retained machine-readable BOM from the registry makes model supply-chain inventory reviewable. Distinct from SCI-M1 (signature/provenance verify+block), SCI-R1 (verify-on-deploy), MOD-R3 (license/provenance policy review), MOD-M1 (model pin inventory), and DG-R3 (dataset cards for eval/fine-tune sets—not model BOMs).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "100% of production model pins have an MBOM/SBOM artifact retained ≥90 days and linked from the model registry entry",
+      "passCondition": "100% of production model pins have a machine-readable MBOM (or SBOM plus model-specific metadata covering weights/adapters/tokenizers and serving stack as applicable) retained ≥90 days and linked from the model registry entry (coverage evidence measuredAt ≤90 days). If no production model pins exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Machine-readable MBOM (or SBOM+model metadata) for each production model pin + retention location"
+        "Machine-readable MBOM (preferred) or SBOM + model-specific metadata per production model pin",
+        "Model registry (or equivalent) entries linking each pin to its MBOM/SBOM artifact",
+        "Retention location proving artifacts are kept ≥90 days",
+        "Coverage attest or inventory export showing 100% of production pins linked (measuredAt ≤90 days)"
       ],
       "detection": {
         "capability": "hybrid",
         "detectors": [
           {
+            "id": "repo-ai-model-mbom",
+            "params": {
+              "hint": "Discover MBOM/SBOM artifacts and model-registry links for production model pins; ingest coverage under imports/ai-model-mbom/; require 100% of pins linked, retention ≥90 days, measuredAt ≤90 days. Container-image SBOM alone without model metadata is insufficient.\n"
+            }
+          },
+          {
             "id": "repo-sbom-config",
-            "params": {}
+            "params": {
+              "hint": "Supporting signal — SBOM generation config (Syft, Trivy, CycloneDX, SPDX); alone does not prove per-model MBOM linkage or ≥90-day retention from the model registry.\n"
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Machine-readable MBOM (or SBOM+model metadata) for each production model pin + retention location"
+              "hint": "If automation cannot prove coverage, attest 100% of production model pins have linked MBOM (or SBOM+model metadata) retained ≥90 days (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (SCI: Machine-readable model bill of materials (MBOM) for production models): inspect current evidence for [Machine-readable MBOM (or SBOM+model metadata) for each production model pin + retention location] and confirm the pass condition holds — 100% of production model pins have an MBOM/SBOM artifact retained ≥90 days and linked from the model registry entry",
-      "falsePositiveGuidance": "(Supply Chain Integrity): when automation and attestation disagree, prefer the stricter outcome until reconciled. Waive only with owner, expiry, and which signal covers the gap.",
+      "manualVerification": "1) Confirm production model pins exist (self-hosted weights, fine-tunes, adapters, or pinned hosted-model IDs in a registry). If none, score NOT_APPLICABLE. 2) For each pin, locate a machine-readable MBOM or SBOM plus model-specific metadata (weights/adapters/tokenizers and serving components as applicable—not only the app container). 3) Confirm the model registry entry links to that artifact. 4) Confirm retention ≥90 days and coverage evidence measuredAt ≤90 days. 5) PASS only if 100% of pins are linked with retention. A generic CI image SBOM that omits model artifacts does not satisfy. MOD-R3 license reviews alone do not produce an MBOM. DG-R3 dataset cards alone do not satisfy. Hosted API pins without vendor weight BOMs may use registry-linked machine-readable model identity + provider provenance/metadata packages that meet the same retention and linkage bar.\n",
+      "falsePositiveGuidance": "Do not pass container-only SBOMs that omit model weights, adapters, or serving runtimes in scope. Do not pass an MBOM file that is not linked from the model registry. Do not pass retention “policy” without artifacts kept ≥90 days. Do not score SCI-M1, SCI-R1, MOD-M1, MOD-R3, or DG-R3 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Machine-readable model bill of materials (MBOM) for production models",
-        "Retain evidence artifacts required by this Check, starting with: Machine-readable MBOM (or SBOM+model metadata) for each production model pin + retention location",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Generate a machine-readable MBOM (or SBOM + model metadata) for every production model pin",
+        "Link each BOM from the model registry entry; retain artifacts ≥90 days",
+        "Export coverage under imports/ai-model-mbom/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "SLSA — Supply-chain Levels for Software Artifacts",
           "url": "https://slsa.dev/"
+        },
+        {
+          "title": "CycloneDX — Machine Learning Bill of Materials (ML-BOM)",
+          "url": "https://cyclonedx.org/capabilities/mlbom/"
+        },
+        {
+          "title": "SPDX",
+          "url": "https://spdx.dev/"
         },
         {
           "title": "CNCF Software Supply Chain Best Practices",
@@ -12574,6 +12671,10 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "OWASP LLM — Supply Chain Vulnerabilities",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
@@ -12581,20 +12682,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SCI-M2",
         "SCI-M3",
         "SCI-M4",
-        "SCI-R1"
+        "SCI-R1",
+        "MOD-M1",
+        "MOD-R3",
+        "DG-R3"
       ],
       "tags": [
         "supply-chain",
         "recommended",
-        "hybrid"
+        "hybrid",
+        "mbom",
+        "sbom",
+        "model-registry"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "cicd",
-          "docker"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -13649,62 +13751,73 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "TOL-M1",
       "category": "tool-safety",
       "title": "Every tool invocation must be authorized server-side independent of model output",
-      "description": "Every tool invocation shall be authorized server-side independent of model output",
-      "whyItMatters": "Every tool invocation shall be authorized server-side independent of model output Failing this leaves a production gap against: Automated tests show tool calls without a valid authz decision are denied at 100%; model-proposed tool name/args alone never bypass the gateway",
+      "description": "Every tool invocation shall be authorized server-side independent of model output—proven by automated gateway tests that deny tool calls without a valid authz decision at 100%, not by prompt instructions or client-side checks alone.\n",
+      "whyItMatters": "If the model can invent a tool name or arguments and the gateway executes them without an independent authz decision, injection and confused-deputy paths become production incidents. Distinct from AUTHZ-M1 (AI HTTP/RPC entry-point denial tests), TOL-M2 (per-agent tool allowlists), and AUTHZ-R1 (tool/model policy-as-code + CI/admission deny).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Automated tests show tool calls without a valid authz decision are denied at 100%; model-proposed tool name/args alone never bypass the gateway",
+      "passCondition": "Automated tests show tool calls without a valid authz decision are denied at 100%; model-proposed tool name/args alone never bypass the gateway (measuredAt ≤90 days). If no production tools/agents invoke tools, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Tool gateway authz tests + deny logs"
+        "Tool gateway / tool-runtime authz enforcement config (server-side)",
+        "Automated deny suite for tool calls missing/forged/invalid authz decisions",
+        "Deny logs or test results proving 100% denial + no model-output bypass (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-tool-gateway-authz",
+            "params": {
+              "hint": "Discover tool-gateway / tool-runtime authz and deny-suite signals; ingest coverage under imports/tool-gateway-authz/; require unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway=true + measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Tool gateway authz tests + deny logs"
+              "hint": "If automation cannot prove coverage, attest server-side tool authz with 100% deny of unauthorized tool calls and no model-output bypass (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Every tool invocation must be authorized server-side independent of model output): inspect current evidence for [Tool gateway authz tests + deny logs] and confirm the pass condition holds — Automated tests show tool calls without a valid authz decision are denied at 100%; model-proposed tool name/args alone never bypass the gateway",
-      "falsePositiveGuidance": "(Tool Safety): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm production agents/tools invoke tools through a gateway or runtime. If none, score NOT_APPLICABLE. 2) Confirm authz is enforced server-side (not prompt-only). 3) Review automated tests: calls without a valid authz decision are denied at 100%. 4) Confirm model-proposed tool name/args alone cannot bypass the gateway. 5) PASS only if deny suite + no-bypass hold with measuredAt ≤90 days. AUTHZ-M1 entry-point tests alone do not prove per-tool-call authz. TOL-M2 allowlists alone do not prove authz decisions independent of the allowlist. AUTHZ-R1 policy-as-code alone does not prove runtime deny for every tool invocation.\n",
+      "falsePositiveGuidance": "Do not pass prompt “ask permission” text as server-side authz. Do not pass client SDKs that skip the gateway in production. Do not pass allowlist-only configs without an authz decision path. Do not score AUTHZ-M1, TOL-M2, or AUTHZ-R1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Every tool invocation must be authorized server-side independent of model output",
-        "Retain evidence artifacts required by this Check, starting with: Tool gateway authz tests + deny logs",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Enforce server-side authz on every tool invocation at the gateway/runtime",
+        "Add automated deny tests for missing/forged/invalid authz decisions at 100%",
+        "Prove model-proposed tool name/args cannot bypass the gateway; retain under imports/tool-gateway-authz/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
-          "title": "Model Context Protocol security considerations",
+          "title": "Model Context Protocol — security considerations",
           "url": "https://modelcontextprotocol.io/"
         },
         {
           "title": "OWASP LLM — Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
         "TOL-M2",
         "TOL-M3",
         "TOL-M4",
-        "TOL-M5",
-        "TOL-R1"
+        "AUTHZ-M1",
+        "AUTHZ-R1",
+        "AGN-M2"
       ],
       "tags": [
         "tool-safety",
         "mandatory",
-        "manual"
+        "hybrid",
+        "tool-gateway",
+        "authorization"
       ],
       "applicability": {
-        "technologies": [
-          "mcp",
-          "a2a",
-          "openapi"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -13715,74 +13828,91 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "TOL-M2",
       "category": "tool-safety",
       "title": "Tools must be allowlisted per agent/workload; unknown tools must not be inventable at runtime",
-      "description": "Tools shall be allowlisted per agent/workload; unknown tools shall not be inventable at runtime",
-      "whyItMatters": "Tools shall be allowlisted per agent/workload; unknown tools shall not be inventable at runtime Failing this leaves a production gap against: 100% of production agents have an explicit tool allowlist; requests for tools outside the allowlist are denied at 100% in automated tests",
+      "description": "Production agents and workloads shall have an explicit tool allowlist, and requests for unknown tools shall be denied—proven by allowlist coverage for 100% of production agents plus automated negative tests, not by open MCP “all tools” bindings or prompt-only restrictions.\n",
+      "whyItMatters": "Tool names invented at runtime expand agency beyond the intended blast radius and turn prompt injection into arbitrary capability. Distinct from TOL-M1 (per-invocation server-side authz), SCI-M2 (external AI tool/MCP/plugin inventory+pin+review), AUTHN-M2 (MCP/AI S2S machine identity), and TOL-M5 (signed tool catalogs / reject unsigned).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production agents have an explicit tool allowlist; requests for tools outside the allowlist are denied at 100% in automated tests",
+      "passCondition": "100% of production agents/workloads that can invoke tools have an explicit tool allowlist; requests for tools outside the allowlist are denied at 100% in automated tests (measuredAt ≤90 days). If no production agents/workloads invoke tools, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Per-agent tool allowlist config + negative tests for unknown tool names"
+        "Per-agent/workload tool allowlist configuration covering production agents",
+        "Negative tests for unknown / inventable tool names",
+        "Attest or results: agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
+            "id": "repo-tool-allowlist",
+            "params": {
+              "hint": "Discover per-agent tool allowlists and unknown-tool deny tests; ingest coverage under imports/tool-allowlist/; require agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 + measuredAt ≤90 days.\n"
+            }
+          },
+          {
             "id": "mcp-tool-allowlist",
-            "params": {}
+            "params": {
+              "hint": "Supporting signal — MCP/tool allowlist config present; alone does not prove 100% agent coverage or deny tests.\n"
+            }
           },
           {
             "id": "mcp-no-unrestricted-shell",
-            "params": {}
+            "params": {
+              "hint": "Supporting signal — no unrestricted shell tool bindings."
+            }
           },
           {
             "id": "mcp-no-unrestricted-network",
-            "params": {}
+            "params": {
+              "hint": "Supporting signal — no unrestricted network tool bindings."
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Per-agent tool allowlist config + negative tests for unknown tool names"
+              "hint": "If automation cannot prove coverage, attest 100% agent allowlist coverage and 100% unknown-tool deny in tests (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Tools must be allowlisted per agent/workload; unknown tools must not be inventable at runtime): inspect current evidence for [Per-agent tool allowlist config + negative tests for unknown tool names] and confirm the pass condition holds — 100% of production agents have an explicit tool allowlist; requests for tools outside the allowlist are denied at 100% in automated tests",
-      "falsePositiveGuidance": "(Tool Safety): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm production agents/workloads can invoke tools. If none, score NOT_APPLICABLE. 2) Open per-agent/workload allowlists covering 100% of those agents. 3) Review negative tests: unknown/inventable tool names are denied at 100%. 4) PASS only if coverage + deny hold with measuredAt ≤90 days. Do not PASS from “tools: *” MCP bindings. TOL-M1 authz alone does not prove allowlists. SCI-M2 inventory/pin alone does not prove per-agent allowlists. TOL-M5 signed catalogs alone do not prove unknown-tool denial.\n",
+      "falsePositiveGuidance": "Do not pass open “all tools” MCP configs. Do not pass prompt-only “only use these tools” instructions. Do not pass a single shared allowlist that omits agents. Do not score TOL-M1, SCI-M2, AUTHN-M2, or TOL-M5 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Tools must be allowlisted per agent/workload; unknown tools must not be inventable at runtime",
-        "Retain evidence artifacts required by this Check, starting with: Per-agent tool allowlist config + negative tests for unknown tool names",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish per-agent/workload tool allowlists for every production agent that can invoke tools",
+        "Deny unknown/inventable tool names in the gateway; add automated negative tests at 100%",
+        "Retain coverage under imports/tool-allowlist/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
-          "title": "Model Context Protocol security considerations",
+          "title": "Model Context Protocol — security considerations",
           "url": "https://modelcontextprotocol.io/"
         },
         {
           "title": "OWASP LLM — Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        },
+        {
+          "title": "NIST AI RMF — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
         "TOL-M1",
         "TOL-M3",
-        "TOL-M4",
         "TOL-M5",
-        "TOL-R1"
+        "SCI-M2",
+        "AUTHN-M2",
+        "AGN-M2"
       ],
       "tags": [
         "tool-safety",
         "mandatory",
-        "automated"
+        "hybrid",
+        "allowlist",
+        "mcp"
       ],
       "applicability": {
-        "technologies": [
-          "mcp",
-          "a2a",
-          "openapi"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -13793,62 +13923,74 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "TOL-M3",
       "category": "tool-safety",
       "title": "High-impact tools must require additional gates (approval, dual control, or policy engine)",
-      "description": "High-impact tools shall require additional gates (approval, dual control, or policy engine)",
-      "whyItMatters": "High-impact tools shall require additional gates (approval, dual control, or policy engine) Failing this leaves a production gap against: 100% of tools rated write/irreversible/financial have a configured gate; automated tests show ungated execution is impossible for those tools",
+      "description": "Tools rated write, irreversible, or financial shall require an additional gate beyond base tool authz/allowlist—human approval, dual control, or a policy engine—proven by an impact-tiered inventory plus automated tests that ungated execution is impossible.\n",
+      "whyItMatters": "High-impact tools that run on a single allowlisted authz decision create one-click blast radius for injection and insider abuse. Distinct from TOL-M1 (base per-invocation authz), TOL-M2 (allowlists), HUM-M1/HUM-M3 (human-approval product flows without proving every high-impact tool is gated), and SEC-M2 (model-output schema before side effects).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of tools rated write/irreversible/financial have a configured gate; automated tests show ungated execution is impossible for those tools",
+      "passCondition": "100% of tools rated write/irreversible/financial have a configured additional gate (approval, dual control, or policy engine); automated tests show ungated execution is impossible for those tools (measuredAt ≤90 days). If no write/irreversible/financial tools exist in production, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Impact-tiered tool inventory + gate configuration + bypass tests"
+        "Impact-tiered tool inventory marking write/irreversible/financial tools",
+        "Gate configuration (approval, dual control, or policy engine) for 100% of those tools",
+        "Automated bypass/ungated-execution tests proving gates cannot be skipped (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-high-impact-tool-gates",
+            "params": {
+              "hint": "Discover impact-tiered tool inventories and approval/dual/policy gates; ingest coverage under imports/high-impact-tool-gates/; require highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests=true + measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Impact-tiered tool inventory + gate configuration + bypass tests"
+              "hint": "If automation cannot prove coverage, attest impact-tiered inventory with 100% gated high-impact tools and ungated-execution impossible in tests (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Require additional gates (approval, dual control, or policy engine)): inspect current evidence for [Impact-tiered tool inventory + gate configuration + bypass tests] and confirm the pass condition holds — 100% of tools rated write/irreversible/financial have a configured gate; automated tests show ungated execution is impossible for those tools",
-      "falsePositiveGuidance": "(Tool Safety): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production exposes write/irreversible/financial tools. If none, score NOT_APPLICABLE. 2) Open the impact-tiered inventory. 3) Confirm each high-impact tool has an additional gate (approval, dual control, or policy engine)—not base allowlist alone. 4) Review automated tests: ungated execution is impossible. 5) PASS only if inventory + 100% gated + bypass tests hold with measuredAt ≤90 days. HUM-M1 approval UI alone does not prove every high-impact tool is covered. TOL-M1/M2 alone do not prove extra gates.\n",
+      "falsePositiveGuidance": "Do not pass base allowlists as high-impact gates. Do not pass prompt “ask a human” without an enforced gate. Do not pass inventories missing financial or irreversible tools that exist in production. Do not score TOL-M1, TOL-M2, HUM-M1, HUM-M3, or SEC-M2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: High-impact tools must require additional gates (approval, dual control, or policy engine)",
-        "Retain evidence artifacts required by this Check, starting with: Impact-tiered tool inventory + gate configuration + bypass tests",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Publish an impact-tiered tool inventory (read / write / irreversible / financial)",
+        "Attach approval, dual control, or policy-engine gates to 100% of high-impact tools",
+        "Add automated tests proving ungated execution is impossible; retain under imports/high-impact-tool-gates/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
-          "title": "Model Context Protocol security considerations",
+          "title": "Model Context Protocol — security considerations",
           "url": "https://modelcontextprotocol.io/"
         },
         {
           "title": "OWASP LLM — Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        },
+        {
+          "title": "NIST AI RMF — Govern / Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
       ],
       "relatedRules": [
         "TOL-M1",
         "TOL-M2",
         "TOL-M4",
-        "TOL-M5",
-        "TOL-R1"
+        "HUM-M1",
+        "HUM-M3",
+        "SEC-M2"
       ],
       "tags": [
         "tool-safety",
         "mandatory",
-        "manual"
+        "hybrid",
+        "high-impact",
+        "approval",
+        "dual-control"
       ],
       "applicability": {
-        "technologies": [
-          "mcp",
-          "a2a",
-          "openapi"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -13859,62 +14001,72 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "TOL-M4",
       "category": "tool-safety",
       "title": "Tool arguments must be schema-validated and sanitized before execution",
-      "description": "Tool arguments shall be schema-validated and sanitized before execution",
-      "whyItMatters": "Tool arguments shall be schema-validated and sanitized before execution Failing this leaves a production gap against: 100% of production tools have a declared argument schema; invalid/malicious argument fixtures are rejected at 100% before side effects",
+      "description": "Production tools shall declare argument schemas and reject invalid or malicious payloads before side effects—proven by schema coverage for 100% of production tools plus contract tests, not by prompt-only “follow the schema” instructions.\n",
+      "whyItMatters": "Unvalidated tool arguments enable path traversal, command injection, and privilege escalation through tool parameters even when the tool name is allowlisted. Distinct from SEC-M2 (model-output schema/policy before side effects), TOL-M1 (authz decision), and TOL-M2 (tool-name allowlists).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production tools have a declared argument schema; invalid/malicious argument fixtures are rejected at 100% before side effects",
+      "passCondition": "100% of production tools have a declared argument schema; invalid/malicious argument fixtures are rejected at 100% before side effects (measuredAt ≤90 days). If no production tools exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "JSON Schema (or equivalent) per tool + contract tests for invalid payloads"
+        "JSON Schema (or equivalent) per production tool",
+        "Contract tests for invalid/malicious argument fixtures",
+        "Attest or results: toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-tool-argument-schema",
+            "params": {
+              "hint": "Discover tool argument schemas and contract tests; ingest coverage under imports/tool-argument-schema/; require toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 + measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "JSON Schema (or equivalent) per tool + contract tests for invalid payloads"
+              "hint": "If automation cannot prove coverage, attest 100% schema coverage and 100% rejection of invalid/malicious fixtures before side effects (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Tool arguments must be schema-validated and sanitized before execution): inspect current evidence for [JSON Schema (or equivalent) per tool + contract tests for invalid payloads] and confirm the pass condition holds — 100% of production tools have a declared argument schema; invalid/malicious argument fixtures are rejected at 100% before side effects",
-      "falsePositiveGuidance": "(Tool Safety): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production tools exist. If none, score NOT_APPLICABLE. 2) Confirm every production tool has a declared argument schema (JSON Schema, Zod, Pydantic, protobuf, or equivalent). 3) Review contract tests: invalid/ malicious fixtures are rejected at 100% before side effects. 4) PASS only if schema coverage + rejection hold with measuredAt ≤90 days. SEC-M2 model-output gates alone do not prove tool-argument validation. TOL-M2 allowlists alone do not prove argument schemas.\n",
+      "falsePositiveGuidance": "Do not pass prompt-only schema instructions. Do not pass OpenAPI for the customer API as tool-argument schemas. Do not pass coverage under 100% of production tools. Do not score SEC-M2, TOL-M1, or TOL-M2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Tool arguments must be schema-validated and sanitized before execution",
-        "Retain evidence artifacts required by this Check, starting with: JSON Schema (or equivalent) per tool + contract tests for invalid payloads",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Declare argument schemas for every production tool",
+        "Reject invalid/malicious fixtures before side effects in contract tests at 100%",
+        "Retain coverage under imports/tool-argument-schema/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
-          "title": "Model Context Protocol security considerations",
+          "title": "Model Context Protocol — security considerations",
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP LLM — Insecure Output Handling / Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        },
+        {
+          "title": "JSON Schema",
+          "url": "https://json-schema.org/"
         }
       ],
       "relatedRules": [
         "TOL-M1",
         "TOL-M2",
         "TOL-M3",
-        "TOL-M5",
-        "TOL-R1"
+        "SEC-M2",
+        "SEC-M1"
       ],
       "tags": [
         "tool-safety",
         "mandatory",
-        "manual"
+        "hybrid",
+        "argument-schema",
+        "contract-tests"
       ],
       "applicability": {
-        "technologies": [
-          "mcp",
-          "a2a",
-          "openapi"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },
@@ -13924,56 +14076,74 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "TOL-M5",
       "category": "tool-safety",
-      "title": "MCP tool catalogs must be signed and supply-chain reviewed before production use",
-      "description": "MCP tool catalogs shall be signed and supply-chain reviewed before production use",
-      "whyItMatters": "MCP tool catalogs shall be signed and supply-chain reviewed before production use Failing this leaves a production gap against: PASS if production MCP runtimes reject unsigned/unapproved tool catalogs; last review ≤90 days or since last catalog change",
+      "title": "MCP and agent tool catalogs must be signed and supply-chain reviewed before production use",
+      "description": "Production MCP and agent tool catalogs shall be signed (or equivalently integrity-verified) and supply-chain reviewed before use—proven by verify-on-load that rejects unsigned/unapproved catalogs plus a review ≤90 days or since last catalog change—not by SCI-M2 inventory pins alone.\n",
+      "whyItMatters": "An unsigned tool catalog can swap tool definitions, expand privilege, or inject malicious handlers without a deploy. Level-5 / regulated advanced mandatory—not Core baseline. Distinct from SCI-M2 (inventory+pin+owner+ review of external tools/integrations), SCI-M1 (model/container provenance verify+block), TOL-M2 (per-agent allowlists), and SCI-M4 (deploy-path unsigned/unapproved/revoked policy for artifacts).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "PASS if production MCP runtimes reject unsigned/unapproved tool catalogs; last review ≤90 days or since last catalog change",
+      "passCondition": "Production MCP/agent tool-catalog loaders reject unsigned or unapproved catalogs; last supply-chain review is ≤90 days or since the last catalog change (measuredAt ≤90 days). If no production MCP/agent tool catalogs are loaded, score NOT_APPLICABLE. (Level-5 / regulated advanced scope.)\n",
       "evidenceRequired": [
-        "Signed tool catalog + supply-chain review record + verify-on-load config"
+        "Signed (or integrity-verified) production MCP/agent tool catalog",
+        "Verify-on-load / reject-unsigned configuration for catalog consumers",
+        "Supply-chain review record ≤90 days or since last catalog change (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
-        "detectors": []
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-signed-tool-catalog",
+            "params": {
+              "hint": "Discover signed tool-catalog / verify-on-load signals; ingest coverage under imports/signed-tool-catalog/; require unsignedOrUnapprovedCatalogsRejected=true + supplyChainReviewWithin90DaysOrSinceLastChange=true + measuredAt ≤90 days.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest signed catalogs + reject unsigned/unapproved + review ≤90d or since last change (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
       },
-      "manualVerification": "For this Check (MCP tool catalogs must be signed and supply-chain reviewed before production use): inspect current evidence for [Signed tool catalog + supply-chain review record + verify-on-load config] and confirm the pass condition holds — PASS if production MCP runtimes reject unsigned/unapproved tool catalogs; last review ≤90 days or since last catalog change",
-      "falsePositiveGuidance": "(Tool Safety): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm production loads MCP or agent tool catalogs. If none, score NOT_APPLICABLE. 2) Confirm catalogs are signed or integrity-verified. 3) Confirm loaders reject unsigned/unapproved catalogs. 4) Confirm supply-chain review ≤90 days or since last catalog change. 5) PASS only if reject + review hold with measuredAt ≤90 days. This Check is Level-5 / regulated advanced—not Core. SCI-M2 pin/owner inventory alone does not prove signed catalogs. SCI-M1 image signing alone does not prove tool-catalog verify-on- load. TOL-M2 allowlists alone do not prove catalog integrity.\n",
+      "falsePositiveGuidance": "Do not pass unsigned catalogs with a waiver note. Do not pass CI Action SHA pins as catalog signatures. Do not pass SCI-M1/SCI-M2/TOL-M2 as substitutes. Do not require Core assessments to PASS this Level-5 Check. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: MCP tool catalogs must be signed and supply-chain reviewed before production use",
-        "Retain evidence artifacts required by this Check, starting with: Signed tool catalog + supply-chain review record + verify-on-load config",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Sign (or integrity-verify) production MCP/agent tool catalogs",
+        "Configure verify-on-load to reject unsigned/unapproved catalogs",
+        "Record supply-chain review ≤90 days or on each catalog change; retain under imports/signed-tool-catalog/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
-          "title": "Model Context Protocol security considerations",
+          "title": "Model Context Protocol — security considerations",
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "SLSA — Supply-chain Levels for Software Artifacts",
+          "url": "https://slsa.dev/"
+        },
+        {
+          "title": "OWASP LLM — Supply Chain Vulnerabilities",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
       "relatedRules": [
-        "TOL-M1",
         "TOL-M2",
-        "TOL-M3",
-        "TOL-M4",
-        "TOL-R1"
+        "SCI-M1",
+        "SCI-M2",
+        "SCI-M4",
+        "SCI-R1"
       ],
       "tags": [
         "tool-safety",
         "mandatory",
-        "manual"
+        "hybrid",
+        "mcp",
+        "signed-catalog",
+        "level-5"
       ],
       "applicability": {
-        "technologies": [
-          "mcp",
-          "a2a",
-          "openapi"
-        ],
+        "technologies": [],
         "minCriticality": 3,
         "requiredFromLevel": 5
       },
@@ -13984,37 +14154,45 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "TOL-R1",
       "category": "tool-safety",
       "title": "Production systems should have dry-run or simulation mode for destructive tools in lower environments",
-      "description": "Dry-run or simulation mode for destructive tools in lower environments",
-      "whyItMatters": "Dry-run or simulation mode for destructive tools in lower environments Failing this leaves a production gap against: 100% of tools classified destructive expose dry-run or simulation in non-prod; last promotion of a destructive tool includes a dry-run evidence link ≤90 days old",
-      "severity": "critical",
-      "weight": 4,
+      "description": "Destructive tools should expose dry-run or simulation in non-production environments, and the last promotion of a destructive tool should include a dry-run evidence link ≤90 days old—so operators rehearse blast radius before production.\n",
+      "whyItMatters": "Destructive tools promoted without a lower-env dry-run create avoidable outages and data loss when allowlists and gates are first exercised in prod. Distinct from TOL-M3 (production high-impact gates), AGN-R2 sandbox/sim before prod for agents, and CHG promotion records without dry-run linkage.\n",
+      "severity": "high",
+      "weight": 3,
       "gate": "recommended",
-      "passCondition": "100% of tools classified destructive expose dry-run or simulation in non-prod; last promotion of a destructive tool includes a dry-run evidence link ≤90 days old",
+      "passCondition": "100% of tools classified destructive expose dry-run or simulation in non-prod; the last promotion of a destructive tool includes a dry-run evidence link ≤90 days old (measuredAt ≤90 days). If no destructive tools exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Destructive-tool catalog marking dry-run/simulation support + sample lower-env dry-run logs"
+        "Destructive-tool catalog marking dry-run/simulation support",
+        "Sample lower-env dry-run logs or promotion evidence links ≤90 days",
+        "Attest or results: destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days=true (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-destructive-tool-dry-run",
+            "params": {
+              "hint": "Discover dry-run/simulation flags for destructive tools; ingest coverage under imports/destructive-tool-dry-run/; require destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days=true + measuredAt ≤90 days.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Destructive-tool catalog marking dry-run/simulation support + sample lower-env dry-run logs"
+              "hint": "If automation cannot prove coverage, attest 100% dry-run support in non-prod and a ≤90d dry-run evidence link on last destructive promotion (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Dry-run or simulation mode for destructive tools in lower environments): inspect current evidence for [Destructive-tool catalog marking dry-run/simulation support + sample lower-env dry-run logs] and confirm the pass condition holds — 100% of tools classified destructive expose dry-run or simulation in non-prod; last promotion of a destructive tool includes a dry-run evidence link ≤90 days old",
-      "falsePositiveGuidance": "(Tool Safety): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm destructive tools exist. If none, score NOT_APPLICABLE. 2) Confirm each exposes dry-run or simulation in non-prod. 3) Confirm the last destructive-tool promotion links dry-run evidence ≤90 days old. 4) PASS only if coverage + promotion link hold with measuredAt ≤90 days. TOL-M3 production gates alone do not prove lower-env dry-run. Agent sandbox Checks alone do not prove per-destructive-tool dry-run catalogs.\n",
+      "falsePositiveGuidance": "Do not pass “dry-run” prompt flags without runtime support. Do not pass production-only confirmation dialogs as lower-env simulation. Do not score TOL-M3 or agent-sandbox Checks as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Dry-run or simulation mode for destructive tools in lower environments",
-        "Retain evidence artifacts required by this Check, starting with: Destructive-tool catalog marking dry-run/simulation support + sample lower-env dry-run logs",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Mark destructive tools and implement dry-run/simulation in non-prod for 100% of them",
+        "Require a dry-run evidence link on destructive-tool promotions (≤90 days)",
+        "Retain coverage under imports/destructive-tool-dry-run/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
-          "title": "Model Context Protocol security considerations",
+          "title": "Model Context Protocol — security considerations",
           "url": "https://modelcontextprotocol.io/"
         },
         {
@@ -14023,23 +14201,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         }
       ],
       "relatedRules": [
-        "TOL-M1",
-        "TOL-M2",
         "TOL-M3",
-        "TOL-M4",
-        "TOL-M5"
+        "TOL-M1",
+        "TOL-R2",
+        "AGN-R2"
       ],
       "tags": [
         "tool-safety",
         "recommended",
-        "manual"
+        "hybrid",
+        "dry-run",
+        "destructive-tools"
       ],
       "applicability": {
-        "technologies": [
-          "mcp",
-          "a2a",
-          "openapi"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },
@@ -14050,37 +14225,51 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "TOL-R2",
       "category": "tool-safety",
       "title": "Production systems should have per-tool rate limits and blast-radius budgets",
-      "description": "Per-tool rate limits and blast-radius budgets",
-      "whyItMatters": "Per-tool rate limits and blast-radius budgets Failing this leaves a production gap against: Each high-impact tool has a documented QPS/daily cap and max-affected-entities budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days",
-      "severity": "critical",
-      "weight": 4,
+      "description": "High-impact tools should have documented QPS/daily caps and max-affected-entities budgets, with ≥1 limit hit or synthetic enforcement test in the last 30 days—so runaway loops cannot exhaust blast radius silently.\n",
+      "whyItMatters": "Allowlisted, authorized tools without rate/blast budgets can still amplify mistakes and injection into mass deletes or API abuse. Distinct from AGN-M2 (agent loop/step/token limits), COST-M* spend caps, and TOL-M3 (approval/dual/policy gates without quantitative budgets).\n",
+      "severity": "high",
+      "weight": 3,
       "gate": "recommended",
-      "passCondition": "Each high-impact tool has a documented QPS/daily cap and max-affected-entities budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days",
+      "passCondition": "Each high-impact tool has a documented QPS or daily cap and a max-affected-entities (or equivalent) blast-radius budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days (measuredAt ≤90 days). If no high-impact tools exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Per-tool rate-limit and blast-radius policy config + sample enforcement metrics (7 days)"
+        "Per-tool rate-limit and blast-radius policy config for high-impact tools",
+        "Sample enforcement metrics or synthetic limit-hit test ≤30 days",
+        "Attest or results: highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days=true (measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-tool-rate-limits",
+            "params": {
+              "hint": "Discover per-tool rate-limit / blast-radius configs; ingest coverage under imports/tool-rate-limits/; require highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days=true + measuredAt ≤90 days.\n"
+            }
+          },
+          {
+            "id": "repo-rate-limit-config",
+            "params": {
+              "hint": "Supporting signal — generic rate-limit config; alone does not prove per-tool blast-radius budgets or ≤30d enforcement proof.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Per-tool rate-limit and blast-radius policy config + sample enforcement metrics (7 days)"
+              "hint": "If automation cannot prove coverage, attest 100% high-impact tools have rate + blast budgets and ≤30d enforcement proof (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Per-tool rate limits and blast-radius budgets): inspect current evidence for [Per-tool rate-limit and blast-radius policy config + sample enforcement metrics (7 days)] and confirm the pass condition holds — Each high-impact tool has a documented QPS/daily cap and max-affected-entities budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days",
-      "falsePositiveGuidance": "(Tool Safety): re-verify against a current artifact for this specific Check , not a sibling control. Document named exceptions with owner and expiry.",
+      "manualVerification": "1) Confirm high-impact tools exist. If none, score NOT_APPLICABLE. 2) Confirm each has QPS/daily cap and max-affected-entities (or equivalent) budget. 3) Confirm ≥1 limit hit or synthetic enforcement test in the last 30 days. 4) PASS only if budgets + enforcement hold with measuredAt ≤90 days. AGN-M2 agent-loop limits alone do not prove per-tool blast budgets. COST spend caps alone do not prove entity blast-radius limits.\n",
+      "falsePositiveGuidance": "Do not pass global API gateway rate limits without per-tool budgets. Do not pass docs without a ≤30d enforcement proof. Do not score AGN-M2, COST-M*, or TOL-M3 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: this Check: Per-tool rate limits and blast-radius budgets",
-        "Retain evidence artifacts required by this Check, starting with: Per-tool rate-limit and blast-radius policy config + sample enforcement metrics (7 days)",
-        "Schedule recurring manual verification for this Check with a named owner and retained report",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Document QPS/daily caps and max-affected-entities budgets for every high-impact tool",
+        "Prove enforcement with a limit hit or synthetic test ≤30 days",
+        "Retain coverage under imports/tool-rate-limits/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
-          "title": "Model Context Protocol security considerations",
+          "title": "Model Context Protocol — security considerations",
           "url": "https://modelcontextprotocol.io/"
         },
         {
@@ -14089,23 +14278,20 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         }
       ],
       "relatedRules": [
-        "TOL-M1",
-        "TOL-M2",
         "TOL-M3",
-        "TOL-M4",
-        "TOL-M5"
+        "TOL-R1",
+        "AGN-M2",
+        "COST-M1"
       ],
       "tags": [
         "tool-safety",
         "recommended",
-        "manual"
+        "hybrid",
+        "rate-limits",
+        "blast-radius"
       ],
       "applicability": {
-        "technologies": [
-          "mcp",
-          "a2a",
-          "openapi"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 4
       },

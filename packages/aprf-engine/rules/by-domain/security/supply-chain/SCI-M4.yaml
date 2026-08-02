@@ -1,58 +1,113 @@
 id: "SCI-M4"
 category: "supply-chain"
-title: "Admission controls must block unsigned or unapproved AI artifacts"
-description: "Admission controls shall block unsigned or unapproved AI artifacts"
-whyItMatters: "Admission controls shall block unsigned or unapproved AI artifacts Failing this
-  leaves a production gap against: PASS if admission is enforced in production deploy paths and the
-  latest probe shows unsigned artifacts are blocked"
+title: "Production deployment controls must block unsigned or unapproved AI
+  artifacts"
+description: >
+  Production deployment policy shall enforce blocking of unsigned, unapproved,
+  and revoked-signature AI artifacts on the deploy path—proven by policy plus
+  deny/verification logs, not by signing in CI or digest pins alone. Applies
+  via Kubernetes admission, pipeline gates, cloud deploy policies, artifact
+  registry rules, or AI-platform promote gates—not Kubernetes-only.
+whyItMatters: >
+  Signing and provenance (SCI-M1) without deploy-time enforcement still allow
+  an operator or broken pipeline to ship an unsigned or unapproved model/
+  container. Deploy-path policy (Gatekeeper, Kyverno, Sigstore Policy
+  Controller, Ratify, OPA, cloud deploy policies, registry admission, Vertex/
+  SageMaker/Foundry promote gates, or equivalent) with measured deny logs
+  makes enforcement real. This is Level-5 / advanced maturity—not a Tier 2
+  baseline. Distinct from SCI-M1 (provenance/signature verification capability
+  and measured verify+block on pulls), SCI-M3 (vuln scan promote gates), and
+  SCI-R1 (recommended verify-on-deploy for lower maturity).
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "PASS if admission is enforced in production deploy paths and the latest probe shows
-  unsigned artifacts are blocked"
+passCondition: >
+  Production deployment policy is enforced on AI artifact deploy/promote
+  paths; unsigned artifacts are blocked; unapproved artifacts are blocked;
+  revoked or untrusted signatures are rejected; deployment or admission deny/
+  verification logs prove enforcement (measuredAt ≤90 days). If no production
+  AI artifacts are deployed (models/containers/serverless AI packages), score
+  NOT_APPLICABLE. Required from capability Level 5 (advanced mandatory)—not
+  a Tier 2/Core baseline.
 evidenceRequired:
-  - "Admission policy config + deny logs for unsigned/unapproved artifacts"
+  - "Deployment policy configuration (admission controller, pipeline gate, cloud deploy policy, registry rule, or AI-platform promote gate)"
+  - "Deny or verification logs showing unsigned artifacts blocked"
+  - "Deny or verification logs showing unapproved artifacts blocked"
+  - "Evidence revoked/untrusted signatures are rejected (policy + logs or probe; measuredAt ≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-deploy-policy-enforcement"
+      params:
+        hint: >
+          Discover deploy-path policy for unsigned/unapproved AI artifacts
+          (Gatekeeper, Kyverno, Policy Controller, Ratify, OPA, cloud deploy
+          policies, registry rules, platform promote gates); ingest coverage
+          under imports/ai-deploy-policy-enforcement/; require policy enforced,
+          unsignedBlocked, unapprovedBlocked, revokedOrUntrustedRejected,
+          measuredAt ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "Admission policy config + deny logs for unsigned/unapproved artifacts"
-manualVerification: "For this Check (Admission controls must block unsigned or unapproved AI
-  artifacts): inspect current evidence for [Admission policy config + deny logs for
-  unsigned/unapproved artifacts] and confirm the pass condition holds — PASS if admission is
-  enforced in production deploy paths and the latest probe shows unsigned artifacts are blocked"
-falsePositiveGuidance: "(Supply Chain Integrity): confirm the detector target matches the production
-  path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days."
+        hint: >
+          If automation cannot prove coverage, attest production deployment
+          policy plus deny/verification logs that unsigned, unapproved, and
+          revoked/untrusted AI artifacts are blocked (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm the assessment requires capability Level 5 / regulated advanced
+  scope for this Check. If below Level 5, this Check is out of Core/Tier-2
+  baseline (still score when in Level-5/regulated profile). 2) Confirm
+  production deploys AI artifacts (models, containers, or serverless AI
+  packages). If none, score NOT_APPLICABLE. 3) Locate deployment policy—
+  Kubernetes admission (Gatekeeper/Kyverno/Policy Controller/Ratify/OPA),
+  CI/CD promote gate, cloud deploy policy (Lambda/Cloud Run/ECS/Fargate),
+  registry admission, or AI-platform gate (Vertex/SageMaker/Azure AI Foundry)
+  —not CI signing alone. 4) Review deny/verification logs or a probe:
+  unsigned blocked, unapproved blocked, revoked/untrusted signatures rejected
+  (measuredAt ≤90 days). 5) PASS only if policy + all three block outcomes +
+  logs hold. SCI-M1 pull-time verify evidence alone does not prove deploy-path
+  policy. Digest pins or Trivy without deploy deny do not satisfy. Lack of
+  Kubernetes is not a fail if an equivalent non-K8s deploy control is proven.
+falsePositiveGuidance: >
+  Do not require Kyverno/Gatekeeper specifically—accept equivalent pipeline,
+  cloud, registry, or platform deploy controls. Do not pass CI image signing
+  without deploy-path enforcement. Do not pass SCI-M1 verify+block pull
+  metrics as a substitute for production deploy policy. Do not pass “policy
+  docs” without deny/verification logs. Do not score SCI-M3 vuln gates or
+  SCI-R1 recommended verify-on-deploy as substitutes for this Level-5
+  mandatory. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: Admission controls must block unsigned or unapproved AI artifacts"
-  - "Retain evidence artifacts required by this Check, starting with: Admission policy config + deny
-    logs for unsigned/unapproved artifacts"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Enforce deploy-path policy that blocks unsigned and unapproved AI artifacts (admission, pipeline, cloud deploy policy, registry, or AI-platform gate)"
+  - "Reject revoked/untrusted signatures; prove with deny/verification logs or a probe"
+  - "Retain enforcement evidence under imports/ai-deploy-policy-enforcement/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "SLSA — Supply-chain Levels for Software Artifacts"
     url: "https://slsa.dev/"
+  - title: "Sigstore Policy Controller"
+    url: "https://docs.sigstore.dev/policy-controller/overview/"
   - title: "CNCF Software Supply Chain Best Practices"
     url: "https://www.cncf.io/"
   - title: "OWASP LLM — Supply Chain Vulnerabilities"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI RMF — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "SCI-M1"
   - "SCI-M2"
   - "SCI-M3"
   - "SCI-R1"
   - "SCI-R2"
+  - "CHG-M1"
 tags:
   - "supply-chain"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "level-5"
+  - "deployment-policy"
+  - "admission"
+  - "signed-artifacts"
 applicability:
-  technologies:
-    - "github"
-    - "github-actions"
-    - "cicd"
-    - "docker"
+  technologies: []
   minCriticality: 3
   requiredFromLevel: 5
 status: "active"

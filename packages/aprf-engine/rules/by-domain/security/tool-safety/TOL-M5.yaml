@@ -1,54 +1,88 @@
 id: "TOL-M5"
 category: "tool-safety"
-title: "MCP tool catalogs must be signed and supply-chain reviewed before production use"
-description: "MCP tool catalogs shall be signed and supply-chain reviewed before production use"
-whyItMatters: "MCP tool catalogs shall be signed and supply-chain reviewed before production use
-  Failing this leaves a production gap against: PASS if production MCP runtimes reject
-  unsigned/unapproved tool catalogs; last review ≤90 days or since last catalog change"
+title: "MCP and agent tool catalogs must be signed and supply-chain reviewed before production use"
+description: >
+  Production MCP and agent tool catalogs shall be signed (or equivalently
+  integrity-verified) and supply-chain reviewed before use—proven by
+  verify-on-load that rejects unsigned/unapproved catalogs plus a review ≤90
+  days or since last catalog change—not by SCI-M2 inventory pins alone.
+whyItMatters: >
+  An unsigned tool catalog can swap tool definitions, expand privilege, or
+  inject malicious handlers without a deploy. Level-5 / regulated advanced
+  mandatory—not Core baseline. Distinct from SCI-M2 (inventory+pin+owner+
+  review of external tools/integrations), SCI-M1 (model/container provenance
+  verify+block), TOL-M2 (per-agent allowlists), and SCI-M4 (deploy-path
+  unsigned/unapproved/revoked policy for artifacts).
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "PASS if production MCP runtimes reject unsigned/unapproved tool catalogs; last
-  review ≤90 days or since last catalog change"
+passCondition: >
+  Production MCP/agent tool-catalog loaders reject unsigned or unapproved
+  catalogs; last supply-chain review is ≤90 days or since the last catalog
+  change (measuredAt ≤90 days). If no production MCP/agent tool catalogs are
+  loaded, score NOT_APPLICABLE. (Level-5 / regulated advanced scope.)
 evidenceRequired:
-  - "Signed tool catalog + supply-chain review record + verify-on-load config"
+  - "Signed (or integrity-verified) production MCP/agent tool catalog"
+  - "Verify-on-load / reject-unsigned configuration for catalog consumers"
+  - "Supply-chain review record ≤90 days or since last catalog change (measuredAt ≤90 days)"
 detection:
-  capability: "manual"
-  detectors: []
-manualVerification: "For this Check (MCP tool catalogs must be signed and supply-chain reviewed
-  before production use): inspect current evidence for [Signed tool catalog + supply-chain review
-  record + verify-on-load config] and confirm the pass condition holds — PASS if production MCP
-  runtimes reject unsigned/unapproved tool catalogs; last review ≤90 days or since last catalog
-  change"
-falsePositiveGuidance: "(Tool Safety): re-verify against a current artifact for this specific Check
-  , not a sibling control. Document named exceptions with owner and expiry."
+  capability: "hybrid"
+  detectors:
+    - id: "repo-signed-tool-catalog"
+      params:
+        hint: >
+          Discover signed tool-catalog / verify-on-load signals; ingest
+          coverage under imports/signed-tool-catalog/; require
+          unsignedOrUnapprovedCatalogsRejected=true +
+          supplyChainReviewWithin90DaysOrSinceLastChange=true +
+          measuredAt ≤90 days.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest signed catalogs +
+          reject unsigned/unapproved + review ≤90d or since last change
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production loads MCP or agent tool catalogs. If none, score
+  NOT_APPLICABLE. 2) Confirm catalogs are signed or integrity-verified. 3)
+  Confirm loaders reject unsigned/unapproved catalogs. 4) Confirm supply-chain
+  review ≤90 days or since last catalog change. 5) PASS only if reject +
+  review hold with measuredAt ≤90 days. This Check is Level-5 / regulated
+  advanced—not Core. SCI-M2 pin/owner inventory alone does not prove signed
+  catalogs. SCI-M1 image signing alone does not prove tool-catalog verify-on-
+  load. TOL-M2 allowlists alone do not prove catalog integrity.
+falsePositiveGuidance: >
+  Do not pass unsigned catalogs with a waiver note. Do not pass CI Action SHA
+  pins as catalog signatures. Do not pass SCI-M1/SCI-M2/TOL-M2 as substitutes.
+  Do not require Core assessments to PASS this Level-5 Check. Named exceptions
+  need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: MCP tool catalogs must be signed and supply-chain reviewed before
-    production use"
-  - "Retain evidence artifacts required by this Check, starting with: Signed tool catalog +
-    supply-chain review record + verify-on-load config"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Sign (or integrity-verify) production MCP/agent tool catalogs"
+  - "Configure verify-on-load to reject unsigned/unapproved catalogs"
+  - "Record supply-chain review ≤90 days or on each catalog change; retain under imports/signed-tool-catalog/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
-  - title: "Model Context Protocol security considerations"
+  - title: "Model Context Protocol — security considerations"
     url: "https://modelcontextprotocol.io/"
-  - title: "OWASP LLM — Excessive Agency"
+  - title: "SLSA — Supply-chain Levels for Software Artifacts"
+    url: "https://slsa.dev/"
+  - title: "OWASP LLM — Supply Chain Vulnerabilities"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
-  - "TOL-M1"
   - "TOL-M2"
-  - "TOL-M3"
-  - "TOL-M4"
-  - "TOL-R1"
+  - "SCI-M1"
+  - "SCI-M2"
+  - "SCI-M4"
+  - "SCI-R1"
 tags:
   - "tool-safety"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "mcp"
+  - "signed-catalog"
+  - "level-5"
 applicability:
-  technologies:
-    - "mcp"
-    - "a2a"
-    - "openapi"
+  technologies: []
   minCriticality: 3
   requiredFromLevel: 5
 status: "active"

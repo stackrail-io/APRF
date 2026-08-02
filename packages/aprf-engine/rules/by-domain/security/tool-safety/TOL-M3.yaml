@@ -1,57 +1,88 @@
 id: "TOL-M3"
 category: "tool-safety"
 title: "High-impact tools must require additional gates (approval, dual control, or policy engine)"
-description: "High-impact tools shall require additional gates (approval, dual control, or policy engine)"
-whyItMatters: "High-impact tools shall require additional gates (approval, dual control, or policy
-  engine) Failing this leaves a production gap against: 100% of tools rated
-  write/irreversible/financial have a configured gate; automated tests show ungated execution is
-  impossible for those tools"
+description: >
+  Tools rated write, irreversible, or financial shall require an additional
+  gate beyond base tool authz/allowlist—human approval, dual control, or a
+  policy engine—proven by an impact-tiered inventory plus automated tests
+  that ungated execution is impossible.
+whyItMatters: >
+  High-impact tools that run on a single allowlisted authz decision create
+  one-click blast radius for injection and insider abuse. Distinct from
+  TOL-M1 (base per-invocation authz), TOL-M2 (allowlists), HUM-M1/HUM-M3
+  (human-approval product flows without proving every high-impact tool is
+  gated), and SEC-M2 (model-output schema before side effects).
 severity: "critical"
 weight: 4
 gate: "mandatory"
-passCondition: "100% of tools rated write/irreversible/financial have a configured gate; automated
-  tests show ungated execution is impossible for those tools"
+passCondition: >
+  100% of tools rated write/irreversible/financial have a configured
+  additional gate (approval, dual control, or policy engine); automated tests
+  show ungated execution is impossible for those tools (measuredAt ≤90 days).
+  If no write/irreversible/financial tools exist in production, score
+  NOT_APPLICABLE.
 evidenceRequired:
-  - "Impact-tiered tool inventory + gate configuration + bypass tests"
+  - "Impact-tiered tool inventory marking write/irreversible/financial tools"
+  - "Gate configuration (approval, dual control, or policy engine) for 100% of those tools"
+  - "Automated bypass/ungated-execution tests proving gates cannot be skipped (measuredAt ≤90 days)"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-high-impact-tool-gates"
+      params:
+        hint: >
+          Discover impact-tiered tool inventories and approval/dual/policy
+          gates; ingest coverage under imports/high-impact-tool-gates/;
+          require highImpactToolsWithConfiguredGatePct=100 +
+          ungatedExecutionImpossibleInTests=true + measuredAt ≤90 days.
     - id: "manual-attest"
       params:
-        hint: "Impact-tiered tool inventory + gate configuration + bypass tests"
-manualVerification: "For this Check (Require additional gates (approval, dual control, or policy
-  engine)): inspect current evidence for [Impact-tiered tool inventory + gate configuration + bypass
-  tests] and confirm the pass condition holds — 100% of tools rated write/irreversible/financial
-  have a configured gate; automated tests show ungated execution is impossible for those tools"
-falsePositiveGuidance: "(Tool Safety): re-verify against a current artifact for this specific Check
-  , not a sibling control. Document named exceptions with owner and expiry."
+        hint: >
+          If automation cannot prove coverage, attest impact-tiered inventory
+          with 100% gated high-impact tools and ungated-execution impossible
+          in tests (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production exposes write/irreversible/financial tools. If none,
+  score NOT_APPLICABLE. 2) Open the impact-tiered inventory. 3) Confirm each
+  high-impact tool has an additional gate (approval, dual control, or policy
+  engine)—not base allowlist alone. 4) Review automated tests: ungated
+  execution is impossible. 5) PASS only if inventory + 100% gated + bypass
+  tests hold with measuredAt ≤90 days. HUM-M1 approval UI alone does not prove
+  every high-impact tool is covered. TOL-M1/M2 alone do not prove extra gates.
+falsePositiveGuidance: >
+  Do not pass base allowlists as high-impact gates. Do not pass prompt “ask a
+  human” without an enforced gate. Do not pass inventories missing financial
+  or irreversible tools that exist in production. Do not score TOL-M1,
+  TOL-M2, HUM-M1, HUM-M3, or SEC-M2 as substitutes. Named exceptions need
+  owner and expiry ≤90 days.
 recommendedFixes:
-  - "Implement and operationalize: High-impact tools must require additional gates (approval, dual
-    control, or policy engine)"
-  - "Retain evidence artifacts required by this Check, starting with: Impact-tiered tool inventory +
-    gate configuration + bypass tests"
-  - "Schedule recurring manual verification for this Check with a named owner and retained report"
-  - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+  - "Publish an impact-tiered tool inventory (read / write / irreversible / financial)"
+  - "Attach approval, dual control, or policy-engine gates to 100% of high-impact tools"
+  - "Add automated tests proving ungated execution is impossible; retain under imports/high-impact-tool-gates/ (measuredAt ≤90 days)"
+  - "Time-box gaps with owner and expiry ≤90 days"
 references:
-  - title: "Model Context Protocol security considerations"
+  - title: "Model Context Protocol — security considerations"
     url: "https://modelcontextprotocol.io/"
   - title: "OWASP LLM — Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "NIST AI RMF — Govern / Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
   - "TOL-M1"
   - "TOL-M2"
   - "TOL-M4"
-  - "TOL-M5"
-  - "TOL-R1"
+  - "HUM-M1"
+  - "HUM-M3"
+  - "SEC-M2"
 tags:
   - "tool-safety"
   - "mandatory"
-  - "manual"
+  - "hybrid"
+  - "high-impact"
+  - "approval"
+  - "dual-control"
 applicability:
-  technologies:
-    - "mcp"
-    - "a2a"
-    - "openapi"
+  technologies: []
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

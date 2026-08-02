@@ -11,8 +11,9 @@ whyItMatters: >
   tampering reach production silently. Cosign/Notation signatures, SLSA/OCI
   provenance, and model checksum validation—with measured 100% verified pulls
   and blocked unverified pulls—make integrity enforceable. Distinct from
-  SCI-M2 (MCP/tool inventory pins), SCI-M3 (dependency/update hygiene), and
-  MOD-R1 (model license/provenance review—policy review, not pull-time
+  SCI-M2 (external AI tool / MCP / plugin inventory pins + review), SCI-M3
+  (vuln scan gates on production AI artifacts/deps/runtimes), and MOD-R3
+  (model license/provenance review—policy review, not pull-time
   verify/block).
 severity: "critical"
 weight: 4
@@ -74,14 +75,14 @@ manualVerification: >
   against expected digest or signature. 4) Confirm unverified pulls are
   blocked (admission/registry/deploy gate). 5) PASS only if config + 100%
   verified + block hold with measuredAt ≤90 days. Dockerfile digest pins
-  alone do not prove runtime verification. SCI-M2 MCP pins alone do not prove
-  artifact signatures. MOD-R1 license reviews alone do not prove pull-time
-  verify/block.
+  alone do not prove runtime verification. SCI-M2 AI-tool/MCP/plugin inventory
+  pins alone do not prove artifact signatures. MOD-R3 license reviews alone do
+  not prove pull-time verify/block.
 falsePositiveGuidance: >
   Do not pass digest pins without verification logs and a block on unverified
   pulls. Do not pass signing in CI without admit/deploy verification. Do not
   pass SBOM generation alone as provenance verification. Do not score SCI-M2,
-  SCI-M3, or MOD-R1 as substitutes. Named exceptions need owner and expiry ≤90
+  SCI-M3, or MOD-R3 as substitutes. Named exceptions need owner and expiry ≤90
   days.
 recommendedFixes:
   - "Sign model/container artifacts (cosign, Notation, or equivalent) and verify at pull/admit"
@@ -105,7 +106,7 @@ relatedRules:
   - "SCI-M4"
   - "SCI-R1"
   - "SCI-R2"
-  - "MOD-R1"
+  - "MOD-R3"
   - "INF-M2"
 tags:
   - "supply-chain"

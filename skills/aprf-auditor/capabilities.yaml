@@ -94,6 +94,18 @@ plugins:
     - credential-egress-controls
     - dataset-secret-scan-gate
     - artifact-provenance-integrity
+    - ai-external-tool-inventory
+    - ai-vuln-scan-gate
+    - ai-deploy-policy-enforcement
+    - ai-verify-on-deploy
+    - ai-model-mbom
+    - tool-gateway-authz
+    - tool-allowlist
+    - high-impact-tool-gates
+    - tool-argument-schema
+    - signed-tool-catalog
+    - destructive-tool-dry-run
+    - tool-rate-limits
     - injection-policy-gate
     - custom
   optional:
@@ -149,6 +161,18 @@ userInputRequiredWhen:
   - SEC2-R2: no credential egress allowlist + documented destinations + ≥1 deny event ≤90d (run credential-egress-controls or import results)
   - SEC2-R3: no dataset secret/PII scan gate before fine-tune/eval publish + 100% linked reports ≤90d (run dataset-secret-scan-gate or import results)
   - SCI-M1: no cosign/Notation/SLSA/OCI/checksum verification + 100% verified pulls + block unverified (run artifact-provenance-integrity or import results; digest pins alone ≠ PASS)
+  - SCI-M2: no external AI tool/MCP/plugin inventory with 100% pin+owner+review and 0 unpinned (run ai-external-tool-inventory or import results; lockfiles/Action SHA alone ≠ PASS)
+  - SCI-M3: no vuln-scan coverage 100% + org-policy critical block + 0 skipped + retained results (run ai-vuln-scan-gate or import results; app-deps-only ≠ PASS)
+  - SCI-M4: no deploy-path policy enforcing unsigned/unapproved/revoked blocks (run ai-deploy-policy-enforcement or import results; Level-5; CI signing alone ≠ PASS)
+  - SCI-R1: no last-deploy verify + unsigned reject in test/canary (run ai-verify-on-deploy or import results)
+  - SCI-R2: no registry-linked MBOM coverage 100% + retention ≥90d (run ai-model-mbom or import results; container-only SBOM ≠ PASS)
+  - TOL-M1: no server-side tool-gateway authz deny suite at 100% + no model-output bypass (run tool-gateway-authz or import results)
+  - TOL-M2: no per-agent tool allowlist 100% + unknown-tool deny 100% (run tool-allowlist or import results; open "all tools" != PASS)
+  - TOL-M3: no high-impact tool gates 100% + ungated execution impossible in tests (run high-impact-tool-gates or import results)
+  - TOL-M4: no tool argument schema 100% + invalid fixture reject 100% (run tool-argument-schema or import results)
+  - TOL-M5: no signed MCP/agent tool catalog reject-unsigned + review ≤90d (run signed-tool-catalog or import results; Level-5)
+  - TOL-R1: no destructive-tool dry-run in non-prod 100% + promotion evidence ≤90d (run destructive-tool-dry-run or import results)
+  - TOL-R2: no per-tool rate + blast budgets 100% + ≤30d enforcement proof (run tool-rate-limits or import results)
   - SEC-M1: no injection/privilege-escalation corpus + CI gate at ≥95% deny (run injection-policy-gate or import results)
   - evidence not found after precedence-ordered search
   - N/A applicability needs confirmation
@@ -181,6 +205,18 @@ limitations:
   - credential-egress-controls needs egress allowlist/policy + credentialEgressDestinationsDocumented + denyEventCountProvingEnforcementInLast90Days≥1 + measuredAt ≤90d; allowlist docs alone are not a PASS but credential-runtime/deny signals block N/A launder
   - dataset-secret-scan-gate needs scan gate + publishBlockedWhenCriticalFindingsOpen + fineTuneOrEvalCorporaPublishedInLast90DaysWithLinkedScanReportPct=100 + measuredAt ≤90d; dataset cards / corpus-publish alone are not a PASS but block N/A launder
   - artifact-provenance-integrity needs cosign/Notation/SLSA/OCI/checksum verification + productionPullsVerifiedAgainstDigestOrSignaturePct=100 + unverifiedPullsBlocked + measuredAt ≤90d; digest pins / block-unverified text alone are not a PASS but block N/A launder
+  - ai-external-tool-inventory needs entriesWithPinOwnerReviewPct=100 + unpinnedLatestOrFloatingEntries=0 + measuredAt ≤90d; MCP/plugin/registry signals alone are not a PASS but block N/A launder
+  - ai-vuln-scan-gate needs scanCoveragePct=100 + criticalFindingsBlockPromotion + skippedScans=0 + retainedResults + measuredAt ≤90d; scan/model-serving signals alone are not a PASS but block N/A launder
+  - ai-deploy-policy-enforcement needs deploymentPolicyEnforced + unsignedBlocked + unapprovedBlocked + revokedOrUntrustedRejected + measuredAt ≤90d; policy signals alone are not a PASS but block N/A launder
+  - ai-verify-on-deploy needs lastDeployVerified + unsignedRejectedInTestOrCanary + measuredAt ≤90d; verify-on-deploy signals alone are not a PASS but block N/A launder
+  - ai-model-mbom needs pinsWithLinkedMbomPct=100 + retentionDaysSatisfied + measuredAt ≤90d; MBOM/registry signals alone are not a PASS but block N/A launder; container-only SBOM ≠ PASS
+  - tool-gateway-authz needs unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway + measuredAt ≤90d; gateway docs alone are not a PASS but block N/A launder
+  - tool-allowlist needs agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 + measuredAt ≤90d; allowlist files alone are not a PASS but block N/A launder
+  - high-impact-tool-gates needs highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests + measuredAt ≤90d; inventory alone is not a PASS but blocks N/A launder
+  - tool-argument-schema needs toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 + measuredAt ≤90d; schema files alone are not a PASS but block N/A launder
+  - signed-tool-catalog needs unsignedOrUnapprovedCatalogsRejected + supplyChainReviewWithin90DaysOrSinceLastChange + measuredAt ≤90d; Level-5; catalog docs alone are not a PASS
+  - destructive-tool-dry-run needs destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days + measuredAt ≤90d; dry-run flags alone are not a PASS
+  - tool-rate-limits needs highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days + measuredAt ≤90d; global rate limits alone are not a PASS
   - injection-policy-gate needs versioned corpus + CI gate with ≥95% deny and 0 model-text privilege grants; filters alone are not a PASS
   - Published aprf-spec.json is an ID/passCondition mirror; full evidenceRequired lives in Check YAML
 

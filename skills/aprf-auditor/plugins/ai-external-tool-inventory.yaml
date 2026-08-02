@@ -1,0 +1,32 @@
+id: ai-external-tool-inventory
+title: AI external tool / MCP / plugin inventory (SCI-M2)
+version: "0.2.0"
+executor: collectors/ai-external-tool-inventory.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds:
+  - repo-ai-external-tool-inventory
+inputs:
+  - "Target repo (MCP configs, agent plugins, tool registries, integration pins)"
+  - "Optional coverage: aprf-assessment/imports/ai-external-tool-inventory/*.json"
+collect:
+  - "Detect MCP, agent-plugin, tool-registry, and version-pin signals"
+  - "Ingest imported pin/owner/review coverage; write ai-external-tool-inventory-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-external-tool-inventory/*"
+  signals:
+    - ai-external-tool-inventory
+    - sci-m2
+    - repo-ai-external-tool-inventory
+mapsToChecks: [SCI-M2]
+whenUnavailable: >
+  Signals alone are PARTIAL. SCI-M2 PASS needs inventory coverage with
+  entriesWithPinOwnerReviewPct=100 (pin + owner + review date ≤180 days) and
+  unpinnedLatestOrFloatingEntries=0, measuredAt ≤90 days under
+  imports/ai-external-tool-inventory/. Package lockfiles / CI Action SHA pins
+  alone are not a PASS. Set productionAiExternalToolsOrIntegrationsPresent=false
+  for NOT_APPLICABLE only when no in-repo MCP/plugin/tool-registry signals.
+live:
+  required: false
+  note: Offline discovery + optional imported inventory coverage.

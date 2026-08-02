@@ -1,0 +1,33 @@
+id: ai-verify-on-deploy
+title: Verify-on-deploy for AI artifacts (SCI-R1)
+version: "0.2.0"
+executor: collectors/ai-verify-on-deploy.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds:
+  - repo-ai-verify-on-deploy
+  - cosign-verification
+inputs:
+  - "Target repo (verify-on-deploy, unsigned reject, promote gates)"
+  - "Optional coverage: aprf-assessment/imports/ai-verify-on-deploy/*.json"
+collect:
+  - "Detect verify-on-deploy, unsigned-reject, and promote-gate signals"
+  - "Ingest imported last-deploy verify coverage; write ai-verify-on-deploy-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-verify-on-deploy/*"
+  signals:
+    - ai-verify-on-deploy
+    - sci-r1
+    - repo-ai-verify-on-deploy
+    - cosign-verification
+mapsToChecks: [SCI-R1]
+whenUnavailable: >
+  Signals alone are PARTIAL. SCI-R1 PASS needs lastDeployVerified=true +
+  unsignedRejectedInTestOrCanary=true, measuredAt ≤90 days under
+  imports/ai-verify-on-deploy/. CI signing or SCI-M1 pull verify alone is not
+  a PASS. Set productionModelOrContainerArtifactsDeployed=false for
+  NOT_APPLICABLE only when no in-repo verify-on-deploy signals.
+live:
+  required: false
+  note: Offline discovery + optional imported verify-on-deploy coverage.

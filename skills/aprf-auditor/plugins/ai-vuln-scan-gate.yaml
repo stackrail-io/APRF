@@ -1,0 +1,32 @@
+id: ai-vuln-scan-gate
+title: AI vuln-scan promote gate (SCI-M3)
+version: "0.2.0"
+executor: collectors/ai-vuln-scan-gate.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds:
+  - repo-ai-vuln-scan-gate
+inputs:
+  - "Target repo (trivy/grype/snyk, Dependabot, model-serving, promote gates)"
+  - "Optional coverage: aprf-assessment/imports/ai-vuln-scan-gate/*.json"
+collect:
+  - "Detect vuln-scan, model-serving, block-promote, and dependency-update signals"
+  - "Ingest imported scan coverage; write ai-vuln-scan-gate-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/ai-vuln-scan-gate/*"
+  signals:
+    - ai-vuln-scan-gate
+    - sci-m3
+    - repo-ai-vuln-scan-gate
+mapsToChecks: [SCI-M3]
+whenUnavailable: >
+  Signals alone are PARTIAL. SCI-M3 PASS needs scanCoveragePct=100 +
+  criticalFindingsBlockPromotion=true + skippedScans=0 + retainedResults=true,
+  measuredAt ≤90 days under imports/ai-vuln-scan-gate/. App-deps-only scans
+  that omit inference servers are not a PASS. Set
+  productionAiArtifactsPresent=false for NOT_APPLICABLE only when no in-repo
+  scan/model-serving/block signals.
+live:
+  required: false
+  note: Offline discovery + optional imported scan-gate coverage.

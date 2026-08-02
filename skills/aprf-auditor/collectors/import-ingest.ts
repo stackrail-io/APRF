@@ -53,6 +53,18 @@ const RUNTIME_PLUGINS = new Set([
   "credential-egress-controls",
   "dataset-secret-scan-gate",
   "artifact-provenance-integrity",
+  "ai-external-tool-inventory",
+  "ai-vuln-scan-gate",
+  "ai-deploy-policy-enforcement",
+  "ai-verify-on-deploy",
+  "ai-model-mbom",
+  "tool-gateway-authz",
+  "tool-allowlist",
+  "high-impact-tool-gates",
+  "tool-argument-schema",
+  "signed-tool-catalog",
+  "destructive-tool-dry-run",
+  "tool-rate-limits",
   "injection-policy-gate",
 ]);
 
