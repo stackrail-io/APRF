@@ -195,6 +195,16 @@ npm run aprf:dataset-secret-scan-gate -- \
 
 PASS only with a secret/PII scan gate before fine-tune/eval publish + blocking on critical findings + 100% linked scan reports for corpora published in the last 90 days (measuredAt ≤90d). SEC2-R1 code/prompt scanners and DG dataset cards do not substitute.
 
+**SCI-M1 (artifact-provenance-integrity):** Dockerfile digest pins alone are **supporting** only. Prefer:
+
+```bash
+npm run aprf:artifact-provenance-integrity -- \
+  --target <project> --out <project>/aprf-assessment
+# or drop verify/block coverage JSON under imports/artifact-provenance-integrity/
+```
+
+PASS only with cosign/Notation/SLSA/OCI/checksum verification configured + 100% of production model/container pulls verified + unverified pulls blocked (measuredAt ≤90d).
+
 **SEC-M1 (injection-policy-gate):** content-filter warnings are **supporting** only. Prefer:
 
 ```bash

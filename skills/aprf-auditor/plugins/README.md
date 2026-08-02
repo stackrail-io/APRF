@@ -112,6 +112,14 @@ npm run aprf:dataset-secret-scan-gate -- --target <app> --out <app>/aprf-assessm
 
 Needs a secret/PII scan gate before fine-tune/eval corpus publish, blocking on critical findings, and 100% linked scan reports ≤90 days. Dataset cards alone are not enough.
 
+## Built-in highlight: `artifact-provenance-integrity` (SCI-M1)
+
+```bash
+npm run aprf:artifact-provenance-integrity -- --target <app> --out <app>/aprf-assessment
+```
+
+Needs cosign/Notation/SLSA/OCI/checksum verification + 100% verified production pulls + blocked unverified pulls. Digest pins alone are not enough.
+
 ## Built-in highlight: `injection-policy-gate` (SEC-M1)
 
 ```bash

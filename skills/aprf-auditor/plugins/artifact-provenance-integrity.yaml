@@ -1,0 +1,44 @@
+id: artifact-provenance-integrity
+title: Artifact provenance/integrity verification (SCI-M1)
+version: "0.2.0"
+executor: collectors/artifact-provenance-integrity.ts
+evidenceClass: ci
+alsoEmits: []
+detectorIds:
+  - repo-artifact-provenance-integrity
+  - artifact-signature-verification
+  - cosign-verification
+  - notation-verification
+  - slsa-attestation
+  - oci-provenance
+  - model-checksum-validation
+  - docker-image-digest-pinned
+inputs:
+  - "Target repo (cosign, Notation, SLSA, OCI, checksum, digest pins)"
+  - "Optional coverage: aprf-assessment/imports/artifact-provenance-integrity/*.json"
+collect:
+  - "Detect cosign, Notation, SLSA, OCI provenance, model-checksum, digest-pin, and block-unverified signals"
+  - "Ingest imported coverage; write artifact-provenance-integrity-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/artifact-provenance-integrity/*"
+  signals:
+    - artifact-provenance-integrity
+    - sci-m1
+    - repo-artifact-provenance-integrity
+    - cosign-verification
+    - notation-verification
+    - slsa-attestation
+    - oci-provenance
+    - model-checksum-validation
+mapsToChecks: [SCI-M1]
+whenUnavailable: >
+  Signals alone are PARTIAL. SCI-M1 PASS needs verification configured
+  (cosign/Notation/SLSA/OCI/checksum) plus
+  productionPullsVerifiedAgainstDigestOrSignaturePct=100 and
+  unverifiedPullsBlocked=true, measuredAt ≤90 days under
+  imports/artifact-provenance-integrity/. Digest pins alone are not a PASS.
+  Set productionModelOrContainerArtifactsPresent=false for NOT_APPLICABLE.
+live:
+  required: false
+  note: Offline discovery + optional imported verify/block coverage.

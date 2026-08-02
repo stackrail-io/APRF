@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:c7c7285414489f1808debc2d525c66beeb29409829528bf0ede06a0953c208af",
+  "generatedAt": "sha256:5147e1790b6042257f68cb693bf3628e550552ef0e4cd2e57c80298d74fc3dba",
   "ruleCount": 178,
   "domains": [
     {
@@ -12100,42 +12100,96 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "SCI-M1",
       "category": "supply-chain",
       "title": "Production model and container artifacts must have verified provenance/integrity",
-      "description": "Production model and container artifacts shall have verified provenance/integrity",
-      "whyItMatters": "Production model and container artifacts shall have verified provenance/integrity Failing this leaves a production gap against: 100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked",
+      "description": "Production model and container artifacts shall have verified provenance/integrity—proven by signature, attestation, or digest verification with unverified pulls blocked, not by digest pins in Dockerfiles alone.\n",
+      "whyItMatters": "Unsigned or unattested model weights and container images let supply-chain tampering reach production silently. Cosign/Notation signatures, SLSA/OCI provenance, and model checksum validation—with measured 100% verified pulls and blocked unverified pulls—make integrity enforceable. Distinct from SCI-M2 (MCP/tool inventory pins), SCI-M3 (dependency/update hygiene), and MOD-R1 (model license/provenance review—policy review, not pull-time verify/block).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked",
+      "passCondition": "Provenance/integrity verification is configured for production model and/or container artifacts (signature, attestation, OCI provenance, and/or checksum/ digest); 100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked (measuredAt ≤90 days). If no production model or container artifacts are pulled, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Digest/signature verification logs for last production deploy"
+        "Signature / attestation / provenance / checksum verification config (cosign, Notation, SLSA, OCI, or equivalent)",
+        "Digest or signature verification logs for production model/container pulls in the sample window",
+        "Proof unverified pulls are blocked (admission policy, registry policy, or deploy gate; measuredAt ≤90 days)"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
+            "id": "repo-artifact-provenance-integrity",
+            "params": {
+              "hint": "Discover cosign/Notation/SLSA/OCI/checksum/digest-pin signals; ingest coverage under imports/artifact-provenance-integrity/; require verification config (or present=true), productionPullsVerifiedAgainstDigestOrSignaturePct=100, unverifiedPullsBlocked=true, measuredAt ≤90 days.\n"
+            }
+          },
+          {
+            "id": "artifact-signature-verification",
+            "params": {
+              "hint": "Generic artifact signature verification policy or verify logs for production pulls."
+            }
+          },
+          {
+            "id": "cosign-verification",
+            "params": {
+              "hint": "Cosign sign/verify, keyless OIDC, or policy-controller evidence for images/models."
+            }
+          },
+          {
+            "id": "notation-verification",
+            "params": {
+              "hint": "Notation / ORAS signature verification trust policy for OCI artifacts."
+            }
+          },
+          {
+            "id": "slsa-attestation",
+            "params": {
+              "hint": "SLSA provenance attestations verified at deploy/admit (in-toto / SLSA verifier)."
+            }
+          },
+          {
+            "id": "oci-provenance",
+            "params": {
+              "hint": "OCI referrers / provenance artifacts attached and verified for production images."
+            }
+          },
+          {
+            "id": "model-checksum-validation",
+            "params": {
+              "hint": "Model weight/artifact checksum or digest validation before load or promote."
+            }
+          },
+          {
             "id": "docker-image-digest-pinned",
-            "params": {}
+            "params": {
+              "hint": "Supporting signal — digest-pinned image refs; alone does not satisfy verify+block."
+            }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Digest/signature verification logs for last production deploy"
+              "hint": "If automation cannot prove coverage, attest verification config plus 100% verified production pulls and blocked unverified pulls (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "For this Check (Production model and container artifacts must have verified provenance/integrity): inspect current evidence for [Digest/signature verification logs for last production deploy] and confirm the pass condition holds — 100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked",
-      "falsePositiveGuidance": "(Supply Chain Integrity): confirm the detector target matches the production path for this Check before waiving. Named exceptions need an owner and expiry ≤90 days.",
+      "manualVerification": "1) Confirm production pulls model weights and/or container images. If none, score NOT_APPLICABLE. 2) Locate verification config (cosign, Notation, SLSA attestation, OCI provenance, model checksum, or equivalent). 3) Review verification logs for the sample window: 100% of production pulls verify against expected digest or signature. 4) Confirm unverified pulls are blocked (admission/registry/deploy gate). 5) PASS only if config + 100% verified + block hold with measuredAt ≤90 days. Dockerfile digest pins alone do not prove runtime verification. SCI-M2 MCP pins alone do not prove artifact signatures. MOD-R1 license reviews alone do not prove pull-time verify/block.\n",
+      "falsePositiveGuidance": "Do not pass digest pins without verification logs and a block on unverified pulls. Do not pass signing in CI without admit/deploy verification. Do not pass SBOM generation alone as provenance verification. Do not score SCI-M2, SCI-M3, or MOD-R1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Implement and operationalize: Production model and container artifacts must have verified provenance/integrity",
-        "Retain evidence artifacts required by this Check, starting with: Digest/signature verification logs for last production deploy",
-        "Wire or verify detectors declared on this Check so automation matches the pass condition",
-        "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
+        "Sign model/container artifacts (cosign, Notation, or equivalent) and verify at pull/admit",
+        "Attach and verify SLSA/OCI provenance; validate model checksums before load",
+        "Block unverified pulls; retain coverage under imports/artifact-provenance-integrity/ (measuredAt ≤90 days)",
+        "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
         {
           "title": "SLSA — Supply-chain Levels for Software Artifacts",
           "url": "https://slsa.dev/"
+        },
+        {
+          "title": "Sigstore Cosign",
+          "url": "https://docs.sigstore.dev/cosign/overview/"
+        },
+        {
+          "title": "Notary Project — Notation",
+          "url": "https://notaryproject.dev/"
         },
         {
           "title": "CNCF Software Supply Chain Best Practices",
@@ -12151,20 +12205,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SCI-M3",
         "SCI-M4",
         "SCI-R1",
-        "SCI-R2"
+        "SCI-R2",
+        "MOD-R1",
+        "INF-M2"
       ],
       "tags": [
         "supply-chain",
         "mandatory",
-        "automated"
+        "hybrid",
+        "provenance",
+        "cosign",
+        "slsa",
+        "oci"
       ],
       "applicability": {
-        "technologies": [
-          "github",
-          "github-actions",
-          "cicd",
-          "docker"
-        ],
+        "technologies": [],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },

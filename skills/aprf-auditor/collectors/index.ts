@@ -57,6 +57,7 @@ import { aiRuntimePatchingCollector } from "./ai-runtime-patching.ts";
 import { agentToolConnectivityCollector } from "./agent-tool-connectivity.ts";
 import { sharedAcceleratorIsolationCollector } from "./shared-accelerator-isolation.ts";
 import { secretsHygieneCollector } from "./secrets-hygiene.ts";
+import { artifactProvenanceIntegrityCollector } from "./artifact-provenance-integrity.ts";
 import { secretRedactionCollector } from "./secret-redaction.ts";
 import { keyRotationScopeCollector } from "./key-rotation-scope.ts";
 import { precommitCiSecretScanCollector } from "./precommit-ci-secret-scan.ts";
@@ -235,6 +236,7 @@ export const COLLECTORS: Collector[] = [
   agentToolConnectivityCollector,
   sharedAcceleratorIsolationCollector,
   secretsHygieneCollector,
+  artifactProvenanceIntegrityCollector,
   secretRedactionCollector,
   keyRotationScopeCollector,
   precommitCiSecretScanCollector,

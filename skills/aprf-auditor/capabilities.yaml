@@ -93,6 +93,7 @@ plugins:
     - precommit-ci-secret-scan
     - credential-egress-controls
     - dataset-secret-scan-gate
+    - artifact-provenance-integrity
     - injection-policy-gate
     - custom
   optional:
@@ -147,6 +148,7 @@ userInputRequiredWhen:
   - SEC2-R1: no pre-commit + CI secret-scan covering prompts/fixtures with ≤7d green scan (run precommit-ci-secret-scan or import results)
   - SEC2-R2: no credential egress allowlist + documented destinations + ≥1 deny event ≤90d (run credential-egress-controls or import results)
   - SEC2-R3: no dataset secret/PII scan gate before fine-tune/eval publish + 100% linked reports ≤90d (run dataset-secret-scan-gate or import results)
+  - SCI-M1: no cosign/Notation/SLSA/OCI/checksum verification + 100% verified pulls + block unverified (run artifact-provenance-integrity or import results)
   - SEC-M1: no injection/privilege-escalation corpus + CI gate at ≥95% deny (run injection-policy-gate or import results)
   - evidence not found after precedence-ordered search
   - N/A applicability needs confirmation
@@ -178,6 +180,7 @@ limitations:
   - precommit-ci-secret-scan needs pre-commit + CI secret-scan + secretScanCoversPromptsAndFixtures + blocksOnHighConfidenceSecrets + lastGreenMainBranchOrPrMergeScanWithin7Days + measuredAt ≤7d; config alone is not a PASS
   - credential-egress-controls needs egress allowlist/policy + credentialEgressDestinationsDocumented + denyEventCountProvingEnforcementInLast90Days≥1 + measuredAt ≤90d; allowlist docs alone are not a PASS
   - dataset-secret-scan-gate needs scan gate + publishBlockedWhenCriticalFindingsOpen + fineTuneOrEvalCorporaPublishedInLast90DaysWithLinkedScanReportPct=100 + measuredAt ≤90d; dataset cards alone are not a PASS
+  - artifact-provenance-integrity needs cosign/Notation/SLSA/OCI/checksum verification + productionPullsVerifiedAgainstDigestOrSignaturePct=100 + unverifiedPullsBlocked + measuredAt ≤90d; digest pins alone are not a PASS
   - injection-policy-gate needs versioned corpus + CI gate with ≥95% deny and 0 model-text privilege grants; filters alone are not a PASS
   - Published aprf-spec.json is an ID/passCondition mirror; full evidenceRequired lives in Check YAML
 

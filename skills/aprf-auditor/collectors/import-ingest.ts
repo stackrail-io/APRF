@@ -52,6 +52,7 @@ const RUNTIME_PLUGINS = new Set([
   "precommit-ci-secret-scan",
   "credential-egress-controls",
   "dataset-secret-scan-gate",
+  "artifact-provenance-integrity",
   "injection-policy-gate",
 ]);
 

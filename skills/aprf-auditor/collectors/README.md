@@ -381,6 +381,16 @@ npm run aprf:dataset-secret-scan-gate -- \
 
 Detects dataset secret/PII scan gates before fine-tune/eval publish; PASS needs gate + blocking + 100% linked reports (measuredAt ≤90d). Writes `imports/dataset-secret-scan-gate/dataset-secret-scan-gate-report.json`.
 
+### SCI-M1 — Artifact provenance / integrity
+
+```bash
+npm run aprf:artifact-provenance-integrity -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment
+```
+
+Detects cosign, Notation, SLSA, OCI provenance, model-checksum, and digest-pin signals; PASS needs verification + 100% verified pulls + blocked unverified (measuredAt ≤90d). Writes `imports/artifact-provenance-integrity/artifact-provenance-integrity-report.json`.
+
 ### SEC-M1 — Injection / privilege-escalation policy gate
 
 ```bash

@@ -105,12 +105,16 @@ categoryDefaults:
     search:
       - "**/sbom*"
       - "**/*provenance*"
+      - "**/*cosign*"
+      - "**/*notation*"
+      - "**/*slsa*"
       - "**/.github/workflows/**"
       - "**/Dockerfile*"
       - "**/package-lock.json"
       - "**/pnpm-lock.yaml"
       - "**/go.sum"
-    signals: [pin digests, signed images, dependency lockfile, SLSA]
+    plugins: [artifact-provenance-integrity, github-actions, repo-filesystem]
+    signals: [pin digests, signed images, cosign, Notation, SLSA, OCI provenance, model checksum, dependency lockfile]
   infrastructure:
     search:
       - "**/Dockerfile*"
@@ -812,6 +816,32 @@ checks:
       PARTIAL if isolation/test signals without inventory, or incomplete import.
       FAIL if isolation design or capacity/isolation test attested false.
       Managed-API-only stacks should N/A, not FAIL. INF-M1/M2/M3 do not substitute.
+  SCI-M1:
+    requiredEvidence:
+      - "Signature / attestation / provenance / checksum verification config (cosign, Notation, SLSA, OCI, or equivalent)"
+      - "productionPullsVerifiedAgainstDigestOrSignaturePct=100 + unverifiedPullsBlocked under imports/artifact-provenance-integrity/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*cosign*"
+      - "**/*notation*"
+      - "**/*slsa*"
+      - "**/*provenance*"
+      - "**/*checksum*"
+      - "**/*ClusterImagePolicy*"
+      - "**/.github/workflows/**"
+    plugins: [artifact-provenance-integrity, github-actions, repo-filesystem]
+    naWhen: "No production model or container artifacts pulled"
+    evaluation: |
+      Prefer collectors/artifact-provenance-integrity or imports/artifact-provenance-integrity/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / sciM1Satisfied === true
+      (verification via cosign/Notation/SLSA/OCI/checksum +
+      productionPullsVerifiedAgainstDigestOrSignaturePct=100 +
+      unverifiedPullsBlocked=true + measuredAt ≤90d).
+      NOT_APPLICABLE if productionModelOrContainerArtifactsPresent=false and no in-repo verification tooling.
+      PARTIAL if digest pins or verification signals without complete import (pins alone ≠ PASS).
+      FAIL if verifiedPct<100, unverifiedPullsBlocked=false, or verification attested absent without in-repo tooling.
+      Detector hits may include cosign-verification, notation-verification, slsa-attestation,
+      oci-provenance, model-checksum-validation, artifact-signature-verification, docker-image-digest-pinned.
+      SCI-M2, SCI-M3, and MOD-R1 do not substitute.
   SEC2-M1:
     requiredEvidence:
       - "Secrets manager / sealed-secrets / cloud secret refs in runtime config"

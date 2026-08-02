@@ -2574,10 +2574,10 @@
       "mandatoryChecks": [
         {
           "id": "SCI-M1",
-          "requirement": "Production model and container artifacts shall have verified provenance/integrity",
-          "artifact": "Digest/signature verification logs for last production deploy",
-          "passCondition": "100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked",
-          "method": "automated",
+          "requirement": "Production model and container artifacts shall have verified provenance/integrity\u2014proven by signature, attestation, or digest verification with unverified pulls blocked, not by digest pins in Dockerfiles alone.",
+          "artifact": "Signature / attestation / provenance / checksum verification config (cosign, Notation, SLSA, OCI, or equivalent); Digest or signature verification logs for production model/container pulls in the sample window; Proof unverified pulls are blocked (admission policy, registry policy, or deploy gate; measuredAt \u226490 days)",
+          "passCondition": "Provenance/integrity verification is configured for production model and/or container artifacts (signature, attestation, OCI provenance, and/or checksum/digest); 100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked (measuredAt \u226490 days). If no production model or container artifacts are pulled, score NOT_APPLICABLE.",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
