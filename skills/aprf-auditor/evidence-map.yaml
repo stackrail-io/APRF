@@ -836,9 +836,11 @@ checks:
       (verification via cosign/Notation/SLSA/OCI/checksum +
       productionPullsVerifiedAgainstDigestOrSignaturePct=100 +
       unverifiedPullsBlocked=true + measuredAt ≤90d).
-      NOT_APPLICABLE if productionModelOrContainerArtifactsPresent=false and no in-repo verification tooling.
+      NOT_APPLICABLE if productionModelOrContainerArtifactsPresent=false and no in-repo digest pin,
+      block-unverified policy, or verification tooling (any of those blocks N/A launder).
       PARTIAL if digest pins or verification signals without complete import (pins alone ≠ PASS).
-      FAIL if verifiedPct<100, unverifiedPullsBlocked=false, or verification attested absent without in-repo tooling.
+      FAIL if verifiedPct<100, unverifiedPullsBlocked=false, or verification attested absent without in-repo tooling
+      (failing import metrics beat present=false N/A).
       Detector hits may include cosign-verification, notation-verification, slsa-attestation,
       oci-provenance, model-checksum-validation, artifact-signature-verification, docker-image-digest-pinned.
       SCI-M2, SCI-M3, and MOD-R1 do not substitute.
@@ -860,15 +862,18 @@ checks:
       (secrets-manager wiring + privilegedSecretsInReposPromptsOrClientBundles=0 +
       productionRuntimeSecretsResolvedFromSecretsManagerPct=100 +
       secretScanCoversPromptsAndFixtures=true + measuredAt ≤90d).
-      NOT_APPLICABLE if productionRuntimeSecretsPresent=false and no in-repo manager wiring.
-      PARTIAL if manager/scan-config signals without complete import (CI config alone ≠ PASS).
-      FAIL if heuristic embeds found, privileged findings >0, resolvedPct<100, or covers/manager attested false.
+      NOT_APPLICABLE if productionRuntimeSecretsPresent=false and no in-repo manager wiring
+      and no heuristic embedded privileged secrets (embeds block N/A and force FAIL).
+      PARTIAL if manager/scan-config signals without complete import (CI config / empty SARIF alone ≠ PASS;
+      privilegedSecrets…=0 must be an explicit coverage field).
+      FAIL if heuristic embeds found, privileged findings >0, resolvedPct<100, or covers/manager attested false
+      (failing import metrics beat present=false N/A).
       AUTHN-R1 and SEC2-M2 do not substitute. CI ${{ secrets.* }} alone is not a secrets manager.
   SEC2-M2:
     requiredEvidence:
       - "Redaction/masking config for logging and/or tracing pipelines"
       - "Synthetic secret-injection canary harness covering API key/bearer/AWS-key patterns"
-      - "detectionRatePct=100 + canaryCoversApiKeyBearerAndAwsKeyPatterns + measuredAt≤90d under imports/secret-redaction/"
+      - "Non-empty canary cases/results + detectionRatePct=100 + canaryCoversApiKeyBearerAndAwsKeyPatterns + measuredAt≤90d under imports/secret-redaction/"
     searchExtra:
       - "**/*redact*"
       - "**/*scrub*"
@@ -880,10 +885,12 @@ checks:
     evaluation: |
       Prefer collectors/secret-redaction or imports/secret-redaction/*.json with measuredAt ≤90d.
       PASS if statusHint=pass / sec2M2Satisfied === true
-      (redaction config + detectionRatePct=100 + canaryCoversApiKeyBearerAndAwsKeyPatterns=true + measuredAt ≤90d).
+      (redaction config + non-empty cases/results + detectionRatePct=100 +
+      canaryCoversApiKeyBearerAndAwsKeyPatterns=true + measuredAt ≤90d).
       NOT_APPLICABLE if productionLoggingOrTracingPipelinesPresent=false and no in-repo redaction/canary signals.
-      PARTIAL if config/canary signals without complete import (config alone ≠ PASS).
-      FAIL if detectionRatePct<100, coversPatterns=false, or redactionConfigPresent=false without in-repo config.
+      PARTIAL if config/canary signals without complete import (config or bare detectionRatePct alone ≠ PASS).
+      FAIL if detectionRatePct<100, coversPatterns=false, or redactionConfigPresent=false without in-repo config
+      (failing import metrics beat present=false N/A).
       SEC2-M1 and OBS AI-trace redaction do not substitute. LLM redacted_thinking is not log redaction.
   SEC2-M3:
     requiredEvidence:
@@ -906,10 +913,12 @@ checks:
       privilegedProviderOrCloudKeysInClientApps=0 +
       productionKeysWithDocumentedLeastPrivilegeScopePct=100 +
       productionKeysWithinRotationPolicyPct=100 + measuredAt ≤90d).
-      NOT_APPLICABLE if productionProviderOrCloudKeysPresent=false and no in-repo key inventory
-      (rotation/scope docs alone do not block N/A).
-      PARTIAL if inventory/rotation/scope signals without complete import (rotation docs alone ≠ PASS).
-      FAIL if privileged client keys >0, scopedPct<100, or rotationPct<100.
+      NOT_APPLICABLE if productionProviderOrCloudKeysPresent=false and no in-repo key inventory,
+      rotation/scope, or client-key-risk signals (any gate signal blocks N/A launder).
+      PARTIAL if inventory/rotation/scope/client signals without complete import (rotation docs alone ≠ PASS;
+      inventory still required for PASS).
+      FAIL if privileged client keys >0, scopedPct<100, or rotationPct<100
+      (failing import metrics beat present=false N/A).
       SEC2-M1, SEC2-M2, and AUTHN-R1 do not substitute.
   SEC2-R1:
     requiredEvidence:
@@ -930,9 +939,13 @@ checks:
       (pre-commit + CI secret-scan configured + secretScanCoversPromptsAndFixtures=true +
       blocksOnHighConfidenceSecrets=true + lastGreenMainBranchOrPrMergeScanWithin7Days=true +
       measuredAt ≤7d).
-      NOT_APPLICABLE if applicationCodePromptsOrFixturesPresent=false and no in-repo pre-commit/CI secret-scan config.
-      PARTIAL if pre-commit/CI signals without complete import (config alone ≠ PASS).
-      FAIL if covers=false, blocks=false, greenWithin7d=false, or pre-commit/CI attested absent without in-repo config.
+      NOT_APPLICABLE if applicationCodePromptsOrFixturesPresent=false and no in-repo pre-commit/CI/scanner-config
+      (root gitleaks.toml counts as scanner-config and blocks N/A / not_demonstrated).
+      PARTIAL if pre-commit/CI/scanner-config signals without complete import (config alone ≠ PASS;
+      root gitleaks.toml alone → PARTIAL).
+      FAIL if covers=false, blocks=false, greenWithin7d=false, or pre-commit/CI attested absent without in-repo config
+      (failing import metrics beat present=false N/A).
+      Freshness requires measuredAt ≤7d — generatedAt is ignored.
       SEC2-M1, DX-M2, and PRM-R2 do not substitute. ≤90d content scans do not satisfy ≤7d green-scan freshness.
   SEC2-R2:
     requiredEvidence:
@@ -952,9 +965,11 @@ checks:
       PASS if statusHint=pass / sec2R2Satisfied === true
       (egress allowlist/policy + credentialEgressDestinationsDocumented=true +
       denyEventCountProvingEnforcementInLast90Days≥1 + measuredAt ≤90d).
-      NOT_APPLICABLE if runtimesHoldingCredentialsPresent=false and no in-repo egress allowlist/policy.
+      NOT_APPLICABLE if runtimesHoldingCredentialsPresent=false and no in-repo egress policy,
+      credential-runtime, destination, or deny-log signals (any gate signal blocks N/A launder).
       PARTIAL if allowlist/destination/deny signals without complete import (allowlist alone ≠ PASS).
-      FAIL if destinations=false, denyCount=0, or allowlist attested absent without in-repo policy.
+      FAIL if destinations=false, denyCount=0, or allowlist attested absent without in-repo policy
+      (failing import metrics beat present=false N/A).
       SEC-M4, INF-M3, and SEC2-M1 do not substitute.
   SEC2-R3:
     requiredEvidence:
@@ -974,9 +989,12 @@ checks:
       PASS if statusHint=pass / sec2R3Satisfied === true
       (dataset secret/PII scan gate + publishBlockedWhenCriticalFindingsOpen=true +
       fineTuneOrEvalCorporaPublishedInLast90DaysWithLinkedScanReportPct=100 + measuredAt ≤90d).
-      NOT_APPLICABLE if fineTuneOrEvalCorpusPublishPresent=false and no in-repo scan gate.
-      PARTIAL if gate/blocking/report signals without complete import (gate config alone ≠ PASS).
-      FAIL if blocking=false, linkedPct<100, or gate attested absent without in-repo config.
+      NOT_APPLICABLE if fineTuneOrEvalCorpusPublishPresent=false and no in-repo corpus-publish,
+      scan-gate, blocking, or scan-report signals (any gate signal blocks N/A launder).
+      PARTIAL if gate/blocking/report/corpus signals without complete import (gate config alone ≠ PASS;
+      scan gate still required for PASS).
+      FAIL if blocking=false, linkedPct<100, or gate attested absent without in-repo config
+      (failing import metrics beat present=false N/A).
       SEC2-R1, SEC2-M1, DG-M2, and DG-R3 do not substitute.
   PRM-M1:
     requiredEvidence:

@@ -140,10 +140,11 @@ PASS only with ≥10 automated cross-tenant attack cases and 0 successful unauth
 ```bash
 npm run aprf:secrets -- \
   --target <project> --out <project>/aprf-assessment
-# or drop gitleaks/trufflehog SARIF under imports/secrets-hygiene/
+# or drop coverage JSON under imports/secrets-hygiene/
+# (explicit privilegedSecretsInReposPromptsOrClientBundles=0; empty SARIF alone ≠ clean scan)
 ```
 
-PASS only with secrets-manager runtime wiring AND a clean secret-scan (0 privileged secrets in repos/prompts/fixtures).
+PASS only with secrets-manager runtime wiring AND a clean secret-scan import (0 privileged secrets in repos/prompts/fixtures, measuredAt ≤90d). Heuristic embeds fail even when `productionRuntimeSecretsPresent=false`.
 
 **SEC2-M2 (secret-redaction):** log scrubbers in code are **supporting** only. Prefer:
 
@@ -153,7 +154,7 @@ npm run aprf:secret-redaction -- \
 # or drop canary harness JSON under imports/secret-redaction/
 ```
 
-PASS only with redaction config + canary results showing 100% detection of synthetic API/bearer/AWS-key patterns in persisted logs/traces.
+PASS only with redaction config + non-empty canary `cases`/`results` showing 100% detection of synthetic API/bearer/AWS-key patterns in persisted logs/traces (measuredAt ≤90d). Bare `detectionRatePct=100` without cases is not a PASS.
 
 **SEC2-M3 (key-rotation-scope):** rotation calendars alone are **supporting** only. Prefer:
 
@@ -173,7 +174,7 @@ npm run aprf:precommit-ci-secret-scan -- \
 # or drop green-scan coverage JSON under imports/precommit-ci-secret-scan/
 ```
 
-PASS only with pre-commit + CI secret scanning covering prompts/fixtures, blocking on high-confidence secrets, and a green main-branch or PR-merge scan ≤7 days (measuredAt ≤7d). SEC2-M1 ≤90d content scans do not satisfy this freshness gate.
+PASS only with pre-commit + CI secret scanning covering prompts/fixtures, blocking on high-confidence secrets, and a green main-branch or PR-merge scan ≤7 days (`measuredAt` ≤7d — `generatedAt` is ignored). Root `gitleaks.toml` alone is PARTIAL, not not_demonstrated. SEC2-M1 ≤90d content scans do not satisfy this freshness gate.
 
 **SEC2-R2 (credential-egress-controls):** allowlist docs alone are **supporting** only. Prefer:
 
@@ -269,7 +270,7 @@ Batch in one message; allow replies like `all C`, `SEC2-M1:A`, or a full A/B/C m
 | User says NO | **`FAIL`** |
 | Don't know / nothing found | **`NOT_DEMONSTRATED`** |
 
-Same bar for `automated` / `hybrid`: chat YES alone never upgrades to PASS. SEC2-M1 is `automated` — it expects scan/config evidence (detectors + `evidenceRequired`), not a verbal attestation.
+Same bar for `automated` / `hybrid`: chat YES alone never upgrades to PASS. SEC2-M1 is `hybrid` — it expects secrets-manager + scan/import evidence (detectors + `evidenceRequired`), not a verbal attestation.
 
 **Answer → status mapping** (record on the control as `userAttestation`):
 
