@@ -3,7 +3,7 @@
  *
  * Discovers tool-gateway / tool-runtime authz and deny-suite signals.
  * Import coverage under imports/tool-gateway-authz/ unlocks PASS
- * (measuredAt ≤90d).
+ * (path coverage 100% + deny 100% + no-bypass; measuredAt ≤90d).
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
@@ -48,6 +48,7 @@ export interface ToolGatewayAuthzReport {
   importedResults: {
     found: boolean;
     productionToolsOrAgentsPresent: boolean | null;
+    productionToolInvocationPathsCoveredByAuthzPct: number | null;
     unauthorizedToolCallsDeniedPct: number | null;
     modelOutputAloneCannotBypassGateway: boolean | null;
     measuredAt: string | null;
@@ -76,6 +77,7 @@ function loadImported(
 ): ToolGatewayAuthzReport["importedResults"] {
   const sources: string[] = [];
   let productionToolsOrAgentsPresent: boolean | null = null;
+  let productionToolInvocationPathsCoveredByAuthzPct: number | null = null;
   let unauthorizedToolCallsDeniedPct: number | null = null;
   let modelOutputAloneCannotBypassGateway: boolean | null = null;
   let measuredAt: string | null = null;
@@ -91,7 +93,14 @@ function loadImported(
       productionToolsOrAgentsPresent = mergeOrBool(
         productionToolsOrAgentsPresent,
         asBool(data.productionToolsOrAgentsPresent) ??
-          asBool(data.production_tools_or_agents_present),
+          asBool(data.production_tools_or_agents_present) ??
+          asBool(data.productionAgentsOrToolWorkloadsPresent),
+      );
+      productionToolInvocationPathsCoveredByAuthzPct = mergeMinNum(
+        productionToolInvocationPathsCoveredByAuthzPct,
+        asNum(data.productionToolInvocationPathsCoveredByAuthzPct) ??
+          asNum(data.production_tool_invocation_paths_covered_by_authz_pct) ??
+          asNum(data.pathCoveragePct),
       );
       unauthorizedToolCallsDeniedPct = mergeMinNum(
         unauthorizedToolCallsDeniedPct,
@@ -111,6 +120,7 @@ function loadImported(
   return {
     found: sources.length > 0,
     productionToolsOrAgentsPresent,
+    productionToolInvocationPathsCoveredByAuthzPct,
     unauthorizedToolCallsDeniedPct,
     modelOutputAloneCannotBypassGateway,
     measuredAt,
@@ -132,7 +142,7 @@ export function buildToolGatewayAuthzReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No tool-gateway authz signals — TOL-M1 remains not demonstrated until deny coverage or productionToolsOrAgentsPresent=false is imported.",
+      "No tool-gateway authz signals — TOL-M1 remains not demonstrated until path coverage + deny + no-bypass import or productionToolsOrAgentsPresent=false is imported.",
     );
   }
   if (opts.gatewayAuthz.found) {
@@ -145,11 +155,11 @@ export function buildToolGatewayAuthzReport(opts: {
   }
   if (opts.imported.found) {
     notes.push(
-      `Imported: ${opts.imported.sources.join(", ")} (present=${opts.imported.productionToolsOrAgentsPresent}, deniedPct=${opts.imported.unauthorizedToolCallsDeniedPct}, noBypass=${opts.imported.modelOutputAloneCannotBypassGateway}, measuredAt=${opts.imported.measuredAt})`,
+      `Imported: ${opts.imported.sources.join(", ")} (present=${opts.imported.productionToolsOrAgentsPresent}, pathCoverage=${opts.imported.productionToolInvocationPathsCoveredByAuthzPct}, deniedPct=${opts.imported.unauthorizedToolCallsDeniedPct}, noBypass=${opts.imported.modelOutputAloneCannotBypassGateway}, measuredAt=${opts.imported.measuredAt})`,
     );
   } else if (gateSignalsPresent) {
     notes.push(
-      "Signals alone are PARTIAL — import unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway=true (measuredAt ≤90d) under imports/tool-gateway-authz/ to PASS.",
+      "Signals alone are PARTIAL — import productionToolInvocationPathsCoveredByAuthzPct=100 + unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway=true (measuredAt ≤90d) under imports/tool-gateway-authz/ to PASS.",
     );
   }
 
@@ -161,14 +171,25 @@ export function buildToolGatewayAuthzReport(opts: {
   const surfacePresent =
     surfaceProvedForNaOverride ||
     opts.imported.productionToolsOrAgentsPresent === true;
+  const coverageOk =
+    opts.imported.productionToolInvocationPathsCoveredByAuthzPct === 100;
   const denyOk = opts.imported.unauthorizedToolCallsDeniedPct === 100;
   const bypassOk = opts.imported.modelOutputAloneCannotBypassGateway === true;
+  const passReady =
+    surfacePresent &&
+    coverageOk &&
+    denyOk &&
+    bypassOk &&
+    importFresh &&
+    opts.imported.found;
 
   const naCandidate =
     opts.imported.found &&
     opts.imported.productionToolsOrAgentsPresent === false &&
     !surfaceProvedForNaOverride;
   const contradictingFail =
+    (opts.imported.productionToolInvocationPathsCoveredByAuthzPct !== null &&
+      opts.imported.productionToolInvocationPathsCoveredByAuthzPct < 100) ||
     (opts.imported.unauthorizedToolCallsDeniedPct !== null &&
       opts.imported.unauthorizedToolCallsDeniedPct < 100) ||
     opts.imported.modelOutputAloneCannotBypassGateway === false;
@@ -181,7 +202,7 @@ export function buildToolGatewayAuthzReport(opts: {
     statusHint = "fail";
     tolM1Satisfied = false;
     notes.push(
-      "Imported evidence shows incomplete deny coverage or model-output bypass — TOL-M1 fail.",
+      "Imported evidence shows incomplete path coverage, deny coverage, or model-output bypass — TOL-M1 fail.",
     );
   } else if (naCandidate) {
     statusHint = "not_applicable";
@@ -196,7 +217,7 @@ export function buildToolGatewayAuthzReport(opts: {
     notes.push(
       "Imported productionToolsOrAgentsPresent=false ignored — in-repo gateway/deny signals prove the surface exists.",
     );
-    if (surfacePresent && denyOk && bypassOk && importFresh && opts.imported.found) {
+    if (passReady) {
       statusHint = "pass";
       tolM1Satisfied = true;
     } else {
@@ -206,13 +227,7 @@ export function buildToolGatewayAuthzReport(opts: {
   } else if (!gateSignalsPresent && !opts.imported.found) {
     statusHint = "not_demonstrated";
     tolM1Satisfied = null;
-  } else if (
-    surfacePresent &&
-    denyOk &&
-    bypassOk &&
-    importFresh &&
-    opts.imported.found
-  ) {
+  } else if (passReady) {
     statusHint = "pass";
     tolM1Satisfied = true;
   } else {

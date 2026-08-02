@@ -1,5 +1,5 @@
 /**
- * Smoke: destructive-tool-dry-run needs 100% dry-run + promotion evidence + measuredAt ≤90d.
+ * Smoke: destructive-tool-dry-run needs inventory 100% + dry-run 100% + promotion evidence + measuredAt ≤90d.
  */
 import {
   mkdtempSync,
@@ -44,6 +44,7 @@ function coverage(extra: Record<string, unknown> = {}) {
   return JSON.stringify({
     measuredAt: new Date().toISOString(),
     destructiveToolsPresent: true,
+    destructiveToolsInventoriedPct: 100,
     destructiveToolsWithDryRunInNonProdPct: 100,
     lastDestructivePromotionHasDryRunEvidenceWithin90Days: true,
     ...extra,
@@ -82,6 +83,41 @@ async function main() {
     const r2 = await run(tSig, outFail);
     if (r2.summary.statusHint !== "fail") {
       throw new Error(`expected fail, got ${JSON.stringify(r2.summary)}`);
+    }
+
+    const outInvFail = join(root, "o-inv-fail");
+    mkdirSync(join(outInvFail, "imports", "destructive-tool-dry-run"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outInvFail, "imports", "destructive-tool-dry-run", "coverage.json"),
+      coverage({ destructiveToolsInventoriedPct: 40 }),
+    );
+    const rInvFail = await run(tSig, outInvFail);
+    if (rInvFail.summary.statusHint !== "fail") {
+      throw new Error(
+        `inventory <100 must FAIL: ${JSON.stringify(rInvFail.summary)}`,
+      );
+    }
+
+    const outNoInv = join(root, "o-no-inv");
+    mkdirSync(join(outNoInv, "imports", "destructive-tool-dry-run"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNoInv, "imports", "destructive-tool-dry-run", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        destructiveToolsPresent: true,
+        destructiveToolsWithDryRunInNonProdPct: 100,
+        lastDestructivePromotionHasDryRunEvidenceWithin90Days: true,
+      }),
+    );
+    const rNoInv = await run(tSig, outNoInv);
+    if (rNoInv.summary.statusHint === "pass") {
+      throw new Error(
+        `dry-run+promotion without inventory must not PASS: ${JSON.stringify(rNoInv.summary)}`,
+      );
     }
 
     const outAged = join(root, "o-aged");

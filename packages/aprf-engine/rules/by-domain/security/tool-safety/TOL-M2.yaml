@@ -3,27 +3,33 @@ category: "tool-safety"
 title: "Tools must be allowlisted per agent/workload; unknown tools must not be inventable at runtime"
 description: >
   Production agents and workloads shall have an explicit tool allowlist, and
-  requests for unknown tools shall be denied—proven by allowlist coverage for
-  100% of production agents plus automated negative tests, not by open MCP
-  “all tools” bindings or prompt-only restrictions.
+  unknown or model-invented tool names shall be rejected at runtime—proven by
+  an inventory of production agents that can invoke tools, 100% allowlist
+  coverage, automated unknown-tool deny tests, and runtime rejection of
+  invented names—not by open MCP "all tools" bindings, prompt-only
+  restrictions, or a deny suite that covers only a subset of agents.
 whyItMatters: >
   Tool names invented at runtime expand agency beyond the intended blast
-  radius and turn prompt injection into arbitrary capability. Distinct from TOL-M1
-  (per-invocation server-side authz), SCI-M2 (external AI tool/MCP/plugin
-  inventory+pin+review), AUTHN-M2 (MCP/AI S2S machine identity), and TOL-M5
-  (signed tool catalogs / reject unsigned).
+  radius and turn prompt injection into arbitrary capability. Distinct from
+  TOL-M1 (per-invocation server-side authz independent of allowlists), TOL-M3
+  (extra gates on high-impact tools), TOL-M5 (signed tool catalogs / reject
+  unsigned), SCI-M2 (external AI tool/MCP/plugin inventory+pin+review),
+  AUTHN-M2 (MCP/AI S2S machine identity), and AGN-M1 (charter references to
+  allowlists without proving runtime unknown-tool reject).
 severity: "critical"
 weight: 4
 gate: "mandatory"
 passCondition: >
-  100% of production agents/workloads that can invoke tools have an explicit
-  tool allowlist; requests for tools outside the allowlist are denied at 100%
-  in automated tests (measuredAt ≤90 days). If no production agents/workloads
-  invoke tools, score NOT_APPLICABLE.
+  Inventory covers 100% of production agents/workloads that can invoke tools;
+  each has an explicit tool allowlist; automated tests deny unknown-tool
+  requests at 100%; unknown or model-invented tool names are rejected at
+  runtime (measuredAt ≤90 days). If no production agents/workloads invoke
+  tools, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Per-agent/workload tool allowlist configuration covering production agents"
+  - "Inventory of production agents/workloads that can invoke tools"
+  - "Per-agent/workload tool allowlist configuration covering 100% of those agents"
   - "Negative tests for unknown / inventable tool names"
-  - "Attest or results: agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 (measuredAt ≤90 days)"
+  - "Attest or results: agentsInventoriedPct=100 + agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 + unknownOrInventedToolsRejectedAtRuntime=true (measuredAt ≤90 days)"
 detection:
   capability: "hybrid"
   detectors:
@@ -32,13 +38,15 @@ detection:
         hint: >
           Discover per-agent tool allowlists and unknown-tool deny tests;
           ingest coverage under imports/tool-allowlist/; require
+          agentsInventoriedPct=100 +
           agentsWithExplicitToolAllowlistPct=100 +
-          unknownToolRequestsDeniedPct=100 + measuredAt ≤90 days.
+          unknownToolRequestsDeniedPct=100 +
+          unknownOrInventedToolsRejectedAtRuntime=true + measuredAt ≤90 days.
     - id: "mcp-tool-allowlist"
       params:
         hint: >
           Supporting signal — MCP/tool allowlist config present; alone does
-          not prove 100% agent coverage or deny tests.
+          not prove 100% agent coverage, deny tests, or runtime invent-reject.
     - id: "mcp-no-unrestricted-shell"
       params:
         hint: Supporting signal — no unrestricted shell tool bindings.
@@ -48,25 +56,35 @@ detection:
     - id: "manual-attest"
       params:
         hint: >
-          If automation cannot prove coverage, attest 100% agent allowlist
-          coverage and 100% unknown-tool deny in tests (measuredAt ≤90 days).
+          If automation cannot prove coverage, attest inventory of production
+          tool-invoking agents, 100% allowlist coverage, 100% unknown-tool
+          deny in tests, and runtime rejection of invented tool names
+          (measuredAt ≤90 days).
 manualVerification: >
   1) Confirm production agents/workloads can invoke tools. If none, score
-  NOT_APPLICABLE. 2) Open per-agent/workload allowlists covering 100% of those
-  agents. 3) Review negative tests: unknown/inventable tool names are denied
-  at 100%. 4) PASS only if coverage + deny hold with measuredAt ≤90 days. Do
-  not PASS from “tools: *” MCP bindings. TOL-M1 authz alone does not prove
-  allowlists. SCI-M2 inventory/pin alone does not prove per-agent allowlists.
-  TOL-M5 signed catalogs alone do not prove unknown-tool denial.
+  NOT_APPLICABLE. 2) Inventory those agents/workloads (required—do not PASS
+  from a deny suite without an agent inventory). 3) Open per-agent/workload
+  allowlists covering 100% of inventoried agents. 4) Review negative tests:
+  unknown/inventable tool names are denied at 100%. 5) Confirm runtime/
+  gateway rejects unknown or model-invented tool names (not prompt-only).
+  6) PASS only if inventory + allowlist coverage + deny + runtime invent-
+  reject hold with measuredAt ≤90 days. Do not PASS from "tools: *" or open
+  "all tools" MCP bindings. TOL-M1 authz alone does not prove allowlists.
+  TOL-M3 high-impact gates alone do not prove base allowlists. SCI-M2
+  inventory/pin alone does not prove per-agent allowlists. TOL-M5 signed
+  catalogs alone do not prove unknown-tool denial. AGN-M1 charter allowlist
+  references alone do not prove runtime reject.
 falsePositiveGuidance: >
-  Do not pass open “all tools” MCP configs. Do not pass prompt-only “only use
-  these tools” instructions. Do not pass a single shared allowlist that omits
-  agents. Do not score TOL-M1, SCI-M2, AUTHN-M2, or TOL-M5 as substitutes.
-  Named exceptions need owner and expiry ≤90 days.
+  Do not pass open "all tools" MCP configs. Do not pass prompt-only "only use
+  these tools" instructions. Do not pass a deny suite that covers only a
+  subset of production agents. Do not pass a single shared allowlist that
+  omits agents. Do not pass charter documents (AGN-M1) as runtime
+  enforcement. Do not score TOL-M1, TOL-M3, TOL-M5, SCI-M2, or AUTHN-M2 as
+  substitutes. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Publish per-agent/workload tool allowlists for every production agent that can invoke tools"
-  - "Deny unknown/inventable tool names in the gateway; add automated negative tests at 100%"
-  - "Retain coverage under imports/tool-allowlist/ (measuredAt ≤90 days)"
+  - "Inventory production agents/workloads that can invoke tools; publish per-agent tool allowlists for 100% of them"
+  - "Deny unknown/inventable tool names at the gateway/runtime; add automated negative tests at 100%"
+  - "Prove unknown or model-invented tool names are rejected at runtime; retain under imports/tool-allowlist/ (measuredAt ≤90 days)"
   - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Model Context Protocol — security considerations"
@@ -81,6 +99,7 @@ relatedRules:
   - "TOL-M5"
   - "SCI-M2"
   - "AUTHN-M2"
+  - "AGN-M1"
   - "AGN-M2"
 tags:
   - "tool-safety"
@@ -88,6 +107,7 @@ tags:
   - "hybrid"
   - "allowlist"
   - "mcp"
+  - "unknown-tool-deny"
 applicability:
   technologies: []
   minCriticality: 2

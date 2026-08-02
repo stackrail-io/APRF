@@ -3,7 +3,7 @@
  *
  * Discovers signed tool-catalog / verify-on-load signals.
  * Import coverage under imports/signed-tool-catalog/ unlocks PASS
- * (measuredAt ≤90d).
+ * (inventory 100% + reject unsigned + review; measuredAt ≤90d).
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
@@ -14,11 +14,12 @@ import type {
   EvidenceNode,
 } from "./types.ts";
 import { ensureDir, listImportFiles, readText, redact } from "./lib/fs.ts";
-import { collectRefs } from "./lib/collect-refs.ts";
+import { asNum, collectRefs } from "./lib/collect-refs.ts";
 import {
   asBool,
   measuredAtFresh,
   mergeAndBool,
+  mergeMinNum,
   mergeOldestMeasuredAt,
   mergeOrBool,
   parseMeasuredAt,
@@ -47,6 +48,7 @@ export interface SignedToolCatalogReport {
   importedResults: {
     found: boolean;
     productionToolCatalogsPresent: boolean | null;
+    productionToolCatalogsInventoriedPct: number | null;
     unsignedOrUnapprovedCatalogsRejected: boolean | null;
     supplyChainReviewWithin90DaysOrSinceLastChange: boolean | null;
     measuredAt: string | null;
@@ -75,6 +77,7 @@ function loadImported(
 ): SignedToolCatalogReport["importedResults"] {
   const sources: string[] = [];
   let productionToolCatalogsPresent: boolean | null = null;
+  let productionToolCatalogsInventoriedPct: number | null = null;
   let unsignedOrUnapprovedCatalogsRejected: boolean | null = null;
   let supplyChainReviewWithin90DaysOrSinceLastChange: boolean | null = null;
   let measuredAt: string | null = null;
@@ -91,6 +94,12 @@ function loadImported(
         productionToolCatalogsPresent,
         asBool(data.productionToolCatalogsPresent) ??
           asBool(data.production_tool_catalogs_present),
+      );
+      productionToolCatalogsInventoriedPct = mergeMinNum(
+        productionToolCatalogsInventoriedPct,
+        asNum(data.productionToolCatalogsInventoriedPct) ??
+          asNum(data.production_tool_catalogs_inventoried_pct) ??
+          asNum(data.inventoryCoveragePct),
       );
       unsignedOrUnapprovedCatalogsRejected = mergeAndBool(
         unsignedOrUnapprovedCatalogsRejected,
@@ -110,6 +119,7 @@ function loadImported(
   return {
     found: sources.length > 0,
     productionToolCatalogsPresent,
+    productionToolCatalogsInventoriedPct,
     unsignedOrUnapprovedCatalogsRejected,
     supplyChainReviewWithin90DaysOrSinceLastChange,
     measuredAt,
@@ -131,7 +141,7 @@ export function buildSignedToolCatalogReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No signed-tool-catalog signals — TOL-M5 remains not demonstrated until reject/review coverage or productionToolCatalogsPresent=false is imported.",
+      "No signed-tool-catalog signals — TOL-M5 remains not demonstrated until inventory/reject/review coverage or productionToolCatalogsPresent=false is imported.",
     );
   }
   if (opts.signedCatalog.found) {
@@ -146,11 +156,11 @@ export function buildSignedToolCatalogReport(opts: {
   }
   if (opts.imported.found) {
     notes.push(
-      `Imported: ${opts.imported.sources.join(", ")} (present=${opts.imported.productionToolCatalogsPresent}, rejectUnsigned=${opts.imported.unsignedOrUnapprovedCatalogsRejected}, reviewOk=${opts.imported.supplyChainReviewWithin90DaysOrSinceLastChange}, measuredAt=${opts.imported.measuredAt})`,
+      `Imported: ${opts.imported.sources.join(", ")} (present=${opts.imported.productionToolCatalogsPresent}, inventoriedPct=${opts.imported.productionToolCatalogsInventoriedPct}, rejectUnsigned=${opts.imported.unsignedOrUnapprovedCatalogsRejected}, reviewOk=${opts.imported.supplyChainReviewWithin90DaysOrSinceLastChange}, measuredAt=${opts.imported.measuredAt})`,
     );
   } else if (gateSignalsPresent) {
     notes.push(
-      "Signals alone are PARTIAL — import unsignedOrUnapprovedCatalogsRejected=true + supplyChainReviewWithin90DaysOrSinceLastChange=true (measuredAt ≤90d) under imports/signed-tool-catalog/ to PASS.",
+      "Signals alone are PARTIAL — import productionToolCatalogsInventoriedPct=100 + unsignedOrUnapprovedCatalogsRejected=true + supplyChainReviewWithin90DaysOrSinceLastChange=true (measuredAt ≤90d) under imports/signed-tool-catalog/ to PASS. Reject/review without catalog inventory ≠ PASS.",
     );
   }
 
@@ -162,6 +172,8 @@ export function buildSignedToolCatalogReport(opts: {
   const surfacePresent =
     surfaceProvedForNaOverride ||
     opts.imported.productionToolCatalogsPresent === true;
+  const inventoryOk =
+    opts.imported.productionToolCatalogsInventoriedPct === 100;
   const rejectOk = opts.imported.unsignedOrUnapprovedCatalogsRejected === true;
   const reviewOk =
     opts.imported.supplyChainReviewWithin90DaysOrSinceLastChange === true;
@@ -171,6 +183,8 @@ export function buildSignedToolCatalogReport(opts: {
     opts.imported.productionToolCatalogsPresent === false &&
     !surfaceProvedForNaOverride;
   const contradictingFail =
+    (opts.imported.productionToolCatalogsInventoriedPct !== null &&
+      opts.imported.productionToolCatalogsInventoriedPct < 100) ||
     opts.imported.unsignedOrUnapprovedCatalogsRejected === false ||
     opts.imported.supplyChainReviewWithin90DaysOrSinceLastChange === false;
   const explicitFail = opts.imported.found && contradictingFail;
@@ -182,7 +196,7 @@ export function buildSignedToolCatalogReport(opts: {
     statusHint = "fail";
     tolM5Satisfied = false;
     notes.push(
-      "Imported evidence shows unsigned catalogs accepted or stale supply-chain review — TOL-M5 fail.",
+      "Imported evidence shows incomplete catalog inventory, unsigned catalogs accepted, or stale supply-chain review — TOL-M5 fail.",
     );
   } else if (naCandidate) {
     statusHint = "not_applicable";
@@ -197,7 +211,14 @@ export function buildSignedToolCatalogReport(opts: {
     notes.push(
       "Imported productionToolCatalogsPresent=false ignored — in-repo signed/verify signals prove the surface exists.",
     );
-    if (surfacePresent && rejectOk && reviewOk && importFresh && opts.imported.found) {
+    if (
+      surfacePresent &&
+      inventoryOk &&
+      rejectOk &&
+      reviewOk &&
+      importFresh &&
+      opts.imported.found
+    ) {
       statusHint = "pass";
       tolM5Satisfied = true;
     } else {
@@ -209,6 +230,7 @@ export function buildSignedToolCatalogReport(opts: {
     tolM5Satisfied = null;
   } else if (
     surfacePresent &&
+    inventoryOk &&
     rejectOk &&
     reviewOk &&
     importFresh &&

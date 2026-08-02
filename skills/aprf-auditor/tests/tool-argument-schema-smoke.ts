@@ -1,5 +1,5 @@
 /**
- * Smoke: tool-argument-schema needs 100% schema + 100% reject + measuredAt ≤90d.
+ * Smoke: tool-argument-schema needs inventory 100% + schema 100% + reject 100% + measuredAt ≤90d.
  */
 import {
   mkdtempSync,
@@ -44,6 +44,7 @@ function coverage(extra: Record<string, unknown> = {}) {
   return JSON.stringify({
     measuredAt: new Date().toISOString(),
     productionToolsPresent: true,
+    productionToolsInventoriedPct: 100,
     toolsWithDeclaredArgumentSchemaPct: 100,
     invalidArgumentFixturesRejectedPct: 100,
     ...extra,
@@ -84,6 +85,41 @@ async function main() {
     const r2 = await run(tSig, outFail);
     if (r2.summary.statusHint !== "fail") {
       throw new Error(`expected fail, got ${JSON.stringify(r2.summary)}`);
+    }
+
+    const outInvFail = join(root, "o-inv-fail");
+    mkdirSync(join(outInvFail, "imports", "tool-argument-schema"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outInvFail, "imports", "tool-argument-schema", "coverage.json"),
+      coverage({ productionToolsInventoriedPct: 60 }),
+    );
+    const rInvFail = await run(tSig, outInvFail);
+    if (rInvFail.summary.statusHint !== "fail") {
+      throw new Error(
+        `inventory <100 must FAIL: ${JSON.stringify(rInvFail.summary)}`,
+      );
+    }
+
+    const outNoInv = join(root, "o-no-inv");
+    mkdirSync(join(outNoInv, "imports", "tool-argument-schema"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNoInv, "imports", "tool-argument-schema", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionToolsPresent: true,
+        toolsWithDeclaredArgumentSchemaPct: 100,
+        invalidArgumentFixturesRejectedPct: 100,
+      }),
+    );
+    const rNoInv = await run(tSig, outNoInv);
+    if (rNoInv.summary.statusHint === "pass") {
+      throw new Error(
+        `schema+reject without inventory must not PASS: ${JSON.stringify(rNoInv.summary)}`,
+      );
     }
 
     const outAged = join(root, "o-aged");

@@ -3,7 +3,7 @@
  *
  * Discovers impact-tiered tool inventories and approval/dual/policy gates.
  * Import coverage under imports/high-impact-tool-gates/ unlocks PASS
- * (measuredAt ≤90d).
+ * (inventory 100% + gates 100% + ungated impossible; measuredAt ≤90d).
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
@@ -48,6 +48,7 @@ export interface HighImpactToolGatesReport {
   importedResults: {
     found: boolean;
     highImpactToolsPresent: boolean | null;
+    highImpactToolsInventoriedPct: number | null;
     highImpactToolsWithConfiguredGatePct: number | null;
     ungatedExecutionImpossibleInTests: boolean | null;
     measuredAt: string | null;
@@ -76,6 +77,7 @@ function loadImported(
 ): HighImpactToolGatesReport["importedResults"] {
   const sources: string[] = [];
   let highImpactToolsPresent: boolean | null = null;
+  let highImpactToolsInventoriedPct: number | null = null;
   let highImpactToolsWithConfiguredGatePct: number | null = null;
   let ungatedExecutionImpossibleInTests: boolean | null = null;
   let measuredAt: string | null = null;
@@ -92,6 +94,14 @@ function loadImported(
         highImpactToolsPresent,
         asBool(data.highImpactToolsPresent) ??
           asBool(data.high_impact_tools_present),
+      );
+      highImpactToolsInventoriedPct = mergeMinNum(
+        highImpactToolsInventoriedPct,
+        asNum(data.highImpactToolsInventoriedPct) ??
+          asNum(data.high_impact_tools_inventoried_pct) ??
+          asNum(data.productionHighImpactToolsInventoriedPct) ??
+          asNum(data.production_high_impact_tools_inventoried_pct) ??
+          asNum(data.inventoryCoveragePct),
       );
       highImpactToolsWithConfiguredGatePct = mergeMinNum(
         highImpactToolsWithConfiguredGatePct,
@@ -111,6 +121,7 @@ function loadImported(
   return {
     found: sources.length > 0,
     highImpactToolsPresent,
+    highImpactToolsInventoriedPct,
     highImpactToolsWithConfiguredGatePct,
     ungatedExecutionImpossibleInTests,
     measuredAt,
@@ -131,7 +142,7 @@ export function buildHighImpactToolGatesReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No high-impact tool gate signals — TOL-M3 remains not demonstrated until gate coverage or highImpactToolsPresent=false is imported.",
+      "No high-impact tool gate signals — TOL-M3 remains not demonstrated until inventory/gate coverage or highImpactToolsPresent=false is imported.",
     );
   }
   if (opts.impactTier.found) {
@@ -144,11 +155,11 @@ export function buildHighImpactToolGatesReport(opts: {
   }
   if (opts.imported.found) {
     notes.push(
-      `Imported: ${opts.imported.sources.join(", ")} (present=${opts.imported.highImpactToolsPresent}, gatePct=${opts.imported.highImpactToolsWithConfiguredGatePct}, ungatedImpossible=${opts.imported.ungatedExecutionImpossibleInTests}, measuredAt=${opts.imported.measuredAt})`,
+      `Imported: ${opts.imported.sources.join(", ")} (present=${opts.imported.highImpactToolsPresent}, inventoriedPct=${opts.imported.highImpactToolsInventoriedPct}, gatePct=${opts.imported.highImpactToolsWithConfiguredGatePct}, ungatedImpossible=${opts.imported.ungatedExecutionImpossibleInTests}, measuredAt=${opts.imported.measuredAt})`,
     );
   } else if (gateSignalsPresent) {
     notes.push(
-      "Signals alone are PARTIAL — import highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests=true (measuredAt ≤90d) under imports/high-impact-tool-gates/ to PASS.",
+      "Signals alone are PARTIAL — import highImpactToolsInventoriedPct=100 + highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests=true (measuredAt ≤90d) under imports/high-impact-tool-gates/ to PASS. Bypass suite without inventory coverage ≠ PASS.",
     );
   }
 
@@ -159,6 +170,7 @@ export function buildHighImpactToolGatesReport(opts: {
   );
   const surfacePresent =
     surfaceProvedForNaOverride || opts.imported.highImpactToolsPresent === true;
+  const inventoryOk = opts.imported.highImpactToolsInventoriedPct === 100;
   const gateOk = opts.imported.highImpactToolsWithConfiguredGatePct === 100;
   const bypassOk = opts.imported.ungatedExecutionImpossibleInTests === true;
 
@@ -167,6 +179,8 @@ export function buildHighImpactToolGatesReport(opts: {
     opts.imported.highImpactToolsPresent === false &&
     !surfaceProvedForNaOverride;
   const contradictingFail =
+    (opts.imported.highImpactToolsInventoriedPct !== null &&
+      opts.imported.highImpactToolsInventoriedPct < 100) ||
     (opts.imported.highImpactToolsWithConfiguredGatePct !== null &&
       opts.imported.highImpactToolsWithConfiguredGatePct < 100) ||
     opts.imported.ungatedExecutionImpossibleInTests === false;
@@ -179,7 +193,7 @@ export function buildHighImpactToolGatesReport(opts: {
     statusHint = "fail";
     tolM3Satisfied = false;
     notes.push(
-      "Imported evidence shows incomplete gate coverage or ungated execution possible — TOL-M3 fail.",
+      "Imported evidence shows incomplete inventory coverage, gate coverage, or ungated execution possible — TOL-M3 fail.",
     );
   } else if (naCandidate) {
     statusHint = "not_applicable";
@@ -194,7 +208,14 @@ export function buildHighImpactToolGatesReport(opts: {
     notes.push(
       "Imported highImpactToolsPresent=false ignored — in-repo impact/gate signals prove the surface exists.",
     );
-    if (surfacePresent && gateOk && bypassOk && importFresh && opts.imported.found) {
+    if (
+      surfacePresent &&
+      inventoryOk &&
+      gateOk &&
+      bypassOk &&
+      importFresh &&
+      opts.imported.found
+    ) {
       statusHint = "pass";
       tolM3Satisfied = true;
     } else {
@@ -206,6 +227,7 @@ export function buildHighImpactToolGatesReport(opts: {
     tolM3Satisfied = null;
   } else if (
     surfacePresent &&
+    inventoryOk &&
     gateOk &&
     bypassOk &&
     importFresh &&

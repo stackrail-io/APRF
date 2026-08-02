@@ -21,9 +21,11 @@ emits:
     - repo-destructive-tool-dry-run
 mapsToChecks: [TOL-R1]
 whenUnavailable: >
-  Signals alone are PARTIAL. TOL-R1 PASS needs destructiveToolsWithDryRunInNonProdPct=100
-  and lastDestructivePromotionHasDryRunEvidenceWithin90Days=true, measuredAt ≤90 days under
-  imports/destructive-tool-dry-run/. Set destructiveToolsPresent=false for
+  Signals alone are PARTIAL. TOL-R1 PASS needs destructiveToolsInventoriedPct=100,
+  destructiveToolsWithDryRunInNonProdPct=100, and
+  lastDestructivePromotionHasDryRunEvidenceWithin90Days=true, measuredAt ≤90 days under
+  imports/destructive-tool-dry-run/. Promotion evidence without inventory ≠ PASS.
+  Set destructiveToolsPresent=false for
   NOT_APPLICABLE only when no in-repo dry-run/destructive signals.
 live:
   required: false

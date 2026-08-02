@@ -21,9 +21,10 @@ emits:
     - repo-tool-argument-schema
 mapsToChecks: [TOL-M4]
 whenUnavailable: >
-  Signals alone are PARTIAL. TOL-M4 PASS needs toolsWithDeclaredArgumentSchemaPct=100
-  and invalidArgumentFixturesRejectedPct=100, measuredAt ≤90 days under
-  imports/tool-argument-schema/. Set productionToolsPresent=false for
+  Signals alone are PARTIAL. TOL-M4 PASS needs productionToolsInventoriedPct=100,
+  toolsWithDeclaredArgumentSchemaPct=100, and invalidArgumentFixturesRejectedPct=100,
+  measuredAt ≤90 days under imports/tool-argument-schema/. Reject suite without
+  tool inventory coverage ≠ PASS. Set productionToolsPresent=false for
   NOT_APPLICABLE only when no in-repo schema/contract signals.
 live:
   required: false

@@ -21,9 +21,11 @@ emits:
     - repo-tool-gateway-authz
 mapsToChecks: [TOL-M1]
 whenUnavailable: >
-  Signals alone are PARTIAL. TOL-M1 PASS needs unauthorizedToolCallsDeniedPct=100
-  and modelOutputAloneCannotBypassGateway=true, measuredAt ≤90 days under
-  imports/tool-gateway-authz/. Set productionToolsOrAgentsPresent=false for
+  Signals alone are PARTIAL. TOL-M1 PASS needs
+  productionToolInvocationPathsCoveredByAuthzPct=100 +
+  unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway=true,
+  measuredAt ≤90 days under imports/tool-gateway-authz/. Deny suite without path
+  coverage is not a PASS. Set productionToolsOrAgentsPresent=false for
   NOT_APPLICABLE only when no in-repo gateway/deny signals.
 live:
   required: false

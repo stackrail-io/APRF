@@ -1,5 +1,5 @@
 /**
- * Smoke: signed-tool-catalog needs reject unsigned + review + measuredAt ≤90d.
+ * Smoke: signed-tool-catalog needs inventory 100% + reject unsigned + review + measuredAt ≤90d.
  */
 import {
   mkdtempSync,
@@ -44,6 +44,7 @@ function coverage(extra: Record<string, unknown> = {}) {
   return JSON.stringify({
     measuredAt: new Date().toISOString(),
     productionToolCatalogsPresent: true,
+    productionToolCatalogsInventoriedPct: 100,
     unsignedOrUnapprovedCatalogsRejected: true,
     supplyChainReviewWithin90DaysOrSinceLastChange: true,
     ...extra,
@@ -84,6 +85,41 @@ async function main() {
       throw new Error(`expected fail, got ${JSON.stringify(r2.summary)}`);
     }
 
+    const outInvFail = join(root, "o-inv-fail");
+    mkdirSync(join(outInvFail, "imports", "signed-tool-catalog"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outInvFail, "imports", "signed-tool-catalog", "coverage.json"),
+      coverage({ productionToolCatalogsInventoriedPct: 50 }),
+    );
+    const rInvFail = await run(tSig, outInvFail);
+    if (rInvFail.summary.statusHint !== "fail") {
+      throw new Error(
+        `inventory <100 must FAIL: ${JSON.stringify(rInvFail.summary)}`,
+      );
+    }
+
+    const outNoInv = join(root, "o-no-inv");
+    mkdirSync(join(outNoInv, "imports", "signed-tool-catalog"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNoInv, "imports", "signed-tool-catalog", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionToolCatalogsPresent: true,
+        unsignedOrUnapprovedCatalogsRejected: true,
+        supplyChainReviewWithin90DaysOrSinceLastChange: true,
+      }),
+    );
+    const rNoInv = await run(tSig, outNoInv);
+    if (rNoInv.summary.statusHint === "pass") {
+      throw new Error(
+        `reject+review without inventory must not PASS: ${JSON.stringify(rNoInv.summary)}`,
+      );
+    }
+
     const outAged = join(root, "o-aged");
     mkdirSync(join(outAged, "imports", "signed-tool-catalog"), {
       recursive: true,
@@ -112,6 +148,7 @@ async function main() {
       join(outNoMeasured, "imports", "signed-tool-catalog", "coverage.json"),
       JSON.stringify({
         productionToolCatalogsPresent: true,
+        productionToolCatalogsInventoriedPct: 100,
         unsignedOrUnapprovedCatalogsRejected: true,
         supplyChainReviewWithin90DaysOrSinceLastChange: true,
       }),

@@ -3,25 +3,30 @@ category: "tool-safety"
 title: "Tool arguments must be schema-validated and sanitized before execution"
 description: >
   Production tools shall declare argument schemas and reject invalid or
-  malicious payloads before side effects—proven by schema coverage for 100%
-  of production tools plus contract tests, not by prompt-only “follow the
-  schema” instructions.
+  malicious payloads before side effects—proven by an inventory of production
+  tools, 100% schema coverage, and contract tests at 100% rejection—not by
+  prompt-only "follow the schema" instructions, customer-API OpenAPI alone,
+  or a reject suite that covers only a subset of tools.
 whyItMatters: >
   Unvalidated tool arguments enable path traversal, command injection, and
   privilege escalation through tool parameters even when the tool name is
   allowlisted. Distinct from SEC-M2 (model-output schema/policy before side
-  effects), TOL-M1 (authz decision), and TOL-M2 (tool-name allowlists).
+  effects), SEC-M1 (prompt-injection / input mediation), TOL-M1 (authz
+  decision), TOL-M2 (tool-name allowlists), and TOL-M3 (high-impact extra
+  gates without proving argument schemas).
 severity: "critical"
 weight: 4
 gate: "mandatory"
 passCondition: >
-  100% of production tools have a declared argument schema; invalid/malicious
-  argument fixtures are rejected at 100% before side effects (measuredAt ≤90
-  days). If no production tools exist, score NOT_APPLICABLE.
+  Inventory covers 100% of production tools; each has a declared argument
+  schema; invalid/malicious argument fixtures are rejected at 100% before
+  side effects (measuredAt ≤90 days). If no production tools exist, score
+  NOT_APPLICABLE.
 evidenceRequired:
-  - "JSON Schema (or equivalent) per production tool"
+  - "Inventory of production tools that accept arguments"
+  - "JSON Schema (or equivalent) per inventoried production tool"
   - "Contract tests for invalid/malicious argument fixtures"
-  - "Attest or results: toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 (measuredAt ≤90 days)"
+  - "Attest or results: productionToolsInventoriedPct=100 + toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 (measuredAt ≤90 days)"
 detection:
   capability: "hybrid"
   detectors:
@@ -30,29 +35,35 @@ detection:
         hint: >
           Discover tool argument schemas and contract tests; ingest coverage
           under imports/tool-argument-schema/; require
+          productionToolsInventoriedPct=100 +
           toolsWithDeclaredArgumentSchemaPct=100 +
           invalidArgumentFixturesRejectedPct=100 + measuredAt ≤90 days.
     - id: "manual-attest"
       params:
         hint: >
-          If automation cannot prove coverage, attest 100% schema coverage and
-          100% rejection of invalid/malicious fixtures before side effects
-          (measuredAt ≤90 days).
+          If automation cannot prove coverage, attest inventory of production
+          tools, 100% schema coverage, and 100% rejection of invalid/
+          malicious fixtures before side effects (measuredAt ≤90 days).
 manualVerification: >
-  1) Confirm production tools exist. If none, score NOT_APPLICABLE. 2) Confirm
-  every production tool has a declared argument schema (JSON Schema, Zod,
-  Pydantic, protobuf, or equivalent). 3) Review contract tests: invalid/
-  malicious fixtures are rejected at 100% before side effects. 4) PASS only if
-  schema coverage + rejection hold with measuredAt ≤90 days. SEC-M2
-  model-output gates alone do not prove tool-argument validation. TOL-M2
-  allowlists alone do not prove argument schemas.
+  1) Confirm production tools exist. If none, score NOT_APPLICABLE. 2)
+  Inventory those tools (required—do not PASS from a reject suite without
+  tool inventory coverage). 3) Confirm every inventoried tool has a declared
+  argument schema (JSON Schema, Zod, Pydantic, protobuf, or equivalent). 4)
+  Review contract tests: invalid/malicious fixtures are rejected at 100%
+  before side effects. 5) PASS only if inventory + schema coverage +
+  rejection hold with measuredAt ≤90 days. SEC-M2 model-output gates alone
+  do not prove tool-argument validation. SEC-M1 injection gates alone do not
+  prove per-tool argument schemas. TOL-M2 allowlists alone do not prove
+  argument schemas. TOL-M3 high-impact gates alone do not prove schemas.
 falsePositiveGuidance: >
   Do not pass prompt-only schema instructions. Do not pass OpenAPI for the
-  customer API as tool-argument schemas. Do not pass coverage under 100% of
-  production tools. Do not score SEC-M2, TOL-M1, or TOL-M2 as substitutes.
-  Named exceptions need owner and expiry ≤90 days.
+  customer API as tool-argument schemas. Do not pass a reject suite that
+  covers only a subset of production tools. Do not pass schema files without
+  inventory coverage of production tools. Do not score SEC-M1, SEC-M2,
+  TOL-M1, TOL-M2, or TOL-M3 as substitutes. Named exceptions need owner and
+  expiry ≤90 days.
 recommendedFixes:
-  - "Declare argument schemas for every production tool"
+  - "Inventory production tools that accept arguments; declare argument schemas for 100% of them"
   - "Reject invalid/malicious fixtures before side effects in contract tests at 100%"
   - "Retain coverage under imports/tool-argument-schema/ (measuredAt ≤90 days)"
   - "Time-box gaps with owner and expiry ≤90 days"
@@ -67,14 +78,15 @@ relatedRules:
   - "TOL-M1"
   - "TOL-M2"
   - "TOL-M3"
-  - "SEC-M2"
   - "SEC-M1"
+  - "SEC-M2"
 tags:
   - "tool-safety"
   - "mandatory"
   - "hybrid"
   - "argument-schema"
   - "contract-tests"
+  - "inventory"
 applicability:
   technologies: []
   minCriticality: 2

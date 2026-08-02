@@ -5,25 +5,29 @@ title: "Production systems should have dry-run or simulation mode for destructiv
 description: >
   Destructive tools should expose dry-run or simulation in non-production
   environments, and the last promotion of a destructive tool should include a
-  dry-run evidence link ≤90 days old—so operators rehearse blast radius before
-  production.
+  dry-run evidence link ≤90 days old—proven by an inventory of destructive
+  tools, 100% dry-run coverage in non-prod, and promotion linkage—not by
+  prompt-only "dry-run" flags, production confirmation dialogs, or promotion
+  evidence without a complete destructive-tool inventory.
 whyItMatters: >
   Destructive tools promoted without a lower-env dry-run create avoidable
   outages and data loss when allowlists and gates are first exercised in prod.
-  Distinct from TOL-M3 (production high-impact gates), AGN-R2 sandbox/sim
-  before prod for agents, and CHG promotion records without dry-run linkage.
+  Distinct from TOL-M3 (production high-impact gates without proving non-prod
+  dry-run), TOL-R2 (rate/blast budgets), AGN-R2 (agent sandbox/sim before prod
+  without proving per-destructive-tool dry-run catalogs), and change/promotion
+  records that lack a dry-run evidence link.
 severity: "high"
 weight: 3
 gate: "recommended"
 passCondition: >
-  100% of tools classified destructive expose dry-run or simulation in
-  non-prod; the last promotion of a destructive tool includes a dry-run
-  evidence link ≤90 days old (measuredAt ≤90 days). If no destructive tools
-  exist, score NOT_APPLICABLE.
+  Inventory covers 100% of tools classified destructive; each exposes dry-run
+  or simulation in non-prod; the last promotion of a destructive tool includes
+  a dry-run evidence link ≤90 days old (measuredAt ≤90 days). If no
+  destructive tools exist, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Destructive-tool catalog marking dry-run/simulation support"
+  - "Inventory/catalog of destructive tools marking dry-run/simulation support"
   - "Sample lower-env dry-run logs or promotion evidence links ≤90 days"
-  - "Attest or results: destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days=true (measuredAt ≤90 days)"
+  - "Attest or results: destructiveToolsInventoriedPct=100 + destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days=true (measuredAt ≤90 days)"
 detection:
   capability: "hybrid"
   detectors:
@@ -32,29 +36,34 @@ detection:
         hint: >
           Discover dry-run/simulation flags for destructive tools; ingest
           coverage under imports/destructive-tool-dry-run/; require
+          destructiveToolsInventoriedPct=100 +
           destructiveToolsWithDryRunInNonProdPct=100 +
           lastDestructivePromotionHasDryRunEvidenceWithin90Days=true +
           measuredAt ≤90 days.
     - id: "manual-attest"
       params:
         hint: >
-          If automation cannot prove coverage, attest 100% dry-run support in
-          non-prod and a ≤90d dry-run evidence link on last destructive
-          promotion (measuredAt ≤90 days).
+          If automation cannot prove coverage, attest inventory of destructive
+          tools, 100% dry-run support in non-prod, and a ≤90d dry-run evidence
+          link on last destructive promotion (measuredAt ≤90 days).
 manualVerification: >
   1) Confirm destructive tools exist. If none, score NOT_APPLICABLE. 2)
-  Confirm each exposes dry-run or simulation in non-prod. 3) Confirm the last
-  destructive-tool promotion links dry-run evidence ≤90 days old. 4) PASS only
-  if coverage + promotion link hold with measuredAt ≤90 days. TOL-M3 production
-  gates alone do not prove lower-env dry-run. Agent sandbox Checks alone do
-  not prove per-destructive-tool dry-run catalogs.
+  Inventory those tools (required—do not PASS from promotion evidence without
+  destructive-tool inventory coverage). 3) Confirm each exposes dry-run or
+  simulation in non-prod. 4) Confirm the last destructive-tool promotion links
+  dry-run evidence ≤90 days old. 5) PASS only if inventory + dry-run coverage
+  + promotion link hold with measuredAt ≤90 days. TOL-M3 production gates
+  alone do not prove lower-env dry-run. AGN-R2 agent sandbox alone does not
+  prove per-destructive-tool dry-run catalogs. TOL-R2 rate/blast budgets alone
+  do not prove dry-run rehearsal.
 falsePositiveGuidance: >
-  Do not pass “dry-run” prompt flags without runtime support. Do not pass
-  production-only confirmation dialogs as lower-env simulation. Do not score
-  TOL-M3 or agent-sandbox Checks as substitutes. Named exceptions need owner
+  Do not pass "dry-run" prompt flags without runtime support. Do not pass
+  production-only confirmation dialogs as lower-env simulation. Do not pass
+  promotion evidence that covers only a subset of destructive tools. Do not
+  score TOL-M3, TOL-R2, or AGN-R2 as substitutes. Named exceptions need owner
   and expiry ≤90 days.
 recommendedFixes:
-  - "Mark destructive tools and implement dry-run/simulation in non-prod for 100% of them"
+  - "Inventory destructive tools; implement dry-run/simulation in non-prod for 100% of them"
   - "Require a dry-run evidence link on destructive-tool promotions (≤90 days)"
   - "Retain coverage under imports/destructive-tool-dry-run/ (measuredAt ≤90 days)"
   - "Time-box gaps with owner and expiry ≤90 days"
@@ -74,6 +83,7 @@ tags:
   - "hybrid"
   - "dry-run"
   - "destructive-tools"
+  - "inventory"
 applicability:
   technologies: []
   minCriticality: 2

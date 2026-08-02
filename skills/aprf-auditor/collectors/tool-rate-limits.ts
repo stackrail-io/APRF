@@ -3,7 +3,7 @@
  *
  * Discovers per-tool rate-limit and blast-radius budget configs.
  * Import coverage under imports/tool-rate-limits/ unlocks PASS
- * (measuredAt ≤90d).
+ * (inventory 100% + budgets 100% + ≤30d enforcement; measuredAt ≤90d).
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
@@ -48,6 +48,7 @@ export interface ToolRateLimitsReport {
   importedResults: {
     found: boolean;
     highImpactToolsPresent: boolean | null;
+    highImpactToolsInventoriedPct: number | null;
     highImpactToolsWithRateAndBlastBudgetPct: number | null;
     enforcementProvenWithin30Days: boolean | null;
     measuredAt: string | null;
@@ -76,6 +77,7 @@ function loadImported(
 ): ToolRateLimitsReport["importedResults"] {
   const sources: string[] = [];
   let highImpactToolsPresent: boolean | null = null;
+  let highImpactToolsInventoriedPct: number | null = null;
   let highImpactToolsWithRateAndBlastBudgetPct: number | null = null;
   let enforcementProvenWithin30Days: boolean | null = null;
   let measuredAt: string | null = null;
@@ -92,6 +94,14 @@ function loadImported(
         highImpactToolsPresent,
         asBool(data.highImpactToolsPresent) ??
           asBool(data.high_impact_tools_present),
+      );
+      highImpactToolsInventoriedPct = mergeMinNum(
+        highImpactToolsInventoriedPct,
+        asNum(data.highImpactToolsInventoriedPct) ??
+          asNum(data.high_impact_tools_inventoried_pct) ??
+          asNum(data.productionHighImpactToolsInventoriedPct) ??
+          asNum(data.production_high_impact_tools_inventoried_pct) ??
+          asNum(data.inventoryCoveragePct),
       );
       highImpactToolsWithRateAndBlastBudgetPct = mergeMinNum(
         highImpactToolsWithRateAndBlastBudgetPct,
@@ -111,6 +121,7 @@ function loadImported(
   return {
     found: sources.length > 0,
     highImpactToolsPresent,
+    highImpactToolsInventoriedPct,
     highImpactToolsWithRateAndBlastBudgetPct,
     enforcementProvenWithin30Days,
     measuredAt,
@@ -131,7 +142,7 @@ export function buildToolRateLimitsReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No tool-rate-limit signals — TOL-R2 remains not demonstrated until rate/blast coverage or highImpactToolsPresent=false is imported.",
+      "No tool-rate-limit signals — TOL-R2 remains not demonstrated until inventory/budget/enforcement coverage or highImpactToolsPresent=false is imported.",
     );
   }
   if (opts.rateLimit.found) {
@@ -146,11 +157,11 @@ export function buildToolRateLimitsReport(opts: {
   }
   if (opts.imported.found) {
     notes.push(
-      `Imported: ${opts.imported.sources.join(", ")} (present=${opts.imported.highImpactToolsPresent}, budgetPct=${opts.imported.highImpactToolsWithRateAndBlastBudgetPct}, enforcement30d=${opts.imported.enforcementProvenWithin30Days}, measuredAt=${opts.imported.measuredAt})`,
+      `Imported: ${opts.imported.sources.join(", ")} (present=${opts.imported.highImpactToolsPresent}, inventoriedPct=${opts.imported.highImpactToolsInventoriedPct}, budgetPct=${opts.imported.highImpactToolsWithRateAndBlastBudgetPct}, enforcement30d=${opts.imported.enforcementProvenWithin30Days}, measuredAt=${opts.imported.measuredAt})`,
     );
   } else if (gateSignalsPresent) {
     notes.push(
-      "Signals alone are PARTIAL — import highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days=true (measuredAt ≤90d) under imports/tool-rate-limits/ to PASS.",
+      "Signals alone are PARTIAL — import highImpactToolsInventoriedPct=100 + highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days=true (measuredAt ≤90d) under imports/tool-rate-limits/ to PASS. Enforcement without high-impact inventory ≠ PASS.",
     );
   }
 
@@ -162,6 +173,7 @@ export function buildToolRateLimitsReport(opts: {
   const surfacePresent =
     surfaceProvedForNaOverride ||
     opts.imported.highImpactToolsPresent === true;
+  const inventoryOk = opts.imported.highImpactToolsInventoriedPct === 100;
   const budgetOk =
     opts.imported.highImpactToolsWithRateAndBlastBudgetPct === 100;
   const enforcementOk = opts.imported.enforcementProvenWithin30Days === true;
@@ -171,6 +183,8 @@ export function buildToolRateLimitsReport(opts: {
     opts.imported.highImpactToolsPresent === false &&
     !surfaceProvedForNaOverride;
   const contradictingFail =
+    (opts.imported.highImpactToolsInventoriedPct !== null &&
+      opts.imported.highImpactToolsInventoriedPct < 100) ||
     (opts.imported.highImpactToolsWithRateAndBlastBudgetPct !== null &&
       opts.imported.highImpactToolsWithRateAndBlastBudgetPct < 100) ||
     opts.imported.enforcementProvenWithin30Days === false;
@@ -183,7 +197,7 @@ export function buildToolRateLimitsReport(opts: {
     statusHint = "fail";
     tolR2Satisfied = false;
     notes.push(
-      "Imported evidence shows incomplete rate/blast budgets or missing ≤30d enforcement proof — TOL-R2 fail.",
+      "Imported evidence shows incomplete inventory, rate/blast budgets, or missing ≤30d enforcement proof — TOL-R2 fail.",
     );
   } else if (naCandidate) {
     statusHint = "not_applicable";
@@ -200,6 +214,7 @@ export function buildToolRateLimitsReport(opts: {
     );
     if (
       surfacePresent &&
+      inventoryOk &&
       budgetOk &&
       enforcementOk &&
       importFresh &&
@@ -216,6 +231,7 @@ export function buildToolRateLimitsReport(opts: {
     tolR2Satisfied = null;
   } else if (
     surfacePresent &&
+    inventoryOk &&
     budgetOk &&
     enforcementOk &&
     importFresh &&

@@ -268,7 +268,7 @@ npm run aprf:destructive-tool-dry-run -- --target <project> --out <project>/aprf
 npm run aprf:tool-rate-limits -- --target <project> --out <project>/aprf-assessment
 ```
 
-PASS needs measured imports (≤90d) per Check — gateway deny suite, allowlist+unknown deny, high-impact gates, argument schemas, signed catalogs (Level-5), dry-run promotion evidence, or rate/blast enforcement proof.
+PASS needs measured imports (≤90d) per Check — gateway path coverage+deny+no-bypass, allowlist+unknown deny+runtime invent-reject, high-impact inventory+gates, tool inventory+argument schemas, catalog inventory+signed reject (Level-5), destructive inventory+dry-run promotion evidence, or high-impact inventory+rate/blast enforcement proof.
 
 **SEC-M1 (injection-policy-gate):** content-filter warnings are **supporting** only. Prefer:
 

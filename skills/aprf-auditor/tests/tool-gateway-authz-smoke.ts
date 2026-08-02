@@ -1,5 +1,6 @@
 /**
- * Smoke: tool-gateway-authz needs 100% deny + no-bypass + measuredAt ≤90d.
+ * Smoke: tool-gateway-authz needs path coverage 100% + deny 100% + no-bypass
+ * + measuredAt ≤90d.
  */
 import {
   mkdtempSync,
@@ -44,6 +45,7 @@ function coverage(extra: Record<string, unknown> = {}) {
   return JSON.stringify({
     measuredAt: new Date().toISOString(),
     productionToolsOrAgentsPresent: true,
+    productionToolInvocationPathsCoveredByAuthzPct: 100,
     unauthorizedToolCallsDeniedPct: 100,
     modelOutputAloneCannotBypassGateway: true,
     ...extra,
@@ -80,6 +82,41 @@ async function main() {
     const r2 = await run(tSig, outFail);
     if (r2.summary.statusHint !== "fail") {
       throw new Error(`expected fail, got ${JSON.stringify(r2.summary)}`);
+    }
+
+    const outCovFail = join(root, "o-cov-fail");
+    mkdirSync(join(outCovFail, "imports", "tool-gateway-authz"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outCovFail, "imports", "tool-gateway-authz", "coverage.json"),
+      coverage({ productionToolInvocationPathsCoveredByAuthzPct: 80 }),
+    );
+    const rCov = await run(tSig, outCovFail);
+    if (rCov.summary.statusHint !== "fail") {
+      throw new Error(
+        `path coverage <100 must fail: ${JSON.stringify(rCov.summary)}`,
+      );
+    }
+
+    const outNoPathCov = join(root, "o-no-path-cov");
+    mkdirSync(join(outNoPathCov, "imports", "tool-gateway-authz"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNoPathCov, "imports", "tool-gateway-authz", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionToolsOrAgentsPresent: true,
+        unauthorizedToolCallsDeniedPct: 100,
+        modelOutputAloneCannotBypassGateway: true,
+      }),
+    );
+    const rNoPathCov = await run(tSig, outNoPathCov);
+    if (rNoPathCov.summary.statusHint === "pass") {
+      throw new Error(
+        `deny+no-bypass without path coverage must not PASS: ${JSON.stringify(rNoPathCov.summary)}`,
+      );
     }
 
     const outBypass = join(root, "o-bypass");

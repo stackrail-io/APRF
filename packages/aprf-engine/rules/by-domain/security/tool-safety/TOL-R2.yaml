@@ -4,25 +4,30 @@ title: "Production systems should have per-tool rate limits and blast-radius bud
 description: >
   High-impact tools should have documented QPS/daily caps and
   max-affected-entities budgets, with ≥1 limit hit or synthetic enforcement
-  test in the last 30 days—so runaway loops cannot exhaust blast radius
-  silently.
+  test in the last 30 days—proven by an inventory of high-impact tools, 100%
+  rate+blast budget coverage, and ≤30d enforcement proof—not by global API
+  gateway limits alone, docs without enforcement, or budgets that cover only
+  a subset of high-impact tools.
 whyItMatters: >
   Allowlisted, authorized tools without rate/blast budgets can still amplify
   mistakes and injection into mass deletes or API abuse. Distinct from
-  AGN-M2 (agent loop/step/token limits), COST-M* spend caps, and TOL-M3
-  (approval/dual/policy gates without quantitative budgets).
+  AGN-M2 (agent loop/step/token limits), COST-M* spend caps, TOL-M3
+  (approval/dual/policy gates without quantitative budgets), and TOL-R1
+  (destructive dry-run rehearsal without rate/blast caps).
 severity: "high"
 weight: 3
 gate: "recommended"
 passCondition: >
-  Each high-impact tool has a documented QPS or daily cap and a
-  max-affected-entities (or equivalent) blast-radius budget; ≥1 limit hit or
-  synthetic test proves enforcement in the last 30 days (measuredAt ≤90 days).
-  If no high-impact tools exist, score NOT_APPLICABLE.
+  Inventory covers 100% of high-impact tools; each has a documented QPS or
+  daily cap and a max-affected-entities (or equivalent) blast-radius budget;
+  ≥1 limit hit or synthetic test proves enforcement in the last 30 days
+  (measuredAt ≤90 days). If no high-impact tools exist, score
+  NOT_APPLICABLE.
 evidenceRequired:
-  - "Per-tool rate-limit and blast-radius policy config for high-impact tools"
+  - "Inventory of high-impact tools requiring rate and blast-radius budgets"
+  - "Per-tool rate-limit and blast-radius policy config for those tools"
   - "Sample enforcement metrics or synthetic limit-hit test ≤30 days"
-  - "Attest or results: highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days=true (measuredAt ≤90 days)"
+  - "Attest or results: highImpactToolsInventoriedPct=100 + highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days=true (measuredAt ≤90 days)"
 detection:
   capability: "hybrid"
   detectors:
@@ -31,32 +36,39 @@ detection:
         hint: >
           Discover per-tool rate-limit / blast-radius configs; ingest coverage
           under imports/tool-rate-limits/; require
+          highImpactToolsInventoriedPct=100 +
           highImpactToolsWithRateAndBlastBudgetPct=100 +
           enforcementProvenWithin30Days=true + measuredAt ≤90 days.
     - id: "repo-rate-limit-config"
       params:
         hint: >
           Supporting signal — generic rate-limit config; alone does not prove
-          per-tool blast-radius budgets or ≤30d enforcement proof.
+          inventory coverage, per-tool blast-radius budgets, or ≤30d
+          enforcement proof.
     - id: "manual-attest"
       params:
         hint: >
-          If automation cannot prove coverage, attest 100% high-impact tools
-          have rate + blast budgets and ≤30d enforcement proof (measuredAt
-          ≤90 days).
+          If automation cannot prove coverage, attest inventory of high-impact
+          tools, 100% rate + blast budgets, and ≤30d enforcement proof
+          (measuredAt ≤90 days).
 manualVerification: >
   1) Confirm high-impact tools exist. If none, score NOT_APPLICABLE. 2)
-  Confirm each has QPS/daily cap and max-affected-entities (or equivalent)
-  budget. 3) Confirm ≥1 limit hit or synthetic enforcement test in the last
-  30 days. 4) PASS only if budgets + enforcement hold with measuredAt ≤90
-  days. AGN-M2 agent-loop limits alone do not prove per-tool blast budgets.
-  COST spend caps alone do not prove entity blast-radius limits.
+  Inventory those tools (required—do not PASS from enforcement proof without
+  high-impact inventory coverage). 3) Confirm each has QPS/daily cap and
+  max-affected-entities (or equivalent) budget. 4) Confirm ≥1 limit hit or
+  synthetic enforcement test in the last 30 days. 5) PASS only if inventory +
+  budgets + enforcement hold with measuredAt ≤90 days. AGN-M2 agent-loop
+  limits alone do not prove per-tool blast budgets. COST spend caps alone do
+  not prove entity blast-radius limits. TOL-M3 gates alone do not prove
+  quantitative budgets. TOL-R1 dry-run alone does not prove rate/blast caps.
 falsePositiveGuidance: >
   Do not pass global API gateway rate limits without per-tool budgets. Do not
-  pass docs without a ≤30d enforcement proof. Do not score AGN-M2, COST-M*,
-  or TOL-M3 as substitutes. Named exceptions need owner and expiry ≤90 days.
+  pass docs without a ≤30d enforcement proof. Do not pass enforcement that
+  covers only a subset of high-impact tools. Do not score AGN-M2, COST-M*,
+  TOL-M3, or TOL-R1 as substitutes. Named exceptions need owner and expiry
+  ≤90 days.
 recommendedFixes:
-  - "Document QPS/daily caps and max-affected-entities budgets for every high-impact tool"
+  - "Inventory high-impact tools; document QPS/daily caps and max-affected-entities budgets for 100% of them"
   - "Prove enforcement with a limit hit or synthetic test ≤30 days"
   - "Retain coverage under imports/tool-rate-limits/ (measuredAt ≤90 days)"
   - "Time-box gaps with owner and expiry ≤90 days"
@@ -76,6 +88,7 @@ tags:
   - "hybrid"
   - "rate-limits"
   - "blast-radius"
+  - "inventory"
 applicability:
   technologies: []
   minCriticality: 2

@@ -166,13 +166,13 @@ userInputRequiredWhen:
   - SCI-M4: no deploy-path policy enforcing unsigned/unapproved/revoked blocks (run ai-deploy-policy-enforcement or import results; Level-5; CI signing alone ≠ PASS)
   - SCI-R1: no last-deploy verify + unsigned reject in test/canary (run ai-verify-on-deploy or import results)
   - SCI-R2: no registry-linked MBOM coverage 100% + retention ≥90d (run ai-model-mbom or import results; container-only SBOM ≠ PASS)
-  - TOL-M1: no server-side tool-gateway authz deny suite at 100% + no model-output bypass (run tool-gateway-authz or import results)
-  - TOL-M2: no per-agent tool allowlist 100% + unknown-tool deny 100% (run tool-allowlist or import results; open "all tools" != PASS)
-  - TOL-M3: no high-impact tool gates 100% + ungated execution impossible in tests (run high-impact-tool-gates or import results)
-  - TOL-M4: no tool argument schema 100% + invalid fixture reject 100% (run tool-argument-schema or import results)
-  - TOL-M5: no signed MCP/agent tool catalog reject-unsigned + review ≤90d (run signed-tool-catalog or import results; Level-5)
-  - TOL-R1: no destructive-tool dry-run in non-prod 100% + promotion evidence ≤90d (run destructive-tool-dry-run or import results)
-  - TOL-R2: no per-tool rate + blast budgets 100% + ≤30d enforcement proof (run tool-rate-limits or import results)
+  - TOL-M1: no path coverage 100% + deny suite 100% + no model-output bypass (run tool-gateway-authz or import results; deny suite without path coverage ≠ PASS)
+  - TOL-M2: no agentsInventoriedPct=100 + allowlist 100% + unknown-tool deny 100% + runtime invent-reject (run tool-allowlist or import results; deny suite without inventory ≠ PASS)
+  - TOL-M3: no highImpactToolsInventoriedPct=100 + gates 100% + ungated execution impossible (run high-impact-tool-gates or import results; bypass suite without inventory ≠ PASS)
+  - TOL-M4: no tool inventory 100% + argument schema 100% + invalid fixture reject 100% (run tool-argument-schema or import results; reject suite without inventory ≠ PASS)
+  - TOL-M5: no catalog inventory 100% + reject-unsigned + review ≤90d (run signed-tool-catalog or import results; Level-5; reject/review without inventory ≠ PASS)
+  - TOL-R1: no destructive-tool inventory 100% + dry-run in non-prod 100% + promotion evidence ≤90d (run destructive-tool-dry-run or import results; promotion without inventory ≠ PASS)
+  - TOL-R2: no high-impact inventory 100% + per-tool rate + blast budgets 100% + ≤30d enforcement proof (run tool-rate-limits or import results; enforcement without inventory ≠ PASS)
   - SEC-M1: no injection/privilege-escalation corpus + CI gate at ≥95% deny (run injection-policy-gate or import results)
   - evidence not found after precedence-ordered search
   - N/A applicability needs confirmation
@@ -210,13 +210,13 @@ limitations:
   - ai-deploy-policy-enforcement needs deploymentPolicyEnforced + unsignedBlocked + unapprovedBlocked + revokedOrUntrustedRejected + measuredAt ≤90d; policy signals alone are not a PASS but block N/A launder
   - ai-verify-on-deploy needs lastDeployVerified + unsignedRejectedInTestOrCanary + measuredAt ≤90d; verify-on-deploy signals alone are not a PASS but block N/A launder
   - ai-model-mbom needs pinsWithLinkedMbomPct=100 + retentionDaysSatisfied + measuredAt ≤90d; MBOM/registry signals alone are not a PASS but block N/A launder; container-only SBOM ≠ PASS
-  - tool-gateway-authz needs unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway + measuredAt ≤90d; gateway docs alone are not a PASS but block N/A launder
-  - tool-allowlist needs agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 + measuredAt ≤90d; allowlist files alone are not a PASS but block N/A launder
-  - high-impact-tool-gates needs highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests + measuredAt ≤90d; inventory alone is not a PASS but blocks N/A launder
-  - tool-argument-schema needs toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 + measuredAt ≤90d; schema files alone are not a PASS but block N/A launder
-  - signed-tool-catalog needs unsignedOrUnapprovedCatalogsRejected + supplyChainReviewWithin90DaysOrSinceLastChange + measuredAt ≤90d; Level-5; catalog docs alone are not a PASS
-  - destructive-tool-dry-run needs destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days + measuredAt ≤90d; dry-run flags alone are not a PASS
-  - tool-rate-limits needs highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days + measuredAt ≤90d; global rate limits alone are not a PASS
+  - tool-gateway-authz needs productionToolInvocationPathsCoveredByAuthzPct=100 + unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway + measuredAt ≤90d; gateway docs alone are not a PASS but block N/A launder
+  - tool-allowlist needs agentsInventoriedPct=100 + agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 + unknownOrInventedToolsRejectedAtRuntime + measuredAt ≤90d; allowlist files alone are not a PASS but block N/A launder
+  - high-impact-tool-gates needs highImpactToolsInventoriedPct=100 + highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests + measuredAt ≤90d; inventory alone is not a PASS but blocks N/A launder
+  - tool-argument-schema needs productionToolsInventoriedPct=100 + toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 + measuredAt ≤90d; schema files alone are not a PASS but block N/A launder
+  - signed-tool-catalog needs productionToolCatalogsInventoriedPct=100 + unsignedOrUnapprovedCatalogsRejected + supplyChainReviewWithin90DaysOrSinceLastChange + measuredAt ≤90d; Level-5; catalog docs alone are not a PASS
+  - destructive-tool-dry-run needs destructiveToolsInventoriedPct=100 + destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days + measuredAt ≤90d; dry-run flags alone are not a PASS
+  - tool-rate-limits needs highImpactToolsInventoriedPct=100 + highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days + measuredAt ≤90d; global rate limits alone are not a PASS
   - injection-policy-gate needs versioned corpus + CI gate with ≥95% deny and 0 model-text privilege grants; filters alone are not a PASS
   - Published aprf-spec.json is an ID/passCondition mirror; full evidenceRequired lives in Check YAML
 

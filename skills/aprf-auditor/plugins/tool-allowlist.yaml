@@ -21,10 +21,12 @@ emits:
     - repo-tool-allowlist
 mapsToChecks: [TOL-M2]
 whenUnavailable: >
-  Signals alone are PARTIAL. TOL-M2 PASS needs agentsWithExplicitToolAllowlistPct=100
-  and unknownToolRequestsDeniedPct=100, measuredAt ≤90 days under
-  imports/tool-allowlist/. Set productionAgentsOrToolWorkloadsPresent=false for
-  NOT_APPLICABLE only when no in-repo allowlist signals.
+  Signals alone are PARTIAL. TOL-M2 PASS needs agentsInventoriedPct=100,
+  agentsWithExplicitToolAllowlistPct=100, unknownToolRequestsDeniedPct=100, and
+  unknownOrInventedToolsRejectedAtRuntime=true, measuredAt ≤90 days under
+  imports/tool-allowlist/. Deny suite without agent inventory ≠ PASS. Set
+  productionAgentsOrToolWorkloadsPresent=false for NOT_APPLICABLE only when no
+  in-repo allowlist signals.
 live:
   required: false
   note: Offline discovery + optional imported allowlist coverage.

@@ -3,7 +3,7 @@
  *
  * Discovers tool argument schemas and contract tests.
  * Import coverage under imports/tool-argument-schema/ unlocks PASS
- * (measuredAt ≤90d).
+ * (inventory 100% + schema 100% + reject 100%; measuredAt ≤90d).
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
@@ -47,6 +47,7 @@ export interface ToolArgumentSchemaReport {
   importedResults: {
     found: boolean;
     productionToolsPresent: boolean | null;
+    productionToolsInventoriedPct: number | null;
     toolsWithDeclaredArgumentSchemaPct: number | null;
     invalidArgumentFixturesRejectedPct: number | null;
     measuredAt: string | null;
@@ -75,6 +76,7 @@ function loadImported(
 ): ToolArgumentSchemaReport["importedResults"] {
   const sources: string[] = [];
   let productionToolsPresent: boolean | null = null;
+  let productionToolsInventoriedPct: number | null = null;
   let toolsWithDeclaredArgumentSchemaPct: number | null = null;
   let invalidArgumentFixturesRejectedPct: number | null = null;
   let measuredAt: string | null = null;
@@ -91,6 +93,12 @@ function loadImported(
         productionToolsPresent,
         asBool(data.productionToolsPresent) ??
           asBool(data.production_tools_present),
+      );
+      productionToolsInventoriedPct = mergeMinNum(
+        productionToolsInventoriedPct,
+        asNum(data.productionToolsInventoriedPct) ??
+          asNum(data.production_tools_inventoried_pct) ??
+          asNum(data.inventoryCoveragePct),
       );
       toolsWithDeclaredArgumentSchemaPct = mergeMinNum(
         toolsWithDeclaredArgumentSchemaPct,
@@ -110,6 +118,7 @@ function loadImported(
   return {
     found: sources.length > 0,
     productionToolsPresent,
+    productionToolsInventoriedPct,
     toolsWithDeclaredArgumentSchemaPct,
     invalidArgumentFixturesRejectedPct,
     measuredAt,
@@ -131,7 +140,7 @@ export function buildToolArgumentSchemaReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No tool-argument-schema signals — TOL-M4 remains not demonstrated until schema/rejection coverage or productionToolsPresent=false is imported.",
+      "No tool-argument-schema signals — TOL-M4 remains not demonstrated until inventory/schema/rejection coverage or productionToolsPresent=false is imported.",
     );
   }
   if (opts.argumentSchema.found) {
@@ -146,11 +155,11 @@ export function buildToolArgumentSchemaReport(opts: {
   }
   if (opts.imported.found) {
     notes.push(
-      `Imported: ${opts.imported.sources.join(", ")} (present=${opts.imported.productionToolsPresent}, schemaPct=${opts.imported.toolsWithDeclaredArgumentSchemaPct}, rejectPct=${opts.imported.invalidArgumentFixturesRejectedPct}, measuredAt=${opts.imported.measuredAt})`,
+      `Imported: ${opts.imported.sources.join(", ")} (present=${opts.imported.productionToolsPresent}, inventoriedPct=${opts.imported.productionToolsInventoriedPct}, schemaPct=${opts.imported.toolsWithDeclaredArgumentSchemaPct}, rejectPct=${opts.imported.invalidArgumentFixturesRejectedPct}, measuredAt=${opts.imported.measuredAt})`,
     );
   } else if (gateSignalsPresent) {
     notes.push(
-      "Signals alone are PARTIAL — import toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 (measuredAt ≤90d) under imports/tool-argument-schema/ to PASS.",
+      "Signals alone are PARTIAL — import productionToolsInventoriedPct=100 + toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 (measuredAt ≤90d) under imports/tool-argument-schema/ to PASS. Reject suite without tool inventory coverage ≠ PASS.",
     );
   }
 
@@ -162,6 +171,7 @@ export function buildToolArgumentSchemaReport(opts: {
   const surfacePresent =
     surfaceProvedForNaOverride ||
     opts.imported.productionToolsPresent === true;
+  const inventoryOk = opts.imported.productionToolsInventoriedPct === 100;
   const schemaOk = opts.imported.toolsWithDeclaredArgumentSchemaPct === 100;
   const rejectOk = opts.imported.invalidArgumentFixturesRejectedPct === 100;
 
@@ -170,6 +180,8 @@ export function buildToolArgumentSchemaReport(opts: {
     opts.imported.productionToolsPresent === false &&
     !surfaceProvedForNaOverride;
   const contradictingFail =
+    (opts.imported.productionToolsInventoriedPct !== null &&
+      opts.imported.productionToolsInventoriedPct < 100) ||
     (opts.imported.toolsWithDeclaredArgumentSchemaPct !== null &&
       opts.imported.toolsWithDeclaredArgumentSchemaPct < 100) ||
     (opts.imported.invalidArgumentFixturesRejectedPct !== null &&
@@ -183,7 +195,7 @@ export function buildToolArgumentSchemaReport(opts: {
     statusHint = "fail";
     tolM4Satisfied = false;
     notes.push(
-      "Imported evidence shows incomplete schema coverage or fixture rejection — TOL-M4 fail.",
+      "Imported evidence shows incomplete inventory, schema coverage, or fixture rejection — TOL-M4 fail.",
     );
   } else if (naCandidate) {
     statusHint = "not_applicable";
@@ -200,6 +212,7 @@ export function buildToolArgumentSchemaReport(opts: {
     );
     if (
       surfacePresent &&
+      inventoryOk &&
       schemaOk &&
       rejectOk &&
       importFresh &&
@@ -216,6 +229,7 @@ export function buildToolArgumentSchemaReport(opts: {
     tolM4Satisfied = null;
   } else if (
     surfacePresent &&
+    inventoryOk &&
     schemaOk &&
     rejectOk &&
     importFresh &&

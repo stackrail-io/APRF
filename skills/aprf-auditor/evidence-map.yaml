@@ -999,27 +999,30 @@ checks:
       SCI-M1, SCI-R1, MOD-M1, MOD-R3, and DG-R3 do not substitute.
   TOL-M1:
     requiredEvidence:
-      - "Tool gateway / tool-runtime authz enforcement config (server-side)"
-      - "unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway under imports/tool-gateway-authz/ (measuredAt ≤90d)"
+      - "Inventory or mapping of production tool-invocation paths (or attested gateway covering 100%)"
+      - "productionToolInvocationPathsCoveredByAuthzPct=100 + unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway under imports/tool-gateway-authz/ (measuredAt ≤90d)"
     searchExtra:
       - "**/*tool*gateway*"
       - "**/*tool*authz*"
       - "**/*mcp*"
       - "**/*deny*"
     plugins: [tool-gateway-authz, repo-filesystem]
-    naWhen: "No production tools/agents invoke tools"
+    naWhen: "No production agents/workloads invoke tools"
     evaluation: |
       Prefer collectors/tool-gateway-authz or imports/tool-gateway-authz/*.json with measuredAt ≤90d.
       PASS if statusHint=pass / tolM1Satisfied === true
-      (unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway + measuredAt ≤90d).
+      (productionToolInvocationPathsCoveredByAuthzPct=100 +
+      unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway + measuredAt ≤90d).
       NOT_APPLICABLE if productionToolsOrAgentsPresent=false and no in-repo gateway/authz signals.
-      PARTIAL if gateway signals without complete import. AUTHZ-M1, TOL-M2, AUTHZ-R1 do not substitute.
-      FAIL if unauthorizedToolCallsDeniedPct<100 or modelOutputAloneCannotBypassGateway=false
+      PARTIAL if gateway signals without complete import (deny suite without path coverage ≠ PASS).
+      FAIL if pathCoverage<100, unauthorizedToolCallsDeniedPct<100, or modelOutputAloneCannotBypassGateway=false
       (failing import metrics beat present=false N/A).
+      AUTHZ-M1 entry-point suites, TOL-M2 allowlists, TOL-M3 high-impact gates, and AUTHZ-R1 do not substitute.
   TOL-M2:
     requiredEvidence:
-      - "Per-agent/workload tool allowlist covering production agents"
-      - "agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 under imports/tool-allowlist/ (measuredAt ≤90d)"
+      - "Inventory of production agents/workloads that can invoke tools"
+      - "Per-agent/workload tool allowlist covering 100% of those agents"
+      - "agentsInventoriedPct=100 + agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 + unknownOrInventedToolsRejectedAtRuntime under imports/tool-allowlist/ (measuredAt ≤90d)"
     searchExtra:
       - "**/*allowlist*"
       - "**/*tool*allow*"
@@ -1030,16 +1033,19 @@ checks:
     evaluation: |
       Prefer collectors/tool-allowlist or imports/tool-allowlist/*.json with measuredAt ≤90d.
       PASS if statusHint=pass / tolM2Satisfied === true
-      (agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 + measuredAt ≤90d).
+      (agentsInventoriedPct=100 + agentsWithExplicitToolAllowlistPct=100 +
+      unknownToolRequestsDeniedPct=100 + unknownOrInventedToolsRejectedAtRuntime + measuredAt ≤90d).
       NOT_APPLICABLE if productionAgentsOrToolWorkloadsPresent=false and no in-repo allowlist signals.
-      PARTIAL if allowlist config without deny tests (open "all tools" != PASS).
-      FAIL if agentsWithExplicitToolAllowlistPct<100 or unknownToolRequestsDeniedPct<100
+      PARTIAL if allowlist/deny/invent-reject without agent inventory
+      (open "all tools" / deny suite without inventory ≠ PASS).
+      FAIL if agentsInventoriedPct<100, agentsWithExplicitToolAllowlistPct<100,
+      unknownToolRequestsDeniedPct<100, or unknownOrInventedToolsRejectedAtRuntime=false
       (failing import metrics beat present=false N/A).
-      TOL-M1, SCI-M2, AUTHN-M2, TOL-M5 do not substitute.
+      TOL-M1, TOL-M3, SCI-M2, AUTHN-M2, TOL-M5, AGN-M1 do not substitute.
   TOL-M3:
     requiredEvidence:
-      - "Impact-tiered tool inventory (write/irreversible/financial)"
-      - "highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests under imports/high-impact-tool-gates/ (measuredAt ≤90d)"
+      - "Impact-tiered tool inventory covering production write/irreversible/financial tools"
+      - "highImpactToolsInventoriedPct=100 + highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests under imports/high-impact-tool-gates/ (measuredAt ≤90d)"
     searchExtra:
       - "**/*impact*tier*"
       - "**/*high*impact*tool*"
@@ -1051,15 +1057,19 @@ checks:
     evaluation: |
       Prefer collectors/high-impact-tool-gates or imports/high-impact-tool-gates/*.json with measuredAt ≤90d.
       PASS if statusHint=pass / tolM3Satisfied === true
-      (highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests + measuredAt ≤90d).
+      (highImpactToolsInventoriedPct=100 + highImpactToolsWithConfiguredGatePct=100 +
+      ungatedExecutionImpossibleInTests + measuredAt ≤90d).
       NOT_APPLICABLE if highImpactToolsPresent=false and no in-repo gate signals.
-      PARTIAL if inventory/docs without bypass tests. TOL-M1/M2, HUM-M1/M3, SEC-M2 do not substitute.
-      FAIL if highImpactToolsWithConfiguredGatePct<100 or ungatedExecutionImpossibleInTests=false
+      PARTIAL if gates/bypass without inventory coverage
+      (bypass suite without inventory ≠ PASS).
+      FAIL if inventoriedPct<100, gatePct<100, or ungatedExecutionImpossibleInTests=false
       (failing import metrics beat present=false N/A).
+      TOL-M1/M2/M4, TOL-R2, HUM-M1/M3, SEC-M2 do not substitute.
   TOL-M4:
     requiredEvidence:
-      - "JSON Schema (or equivalent) per production tool"
-      - "toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 under imports/tool-argument-schema/ (measuredAt ≤90d)"
+      - "Inventory of production tools that accept arguments"
+      - "JSON Schema (or equivalent) per inventoried production tool"
+      - "productionToolsInventoriedPct=100 + toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 under imports/tool-argument-schema/ (measuredAt ≤90d)"
     searchExtra:
       - "**/*inputSchema*"
       - "**/*tool*schema*"
@@ -1070,15 +1080,19 @@ checks:
     evaluation: |
       Prefer collectors/tool-argument-schema or imports/tool-argument-schema/*.json with measuredAt ≤90d.
       PASS if statusHint=pass / tolM4Satisfied === true
-      (toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 + measuredAt ≤90d).
+      (productionToolsInventoriedPct=100 + toolsWithDeclaredArgumentSchemaPct=100 +
+      invalidArgumentFixturesRejectedPct=100 + measuredAt ≤90d).
       NOT_APPLICABLE if productionToolsPresent=false and no in-repo schema signals.
-      PARTIAL if schemas without contract rejection. SEC-M2, TOL-M1/M2 do not substitute.
-      FAIL if toolsWithDeclaredArgumentSchemaPct<100 or invalidArgumentFixturesRejectedPct<100
+      PARTIAL if schema/reject without tool inventory coverage
+      (reject suite without inventory ≠ PASS).
+      FAIL if inventoriedPct<100, schemaPct<100, or rejectPct<100
       (failing import metrics beat present=false N/A).
+      SEC-M1/M2, TOL-M1/M2/M3 do not substitute.
   TOL-M5:
     requiredEvidence:
-      - "Signed (or integrity-verified) MCP/agent tool catalog + verify-on-load"
-      - "unsignedOrUnapprovedCatalogsRejected + supplyChainReviewWithin90DaysOrSinceLastChange under imports/signed-tool-catalog/ (measuredAt ≤90d)"
+      - "Inventory of production MCP/agent tool catalogs"
+      - "Signed (or integrity-verified) catalogs + verify-on-load"
+      - "productionToolCatalogsInventoriedPct=100 + unsignedOrUnapprovedCatalogsRejected + supplyChainReviewWithin90DaysOrSinceLastChange under imports/signed-tool-catalog/ (measuredAt ≤90d)"
     searchExtra:
       - "**/*tool*catalog*"
       - "**/*signed*catalog*"
@@ -1090,15 +1104,19 @@ checks:
       Prefer collectors/signed-tool-catalog or imports/signed-tool-catalog/*.json with measuredAt ≤90d.
       Level-5 / regulated advanced mandatory — not Core baseline.
       PASS if statusHint=pass / tolM5Satisfied === true
-      (unsignedOrUnapprovedCatalogsRejected + supplyChainReviewWithin90DaysOrSinceLastChange + measuredAt ≤90d).
+      (productionToolCatalogsInventoriedPct=100 + unsignedOrUnapprovedCatalogsRejected +
+      supplyChainReviewWithin90DaysOrSinceLastChange + measuredAt ≤90d).
       NOT_APPLICABLE if productionToolCatalogsPresent=false and no in-repo signed-catalog signals.
-      PARTIAL if catalog docs without reject-unsigned. SCI-M1/M2, TOL-M2 do not substitute.
-      FAIL if unsignedOrUnapprovedCatalogsRejected=false or supplyChainReviewWithin90DaysOrSinceLastChange=false
+      PARTIAL if reject/review without catalog inventory coverage
+      (reject/review without inventory ≠ PASS).
+      FAIL if inventoriedPct<100, unsignedOrUnapprovedCatalogsRejected=false, or
+      supplyChainReviewWithin90DaysOrSinceLastChange=false
       (failing import metrics beat present=false N/A).
+      SCI-M1/M2/M4, SCI-R1, TOL-M2 do not substitute.
   TOL-R1:
     requiredEvidence:
-      - "Destructive-tool catalog marking dry-run/simulation support"
-      - "destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days under imports/destructive-tool-dry-run/ (measuredAt ≤90d)"
+      - "Inventory/catalog of destructive tools marking dry-run/simulation support"
+      - "destructiveToolsInventoriedPct=100 + destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days under imports/destructive-tool-dry-run/ (measuredAt ≤90d)"
     searchExtra:
       - "**/*dry-run*"
       - "**/*dry_run*"
@@ -1109,15 +1127,19 @@ checks:
     evaluation: |
       Prefer collectors/destructive-tool-dry-run or imports/destructive-tool-dry-run/*.json with measuredAt ≤90d.
       PASS if statusHint=pass / tolR1Satisfied === true
-      (destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days + measuredAt ≤90d).
+      (destructiveToolsInventoriedPct=100 + destructiveToolsWithDryRunInNonProdPct=100 +
+      lastDestructivePromotionHasDryRunEvidenceWithin90Days + measuredAt ≤90d).
       NOT_APPLICABLE if destructiveToolsPresent=false and no in-repo dry-run signals.
-      PARTIAL if dry-run docs without promotion evidence. TOL-M3 / agent-sandbox do not substitute.
-      FAIL if destructiveToolsWithDryRunInNonProdPct<100 or lastDestructivePromotionHasDryRunEvidenceWithin90Days=false
+      PARTIAL if dry-run/promotion without destructive-tool inventory
+      (promotion evidence without inventory ≠ PASS).
+      FAIL if inventoriedPct<100, dryRunPct<100, or lastDestructivePromotionHasDryRunEvidenceWithin90Days=false
       (failing import metrics beat present=false N/A).
+      TOL-M3, TOL-R2, AGN-R2 do not substitute.
   TOL-R2:
     requiredEvidence:
-      - "Per-tool rate-limit and blast-radius budgets for high-impact tools"
-      - "highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days under imports/tool-rate-limits/ (measuredAt ≤90d)"
+      - "Inventory of high-impact tools requiring rate and blast-radius budgets"
+      - "Per-tool rate-limit and blast-radius budgets for those tools"
+      - "highImpactToolsInventoriedPct=100 + highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days under imports/tool-rate-limits/ (measuredAt ≤90d)"
     searchExtra:
       - "**/*rate*limit*"
       - "**/*blast*radius*"
@@ -1128,11 +1150,14 @@ checks:
     evaluation: |
       Prefer collectors/tool-rate-limits or imports/tool-rate-limits/*.json with measuredAt ≤90d.
       PASS if statusHint=pass / tolR2Satisfied === true
-      (highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days + measuredAt ≤90d).
+      (highImpactToolsInventoriedPct=100 + highImpactToolsWithRateAndBlastBudgetPct=100 +
+      enforcementProvenWithin30Days + measuredAt ≤90d).
       NOT_APPLICABLE if highImpactToolsPresent=false and no in-repo rate/blast signals.
-      PARTIAL if global rate limits without per-tool blast budgets. AGN-M2, COST-M*, TOL-M3 do not substitute.
-      FAIL if highImpactToolsWithRateAndBlastBudgetPct<100 or enforcementProvenWithin30Days=false
+      PARTIAL if budgets/enforcement without high-impact inventory
+      (global rate limits / enforcement without inventory ≠ PASS).
+      FAIL if inventoriedPct<100, budgetPct<100, or enforcementProvenWithin30Days=false
       (failing import metrics beat present=false N/A).
+      AGN-M2, COST-M*, TOL-M3, TOL-R1 do not substitute.
   SEC2-M1:
     requiredEvidence:
       - "Secrets manager / sealed-secrets / cloud secret refs in runtime config"

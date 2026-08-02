@@ -2453,45 +2453,45 @@
       "mandatoryChecks": [
         {
           "id": "TOL-M1",
-          "requirement": "Every tool invocation shall be authorized server-side independent of model output—proven by automated gateway tests that deny tool calls without a valid authz decision at 100%, not by prompt instructions or client-side checks alone.",
-          "artifact": "Tool gateway / tool-runtime authz enforcement config (server-side); Automated deny suite for tool calls missing/forged/invalid authz decisions",
-          "passCondition": "Automated tests show tool calls without a valid authz decision are denied at 100%; model-proposed tool name/args alone never bypass the gateway (measuredAt ≤90 days). If no production tools/agents invoke tools, score NOT_APPLICABLE.",
+          "requirement": "Every production tool invocation shall be authorized server-side by an independent authz decision—proven by coverage of production tool-invocation paths plus automated deny tests at 100%, not by prompt instructions, client-side checks, or model-proposed tool name/args alone.",
+          "artifact": "Inventory or mapping of production tool-invocation paths (or attested gateway covering 100%); Tool gateway / tool-runtime authz enforcement config (server-side)",
+          "passCondition": "100% of production tool-invocation paths are covered by server-side tool authz (gateway or runtime); automated tests show tool calls without a valid authz decision are denied at 100%; model-proposed tool name/args alone never bypass the gateway/runtime (measuredAt ≤90 days). If no production agents/workloads invoke tools, score NOT_APPLICABLE.",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "TOL-M2",
-          "requirement": "Production agents and workloads shall have an explicit tool allowlist, and requests for unknown tools shall be denied—proven by allowlist coverage for 100% of production agents plus automated negative tests, not by open MCP “all tools” bindings or prompt-only restrictions.",
-          "artifact": "Per-agent/workload tool allowlist configuration covering production agents; Negative tests for unknown / inventable tool names",
-          "passCondition": "100% of production agents/workloads that can invoke tools have an explicit tool allowlist; requests for tools outside the allowlist are denied at 100% in automated tests (measuredAt ≤90 days). If no production agents/workloads invoke tools, score NOT_APPLICABLE.",
+          "requirement": "Production agents and workloads shall have an explicit tool allowlist, and unknown or model-invented tool names shall be rejected at runtime—proven by an inventory of production agents that can invoke tools, 100% allowlist coverage, automated unknown-tool deny tests, and runtime rejection of invented names—not by open MCP \"all tools\" bindings, prompt-only restrictions, or a deny suite that covers only a subset of agents.",
+          "artifact": "Inventory of production agents/workloads that can invoke tools; Per-agent/workload tool allowlist configuration covering 100% of those agents",
+          "passCondition": "Inventory covers 100% of production agents/workloads that can invoke tools; each has an explicit tool allowlist; automated tests deny unknown-tool requests at 100%; unknown or model-invented tool names are rejected at runtime (measuredAt ≤90 days). If no production agents/workloads invoke tools, score NOT_APPLICABLE.",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "TOL-M3",
-          "requirement": "Tools rated write, irreversible, or financial shall require an additional gate beyond base tool authz/allowlist—human approval, dual control, or a policy engine—proven by an impact-tiered inventory plus automated tests that ungated execution is impossible.",
-          "artifact": "Impact-tiered tool inventory marking write/irreversible/financial tools; Gate configuration (approval, dual control, or policy engine) for 100% of those tools",
-          "passCondition": "100% of tools rated write/irreversible/financial have a configured additional gate (approval, dual control, or policy engine); automated tests show ungated execution is impossible for those tools (measuredAt ≤90 days). If no write/irreversible/financial tools exist in production, score NOT_APPLICABLE.",
+          "requirement": "Tools rated write, irreversible, or financial shall require an additional gate beyond base tool authz/allowlist—human approval, dual control, or a policy engine—proven by a complete impact-tiered inventory of production high-impact tools, 100% gate coverage, and automated tests that ungated execution is impossible—not by prompt \"ask a human\" text, base allowlists, or a bypass suite that covers only a subset of high-impact tools.",
+          "artifact": "Impact-tiered tool inventory marking write/irreversible/financial tools in production; Gate configuration (approval, dual control, or policy engine) for 100% of those tools",
+          "passCondition": "Impact-tiered inventory covers 100% of production write/irreversible/financial tools; 100% of those tools have a configured additional gate (approval, dual control, or policy engine); automated tests show ungated execution is impossible for those tools (measuredAt ≤90 days). If no write/irreversible/financial tools exist in production, score NOT_APPLICABLE.",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "TOL-M4",
-          "requirement": "Production tools shall declare argument schemas and reject invalid or malicious payloads before side effects—proven by schema coverage for 100% of production tools plus contract tests, not by prompt-only “follow the schema” instructions.",
-          "artifact": "JSON Schema (or equivalent) per production tool; Contract tests for invalid/malicious argument fixtures",
-          "passCondition": "100% of production tools have a declared argument schema; invalid/malicious argument fixtures are rejected at 100% before side effects (measuredAt ≤90 days). If no production tools exist, score NOT_APPLICABLE.",
+          "requirement": "Production tools shall declare argument schemas and reject invalid or malicious payloads before side effects—proven by an inventory of production tools, 100% schema coverage, and contract tests at 100% rejection—not by prompt-only \"follow the schema\" instructions, customer-API OpenAPI alone, or a reject suite that covers only a subset of tools.",
+          "artifact": "Inventory of production tools that accept arguments; JSON Schema (or equivalent) per inventoried production tool",
+          "passCondition": "Inventory covers 100% of production tools; each has a declared argument schema; invalid/malicious argument fixtures are rejected at 100% before side effects (measuredAt ≤90 days). If no production tools exist, score NOT_APPLICABLE.",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
         {
           "id": "TOL-M5",
-          "requirement": "Production MCP and agent tool catalogs shall be signed (or equivalently integrity-verified) and supply-chain reviewed before use—proven by verify-on-load that rejects unsigned/unapproved catalogs plus a review ≤90 days or since last catalog change—not by SCI-M2 inventory pins alone.",
-          "artifact": "Signed (or integrity-verified) production MCP/agent tool catalog; Verify-on-load / reject-unsigned configuration for catalog consumers",
-          "passCondition": "Production MCP/agent tool-catalog loaders reject unsigned or unapproved catalogs; last supply-chain review is ≤90 days or since the last catalog change (measuredAt ≤90 days). If no production MCP/agent tool catalogs are loaded, score NOT_APPLICABLE. (Level-5 / regulated advanced scope.)",
+          "requirement": "Production MCP and agent tool catalogs shall be signed (or equivalently integrity-verified) and supply-chain reviewed before use—proven by an inventory of production catalogs, verify-on-load that rejects unsigned/unapproved catalogs on 100% of load paths, plus a review ≤90 days or since last catalog change—not by SCI-M2 inventory pins alone or a reject config that covers only a subset of catalog loaders.",
+          "artifact": "Inventory of production MCP/agent tool catalogs; Signed (or integrity-verified) catalogs + verify-on-load / reject-unsigned for catalog consumers",
+          "passCondition": "Inventory covers 100% of production MCP/agent tool catalogs; catalog loaders reject unsigned or unapproved catalogs; last supply-chain review is ≤90 days or since the last catalog change (measuredAt ≤90 days). If no production MCP/agent tool catalogs are loaded, score NOT_APPLICABLE. (Level-5 / regulated advanced scope.)",
           "method": "hybrid",
           "requiredFromLevel": 5,
           "minCriticality": 3
@@ -2500,18 +2500,18 @@
       "recommendedChecks": [
         {
           "id": "TOL-R1",
-          "requirement": "Destructive tools should expose dry-run or simulation in non-production environments, and the last promotion of a destructive tool should include a dry-run evidence link ≤90 days old—so operators rehearse blast radius before production.",
-          "artifact": "Destructive-tool catalog marking dry-run/simulation support; Sample lower-env dry-run logs or promotion evidence links ≤90 days",
-          "passCondition": "100% of tools classified destructive expose dry-run or simulation in non-prod; the last promotion of a destructive tool includes a dry-run evidence link ≤90 days old (measuredAt ≤90 days). If no destructive tools exist, score NOT_APPLICABLE.",
+          "requirement": "Destructive tools should expose dry-run or simulation in non-production environments, and the last promotion of a destructive tool should include a dry-run evidence link ≤90 days old—proven by an inventory of destructive tools, 100% dry-run coverage in non-prod, and promotion linkage—not by prompt-only \"dry-run\" flags, production confirmation dialogs, or promotion evidence without a complete destructive-tool inventory.",
+          "artifact": "Inventory/catalog of destructive tools marking dry-run/simulation support; Sample lower-env dry-run logs or promotion evidence links ≤90 days",
+          "passCondition": "Inventory covers 100% of tools classified destructive; each exposes dry-run or simulation in non-prod; the last promotion of a destructive tool includes a dry-run evidence link ≤90 days old (measuredAt ≤90 days). If no destructive tools exist, score NOT_APPLICABLE.",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
         {
           "id": "TOL-R2",
-          "requirement": "High-impact tools should have documented QPS/daily caps and max-affected-entities budgets, with ≥1 limit hit or synthetic enforcement test in the last 30 days—so runaway loops cannot exhaust blast radius silently.",
-          "artifact": "Per-tool rate-limit and blast-radius policy config for high-impact tools; Sample enforcement metrics or synthetic limit-hit test ≤30 days",
-          "passCondition": "Each high-impact tool has a documented QPS or daily cap and a max-affected-entities (or equivalent) blast-radius budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days (measuredAt ≤90 days). If no high-impact tools exist, score NOT_APPLICABLE.",
+          "requirement": "High-impact tools should have documented QPS/daily caps and max-affected-entities budgets, with ≥1 limit hit or synthetic enforcement test in the last 30 days—proven by an inventory of high-impact tools, 100% rate+blast budget coverage, and ≤30d enforcement proof—not by global API gateway limits alone, docs without enforcement, or budgets that cover only a subset of high-impact tools.",
+          "artifact": "Inventory of high-impact tools requiring rate and blast-radius budgets; Per-tool rate-limit and blast-radius policy config for those tools",
+          "passCondition": "Inventory covers 100% of high-impact tools; each has a documented QPS or daily cap and a max-affected-entities (or equivalent) blast-radius budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days (measuredAt ≤90 days). If no high-impact tools exist, score NOT_APPLICABLE.",
           "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
