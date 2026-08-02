@@ -227,6 +227,49 @@ function esc(s: unknown): string {
     .replace(/"/g, "&quot;");
 }
 
+/** Pretty-print JSON inside an evidence excerpt when present; otherwise escape as text. */
+function formatEvidenceExcerpt(excerpt: string): string {
+  const trimmed = excerpt.trim();
+  if (!trimmed) return "";
+
+  const tryParse = (raw: string): string | null => {
+    try {
+      return JSON.stringify(JSON.parse(raw), null, 2);
+    } catch {
+      return null;
+    }
+  };
+
+  // Whole excerpt is JSON
+  const whole = tryParse(trimmed);
+  if (whole != null) {
+    return `<pre class="evidence-json" tabindex="0"><code>${esc(whole)}</code></pre>`;
+  }
+
+  // Common collector shape: "statusHint=fail; {…}" (or any prefix before first { / [)
+  const objStart = trimmed.search(/[\[{]/);
+  if (objStart >= 0) {
+    const prefix = trimmed.slice(0, objStart).replace(/[;\s]+$/, "").trim();
+    const jsonRaw = trimmed.slice(objStart);
+    const pretty = tryParse(jsonRaw);
+    if (pretty != null) {
+      const lead = prefix ? `<span class="evidence-lead">${esc(prefix)}</span>` : "";
+      return `${lead}<pre class="evidence-json" tabindex="0"><code>${esc(pretty)}</code></pre>`;
+    }
+  }
+
+  return ` — ${esc(excerpt)}`;
+}
+
+function formatEvidenceItem(e: { ref: string; excerpt?: string }): string {
+  const excerptHtml = e.excerpt ? formatEvidenceExcerpt(e.excerpt) : "";
+  const hasBlock = excerptHtml.includes('class="evidence-json"');
+  if (hasBlock) {
+    return `<li class="evidence-item"><div class="evidence-ref"><code>${esc(e.ref)}</code></div>${excerptHtml}</li>`;
+  }
+  return `<li class="evidence-item"><code>${esc(e.ref)}</code>${excerptHtml}</li>`;
+}
+
 function statusClass(status: string): string {
   switch (status) {
     case "PASS":
@@ -586,7 +629,7 @@ function tagPills(tags: string[]): string {
 function controlDetailBody(c: Control): string {
   const evidence =
     c.evidenceFound?.length ?
-      `<ul>${c.evidenceFound.map((e) => `<li><code>${esc(e.ref)}</code>${e.excerpt ? ` — ${esc(e.excerpt)}` : ""}</li>`).join("")}</ul>`
+      `<ul class="evidence-list">${c.evidenceFound.map(formatEvidenceItem).join("")}</ul>`
     : `<p class="empty">None</p>`;
   const missing =
     c.requiredEvidenceMissing?.length ?
@@ -1015,6 +1058,24 @@ function render(a: Assessment): string {
     .prio { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
     code { font-family: var(--mono); font-size: 0.84em; background: #f0f4f7; padding: 0.08em 0.35em; border-radius: 4px; }
     ul { padding-left: 1.15rem; }
+    .evidence-list { margin: 0.35rem 0 0.65rem; padding-left: 1.15rem; }
+    .evidence-item { margin: 0.45rem 0; word-break: break-word; }
+    .evidence-ref { margin-bottom: 0.3rem; }
+    .evidence-lead {
+      display: block; font-family: var(--sans); font-size: 0.84rem;
+      color: var(--muted); margin: 0.15rem 0 0.35rem;
+    }
+    .evidence-json {
+      margin: 0.25rem 0 0; padding: 0.65rem 0.75rem;
+      background: #f3f6f8; border: 1px solid var(--line); border-radius: 8px;
+      font-family: var(--mono); font-size: 0.78rem; line-height: 1.45;
+      overflow-x: auto; max-width: 100%; white-space: pre;
+      color: var(--ink);
+    }
+    .evidence-json code {
+      background: transparent; padding: 0; border-radius: 0;
+      font-size: inherit; color: inherit;
+    }
     .help { margin: 0.65rem 0 0; font-size: 0.82rem; color: var(--muted); }
     .roadmap-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -1059,8 +1120,8 @@ function render(a: Assessment): string {
     }
     .flyout-close:hover { background: var(--bg); }
     .flyout-body {
-      padding: 1.15rem 1.25rem 2.25rem; overflow-y: auto; flex: 1;
-      font-family: var(--serif); font-size: 0.98rem;
+      padding: 1.15rem 1.25rem 2.25rem; overflow-y: auto; overflow-x: hidden; flex: 1;
+      font-family: var(--serif); font-size: 0.98rem; min-width: 0;
     }
     .flyout-body .meta { font-family: var(--sans); font-size: 0.82rem; }
     .flyout-body h4 {
