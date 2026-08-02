@@ -913,12 +913,12 @@ checks:
       privilegedProviderOrCloudKeysInClientApps=0 +
       productionKeysWithDocumentedLeastPrivilegeScopePct=100 +
       productionKeysWithinRotationPolicyPct=100 + measuredAt ≤90d).
-      NOT_APPLICABLE if productionProviderOrCloudKeysPresent=false and no in-repo key inventory,
-      rotation/scope, or client-key-risk signals (any gate signal blocks N/A launder).
+      NOT_APPLICABLE if productionProviderOrCloudKeysPresent=false and no in-repo key inventory
+      or client-key-risk signals (rotation/scope docs alone do not block N/A).
       PARTIAL if inventory/rotation/scope/client signals without complete import (rotation docs alone ≠ PASS;
       inventory still required for PASS).
       FAIL if privileged client keys >0, scopedPct<100, or rotationPct<100
-      (failing import metrics beat present=false N/A).
+      (privileged client keys >0 beat present=false N/A; vacuous control=false under N/A does not).
       SEC2-M1, SEC2-M2, and AUTHN-R1 do not substitute.
   SEC2-R1:
     requiredEvidence:
@@ -989,12 +989,12 @@ checks:
       PASS if statusHint=pass / sec2R3Satisfied === true
       (dataset secret/PII scan gate + publishBlockedWhenCriticalFindingsOpen=true +
       fineTuneOrEvalCorporaPublishedInLast90DaysWithLinkedScanReportPct=100 + measuredAt ≤90d).
-      NOT_APPLICABLE if fineTuneOrEvalCorpusPublishPresent=false and no in-repo corpus-publish,
-      scan-gate, blocking, or scan-report signals (any gate signal blocks N/A launder).
+      NOT_APPLICABLE if fineTuneOrEvalCorpusPublishPresent=false and no in-repo corpus-publish
+      or scan-gate signals (generic blocking/scan-report wording alone does not block N/A).
       PARTIAL if gate/blocking/report/corpus signals without complete import (gate config alone ≠ PASS;
       scan gate still required for PASS).
       FAIL if blocking=false, linkedPct<100, or gate attested absent without in-repo config
-      (failing import metrics beat present=false N/A).
+      (linkedPct<100 beats present=false N/A; vacuous control=false under N/A does not).
       SEC2-R1, SEC2-M1, DG-M2, and DG-R3 do not substitute.
   PRM-M1:
     requiredEvidence:

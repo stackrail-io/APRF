@@ -144,7 +144,7 @@ npm run aprf:secrets -- \
 # (explicit privilegedSecretsInReposPromptsOrClientBundles=0; empty SARIF alone ≠ clean scan)
 ```
 
-PASS only with secrets-manager runtime wiring AND a clean secret-scan import (0 privileged secrets in repos/prompts/fixtures, measuredAt ≤90d). Heuristic embeds fail even when `productionRuntimeSecretsPresent=false`.
+PASS only with secrets-manager runtime wiring AND a clean secret-scan import (0 privileged secrets in repos, prompt registries, and client bundles — include fixtures when present; measuredAt ≤90d). Heuristic embeds fail even when `productionRuntimeSecretsPresent=false`.
 
 **SEC2-M2 (secret-redaction):** log scrubbers in code are **supporting** only. Prefer:
 

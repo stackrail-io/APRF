@@ -208,8 +208,9 @@ export function buildKeyRotationScopeReport(opts: {
     opts.rotationPolicy.found ||
     opts.leastPrivilegeScope.found ||
     opts.clientKeyRisk.found;
-  // Any in-repo key-surface signal blocks N/A launder (inventory not required).
-  const surfaceProvedForNaOverride = gateSignalsPresent;
+  // Inventory / client-key risk prove keys exist; rotation/scope docs alone are too generic.
+  const surfaceProvedForNaOverride =
+    opts.keyInventory.found || opts.clientKeyRisk.found;
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
@@ -238,7 +239,7 @@ export function buildKeyRotationScopeReport(opts: {
   }
   if (opts.imported.found) {
     notes.push(
-      `Imported: ${opts.imported.sources.join(", ")} (scopePresent=${opts.imported.productionProviderOrCloudKeysPresent}, clientPrivileged=${opts.imported.privilegedProviderOrCloudKeysInClientApps}, scopedPct=${opts.imported.productionKeysWithDocumentedLeastPrivilegeScopePct}, rotationPct=${opts.imported.productionKeysWithinRotationPolicyPct}, measuredAt=${opts.imported.measuredAt})`,
+      `Imported: ${opts.imported.sources.join(", ")} (keysPresent=${opts.imported.productionProviderOrCloudKeysPresent}, clientPrivileged=${opts.imported.privilegedProviderOrCloudKeysInClientApps}, scopedPct=${opts.imported.productionKeysWithDocumentedLeastPrivilegeScopePct}, rotationPct=${opts.imported.productionKeysWithinRotationPolicyPct}, measuredAt=${opts.imported.measuredAt})`,
     );
   } else if (gateSignalsPresent) {
     notes.push(
@@ -251,9 +252,9 @@ export function buildKeyRotationScopeReport(opts: {
     new Date(opts.assessedAt),
     IMPORT_MAX_AGE_DAYS,
   );
-  const scopePresent =
+  const keysPresent =
     opts.imported.productionProviderOrCloudKeysPresent === true;
-  const inventoryPresent = opts.keyInventory.found || scopePresent;
+  const inventoryPresent = opts.keyInventory.found || keysPresent;
 
   const clientOk =
     opts.imported.privilegedProviderOrCloudKeysInClientApps === 0;
@@ -265,9 +266,16 @@ export function buildKeyRotationScopeReport(opts: {
   let statusHint: KeyRotationScopeReport["summary"]["statusHint"];
   let sec2M3Satisfied: boolean | null = null;
 
-  // Failing metrics beat N/A even when present=false with no in-repo override.
+  const naCandidate =
+    opts.imported.found &&
+    opts.imported.productionProviderOrCloudKeysPresent === false &&
+    !surfaceProvedForNaOverride;
+  const contradictingFail =
+    opts.imported.privilegedProviderOrCloudKeysInClientApps !== null &&
+    opts.imported.privilegedProviderOrCloudKeysInClientApps > 0;
   const explicitFail =
     opts.imported.found &&
+    (!naCandidate || contradictingFail) &&
     ((opts.imported.privilegedProviderOrCloudKeysInClientApps !== null &&
       opts.imported.privilegedProviderOrCloudKeysInClientApps > 0) ||
       (opts.imported.productionKeysWithDocumentedLeastPrivilegeScopePct !==
@@ -277,6 +285,9 @@ export function buildKeyRotationScopeReport(opts: {
       (opts.imported.productionKeysWithinRotationPolicyPct !== null &&
         opts.imported.productionKeysWithinRotationPolicyPct < 100));
 
+  const naOverrideNote =
+    "Imported productionProviderOrCloudKeysPresent=false ignored — in-repo key inventory or client-key signals prove the surface exists.";
+
   if (explicitFail) {
     statusHint = "fail";
     sec2M3Satisfied = false;
@@ -284,9 +295,7 @@ export function buildKeyRotationScopeReport(opts: {
       opts.imported.productionProviderOrCloudKeysPresent === false &&
       surfaceProvedForNaOverride
     ) {
-      notes.push(
-        "Imported productionProviderOrCloudKeysPresent=false ignored — in-repo key inventory, rotation/scope, or client-key signals prove the surface exists.",
-      );
+      notes.push(naOverrideNote);
     }
     notes.push(
       "Imported evidence shows privileged client keys, incomplete scope coverage, or rotation-policy breaches — SEC2-M3 fail.",
@@ -305,9 +314,7 @@ export function buildKeyRotationScopeReport(opts: {
     opts.imported.productionProviderOrCloudKeysPresent === false &&
     surfaceProvedForNaOverride
   ) {
-    notes.push(
-      "Imported productionProviderOrCloudKeysPresent=false ignored — in-repo key inventory, rotation/scope, or client-key signals prove the surface exists.",
-    );
+    notes.push(naOverrideNote);
     if (
       inventoryPresent &&
       clientOk &&

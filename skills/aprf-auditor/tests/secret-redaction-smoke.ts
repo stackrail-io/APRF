@@ -148,9 +148,9 @@ class SensitiveDataFilter:
       }),
     );
     const rBare = await run(tConfig, outBare);
-    if (rBare.summary.statusHint === "pass") {
+    if (rBare.summary.statusHint !== "partial") {
       throw new Error(
-        `bare rate/covers without cases must not PASS: ${JSON.stringify(rBare.summary)}`,
+        `bare rate/covers without cases expected partial: ${JSON.stringify(rBare.summary)}`,
       );
     }
 

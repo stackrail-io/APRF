@@ -75,6 +75,25 @@ async function main() {
       );
     }
 
+    // Rotation docs alone must not block N/A.
+    const outRotNa = join(root, "o-rot-na");
+    mkdirSync(join(outRotNa, "imports", "key-rotation-scope"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outRotNa, "imports", "key-rotation-scope", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionProviderOrCloudKeysPresent: false,
+      }),
+    );
+    const rRotNa = await run(tRot, outRotNa);
+    if (rRotNa.summary.statusHint !== "not_applicable") {
+      throw new Error(
+        `rotation-only must allow N/A: ${JSON.stringify(rRotNa.summary)}`,
+      );
+    }
+
     const tInv = join(root, "t-inv");
     mkdirSync(join(tInv, "ops"), { recursive: true });
     writeFileSync(

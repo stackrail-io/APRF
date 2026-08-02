@@ -122,6 +122,24 @@ spec:
       );
     }
 
+    // Over-age measuredAt must not PASS.
+    const outAged = join(root, "o-aged");
+    mkdirSync(join(outAged, "imports", "credential-egress-controls"), {
+      recursive: true,
+    });
+    const aged = new Date();
+    aged.setUTCDate(aged.getUTCDate() - 120);
+    writeFileSync(
+      join(outAged, "imports", "credential-egress-controls", "coverage.json"),
+      coverage({ measuredAt: aged.toISOString() }),
+    );
+    const rAged = await run(tPol, outAged);
+    if (rAged.summary.statusHint === "pass") {
+      throw new Error(
+        `over-age measuredAt must not PASS: ${JSON.stringify(rAged.summary)}`,
+      );
+    }
+
     // PASS
     const outPass = join(root, "o-pass");
     mkdirSync(join(outPass, "imports", "credential-egress-controls"), {

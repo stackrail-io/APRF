@@ -344,8 +344,17 @@ export function buildSecretRedactionReport(opts: {
   let statusHint: SecretRedactionReport["summary"]["statusHint"];
   let sec2M2Satisfied: boolean | null = null;
 
+  const naCandidate =
+    opts.imported.found &&
+    opts.imported.productionLoggingOrTracingPipelinesPresent === false &&
+    !surfaceProvedForNaOverride;
+  // Measured sub-100 rate / pattern miss contradicts N/A; bare config=false under N/A does not.
+  const contradictingFail =
+    (detectionRatePct !== null && detectionRatePct < 100) ||
+    opts.imported.canaryCoversApiKeyBearerAndAwsKeyPatterns === false;
   const explicitFail =
     opts.imported.found &&
+    (!naCandidate || contradictingFail) &&
     ((detectionRatePct !== null && detectionRatePct < 100) ||
       opts.imported.canaryCoversApiKeyBearerAndAwsKeyPatterns === false ||
       (opts.imported.redactionConfigPresent === false && !opts.config.found));

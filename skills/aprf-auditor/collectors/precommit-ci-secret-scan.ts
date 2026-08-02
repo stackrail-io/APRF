@@ -351,8 +351,14 @@ export function buildPrecommitCiSecretScanReport(opts: {
   let statusHint: PrecommitCiSecretScanReport["summary"]["statusHint"];
   let sec2R1Satisfied: boolean | null = null;
 
+  const naCandidate =
+    opts.imported.found &&
+    opts.imported.applicationCodePromptsOrFixturesPresent === false &&
+    !surfaceProvedForNaOverride;
+  // Vacuous control=false fields under N/A must not force fail.
   const explicitFail =
     opts.imported.found &&
+    !naCandidate &&
     ((opts.imported.preCommitSecretScanConfigured === false &&
       !opts.preCommitSecretScan.found) ||
       (opts.imported.ciSecretScanConfigured === false &&

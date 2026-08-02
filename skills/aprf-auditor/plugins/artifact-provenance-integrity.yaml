@@ -26,11 +26,13 @@ emits:
     - artifact-provenance-integrity
     - sci-m1
     - repo-artifact-provenance-integrity
+    - artifact-signature-verification
     - cosign-verification
     - notation-verification
     - slsa-attestation
     - oci-provenance
     - model-checksum-validation
+    - docker-image-digest-pinned
 mapsToChecks: [SCI-M1]
 whenUnavailable: >
   Signals alone are PARTIAL. SCI-M1 PASS needs verification configured

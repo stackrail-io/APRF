@@ -460,8 +460,16 @@ export function buildSecretsReport(opts: {
   let statusHint: SecretsHygieneReport["summary"]["statusHint"];
   let sec2M1Satisfied: boolean | null = null;
 
+  const naCandidate =
+    opts.imported.found &&
+    opts.imported.productionRuntimeSecretsPresent === false &&
+    !surfaceProvedForNaOverride;
+  // Positive findings contradict N/A; vacuous control=false fields under N/A do not.
+  const contradictingFail =
+    privilegedCount !== null && privilegedCount > 0;
   const explicitFail =
     opts.imported.found &&
+    (!naCandidate || contradictingFail) &&
     ((privilegedCount !== null && privilegedCount > 0) ||
       (opts.imported.productionRuntimeSecretsResolvedFromSecretsManagerPct !==
         null &&
@@ -481,7 +489,7 @@ export function buildSecretsReport(opts: {
       ? `Imported productionRuntimeSecretsPresent=false ignored — in-repo ${naOverrideReasons.join(" / ")} prove the surface exists.`
       : "Imported productionRuntimeSecretsPresent=false ignored — in-repo signals prove the surface exists.";
 
-  // Heuristic embeds + failing import metrics beat N/A.
+  // Heuristic embeds + contradicting fail metrics beat N/A.
   if (embeddedCount > 0) {
     statusHint = "fail";
     sec2M1Satisfied = false;
@@ -556,7 +564,7 @@ export function buildSecretsReport(opts: {
     sec2M1Satisfied = false;
     if (opts.imported.found && !managerOk) {
       notes.push(
-        "PASS requires secrets-manager wiring (in-repo or secretsManagerWiringPresent/productionRuntimeSecretsPresent=true).",
+        "PASS requires secrets-manager wiring (in-repo or secretsManagerWiringPresent=true).",
       );
     }
     if (opts.imported.found && !privilegedOk) {

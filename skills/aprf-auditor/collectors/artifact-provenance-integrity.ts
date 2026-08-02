@@ -60,9 +60,6 @@ const DIGEST_PIN_RE =
 const BLOCK_UNVERIFIED_RE =
   /\b(verify[_-]?images?|block[_-]?(unsigned|unverified)|reject[_-]?(unsigned|unverified)|admission[_-]?(controller|webhook)|image[_-]?policy|clusterimagepolicy|unverified[_-]?pull)\b/i;
 
-const ARTIFACT_SURFACE_RE =
-  /\b(container[_-]?image|docker[_-]?image|oci[_-]?image|model[_-]?(artifact|weight|registry)|production[_-]?(image|model))\b/i;
-
 export interface ArtifactProvenanceIntegrityReport {
   schemaVersion: "0.2.0";
   pluginId: typeof PLUGIN_ID;
@@ -471,10 +468,7 @@ export const artifactProvenanceIntegrityCollector: Collector = {
     const blockRefs = collectRefs(
       ctx.targetPath,
       maxFiles,
-      (p, t) =>
-        BLOCK_UNVERIFIED_RE.test(p) ||
-        BLOCK_UNVERIFIED_RE.test(t) ||
-        (ARTIFACT_SURFACE_RE.test(t) && BLOCK_UNVERIFIED_RE.test(t)),
+      (p, t) => BLOCK_UNVERIFIED_RE.test(p) || BLOCK_UNVERIFIED_RE.test(t),
       10,
     );
 

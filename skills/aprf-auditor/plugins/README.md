@@ -86,7 +86,7 @@ Needs redaction config + canary harness at 100% detection in logs/traces.
 npm run aprf:key-rotation-scope -- --target <app> --out <app>/aprf-assessment
 ```
 
-Needs key inventory + least-privilege scope + rotation/short-lived coverage + 0 privileged keys in client apps. Rotation docs alone are not enough.
+Needs key inventory + least-privilege scope + rotation/short-lived coverage + 0 privileged keys in client apps (inventory/coverage measuredAt ≤90d). Rotation docs alone are not enough.
 
 ## Built-in highlight: `precommit-ci-secret-scan` (SEC2-R1)
 
@@ -118,7 +118,7 @@ Needs a secret/PII scan gate before fine-tune/eval corpus publish, blocking on c
 npm run aprf:artifact-provenance-integrity -- --target <app> --out <app>/aprf-assessment
 ```
 
-Needs cosign/Notation/SLSA/OCI/checksum verification + 100% verified production pulls + blocked unverified pulls. Digest pins alone are not enough.
+Needs cosign/Notation/SLSA/OCI/checksum verification + 100% verified production pulls + blocked unverified pulls (verification/enforcement measuredAt ≤90d). Digest pins alone are not enough.
 
 ## Built-in highlight: `injection-policy-gate` (SEC-M1)
 

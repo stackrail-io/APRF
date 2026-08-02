@@ -263,8 +263,14 @@ export function buildCredentialEgressControlsReport(opts: {
   let statusHint: CredentialEgressControlsReport["summary"]["statusHint"];
   let sec2R2Satisfied: boolean | null = null;
 
+  const naCandidate =
+    opts.imported.found &&
+    opts.imported.runtimesHoldingCredentialsPresent === false &&
+    !surfaceProvedForNaOverride;
+  // Vacuous control=false fields under N/A must not force fail.
   const explicitFail =
     opts.imported.found &&
+    !naCandidate &&
     ((opts.imported.egressAllowlistOrPolicyConfigured === false &&
       !opts.egressPolicy.found) ||
       opts.imported.credentialEgressDestinationsDocumented === false ||

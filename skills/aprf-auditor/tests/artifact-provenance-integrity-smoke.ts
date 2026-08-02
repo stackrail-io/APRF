@@ -142,6 +142,24 @@ jobs:
       );
     }
 
+    // Over-age measuredAt must not PASS.
+    const outAged = join(root, "o-aged");
+    mkdirSync(join(outAged, "imports", "artifact-provenance-integrity"), {
+      recursive: true,
+    });
+    const aged = new Date();
+    aged.setUTCDate(aged.getUTCDate() - 120);
+    writeFileSync(
+      join(outAged, "imports", "artifact-provenance-integrity", "coverage.json"),
+      coverage({ measuredAt: aged.toISOString() }),
+    );
+    const rAged = await run(tCosign, outAged);
+    if (rAged.summary.statusHint === "pass") {
+      throw new Error(
+        `over-age measuredAt must not PASS: ${JSON.stringify(rAged.summary)}`,
+      );
+    }
+
     // PASS
     const outPass = join(root, "o-pass");
     mkdirSync(join(outPass, "imports", "artifact-provenance-integrity"), {

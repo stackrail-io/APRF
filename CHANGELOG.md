@@ -7,9 +7,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ## [Unreleased]
 
-### Fixed
-- Secrets / SCI-M1 collectors: broaden N/A surface overrides; failing import metrics beat `present=false` N/A; SEC2-R1 counts root `gitleaks.toml` and ignores `generatedAt` for ≤7d freshness; SEC2-M2 requires measured canary `cases`/`results`; accurate SEC2-M1 N/A-override notes.
-
 ### Changed
 - Rewrote **secrets** + collectors; synced `aprf-spec.json`.
 - Rewrote **supply-chain** **SCI-M1** (hybrid artifact provenance/integrity; detectors for cosign, Notation, SLSA, OCI provenance, model checksum, artifact signature, digest pins; `repo-artifact-provenance-integrity` / `artifact-provenance-integrity` requires 100% verified pulls + unverifiedPullsBlocked + measuredAt ≤90d—no vacuous PASS from digest pins alone; N/A via `productionModelOrContainerArtifactsPresent=false`; cleared `technologies`); synced `aprf-spec.json`.
@@ -93,6 +90,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 - Auditor **Phase 2b attestation**: for Checks that would be `NOT_DEMONSTRATED`, ask the customer **YES / NO / DON'T KNOW** before finalizing; map YES (no artifact)→PARTIAL, NO→FAIL, DON'T KNOW→NOT_DEMONSTRATED; persist `userAttestation` on controls.
 
 ### Fixed
+- Secrets / SCI-M1 collectors: N/A surface overrides key inventory/client-key (SEC2-M3) and corpus-publish/scan-gate (SEC2-R3); contradicting fail metrics (e.g. privileged findings > 0) beat `present=false` N/A while vacuous control=false fields do not; SEC2-R1 counts root `gitleaks.toml` and ignores `generatedAt` for ≤7d freshness; SEC2-M2 requires measured canary `cases`/`results`; accurate SEC2-M1 N/A-override notes.
 - `@stackrail-io/aprf-engine` no longer advertises a published disk loader; `src/loader.ts` remains repo-script tooling only. Moved `ajv` / `ajv-formats` / `yaml` to `devDependencies` (patch **0.10.1**).
 - Attestation schema 0.6: N/A is not a pass (`passed` must be `false` when `notApplicable` is true); removed “gate-satisfied” wording that contradicted evaluate helpers.
 - Package README `validate` script description now matches root `package.json` (includes both packages’ `test:unit`).

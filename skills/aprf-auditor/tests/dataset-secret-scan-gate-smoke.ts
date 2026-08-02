@@ -168,6 +168,31 @@ jobs:
       );
     }
 
+    // Generic blocking wording alone must not block N/A.
+    const tBlock = join(root, "t-block");
+    mkdirSync(join(tBlock, ".github", "workflows"), { recursive: true });
+    writeFileSync(
+      join(tBlock, ".github", "workflows", "ci.yml"),
+      "jobs:\n  build:\n    steps:\n      - run: echo fail the job if critical findings\n",
+    );
+    const outBlockNa = join(root, "o-block-na");
+    mkdirSync(join(outBlockNa, "imports", "dataset-secret-scan-gate"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outBlockNa, "imports", "dataset-secret-scan-gate", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        fineTuneOrEvalCorpusPublishPresent: false,
+      }),
+    );
+    const rBlockNa = await run(tBlock, outBlockNa);
+    if (rBlockNa.summary.statusHint !== "not_applicable") {
+      throw new Error(
+        `blocking-only must allow N/A: ${JSON.stringify(rBlockNa.summary)}`,
+      );
+    }
+
     // Corpus-publish alone blocks N/A launder.
     const tCorpus = join(root, "t-corpus");
     mkdirSync(join(tCorpus, "docs"), { recursive: true });

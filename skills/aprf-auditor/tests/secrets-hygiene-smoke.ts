@@ -77,14 +77,16 @@ jobs:
 
     const tLeak = join(root, "t-leak");
     mkdirSync(tLeak, { recursive: true });
-    writeFileSync(join(tLeak, "leak.py"), `KEY = "AKIAJTESTKEYNOTREAL0"\n`);
+    // Assembled at runtime so this source file does not match secret scanners.
+    const fakeAwsKey = ["AKIA", "JTESTKEYNOTREAL0"].join("");
+    writeFileSync(join(tLeak, "leak.py"), `KEY = "${fakeAwsKey}"\n`);
     const r2 = await run(tLeak, join(root, "o2"));
     if (r2.summary.statusHint !== "fail" || r2.summary.embeddedCount < 1) {
       throw new Error(
         `expected fail with findings, got ${JSON.stringify(r2.summary)}`,
       );
     }
-    if (JSON.stringify(r2).includes("AKIAJTESTKEYNOTREAL0")) {
+    if (JSON.stringify(r2).includes(fakeAwsKey)) {
       throw new Error("secret value leaked into report");
     }
 
@@ -120,6 +122,22 @@ jobs:
       rPass.summary.statusHint !== "pass"
     ) {
       throw new Error(`expected pass, got ${JSON.stringify(rPass.summary)}`);
+    }
+
+    // Over-age measuredAt must not PASS.
+    const outAged = join(root, "o-aged");
+    mkdirSync(join(outAged, "imports", "secrets-hygiene"), { recursive: true });
+    const aged = new Date();
+    aged.setUTCDate(aged.getUTCDate() - 120);
+    writeFileSync(
+      join(outAged, "imports", "secrets-hygiene", "coverage.json"),
+      coverage({ measuredAt: aged.toISOString() }),
+    );
+    const rAged = await run(tPartial, outAged);
+    if (rAged.summary.statusHint === "pass") {
+      throw new Error(
+        `over-age measuredAt must not PASS: ${JSON.stringify(rAged.summary)}`,
+      );
     }
 
     // N/A when no production runtime secrets.

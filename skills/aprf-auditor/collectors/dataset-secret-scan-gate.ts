@@ -210,8 +210,9 @@ export function buildDatasetSecretScanGateReport(opts: {
     opts.scanGate.found ||
     opts.blocking.found ||
     opts.scanReport.found;
-  // Any corpus-publish / scan-gate surface signal blocks N/A launder.
-  const surfaceProvedForNaOverride = gateSignalsPresent;
+  // Corpus-publish / scan-gate prove the surface; generic blocking/CI report wording alone does not.
+  const surfaceProvedForNaOverride =
+    opts.corpusPublish.found || opts.scanGate.found;
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
@@ -266,17 +267,24 @@ export function buildDatasetSecretScanGateReport(opts: {
   let statusHint: DatasetSecretScanGateReport["summary"]["statusHint"];
   let sec2R3Satisfied: boolean | null = null;
 
+  const naCandidate =
+    opts.imported.found &&
+    opts.imported.fineTuneOrEvalCorpusPublishPresent === false &&
+    !surfaceProvedForNaOverride;
+  const linkedPct =
+    opts.imported
+      .fineTuneOrEvalCorporaPublishedInLast90DaysWithLinkedScanReportPct;
+  const contradictingFail = linkedPct !== null && linkedPct < 100;
   const explicitFail =
     opts.imported.found &&
+    (!naCandidate || contradictingFail) &&
     ((opts.imported.datasetSecretPiiScanGateConfigured === false &&
       !opts.scanGate.found) ||
       opts.imported.publishBlockedWhenCriticalFindingsOpen === false ||
-      (opts.imported
-        .fineTuneOrEvalCorporaPublishedInLast90DaysWithLinkedScanReportPct !==
-        null &&
-        opts.imported
-          .fineTuneOrEvalCorporaPublishedInLast90DaysWithLinkedScanReportPct <
-          100));
+      (linkedPct !== null && linkedPct < 100));
+
+  const naOverrideNote =
+    "Imported fineTuneOrEvalCorpusPublishPresent=false ignored — in-repo corpus-publish or scan-gate signals prove the surface exists.";
 
   if (explicitFail) {
     statusHint = "fail";
@@ -285,9 +293,7 @@ export function buildDatasetSecretScanGateReport(opts: {
       opts.imported.fineTuneOrEvalCorpusPublishPresent === false &&
       surfaceProvedForNaOverride
     ) {
-      notes.push(
-        "Imported fineTuneOrEvalCorpusPublishPresent=false ignored — in-repo corpus-publish, scan-gate, blocking, or scan-report signals prove the surface exists.",
-      );
+      notes.push(naOverrideNote);
     }
     notes.push(
       "Imported evidence shows missing scan gate, non-blocking publish, or incomplete linked-scan coverage — SEC2-R3 fail.",
@@ -306,9 +312,7 @@ export function buildDatasetSecretScanGateReport(opts: {
     opts.imported.fineTuneOrEvalCorpusPublishPresent === false &&
     surfaceProvedForNaOverride
   ) {
-    notes.push(
-      "Imported fineTuneOrEvalCorpusPublishPresent=false ignored — in-repo corpus-publish, scan-gate, blocking, or scan-report signals prove the surface exists.",
-    );
+    notes.push(naOverrideNote);
     if (
       scanGatePresent &&
       blockingOk &&
