@@ -4,7 +4,7 @@
 
 | Version | Supported |
 | --- | --- |
-| Working draft **0.10.x** (this repository) | Yes — current normative catalog |
+| Working draft **0.11.x** (this repository) | Yes — current normative catalog |
 | Older draft tags | Best-effort; prefer upgrading to the latest published SemVer |
 
 ## Reporting a vulnerability

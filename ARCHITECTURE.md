@@ -1,7 +1,7 @@
 # APRF architecture
 
 **Status:** hardened design target (post adversarial review)  
-**Framework SemVer today:** v0.10.0  
+**Framework SemVer today:** v0.11.0  
 **Companion:** [ARCHITECTURE-REVIEW.md](ARCHITECTURE-REVIEW.md) (panel critique → accepted changes)
 
 APRF is an **engineering readiness standard** for whether an AI application can safely operate in production. It is **not** a vulnerability scanner, **not** a CNAPP, and **not** a SOC 2 / ISO certification program.

@@ -3,7 +3,7 @@
 # Lower ranks may be SUPPORTING only. Never invent evidence to fill a gap.
 
 version: "0.2.0"
-aprfVersion: "0.10.1"
+aprfVersion: "0.11.0"
 
 # Higher rank number = higher precedence (wins conflicts)
 precedence:

@@ -1,6 +1,6 @@
 # APRF Assessment Report (excerpt)
 
-**APRF:** 0.10.1 · **Skill:** 0.1.0 · **Profile:** Core · **Gate:** FAIL
+**APRF:** 0.11.0 · **Skill:** 0.1.0 · **Profile:** Core · **Gate:** FAIL
 
 ## Executive Summary
 

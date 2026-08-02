@@ -126,7 +126,7 @@ In Copilot Agent chat: `Run an APRF assessment against this repository (Core pro
 | Field | Value |
 | --- | --- |
 | Skill | `0.2.0` |
-| Aligned APRF | `0.10.1` |
+| Aligned APRF | `0.11.0` |
 
 ## License
 

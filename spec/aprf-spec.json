@@ -4,10 +4,10 @@
   "name": "AI Production Readiness Framework",
   "question": "Can this AI application safely operate in production?",
   "governance": {
-    "version": "0.10.0",
+    "version": "0.11.0",
     "status": "working-draft",
-    "releaseName": "CHANGELOG + CI validators, Regulated Assess, WA/SLSA crosswalks, expanded N/A",
-    "publishedAt": "2026-07-25",
+    "releaseName": "Hybrid Check rewrites, mandatory→recommended RFCs, collector hardening",
+    "publishedAt": "2026-08-02",
     "publisher": {
       "name": "StackRail",
       "role": "working-draft-publisher",
@@ -32,7 +32,7 @@
       "frameworkSemVer": "APRF_GOVERNANCE.version — semantic version of the normative framework, check catalog, profiles, and scoring semantics.",
       "specSchemaId": "https://stackrail.io/aprf/spec-schema/0.7 — JSON Schema for the machine-readable APRF document shape; may lag framework SemVer when only content changes.",
       "attestationSchemaId": "https://stackrail.io/aprf/attestation-schema/0.6 — JSON Schema for aprf-self-attestation exports.",
-      "note": "Do not equate schema path versions (0.7 / 0.6) with APRF framework SemVer (e.g. 0.10.0). Validators and conformance claims should cite both."
+      "note": "Do not equate schema path versions (0.7 / 0.6) with APRF framework SemVer (e.g. 0.11.0). Validators and conformance claims should cite both."
     },
     "deprecation": {
       "policy": "Deprecated checks and pillars remain in the spec for at least one MINOR cycle (N−1), marked deprecated, with a replacement ID.",

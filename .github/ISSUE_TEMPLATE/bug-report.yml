@@ -27,6 +27,6 @@ body:
     id: version
     attributes:
       label: Framework / package version
-      placeholder: 0.10.0
+      placeholder: 0.11.0
     validations:
       required: true

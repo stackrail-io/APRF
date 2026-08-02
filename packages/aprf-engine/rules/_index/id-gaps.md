@@ -9,7 +9,7 @@ Numbering gaps in Check IDs are **intentional**. Do not fill gaps by reusing ret
 
 ## Pre-release exception (before first tagged version)
 
-APRF `0.10.x` is a working draft; **no release versions have been tagged yet**. For this window only, stewards may remove or renumber a Check ID when remapping **if** an RFC (or this file) records the change.
+APRF `0.11.x` is a working draft; **no release versions have been tagged yet**. For this window only, stewards may remove or renumber a Check ID when remapping **if** an RFC (or this file) records the change.
 
 | Retired / vacated ID | Replaced by / current holder | RFC / note | Notes |
 | --- | --- | --- | --- |
