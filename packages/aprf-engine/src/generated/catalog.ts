@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:93856df984ce869fdd259aaa93f1485641ec017f00203fd7f9fe0f8d71454934",
+  "generatedAt": "sha256:0bcc0472033e39c72e98e6e1803b228f0ace826c729e7a03f8f3e1957ba99869",
   "ruleCount": 178,
   "domains": [
     {
@@ -1605,8 +1605,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm privileged AI feature, tool, or retrieval entry points exist. If none, score NOT_APPLICABLE. 2) Inventory those entry points (route catalog, tool handlers, or equivalent). 3) Confirm each enforces authorization server-side (middleware/policy/Depends)—not prompt text or client-only checks. 4) Review an authz suite: authenticated callers lacking required permission/scope are denied (401/403); 0 successful unauthorized accesses. 5) PASS only if inventory + server-side enforcement + suite hold with measuredAt ≤90 days. AUTHN-M1 unauthenticated probes alone do not prove unauthorized-caller denial. AUTHZ-M2 cross-tenant suites alone do not prove least-privilege on feature/tool/retrieval entry points. AUTHN-M4 subject-propagation samples alone do not prove entry-point permission checks. TOL-M1 tool allowlists alone do not prove authenticated-but-unauthorized denial tests.\n",
-      "falsePositiveGuidance": "Do not pass auth middleware presence without an authz suite that denies authenticated-but-unauthorized callers. Do not pass unauthenticated (AUTHN-M1) rejection as this Check. Do not pass empty inventories without an explicit N/A attest. Do not score AUTHZ-M2, AUTHN-M4, or TOL-M1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
+      "manualVerification": "1) Confirm privileged AI feature, tool, or retrieval entry points exist. If none, score NOT_APPLICABLE. 2) Inventory those entry points (route catalog, tool handlers, or equivalent). 3) Confirm each enforces authorization server-side (middleware/policy/Depends)—not prompt text or client-only checks. 4) Review an authz suite: authenticated callers lacking required permission/scope are denied (401/403); 0 successful unauthorized accesses. 5) PASS only if inventory + server-side enforcement + suite hold with measuredAt ≤90 days. AUTHN-M1 unauthenticated probes alone do not prove unauthorized-caller denial. AUTHZ-M2 cross-tenant suites alone do not prove least-privilege on feature/tool/retrieval entry points. AUTHN-M4 subject-propagation samples alone do not prove entry-point permission checks. TOL-M1 per-tool-call gateway/runtime authz alone does not prove authenticated-but-unauthorized denial on AI HTTP/RPC entry points.\n",
+      "falsePositiveGuidance": "Do not pass auth middleware presence without an authz suite that denies authenticated-but-unauthorized callers. Do not pass unauthenticated (AUTHN-M1) rejection as this Check. Do not pass empty inventories without an explicit N/A attest. Do not score AUTHZ-M2, AUTHN-M4, or TOL-M1 (per-tool-call authz) as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Enforce server-side authorization on every privileged AI feature, tool, and retrieval entry point",
         "Add authz suite cases that deny authenticated callers lacking required permission or scope",
@@ -6153,7 +6153,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         ]
       },
       "manualVerification": "1) Define high-impact for this system (writes, irreversible, financial, external communications, privileged admin). If none apply, score NOT_APPLICABLE with rationale. 2) Build/open the inventory of action classes and confirm each maps to a production approval gate. 3) Review ungated execution tests (or imports): attempts without approval must fail at 100%. 4) PASS only if inventory coverage + gate wiring + ungated deny evidence all hold with measuredAt ≤90 days.\n",
-      "falsePositiveGuidance": "Do not pass on a UI confirm dialog that agents/APIs can bypass. Do not pass because HUM-M2 logs exist without gates. Do not pass a partial inventory that omits agent/tool paths. Prompt-only “ask a human” without a runtime gate fails. Named exceptions need owner and expiry ≤90 days.\n",
+      "falsePositiveGuidance": "Do not pass on a UI confirm dialog that agents/APIs can bypass. Do not pass because HUM-M2 logs exist without gates. Do not pass a partial inventory that omits agent/tool paths. Prompt-only \"ask a human\" without a runtime gate fails. Do not score TOL-M3 per-tool extra gates as a substitute for action-class human-approval inventory coverage. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Publish a versioned high-impact action inventory with risk tier and gate owner per class",
         "Wire fail-closed approval gates on every inventoried class in production",
@@ -6175,6 +6175,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "HUM-M3",
         "HUM-M4",
         "TOL-M1",
+        "TOL-M3",
         "AGN-M1",
         "AUTHZ-M1"
       ],
@@ -13751,16 +13752,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "TOL-M1",
       "category": "tool-safety",
       "title": "Every tool invocation must be authorized server-side independent of model output",
-      "description": "Every tool invocation shall be authorized server-side independent of model output—proven by automated gateway tests that deny tool calls without a valid authz decision at 100%, not by prompt instructions or client-side checks alone.\n",
-      "whyItMatters": "If the model can invent a tool name or arguments and the gateway executes them without an independent authz decision, injection and confused-deputy paths become production incidents. Distinct from AUTHZ-M1 (AI HTTP/RPC entry-point denial tests), TOL-M2 (per-agent tool allowlists), and AUTHZ-R1 (tool/model policy-as-code + CI/admission deny).\n",
+      "description": "Every production tool invocation shall be authorized server-side by an independent authz decision—proven by coverage of production tool-invocation paths plus automated deny tests at 100%, not by prompt instructions, client-side checks, or model-proposed tool name/args alone.\n",
+      "whyItMatters": "If a model-proposed tool call can execute without a server-side authz decision (subject, permission, or equivalent), injection and confused-deputy paths become production incidents. Distinct from AUTHZ-M1 (privileged AI HTTP/RPC entry-point denial for authenticated-but- unauthorized callers), TOL-M2 (per-agent tool allowlists / unknown-tool deny), TOL-M3 (extra gates on high-impact tools), and AUTHZ-R1 (tool/model policy-as-code + CI/admission deny without proving runtime per-call authz).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Automated tests show tool calls without a valid authz decision are denied at 100%; model-proposed tool name/args alone never bypass the gateway (measuredAt ≤90 days). If no production tools/agents invoke tools, score NOT_APPLICABLE.\n",
+      "passCondition": "100% of production tool-invocation paths are covered by server-side tool authz (gateway or runtime); automated tests show tool calls without a valid authz decision are denied at 100%; model-proposed tool name/args alone never bypass the gateway/runtime (measuredAt ≤90 days). If no production agents/workloads invoke tools, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
+        "Inventory or mapping of production tool-invocation paths (or attested gateway covering 100%)",
         "Tool gateway / tool-runtime authz enforcement config (server-side)",
         "Automated deny suite for tool calls missing/forged/invalid authz decisions",
-        "Deny logs or test results proving 100% denial + no model-output bypass (measuredAt ≤90 days)"
+        "Attest or results: productionToolInvocationPathsCoveredByAuthzPct=100 + unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway=true (measuredAt ≤90 days)"
       ],
       "detection": {
         "capability": "hybrid",
@@ -13768,23 +13770,23 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "repo-tool-gateway-authz",
             "params": {
-              "hint": "Discover tool-gateway / tool-runtime authz and deny-suite signals; ingest coverage under imports/tool-gateway-authz/; require unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway=true + measuredAt ≤90 days.\n"
+              "hint": "Discover tool-gateway / tool-runtime authz and deny-suite signals; ingest coverage under imports/tool-gateway-authz/; require productionToolInvocationPathsCoveredByAuthzPct=100 + unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway=true + measuredAt ≤90 days.\n"
             }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove coverage, attest server-side tool authz with 100% deny of unauthorized tool calls and no model-output bypass (measuredAt ≤90 days).\n"
+              "hint": "If automation cannot prove coverage, attest 100% path coverage, 100% deny of unauthorized tool calls, and no model-output bypass (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Confirm production agents/tools invoke tools through a gateway or runtime. If none, score NOT_APPLICABLE. 2) Confirm authz is enforced server-side (not prompt-only). 3) Review automated tests: calls without a valid authz decision are denied at 100%. 4) Confirm model-proposed tool name/args alone cannot bypass the gateway. 5) PASS only if deny suite + no-bypass hold with measuredAt ≤90 days. AUTHZ-M1 entry-point tests alone do not prove per-tool-call authz. TOL-M2 allowlists alone do not prove authz decisions independent of the allowlist. AUTHZ-R1 policy-as-code alone does not prove runtime deny for every tool invocation.\n",
-      "falsePositiveGuidance": "Do not pass prompt “ask permission” text as server-side authz. Do not pass client SDKs that skip the gateway in production. Do not pass allowlist-only configs without an authz decision path. Do not score AUTHZ-M1, TOL-M2, or AUTHZ-R1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
+      "manualVerification": "1) Confirm production agents/workloads invoke tools through a gateway or runtime. If none, score NOT_APPLICABLE. 2) Inventory production tool-invocation paths (or attest the gateway/runtime covers 100%). 3) Confirm authz is enforced server-side on those paths (not prompt-only). 4) Review automated tests: calls without a valid authz decision are denied at 100%. 5) Confirm model-proposed tool name/args alone cannot bypass the gateway/runtime. 6) PASS only if path coverage + deny suite + no-bypass hold with measuredAt ≤90 days. AUTHZ-M1 entry-point suites alone do not prove per-tool-call authz. TOL-M2 allowlists alone do not prove an authz decision independent of the allowlist. TOL-M3 high-impact gates alone do not prove base authz on every tool call. AUTHZ-R1 policy-as-code alone does not prove runtime deny for every tool invocation.\n",
+      "falsePositiveGuidance": "Do not pass prompt \"ask permission\" text as server-side authz. Do not pass client SDKs that skip the gateway/runtime in production. Do not pass a deny suite that covers only a subset of production tool-invocation paths. Do not pass allowlist-only configs without an authz decision path. Do not score AUTHZ-M1, TOL-M2, TOL-M3, or AUTHZ-R1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Enforce server-side authz on every tool invocation at the gateway/runtime",
+        "Inventory production tool-invocation paths; enforce server-side authz on 100% of them at the gateway/runtime",
         "Add automated deny tests for missing/forged/invalid authz decisions at 100%",
-        "Prove model-proposed tool name/args cannot bypass the gateway; retain under imports/tool-gateway-authz/ (measuredAt ≤90 days)",
+        "Prove model-proposed tool name/args cannot bypass the gateway/runtime; retain under imports/tool-gateway-authz/ (measuredAt ≤90 days)",
         "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
@@ -13797,6 +13799,10 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
+          "title": "OWASP Access Control Cheat Sheet",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
+        },
+        {
           "title": "NIST AI RMF — Manage",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         }
@@ -13807,6 +13813,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "TOL-M4",
         "AUTHZ-M1",
         "AUTHZ-R1",
+        "AUTHN-M4",
         "AGN-M2"
       ],
       "tags": [
@@ -13814,7 +13821,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "mandatory",
         "hybrid",
         "tool-gateway",
-        "authorization"
+        "authorization",
+        "per-call-authz"
       ],
       "applicability": {
         "technologies": [],
@@ -13828,16 +13836,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "TOL-M2",
       "category": "tool-safety",
       "title": "Tools must be allowlisted per agent/workload; unknown tools must not be inventable at runtime",
-      "description": "Production agents and workloads shall have an explicit tool allowlist, and requests for unknown tools shall be denied—proven by allowlist coverage for 100% of production agents plus automated negative tests, not by open MCP “all tools” bindings or prompt-only restrictions.\n",
-      "whyItMatters": "Tool names invented at runtime expand agency beyond the intended blast radius and turn prompt injection into arbitrary capability. Distinct from TOL-M1 (per-invocation server-side authz), SCI-M2 (external AI tool/MCP/plugin inventory+pin+review), AUTHN-M2 (MCP/AI S2S machine identity), and TOL-M5 (signed tool catalogs / reject unsigned).\n",
+      "description": "Production agents and workloads shall have an explicit tool allowlist, and unknown or model-invented tool names shall be rejected at runtime—proven by an inventory of production agents that can invoke tools, 100% allowlist coverage, automated unknown-tool deny tests, and runtime rejection of invented names—not by open MCP \"all tools\" bindings, prompt-only restrictions, or a deny suite that covers only a subset of agents.\n",
+      "whyItMatters": "Tool names invented at runtime expand agency beyond the intended blast radius and turn prompt injection into arbitrary capability. Distinct from TOL-M1 (per-invocation server-side authz independent of allowlists), TOL-M3 (extra gates on high-impact tools), TOL-M5 (signed tool catalogs / reject unsigned), SCI-M2 (external AI tool/MCP/plugin inventory+pin+review), AUTHN-M2 (MCP/AI S2S machine identity), and AGN-M1 (charter references to allowlists without proving runtime unknown-tool reject).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production agents/workloads that can invoke tools have an explicit tool allowlist; requests for tools outside the allowlist are denied at 100% in automated tests (measuredAt ≤90 days). If no production agents/workloads invoke tools, score NOT_APPLICABLE.\n",
+      "passCondition": "Inventory covers 100% of production agents/workloads that can invoke tools; each has an explicit tool allowlist; automated tests deny unknown-tool requests at 100%; unknown or model-invented tool names are rejected at runtime (measuredAt ≤90 days). If no production agents/workloads invoke tools, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Per-agent/workload tool allowlist configuration covering production agents",
+        "Inventory of production agents/workloads that can invoke tools",
+        "Per-agent/workload tool allowlist configuration covering 100% of those agents",
         "Negative tests for unknown / inventable tool names",
-        "Attest or results: agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 (measuredAt ≤90 days)"
+        "Attest or results: agentsInventoriedPct=100 + agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 + unknownOrInventedToolsRejectedAtRuntime=true (measuredAt ≤90 days)"
       ],
       "detection": {
         "capability": "hybrid",
@@ -13845,13 +13854,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "repo-tool-allowlist",
             "params": {
-              "hint": "Discover per-agent tool allowlists and unknown-tool deny tests; ingest coverage under imports/tool-allowlist/; require agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 + measuredAt ≤90 days.\n"
+              "hint": "Discover per-agent tool allowlists and unknown-tool deny tests; ingest coverage under imports/tool-allowlist/; require agentsInventoriedPct=100 + agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 + unknownOrInventedToolsRejectedAtRuntime=true + measuredAt ≤90 days.\n"
             }
           },
           {
             "id": "mcp-tool-allowlist",
             "params": {
-              "hint": "Supporting signal — MCP/tool allowlist config present; alone does not prove 100% agent coverage or deny tests.\n"
+              "hint": "Supporting signal — MCP/tool allowlist config present; alone does not prove 100% agent coverage, deny tests, or runtime invent-reject.\n"
             }
           },
           {
@@ -13869,17 +13878,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove coverage, attest 100% agent allowlist coverage and 100% unknown-tool deny in tests (measuredAt ≤90 days).\n"
+              "hint": "If automation cannot prove coverage, attest inventory of production tool-invoking agents, 100% allowlist coverage, 100% unknown-tool deny in tests, and runtime rejection of invented tool names (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Confirm production agents/workloads can invoke tools. If none, score NOT_APPLICABLE. 2) Open per-agent/workload allowlists covering 100% of those agents. 3) Review negative tests: unknown/inventable tool names are denied at 100%. 4) PASS only if coverage + deny hold with measuredAt ≤90 days. Do not PASS from “tools: *” MCP bindings. TOL-M1 authz alone does not prove allowlists. SCI-M2 inventory/pin alone does not prove per-agent allowlists. TOL-M5 signed catalogs alone do not prove unknown-tool denial.\n",
-      "falsePositiveGuidance": "Do not pass open “all tools” MCP configs. Do not pass prompt-only “only use these tools” instructions. Do not pass a single shared allowlist that omits agents. Do not score TOL-M1, SCI-M2, AUTHN-M2, or TOL-M5 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
+      "manualVerification": "1) Confirm production agents/workloads can invoke tools. If none, score NOT_APPLICABLE. 2) Inventory those agents/workloads (required—do not PASS from a deny suite without an agent inventory). 3) Open per-agent/workload allowlists covering 100% of inventoried agents. 4) Review negative tests: unknown/inventable tool names are denied at 100%. 5) Confirm runtime/ gateway rejects unknown or model-invented tool names (not prompt-only). 6) PASS only if inventory + allowlist coverage + deny + runtime invent- reject hold with measuredAt ≤90 days. Do not PASS from \"tools: *\" or open \"all tools\" MCP bindings. TOL-M1 authz alone does not prove allowlists. TOL-M3 high-impact gates alone do not prove base allowlists. SCI-M2 inventory/pin alone does not prove per-agent allowlists. TOL-M5 signed catalogs alone do not prove unknown-tool denial. AGN-M1 charter allowlist references alone do not prove runtime reject.\n",
+      "falsePositiveGuidance": "Do not pass open \"all tools\" MCP configs. Do not pass prompt-only \"only use these tools\" instructions. Do not pass a deny suite that covers only a subset of production agents. Do not pass a single shared allowlist that omits agents. Do not pass charter documents (AGN-M1) as runtime enforcement. Do not score TOL-M1, TOL-M3, TOL-M5, SCI-M2, or AUTHN-M2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Publish per-agent/workload tool allowlists for every production agent that can invoke tools",
-        "Deny unknown/inventable tool names in the gateway; add automated negative tests at 100%",
-        "Retain coverage under imports/tool-allowlist/ (measuredAt ≤90 days)",
+        "Inventory production agents/workloads that can invoke tools; publish per-agent tool allowlists for 100% of them",
+        "Deny unknown/inventable tool names at the gateway/runtime; add automated negative tests at 100%",
+        "Prove unknown or model-invented tool names are rejected at runtime; retain under imports/tool-allowlist/ (measuredAt ≤90 days)",
         "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
@@ -13902,6 +13911,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "TOL-M5",
         "SCI-M2",
         "AUTHN-M2",
+        "AGN-M1",
         "AGN-M2"
       ],
       "tags": [
@@ -13909,7 +13919,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "mandatory",
         "hybrid",
         "allowlist",
-        "mcp"
+        "mcp",
+        "unknown-tool-deny"
       ],
       "applicability": {
         "technologies": [],
@@ -13923,16 +13934,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "TOL-M3",
       "category": "tool-safety",
       "title": "High-impact tools must require additional gates (approval, dual control, or policy engine)",
-      "description": "Tools rated write, irreversible, or financial shall require an additional gate beyond base tool authz/allowlist—human approval, dual control, or a policy engine—proven by an impact-tiered inventory plus automated tests that ungated execution is impossible.\n",
-      "whyItMatters": "High-impact tools that run on a single allowlisted authz decision create one-click blast radius for injection and insider abuse. Distinct from TOL-M1 (base per-invocation authz), TOL-M2 (allowlists), HUM-M1/HUM-M3 (human-approval product flows without proving every high-impact tool is gated), and SEC-M2 (model-output schema before side effects).\n",
+      "description": "Tools rated write, irreversible, or financial shall require an additional gate beyond base tool authz/allowlist—human approval, dual control, or a policy engine—proven by a complete impact-tiered inventory of production high-impact tools, 100% gate coverage, and automated tests that ungated execution is impossible—not by prompt \"ask a human\" text, base allowlists, or a bypass suite that covers only a subset of high-impact tools.\n",
+      "whyItMatters": "High-impact tools that run on a single allowlisted authz decision create one-click blast radius for injection and insider abuse. Distinct from TOL-M1 (base per-invocation authz), TOL-M2 (allowlists / unknown-tool deny), TOL-M4 (argument schema / contract reject), TOL-R2 (rate and blast-radius budgets without proving approval/dual/policy gates), HUM-M1/HUM-M3 (high-impact action-class human-approval inventories without proving every high-impact tool has an extra gate beyond allowlist/authz), and SEC-M2 (model-output schema before side effects).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of tools rated write/irreversible/financial have a configured additional gate (approval, dual control, or policy engine); automated tests show ungated execution is impossible for those tools (measuredAt ≤90 days). If no write/irreversible/financial tools exist in production, score NOT_APPLICABLE.\n",
+      "passCondition": "Impact-tiered inventory covers 100% of production write/irreversible/ financial tools; 100% of those tools have a configured additional gate (approval, dual control, or policy engine); automated tests show ungated execution is impossible for those tools (measuredAt ≤90 days). If no write/irreversible/financial tools exist in production, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Impact-tiered tool inventory marking write/irreversible/financial tools",
+        "Impact-tiered tool inventory marking write/irreversible/financial tools in production",
         "Gate configuration (approval, dual control, or policy engine) for 100% of those tools",
-        "Automated bypass/ungated-execution tests proving gates cannot be skipped (measuredAt ≤90 days)"
+        "Automated bypass/ungated-execution tests proving gates cannot be skipped",
+        "Attest or results: highImpactToolsInventoriedPct=100 + highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests=true (measuredAt ≤90 days)"
       ],
       "detection": {
         "capability": "hybrid",
@@ -13940,22 +13952,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "repo-high-impact-tool-gates",
             "params": {
-              "hint": "Discover impact-tiered tool inventories and approval/dual/policy gates; ingest coverage under imports/high-impact-tool-gates/; require highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests=true + measuredAt ≤90 days.\n"
+              "hint": "Discover impact-tiered tool inventories and approval/dual/policy gates; ingest coverage under imports/high-impact-tool-gates/; require highImpactToolsInventoriedPct=100 + highImpactToolsWithConfiguredGatePct=100 + ungatedExecutionImpossibleInTests=true + measuredAt ≤90 days.\n"
             }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove coverage, attest impact-tiered inventory with 100% gated high-impact tools and ungated-execution impossible in tests (measuredAt ≤90 days).\n"
+              "hint": "If automation cannot prove coverage, attest a complete impact- tiered inventory of production high-impact tools, 100% gated, and ungated-execution impossible in tests (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Confirm production exposes write/irreversible/financial tools. If none, score NOT_APPLICABLE. 2) Open the impact-tiered inventory. 3) Confirm each high-impact tool has an additional gate (approval, dual control, or policy engine)—not base allowlist alone. 4) Review automated tests: ungated execution is impossible. 5) PASS only if inventory + 100% gated + bypass tests hold with measuredAt ≤90 days. HUM-M1 approval UI alone does not prove every high-impact tool is covered. TOL-M1/M2 alone do not prove extra gates.\n",
-      "falsePositiveGuidance": "Do not pass base allowlists as high-impact gates. Do not pass prompt “ask a human” without an enforced gate. Do not pass inventories missing financial or irreversible tools that exist in production. Do not score TOL-M1, TOL-M2, HUM-M1, HUM-M3, or SEC-M2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
+      "manualVerification": "1) Confirm production exposes write/irreversible/financial tools. If none, score NOT_APPLICABLE. 2) Open the impact-tiered inventory covering 100% of those tools (required—do not PASS from a bypass suite without inventory coverage). 3) Confirm each high-impact tool has an additional gate (approval, dual control, or policy engine)—not base allowlist/authz alone. 4) Review automated tests: ungated execution is impossible. 5) PASS only if inventory coverage + 100% gated + bypass tests hold with measuredAt ≤90 days. HUM-M1 action-class approval inventories alone do not prove every high-impact tool is gated beyond allowlist. TOL-M1/M2 alone do not prove extra gates. TOL-R2 rate/blast budgets alone do not prove approval/dual/ policy gates. SEC-M2 output schemas alone do not prove tool gates.\n",
+      "falsePositiveGuidance": "Do not pass base allowlists as high-impact gates. Do not pass prompt \"ask a human\" without an enforced gate. Do not pass a bypass suite that covers only a subset of production high-impact tools. Do not pass inventories missing financial or irreversible tools that exist in production. Do not score TOL-M1, TOL-M2, TOL-M4, TOL-R2, HUM-M1, HUM-M3, or SEC-M2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Publish an impact-tiered tool inventory (read / write / irreversible / financial)",
-        "Attach approval, dual control, or policy-engine gates to 100% of high-impact tools",
+        "Publish an impact-tiered tool inventory covering 100% of production write/irreversible/financial tools",
+        "Attach approval, dual control, or policy-engine gates to 100% of those tools",
         "Add automated tests proving ungated execution is impossible; retain under imports/high-impact-tool-gates/ (measuredAt ≤90 days)",
         "Time-box gaps with owner and expiry ≤90 days"
       ],
@@ -13977,6 +13989,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "TOL-M1",
         "TOL-M2",
         "TOL-M4",
+        "TOL-R2",
         "HUM-M1",
         "HUM-M3",
         "SEC-M2"
@@ -13987,7 +14000,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "hybrid",
         "high-impact",
         "approval",
-        "dual-control"
+        "dual-control",
+        "inventory"
       ],
       "applicability": {
         "technologies": [],
@@ -14001,16 +14015,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "TOL-M4",
       "category": "tool-safety",
       "title": "Tool arguments must be schema-validated and sanitized before execution",
-      "description": "Production tools shall declare argument schemas and reject invalid or malicious payloads before side effects—proven by schema coverage for 100% of production tools plus contract tests, not by prompt-only “follow the schema” instructions.\n",
-      "whyItMatters": "Unvalidated tool arguments enable path traversal, command injection, and privilege escalation through tool parameters even when the tool name is allowlisted. Distinct from SEC-M2 (model-output schema/policy before side effects), TOL-M1 (authz decision), and TOL-M2 (tool-name allowlists).\n",
+      "description": "Production tools shall declare argument schemas and reject invalid or malicious payloads before side effects—proven by an inventory of production tools, 100% schema coverage, and contract tests at 100% rejection—not by prompt-only \"follow the schema\" instructions, customer-API OpenAPI alone, or a reject suite that covers only a subset of tools.\n",
+      "whyItMatters": "Unvalidated tool arguments enable path traversal, command injection, and privilege escalation through tool parameters even when the tool name is allowlisted. Distinct from SEC-M2 (model-output schema/policy before side effects), SEC-M1 (prompt-injection / input mediation), TOL-M1 (authz decision), TOL-M2 (tool-name allowlists), and TOL-M3 (high-impact extra gates without proving argument schemas).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production tools have a declared argument schema; invalid/malicious argument fixtures are rejected at 100% before side effects (measuredAt ≤90 days). If no production tools exist, score NOT_APPLICABLE.\n",
+      "passCondition": "Inventory covers 100% of production tools; each has a declared argument schema; invalid/malicious argument fixtures are rejected at 100% before side effects (measuredAt ≤90 days). If no production tools exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "JSON Schema (or equivalent) per production tool",
+        "Inventory of production tools that accept arguments",
+        "JSON Schema (or equivalent) per inventoried production tool",
         "Contract tests for invalid/malicious argument fixtures",
-        "Attest or results: toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 (measuredAt ≤90 days)"
+        "Attest or results: productionToolsInventoriedPct=100 + toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 (measuredAt ≤90 days)"
       ],
       "detection": {
         "capability": "hybrid",
@@ -14018,21 +14033,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "repo-tool-argument-schema",
             "params": {
-              "hint": "Discover tool argument schemas and contract tests; ingest coverage under imports/tool-argument-schema/; require toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 + measuredAt ≤90 days.\n"
+              "hint": "Discover tool argument schemas and contract tests; ingest coverage under imports/tool-argument-schema/; require productionToolsInventoriedPct=100 + toolsWithDeclaredArgumentSchemaPct=100 + invalidArgumentFixturesRejectedPct=100 + measuredAt ≤90 days.\n"
             }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove coverage, attest 100% schema coverage and 100% rejection of invalid/malicious fixtures before side effects (measuredAt ≤90 days).\n"
+              "hint": "If automation cannot prove coverage, attest inventory of production tools, 100% schema coverage, and 100% rejection of invalid/ malicious fixtures before side effects (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Confirm production tools exist. If none, score NOT_APPLICABLE. 2) Confirm every production tool has a declared argument schema (JSON Schema, Zod, Pydantic, protobuf, or equivalent). 3) Review contract tests: invalid/ malicious fixtures are rejected at 100% before side effects. 4) PASS only if schema coverage + rejection hold with measuredAt ≤90 days. SEC-M2 model-output gates alone do not prove tool-argument validation. TOL-M2 allowlists alone do not prove argument schemas.\n",
-      "falsePositiveGuidance": "Do not pass prompt-only schema instructions. Do not pass OpenAPI for the customer API as tool-argument schemas. Do not pass coverage under 100% of production tools. Do not score SEC-M2, TOL-M1, or TOL-M2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
+      "manualVerification": "1) Confirm production tools exist. If none, score NOT_APPLICABLE. 2) Inventory those tools (required—do not PASS from a reject suite without tool inventory coverage). 3) Confirm every inventoried tool has a declared argument schema (JSON Schema, Zod, Pydantic, protobuf, or equivalent). 4) Review contract tests: invalid/malicious fixtures are rejected at 100% before side effects. 5) PASS only if inventory + schema coverage + rejection hold with measuredAt ≤90 days. SEC-M2 model-output gates alone do not prove tool-argument validation. SEC-M1 injection gates alone do not prove per-tool argument schemas. TOL-M2 allowlists alone do not prove argument schemas. TOL-M3 high-impact gates alone do not prove schemas.\n",
+      "falsePositiveGuidance": "Do not pass prompt-only schema instructions. Do not pass OpenAPI for the customer API as tool-argument schemas. Do not pass a reject suite that covers only a subset of production tools. Do not pass schema files without inventory coverage of production tools. Do not score SEC-M1, SEC-M2, TOL-M1, TOL-M2, or TOL-M3 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Declare argument schemas for every production tool",
+        "Inventory production tools that accept arguments; declare argument schemas for 100% of them",
         "Reject invalid/malicious fixtures before side effects in contract tests at 100%",
         "Retain coverage under imports/tool-argument-schema/ (measuredAt ≤90 days)",
         "Time-box gaps with owner and expiry ≤90 days"
@@ -14055,15 +14070,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "TOL-M1",
         "TOL-M2",
         "TOL-M3",
-        "SEC-M2",
-        "SEC-M1"
+        "SEC-M1",
+        "SEC-M2"
       ],
       "tags": [
         "tool-safety",
         "mandatory",
         "hybrid",
         "argument-schema",
-        "contract-tests"
+        "contract-tests",
+        "inventory"
       ],
       "applicability": {
         "technologies": [],
@@ -14077,16 +14093,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "TOL-M5",
       "category": "tool-safety",
       "title": "MCP and agent tool catalogs must be signed and supply-chain reviewed before production use",
-      "description": "Production MCP and agent tool catalogs shall be signed (or equivalently integrity-verified) and supply-chain reviewed before use—proven by verify-on-load that rejects unsigned/unapproved catalogs plus a review ≤90 days or since last catalog change—not by SCI-M2 inventory pins alone.\n",
-      "whyItMatters": "An unsigned tool catalog can swap tool definitions, expand privilege, or inject malicious handlers without a deploy. Level-5 / regulated advanced mandatory—not Core baseline. Distinct from SCI-M2 (inventory+pin+owner+ review of external tools/integrations), SCI-M1 (model/container provenance verify+block), TOL-M2 (per-agent allowlists), and SCI-M4 (deploy-path unsigned/unapproved/revoked policy for artifacts).\n",
+      "description": "Production MCP and agent tool catalogs shall be signed (or equivalently integrity-verified) and supply-chain reviewed before use—proven by an inventory of production catalogs, verify-on-load that rejects unsigned/unapproved catalogs on 100% of load paths, plus a review ≤90 days or since last catalog change—not by SCI-M2 inventory pins alone or a reject config that covers only a subset of catalog loaders.\n",
+      "whyItMatters": "An unsigned tool catalog can swap tool definitions, expand privilege, or inject malicious handlers without a deploy. Level-5 / regulated advanced mandatory—not Core baseline. Distinct from SCI-M2 (inventory+pin+owner+ review of external tools/integrations without proving signed catalogs), SCI-M1 (model/container provenance verify+block), SCI-M4 (deploy-path unsigned/unapproved/revoked policy for artifacts), SCI-R1 (verify-on-deploy for images/artifacts), and TOL-M2 (per-agent allowlists without catalog integrity).\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Production MCP/agent tool-catalog loaders reject unsigned or unapproved catalogs; last supply-chain review is ≤90 days or since the last catalog change (measuredAt ≤90 days). If no production MCP/agent tool catalogs are loaded, score NOT_APPLICABLE. (Level-5 / regulated advanced scope.)\n",
+      "passCondition": "Inventory covers 100% of production MCP/agent tool catalogs; catalog loaders reject unsigned or unapproved catalogs; last supply-chain review is ≤90 days or since the last catalog change (measuredAt ≤90 days). If no production MCP/agent tool catalogs are loaded, score NOT_APPLICABLE. (Level-5 / regulated advanced scope.)\n",
       "evidenceRequired": [
-        "Signed (or integrity-verified) production MCP/agent tool catalog",
-        "Verify-on-load / reject-unsigned configuration for catalog consumers",
-        "Supply-chain review record ≤90 days or since last catalog change (measuredAt ≤90 days)"
+        "Inventory of production MCP/agent tool catalogs",
+        "Signed (or integrity-verified) catalogs + verify-on-load / reject-unsigned for catalog consumers",
+        "Supply-chain review record ≤90 days or since last catalog change",
+        "Attest or results: productionToolCatalogsInventoriedPct=100 + unsignedOrUnapprovedCatalogsRejected=true + supplyChainReviewWithin90DaysOrSinceLastChange=true (measuredAt ≤90 days)"
       ],
       "detection": {
         "capability": "hybrid",
@@ -14094,22 +14111,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "repo-signed-tool-catalog",
             "params": {
-              "hint": "Discover signed tool-catalog / verify-on-load signals; ingest coverage under imports/signed-tool-catalog/; require unsignedOrUnapprovedCatalogsRejected=true + supplyChainReviewWithin90DaysOrSinceLastChange=true + measuredAt ≤90 days.\n"
+              "hint": "Discover signed tool-catalog / verify-on-load signals; ingest coverage under imports/signed-tool-catalog/; require productionToolCatalogsInventoriedPct=100 + unsignedOrUnapprovedCatalogsRejected=true + supplyChainReviewWithin90DaysOrSinceLastChange=true + measuredAt ≤90 days.\n"
             }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove coverage, attest signed catalogs + reject unsigned/unapproved + review ≤90d or since last change (measuredAt ≤90 days).\n"
+              "hint": "If automation cannot prove coverage, attest inventory of production catalogs, reject unsigned/unapproved, and review ≤90d or since last change (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Confirm production loads MCP or agent tool catalogs. If none, score NOT_APPLICABLE. 2) Confirm catalogs are signed or integrity-verified. 3) Confirm loaders reject unsigned/unapproved catalogs. 4) Confirm supply-chain review ≤90 days or since last catalog change. 5) PASS only if reject + review hold with measuredAt ≤90 days. This Check is Level-5 / regulated advanced—not Core. SCI-M2 pin/owner inventory alone does not prove signed catalogs. SCI-M1 image signing alone does not prove tool-catalog verify-on- load. TOL-M2 allowlists alone do not prove catalog integrity.\n",
-      "falsePositiveGuidance": "Do not pass unsigned catalogs with a waiver note. Do not pass CI Action SHA pins as catalog signatures. Do not pass SCI-M1/SCI-M2/TOL-M2 as substitutes. Do not require Core assessments to PASS this Level-5 Check. Named exceptions need owner and expiry ≤90 days.\n",
+      "manualVerification": "1) Confirm production loads MCP or agent tool catalogs. If none, score NOT_APPLICABLE. 2) Inventory those catalogs (required—do not PASS from reject/review without catalog inventory coverage). 3) Confirm catalogs are signed or integrity-verified. 4) Confirm loaders reject unsigned/unapproved catalogs. 5) Confirm supply-chain review ≤90 days or since last catalog change. 6) PASS only if inventory + reject + review hold with measuredAt ≤90 days. This Check is Level-5 / regulated advanced—not Core. SCI-M2 pin/owner inventory alone does not prove signed catalogs. SCI-M1 image signing alone does not prove tool-catalog verify-on-load. SCI-M4/SCI-R1 deploy-path verify alone does not prove catalog integrity. TOL-M2 allowlists alone do not prove catalog integrity.\n",
+      "falsePositiveGuidance": "Do not pass unsigned catalogs with a waiver note. Do not pass CI Action SHA pins as catalog signatures. Do not pass reject/review that covers only a subset of production catalog loaders. Do not score SCI-M1, SCI-M2, SCI-M4, SCI-R1, or TOL-M2 as substitutes. Do not require Core assessments to PASS this Level-5 Check. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Sign (or integrity-verify) production MCP/agent tool catalogs",
-        "Configure verify-on-load to reject unsigned/unapproved catalogs",
+        "Inventory production MCP/agent tool catalogs; sign (or integrity-verify) 100% of them",
+        "Configure verify-on-load to reject unsigned/unapproved catalogs on every loader path",
         "Record supply-chain review ≤90 days or on each catalog change; retain under imports/signed-tool-catalog/ (measuredAt ≤90 days)",
         "Time-box gaps with owner and expiry ≤90 days"
       ],
@@ -14140,7 +14157,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "hybrid",
         "mcp",
         "signed-catalog",
-        "level-5"
+        "level-5",
+        "inventory"
       ],
       "applicability": {
         "technologies": [],
@@ -14154,16 +14172,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "TOL-R1",
       "category": "tool-safety",
       "title": "Production systems should have dry-run or simulation mode for destructive tools in lower environments",
-      "description": "Destructive tools should expose dry-run or simulation in non-production environments, and the last promotion of a destructive tool should include a dry-run evidence link ≤90 days old—so operators rehearse blast radius before production.\n",
-      "whyItMatters": "Destructive tools promoted without a lower-env dry-run create avoidable outages and data loss when allowlists and gates are first exercised in prod. Distinct from TOL-M3 (production high-impact gates), AGN-R2 sandbox/sim before prod for agents, and CHG promotion records without dry-run linkage.\n",
+      "description": "Destructive tools should expose dry-run or simulation in non-production environments, and the last promotion of a destructive tool should include a dry-run evidence link ≤90 days old—proven by an inventory of destructive tools, 100% dry-run coverage in non-prod, and promotion linkage—not by prompt-only \"dry-run\" flags, production confirmation dialogs, or promotion evidence without a complete destructive-tool inventory.\n",
+      "whyItMatters": "Destructive tools promoted without a lower-env dry-run create avoidable outages and data loss when allowlists and gates are first exercised in prod. Distinct from TOL-M3 (production high-impact gates without proving non-prod dry-run), TOL-R2 (rate/blast budgets), AGN-R2 (agent sandbox/sim before prod without proving per-destructive-tool dry-run catalogs), and change/promotion records that lack a dry-run evidence link.\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "100% of tools classified destructive expose dry-run or simulation in non-prod; the last promotion of a destructive tool includes a dry-run evidence link ≤90 days old (measuredAt ≤90 days). If no destructive tools exist, score NOT_APPLICABLE.\n",
+      "passCondition": "Inventory covers 100% of tools classified destructive; each exposes dry-run or simulation in non-prod; the last promotion of a destructive tool includes a dry-run evidence link ≤90 days old (measuredAt ≤90 days). If no destructive tools exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Destructive-tool catalog marking dry-run/simulation support",
+        "Inventory/catalog of destructive tools marking dry-run/simulation support",
         "Sample lower-env dry-run logs or promotion evidence links ≤90 days",
-        "Attest or results: destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days=true (measuredAt ≤90 days)"
+        "Attest or results: destructiveToolsInventoriedPct=100 + destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days=true (measuredAt ≤90 days)"
       ],
       "detection": {
         "capability": "hybrid",
@@ -14171,21 +14189,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "repo-destructive-tool-dry-run",
             "params": {
-              "hint": "Discover dry-run/simulation flags for destructive tools; ingest coverage under imports/destructive-tool-dry-run/; require destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days=true + measuredAt ≤90 days.\n"
+              "hint": "Discover dry-run/simulation flags for destructive tools; ingest coverage under imports/destructive-tool-dry-run/; require destructiveToolsInventoriedPct=100 + destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days=true + measuredAt ≤90 days.\n"
             }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove coverage, attest 100% dry-run support in non-prod and a ≤90d dry-run evidence link on last destructive promotion (measuredAt ≤90 days).\n"
+              "hint": "If automation cannot prove coverage, attest inventory of destructive tools, 100% dry-run support in non-prod, and a ≤90d dry-run evidence link on last destructive promotion (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Confirm destructive tools exist. If none, score NOT_APPLICABLE. 2) Confirm each exposes dry-run or simulation in non-prod. 3) Confirm the last destructive-tool promotion links dry-run evidence ≤90 days old. 4) PASS only if coverage + promotion link hold with measuredAt ≤90 days. TOL-M3 production gates alone do not prove lower-env dry-run. Agent sandbox Checks alone do not prove per-destructive-tool dry-run catalogs.\n",
-      "falsePositiveGuidance": "Do not pass “dry-run” prompt flags without runtime support. Do not pass production-only confirmation dialogs as lower-env simulation. Do not score TOL-M3 or agent-sandbox Checks as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
+      "manualVerification": "1) Confirm destructive tools exist. If none, score NOT_APPLICABLE. 2) Inventory those tools (required—do not PASS from promotion evidence without destructive-tool inventory coverage). 3) Confirm each exposes dry-run or simulation in non-prod. 4) Confirm the last destructive-tool promotion links dry-run evidence ≤90 days old. 5) PASS only if inventory + dry-run coverage + promotion link hold with measuredAt ≤90 days. TOL-M3 production gates alone do not prove lower-env dry-run. AGN-R2 agent sandbox alone does not prove per-destructive-tool dry-run catalogs. TOL-R2 rate/blast budgets alone do not prove dry-run rehearsal.\n",
+      "falsePositiveGuidance": "Do not pass \"dry-run\" prompt flags without runtime support. Do not pass production-only confirmation dialogs as lower-env simulation. Do not pass promotion evidence that covers only a subset of destructive tools. Do not score TOL-M3, TOL-R2, or AGN-R2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Mark destructive tools and implement dry-run/simulation in non-prod for 100% of them",
+        "Inventory destructive tools; implement dry-run/simulation in non-prod for 100% of them",
         "Require a dry-run evidence link on destructive-tool promotions (≤90 days)",
         "Retain coverage under imports/destructive-tool-dry-run/ (measuredAt ≤90 days)",
         "Time-box gaps with owner and expiry ≤90 days"
@@ -14211,7 +14229,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "recommended",
         "hybrid",
         "dry-run",
-        "destructive-tools"
+        "destructive-tools",
+        "inventory"
       ],
       "applicability": {
         "technologies": [],
@@ -14225,16 +14244,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "TOL-R2",
       "category": "tool-safety",
       "title": "Production systems should have per-tool rate limits and blast-radius budgets",
-      "description": "High-impact tools should have documented QPS/daily caps and max-affected-entities budgets, with ≥1 limit hit or synthetic enforcement test in the last 30 days—so runaway loops cannot exhaust blast radius silently.\n",
-      "whyItMatters": "Allowlisted, authorized tools without rate/blast budgets can still amplify mistakes and injection into mass deletes or API abuse. Distinct from AGN-M2 (agent loop/step/token limits), COST-M* spend caps, and TOL-M3 (approval/dual/policy gates without quantitative budgets).\n",
+      "description": "High-impact tools should have documented QPS/daily caps and max-affected-entities budgets, with ≥1 limit hit or synthetic enforcement test in the last 30 days—proven by an inventory of high-impact tools, 100% rate+blast budget coverage, and ≤30d enforcement proof—not by global API gateway limits alone, docs without enforcement, or budgets that cover only a subset of high-impact tools.\n",
+      "whyItMatters": "Allowlisted, authorized tools without rate/blast budgets can still amplify mistakes and injection into mass deletes or API abuse. Distinct from AGN-M2 (agent loop/step/token limits), COST-M* spend caps, TOL-M3 (approval/dual/policy gates without quantitative budgets), and TOL-R1 (destructive dry-run rehearsal without rate/blast caps).\n",
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Each high-impact tool has a documented QPS or daily cap and a max-affected-entities (or equivalent) blast-radius budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days (measuredAt ≤90 days). If no high-impact tools exist, score NOT_APPLICABLE.\n",
+      "passCondition": "Inventory covers 100% of high-impact tools; each has a documented QPS or daily cap and a max-affected-entities (or equivalent) blast-radius budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days (measuredAt ≤90 days). If no high-impact tools exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Per-tool rate-limit and blast-radius policy config for high-impact tools",
+        "Inventory of high-impact tools requiring rate and blast-radius budgets",
+        "Per-tool rate-limit and blast-radius policy config for those tools",
         "Sample enforcement metrics or synthetic limit-hit test ≤30 days",
-        "Attest or results: highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days=true (measuredAt ≤90 days)"
+        "Attest or results: highImpactToolsInventoriedPct=100 + highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days=true (measuredAt ≤90 days)"
       ],
       "detection": {
         "capability": "hybrid",
@@ -14242,27 +14262,27 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "repo-tool-rate-limits",
             "params": {
-              "hint": "Discover per-tool rate-limit / blast-radius configs; ingest coverage under imports/tool-rate-limits/; require highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days=true + measuredAt ≤90 days.\n"
+              "hint": "Discover per-tool rate-limit / blast-radius configs; ingest coverage under imports/tool-rate-limits/; require highImpactToolsInventoriedPct=100 + highImpactToolsWithRateAndBlastBudgetPct=100 + enforcementProvenWithin30Days=true + measuredAt ≤90 days.\n"
             }
           },
           {
             "id": "repo-rate-limit-config",
             "params": {
-              "hint": "Supporting signal — generic rate-limit config; alone does not prove per-tool blast-radius budgets or ≤30d enforcement proof.\n"
+              "hint": "Supporting signal — generic rate-limit config; alone does not prove inventory coverage, per-tool blast-radius budgets, or ≤30d enforcement proof.\n"
             }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove coverage, attest 100% high-impact tools have rate + blast budgets and ≤30d enforcement proof (measuredAt ≤90 days).\n"
+              "hint": "If automation cannot prove coverage, attest inventory of high-impact tools, 100% rate + blast budgets, and ≤30d enforcement proof (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Confirm high-impact tools exist. If none, score NOT_APPLICABLE. 2) Confirm each has QPS/daily cap and max-affected-entities (or equivalent) budget. 3) Confirm ≥1 limit hit or synthetic enforcement test in the last 30 days. 4) PASS only if budgets + enforcement hold with measuredAt ≤90 days. AGN-M2 agent-loop limits alone do not prove per-tool blast budgets. COST spend caps alone do not prove entity blast-radius limits.\n",
-      "falsePositiveGuidance": "Do not pass global API gateway rate limits without per-tool budgets. Do not pass docs without a ≤30d enforcement proof. Do not score AGN-M2, COST-M*, or TOL-M3 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
+      "manualVerification": "1) Confirm high-impact tools exist. If none, score NOT_APPLICABLE. 2) Inventory those tools (required—do not PASS from enforcement proof without high-impact inventory coverage). 3) Confirm each has QPS/daily cap and max-affected-entities (or equivalent) budget. 4) Confirm ≥1 limit hit or synthetic enforcement test in the last 30 days. 5) PASS only if inventory + budgets + enforcement hold with measuredAt ≤90 days. AGN-M2 agent-loop limits alone do not prove per-tool blast budgets. COST spend caps alone do not prove entity blast-radius limits. TOL-M3 gates alone do not prove quantitative budgets. TOL-R1 dry-run alone does not prove rate/blast caps.\n",
+      "falsePositiveGuidance": "Do not pass global API gateway rate limits without per-tool budgets. Do not pass docs without a ≤30d enforcement proof. Do not pass enforcement that covers only a subset of high-impact tools. Do not score AGN-M2, COST-M*, TOL-M3, or TOL-R1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Document QPS/daily caps and max-affected-entities budgets for every high-impact tool",
+        "Inventory high-impact tools; document QPS/daily caps and max-affected-entities budgets for 100% of them",
         "Prove enforcement with a limit hit or synthetic test ≤30 days",
         "Retain coverage under imports/tool-rate-limits/ (measuredAt ≤90 days)",
         "Time-box gaps with owner and expiry ≤90 days"
@@ -14288,7 +14308,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "recommended",
         "hybrid",
         "rate-limits",
-        "blast-radius"
+        "blast-radius",
+        "inventory"
       ],
       "applicability": {
         "technologies": [],

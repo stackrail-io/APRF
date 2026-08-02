@@ -48,8 +48,10 @@ manualVerification: >
 falsePositiveGuidance: >
   Do not pass on a UI confirm dialog that agents/APIs can bypass. Do not pass
   because HUM-M2 logs exist without gates. Do not pass a partial inventory that
-  omits agent/tool paths. Prompt-only “ask a human” without a runtime gate fails.
-  Named exceptions need owner and expiry ≤90 days.
+  omits agent/tool paths. Prompt-only "ask a human" without a runtime gate fails.
+  Do not score TOL-M3 per-tool extra gates as a substitute for action-class
+  human-approval inventory coverage. Named exceptions need owner and expiry
+  ≤90 days.
 recommendedFixes:
   - "Publish a versioned high-impact action inventory with risk tier and gate owner per class"
   - "Wire fail-closed approval gates on every inventoried class in production"
@@ -65,6 +67,7 @@ relatedRules:
   - "HUM-M3"
   - "HUM-M4"
   - "TOL-M1"
+  - "TOL-M3"
   - "AGN-M1"
   - "AUTHZ-M1"
 tags:

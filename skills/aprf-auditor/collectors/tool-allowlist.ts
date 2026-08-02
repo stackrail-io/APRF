@@ -2,7 +2,8 @@
  * tool-allowlist — TOL-M2 / repo-tool-allowlist.
  *
  * Discovers per-agent tool allowlists and unknown-tool deny tests.
- * Import coverage under imports/tool-allowlist/ unlocks PASS (measuredAt ≤90d).
+ * Import coverage under imports/tool-allowlist/ unlocks PASS
+ * (inventory 100% + allowlist 100% + deny 100% + invent-reject; measuredAt ≤90d).
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
@@ -17,6 +18,7 @@ import { asNum, collectRefs } from "./lib/collect-refs.ts";
 import {
   asBool,
   measuredAtFresh,
+  mergeAndBool,
   mergeMinNum,
   mergeOldestMeasuredAt,
   mergeOrBool,
@@ -46,8 +48,10 @@ export interface ToolAllowlistReport {
   importedResults: {
     found: boolean;
     productionAgentsOrToolWorkloadsPresent: boolean | null;
+    agentsInventoriedPct: number | null;
     agentsWithExplicitToolAllowlistPct: number | null;
     unknownToolRequestsDeniedPct: number | null;
+    unknownOrInventedToolsRejectedAtRuntime: boolean | null;
     measuredAt: string | null;
     sources: string[];
   };
@@ -74,8 +78,10 @@ function loadImported(
 ): ToolAllowlistReport["importedResults"] {
   const sources: string[] = [];
   let productionAgentsOrToolWorkloadsPresent: boolean | null = null;
+  let agentsInventoriedPct: number | null = null;
   let agentsWithExplicitToolAllowlistPct: number | null = null;
   let unknownToolRequestsDeniedPct: number | null = null;
+  let unknownOrInventedToolsRejectedAtRuntime: boolean | null = null;
   let measuredAt: string | null = null;
 
   for (const f of listImportFiles(ctx.outputDir, PLUGIN_ID)) {
@@ -91,6 +97,12 @@ function loadImported(
         asBool(data.productionAgentsOrToolWorkloadsPresent) ??
           asBool(data.production_agents_or_tool_workloads_present),
       );
+      agentsInventoriedPct = mergeMinNum(
+        agentsInventoriedPct,
+        asNum(data.agentsInventoriedPct) ??
+          asNum(data.agents_inventoried_pct) ??
+          asNum(data.inventoryCoveragePct),
+      );
       agentsWithExplicitToolAllowlistPct = mergeMinNum(
         agentsWithExplicitToolAllowlistPct,
         asNum(data.agentsWithExplicitToolAllowlistPct) ??
@@ -101,6 +113,12 @@ function loadImported(
         asNum(data.unknownToolRequestsDeniedPct) ??
           asNum(data.unknown_tool_requests_denied_pct),
       );
+      unknownOrInventedToolsRejectedAtRuntime = mergeAndBool(
+        unknownOrInventedToolsRejectedAtRuntime,
+        asBool(data.unknownOrInventedToolsRejectedAtRuntime) ??
+          asBool(data.unknown_or_invented_tools_rejected_at_runtime) ??
+          asBool(data.inventRejectAtRuntime),
+      );
     } catch {
       /* skip */
     }
@@ -109,8 +127,10 @@ function loadImported(
   return {
     found: sources.length > 0,
     productionAgentsOrToolWorkloadsPresent,
+    agentsInventoriedPct,
     agentsWithExplicitToolAllowlistPct,
     unknownToolRequestsDeniedPct,
+    unknownOrInventedToolsRejectedAtRuntime,
     measuredAt,
     sources,
   };
@@ -130,7 +150,7 @@ export function buildToolAllowlistReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No tool-allowlist signals — TOL-M2 remains not demonstrated until allowlist/deny coverage or productionAgentsOrToolWorkloadsPresent=false is imported.",
+      "No tool-allowlist signals — TOL-M2 remains not demonstrated until inventory/allowlist/deny/invent-reject coverage or productionAgentsOrToolWorkloadsPresent=false is imported.",
     );
   }
   if (opts.toolAllowlist.found) {
@@ -145,11 +165,11 @@ export function buildToolAllowlistReport(opts: {
   }
   if (opts.imported.found) {
     notes.push(
-      `Imported: ${opts.imported.sources.join(", ")} (present=${opts.imported.productionAgentsOrToolWorkloadsPresent}, allowlistPct=${opts.imported.agentsWithExplicitToolAllowlistPct}, denyPct=${opts.imported.unknownToolRequestsDeniedPct}, measuredAt=${opts.imported.measuredAt})`,
+      `Imported: ${opts.imported.sources.join(", ")} (present=${opts.imported.productionAgentsOrToolWorkloadsPresent}, inventoriedPct=${opts.imported.agentsInventoriedPct}, allowlistPct=${opts.imported.agentsWithExplicitToolAllowlistPct}, denyPct=${opts.imported.unknownToolRequestsDeniedPct}, inventReject=${opts.imported.unknownOrInventedToolsRejectedAtRuntime}, measuredAt=${opts.imported.measuredAt})`,
     );
   } else if (gateSignalsPresent) {
     notes.push(
-      "Signals alone are PARTIAL — import agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 (measuredAt ≤90d) under imports/tool-allowlist/ to PASS.",
+      "Signals alone are PARTIAL — import agentsInventoriedPct=100 + agentsWithExplicitToolAllowlistPct=100 + unknownToolRequestsDeniedPct=100 + unknownOrInventedToolsRejectedAtRuntime=true (measuredAt ≤90d) under imports/tool-allowlist/ to PASS. Deny suite without agent inventory ≠ PASS.",
     );
   }
 
@@ -161,18 +181,24 @@ export function buildToolAllowlistReport(opts: {
   const surfacePresent =
     surfaceProvedForNaOverride ||
     opts.imported.productionAgentsOrToolWorkloadsPresent === true;
+  const inventoryOk = opts.imported.agentsInventoriedPct === 100;
   const allowlistOk = opts.imported.agentsWithExplicitToolAllowlistPct === 100;
   const denyOk = opts.imported.unknownToolRequestsDeniedPct === 100;
+  const inventRejectOk =
+    opts.imported.unknownOrInventedToolsRejectedAtRuntime === true;
 
   const naCandidate =
     opts.imported.found &&
     opts.imported.productionAgentsOrToolWorkloadsPresent === false &&
     !surfaceProvedForNaOverride;
   const contradictingFail =
+    (opts.imported.agentsInventoriedPct !== null &&
+      opts.imported.agentsInventoriedPct < 100) ||
     (opts.imported.agentsWithExplicitToolAllowlistPct !== null &&
       opts.imported.agentsWithExplicitToolAllowlistPct < 100) ||
     (opts.imported.unknownToolRequestsDeniedPct !== null &&
-      opts.imported.unknownToolRequestsDeniedPct < 100);
+      opts.imported.unknownToolRequestsDeniedPct < 100) ||
+    opts.imported.unknownOrInventedToolsRejectedAtRuntime === false;
   const explicitFail = opts.imported.found && contradictingFail;
 
   let statusHint: ToolAllowlistReport["summary"]["statusHint"];
@@ -182,7 +208,7 @@ export function buildToolAllowlistReport(opts: {
     statusHint = "fail";
     tolM2Satisfied = false;
     notes.push(
-      "Imported evidence shows incomplete allowlist coverage or unknown-tool deny — TOL-M2 fail.",
+      "Imported evidence shows incomplete inventory, allowlist coverage, unknown-tool deny, or runtime invent-reject — TOL-M2 fail.",
     );
   } else if (naCandidate) {
     statusHint = "not_applicable";
@@ -199,8 +225,10 @@ export function buildToolAllowlistReport(opts: {
     );
     if (
       surfacePresent &&
+      inventoryOk &&
       allowlistOk &&
       denyOk &&
+      inventRejectOk &&
       importFresh &&
       opts.imported.found
     ) {
@@ -215,8 +243,10 @@ export function buildToolAllowlistReport(opts: {
     tolM2Satisfied = null;
   } else if (
     surfacePresent &&
+    inventoryOk &&
     allowlistOk &&
     denyOk &&
+    inventRejectOk &&
     importFresh &&
     opts.imported.found
   ) {

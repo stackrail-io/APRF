@@ -3,7 +3,7 @@
  *
  * Discovers dry-run/simulation flags for destructive tools.
  * Import coverage under imports/destructive-tool-dry-run/ unlocks PASS
- * (measuredAt ≤90d).
+ * (inventory 100% + dry-run 100% + promotion evidence; measuredAt ≤90d).
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
@@ -48,6 +48,7 @@ export interface DestructiveToolDryRunReport {
   importedResults: {
     found: boolean;
     destructiveToolsPresent: boolean | null;
+    destructiveToolsInventoriedPct: number | null;
     destructiveToolsWithDryRunInNonProdPct: number | null;
     lastDestructivePromotionHasDryRunEvidenceWithin90Days: boolean | null;
     measuredAt: string | null;
@@ -76,6 +77,7 @@ function loadImported(
 ): DestructiveToolDryRunReport["importedResults"] {
   const sources: string[] = [];
   let destructiveToolsPresent: boolean | null = null;
+  let destructiveToolsInventoriedPct: number | null = null;
   let destructiveToolsWithDryRunInNonProdPct: number | null = null;
   let lastDestructivePromotionHasDryRunEvidenceWithin90Days: boolean | null =
     null;
@@ -93,6 +95,12 @@ function loadImported(
         destructiveToolsPresent,
         asBool(data.destructiveToolsPresent) ??
           asBool(data.destructive_tools_present),
+      );
+      destructiveToolsInventoriedPct = mergeMinNum(
+        destructiveToolsInventoriedPct,
+        asNum(data.destructiveToolsInventoriedPct) ??
+          asNum(data.destructive_tools_inventoried_pct) ??
+          asNum(data.inventoryCoveragePct),
       );
       destructiveToolsWithDryRunInNonProdPct = mergeMinNum(
         destructiveToolsWithDryRunInNonProdPct,
@@ -114,6 +122,7 @@ function loadImported(
   return {
     found: sources.length > 0,
     destructiveToolsPresent,
+    destructiveToolsInventoriedPct,
     destructiveToolsWithDryRunInNonProdPct,
     lastDestructivePromotionHasDryRunEvidenceWithin90Days,
     measuredAt,
@@ -134,7 +143,7 @@ export function buildDestructiveToolDryRunReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No destructive-tool dry-run signals — TOL-R1 remains not demonstrated until dry-run coverage or destructiveToolsPresent=false is imported.",
+      "No destructive-tool dry-run signals — TOL-R1 remains not demonstrated until inventory/dry-run/promotion coverage or destructiveToolsPresent=false is imported.",
     );
   }
   if (opts.dryRun.found) {
@@ -147,11 +156,11 @@ export function buildDestructiveToolDryRunReport(opts: {
   }
   if (opts.imported.found) {
     notes.push(
-      `Imported: ${opts.imported.sources.join(", ")} (present=${opts.imported.destructiveToolsPresent}, dryRunPct=${opts.imported.destructiveToolsWithDryRunInNonProdPct}, promotionEvidence=${opts.imported.lastDestructivePromotionHasDryRunEvidenceWithin90Days}, measuredAt=${opts.imported.measuredAt})`,
+      `Imported: ${opts.imported.sources.join(", ")} (present=${opts.imported.destructiveToolsPresent}, inventoriedPct=${opts.imported.destructiveToolsInventoriedPct}, dryRunPct=${opts.imported.destructiveToolsWithDryRunInNonProdPct}, promotionEvidence=${opts.imported.lastDestructivePromotionHasDryRunEvidenceWithin90Days}, measuredAt=${opts.imported.measuredAt})`,
     );
   } else if (gateSignalsPresent) {
     notes.push(
-      "Signals alone are PARTIAL — import destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days=true (measuredAt ≤90d) under imports/destructive-tool-dry-run/ to PASS.",
+      "Signals alone are PARTIAL — import destructiveToolsInventoriedPct=100 + destructiveToolsWithDryRunInNonProdPct=100 + lastDestructivePromotionHasDryRunEvidenceWithin90Days=true (measuredAt ≤90d) under imports/destructive-tool-dry-run/ to PASS. Promotion evidence without destructive-tool inventory ≠ PASS.",
     );
   }
 
@@ -163,6 +172,7 @@ export function buildDestructiveToolDryRunReport(opts: {
   const surfacePresent =
     surfaceProvedForNaOverride ||
     opts.imported.destructiveToolsPresent === true;
+  const inventoryOk = opts.imported.destructiveToolsInventoriedPct === 100;
   const dryRunOk = opts.imported.destructiveToolsWithDryRunInNonProdPct === 100;
   const promotionOk =
     opts.imported.lastDestructivePromotionHasDryRunEvidenceWithin90Days ===
@@ -173,6 +183,8 @@ export function buildDestructiveToolDryRunReport(opts: {
     opts.imported.destructiveToolsPresent === false &&
     !surfaceProvedForNaOverride;
   const contradictingFail =
+    (opts.imported.destructiveToolsInventoriedPct !== null &&
+      opts.imported.destructiveToolsInventoriedPct < 100) ||
     (opts.imported.destructiveToolsWithDryRunInNonProdPct !== null &&
       opts.imported.destructiveToolsWithDryRunInNonProdPct < 100) ||
     opts.imported.lastDestructivePromotionHasDryRunEvidenceWithin90Days ===
@@ -186,7 +198,7 @@ export function buildDestructiveToolDryRunReport(opts: {
     statusHint = "fail";
     tolR1Satisfied = false;
     notes.push(
-      "Imported evidence shows incomplete dry-run coverage or missing promotion evidence — TOL-R1 fail.",
+      "Imported evidence shows incomplete inventory, dry-run coverage, or missing promotion evidence — TOL-R1 fail.",
     );
   } else if (naCandidate) {
     statusHint = "not_applicable";
@@ -203,6 +215,7 @@ export function buildDestructiveToolDryRunReport(opts: {
     );
     if (
       surfacePresent &&
+      inventoryOk &&
       dryRunOk &&
       promotionOk &&
       importFresh &&
@@ -219,6 +232,7 @@ export function buildDestructiveToolDryRunReport(opts: {
     tolR1Satisfied = null;
   } else if (
     surfacePresent &&
+    inventoryOk &&
     dryRunOk &&
     promotionOk &&
     importFresh &&

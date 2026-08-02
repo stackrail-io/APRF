@@ -1,5 +1,5 @@
 /**
- * Smoke: high-impact-tool-gates needs 100% gated + ungated impossible + measuredAt ≤90d.
+ * Smoke: high-impact-tool-gates needs inventory 100% + gates 100% + ungated impossible + measuredAt ≤90d.
  */
 import {
   mkdtempSync,
@@ -44,6 +44,7 @@ function coverage(extra: Record<string, unknown> = {}) {
   return JSON.stringify({
     measuredAt: new Date().toISOString(),
     highImpactToolsPresent: true,
+    highImpactToolsInventoriedPct: 100,
     highImpactToolsWithConfiguredGatePct: 100,
     ungatedExecutionImpossibleInTests: true,
     ...extra,
@@ -84,6 +85,41 @@ async function main() {
       throw new Error(`expected fail, got ${JSON.stringify(r2.summary)}`);
     }
 
+    const outInvFail = join(root, "o-inv-fail");
+    mkdirSync(join(outInvFail, "imports", "high-impact-tool-gates"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outInvFail, "imports", "high-impact-tool-gates", "coverage.json"),
+      coverage({ highImpactToolsInventoriedPct: 70 }),
+    );
+    const rInvFail = await run(tSig, outInvFail);
+    if (rInvFail.summary.statusHint !== "fail") {
+      throw new Error(
+        `inventory <100 must FAIL: ${JSON.stringify(rInvFail.summary)}`,
+      );
+    }
+
+    const outNoInv = join(root, "o-no-inv");
+    mkdirSync(join(outNoInv, "imports", "high-impact-tool-gates"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNoInv, "imports", "high-impact-tool-gates", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        highImpactToolsPresent: true,
+        highImpactToolsWithConfiguredGatePct: 100,
+        ungatedExecutionImpossibleInTests: true,
+      }),
+    );
+    const rNoInv = await run(tSig, outNoInv);
+    if (rNoInv.summary.statusHint === "pass") {
+      throw new Error(
+        `gates+bypass without inventory coverage must not PASS: ${JSON.stringify(rNoInv.summary)}`,
+      );
+    }
+
     const outAged = join(root, "o-aged");
     mkdirSync(join(outAged, "imports", "high-impact-tool-gates"), {
       recursive: true,
@@ -110,6 +146,27 @@ async function main() {
     const r3 = await run(tSig, outPass);
     if (r3.summary.tolM3Satisfied !== true || r3.summary.statusHint !== "pass") {
       throw new Error(`expected pass, got ${JSON.stringify(r3.summary)}`);
+    }
+
+    const outAlias = join(root, "o-alias");
+    mkdirSync(join(outAlias, "imports", "high-impact-tool-gates"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outAlias, "imports", "high-impact-tool-gates", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        highImpactToolsPresent: true,
+        productionHighImpactToolsInventoriedPct: 100,
+        highImpactToolsWithConfiguredGatePct: 100,
+        ungatedExecutionImpossibleInTests: true,
+      }),
+    );
+    const rAlias = await run(tSig, outAlias);
+    if (rAlias.summary.statusHint !== "pass") {
+      throw new Error(
+        `legacy productionHighImpactToolsInventoriedPct alias must PASS: ${JSON.stringify(rAlias.summary)}`,
+      );
     }
 
     const outNa = join(root, "ona");

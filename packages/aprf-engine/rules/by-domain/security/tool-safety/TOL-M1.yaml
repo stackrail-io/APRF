@@ -2,28 +2,32 @@ id: "TOL-M1"
 category: "tool-safety"
 title: "Every tool invocation must be authorized server-side independent of model output"
 description: >
-  Every tool invocation shall be authorized server-side independent of model
-  output—proven by automated gateway tests that deny tool calls without a
-  valid authz decision at 100%, not by prompt instructions or client-side
-  checks alone.
+  Every production tool invocation shall be authorized server-side by an
+  independent authz decision—proven by coverage of production
+  tool-invocation paths plus automated deny tests at 100%, not by prompt
+  instructions, client-side checks, or model-proposed tool name/args alone.
 whyItMatters: >
-  If the model can invent a tool name or arguments and the gateway executes
-  them without an independent authz decision, injection and confused-deputy
-  paths become production incidents. Distinct from AUTHZ-M1 (AI HTTP/RPC
-  entry-point denial tests), TOL-M2 (per-agent tool allowlists), and AUTHZ-R1
-  (tool/model policy-as-code + CI/admission deny).
+  If a model-proposed tool call can execute without a server-side authz
+  decision (subject, permission, or equivalent), injection and
+  confused-deputy paths become production incidents. Distinct from AUTHZ-M1
+  (privileged AI HTTP/RPC entry-point denial for authenticated-but-
+  unauthorized callers), TOL-M2 (per-agent tool allowlists / unknown-tool
+  deny), TOL-M3 (extra gates on high-impact tools), and AUTHZ-R1 (tool/model
+  policy-as-code + CI/admission deny without proving runtime per-call authz).
 severity: "critical"
 weight: 4
 gate: "mandatory"
 passCondition: >
-  Automated tests show tool calls without a valid authz decision are denied
-  at 100%; model-proposed tool name/args alone never bypass the gateway
-  (measuredAt ≤90 days). If no production tools/agents invoke tools, score
-  NOT_APPLICABLE.
+  100% of production tool-invocation paths are covered by server-side tool
+  authz (gateway or runtime); automated tests show tool calls without a
+  valid authz decision are denied at 100%; model-proposed tool name/args
+  alone never bypass the gateway/runtime (measuredAt ≤90 days). If no
+  production agents/workloads invoke tools, score NOT_APPLICABLE.
 evidenceRequired:
+  - "Inventory or mapping of production tool-invocation paths (or attested gateway covering 100%)"
   - "Tool gateway / tool-runtime authz enforcement config (server-side)"
   - "Automated deny suite for tool calls missing/forged/invalid authz decisions"
-  - "Deny logs or test results proving 100% denial + no model-output bypass (measuredAt ≤90 days)"
+  - "Attest or results: productionToolInvocationPathsCoveredByAuthzPct=100 + unauthorizedToolCallsDeniedPct=100 + modelOutputAloneCannotBypassGateway=true (measuredAt ≤90 days)"
 detection:
   capability: "hybrid"
   detectors:
@@ -32,39 +36,47 @@ detection:
         hint: >
           Discover tool-gateway / tool-runtime authz and deny-suite signals;
           ingest coverage under imports/tool-gateway-authz/; require
+          productionToolInvocationPathsCoveredByAuthzPct=100 +
           unauthorizedToolCallsDeniedPct=100 +
           modelOutputAloneCannotBypassGateway=true + measuredAt ≤90 days.
     - id: "manual-attest"
       params:
         hint: >
-          If automation cannot prove coverage, attest server-side tool authz
-          with 100% deny of unauthorized tool calls and no model-output
-          bypass (measuredAt ≤90 days).
+          If automation cannot prove coverage, attest 100% path coverage,
+          100% deny of unauthorized tool calls, and no model-output bypass
+          (measuredAt ≤90 days).
 manualVerification: >
-  1) Confirm production agents/tools invoke tools through a gateway or
-  runtime. If none, score NOT_APPLICABLE. 2) Confirm authz is enforced
-  server-side (not prompt-only). 3) Review automated tests: calls without a
-  valid authz decision are denied at 100%. 4) Confirm model-proposed tool
-  name/args alone cannot bypass the gateway. 5) PASS only if deny suite +
-  no-bypass hold with measuredAt ≤90 days. AUTHZ-M1 entry-point tests alone
-  do not prove per-tool-call authz. TOL-M2 allowlists alone do not prove
-  authz decisions independent of the allowlist. AUTHZ-R1 policy-as-code alone
+  1) Confirm production agents/workloads invoke tools through a gateway or
+  runtime. If none, score NOT_APPLICABLE. 2) Inventory production
+  tool-invocation paths (or attest the gateway/runtime covers 100%). 3)
+  Confirm authz is enforced server-side on those paths (not prompt-only). 4)
+  Review automated tests: calls without a valid authz decision are denied at
+  100%. 5) Confirm model-proposed tool name/args alone cannot bypass the
+  gateway/runtime. 6) PASS only if path coverage + deny suite + no-bypass
+  hold with measuredAt ≤90 days. AUTHZ-M1 entry-point suites alone do not
+  prove per-tool-call authz. TOL-M2 allowlists alone do not prove an authz
+  decision independent of the allowlist. TOL-M3 high-impact gates alone do
+  not prove base authz on every tool call. AUTHZ-R1 policy-as-code alone
   does not prove runtime deny for every tool invocation.
 falsePositiveGuidance: >
-  Do not pass prompt “ask permission” text as server-side authz. Do not pass
-  client SDKs that skip the gateway in production. Do not pass allowlist-only
-  configs without an authz decision path. Do not score AUTHZ-M1, TOL-M2, or
-  AUTHZ-R1 as substitutes. Named exceptions need owner and expiry ≤90 days.
+  Do not pass prompt "ask permission" text as server-side authz. Do not pass
+  client SDKs that skip the gateway/runtime in production. Do not pass a deny
+  suite that covers only a subset of production tool-invocation paths. Do not
+  pass allowlist-only configs without an authz decision path. Do not score
+  AUTHZ-M1, TOL-M2, TOL-M3, or AUTHZ-R1 as substitutes. Named exceptions need
+  owner and expiry ≤90 days.
 recommendedFixes:
-  - "Enforce server-side authz on every tool invocation at the gateway/runtime"
+  - "Inventory production tool-invocation paths; enforce server-side authz on 100% of them at the gateway/runtime"
   - "Add automated deny tests for missing/forged/invalid authz decisions at 100%"
-  - "Prove model-proposed tool name/args cannot bypass the gateway; retain under imports/tool-gateway-authz/ (measuredAt ≤90 days)"
+  - "Prove model-proposed tool name/args cannot bypass the gateway/runtime; retain under imports/tool-gateway-authz/ (measuredAt ≤90 days)"
   - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "Model Context Protocol — security considerations"
     url: "https://modelcontextprotocol.io/"
   - title: "OWASP LLM — Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "OWASP Access Control Cheat Sheet"
+    url: "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html"
   - title: "NIST AI RMF — Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
@@ -73,6 +85,7 @@ relatedRules:
   - "TOL-M4"
   - "AUTHZ-M1"
   - "AUTHZ-R1"
+  - "AUTHN-M4"
   - "AGN-M2"
 tags:
   - "tool-safety"
@@ -80,6 +93,7 @@ tags:
   - "hybrid"
   - "tool-gateway"
   - "authorization"
+  - "per-call-authz"
 applicability:
   technologies: []
   minCriticality: 2

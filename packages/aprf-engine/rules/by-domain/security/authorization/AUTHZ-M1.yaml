@@ -54,14 +54,16 @@ manualVerification: >
   unauthenticated probes alone do not prove unauthorized-caller denial.
   AUTHZ-M2 cross-tenant suites alone do not prove least-privilege on
   feature/tool/retrieval entry points. AUTHN-M4 subject-propagation
-  samples alone do not prove entry-point permission checks. TOL-M1 tool
-  allowlists alone do not prove authenticated-but-unauthorized denial tests.
+  samples alone do not prove entry-point permission checks. TOL-M1
+  per-tool-call gateway/runtime authz alone does not prove
+  authenticated-but-unauthorized denial on AI HTTP/RPC entry points.
 falsePositiveGuidance: >
   Do not pass auth middleware presence without an authz suite that denies
   authenticated-but-unauthorized callers. Do not pass unauthenticated
   (AUTHN-M1) rejection as this Check. Do not pass empty inventories without
-  an explicit N/A attest. Do not score AUTHZ-M2, AUTHN-M4, or TOL-M1 as
-  substitutes. Named exceptions need owner and expiry ≤90 days.
+  an explicit N/A attest. Do not score AUTHZ-M2, AUTHN-M4, or TOL-M1
+  (per-tool-call authz) as substitutes. Named exceptions need owner and
+  expiry ≤90 days.
 recommendedFixes:
   - "Enforce server-side authorization on every privileged AI feature, tool, and retrieval entry point"
   - "Add authz suite cases that deny authenticated callers lacking required permission or scope"

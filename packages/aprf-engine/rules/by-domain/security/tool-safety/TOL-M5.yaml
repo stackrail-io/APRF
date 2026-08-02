@@ -3,28 +3,34 @@ category: "tool-safety"
 title: "MCP and agent tool catalogs must be signed and supply-chain reviewed before production use"
 description: >
   Production MCP and agent tool catalogs shall be signed (or equivalently
-  integrity-verified) and supply-chain reviewed before use—proven by
-  verify-on-load that rejects unsigned/unapproved catalogs plus a review ≤90
-  days or since last catalog change—not by SCI-M2 inventory pins alone.
+  integrity-verified) and supply-chain reviewed before use—proven by an
+  inventory of production catalogs, verify-on-load that rejects
+  unsigned/unapproved catalogs on 100% of load paths, plus a review ≤90 days
+  or since last catalog change—not by SCI-M2 inventory pins alone or a reject
+  config that covers only a subset of catalog loaders.
 whyItMatters: >
   An unsigned tool catalog can swap tool definitions, expand privilege, or
   inject malicious handlers without a deploy. Level-5 / regulated advanced
   mandatory—not Core baseline. Distinct from SCI-M2 (inventory+pin+owner+
-  review of external tools/integrations), SCI-M1 (model/container provenance
-  verify+block), TOL-M2 (per-agent allowlists), and SCI-M4 (deploy-path
-  unsigned/unapproved/revoked policy for artifacts).
+  review of external tools/integrations without proving signed catalogs),
+  SCI-M1 (model/container provenance verify+block), SCI-M4 (deploy-path
+  unsigned/unapproved/revoked policy for artifacts), SCI-R1 (verify-on-deploy
+  for images/artifacts), and TOL-M2 (per-agent allowlists without catalog
+  integrity).
 severity: "critical"
 weight: 4
 gate: "mandatory"
 passCondition: >
-  Production MCP/agent tool-catalog loaders reject unsigned or unapproved
-  catalogs; last supply-chain review is ≤90 days or since the last catalog
-  change (measuredAt ≤90 days). If no production MCP/agent tool catalogs are
-  loaded, score NOT_APPLICABLE. (Level-5 / regulated advanced scope.)
+  Inventory covers 100% of production MCP/agent tool catalogs; catalog
+  loaders reject unsigned or unapproved catalogs; last supply-chain review
+  is ≤90 days or since the last catalog change (measuredAt ≤90 days). If no
+  production MCP/agent tool catalogs are loaded, score NOT_APPLICABLE.
+  (Level-5 / regulated advanced scope.)
 evidenceRequired:
-  - "Signed (or integrity-verified) production MCP/agent tool catalog"
-  - "Verify-on-load / reject-unsigned configuration for catalog consumers"
-  - "Supply-chain review record ≤90 days or since last catalog change (measuredAt ≤90 days)"
+  - "Inventory of production MCP/agent tool catalogs"
+  - "Signed (or integrity-verified) catalogs + verify-on-load / reject-unsigned for catalog consumers"
+  - "Supply-chain review record ≤90 days or since last catalog change"
+  - "Attest or results: productionToolCatalogsInventoriedPct=100 + unsignedOrUnapprovedCatalogsRejected=true + supplyChainReviewWithin90DaysOrSinceLastChange=true (measuredAt ≤90 days)"
 detection:
   capability: "hybrid"
   detectors:
@@ -33,32 +39,37 @@ detection:
         hint: >
           Discover signed tool-catalog / verify-on-load signals; ingest
           coverage under imports/signed-tool-catalog/; require
+          productionToolCatalogsInventoriedPct=100 +
           unsignedOrUnapprovedCatalogsRejected=true +
           supplyChainReviewWithin90DaysOrSinceLastChange=true +
           measuredAt ≤90 days.
     - id: "manual-attest"
       params:
         hint: >
-          If automation cannot prove coverage, attest signed catalogs +
-          reject unsigned/unapproved + review ≤90d or since last change
-          (measuredAt ≤90 days).
+          If automation cannot prove coverage, attest inventory of production
+          catalogs, reject unsigned/unapproved, and review ≤90d or since last
+          change (measuredAt ≤90 days).
 manualVerification: >
   1) Confirm production loads MCP or agent tool catalogs. If none, score
-  NOT_APPLICABLE. 2) Confirm catalogs are signed or integrity-verified. 3)
-  Confirm loaders reject unsigned/unapproved catalogs. 4) Confirm supply-chain
-  review ≤90 days or since last catalog change. 5) PASS only if reject +
-  review hold with measuredAt ≤90 days. This Check is Level-5 / regulated
-  advanced—not Core. SCI-M2 pin/owner inventory alone does not prove signed
-  catalogs. SCI-M1 image signing alone does not prove tool-catalog verify-on-
-  load. TOL-M2 allowlists alone do not prove catalog integrity.
+  NOT_APPLICABLE. 2) Inventory those catalogs (required—do not PASS from
+  reject/review without catalog inventory coverage). 3) Confirm catalogs are
+  signed or integrity-verified. 4) Confirm loaders reject unsigned/unapproved
+  catalogs. 5) Confirm supply-chain review ≤90 days or since last catalog
+  change. 6) PASS only if inventory + reject + review hold with measuredAt
+  ≤90 days. This Check is Level-5 / regulated advanced—not Core. SCI-M2
+  pin/owner inventory alone does not prove signed catalogs. SCI-M1 image
+  signing alone does not prove tool-catalog verify-on-load. SCI-M4/SCI-R1
+  deploy-path verify alone does not prove catalog integrity. TOL-M2
+  allowlists alone do not prove catalog integrity.
 falsePositiveGuidance: >
   Do not pass unsigned catalogs with a waiver note. Do not pass CI Action SHA
-  pins as catalog signatures. Do not pass SCI-M1/SCI-M2/TOL-M2 as substitutes.
-  Do not require Core assessments to PASS this Level-5 Check. Named exceptions
-  need owner and expiry ≤90 days.
+  pins as catalog signatures. Do not pass reject/review that covers only a
+  subset of production catalog loaders. Do not score SCI-M1, SCI-M2, SCI-M4,
+  SCI-R1, or TOL-M2 as substitutes. Do not require Core assessments to PASS
+  this Level-5 Check. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Sign (or integrity-verify) production MCP/agent tool catalogs"
-  - "Configure verify-on-load to reject unsigned/unapproved catalogs"
+  - "Inventory production MCP/agent tool catalogs; sign (or integrity-verify) 100% of them"
+  - "Configure verify-on-load to reject unsigned/unapproved catalogs on every loader path"
   - "Record supply-chain review ≤90 days or on each catalog change; retain under imports/signed-tool-catalog/ (measuredAt ≤90 days)"
   - "Time-box gaps with owner and expiry ≤90 days"
 references:
@@ -81,6 +92,7 @@ tags:
   - "mcp"
   - "signed-catalog"
   - "level-5"
+  - "inventory"
 applicability:
   technologies: []
   minCriticality: 3

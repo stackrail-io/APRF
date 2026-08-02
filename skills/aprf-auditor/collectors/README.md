@@ -468,7 +468,7 @@ npm run aprf:tool-gateway-authz -- \
   --out /path/to/app/aprf-assessment
 ```
 
-Detects tool-gateway / deny-suite signals; PASS needs `unauthorizedToolCallsDeniedPct=100` + `modelOutputAloneCannotBypassGateway=true` (measuredAt ≤90d). Writes `imports/tool-gateway-authz/tool-gateway-authz-report.json`.
+Detects tool-gateway / deny-suite signals; PASS needs `productionToolInvocationPathsCoveredByAuthzPct=100` + `unauthorizedToolCallsDeniedPct=100` + `modelOutputAloneCannotBypassGateway=true` (measuredAt ≤90d). Writes `imports/tool-gateway-authz/tool-gateway-authz-report.json`.
 
 ### TOL-M2 — Per-agent tool allowlist
 
@@ -478,7 +478,7 @@ npm run aprf:tool-allowlist -- \
   --out /path/to/app/aprf-assessment
 ```
 
-Detects allowlist / MCP allowlist signals; PASS needs `agentsWithExplicitToolAllowlistPct=100` + `unknownToolRequestsDeniedPct=100` (measuredAt ≤90d). Writes `imports/tool-allowlist/tool-allowlist-report.json`.
+Detects allowlist / MCP allowlist signals; PASS needs `agentsInventoriedPct=100` + `agentsWithExplicitToolAllowlistPct=100` + `unknownToolRequestsDeniedPct=100` + `unknownOrInventedToolsRejectedAtRuntime=true` (measuredAt ≤90d). Writes `imports/tool-allowlist/tool-allowlist-report.json`.
 
 ### TOL-M3 — High-impact tool gates
 
@@ -488,7 +488,7 @@ npm run aprf:high-impact-tool-gates -- \
   --out /path/to/app/aprf-assessment
 ```
 
-Detects impact-tier / approval / dual-control / policy-engine signals; PASS needs `highImpactToolsWithConfiguredGatePct=100` + `ungatedExecutionImpossibleInTests=true` (measuredAt ≤90d). Writes `imports/high-impact-tool-gates/high-impact-tool-gates-report.json`.
+Detects impact-tier / approval / dual-control / policy-engine signals; PASS needs `highImpactToolsInventoriedPct=100` + `highImpactToolsWithConfiguredGatePct=100` + `ungatedExecutionImpossibleInTests=true` (measuredAt ≤90d). Writes `imports/high-impact-tool-gates/high-impact-tool-gates-report.json`.
 
 ### TOL-M4 — Tool argument schema
 
@@ -498,7 +498,7 @@ npm run aprf:tool-argument-schema -- \
   --out /path/to/app/aprf-assessment
 ```
 
-Detects inputSchema / contract-test signals; PASS needs `toolsWithDeclaredArgumentSchemaPct=100` + `invalidArgumentFixturesRejectedPct=100` (measuredAt ≤90d). Writes `imports/tool-argument-schema/tool-argument-schema-report.json`.
+Detects inputSchema / contract-test signals; PASS needs `productionToolsInventoriedPct=100` + `toolsWithDeclaredArgumentSchemaPct=100` + `invalidArgumentFixturesRejectedPct=100` (measuredAt ≤90d). Writes `imports/tool-argument-schema/tool-argument-schema-report.json`.
 
 ### TOL-M5 — Signed tool catalog
 
@@ -508,7 +508,7 @@ npm run aprf:signed-tool-catalog -- \
   --out /path/to/app/aprf-assessment
 ```
 
-Detects signed-catalog / verify-on-load signals; PASS needs `unsignedOrUnapprovedCatalogsRejected` + `supplyChainReviewWithin90DaysOrSinceLastChange` (measuredAt ≤90d; Level-5). Writes `imports/signed-tool-catalog/signed-tool-catalog-report.json`.
+Detects signed-catalog / verify-on-load signals; PASS needs `productionToolCatalogsInventoriedPct=100` + `unsignedOrUnapprovedCatalogsRejected` + `supplyChainReviewWithin90DaysOrSinceLastChange` (measuredAt ≤90d; Level-5). Writes `imports/signed-tool-catalog/signed-tool-catalog-report.json`.
 
 ### TOL-R1 — Destructive tool dry-run
 
@@ -518,7 +518,7 @@ npm run aprf:destructive-tool-dry-run -- \
   --out /path/to/app/aprf-assessment
 ```
 
-Detects dry-run / destructive-tool signals; PASS needs `destructiveToolsWithDryRunInNonProdPct=100` + `lastDestructivePromotionHasDryRunEvidenceWithin90Days` (measuredAt ≤90d). Writes `imports/destructive-tool-dry-run/destructive-tool-dry-run-report.json`.
+Detects dry-run / destructive-tool signals; PASS needs `destructiveToolsInventoriedPct=100` + `destructiveToolsWithDryRunInNonProdPct=100` + `lastDestructivePromotionHasDryRunEvidenceWithin90Days` (measuredAt ≤90d). Writes `imports/destructive-tool-dry-run/destructive-tool-dry-run-report.json`.
 
 ### TOL-R2 — Tool rate / blast-radius limits
 
@@ -528,7 +528,7 @@ npm run aprf:tool-rate-limits -- \
   --out /path/to/app/aprf-assessment
 ```
 
-Detects rate-limit / blast-radius signals; PASS needs `highImpactToolsWithRateAndBlastBudgetPct=100` + `enforcementProvenWithin30Days` (measuredAt ≤90d). Writes `imports/tool-rate-limits/tool-rate-limits-report.json`.
+Detects rate-limit / blast-radius signals; PASS needs `highImpactToolsInventoriedPct=100` + `highImpactToolsWithRateAndBlastBudgetPct=100` + `enforcementProvenWithin30Days` (measuredAt ≤90d). Writes `imports/tool-rate-limits/tool-rate-limits-report.json`.
 
 ### SEC-M1 — Injection / privilege-escalation policy gate
 

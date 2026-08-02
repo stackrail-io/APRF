@@ -21,9 +21,10 @@ emits:
     - repo-tool-rate-limits
 mapsToChecks: [TOL-R2]
 whenUnavailable: >
-  Signals alone are PARTIAL. TOL-R2 PASS needs highImpactToolsWithRateAndBlastBudgetPct=100
-  and enforcementProvenWithin30Days=true, measuredAt ≤90 days under
-  imports/tool-rate-limits/. Set highImpactToolsPresent=false for
+  Signals alone are PARTIAL. TOL-R2 PASS needs highImpactToolsInventoriedPct=100,
+  highImpactToolsWithRateAndBlastBudgetPct=100, and enforcementProvenWithin30Days=true,
+  measuredAt ≤90 days under imports/tool-rate-limits/. Enforcement without
+  high-impact inventory ≠ PASS. Set highImpactToolsPresent=false for
   NOT_APPLICABLE only when no in-repo rate/blast signals.
 live:
   required: false

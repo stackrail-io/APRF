@@ -54,13 +54,13 @@ Collectors: local by default; `aprf-assessment/imports/<plugin>/` for runtime ex
 | SCI-M4 | `ai-deploy-policy-enforcement` | Level-5 deploy-path unsigned/unapproved/revoked blocks |
 | SCI-R1 | `ai-verify-on-deploy` | last deploy verified + unsigned reject test/canary |
 | SCI-R2 | `ai-model-mbom` | registry-linked MBOM 100% + retention ≥90d (container SBOM ≠ PASS) |
-| TOL-M1 | `tool-gateway-authz` | server-side tool authz deny 100% + no model-output bypass |
-| TOL-M2 | `tool-allowlist` | per-agent allowlist 100% + unknown-tool deny 100% |
-| TOL-M3 | `high-impact-tool-gates` | high-impact gates 100% + ungated execution impossible |
-| TOL-M4 | `tool-argument-schema` | argument schema 100% + invalid fixture reject 100% |
-| TOL-M5 | `signed-tool-catalog` | Level-5 signed catalog reject-unsigned + review ≤90d |
-| TOL-R1 | `destructive-tool-dry-run` | dry-run in non-prod 100% + promotion evidence ≤90d |
-| TOL-R2 | `tool-rate-limits` | rate + blast budgets 100% + ≤30d enforcement proof |
+| TOL-M1 | `tool-gateway-authz` | path coverage 100% + deny 100% + no model-output bypass |
+| TOL-M2 | `tool-allowlist` | inventory 100% + allowlist 100% + deny 100% + invent-reject |
+| TOL-M3 | `high-impact-tool-gates` | inventory 100% + gates 100% + ungated execution impossible |
+| TOL-M4 | `tool-argument-schema` | inventory 100% + schema 100% + invalid fixture reject 100% |
+| TOL-M5 | `signed-tool-catalog` | Level-5 inventory 100% + reject-unsigned + review ≤90d |
+| TOL-R1 | `destructive-tool-dry-run` | inventory 100% + dry-run non-prod 100% + promotion evidence ≤90d |
+| TOL-R2 | `tool-rate-limits` | inventory 100% + rate + blast budgets 100% + ≤30d enforcement |
 | SEC-M1 | `injection-policy-gate` | versioned corpus + CI gate ≥95% deny |
 
 ## Hard rules

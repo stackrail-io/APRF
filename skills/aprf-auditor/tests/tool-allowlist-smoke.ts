@@ -1,5 +1,5 @@
 /**
- * Smoke: tool-allowlist needs 100% allowlist + 100% deny + measuredAt ≤90d.
+ * Smoke: tool-allowlist needs inventory 100% + allowlist 100% + deny 100% + invent-reject + measuredAt ≤90d.
  */
 import {
   mkdtempSync,
@@ -39,8 +39,10 @@ function coverage(extra: Record<string, unknown> = {}) {
   return JSON.stringify({
     measuredAt: new Date().toISOString(),
     productionAgentsOrToolWorkloadsPresent: true,
+    agentsInventoriedPct: 100,
     agentsWithExplicitToolAllowlistPct: 100,
     unknownToolRequestsDeniedPct: 100,
+    unknownOrInventedToolsRejectedAtRuntime: true,
     ...extra,
   });
 }
@@ -75,6 +77,90 @@ async function main() {
     const r2 = await run(tSig, outFail);
     if (r2.summary.statusHint !== "fail") {
       throw new Error(`expected fail, got ${JSON.stringify(r2.summary)}`);
+    }
+
+    const outAllowFail = join(root, "o-allow-fail");
+    mkdirSync(join(outAllowFail, "imports", "tool-allowlist"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outAllowFail, "imports", "tool-allowlist", "coverage.json"),
+      coverage({ agentsWithExplicitToolAllowlistPct: 80 }),
+    );
+    const rAllowFail = await run(tSig, outAllowFail);
+    if (rAllowFail.summary.statusHint !== "fail") {
+      throw new Error(
+        `allowlist coverage <100 must FAIL: ${JSON.stringify(rAllowFail.summary)}`,
+      );
+    }
+
+    const outInvFail = join(root, "o-inv-fail");
+    mkdirSync(join(outInvFail, "imports", "tool-allowlist"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outInvFail, "imports", "tool-allowlist", "coverage.json"),
+      coverage({ agentsInventoriedPct: 60 }),
+    );
+    const rInvFail = await run(tSig, outInvFail);
+    if (rInvFail.summary.statusHint !== "fail") {
+      throw new Error(
+        `agentsInventoriedPct <100 must FAIL: ${JSON.stringify(rInvFail.summary)}`,
+      );
+    }
+
+    const outNoInv = join(root, "o-no-inv");
+    mkdirSync(join(outNoInv, "imports", "tool-allowlist"), { recursive: true });
+    writeFileSync(
+      join(outNoInv, "imports", "tool-allowlist", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionAgentsOrToolWorkloadsPresent: true,
+        agentsWithExplicitToolAllowlistPct: 100,
+        unknownToolRequestsDeniedPct: 100,
+        unknownOrInventedToolsRejectedAtRuntime: true,
+      }),
+    );
+    const rNoInv = await run(tSig, outNoInv);
+    if (rNoInv.summary.statusHint === "pass") {
+      throw new Error(
+        `allowlist+deny+invent without inventory must not PASS: ${JSON.stringify(rNoInv.summary)}`,
+      );
+    }
+
+    const outInventFail = join(root, "o-invent-fail");
+    mkdirSync(join(outInventFail, "imports", "tool-allowlist"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outInventFail, "imports", "tool-allowlist", "coverage.json"),
+      coverage({ unknownOrInventedToolsRejectedAtRuntime: false }),
+    );
+    const rInventFail = await run(tSig, outInventFail);
+    if (rInventFail.summary.statusHint !== "fail") {
+      throw new Error(
+        `invent-reject=false must FAIL: ${JSON.stringify(rInventFail.summary)}`,
+      );
+    }
+
+    const outNoInvent = join(root, "o-no-invent");
+    mkdirSync(join(outNoInvent, "imports", "tool-allowlist"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNoInvent, "imports", "tool-allowlist", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionAgentsOrToolWorkloadsPresent: true,
+        agentsWithExplicitToolAllowlistPct: 100,
+        unknownToolRequestsDeniedPct: 100,
+      }),
+    );
+    const rNoInvent = await run(tSig, outNoInvent);
+    if (rNoInvent.summary.statusHint === "pass") {
+      throw new Error(
+        `deny+allowlist without invent-reject must not PASS: ${JSON.stringify(rNoInvent.summary)}`,
+      );
     }
 
     const outAged = join(root, "o-aged");

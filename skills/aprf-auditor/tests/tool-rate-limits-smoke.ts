@@ -1,5 +1,5 @@
 /**
- * Smoke: tool-rate-limits needs 100% budget + ≤30d enforcement + measuredAt ≤90d.
+ * Smoke: tool-rate-limits needs inventory 100% + budgets 100% + ≤30d enforcement + measuredAt ≤90d.
  */
 import {
   mkdtempSync,
@@ -44,6 +44,7 @@ function coverage(extra: Record<string, unknown> = {}) {
   return JSON.stringify({
     measuredAt: new Date().toISOString(),
     highImpactToolsPresent: true,
+    highImpactToolsInventoriedPct: 100,
     highImpactToolsWithRateAndBlastBudgetPct: 100,
     enforcementProvenWithin30Days: true,
     ...extra,
@@ -80,6 +81,41 @@ async function main() {
     const r2 = await run(tSig, outFail);
     if (r2.summary.statusHint !== "fail") {
       throw new Error(`expected fail, got ${JSON.stringify(r2.summary)}`);
+    }
+
+    const outInvFail = join(root, "o-inv-fail");
+    mkdirSync(join(outInvFail, "imports", "tool-rate-limits"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outInvFail, "imports", "tool-rate-limits", "coverage.json"),
+      coverage({ highImpactToolsInventoriedPct: 55 }),
+    );
+    const rInvFail = await run(tSig, outInvFail);
+    if (rInvFail.summary.statusHint !== "fail") {
+      throw new Error(
+        `inventory <100 must FAIL: ${JSON.stringify(rInvFail.summary)}`,
+      );
+    }
+
+    const outNoInv = join(root, "o-no-inv");
+    mkdirSync(join(outNoInv, "imports", "tool-rate-limits"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outNoInv, "imports", "tool-rate-limits", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        highImpactToolsPresent: true,
+        highImpactToolsWithRateAndBlastBudgetPct: 100,
+        enforcementProvenWithin30Days: true,
+      }),
+    );
+    const rNoInv = await run(tSig, outNoInv);
+    if (rNoInv.summary.statusHint === "pass") {
+      throw new Error(
+        `budgets+enforcement without inventory must not PASS: ${JSON.stringify(rNoInv.summary)}`,
+      );
     }
 
     const outAged = join(root, "o-aged");

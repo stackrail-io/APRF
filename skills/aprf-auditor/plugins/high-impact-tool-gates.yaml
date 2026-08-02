@@ -21,9 +21,10 @@ emits:
     - repo-high-impact-tool-gates
 mapsToChecks: [TOL-M3]
 whenUnavailable: >
-  Signals alone are PARTIAL. TOL-M3 PASS needs highImpactToolsWithConfiguredGatePct=100
-  and ungatedExecutionImpossibleInTests=true, measuredAt ≤90 days under
-  imports/high-impact-tool-gates/. Set highImpactToolsPresent=false for
+  Signals alone are PARTIAL. TOL-M3 PASS needs highImpactToolsInventoriedPct=100,
+  highImpactToolsWithConfiguredGatePct=100, and ungatedExecutionImpossibleInTests=true,
+  measuredAt ≤90 days under imports/high-impact-tool-gates/. Bypass suite without
+  inventory coverage ≠ PASS. Set highImpactToolsPresent=false for
   NOT_APPLICABLE only when no in-repo impact/gate signals.
 live:
   required: false
