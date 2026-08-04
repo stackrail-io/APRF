@@ -1,0 +1,36 @@
+{
+  "measuredAt": "2026-07-15T12:00:00Z",
+  "coversAllProductionAgents": true,
+  "complete": true,
+  "missingFieldCount": 0,
+  "agentCount": 1,
+  "agents": [
+    {
+      "id": "support-agent",
+      "owner": "engineering",
+      "charterUri": "docs/agents/support-agent.charter.yaml",
+      "purpose": "Triage inbound support tickets and draft replies for human review",
+      "allowedTools": [
+        "search_kb",
+        "create_ticket_draft",
+        "policy://tools/support-triage-v1"
+      ],
+      "forbiddenTools": ["shell", "unrestricted_http", "customer_email_send"],
+      "dataScope": "Support tickets + public KB articles only",
+      "memoryPolicy": "Session memory only; purge within 24h of ticket close",
+      "networkPolicy": "Egress limited to internal support APIs and approved KB",
+      "autonomy": {
+        "maxSteps": 8,
+        "wallClockSeconds": 120,
+        "spawnDepth": 0
+      },
+      "approvalPolicy": "approved; customer-facing sends require human approval",
+      "identityPolicy": "End-user or service subject on privileged hops",
+      "loggingPolicy": "Tool, policy decision, ticket id, subject id retained ≥90d",
+      "reviewDate": "2026-07-01",
+      "lastUpdated": "2026-07-10T09:00:00Z",
+      "expiryDate": "2027-07-01",
+      "agentVersion": 1
+    }
+  ]
+}

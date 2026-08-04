@@ -78,6 +78,12 @@ owner: platform-oncall
   if (r1.summary.statusHint !== "partial" || !r1.summary.inventoryPresent) {
     throw new Error(`expected partial, got ${JSON.stringify(r1.summary)}`);
   }
+  if (!r1.gapNotes?.some((n) => n.includes("complete=true"))) {
+    throw new Error(`expected gapNotes to state complete=true PASS predicate, got ${JSON.stringify(r1.gapNotes)}`);
+  }
+  if (r1.gapNotes.some((n) => /\bmissingFields\s*=\s*0\b/i.test(n))) {
+    throw new Error("gapNotes should not include informational missingFields=0 lines");
+  }
 
   const out2 = mkdtempSync(join(tmpdir(), "aprf-agn1-2-"));
   mkdirSync(join(out2, "imports", "agent-charter-inventory"), {
@@ -92,10 +98,20 @@ owner: platform-oncall
         {
           id: "support-agent",
           purpose: "Resolve tickets",
-          tool_allowlist: ["search_kb"],
-          data_scope: "support_corpus",
-          autonomy: { max_steps: 20 },
-          owner: "platform-oncall",
+          allowedTools: ["search_kb"],
+          forbiddenTools: ["shell"],
+          dataScope: "support_corpus",
+          autonomy: { maxSteps: 20, wallClockSeconds: 60, spawnDepth: 0 },
+          owner: "engineering",
+          approvalPolicy: "approved",
+          identityPolicy: "workload identity",
+          loggingPolicy: "retain 90d",
+          memoryPolicy: "session only",
+          networkPolicy: "internal only",
+          reviewDate: "2026-07-01",
+          lastUpdated: "2026-07-10T09:00:00Z",
+          expiryDate: "2027-07-01",
+          agentVersion: 1,
         },
       ],
     }),
@@ -105,6 +121,47 @@ owner: platform-oncall
   const r2 = readReport(out2);
   if (r2.summary.statusHint !== "pass" || r2.summary.agnM1Satisfied !== true) {
     throw new Error(`expected pass, got ${JSON.stringify(r2.summary)}`);
+  }
+  if (r2.summary.severityHint !== "high") {
+    throw new Error(`expected severityHint=high on pass, got ${r2.summary.severityHint}`);
+  }
+
+  // Incomplete inventory attestation → critical escalation
+  const out3 = mkdtempSync(join(tmpdir(), "aprf-agn1-3-"));
+  mkdirSync(join(out3, "imports", "agent-charter-inventory"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(out3, "imports", "agent-charter-inventory", "inventory.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      coversAllProductionAgents: false,
+      agents: [
+        {
+          id: "orphan-agent",
+          purpose: "Unknown",
+          tool_allowlist: ["shell"],
+          data_scope: "all",
+          autonomy: { max_steps: 100 },
+          owner: "platform-oncall",
+          review_date: "2026-07-01",
+          last_updated: "2026-07-10T09:00:00Z",
+          charter_version: "1.0.0",
+          approval_status: "approved",
+        },
+      ],
+    }),
+    "utf8",
+  );
+  await agentCharterInventoryCollector.collect({ ...baseCtx, outputDir: out3 });
+  const r3 = readReport(out3);
+  if (r3.summary.statusHint !== "partial") {
+    throw new Error(`expected partial for incomplete coverage, got ${r3.summary.statusHint}`);
+  }
+  if (r3.summary.severityHint !== "critical") {
+    throw new Error(
+      `expected severityHint=critical when completeness unproven, got ${r3.summary.severityHint}`,
+    );
   }
 
   console.log("agent-charter-inventory smoke OK");

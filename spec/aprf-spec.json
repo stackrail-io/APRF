@@ -3812,9 +3812,9 @@
       "mandatoryChecks": [
         {
           "id": "AGN-M1",
-          "requirement": "Each production agent (any autonomous or semi-autonomous runtime that plans, loops, or invokes tools on behalf of a product capability—including in-process agents, MCP clients/servers acting as agents, and A2A participants) shall have a versioned charter covering purpose, allowed tools, data scope, autonomy limits, and a named owner.",
-          "artifact": "Versioned agent inventory listing every production agent with owner and charter URI/id + Per-agent charter documents (or equivalent structured records) covering purpose, tool allowlist reference, data scope, and autonomy limits",
-          "passCondition": "100% of production agents appear in an inventory with a charter that includes purpose, tool allowlist reference, data scope, autonomy limits, and named owner; inventory query returns 0 agents missing any required field.",
+          "requirement": "Each production agent (any autonomous or semi-autonomous runtime that plans, loops, or invokes tools on behalf of a product capability—including in-process agents, MCP clients/servers acting as agents, and A2A participants) shall be represented in a version-controlled inventory with a current charter covering purpose, owner, approved tool policy, data scope, autonomy boundaries, review metadata, and approval status.",
+          "artifact": "Version-controlled agent inventory listing every production agent with owner and charter URI/id + Per-agent charter documents (or equivalent structured records) covering purpose, owner, approved tool policy reference, data scope, autonomy boundaries, review date, last updated, charter version, and approval status",
+          "passCondition": "Every production agent is represented in a version-controlled inventory. Each inventory entry references a current charter containing purpose, owner, approved tool policy, data scope, autonomy boundaries, review date, last updated, charter version, and approval status. No production agent is missing any required governance metadata; inventory completeness is attested (coversAllProductionAgents) with measuredAt ≤90 days.",
           "method": "automated",
           "requiredFromLevel": 3,
           "minCriticality": 2

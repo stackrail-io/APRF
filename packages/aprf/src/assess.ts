@@ -20,7 +20,7 @@ import {
   writeFileSync,
   mkdirSync,
 } from "node:fs";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 import {
   getGeneratedCatalog,
   SEVERITY_WEIGHT,
@@ -111,6 +111,10 @@ type HintHit = {
   hint: HintStatus;
   pluginId: string;
   reportRef: string;
+  /** Collector-specific gap notes (preferred over generic evidenceRequired). */
+  gapNotes?: string[];
+  /** Optional finding severity override (e.g. AGN-M1 high→critical escalation). */
+  severityHint?: AprfRule["severity"];
 };
 
 type ControlOut = {
@@ -203,7 +207,11 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
 
     for (const file of files) {
       if (!file.includes("report")) continue;
-      let doc: { summary?: { statusHint?: unknown } };
+      let doc: {
+        summary?: { statusHint?: unknown; severityHint?: unknown };
+        gapNotes?: unknown;
+        notes?: unknown;
+      };
       try {
         doc = JSON.parse(readFileSync(join(dir, file), "utf8")) as typeof doc;
       } catch {
@@ -212,8 +220,46 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
       const hint = normalizeHint(doc.summary?.statusHint);
       if (!hint) continue;
       const reportRef = `imports/${pluginId}/${file}`;
+      // Prefer typed gapNotes from collectors; fall back to a conservative note filter.
+      const typedGaps = Array.isArray(doc.gapNotes)
+        ? doc.gapNotes
+            .filter((n): n is string => typeof n === "string" && n.trim().length > 0)
+            .slice(0, 8)
+        : [];
+      const gapNotes =
+        typedGaps.length > 0
+          ? typedGaps
+          : Array.isArray(doc.notes)
+            ? doc.notes
+                .filter((n): n is string => typeof n === "string" && n.trim().length > 0)
+                .filter(
+                  (n) =>
+                    !/\bmissingFields\s*=\s*0\b/i.test(n) &&
+                    /missing(?!Fields\s*=\s*0)|no [a-z]|not found|requir(?:ed|es)|cannot|fail|partial|unlock|absent|unscored|severityHint=critical/i.test(
+                      n,
+                    ),
+                )
+                .slice(0, 8)
+            : undefined;
+      const sevRaw =
+        typeof doc.summary?.severityHint === "string"
+          ? doc.summary.severityHint.trim().toLowerCase()
+          : "";
+      const severityHint =
+        sevRaw === "critical" ||
+        sevRaw === "high" ||
+        sevRaw === "medium" ||
+        sevRaw === "low"
+          ? (sevRaw as AprfRule["severity"])
+          : undefined;
       for (const checkId of checkIds) {
-        setHint(byCheck, checkId, { hint, pluginId, reportRef });
+        setHint(byCheck, checkId, {
+          hint,
+          pluginId,
+          reportRef,
+          ...(gapNotes?.length ? { gapNotes } : {}),
+          ...(severityHint ? { severityHint } : {}),
+        });
       }
     }
   }
@@ -504,18 +550,30 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       });
     }
 
+    // Prefer collector gap notes over dumping the full normative evidenceRequired list.
+    const outDirLabel = basename(outDir) || "assessment-output";
     const requiredEvidenceMissing =
       status === "PASS" || status === "NOT_APPLICABLE"
         ? []
-        : [...(rule.evidenceRequired ?? [])];
+        : mapped?.gapNotes?.length
+          ? [...mapped.gapNotes]
+          : status === "NOT_DEMONSTRATED"
+            ? [
+                `No scored collector report for this Check — re-run collect or add measured imports under ${outDirLabel}/imports/<plugin>/.`,
+                ...(rule.evidenceRequired ?? []).slice(0, 2),
+              ]
+            : [...(rule.evidenceRequired ?? [])];
 
-    const priority = priorityFor(gate, rule.severity, status);
+    // Collector may escalate (e.g. AGN-M1 high → critical when inventory unproven).
+    const severity = mapped?.severityHint ?? rule.severity;
+    const priority = priorityFor(gate, severity, status);
     const domain = domainForCategory(
       rule.category,
       catalog.domains ?? [],
       categoryDomain,
     );
 
+    const fix = rule.recommendedFixes?.[0] ?? "";
     controls.push({
       checkId,
       title: rule.title,
@@ -530,7 +588,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       falsePositiveGuidance: rule.falsePositiveGuidance,
       references: rule.references,
       gate,
-      severity: rule.severity,
+      severity,
       status,
       passed,
       ...(notApplicable ? { notApplicable: true } : {}),
@@ -539,16 +597,17 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       evidenceFound,
       requiredEvidenceMissing,
       reasoning: mapped
-        ? `Collector statusHint=${mapped.hint} from ${mapped.reportRef}. Primary evidence class=${related[0]?.class ?? "ci"} (${evidenceFound.length} refs). Deterministic assess (no LLM).`
+        ? `Collector statusHint=${mapped.hint}${mapped.severityHint ? ` severityHint=${mapped.severityHint}` : ""} from ${mapped.reportRef}. Primary evidence class=${related[0]?.class ?? "ci"} (${evidenceFound.length} refs). Deterministic assess (no LLM).`
         : `No collector statusHint for ${checkId}. Marked NOT_DEMONSTRATED — add imports/ evidence or re-run collect. Manual: ${rule.manualVerification}`,
       recommendedAction: (rule.recommendedFixes ?? []).join("; "),
       priority,
+      // No placeholder owner/effort — those belong to a tracked remediation system, not CLI assess.
       remediation: {
-        fix: rule.recommendedFixes?.[0] ?? "",
+        fix,
         reference: checkId,
-        owner: "unassigned",
+        owner: "",
         priority,
-        estimatedEffort: "M",
+        estimatedEffort: "",
       },
       ...(notApplicable
         ? { naReason: "Collector reported not_applicable (surface absent)." }
