@@ -1,11 +1,14 @@
 ---
 name: aprf-auditor
+# Slash entry is /aprf-audit (commands/). Keep this skill model-usable but off the
+# / menu so it does not duplicate the portable repo skill or the audit command.
+user-invocable: false
 description: >-
   Local APRF assessment via @stackrail-io/aprf CLI (no StackRail console, no
-  localhost:3001, no run_* IDs). Prefer `npx @stackrail-io/aprf@0.1.0 audit`.
+  localhost:3001, no run_* IDs). Prefer `npx @stackrail-io/aprf@0.1.1 audit`.
   Writes aprf-assessment/ with evidence-graph.json, assessment.json, REPORT.html.
-  Use for "Run an APRF assessment", "APRF audit", "AI production readiness",
-  or "@aprf-auditor". Do NOT use the StackRail product Assessments UI.
+  Use for "Run an APRF assessment", "APRF audit", "AI production readiness".
+  Prefer slash command /aprf-audit. Do NOT use the StackRail product Assessments UI.
 ---
 
 # APRF Auditor (Cursor plugin)
@@ -34,7 +37,7 @@ node packages/aprf/dist/cli.js audit --target . --out ./aprf-assessment --profil
 2. **Published npm** (any other project):
 
 ```bash
-npx @stackrail-io/aprf@0.1.0 audit --target . --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.1 audit --target . --out ./aprf-assessment --profile core
 ```
 
 Variants (same flags on either binary):
@@ -52,10 +55,10 @@ Variants (same flags on either binary):
 ## Step-by-step (when not using `audit`)
 
 ```bash
-npx @stackrail-io/aprf@0.1.0 collect --target . --out ./aprf-assessment
-npx @stackrail-io/aprf@0.1.0 assess  --out ./aprf-assessment --profile core
-npx @stackrail-io/aprf@0.1.0 report  --in ./aprf-assessment/assessment.json --out ./aprf-assessment/REPORT.html
-npx @stackrail-io/aprf@0.1.0 verify  ./aprf-assessment/REPORT.html
+npx @stackrail-io/aprf@0.1.1 collect --target . --out ./aprf-assessment
+npx @stackrail-io/aprf@0.1.1 assess  --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.1 report  --in ./aprf-assessment/assessment.json --out ./aprf-assessment/REPORT.html
+npx @stackrail-io/aprf@0.1.1 verify  ./aprf-assessment/REPORT.html
 ```
 
 ## After the run
@@ -78,7 +81,7 @@ For deeper agent methodology (attestation Phase 2b, full workflow), see the port
 
 ## Wrong pipeline (abort and restart)
 
-If you find yourself opening StackRail Assessments UI, `http://127.0.0.1:3001`, or inventing `run_*` IDs — **stop**. Re-run with this skill and `npx @stackrail-io/aprf@0.1.0 audit`.
+If you find yourself opening StackRail Assessments UI, `http://127.0.0.1:3001`, or inventing `run_*` IDs — **stop**. Re-run with this skill and `npx @stackrail-io/aprf@0.1.1 audit`.
 
 ## Non-AI / platform repos
 

@@ -13,7 +13,7 @@ Run a **local** APRF assessment on the current workspace using the open CLI.
 2. Shell:
 
 ```bash
-npx @stackrail-io/aprf@0.1.0 audit --target . --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.1 audit --target . --out ./aprf-assessment --profile core
 ```
 
 3. If the user asked for regulated / lenses, adjust flags (`--profile regulated`, `--lens rag,agents`).

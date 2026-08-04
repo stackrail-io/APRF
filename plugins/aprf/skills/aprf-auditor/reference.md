@@ -29,7 +29,7 @@ Package: `@stackrail-io/aprf` (Node ≥ 22)
 ## npm
 
 ```bash
-npx @stackrail-io/aprf@0.1.0 <command> …
+npx @stackrail-io/aprf@0.1.1 <command> …
 # or after publish:
 npm install -g @stackrail-io/aprf
 aprf audit --target . --profile core

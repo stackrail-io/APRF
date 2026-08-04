@@ -28,18 +28,27 @@ Submit at [cursor.com/marketplace/publish](https://cursor.com/marketplace/publis
 
 ## Use
 
-In chat:
+In chat, prefer the slash command:
 
-- `@aprf-auditor Run an APRF assessment`
-- Or command **`/aprf-audit`**
+- **`/aprf-audit`** — full collect → assess → `REPORT.html`
+- **`/aprf-collect`** / **`/aprf-report`** — individual steps
 
-The skill runs:
+The plugin skill (`aprf-auditor`) is model-invocable background guidance and is **not** listed in the `/` menu, so it does not collide with the portable repo skill at `skills/aprf-auditor/` when this checkout is open.
 
 ```bash
-npx @stackrail-io/aprf@0.1.0 audit --target . --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.1 audit --target . --out ./aprf-assessment --profile core
 ```
 
 Artifacts land in `./aprf-assessment/` (`evidence-graph.json`, `assessment.json`, `REPORT.html`).
+
+### If you see two `/aprf-auditor` entries
+
+You almost certainly have **two installs** of the same skill name:
+
+1. Cursor plugin (`~/.cursor/plugins/local/aprf` and/or Team Marketplace **aprf**), and
+2. This repo’s portable skill at `skills/aprf-auditor/` (discovered when the APRF workspace is open).
+
+Fix: keep **one** plugin install (local **or** marketplace, not both), reload Cursor, and use **`/aprf-audit`** for the slash entry.
 
 ## Layout
 
