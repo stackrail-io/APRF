@@ -1,0 +1,55 @@
+{
+  "name": "@stackrail-io/aprf",
+  "version": "0.1.0",
+  "private": false,
+  "license": "Apache-2.0",
+  "description": "APRF CLI — collect evidence, assess from collector statusHints, render REPORT.html (pinned Check catalog)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stackrail-io/APRF.git",
+    "directory": "packages/aprf"
+  },
+  "homepage": "https://stackrail.io/aprf/",
+  "bugs": {
+    "url": "https://github.com/stackrail-io/APRF/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "aprf": "./dist/cli.js"
+  },
+  "main": "./dist/cli.js",
+  "exports": {
+    ".": "./dist/cli.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "gen-plugin-map": "node ./scripts/gen-plugin-map.mjs",
+    "build": "npm run gen-plugin-map && node ./scripts/build.mjs",
+    "prepublishOnly": "npm run build",
+    "pretest:unit": "npm run build -w @stackrail-io/aprf-engine && npm run build -w @stackrail-io/aprf-framework-definition",
+    "test:unit": "npx tsx scripts/smoke.ts"
+  },
+  "dependencies": {
+    "@stackrail-io/aprf-engine": "0.11.0",
+    "@stackrail-io/aprf-framework-definition": "0.11.0",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "esbuild": "^0.25.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5"
+  }
+}

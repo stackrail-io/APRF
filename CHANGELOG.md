@@ -7,6 +7,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ## [Unreleased]
 
+### Added
+- `@stackrail-io/aprf` CLI package (`aprf collect|assess|report|verify|audit|version`): bundles collectors + HTML renderer, pins `@stackrail-io/aprf-engine` catalog.
+- Deterministic **assess engine**: `statusHint` + collector-detail fallback + evidence-graph attachment; gate/grade/risk/`recommendedScore`/priority per auditor `scoring.yaml`; lenses via `--lens`; N/A ≠ pass.
+- **Cursor plugin** [`plugins/aprf/`](plugins/aprf/) + root [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json): CLI-first `@aprf-auditor` skill and `/aprf-audit` / `/aprf-collect` / `/aprf-report` commands (Team Marketplace / local `~/.cursor/plugins/local`).
+
 ## [0.11.0] — 2026-08-02
 
 Working-draft MINOR: hybrid Check rewrites across security/reliability/safety domains, mandatory→recommended RFCs, collector hardening, and SemVer sync.

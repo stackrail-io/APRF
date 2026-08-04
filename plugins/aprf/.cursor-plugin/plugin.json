@@ -1,0 +1,22 @@
+{
+  "name": "aprf",
+  "displayName": "APRF Auditor",
+  "version": "0.1.0",
+  "description": "Local AI Production Readiness Framework assessments. Runs npx @stackrail-io/aprf (collect → assess → REPORT.html). No StackRail console or backend.",
+  "author": {
+    "name": "StackRail",
+    "email": "hello@stackrail.io"
+  },
+  "homepage": "https://stackrail.io/aprf/",
+  "repository": "https://github.com/stackrail-io/APRF",
+  "license": "Apache-2.0",
+  "keywords": [
+    "aprf",
+    "ai",
+    "production-readiness",
+    "security",
+    "assessment",
+    "compliance"
+  ],
+  "logo": "assets/owl-mark.png"
+}

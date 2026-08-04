@@ -64,13 +64,25 @@ Full adapter notes: [`adapters/`](adapters/).
 
 ### Cursor
 
+**Preferred — plugin** (uses `npx @stackrail-io/aprf`, no clone):
+
+```bash
+# From APRF checkout:
+mkdir -p ~/.cursor/plugins/local
+ln -sfn "$(pwd)/plugins/aprf" ~/.cursor/plugins/local/aprf
+```
+
+In chat: `@aprf-auditor Run an APRF assessment` or `/aprf-audit`.
+
+**Legacy — full skill symlink** (deep methodology / attestation Phase 2b):
+
 ```bash
 cd /path/to/your-ai-app
 mkdir -p .cursor/skills
 ln -sf /path/to/APRF/skills/aprf-auditor .cursor/skills/aprf-auditor
 ```
 
-In chat: `@aprf-auditor Run an APRF assessment` (or say explicitly to use the local **aprf-auditor** skill — not the StackRail console).
+See [`adapters/cursor.md`](adapters/cursor.md) and [`plugins/aprf/README.md`](../../plugins/aprf/README.md).
 
 ### Claude Code
 

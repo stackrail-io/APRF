@@ -102,11 +102,12 @@ recommendedScore:
 
 # Domain scores for executive dashboard (map via evidence-map.yaml reportDomains)
 domainScore:
+  excludeStatuses: [NOT_APPLICABLE]
   formula: |
-    For Checks in domain (mandatory + recommended applicable):
-      satisfied = PASS or NOT_APPLICABLE
+    For Checks in domain (mandatory + recommended), excluding NOT_APPLICABLE:
+      satisfied = PASS
       score = 100 * |satisfied| / |applicable|
-    Also emit mandatoryGatePassed for domain subset.
+    Also emit mandatoryGatePassed for domain subset (N/A does not fail the domain gate).
   missingEvidencePenalty: |
     NOT_DEMONSTRATED counts as not satisfied (lowers score) but is labeled distinctly in the report.
 

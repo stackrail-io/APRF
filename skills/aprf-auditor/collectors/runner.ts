@@ -11,6 +11,7 @@
  *   - --live: optional authenticated APIs (e.g. GitHub Actions runs)
  */
 import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { COLLECTORS } from "./index.ts";
 import type { CollectorContext, EvidenceGraph, EvidenceNode } from "./types.ts";
 import {
@@ -640,8 +641,24 @@ Import runtime evidence without live APIs:
   return out;
 }
 
-async function main() {
-  const args = parseArgs(process.argv);
+export type CollectOptions = {
+  target: string;
+  outDir: string;
+  live: boolean;
+  plugins?: string[];
+  maxFiles: number;
+  baseUrl?: string;
+  adminToken?: string;
+  adminEmail?: string;
+  adminPassword?: string;
+  /** When false, suppress per-collector console lines (default true). */
+  log?: boolean;
+};
+
+/** Run selected collectors and write `evidence-graph.json` under `outDir`. */
+export async function runCollectors(
+  args: CollectOptions,
+): Promise<EvidenceGraph> {
   ensureDir(args.outDir);
   ensureDir(resolve(args.outDir, "imports"));
 
@@ -666,6 +683,7 @@ async function main() {
 
   const collectorsMeta: EvidenceGraph["collectors"] = [];
   const nodes: EvidenceNode[] = [];
+  const log = args.log !== false;
 
   for (const c of selected) {
     const result = await c.collect(ctx);
@@ -675,9 +693,11 @@ async function main() {
       detail: result.detail,
     });
     nodes.push(...result.nodes);
-    console.log(
-      `[${result.status}] ${result.pluginId}: ${result.detail ?? ""} (${result.nodes.length} nodes)`,
-    );
+    if (log) {
+      console.log(
+        `[${result.status}] ${result.pluginId}: ${result.detail ?? ""} (${result.nodes.length} nodes)`,
+      );
+    }
   }
 
   nodes.sort((a, b) => a.id.localeCompare(b.id));
@@ -698,10 +718,22 @@ async function main() {
 
   const outPath = resolve(args.outDir, "evidence-graph.json");
   writeJson(outPath, graph);
-  console.log(`\nWrote ${outPath} (${nodes.length} nodes)`);
+  if (log) console.log(`\nWrote ${outPath} (${nodes.length} nodes)`);
+  return graph;
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+async function main() {
+  await runCollectors(parseArgs(process.argv));
+}
+
+const entry = process.argv[1] ? resolve(process.argv[1]) : "";
+const isMain =
+  /(?:^|[/\\])runner\.(?:ts|js|mjs)$/.test(entry) &&
+  import.meta.url === pathToFileURL(entry).href;
+
+if (isMain) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

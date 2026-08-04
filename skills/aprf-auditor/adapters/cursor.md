@@ -1,81 +1,72 @@
 # Adapter — Cursor
 
-## Install
+Prefer the **Cursor plugin** (wraps `@stackrail-io/aprf`). Symlink to the full skill remains supported for deep methodology.
 
-### Option A — Project skill (recommended on the **app under assessment**)
+## Install (recommended) — Cursor plugin
+
+### Local from this repo
 
 ```bash
-cd /path/to/your-ai-app   # NOT required to be cloudOps
+cd /path/to/APRF
+mkdir -p ~/.cursor/plugins/local
+ln -sfn "$(pwd)/plugins/aprf" ~/.cursor/plugins/local/aprf
+```
+
+Reload Cursor → confirm **APRF Auditor** under Plugins / Skills.
+
+### Team Marketplace
+
+Import `https://github.com/stackrail-io/APRF` under Dashboard → Settings → Plugins → Team Marketplaces (uses root `.cursor-plugin/marketplace.json`).
+
+### Public Marketplace
+
+Submit via [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish) after npm publish of `@stackrail-io/aprf`.
+
+## Invoke
+
+1. **@-mention:** `@aprf-auditor Run an APRF assessment`
+2. **Command:** `/aprf-audit`
+3. Explicit wording:  
+   > Use the **aprf-auditor** skill. Do **not** use the StackRail console. Run `npx @stackrail-io/aprf audit`.
+
+The plugin skill runs the CLI (no APRF clone required):
+
+```bash
+npx @stackrail-io/aprf@0.1.0 audit --target . --out ./aprf-assessment --profile core
+```
+
+## Legacy — skill symlink (full portable package)
+
+Use when you need YES/NO/DON'T KNOW attestation workflow / full `workflow.md`:
+
+```bash
+cd /path/to/your-ai-app
 mkdir -p .cursor/skills
 ln -sf /path/to/APRF/skills/aprf-auditor .cursor/skills/aprf-auditor
 ```
 
-### Option B — Personal skill (all projects)
-
-```bash
-mkdir -p ~/.cursor/skills
-ln -sf /path/to/APRF/skills/aprf-auditor ~/.cursor/skills/aprf-auditor
-```
-
-Confirm Cursor lists **aprf-auditor** under Skills (Settings → Rules / Skills, or `@` menu).
-
-Symlinks are fine if `SKILL.md` resolves. If discovery fails, copy instead of symlink.
-
-## Invoke (important)
-
-Just saying “Run an APRF assessment” is **ambiguous** if the open workspace is **something related to assessments** — the agent often runs the **product** assessment instead of this skill.
-
-Do one of:
-
-1. **@-mention the skill** in chat: `@aprf-auditor Run an APRF assessment`
-2. Or say explicitly:  
-   > Use the **aprf-auditor** Cursor skill (local portable skill). Do **not** use the StackRail console or Assessments UI. Write `./aprf-assessment/`.
-3. Prefer opening the **customer AI app repo** as the Cursor workspace (not cloudOps), then run the skill there.
-   - If the target is cloudOps / a console / APRF catalog, use **`systemType=non-ai-platform`** and `scopes/non-ai-platform.yaml` — do **not** claim Core AI production readiness.
+Or personal: `ln -sf … ~/.cursor/skills/aprf-auditor`
 
 ## Success looks like
 
-- Files under `./aprf-assessment/` (`evidence-graph.json`, `REPORT.md`, `REPORT.html`, `assessment.json`, …)
-- Agent may ask for missing evidence / `imports/custom/`
-- **No** `http://127.0.0.1:3001`, **no** `run_ms…` IDs
+- Files under `./aprf-assessment/` (`evidence-graph.json`, `assessment.json`, `REPORT.html`, …)
+- `REPORT.html` contains `stackrail.io` and `Visual overview`
+- **No** `http://127.0.0.1:3001`, **no** product `run_*` IDs
 
-Render HTML after `assessment.json` exists — **required; do not hand-write HTML**:
-
-```bash
-# From APRF repo root:
-npm run aprf:report-html -- \
-  --in /path/to/target/aprf-assessment/assessment.json \
-  --out /path/to/target/aprf-assessment/REPORT.html
-
-# Or from the assessed app with skill symlink:
-npx tsx "$(realpath .cursor/skills/aprf-auditor)/scripts/render-html-report.ts" \
-  --in ./aprf-assessment/assessment.json \
-  --out ./aprf-assessment/REPORT.html
-```
-
-Confirm the file contains `stackrail.io` and `Visual overview`, or run:
+Verify:
 
 ```bash
-npm run aprf:verify-html -- ./aprf-assessment/REPORT.html
+npx @stackrail-io/aprf@0.1.0 verify ./aprf-assessment/REPORT.html
 ```
 
 ## Failure (wrong pipeline)
 
 - “Console is at http://127.0.0.1:3001”
-- “registered source …”
-- Gate result from product Findings UI  
+- Gate result from StackRail Findings UI  
 
-→ That was cloudOps product assess, not this skill. Re-run with `@aprf-auditor` and the wording above.
-
-## Agent load order
-
-1. Read this package’s `SKILL.md`
-2. Read `system.md`, `workflow.md`, `scoring.yaml`, `evidence-map.yaml`
-3. Resolve APRF catalog: sibling/clone `APRF/packages/aprf-engine/rules` or `@stackrail-io/aprf-engine`
-4. Optionally `npm run aprf:collect` from the APRF checkout with `--target` = app path
-5. Write artifacts into the **target app’s** `aprf-assessment/`
+→ Re-run with `@aprf-auditor` / `/aprf-audit` and the CLI wording above.
 
 ## Notes
 
-- Use **Agent** mode with repo read access.
-- Assessing the APRF framework repo itself will correctly fail most production Checks (it is not an AI app).
+- Prefer assessing the **customer AI app** workspace (not cloudOps).
+- Assessing the APRF framework repo itself will fail most production Checks (it is not an AI app).
