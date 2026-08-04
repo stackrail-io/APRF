@@ -113,6 +113,8 @@ type HintHit = {
   reportRef: string;
   /** Collector-specific gap notes (preferred over generic evidenceRequired). */
   gapNotes?: string[];
+  /** Optional finding severity override (e.g. AGN-M1 high→critical escalation). */
+  severityHint?: AprfRule["severity"];
 };
 
 type ControlOut = {
@@ -206,7 +208,7 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
     for (const file of files) {
       if (!file.includes("report")) continue;
       let doc: {
-        summary?: { statusHint?: unknown };
+        summary?: { statusHint?: unknown; severityHint?: unknown };
         notes?: unknown;
       };
       try {
@@ -222,18 +224,30 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
             .filter((n): n is string => typeof n === "string" && n.trim().length > 0)
             .filter(
               (n) =>
-                /missing|no |not found|required|import |cannot|fail|partial|unlock|absent|unscored/i.test(
+                /missing|no |not found|required|import |cannot|fail|partial|unlock|absent|unscored|severity/i.test(
                   n,
                 ),
             )
             .slice(0, 8)
         : undefined;
+      const sevRaw =
+        typeof doc.summary?.severityHint === "string"
+          ? doc.summary.severityHint.trim().toLowerCase()
+          : "";
+      const severityHint =
+        sevRaw === "critical" ||
+        sevRaw === "high" ||
+        sevRaw === "medium" ||
+        sevRaw === "low"
+          ? (sevRaw as AprfRule["severity"])
+          : undefined;
       for (const checkId of checkIds) {
         setHint(byCheck, checkId, {
           hint,
           pluginId,
           reportRef,
           ...(gapNotes?.length ? { gapNotes } : {}),
+          ...(severityHint ? { severityHint } : {}),
         });
       }
     }
@@ -538,7 +552,9 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
               ]
             : [...(rule.evidenceRequired ?? [])];
 
-    const priority = priorityFor(gate, rule.severity, status);
+    // Collector may escalate (e.g. AGN-M1 high → critical when inventory unproven).
+    const severity = mapped?.severityHint ?? rule.severity;
+    const priority = priorityFor(gate, severity, status);
     const domain = domainForCategory(
       rule.category,
       catalog.domains ?? [],
@@ -560,7 +576,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       falsePositiveGuidance: rule.falsePositiveGuidance,
       references: rule.references,
       gate,
-      severity: rule.severity,
+      severity,
       status,
       passed,
       ...(notApplicable ? { notApplicable: true } : {}),
@@ -569,7 +585,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       evidenceFound,
       requiredEvidenceMissing,
       reasoning: mapped
-        ? `Collector statusHint=${mapped.hint} from ${mapped.reportRef}. Primary evidence class=${related[0]?.class ?? "ci"} (${evidenceFound.length} refs). Deterministic assess (no LLM).`
+        ? `Collector statusHint=${mapped.hint}${mapped.severityHint ? ` severityHint=${mapped.severityHint}` : ""} from ${mapped.reportRef}. Primary evidence class=${related[0]?.class ?? "ci"} (${evidenceFound.length} refs). Deterministic assess (no LLM).`
         : `No collector statusHint for ${checkId}. Marked NOT_DEMONSTRATED — add imports/ evidence or re-run collect. Manual: ${rule.manualVerification}`,
       recommendedAction: (rule.recommendedFixes ?? []).join("; "),
       priority,

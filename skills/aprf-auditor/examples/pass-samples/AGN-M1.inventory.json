@@ -12,7 +12,11 @@
       "purpose": "Triage inbound support tickets and draft replies for human review",
       "toolAllowlist": "policy://tools/support-triage-v1",
       "dataScope": "support tickets + public KB articles only",
-      "autonomyLimits": "maxSteps=8; no customer-facing send without human approval"
+      "autonomyLimits": "maxSteps=8; no customer-facing send without human approval",
+      "reviewDate": "2026-07-01",
+      "lastUpdated": "2026-07-10T09:00:00Z",
+      "charterVersion": "1.2.0",
+      "approvalStatus": "approved"
     }
   ]
 }

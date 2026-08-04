@@ -21,7 +21,7 @@ const SAMPLES: PassSample[] = [
     checkId: "AGN-M1",
     filename: "inventory.json",
     destination: "aprf-assessment/imports/agent-charter-inventory/inventory.json",
-    hint: "Copy this measured inventory export into the destination path (do not overwrite *-report.json), then re-run collect + assess.",
+    hint: "Copy this measured inventory export into the destination path (do not overwrite *-report.json), then re-run collect + assess. Finding severity defaults to high; completeness/ownership gaps escalate to critical.",
     content: `${JSON.stringify(agnM1Inventory, null, 2)}\n`,
   },
 ];

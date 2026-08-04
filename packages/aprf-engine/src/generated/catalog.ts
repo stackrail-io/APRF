@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:2a2e50af76a78faac67f719a028d94eabad18dd19a60e865c5fa3ab36e52fa59",
+  "generatedAt": "sha256:6a3cedf9fc8a5d12c57da00077575cf9d249434adef8f0ed8e8b413546b6c228",
   "ruleCount": 178,
   "domains": [
     {
@@ -550,15 +550,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "id": "AGN-M1",
       "category": "agent-governance",
       "title": "Every production agent must have a documented charter",
-      "description": "Each production agent (any autonomous or semi-autonomous runtime that plans, loops, or invokes tools on behalf of a product capability—including in-process agents, MCP clients/servers acting as agents, and A2A participants) shall have a versioned charter covering purpose, allowed tools, data scope, autonomy limits, and a named owner.",
-      "whyItMatters": "Without a charter, agents become unbounded co-processors: they can pursue undefined goals, touch undeclared tools and corpora, and escalate autonomy without an accountable owner. Governance failures usually look like “the agent went rogue” but stem from missing product controls—not model quirks. Charters make allowed agency reviewable before incidents, not reconstructable after.",
-      "severity": "critical",
+      "description": "Each production agent (any autonomous or semi-autonomous runtime that plans, loops, or invokes tools on behalf of a product capability—including in-process agents, MCP clients/servers acting as agents, and A2A participants) shall be represented in a version-controlled inventory with a current charter covering purpose, owner, approved tool policy, data scope, autonomy boundaries, review metadata, and approval status.",
+      "whyItMatters": "Without a charter, agents become unbounded co-processors: they can pursue undefined goals, touch undeclared tools and corpora, and escalate autonomy without an accountable owner. Missing charters are usually governance debt rather than an immediately exploitable defect—but when production agents cannot be enumerated or have no owner, governance has failed and risk escalates. Charters make allowed agency reviewable before incidents, not reconstructable after.",
+      "severity": "high",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production agents appear in an inventory with a charter that includes purpose, tool allowlist reference, data scope, autonomy limits, and named owner; inventory query returns 0 agents missing any required field.",
+      "passCondition": "Every production agent is represented in a version-controlled inventory. Each inventory entry references a current charter containing purpose, owner, approved tool policy, data scope, autonomy boundaries, review date, last updated, charter version, and approval status. No production agent is missing any required governance metadata; inventory completeness is attested (coversAllProductionAgents) with measuredAt ≤90 days.",
       "evidenceRequired": [
-        "Versioned agent inventory listing every production agent with owner and charter URI/id",
-        "Per-agent charter documents (or equivalent structured records) covering purpose, tool allowlist reference, data scope, and autonomy limits"
+        "Version-controlled agent inventory listing every production agent with owner and charter URI/id",
+        "Per-agent charter documents (or equivalent structured records) covering purpose, owner, approved tool policy reference, data scope, autonomy boundaries, review date, last updated, charter version, and approval status"
       ],
       "detection": {
         "capability": "automated",
@@ -571,26 +571,37 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
                 "tool-allowlist",
                 "data-scope",
                 "autonomy-limits",
-                "owner"
+                "owner",
+                "review-date",
+                "last-updated",
+                "charter-version",
+                "approval-status"
               ],
-              "requireInventoryCompleteness": true
+              "requireInventoryCompleteness": true,
+              "defaultSeverity": "high",
+              "escalateToCriticalWhen": [
+                "inventory-completeness-unproven",
+                "production-agents-unenumerable",
+                "autonomous-agent-without-owner",
+                "unknown-or-shadow-production-agents"
+              ]
             }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove inventory completeness, attest a versioned production-agent inventory with charter fields (purpose, tool allowlist, data scope, autonomy limits, owner) and 0 missing rows.\n"
+              "hint": "If automation cannot prove inventory completeness, attest a versioned production-agent inventory with charter fields (purpose, owner, approved tool policy, data scope, autonomy boundaries, review date, last updated, charter version, approval status) and 0 missing rows. Escalate finding severity to critical when completeness or ownership cannot be demonstrated.\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Define “production agent” for this system (any agent runtime reachable from production traffic or scheduled jobs—not only MCP/A2A). Build or export an inventory of those agents with owners. 2) For each inventory row, open the linked charter and verify it states: purpose/goals; tool allowlist reference (config id, policy id, or doc URI); data/corpora scope; autonomy limits (e.g. max steps, wall-clock, spawn depth, or escalation rules—consistent with AGN-M2 where applicable); named owner. 3) PASS only if the inventory query (or equivalent review) shows 0 production agents missing any required field. Agents in non-production environments may be excluded if the inventory documents the exclusion rule.",
-      "falsePositiveGuidance": "Do not pass on architecture or design docs that name agent types without a current inventory (registry/CMDB/manifest export ≤90 days) of deployed production agents. Do not treat a type-level row as covering every deployed instance. Chatbots without tool/autonomy loops are out of scope unless your documented production-agent definition includes them. A tool allowlist in code does not satisfy this Check unless each charter references it. Stub charters (empty purpose, unset owner, missing autonomy limits) fail. Passing step-limit or kill-switch Checks does not substitute for charters. Named exceptions need owner and expiry ≤90 days.",
+      "manualVerification": "1) Define “production agent” for this system (any agent runtime reachable from production traffic or scheduled jobs—not only MCP/A2A). Build or export a version-controlled inventory of those agents with owners. 2) For each inventory row, open the linked charter and verify it states: purpose/goals; approved tool policy reference (config id, policy id, or doc URI); data/corpora scope; autonomy boundaries (e.g. max steps, wall-clock, spawn depth, or escalation rules—consistent with AGN-M2 where applicable); named owner; review date; last updated; charter version; approval status. 3) PASS only if the inventory query (or equivalent review) shows 0 production agents missing any required field and completeness is attested. Agents in non-production environments may be excluded if the inventory documents the exclusion rule. 4) Treat the finding as Critical (not High) when production agents cannot be enumerated, inventory completeness cannot be established, autonomous agents have no accountable owner, or unknown/shadow production agents are present.",
+      "falsePositiveGuidance": "Do not pass on architecture or design docs that name agent types without a current inventory (registry/CMDB/manifest export ≤90 days) of deployed production agents. Do not treat a type-level row as covering every deployed instance. Chatbots without tool/autonomy loops are out of scope unless your documented production-agent definition includes them. A tool allowlist in code does not satisfy this Check unless each charter references it. Stub charters (empty purpose, unset owner, missing autonomy limits, missing review/version/approval metadata) fail. Passing step-limit or kill-switch Checks does not substitute for charters. Do not score Critical solely because a known, owned agent is missing a polished charter while inventory completeness and ownership remain proven—that is High governance debt. Named exceptions need owner and expiry ≤90 days.",
       "recommendedFixes": [
         "Create a single agent inventory (registry, CMDB table, or repo manifest) that lists every production agent with owner and charter link",
-        "Author a charter template with required fields: purpose, tool allowlist reference, data scope, autonomy limits, owner; migrate existing agents onto it",
+        "Author a charter template with required fields: purpose, owner, approved tool policy, data scope, autonomy boundaries, review date, last updated, charter version, approval status; migrate existing agents onto it",
         "Gate new agent promotion to production on inventory + charter completeness (fail closed when fields are missing)",
-        "Schedule a recurring inventory audit (≤90 days) with a named owner and retain the report"
+        "Schedule a recurring inventory audit (≤90 days) with a named owner and retain the report; escalate to Critical when completeness or ownership cannot be demonstrated"
       ],
       "references": [
         {
@@ -600,6 +611,10 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "title": "NIST AI Risk Management Framework — Govern",
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "title": "ISO/IEC 42001 — AI management system (roles, responsibilities, documentation)",
+          "url": "https://www.iso.org/standard/81230.html"
         }
       ],
       "relatedRules": [
