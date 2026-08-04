@@ -61,32 +61,6 @@ recommendedFixes:
   - "Gate new agent promotion to production on inventory + charter completeness (fail closed when
     fields are missing)"
   - "Schedule a recurring inventory audit (≤90 days) with a named owner and retain the report"
-passExample:
-  summary: >
-    Drop a measured inventory export at
-    aprf-assessment/imports/agent-charter-inventory/inventory.json (filename may vary; do not
-    overwrite *-report.json). Repo tags/branches alone cannot unlock PASS — the import must show
-    0 missing charter fields, coversAllProductionAgents=true, and measuredAt ≤90 days. Single-agent
-    systems still need one complete row.
-  artifact: |
-    {
-      "measuredAt": "2026-07-15T12:00:00Z",
-      "coversAllProductionAgents": true,
-      "complete": true,
-      "missingFieldCount": 0,
-      "agentCount": 1,
-      "agents": [
-        {
-          "id": "support-triage-agent",
-          "owner": "platform-ai@example.com",
-          "charterUri": "docs/agents/support-triage-charter.md",
-          "purpose": "Triage inbound support tickets and draft replies for human review",
-          "toolAllowlist": "policy://tools/support-triage-v1",
-          "dataScope": "support tickets + public KB articles only",
-          "autonomyLimits": "maxSteps=8; no customer-facing send without human approval"
-        }
-      ]
-    }
 references:
   - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"

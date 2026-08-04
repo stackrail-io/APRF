@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:ac50c74ea3c060a058a2e51b587cb529de3e770895869d54ee414a2e8a6e77c1",
+  "generatedAt": "sha256:2a2e50af76a78faac67f719a028d94eabad18dd19a60e865c5fa3ab36e52fa59",
   "ruleCount": 178,
   "domains": [
     {
@@ -592,10 +592,6 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Gate new agent promotion to production on inventory + charter completeness (fail closed when fields are missing)",
         "Schedule a recurring inventory audit (≤90 days) with a named owner and retain the report"
       ],
-      "passExample": {
-        "summary": "Drop a measured inventory export at aprf-assessment/imports/agent-charter-inventory/inventory.json (filename may vary; do not overwrite *-report.json). Repo tags/branches alone cannot unlock PASS — the import must show 0 missing charter fields, coversAllProductionAgents=true, and measuredAt ≤90 days. Single-agent systems still need one complete row.\n",
-        "artifact": "{\n  \"measuredAt\": \"2026-07-15T12:00:00Z\",\n  \"coversAllProductionAgents\": true,\n  \"complete\": true,\n  \"missingFieldCount\": 0,\n  \"agentCount\": 1,\n  \"agents\": [\n    {\n      \"id\": \"support-triage-agent\",\n      \"owner\": \"platform-ai@example.com\",\n      \"charterUri\": \"docs/agents/support-triage-charter.md\",\n      \"purpose\": \"Triage inbound support tickets and draft replies for human review\",\n      \"toolAllowlist\": \"policy://tools/support-triage-v1\",\n      \"dataScope\": \"support tickets + public KB articles only\",\n      \"autonomyLimits\": \"maxSteps=8; no customer-facing send without human approval\"\n    }\n  ]\n}\n"
-      },
       "references": [
         {
           "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",

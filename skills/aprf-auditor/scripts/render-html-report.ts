@@ -21,6 +21,7 @@ import { dirname, resolve, join, extname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { getGeneratedCatalog } from "@stackrail-io/aprf-engine";
+import { allPassSamples, getPassSample } from "./pass-samples.ts";
 
 const STACKRAIL = {
   home: "https://stackrail.io",
@@ -35,11 +36,6 @@ const SKILL_ROOT = resolve(SCRIPT_DIR, "..");
 const REPO_ROOT = resolve(SKILL_ROOT, "../..");
 const RULES_ROOT = resolve(REPO_ROOT, "packages/aprf-engine/rules/by-domain");
 
-type PassExample = {
-  summary?: string;
-  artifact?: string;
-};
-
 type CatalogRule = {
   id: string;
   category?: string;
@@ -51,7 +47,6 @@ type CatalogRule = {
   recommendedFixes?: string[];
   manualVerification?: string;
   falsePositiveGuidance?: string;
-  passExample?: PassExample;
   gate?: string;
   severity?: string;
   references?: Array<{ title?: string; url?: string } | string>;
@@ -122,7 +117,6 @@ function enrichControlsFromCatalog(
       falsePositiveGuidance:
         rule.falsePositiveGuidance ?? c.falsePositiveGuidance,
       references: rule.references ?? c.references,
-      passExample: rule.passExample ?? c.passExample,
       recommendedAction,
       remediation:
         c.remediation || remFix ?
@@ -171,7 +165,6 @@ type Control = {
   references?: Array<{ title?: string; url?: string } | string>;
   evidenceFound?: Array<{ ref: string; excerpt?: string }>;
   requiredEvidenceMissing?: string[];
-  passExample?: PassExample;
   remediation?: {
     fix: string;
     example?: string;
@@ -759,15 +752,16 @@ function controlDetailBody(c: Control): string {
       `<p><strong>Evidence still required</strong></p><ul>${c.requiredEvidenceMissing.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>`
     : "";
   const statusKey = (c.status || "").toUpperCase().replace(/-/g, "_");
-  const showPassExample =
-    statusKey !== "PASS" &&
-    statusKey !== "NOT_APPLICABLE" &&
-    !!c.passExample?.artifact?.trim();
-  const passExample = showPassExample
-    ? `<div class="pass-example">
-    <p><strong>Example to pass</strong></p>
-    ${c.passExample?.summary ? `<p class="meta">${esc(c.passExample.summary)}</p>` : ""}
-    <pre class="evidence-json" tabindex="0"><code>${esc(c.passExample!.artifact!.trim())}</code></pre>
+  const sample = getPassSample(c.checkId);
+  const showPassSample =
+    !!sample && statusKey !== "PASS" && statusKey !== "NOT_APPLICABLE";
+  const passSampleAttach = showPassSample && sample
+    ? `<div class="pass-sample-attach">
+    <p><strong>PASS sample</strong></p>
+    <p class="meta">${esc(sample.hint)} Destination: <code>${esc(sample.destination)}</code></p>
+    <button type="button" class="pass-sample-open" data-sample-id="${esc(sample.checkId)}" aria-haspopup="dialog">
+      ${esc(sample.filename)}
+    </button>
   </div>`
     : "";
   const evidenceRequired =
@@ -836,7 +830,7 @@ function controlDetailBody(c: Control): string {
     <h4>This assessment</h4>
     <p><strong>Evidence found</strong></p>${evidence}
     ${missing}
-    ${passExample}
+    ${passSampleAttach}
     <p><strong>Reasoning:</strong> ${esc(c.reasoning)}</p>
     ${c.naReason ? `<p><strong>N/A rationale:</strong> ${esc(c.naReason)}</p>` : ""}
     ${rem}
@@ -976,6 +970,19 @@ function render(a: Assessment): string {
     ordered,
     tagsById,
     statusCounts,
+  );
+  const passSamplesPayload = JSON.stringify(
+    Object.fromEntries(
+      allPassSamples().map((s) => [
+        s.checkId,
+        {
+          filename: s.filename,
+          destination: s.destination,
+          hint: s.hint,
+          content: s.content,
+        },
+      ]),
+    ),
   );
   const excluded =
     a.scope.excludedCheckIds?.length ?
@@ -1295,8 +1302,41 @@ function render(a: Assessment): string {
     .flyout-body p { margin: 0.45rem 0; }
     .flyout-body strong { font-family: var(--sans); font-size: 0.86rem; }
     .assessment-findings { margin: 0.15rem 0 1.15rem; }
-    .pass-example { margin: 0.85rem 0 0.35rem; }
-    .pass-example .evidence-json { margin-top: 0.45rem; max-height: 22rem; }
+    .pass-sample-attach { margin: 0.85rem 0 0.35rem; }
+    .pass-sample-open {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      margin-top: 0.35rem; border: 1px solid var(--line); background: #fff;
+      color: var(--ink); font-family: var(--sans); font-size: 0.82rem; font-weight: 600;
+      padding: 0.45rem 0.75rem; border-radius: 8px; cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .pass-sample-open:hover { background: var(--bg); border-color: var(--accent, #2f6f7e); }
+    .sample-modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15, 28, 38, 0.45);
+      z-index: 80; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; opacity: 0; pointer-events: none; transition: opacity 0.18s ease;
+    }
+    .sample-modal-backdrop.open { opacity: 1; pointer-events: auto; }
+    .sample-modal {
+      width: min(640px, 96vw); max-height: min(80vh, 720px);
+      background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+      box-shadow: 0 24px 60px rgba(15, 28, 38, 0.28);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .sample-modal-header {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;
+      padding: 1rem 1.15rem; border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #f7fafb 0%, #fff 100%);
+    }
+    .sample-modal-header h3 {
+      margin: 0; font-size: 0.98rem; line-height: 1.35; font-weight: 700;
+    }
+    .sample-modal-header .meta { margin: 0.25rem 0 0; }
+    .sample-modal-body {
+      margin: 0; padding: 1rem 1.15rem 1.25rem; overflow: auto; flex: 1;
+      background: #0f1c26; color: #e8eef2; font-size: 0.78rem; line-height: 1.45;
+    }
+    .sample-modal-body code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre; }
     .catalog-rule {
       background: #f5f8fa; border: 1px solid var(--line);
       padding: 0.9rem 1rem; margin: 0.35rem 0 0; border-radius: var(--radius);
@@ -1417,6 +1457,20 @@ function render(a: Assessment): string {
   </aside>
   <div class="flyout-panels" id="flyout-panels">${flyoutPanels}</div>
 
+  <div class="sample-modal-backdrop" id="sample-modal-backdrop" hidden>
+    <div class="sample-modal" role="dialog" aria-modal="true" aria-labelledby="sample-modal-title">
+      <div class="sample-modal-header">
+        <div>
+          <h3 id="sample-modal-title">PASS sample</h3>
+          <p class="meta" id="sample-modal-meta"></p>
+        </div>
+        <button type="button" class="flyout-close" id="sample-modal-close" aria-label="Close sample">Close</button>
+      </div>
+      <pre class="sample-modal-body" tabindex="0"><code id="sample-modal-code"></code></pre>
+    </div>
+  </div>
+  <script type="application/json" id="pass-samples-data">${passSamplesPayload.replace(/</g, "\\u003c")}</script>
+
   <script>
     (function () {
       var backdrop = document.getElementById("flyout-backdrop");
@@ -1425,6 +1479,18 @@ function render(a: Assessment): string {
       var title = document.getElementById("flyout-title");
       var closeBtn = document.getElementById("flyout-close");
       var panels = document.getElementById("flyout-panels");
+      var sampleBackdrop = document.getElementById("sample-modal-backdrop");
+      var sampleTitle = document.getElementById("sample-modal-title");
+      var sampleMeta = document.getElementById("sample-modal-meta");
+      var sampleCode = document.getElementById("sample-modal-code");
+      var sampleClose = document.getElementById("sample-modal-close");
+      var samplesEl = document.getElementById("pass-samples-data");
+      var passSamples = {};
+      try {
+        passSamples = samplesEl ? JSON.parse(samplesEl.textContent || "{}") : {};
+      } catch (e) {
+        passSamples = {};
+      }
       if (!backdrop || !flyout || !body || !title || !closeBtn || !panels) return;
 
       function openFlyout(id) {
@@ -1454,6 +1520,26 @@ function render(a: Assessment): string {
         setTimeout(function () { backdrop.hidden = true; }, 220);
       }
 
+      function openSample(id) {
+        var sample = passSamples[id];
+        if (!sample || !sampleBackdrop || !sampleTitle || !sampleMeta || !sampleCode) return;
+        sampleTitle.textContent = sample.filename || "PASS sample";
+        sampleMeta.textContent = (sample.hint || "") +
+          (sample.destination ? " Destination: " + sample.destination : "");
+        sampleCode.textContent = sample.content || "";
+        sampleBackdrop.hidden = false;
+        requestAnimationFrame(function () {
+          sampleBackdrop.classList.add("open");
+        });
+        if (sampleClose) sampleClose.focus();
+      }
+
+      function closeSample() {
+        if (!sampleBackdrop) return;
+        sampleBackdrop.classList.remove("open");
+        setTimeout(function () { sampleBackdrop.hidden = true; }, 180);
+      }
+
       document.querySelectorAll(".control-row, .roadmap-check").forEach(function (row) {
         row.addEventListener("click", function () {
           openFlyout(row.getAttribute("data-control-id"));
@@ -1467,8 +1553,26 @@ function render(a: Assessment): string {
       });
       closeBtn.addEventListener("click", closeFlyout);
       backdrop.addEventListener("click", closeFlyout);
+      body.addEventListener("click", function (e) {
+        var btn = e.target && e.target.closest ? e.target.closest(".pass-sample-open") : null;
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        openSample(btn.getAttribute("data-sample-id"));
+      });
+      if (sampleClose) sampleClose.addEventListener("click", closeSample);
+      if (sampleBackdrop) {
+        sampleBackdrop.addEventListener("click", function (e) {
+          if (e.target === sampleBackdrop) closeSample();
+        });
+      }
       document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && flyout.classList.contains("open")) closeFlyout();
+        if (e.key !== "Escape") return;
+        if (sampleBackdrop && sampleBackdrop.classList.contains("open")) {
+          closeSample();
+          return;
+        }
+        if (flyout.classList.contains("open")) closeFlyout();
       });
 
       document.querySelectorAll(".filter-chip").forEach(function (chip) {

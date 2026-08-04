@@ -1,0 +1,18 @@
+{
+  "measuredAt": "2026-07-15T12:00:00Z",
+  "coversAllProductionAgents": true,
+  "complete": true,
+  "missingFieldCount": 0,
+  "agentCount": 1,
+  "agents": [
+    {
+      "id": "support-triage-agent",
+      "owner": "platform-ai@example.com",
+      "charterUri": "docs/agents/support-triage-charter.md",
+      "purpose": "Triage inbound support tickets and draft replies for human review",
+      "toolAllowlist": "policy://tools/support-triage-v1",
+      "dataScope": "support tickets + public KB articles only",
+      "autonomyLimits": "maxSteps=8; no customer-facing send without human approval"
+    }
+  ]
+}

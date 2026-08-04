@@ -7,6 +7,7 @@ Illustrative artifacts produced by the APRF Auditor skill. They are **not** live
 | `minimal-assessment.json` | Tiny valid `assessment.json` (schema + N/A invariant) |
 | `sample-issues.json` | Shape of GitHub-issue export |
 | `snippet-REPORT.md` | Excerpt of executive + one control row |
+| `pass-samples/AGN-M1.inventory.json` | Measured inventory export that unlocks AGN-M1 PASS (attached in report flyout) |
 
 Validate the JSON fixture:
 

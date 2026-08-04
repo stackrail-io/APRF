@@ -128,7 +128,6 @@ type ControlOut = {
   manualVerification: string;
   falsePositiveGuidance: string;
   references: AprfRule["references"];
-  passExample?: AprfRule["passExample"];
   gate: "mandatory" | "recommended";
   severity: AprfRule["severity"];
   status: ControlStatus;
@@ -560,7 +559,6 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       manualVerification: rule.manualVerification,
       falsePositiveGuidance: rule.falsePositiveGuidance,
       references: rule.references,
-      ...(rule.passExample ? { passExample: rule.passExample } : {}),
       gate,
       severity: rule.severity,
       status,

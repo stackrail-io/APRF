@@ -238,23 +238,6 @@
     },
     "introducedIn": {
       "type": "string"
-    },
-    "passExample": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["summary", "artifact"],
-      "description": "Concrete sample that unlocks PASS; shown in report flyouts when the Check does not pass.",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "minLength": 1
-        },
-        "artifact": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Copy-paste sample (JSON/YAML/snippet) for the import or repo artifact."
-        }
-      }
     }
   }
 }
