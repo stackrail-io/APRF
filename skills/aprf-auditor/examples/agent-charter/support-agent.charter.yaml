@@ -1,0 +1,59 @@
+# Example production agent charter — copy and adapt.
+# Satisfies AGN-M1 governance metadata when linked from inventory.
+
+agentVersion: 1
+
+id: support-agent
+
+owner: engineering
+
+purpose: >
+  Triage inbound support tickets, retrieve approved knowledge-base articles,
+  and draft replies for human review. Must not send customer-facing messages
+  without approval.
+
+allowedTools:
+  - search_kb
+  - create_ticket_draft
+  - policy://tools/support-triage-v1
+
+forbiddenTools:
+  - shell
+  - unrestricted_http
+  - customer_email_send
+
+dataScope: >
+  Support tickets for the agent's assigned tenants; public KB articles only.
+  No HR, payment, or raw secrets corpora.
+
+memoryPolicy: >
+  Session memory only for the active ticket thread. No cross-tenant memory.
+  Purge session memory within 24h of ticket close.
+
+networkPolicy: >
+  Egress limited to internal support APIs and the approved KB endpoint.
+  No general internet browse.
+
+autonomy:
+  maxSteps: 8
+  wallClockSeconds: 120
+  spawnDepth: 0
+  notes: No child agents; escalate to human on confidence < 0.6 or PII uncertainty.
+
+approvalPolicy: >
+  Charter status: approved. Customer-facing sends and refunds require human
+  approval (HUM-M1). Charter re-approval required on expiryDate.
+
+identityPolicy: >
+  Privileged tool calls must carry the end-user or documented service subject
+  (AUTHN-M4). Agent runtime uses workload identity; no static shared keys.
+
+loggingPolicy: >
+  Log tool name, policy decision, ticket id, and subject id. Retain ≥90 days.
+  Redact message bodies containing secrets or payment data.
+
+reviewDate: "2026-07-01"
+
+lastUpdated: "2026-07-10T09:00:00Z"
+
+expiryDate: "2027-07-01"

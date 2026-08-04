@@ -44,7 +44,7 @@ const INVENTORY_PATH_RE =
 const PURPOSE_RE =
   /\b(purpose|goal|mission|charter|description|objectives?)\b/i;
 const TOOL_ALLOW_RE =
-  /\b(tool[_-]?allowlist|allowed[_-]?tools|tools?[_-]?(list|allow)|tool[_-]?policy|mcp[_-]?tools|approved[_-]?tool)\b/i;
+  /\b(allowedTools|tool[_-]?allowlist|allowed[_-]?tools|tools?[_-]?(list|allow)|tool[_-]?policy|mcp[_-]?tools|approved[_-]?tool|forbiddenTools)\b/i;
 const DATA_SCOPE_RE =
   /\b(data[_-]?scope|corpus|corpora|knowledge[_-]?base|retrieval[_-]?scope|data[_-]?access)\b/i;
 const AUTONOMY_RE =
@@ -56,9 +56,9 @@ const REVIEW_DATE_RE =
 const LAST_UPDATED_RE =
   /\b(last[_-]?updated|updated[_-]?at|modified[_-]?at|last[_-]?modified)\b/i;
 const CHARTER_VERSION_RE =
-  /\b(charter[_-]?version|version)\b/i;
+  /\b(agentVersion|agent[_-]?version|charter[_-]?version|version)\b/i;
 const APPROVAL_STATUS_RE =
-  /\b(approval[_-]?status|approved|approval[_-]?state|sign[_-]?off)\b/i;
+  /\b(approvalPolicy|approval[_-]?policy|approval[_-]?status|approved|approval[_-]?state|sign[_-]?off)\b/i;
 
 export type AgnM1SeverityHint = "high" | "critical";
 
@@ -222,10 +222,11 @@ function loadImported(
             "mission",
           ]);
           const hasTools = agentHasGovernanceField(a, [
+            "allowedTools",
+            "allowed_tools",
             "toolAllowlist",
             "tool_allowlist",
             "tools",
-            "allowed_tools",
             "approvedToolPolicy",
             "approved_tool_policy",
           ]);
@@ -235,8 +236,8 @@ function loadImported(
             "corpus",
           ]);
           const hasAutonomy = agentHasGovernanceField(a, [
-            "autonomyLimits",
             "autonomy",
+            "autonomyLimits",
             "autonomyBoundaries",
             "autonomy_boundaries",
             "max_steps",
@@ -262,11 +263,15 @@ function loadImported(
             "modifiedAt",
           ]);
           const hasVersion = agentHasGovernanceField(a, [
+            "agentVersion",
+            "agent_version",
             "charterVersion",
             "charter_version",
             "version",
           ]);
           const hasApproval = agentHasGovernanceField(a, [
+            "approvalPolicy",
+            "approval_policy",
             "approvalStatus",
             "approval_status",
             "approved",

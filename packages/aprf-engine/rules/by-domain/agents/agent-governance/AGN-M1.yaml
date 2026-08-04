@@ -79,9 +79,10 @@ falsePositiveGuidance: "Do not pass on architecture or design docs that name age
 recommendedFixes:
   - "Create a single agent inventory (registry, CMDB table, or repo manifest) that lists every
     production agent with owner and charter link"
-  - "Author a charter template with required fields: purpose, owner, approved tool policy, data
-    scope, autonomy boundaries, review date, last updated, charter version, approval status; migrate
-    existing agents onto it"
+  - "Adopt the APRF agent charter spec (skills/aprf-auditor/examples/agent-charter/agent-charter.spec.yaml)
+    with fields agentVersion, id, owner, purpose, allowedTools, forbiddenTools, dataScope,
+    memoryPolicy, networkPolicy, autonomy, approvalPolicy, identityPolicy, loggingPolicy, reviewDate,
+    lastUpdated, expiryDate; migrate existing agents onto it"
   - "Gate new agent promotion to production on inventory + charter completeness (fail closed when
     fields are missing)"
   - "Schedule a recurring inventory audit (≤90 days) with a named owner and retain the report;

@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:6a3cedf9fc8a5d12c57da00077575cf9d249434adef8f0ed8e8b413546b6c228",
+  "generatedAt": "sha256:541c2c9fa721b3cae0174e13fca9e36bb240bc86a104186706bc70cda6a70fc0",
   "ruleCount": 178,
   "domains": [
     {
@@ -599,7 +599,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "falsePositiveGuidance": "Do not pass on architecture or design docs that name agent types without a current inventory (registry/CMDB/manifest export ≤90 days) of deployed production agents. Do not treat a type-level row as covering every deployed instance. Chatbots without tool/autonomy loops are out of scope unless your documented production-agent definition includes them. A tool allowlist in code does not satisfy this Check unless each charter references it. Stub charters (empty purpose, unset owner, missing autonomy limits, missing review/version/approval metadata) fail. Passing step-limit or kill-switch Checks does not substitute for charters. Do not score Critical solely because a known, owned agent is missing a polished charter while inventory completeness and ownership remain proven—that is High governance debt. Named exceptions need owner and expiry ≤90 days.",
       "recommendedFixes": [
         "Create a single agent inventory (registry, CMDB table, or repo manifest) that lists every production agent with owner and charter link",
-        "Author a charter template with required fields: purpose, owner, approved tool policy, data scope, autonomy boundaries, review date, last updated, charter version, approval status; migrate existing agents onto it",
+        "Adopt the APRF agent charter spec (skills/aprf-auditor/examples/agent-charter/agent-charter.spec.yaml) with fields agentVersion, id, owner, purpose, allowedTools, forbiddenTools, dataScope, memoryPolicy, networkPolicy, autonomy, approvalPolicy, identityPolicy, loggingPolicy, reviewDate, lastUpdated, expiryDate; migrate existing agents onto it",
         "Gate new agent promotion to production on inventory + charter completeness (fail closed when fields are missing)",
         "Schedule a recurring inventory audit (≤90 days) with a named owner and retain the report; escalate to Critical when completeness or ownership cannot be demonstrated"
       ],

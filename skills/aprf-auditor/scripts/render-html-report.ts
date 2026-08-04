@@ -21,7 +21,7 @@ import { dirname, resolve, join, extname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { getGeneratedCatalog } from "@stackrail-io/aprf-engine";
-import { allPassSamples, getPassSample } from "./pass-samples.ts";
+import { allPassSamples, getPassSamples } from "./pass-samples.ts";
 
 const STACKRAIL = {
   home: "https://stackrail.io",
@@ -752,16 +752,24 @@ function controlDetailBody(c: Control): string {
       `<p><strong>Evidence still required</strong></p><ul>${c.requiredEvidenceMissing.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>`
     : "";
   const statusKey = (c.status || "").toUpperCase().replace(/-/g, "_");
-  const sample = getPassSample(c.checkId);
+  const samples = getPassSamples(c.checkId);
   const showPassSample =
-    !!sample && statusKey !== "PASS" && statusKey !== "NOT_APPLICABLE";
-  const passSampleAttach = showPassSample && sample
+    samples.length > 0 && statusKey !== "PASS" && statusKey !== "NOT_APPLICABLE";
+  const passSampleAttach = showPassSample
     ? `<div class="pass-sample-attach">
-    <p><strong>PASS sample</strong></p>
-    <p class="meta">${esc(sample.hint)} Destination: <code>${esc(sample.destination)}</code></p>
-    <button type="button" class="pass-sample-open" data-sample-id="${esc(sample.checkId)}" aria-haspopup="dialog">
-      ${esc(sample.filename)}
-    </button>
+    <p><strong>PASS samples</strong></p>
+    <p class="meta">Click an attachment to preview. Copy into the destination path, then re-run collect + assess.</p>
+    <ul class="pass-sample-list">${samples
+      .map(
+        (sample) => `<li>
+      <button type="button" class="pass-sample-open" data-sample-id="${esc(sample.id)}" aria-haspopup="dialog">
+        ${esc(sample.filename)}
+      </button>
+      <span class="meta">→ <code>${esc(sample.destination)}</code></span>
+      <span class="meta">${esc(sample.hint)}</span>
+    </li>`,
+      )
+      .join("")}</ul>
   </div>`
     : "";
   const evidenceRequired =
@@ -974,7 +982,7 @@ function render(a: Assessment): string {
   const passSamplesPayload = JSON.stringify(
     Object.fromEntries(
       allPassSamples().map((s) => [
-        s.checkId,
+        s.id,
         {
           filename: s.filename,
           destination: s.destination,
@@ -1303,9 +1311,11 @@ function render(a: Assessment): string {
     .flyout-body strong { font-family: var(--sans); font-size: 0.86rem; }
     .assessment-findings { margin: 0.15rem 0 1.15rem; }
     .pass-sample-attach { margin: 0.85rem 0 0.35rem; }
+    .pass-sample-list { list-style: none; padding: 0; margin: 0.5rem 0 0; display: grid; gap: 0.65rem; }
+    .pass-sample-list li { display: grid; gap: 0.2rem; }
     .pass-sample-open {
-      display: inline-flex; align-items: center; gap: 0.35rem;
-      margin-top: 0.35rem; border: 1px solid var(--line); background: #fff;
+      display: inline-flex; align-items: center; gap: 0.35rem; justify-self: start;
+      border: 1px solid var(--line); background: #fff;
       color: var(--ink); font-family: var(--sans); font-size: 0.82rem; font-weight: 600;
       padding: 0.45rem 0.75rem; border-radius: 8px; cursor: pointer;
       transition: background 0.15s ease, border-color 0.15s ease;

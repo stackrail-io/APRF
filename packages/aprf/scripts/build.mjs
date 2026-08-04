@@ -1,5 +1,12 @@
 #!/usr/bin/env node
-import { mkdirSync, chmodSync, writeFileSync, copyFileSync, existsSync } from "node:fs";
+import {
+  mkdirSync,
+  chmodSync,
+  writeFileSync,
+  copyFileSync,
+  existsSync,
+  cpSync,
+} from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as esbuild from "esbuild";
@@ -10,6 +17,17 @@ const dist = resolve(pkgRoot, "dist");
 const repoRoot = resolve(pkgRoot, "../..");
 
 mkdirSync(dist, { recursive: true });
+
+// Charter spec/examples are read at report-render time from disk (bundled path).
+const charterExamples = resolve(
+  repoRoot,
+  "skills/aprf-auditor/examples/agent-charter",
+);
+if (existsSync(charterExamples)) {
+  cpSync(charterExamples, resolve(dist, "examples/agent-charter"), {
+    recursive: true,
+  });
+}
 
 await esbuild.build({
   entryPoints: [resolve(pkgRoot, "src/cli.ts")],

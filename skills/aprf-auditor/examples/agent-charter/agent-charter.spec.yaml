@@ -1,0 +1,51 @@
+# APRF Agent Charter Specification (v1)
+# Usable template for AGN-M1 production-agent governance records.
+# Copy to docs/agents/<id>.charter.yaml (or equivalent) and fill every field.
+#
+# Mapping to AGN-M1 required metadata:
+#   agentVersion      → charter version
+#   owner             → named owner
+#   purpose           → purpose
+#   allowedTools      → approved tool policy / allowlist
+#   dataScope         → data scope
+#   autonomy          → autonomy boundaries
+#   approvalPolicy    → approval status / human-approval policy
+#   reviewDate        → review date
+#   lastUpdated       → last updated (APRF audit freshness)
+#   expiryDate        → charter expiry / next mandatory re-approval
+
+agentVersion: 1 # integer charter schema / document version
+
+id: "" # stable production agent id (unique in inventory)
+
+owner: "" # accountable team or person (email or team id)
+
+purpose: "" # why this agent exists; goals it may pursue
+
+allowedTools: [] # approved tool / MCP / API allowlist (ids or policy refs)
+
+forbiddenTools: [] # explicitly denied tools (fail closed if invoked)
+
+dataScope: "" # corpora, systems, and tenants this agent may read/write
+
+memoryPolicy: "" # short/long-term memory retention, isolation, and redaction rules
+
+networkPolicy: "" # egress allowlist / deny-by-default network bounds
+
+autonomy:
+  maxSteps: null # hard plan/tool step budget (align with AGN-M2)
+  wallClockSeconds: null # hard wall-clock timeout
+  spawnDepth: null # max child / sub-agent depth
+  notes: "" # escalation or other autonomy boundaries
+
+approvalPolicy: "" # when human approval is required; approval state for this charter
+
+identityPolicy: "" # subject / workload identity expectations on privileged hops
+
+loggingPolicy: "" # what must be logged/retained for audit and incident review
+
+reviewDate: "" # ISO date of last governance review (YYYY-MM-DD)
+
+lastUpdated: "" # ISO timestamp of last charter edit (required for AGN-M1)
+
+expiryDate: "" # ISO date after which the charter must be re-approved
