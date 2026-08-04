@@ -46,7 +46,7 @@ Artifacts land in `./aprf-assessment/` (`evidence-graph.json`, `assessment.json`
 ```text
 plugins/aprf/
 ├── .cursor-plugin/plugin.json
-├── assets/logo.svg
+├── assets/owl-mark.png
 ├── commands/          # /aprf-audit, /aprf-collect, /aprf-report
 ├── skills/aprf-auditor/
 │   ├── SKILL.md       # CLI-first agent instructions
