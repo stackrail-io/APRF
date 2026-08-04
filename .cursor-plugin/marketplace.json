@@ -2,11 +2,11 @@
   "name": "stackrail-aprf",
   "owner": {
     "name": "StackRail",
-    "email": "hello@stackrail.io"
+    "email": "anu.v.apps@gmail.com"
   },
   "metadata": {
     "description": "AI Production Readiness Framework (APRF) — open assessment tooling for Cursor",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "pluginRoot": "plugins"
   },
   "plugins": [
@@ -14,7 +14,7 @@
       "name": "aprf",
       "source": "aprf",
       "description": "Run local APRF assessments via @stackrail-io/aprf (collect → assess → REPORT.html). No StackRail backend.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "keywords": ["aprf", "ai", "production-readiness", "security", "assessment"]
     }
   ]

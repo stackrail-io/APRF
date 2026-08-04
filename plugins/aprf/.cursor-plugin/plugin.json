@@ -1,11 +1,11 @@
 {
   "name": "aprf",
   "displayName": "APRF Auditor",
-  "version": "0.1.0",
-  "description": "Local AI Production Readiness Framework assessments. Runs npx @stackrail-io/aprf (collect → assess → REPORT.html). No StackRail console or backend.",
+  "version": "0.1.1",
+  "description": "Local AI Production Readiness Framework assessments. Runs npx @stackrail-io/aprf (collect \u2192 assess \u2192 REPORT.html). No StackRail console or backend.",
   "author": {
     "name": "StackRail",
-    "email": "hello@stackrail.io"
+    "email": "anu.v.apps@gmail.com"
   },
   "homepage": "https://stackrail.io/aprf/",
   "repository": "https://github.com/stackrail-io/APRF",
@@ -18,5 +18,7 @@
     "assessment",
     "compliance"
   ],
-  "logo": "assets/owl-mark.png"
+  "logo": "assets/owl-mark.png",
+  "skills": "./skills/",
+  "commands": "./commands/"
 }
