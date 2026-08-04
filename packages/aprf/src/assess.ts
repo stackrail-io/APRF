@@ -603,15 +603,14 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       notDemonstrated: 0,
       failGate: false,
     };
-    if (c.status !== "NOT_APPLICABLE") {
-      row.applicable += 1;
-      if (c.status === "PASS") row.satisfied += 1;
-      if (c.status === "NOT_DEMONSTRATED") row.notDemonstrated += 1;
-    } else {
-      // N/A counts as satisfied for domain score formula in scoring.yaml
-      row.applicable += 1;
-      row.satisfied += 1;
+    // Exclude NOT_APPLICABLE from domain applicable/satisfied (same as recommendedScore).
+    if (c.status === "NOT_APPLICABLE") {
+      byDomain.set(d, row);
+      continue;
     }
+    row.applicable += 1;
+    if (c.status === "PASS") row.satisfied += 1;
+    if (c.status === "NOT_DEMONSTRATED") row.notDemonstrated += 1;
     if (
       c.gate === "mandatory" &&
       c.status !== "PASS" &&

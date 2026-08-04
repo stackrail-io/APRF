@@ -38,6 +38,7 @@
     "gen-plugin-map": "node ./scripts/gen-plugin-map.mjs",
     "build": "npm run gen-plugin-map && node ./scripts/build.mjs",
     "prepublishOnly": "npm run build",
+    "pretest:unit": "npm run build -w @stackrail-io/aprf-engine && npm run build -w @stackrail-io/aprf-framework-definition",
     "test:unit": "npx tsx scripts/smoke.ts"
   },
   "dependencies": {

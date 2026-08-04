@@ -2,8 +2,8 @@
 name: aprf-auditor
 description: >-
   Local APRF assessment via @stackrail-io/aprf CLI (no StackRail console, no
-  localhost:3001, no run_* IDs). Prefer `npx @stackrail-io/aprf audit`. Writes
-  aprf-assessment/ with evidence-graph.json, assessment.json, REPORT.html.
+  localhost:3001, no run_* IDs). Prefer `npx @stackrail-io/aprf@0.1.0 audit`.
+  Writes aprf-assessment/ with evidence-graph.json, assessment.json, REPORT.html.
   Use for "Run an APRF assessment", "APRF audit", "AI production readiness",
   or "@aprf-auditor". Do NOT use the StackRail product Assessments UI.
 ---
@@ -78,7 +78,7 @@ For deeper agent methodology (attestation Phase 2b, full workflow), see the port
 
 ## Wrong pipeline (abort and restart)
 
-If you find yourself opening StackRail Assessments UI, `http://127.0.0.1:3001`, or inventing `run_*` IDs — **stop**. Re-run with this skill and `npx @stackrail-io/aprf audit`.
+If you find yourself opening StackRail Assessments UI, `http://127.0.0.1:3001`, or inventing `run_*` IDs — **stop**. Re-run with this skill and `npx @stackrail-io/aprf@0.1.0 audit`.
 
 ## Non-AI / platform repos
 

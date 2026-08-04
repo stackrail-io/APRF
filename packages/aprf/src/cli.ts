@@ -15,7 +15,7 @@ import { verifyHtmlReport } from "../../../skills/aprf-auditor/scripts/verify-ht
 import { writeAssessment } from "./assess.ts";
 import { catalogVersion, cliVersion, frameworkVersion } from "./versions.ts";
 
-function usage(): never {
+function usage(exitCode = 0): never {
   console.log(`APRF CLI v${cliVersion()} (catalog ${catalogVersion()})
 
 Usage:
@@ -42,13 +42,17 @@ Options (assess / audit):
 
 Assess is deterministic: collector statusHints + evidence-graph nodes. Unscored → NOT_DEMONSTRATED.
 `);
-  process.exit(0);
+  process.exit(exitCode);
 }
 
 function takeFlag(argv: string[], name: string): string | undefined {
   const i = argv.indexOf(name);
   if (i < 0) return undefined;
-  return argv[i + 1];
+  const value = argv[i + 1];
+  if (!value || value.startsWith("--")) {
+    throw new Error(`${name} requires a value`);
+  }
+  return value;
 }
 
 function hasFlag(argv: string[], name: string): boolean {
@@ -175,7 +179,7 @@ async function main() {
       break;
     default:
       console.error(`Unknown command: ${cmd}`);
-      usage();
+      usage(1);
   }
 }
 
