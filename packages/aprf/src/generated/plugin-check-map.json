@@ -1,0 +1,611 @@
+{
+  "a2a-peer-auth": [
+    "AGN-M4"
+  ],
+  "abuse-injection-release-gate": [
+    "SEC-M3"
+  ],
+  "agent-behavior-feature-flags": [
+    "CHG-R2"
+  ],
+  "agent-charter-inventory": [
+    "AGN-M1"
+  ],
+  "agent-goal-policy": [
+    "AGN-R1"
+  ],
+  "agent-kill-switch": [
+    "AGN-M3"
+  ],
+  "agent-loop-limits": [
+    "AGN-M2"
+  ],
+  "agent-raci-ownership": [
+    "AGN-R3"
+  ],
+  "agent-role-matrix": [
+    "AUTHZ-M3"
+  ],
+  "agent-sandbox-sim": [
+    "AGN-R2"
+  ],
+  "agent-tool-connectivity": [
+    "INF-M3"
+  ],
+  "ai-acceptable-use-policy": [
+    "ORG-M1"
+  ],
+  "ai-admin-mfa": [
+    "AUTHN-M3"
+  ],
+  "ai-adversarial-capacity-tests": [
+    "PERF-R2"
+  ],
+  "ai-artifact-change-records": [
+    "DEP-M2"
+  ],
+  "ai-artifact-promotion-path": [
+    "DEP-M1"
+  ],
+  "ai-canary-progressive-delivery": [
+    "DEP-R1"
+  ],
+  "ai-change-summary": [
+    "EXP-R3"
+  ],
+  "ai-chaos-dependency": [
+    "REL-R5"
+  ],
+  "ai-circuit-bulkhead": [
+    "REL-R1"
+  ],
+  "ai-config-as-code": [
+    "DEP-M3"
+  ],
+  "ai-containment-drill": [
+    "INC-M2"
+  ],
+  "ai-continuity-drill": [
+    "REL-R4"
+  ],
+  "ai-continuity-options": [
+    "REL-R3"
+  ],
+  "ai-control-evidence-matrix": [
+    "CMP-M2"
+  ],
+  "ai-control-plane-audit-logs": [
+    "CMP-M3"
+  ],
+  "ai-control-plane-backup": [
+    "REL-M4"
+  ],
+  "ai-control-testing": [
+    "CMP-R1"
+  ],
+  "ai-cost-alerts": [
+    "COST-M2"
+  ],
+  "ai-customer-notification-criteria": [
+    "INC-R3"
+  ],
+  "ai-decision-path-recon": [
+    "EXP-M2"
+  ],
+  "ai-degraded-mode": [
+    "REL-M2"
+  ],
+  "ai-deletion-export": [
+    "PRI-M2"
+  ],
+  "ai-deploy-policy-enforcement": [
+    "SCI-M4"
+  ],
+  "ai-distributed-trace-linkage": [
+    "OBS-M1"
+  ],
+  "ai-domain-ownership": [
+    "ORG-R2"
+  ],
+  "ai-dpia": [
+    "PRI-R3"
+  ],
+  "ai-error-budget-release-gate": [
+    "PERF-R1"
+  ],
+  "ai-exfil-detection": [
+    "SEC-R3"
+  ],
+  "ai-explainability-matrix": [
+    "EXP-R2"
+  ],
+  "ai-explanation-hygiene": [
+    "EXP-M3"
+  ],
+  "ai-external-tool-inventory": [
+    "SCI-M2"
+  ],
+  "ai-fairness-eval": [
+    "SAF-M4"
+  ],
+  "ai-fallback-eval": [
+    "REL-R2"
+  ],
+  "ai-finops-unit-economics": [
+    "COST-R3"
+  ],
+  "ai-harm-policy": [
+    "SAF-M1"
+  ],
+  "ai-improvement-backlog": [
+    "ORG-R3"
+  ],
+  "ai-incident-tabletop": [
+    "INC-R4"
+  ],
+  "ai-independent-assessment": [
+    "CMP-R3"
+  ],
+  "ai-interaction-disclosure": [
+    "SAF-M3"
+  ],
+  "ai-jailbreak-harm-redteam": [
+    "SAF-R2"
+  ],
+  "ai-journey-slo-catalog": [
+    "PERF-M1"
+  ],
+  "ai-leadership-review": [
+    "ORG-R1"
+  ],
+  "ai-model-mbom": [
+    "SCI-R2"
+  ],
+  "ai-model-routing": [
+    "COST-R2"
+  ],
+  "ai-multi-provider-continuity": [
+    "REL-R7"
+  ],
+  "ai-obligations-register": [
+    "CMP-M1"
+  ],
+  "ai-ops-dashboards": [
+    "PERF-R4"
+  ],
+  "ai-ops-metrics": [
+    "PERF-M2"
+  ],
+  "ai-org-aprf-sampling": [
+    "ORG-R5"
+  ],
+  "ai-partial-tool-failure": [
+    "REL-M3"
+  ],
+  "ai-prompt-cache": [
+    "COST-R1"
+  ],
+  "ai-public-exposure-scan": [
+    "INF-M1"
+  ],
+  "ai-rag-provenance": [
+    "EXP-M1"
+  ],
+  "ai-residency-routing": [
+    "PRI-M3"
+  ],
+  "ai-retry-amplification": [
+    "COST-M3"
+  ],
+  "ai-risk-acceptance": [
+    "ORG-R4"
+  ],
+  "ai-rto-rpo-catalog": [
+    "REL-M5"
+  ],
+  "ai-runtime-patching": [
+    "INF-M2"
+  ],
+  "ai-safety-edge-sampling": [
+    "SAF-R1"
+  ],
+  "ai-safety-eval-gates": [
+    "SAF-M2"
+  ],
+  "ai-safety-quality-alerts": [
+    "INC-R1"
+  ],
+  "ai-slo-burn-alerts": [
+    "PERF-M3"
+  ],
+  "ai-slo-dashboards": [
+    "OBS-R3"
+  ],
+  "ai-spend-limits": [
+    "COST-M1"
+  ],
+  "ai-streaming-slis": [
+    "PERF-R3"
+  ],
+  "ai-timeouts-retries": [
+    "REL-M1"
+  ],
+  "ai-token-cost-attribution": [
+    "OBS-R4"
+  ],
+  "ai-trace-quality-annotations": [
+    "OBS-R2"
+  ],
+  "ai-trace-replay": [
+    "OBS-R1"
+  ],
+  "ai-trace-sensitive-redaction": [
+    "OBS-M2"
+  ],
+  "ai-trust-documentation": [
+    "CMP-R2"
+  ],
+  "ai-user-rationale": [
+    "EXP-R1"
+  ],
+  "ai-verify-on-deploy": [
+    "SCI-R1"
+  ],
+  "ai-vuln-scan-gate": [
+    "SCI-M3"
+  ],
+  "ai-warm-standby": [
+    "REL-R6"
+  ],
+  "artifact-provenance-integrity": [
+    "SCI-M1"
+  ],
+  "authz-entry-tests": [
+    "AUTHZ-M1"
+  ],
+  "aws": [
+    "SEC2-M1",
+    "INF-M1",
+    "OBS-M1",
+    "COST-M1"
+  ],
+  "azure": [
+    "SEC2-M1",
+    "OBS-M1",
+    "INF-M1"
+  ],
+  "cloudwatch": [
+    "OBS-M1",
+    "INC-M1",
+    "COST-M2"
+  ],
+  "context-budget-monitoring": [
+    "CTX-R1"
+  ],
+  "context-budget": [
+    "CTX-M1"
+  ],
+  "context-compaction-evals": [
+    "CTX-R2"
+  ],
+  "context-sensitive-inclusion": [
+    "CTX-M3"
+  ],
+  "context-source-acl": [
+    "CTX-M2"
+  ],
+  "context-structured-blocks": [
+    "CTX-R3"
+  ],
+  "corpus-freshness-metrics": [
+    "DG-R1"
+  ],
+  "credential-egress-controls": [
+    "SEC2-R2"
+  ],
+  "cross-tenant-tests": [
+    "AUTHZ-M2"
+  ],
+  "custom": [
+    "*"
+  ],
+  "dataset-cards-registry": [
+    "DG-R3"
+  ],
+  "dataset-provenance-governance": [
+    "DG-M2"
+  ],
+  "dataset-secret-scan-gate": [
+    "SEC2-R3"
+  ],
+  "destructive-tool-dry-run": [
+    "TOL-R1"
+  ],
+  "embedding-index-migration": [
+    "DEP-R3"
+  ],
+  "env-parity-model-tool-catalog": [
+    "DEP-R2"
+  ],
+  "eval-human-review": [
+    "EVL-R2"
+  ],
+  "eval-online-signals": [
+    "EVL-M3"
+  ],
+  "eval-release-gates": [
+    "EVL-M2"
+  ],
+  "eval-shadow-cutover": [
+    "EVL-M4"
+  ],
+  "eval-suite-ci": [
+    "EVL-M1"
+  ],
+  "eval-track-catalog": [
+    "EVL-R1"
+  ],
+  "feedback-promotion-governance": [
+    "DG-M3"
+  ],
+  "gcp": [
+    "SEC2-M1",
+    "OBS-M1",
+    "MOD-M1"
+  ],
+  "github-actions": [
+    "SEC2-M1",
+    "SEC2-M2",
+    "SEC2-R1",
+    "EVL-M1",
+    "CHG-M1",
+    "CHG-M2",
+    "DEP-M1",
+    "SUP-M1"
+  ],
+  "grafana": [
+    "OBS-M1",
+    "PERF-M1",
+    "COST-M1"
+  ],
+  "helicone": [
+    "OBS-M1",
+    "COST-M1",
+    "COST-M2"
+  ],
+  "high-impact-tool-gates": [
+    "TOL-M3"
+  ],
+  "high-priv-agent-review": [
+    "AUTHZ-R2"
+  ],
+  "high-risk-output-gate": [
+    "SEC-M2"
+  ],
+  "http-auth-probe": [
+    "AUTHN-M1"
+  ],
+  "human-approval-audit": [
+    "HUM-M2"
+  ],
+  "human-approval-bypass": [
+    "HUM-M3"
+  ],
+  "human-approval-gates": [
+    "HUM-M1"
+  ],
+  "human-approval-sla": [
+    "HUM-R3"
+  ],
+  "human-approval-ui": [
+    "HUM-R1"
+  ],
+  "human-dual-control": [
+    "HUM-M4"
+  ],
+  "identity-propagation": [
+    "AUTHN-M4"
+  ],
+  "incident-playbooks": [
+    "INC-M1"
+  ],
+  "injection-policy-gate": [
+    "SEC-M1"
+  ],
+  "key-rotation-scope": [
+    "SEC2-M3"
+  ],
+  "langsmith": [
+    "OBS-M1",
+    "OBS-R4",
+    "PRM-M1",
+    "TOL-M1",
+    "SEC-M1"
+  ],
+  "mcp-s2s-inventory": [
+    "AUTHN-M2"
+  ],
+  "memory-integrity": [
+    "MEM-M4"
+  ],
+  "memory-isolation": [
+    "MEM-M1"
+  ],
+  "memory-poisoning-evals": [
+    "MEM-R1"
+  ],
+  "memory-promotion-architecture": [
+    "MEM-R3"
+  ],
+  "memory-retention": [
+    "MEM-M2"
+  ],
+  "memory-write-policy": [
+    "MEM-M3"
+  ],
+  "model-capability-allowlist": [
+    "MOD-R2"
+  ],
+  "model-deprecation-sunset": [
+    "MOD-R1"
+  ],
+  "model-inventory": [
+    "MOD-R4"
+  ],
+  "model-license-provenance": [
+    "MOD-R3"
+  ],
+  "model-path-egress-boundary": [
+    "SEC-M4"
+  ],
+  "model-payload-classification": [
+    "PRI-M1"
+  ],
+  "model-payload-redaction": [
+    "PRI-R1"
+  ],
+  "model-pin-config": [
+    "MOD-M1"
+  ],
+  "model-promotion-eval": [
+    "MOD-M2"
+  ],
+  "multi-turn-indirect-injection-redteam": [
+    "SEC-R1"
+  ],
+  "multimodal-input-scan": [
+    "SEC-R2"
+  ],
+  "one-click-ai-rollback": [
+    "CHG-R1"
+  ],
+  "otel": [
+    "OBS-M1",
+    "OBS-R4",
+    "COST-M1"
+  ],
+  "phoenix": [
+    "EVL-M1",
+    "OBS-M1",
+    "SEC-M1"
+  ],
+  "platform-ai-pipeline-gates": [
+    "DX-M2"
+  ],
+  "platform-dx-metrics": [
+    "DX-R3"
+  ],
+  "platform-golden-path": [
+    "DX-M1"
+  ],
+  "platform-inner-loop-evals": [
+    "DX-R2"
+  ],
+  "platform-ownership-support": [
+    "DX-R4"
+  ],
+  "platform-scaffolding-templates": [
+    "DX-R1"
+  ],
+  "policy-as-code": [
+    "AUTHZ-R1"
+  ],
+  "post-incident-aprf-actions": [
+    "INC-R2"
+  ],
+  "precommit-ci-secret-scan": [
+    "SEC2-R1"
+  ],
+  "prometheus": [
+    "OBS-M1",
+    "PERF-M1",
+    "COST-M2"
+  ],
+  "prompt-ab-shadow-eval": [
+    "PRM-R3"
+  ],
+  "prompt-change-review-eval": [
+    "PRM-M2"
+  ],
+  "prompt-lint-ci": [
+    "PRM-R2"
+  ],
+  "prompt-model-version-retention": [
+    "CHG-M1"
+  ],
+  "prompt-rollback": [
+    "PRM-M3"
+  ],
+  "prompt-template-hygiene": [
+    "PRM-R1"
+  ],
+  "prompt-version-registry": [
+    "PRM-M1"
+  ],
+  "promptfoo": [
+    "EVL-M1",
+    "EVL-M2",
+    "SEC-M1",
+    "SEC-M2",
+    "SEC-M3"
+  ],
+  "quality-slo-auto-rollback": [
+    "CHG-R3"
+  ],
+  "rag-corpus-governance": [
+    "DG-M1"
+  ],
+  "repo-filesystem": [
+    "*"
+  ],
+  "rollback-drill": [
+    "CHG-M3"
+  ],
+  "rollback-runbook": [
+    "CHG-M2"
+  ],
+  "secret-redaction": [
+    "SEC2-M2"
+  ],
+  "secrets-hygiene": [
+    "SEC2-M1"
+  ],
+  "sensitive-doc-abac": [
+    "AUTHZ-M4"
+  ],
+  "shared-accelerator-isolation": [
+    "INF-M4"
+  ],
+  "short-lived-agent-tokens": [
+    "AUTHN-R1"
+  ],
+  "signed-tool-catalog": [
+    "TOL-M5"
+  ],
+  "tool-allowlist": [
+    "TOL-M2"
+  ],
+  "tool-argument-schema": [
+    "TOL-M4"
+  ],
+  "tool-gateway-authz": [
+    "TOL-M1"
+  ],
+  "tool-rate-limits": [
+    "TOL-R2"
+  ],
+  "train-serve-skew-monitor": [
+    "DG-R2"
+  ],
+  "vendor-model-terms": [
+    "PRI-R2"
+  ],
+  "wandb": [
+    "MOD-M1",
+    "MOD-R4",
+    "EVL-M1"
+  ],
+  "workload-identity-runtimes": [
+    "AUTHN-R2"
+  ]
+}

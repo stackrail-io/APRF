@@ -27,8 +27,10 @@ Requires Node.js 22+.
 ```bash
 npm install
 npm run validate   # rules + catalog + integrity + unit tests
-npm run build      # publishable dist/
+npm run build      # publishable dist/ (engine, framework-definition, CLI)
 npm run publish:packages   # requires npm login to @stackrail-io org
+# Local CLI without publish:
+npm run build -w @stackrail-io/aprf && node packages/aprf/dist/cli.js audit --target . --profile core
 ```
 
 If YAML Checks change, commit the regenerated:

@@ -18,8 +18,9 @@ import {
   existsSync,
 } from "node:fs";
 import { dirname, resolve, join, extname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { parse as parseYaml } from "yaml";
+import { getGeneratedCatalog } from "@stackrail-io/aprf-engine";
 
 const STACKRAIL = {
   home: "https://stackrail.io",
@@ -64,6 +65,15 @@ function walkYamlFiles(dir: string, out: string[] = []): string[] {
 
 function loadCatalogById(rulesRoot = RULES_ROOT): Map<string, CatalogRule> {
   const map = new Map<string, CatalogRule>();
+  // Prefer published generated catalog (works from npm CLI without repo tree).
+  try {
+    for (const rule of getGeneratedCatalog().rules) {
+      if (rule?.id) map.set(String(rule.id), rule as CatalogRule);
+    }
+    if (map.size > 0) return map;
+  } catch {
+    /* fall through to YAML walk */
+  }
   for (const file of walkYamlFiles(rulesRoot)) {
     try {
       const doc = parseYaml(readFileSync(file, "utf8")) as CatalogRule;
@@ -1470,9 +1480,29 @@ function parseArgs(argv: string[]) {
   return { input, output };
 }
 
-const { input, output } = parseArgs(process.argv);
-const assessment = JSON.parse(readFileSync(input, "utf8")) as Assessment;
-const html = render(assessment);
-mkdirSync(dirname(output), { recursive: true });
-writeFileSync(output, html, "utf8");
-console.log(`Wrote ${output}`);
+/** Render assessment.json → REPORT.html string (catalog-enriched). */
+export function renderAssessmentHtml(assessment: Assessment): string {
+  return render(assessment);
+}
+
+/** Read assessment.json and write REPORT.html. */
+export function writeAssessmentHtmlReport(
+  inputPath: string,
+  outputPath: string,
+): void {
+  const assessment = JSON.parse(readFileSync(inputPath, "utf8")) as Assessment;
+  const html = render(assessment);
+  mkdirSync(dirname(outputPath), { recursive: true });
+  writeFileSync(outputPath, html, "utf8");
+}
+
+const entry = process.argv[1] ? resolve(process.argv[1]) : "";
+const isMain =
+  /(?:^|[/\\])render-html-report\.(?:ts|js|mjs)$/.test(entry) &&
+  import.meta.url === pathToFileURL(entry).href;
+
+if (isMain) {
+  const { input, output } = parseArgs(process.argv);
+  writeAssessmentHtmlReport(input, output);
+  console.log(`Wrote ${output}`);
+}

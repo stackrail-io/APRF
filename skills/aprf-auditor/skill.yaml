@@ -43,6 +43,7 @@ sourceOfTruth:
   npm:
     - "@stackrail-io/aprf-engine"
     - "@stackrail-io/aprf-framework-definition"
+    - "@stackrail-io/aprf"
 
 invariants:
   - No StackRail backend, product APIs, or remote attestation services.
