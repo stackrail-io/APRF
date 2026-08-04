@@ -51,10 +51,12 @@ Or drop redacted `tool_servers.json` under `imports/mcp-s2s-inventory/`.
 ## Built-in highlight: `authz-entry-tests` (AUTHZ-M1)
 
 ```bash
-npm run aprf:authz-tests -- --target <app> --out <app>/aprf-assessment
+npm run aprf:authz-tests -- --target <app> --out <app>/aprf-assessment \
+  --base-url http://127.0.0.1:8080 \
+  --admin-email "$APRF_ADMIN_EMAIL" --admin-password "$APRF_ADMIN_PASSWORD"
 ```
 
-Scores automated 401/403 denial-test coverage of AI entry points. Server-side RBAC helpers alone are not a PASS.
+Scores privilege-gated AI entry points (`get_admin_user` / `has_permission` / …) with denial coverage from tests, imports, or a live limited-user probe. Server-side RBAC helpers alone are not a PASS.
 
 ## Built-in highlight: `cross-tenant-tests` (AUTHZ-M2)
 

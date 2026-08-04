@@ -23,8 +23,25 @@ Package: `@stackrail-io/aprf` (Node ≥ 22)
 | `--lens rag,agents,voice,coding` | assess, audit | Extra mandatories |
 | `--full` | assess, audit | Entire catalog |
 | `--plugins a,b` | collect, audit | Subset of collectors |
-| `--live` | collect, audit | Allow credentialed APIs |
-| `--base-url <url>` | collect, audit | Live HTTP probe (AUTHN-M1) |
+| `--live` | collect, audit | Allow credentialed APIs (auto-on with base-url/creds) |
+| `--base-url <url>` | collect, audit | Running app URL (AUTHN-M1, AUTHZ-M1, AUTHN-M2) |
+| `--admin-token <tok>` | collect, audit | Admin bearer (`APRF_ADMIN_TOKEN`) |
+| `--admin-email <e>` | collect, audit | Admin sign-in email |
+| `--admin-password <p>` | collect, audit | Admin sign-in password (never persisted) |
+| `--limited-email <e>` | collect, audit | Non-admin user for AUTHZ-M1 denial probe |
+| `--limited-password <p>` | collect, audit | Limited-user password |
+| `--limited-token <t>` | collect, audit | Limited-user bearer token |
+
+## Live audit example
+
+```bash
+npx @stackrail-io/aprf@0.1.1 audit --target . --out ./aprf-assessment --profile core \
+  --base-url http://127.0.0.1:8080 \
+  --admin-email "$APRF_ADMIN_EMAIL" \
+  --admin-password "$APRF_ADMIN_PASSWORD"
+```
+
+Other evidence: `./aprf-assessment/imports/<pluginId>/*.json`, or env such as `GITHUB_TOKEN`.
 
 ## npm
 

@@ -12,6 +12,9 @@ import { verifyHtmlReport } from "../../../skills/aprf-auditor/scripts/verify-ht
 const root = join(tmpdir(), `aprf-cli-smoke-${Date.now()}`);
 mkdirSync(join(root, "imports", "secrets-hygiene"), { recursive: true });
 mkdirSync(join(root, "imports", "ai-harm-policy"), { recursive: true });
+mkdirSync(join(root, "imports", "workload-identity-runtimes"), {
+  recursive: true,
+});
 
 writeFileSync(
   join(root, "imports", "secrets-hygiene", "secrets-hygiene-report.json"),
@@ -26,6 +29,32 @@ writeFileSync(
   JSON.stringify({
     pluginId: "ai-harm-policy",
     summary: { statusHint: "not_applicable", safM1Satisfied: false },
+  }),
+);
+
+writeFileSync(
+  join(
+    root,
+    "imports",
+    "workload-identity-runtimes",
+    "workload-identity-runtimes-report.json",
+  ),
+  JSON.stringify({
+    pluginId: "workload-identity-runtimes",
+    summary: { statusHint: "partial", authnR2Satisfied: false },
+    signals: {
+      runtimes: { found: true, refs: ["deploy/vllm.yaml", "backend/main.py"] },
+      workloadIdentity: { found: false, refs: [] },
+      staticKeys: { found: false, refs: [] },
+      traces: { found: false, refs: [] },
+    },
+    notes: [
+      "Self-hosted runtime refs: deploy/vllm.yaml",
+      "Signals alone are PARTIAL — import selfHostedModelRuntimesWithWorkloadIdentityPct=100 under imports/workload-identity-runtimes/ to PASS.",
+    ],
+    gapNotes: [
+      "Signals alone are PARTIAL — import selfHostedModelRuntimesWithWorkloadIdentityPct=100 + staticSharedKeysInRuntimeInventory=0 + sampleAuthenticatedCallsPresent=true (measuredAt ≤90d) under imports/workload-identity-runtimes/ to PASS. Set selfHostedModelRuntimesPresent=false for NOT_APPLICABLE.",
+    ],
   }),
 );
 
@@ -50,6 +79,11 @@ writeFileSync(
         pluginId: "http-auth-probe",
         status: "ran",
         detail: "AUTHN-M1 status=partial",
+      },
+      {
+        pluginId: "workload-identity-runtimes",
+        status: "ran",
+        detail: "AUTHN-R2 status=partial signals=true satisfied=false",
       },
     ],
     nodes: [
@@ -85,6 +119,7 @@ const a = JSON.parse(readFileSync(assessmentPath, "utf8")) as {
     notApplicable?: boolean;
     domain: string;
     evidenceFound: unknown[];
+    requiredEvidenceMissing?: string[];
     gate: string;
   }>;
 };
@@ -119,6 +154,43 @@ const authn = byId.get("AUTHN-M1");
 assert(
   authn?.status === "PARTIAL",
   "AUTHN-M1 PARTIAL from collector detail fallback",
+);
+
+const authnR2 = byId.get("AUTHN-R2");
+assert(authnR2?.status === "PARTIAL", "AUTHN-R2 PARTIAL from statusHint");
+assert(
+  authnR2?.requiredEvidenceMissing?.some((n) =>
+    /Signals alone are PARTIAL/i.test(n),
+  ),
+  `AUTHN-R2 Evidence still required must use collector gapNotes, not YAML dump; got ${JSON.stringify(authnR2?.requiredEvidenceMissing)}`,
+);
+assert(
+  !authnR2?.requiredEvidenceMissing?.some((n) =>
+    /Inventory of self-hosted model runtimes/i.test(n),
+  ),
+  "AUTHN-R2 must not dump normative evidenceRequired when gapNotes exist",
+);
+assert(
+  authnR2?.evidenceFound?.some(
+    (e) =>
+      typeof e === "object" &&
+      e &&
+      "ref" in e &&
+      (e as { ref: string }).ref === "deploy/vllm.yaml",
+  ),
+  `AUTHN-R2 Evidence found should list found=true signal refs; got ${JSON.stringify(authnR2?.evidenceFound)}`,
+);
+assert(
+  !authnR2?.evidenceFound?.some(
+    (e) =>
+      typeof e === "object" &&
+      e &&
+      "excerpt" in e &&
+      /workloadIdentity: found=true/i.test(
+        String((e as { excerpt?: string }).excerpt ?? ""),
+      ),
+  ),
+  "AUTHN-R2 Evidence found must not include found=false signals",
 );
 
 const htmlPath = resolve(root, "REPORT.html");

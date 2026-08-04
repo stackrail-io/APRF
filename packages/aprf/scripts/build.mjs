@@ -29,6 +29,13 @@ if (existsSync(charterExamples)) {
   });
 }
 
+// Brand mark for REPORT.html (embedded as data URI at render time).
+const owlMark = resolve(repoRoot, "plugins/aprf/assets/owl-mark.png");
+if (existsSync(owlMark)) {
+  mkdirSync(resolve(dist, "assets"), { recursive: true });
+  copyFileSync(owlMark, resolve(dist, "assets/owl-mark.png"));
+}
+
 await esbuild.build({
   entryPoints: [resolve(pkgRoot, "src/cli.ts")],
   outfile: resolve(dist, "cli.js"),

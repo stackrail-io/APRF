@@ -87,6 +87,8 @@ export interface WorkloadIdentityRuntimesReport {
       | "not_applicable";
   };
   notes: string[];
+  /** Typed gaps surfaced as "Evidence still required" in REPORT.html */
+  gapNotes: string[];
 }
 
 function importDir(ctx: CollectorContext): string {
@@ -248,6 +250,14 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
   imported: WorkloadIdentityRuntimesReport["importedResults"];
 }): WorkloadIdentityRuntimesReport {
   const notes: string[] = [];
+  const gapNotes: string[] = [];
+  const pushInfo = (msg: string) => {
+    notes.push(msg);
+  };
+  const pushGap = (msg: string) => {
+    notes.push(msg);
+    gapNotes.push(msg);
+  };
   const gateSignalsPresent =
     opts.runtimes.found ||
     opts.workloadIdentity.found ||
@@ -255,31 +265,31 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
     opts.traces.found;
 
   if (!gateSignalsPresent && !opts.imported.found) {
-    notes.push(
+    pushGap(
       "No self-hosted runtime / workload-identity signals — AUTHN-R2 remains not demonstrated until inventory evidence or an explicit N/A attest (selfHostedModelRuntimesPresent=false) is imported.",
     );
   }
   if (opts.runtimes.found) {
-    notes.push(
+    pushInfo(
       `Self-hosted runtime refs: ${opts.runtimes.refs.slice(0, 3).join(", ")}`,
     );
   }
   if (opts.workloadIdentity.found) {
-    notes.push(
+    pushInfo(
       `Workload-identity refs: ${opts.workloadIdentity.refs.slice(0, 3).join(", ")}`,
     );
   }
   if (opts.staticKeys.found) {
-    notes.push(
+    pushInfo(
       `Static-key signal refs: ${opts.staticKeys.refs.slice(0, 3).join(", ")} (supporting — import must show count=0 to PASS)`,
     );
   }
   if (opts.imported.found) {
-    notes.push(
+    pushInfo(
       `Imported: ${opts.imported.sources.join(", ")} (scopePresent=${opts.imported.selfHostedModelRuntimesPresent}, wiPct=${opts.imported.selfHostedModelRuntimesWithWorkloadIdentityPct}, staticKeys=${opts.imported.staticSharedKeysInRuntimeInventory}, sampleCalls=${opts.imported.sampleAuthenticatedCallsPresent}, measuredAt=${opts.imported.measuredAt})`,
     );
   } else if (gateSignalsPresent) {
-    notes.push(
+    pushGap(
       "Signals alone are PARTIAL — import selfHostedModelRuntimesWithWorkloadIdentityPct=100 + staticSharedKeysInRuntimeInventory=0 + sampleAuthenticatedCallsPresent=true (measuredAt ≤90d) under imports/workload-identity-runtimes/ to PASS. Set selfHostedModelRuntimesPresent=false for NOT_APPLICABLE.",
     );
   }
@@ -322,7 +332,7 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
     opts.imported.selfHostedModelRuntimesPresent === false &&
     gateSignalsPresent
   ) {
-    notes.push(
+    pushInfo(
       "Imported selfHostedModelRuntimesPresent=false ignored — in-repo runtime/WI signals prove the surface exists.",
     );
   }
@@ -330,7 +340,7 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
   if (opts.imported.found && scopeAbsent) {
     statusHint = "not_applicable";
     authnR2Satisfied = null;
-    notes.push(
+    pushInfo(
       "Imported selfHostedModelRuntimesPresent=false — AUTHN-R2 NOT_APPLICABLE.",
     );
   } else if (!gateSignalsPresent && !opts.imported.found) {
@@ -339,7 +349,7 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
   } else if (explicitFail) {
     statusHint = "fail";
     authnR2Satisfied = false;
-    notes.push(
+    pushGap(
       "Imported evidence shows workload-identity coverage <100%, static shared keys >0, or attest older than 90 days — AUTHN-R2 fail.",
     );
   } else if (
@@ -357,27 +367,27 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
     statusHint = "partial";
     authnR2Satisfied = false;
     if (opts.imported.found && !surfaceOk) {
-      notes.push(
+      pushGap(
         "Import must set selfHostedModelRuntimesPresent=true (or discover in-repo runtime/WI signals) — coverage metrics alone without an attested surface cannot unlock PASS.",
       );
     }
     if (opts.imported.found && !wiOk) {
-      notes.push(
+      pushGap(
         "Import must show selfHostedModelRuntimesWithWorkloadIdentityPct=100.",
       );
     }
     if (opts.imported.found && !staticOk) {
-      notes.push(
+      pushGap(
         "Import must show staticSharedKeysInRuntimeInventory=0.",
       );
     }
     if (opts.imported.found && !sampleOk) {
-      notes.push(
+      pushGap(
         "Import must show sampleAuthenticatedCallsPresent=true — in-repo trace regex alone does not unlock AUTHN-R2 PASS.",
       );
     }
     if (opts.imported.found && !importFresh) {
-      notes.push(
+      pushGap(
         "Import missing fresh measuredAt (≤90 days) — required to unlock AUTHN-R2 PASS.",
       );
     }
@@ -405,6 +415,7 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
       statusHint,
     },
     notes,
+    gapNotes: gapNotes.slice(0, 8),
   };
 }
 

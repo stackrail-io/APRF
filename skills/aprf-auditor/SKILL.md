@@ -40,7 +40,7 @@ Collectors: local by default; `aprf-assessment/imports/<plugin>/` for runtime ex
 | --- | --- | --- |
 | AUTHN-M1 | `http-auth-probe` | live `--base-url` or probe import — not middleware alone |
 | AUTHN-M2 | `mcp-s2s-inventory` | inventory export or admin token — not OAuth support alone |
-| AUTHZ-M1 | `authz-entry-tests` | automated denial tests for AI entry points |
+| AUTHZ-M1 | `authz-entry-tests` | privilege-gated routes + denial tests or live limited-user probe (`--base-url` + admin/limited creds) |
 | AUTHZ-M2 | `cross-tenant-tests` | ≥10 attack cases, 0 unauthorized successes |
 | SEC2-M1 | `secrets-hygiene` | manager wiring + explicit clean-scan coverage (empty SARIF ≠ clean) |
 | SEC2-M2 | `secret-redaction` | non-empty canary `cases`/`results` at 100% — not bare `detectionRatePct` |

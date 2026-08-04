@@ -59,6 +59,13 @@ export interface CollectorContext {
   adminEmail?: string;
   /** Optional admin password for password login. APRF_ADMIN_PASSWORD — never log/persist. */
   adminPassword?: string;
+  /**
+   * Optional limited (non-admin) principal for AUTHZ-M1 live denial probes.
+   * APRF_AUTHZ_LIMITED_EMAIL / APRF_AUTHZ_LIMITED_PASSWORD / APRF_AUTHZ_LIMITED_TOKEN.
+   */
+  limitedEmail?: string;
+  limitedPassword?: string;
+  limitedToken?: string;
 }
 
 export interface Collector {

@@ -32,6 +32,9 @@ function parseArgs(argv: string[]) {
     adminToken?: string;
     adminEmail?: string;
     adminPassword?: string;
+    limitedEmail?: string;
+    limitedPassword?: string;
+    limitedToken?: string;
   } = {
     target: process.cwd(),
     outDir: resolve(process.cwd(), "aprf-assessment"),
@@ -41,6 +44,12 @@ function parseArgs(argv: string[]) {
     adminToken: process.env.APRF_ADMIN_TOKEN,
     adminEmail: process.env.APRF_ADMIN_EMAIL || process.env.APRF_ADMIN_USER,
     adminPassword: process.env.APRF_ADMIN_PASSWORD,
+    limitedEmail:
+      process.env.APRF_AUTHZ_LIMITED_EMAIL || process.env.APRF_LIMITED_EMAIL,
+    limitedPassword:
+      process.env.APRF_AUTHZ_LIMITED_PASSWORD ||
+      process.env.APRF_LIMITED_PASSWORD,
+    limitedToken: process.env.APRF_AUTHZ_LIMITED_TOKEN,
   };
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
@@ -52,6 +61,9 @@ function parseArgs(argv: string[]) {
     else if (a === "--admin-email" || a === "--admin-user")
       out.adminEmail = argv[++i];
     else if (a === "--admin-password") out.adminPassword = argv[++i];
+    else if (a === "--limited-email") out.limitedEmail = argv[++i];
+    else if (a === "--limited-password") out.limitedPassword = argv[++i];
+    else if (a === "--limited-token") out.limitedToken = argv[++i];
     else if (a === "--plugins") {
       out.plugins = (argv[++i] ?? "").split(",").filter(Boolean);
     } else if (a === "--max-files") {
@@ -64,13 +76,18 @@ Options:
   --out <path>        Output dir (default: ./aprf-assessment)
   --plugins a,b,c     Subset of collector ids (default: all)
   --live              Allow credentialed API calls (also APRF_AUDITOR_LIVE=1)
-  --base-url <url>    Running app URL (AUTHN-M1 probe / AUTHN-M2 live fetch)
+  --base-url <url>    Running app URL (AUTHN-M1 probe / AUTHN-M2 live fetch /
+                      AUTHZ-M1 limited-user denial probe)
                       (also APRF_AUTH_PROBE_BASE_URL)
   --admin-token <tok> Admin bearer token for MCP/S2S inventory live fetch
                       (also APRF_ADMIN_TOKEN) — never commit this value
   --admin-email <e>   Admin email for password sign-in (also APRF_ADMIN_EMAIL /
                       APRF_ADMIN_USER). Open WebUI uses email, not username.
   --admin-password <p> Admin password (also APRF_ADMIN_PASSWORD) — never commit
+  --limited-email <e> Non-admin user for AUTHZ-M1 denial probe
+                      (also APRF_AUTHZ_LIMITED_EMAIL)
+  --limited-password <p> Limited-user password (APRF_AUTHZ_LIMITED_PASSWORD)
+  --limited-token <t> Limited-user bearer token (APRF_AUTHZ_LIMITED_TOKEN)
   --max-files <n>     Cap filesystem walk (default: 4000)
 
 AUTHN-M1 live probe:
@@ -85,6 +102,14 @@ AUTHN-M2 MCP/S2S inventory:
     --base-url http://127.0.0.1:8080 \\
     --admin-email "$APRF_ADMIN_EMAIL" --admin-password "$APRF_ADMIN_PASSWORD"
   # or drop redacted JSON under imports/mcp-s2s-inventory/
+
+AUTHZ-M1 authz entry denial:
+  npm run aprf:authz-tests -- --target <app> --out <app>/aprf-assessment \\
+    --base-url http://127.0.0.1:8080 \\
+    --admin-email "$APRF_ADMIN_EMAIL" --admin-password "$APRF_ADMIN_PASSWORD"
+  # or use an existing non-admin principal:
+  #   --limited-email "$APRF_AUTHZ_LIMITED_EMAIL" --limited-password "$APRF_AUTHZ_LIMITED_PASSWORD"
+  # Offline: denial tests in-repo, or imports/authz-entry-tests/*.json coverage
 
 AGN-M1 agent charters:
   npm run aprf:agent-charters -- --target <app> --out <app>/aprf-assessment
@@ -651,6 +676,9 @@ export type CollectOptions = {
   adminToken?: string;
   adminEmail?: string;
   adminPassword?: string;
+  limitedEmail?: string;
+  limitedPassword?: string;
+  limitedToken?: string;
   /** When false, suppress per-collector console lines (default true). */
   log?: boolean;
 };
@@ -675,6 +703,9 @@ export async function runCollectors(
     adminToken: args.adminToken,
     adminEmail: args.adminEmail,
     adminPassword: args.adminPassword,
+    limitedEmail: args.limitedEmail,
+    limitedPassword: args.limitedPassword,
+    limitedToken: args.limitedToken,
   };
 
   const selected = args.plugins

@@ -144,7 +144,7 @@ userInputRequiredWhen:
   - AUTHN-M4: no identity-propagation design/sample under imports/identity-propagation/ (N/A if no tools/agents/workflows)
   - AUTHN-R1: no short-lived agent/tool credential inventory + prompt/config secret scan under imports/short-lived-agent-tokens/
   - AUTHN-R2: no self-hosted runtime workload-identity coverage under imports/workload-identity-runtimes/ (N/A if no self-hosted runtimes)
-  - AUTHZ-M1: no authz denial tests covering AI feature/tool/retrieval entry points (run authz-entry-tests or import coverage JSON with measuredAt; N/A via privilegedAiFeatureToolOrRetrievalEntryPointsPresent=false)
+  - AUTHZ-M1: no authz denial coverage on privilege-gated AI entry points (run authz-entry-tests with --base-url + admin/limited creds, in-repo denial tests, or import coverage JSON with measuredAt; N/A via privilegedAiFeatureToolOrRetrievalEntryPointsPresent=false)
   - AUTHZ-M2: no cross-tenant attack suite (≥10 cases) for AI data/memory paths (run cross-tenant-tests or import results with measuredAt; N/A via multiTenantAiDataOrMemoryPathsPresent=false)
   - AUTHZ-M3: no agent/automation role matrix + ≤90d access review (run agent-role-matrix or import coverage; N/A via productionAgentOrAutomationIdentitiesPresent=false)
   - AUTHZ-M4: no sensitive document-class ABAC inventory + deny tests (run sensitive-doc-abac or import coverage; N/A via sensitiveDocumentClassesPresent=false)
@@ -188,7 +188,7 @@ limitations:
   - identity-propagation needs design + 100% subject-bound privileged sample with 0 anonymous hops (or N/A if non-agentic); outer HTTP auth alone is not a PASS
   - short-lived-agent-tokens needs TTL≤1h (or owned ≤30d exception) coverage + 0 static keys in prompts/config (or N/A attest); MCP env scanners alone are not a PASS
   - workload-identity-runtimes needs 100% WI coverage + 0 static shared keys + sample calls (or N/A if no self-hosted runtimes); MCP inventories alone are not a PASS
-  - authz-entry-tests scores automated denial-test coverage of AI entry points; server-side guards alone are not a PASS; requires measuredAt ≤90d; empty inventory without N/A attest is not a PASS
+  - authz-entry-tests scores privilege-gated AI entry points (get_admin_user/has_permission/has_access) with denial coverage from tests, imports, or live limited-user probe; authn-only get_verified_user is not AUTHZ-M1 privilege; server-side guards alone are not a PASS; requires measuredAt ≤90d
   - cross-tenant-tests needs ≥10 automated cross-tenant attack cases with 0 unauthorized successes + measuredAt ≤90d; isolation code alone is not a PASS; empty inventory without N/A attest is not a PASS
   - agent-role-matrix needs identitiesInRoleMatrixWithNonAdminDefaultPct=100 + accessReviewWithin90Days + unexplainedPrivilegeEscalations=0 + measuredAt ≤90d; role docs alone are not a PASS
   - sensitive-doc-abac needs sensitiveDocumentClassesEnumerated + inventoryMatchesProductionClasses + unauthorizedClassAccessDeniedInTests + measuredAt ≤90d; ABAC docs alone are not a PASS
@@ -228,5 +228,10 @@ collectorRuntime:
   adminToken: APRF_ADMIN_TOKEN
   adminEmail: APRF_ADMIN_EMAIL
   adminPassword: APRF_ADMIN_PASSWORD
+  limitedEmail: APRF_AUTHZ_LIMITED_EMAIL
+  limitedPassword: APRF_AUTHZ_LIMITED_PASSWORD
+  limitedToken: APRF_AUTHZ_LIMITED_TOKEN
+  # Same live flags on `aprf audit` / `aprf collect` CLI (--base-url, --admin-*, --limited-*).
+  # base-url or creds auto-enable live (no separate --live required).
   importRoot: aprf-assessment/imports/<pluginId>/
   customCatchAll: aprf-assessment/imports/custom/

@@ -167,15 +167,16 @@ function normalizeHint(raw: unknown): HintStatus | null {
   return null;
 }
 
+const HINT_RANK: Record<HintStatus, number> = {
+  fail: 5,
+  partial: 4,
+  not_demonstrated: 3,
+  pass: 2,
+  not_applicable: 1,
+};
+
 function worseHint(a: HintStatus, b: HintStatus): HintStatus {
-  const rank: Record<HintStatus, number> = {
-    fail: 5,
-    partial: 4,
-    not_demonstrated: 3,
-    pass: 2,
-    not_applicable: 1,
-  };
-  return rank[a] >= rank[b] ? a : b;
+  return HINT_RANK[a] >= HINT_RANK[b] ? a : b;
 }
 
 function setHint(
@@ -184,9 +185,41 @@ function setHint(
   hit: HintHit,
 ): void {
   const prev = byCheck.get(checkId);
-  if (!prev || worseHint(hit.hint, prev.hint) === hit.hint) {
+  if (!prev) {
     byCheck.set(checkId, hit);
+    return;
   }
+  const hitRank = HINT_RANK[hit.hint];
+  const prevRank = HINT_RANK[prev.hint];
+  if (hitRank > prevRank) {
+    byCheck.set(checkId, hit);
+    return;
+  }
+  if (hitRank < prevRank) return;
+  // Same status: keep the richer metadata (gapNotes + imports/ reportRef).
+  // evidence-graph collector details must not clobber import gapNotes.
+  const gapNotes = hit.gapNotes?.length
+    ? hit.gapNotes
+    : prev.gapNotes;
+  const preferHitRef = hit.reportRef.startsWith("imports/");
+  const preferPrevRef = prev.reportRef.startsWith("imports/");
+  byCheck.set(checkId, {
+    hint: hit.hint,
+    pluginId: preferHitRef
+      ? hit.pluginId
+      : preferPrevRef
+        ? prev.pluginId
+        : hit.pluginId,
+    reportRef: preferHitRef
+      ? hit.reportRef
+      : preferPrevRef
+        ? prev.reportRef
+        : hit.reportRef,
+    ...(gapNotes?.length ? { gapNotes } : {}),
+    ...(hit.severityHint || prev.severityHint
+      ? { severityHint: hit.severityHint ?? prev.severityHint }
+      : {}),
+  });
 }
 
 function loadHintsFromImports(outDir: string): Map<string, HintHit> {
@@ -235,7 +268,7 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
                 .filter(
                   (n) =>
                     !/\bmissingFields\s*=\s*0\b/i.test(n) &&
-                    /missing(?!Fields\s*=\s*0)|no [a-z]|not found|requir(?:ed|es)|cannot|fail|partial|unlock|absent|unscored|severityHint=critical/i.test(
+                    /missing(?!Fields\s*=\s*0)|no [a-z]|not found|requir(?:ed|es)|cannot|fail|partial|unlock|absent|unscored|severityHint=critical|import .{0,80}to PASS|NOT_APPLICABLE|Signals alone/i.test(
                       n,
                     ),
                 )
@@ -330,6 +363,55 @@ function domainForCategory(
     return d?.name ?? mapped;
   }
   return category;
+}
+
+/**
+ * Prefer Evidence found from collector report `signals.<name>.found === true`
+ * refs. Skip found=false groups entirely.
+ */
+function evidenceFromFoundSignals(
+  outDir: string,
+  reportRef: string,
+): Array<{ ref: string; excerpt?: string }> {
+  if (!reportRef.startsWith("imports/")) return [];
+  const path = join(outDir, reportRef);
+  if (!existsSync(path)) return [];
+  try {
+    const doc = JSON.parse(readFileSync(path, "utf8")) as {
+      signals?: Record<string, unknown>;
+    };
+    if (!doc.signals || typeof doc.signals !== "object" || Array.isArray(doc.signals)) {
+      return [];
+    }
+    const out: Array<{ ref: string; excerpt?: string }> = [];
+    const seen = new Set<string>();
+    for (const [name, raw] of Object.entries(doc.signals)) {
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) continue;
+      const sig = raw as { found?: unknown; refs?: unknown };
+      if (sig.found !== true) continue;
+      const refs = Array.isArray(sig.refs)
+        ? sig.refs.filter(
+            (r): r is string => typeof r === "string" && r.trim().length > 0,
+          )
+        : [];
+      if (refs.length === 0) {
+        const key = `${reportRef}#${name}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push({ ref: reportRef, excerpt: `${name}: found=true` });
+        continue;
+      }
+      for (const r of refs) {
+        if (seen.has(r)) continue;
+        seen.add(r);
+        out.push({ ref: r, excerpt: `${name}: found=true` });
+        if (out.length >= 12) return out;
+      }
+    }
+    return out;
+  } catch {
+    return [];
+  }
 }
 
 function buildCategoryDomainMap(
@@ -533,21 +615,37 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     const related = nodesForCheck(graph, checkId);
     const conf = confidenceFromEvidence(related, Boolean(mapped));
 
+    // Evidence found: prefer report signals where found=true (and their refs).
+    // Fall back to graph node excerpts. Never invent statusHint=… (plugin=…) rows.
     const evidenceFound: Array<{ ref: string; excerpt?: string }> = [];
-    if (mapped) {
-      evidenceFound.push({
-        ref: mapped.reportRef,
-        excerpt: `statusHint=${mapped.hint} (plugin=${mapped.pluginId})`,
-      });
+    if (mapped?.reportRef) {
+      for (const e of evidenceFromFoundSignals(outDir, mapped.reportRef)) {
+        evidenceFound.push(e);
+      }
     }
-    for (const n of related.slice(0, 8)) {
-      if (evidenceFound.some((e) => e.ref === n.ref)) continue;
-      evidenceFound.push({
-        ref: n.ref,
-        excerpt:
-          n.excerpt?.slice(0, 240) ??
-          `class=${n.class} plugin=${n.pluginId}${n.signals?.length ? ` signals=${n.signals.join(",")}` : ""}`,
-      });
+    if (evidenceFound.length === 0) {
+      for (const n of related.slice(0, 8)) {
+        if (evidenceFound.some((e) => e.ref === n.ref)) continue;
+        const raw = n.excerpt?.trim() ?? "";
+        const looksJson = raw.startsWith("{") || raw.startsWith("[");
+        const maxLen = looksJson ? 4000 : 240;
+        const excerpt =
+          raw.length > 0
+            ? raw.length > maxLen
+              ? raw.slice(0, maxLen)
+              : raw
+            : undefined;
+        evidenceFound.push({
+          ref: n.ref,
+          ...(excerpt ? { excerpt } : {}),
+        });
+      }
+    }
+    if (
+      evidenceFound.length === 0 &&
+      mapped?.reportRef?.startsWith("imports/")
+    ) {
+      evidenceFound.push({ ref: mapped.reportRef });
     }
 
     // Prefer collector gap notes over dumping the full normative evidenceRequired list.
@@ -597,8 +695,8 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       evidenceFound,
       requiredEvidenceMissing,
       reasoning: mapped
-        ? `Collector statusHint=${mapped.hint}${mapped.severityHint ? ` severityHint=${mapped.severityHint}` : ""} from ${mapped.reportRef}. Primary evidence class=${related[0]?.class ?? "ci"} (${evidenceFound.length} refs). Deterministic assess (no LLM).`
-        : `No collector statusHint for ${checkId}. Marked NOT_DEMONSTRATED — add imports/ evidence or re-run collect. Manual: ${rule.manualVerification}`,
+        ? `Primary evidence class=${related[0]?.class ?? "ci"} (${evidenceFound.length} refs). Deterministic assess (no LLM).`
+        : `No scored collector report — marked NOT_DEMONSTRATED. Add imports/ evidence or re-run collect. Manual: ${rule.manualVerification}`,
       recommendedAction: (rule.recommendedFixes ?? []).join("; "),
       priority,
       // No placeholder owner/effort — those belong to a tracked remediation system, not CLI assess.

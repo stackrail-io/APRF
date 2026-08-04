@@ -1,17 +1,19 @@
 executor: collectors/authz-entry-tests.ts
 id: authz-entry-tests
 title: Authz middleware / policy tests for AI entry points (AUTHZ-M1)
-version: "0.2.0"
+version: "0.3.0"
 evidenceClass: code
 inputs:
   - "Target repo with FastAPI (or similar) AI routes"
+  - "Optional --base-url + admin or limited-user credentials for live denial probe"
   - "Optional prior/imported test inventory: aprf-assessment/imports/authz-entry-tests/*.json"
   - "Optional prior report: aprf-assessment/imports/authz-entry-tests/authz-entry-report.json"
 collect:
   - "Discover AI HTTP entry points (reuses http-auth-probe route discovery)"
-  - "Detect server-side authz guards near handlers (get_verified_user, get_admin_user, has_permission, …)"
-  - "Scan repo tests for authenticated-but-unauthorized denial coverage of those entry points"
-  - "Write authz-entry-report.json; AUTHZ-M1 needs server-side enforcement + unauthorized-caller suite"
+  - "Classify privilege-gated routes (get_admin_user / has_permission / has_access) vs authn-only"
+  - "Scan repo tests for authenticated-but-unauthorized denial coverage"
+  - "Optional live probe: limited (non-admin) user against privileged routes expecting 401/403"
+  - "Write authz-entry-report.json with typed gapNotes; AUTHZ-M1 needs authz guards + denial suite"
 emits:
   nodeClass: code
   refPattern: "aprf-assessment/imports/authz-entry-tests/*"
@@ -20,15 +22,18 @@ emits:
     - authz-m1
     - authz-guard
     - authz-test-gap
+    - authz-live-probe
 mapsToChecks: [AUTHZ-M1]
 whenUnavailable: >
-  Code that calls has_permission / Depends(get_verified_user) is supporting evidence only.
+  Code that calls has_permission / Depends(get_admin_user) is supporting evidence only.
   AUTHZ-M1 PASS requires server-side authorization on privileged AI feature/tool/retrieval
-  entry points AND an authz suite showing authenticated-but-unauthorized callers denied
-  (measuredAt ≤90 days). Empty inventories without
-  privilegedAiFeatureToolOrRetrievalEntryPointsPresent=false are not N/A. Do not score
-  AUTHN-M1 (unauthenticated rejection) as satisfying this Check. Drop suite results under
-  imports/authz-entry-tests/ if tests live elsewhere.
+  entry points AND an authz suite (in-repo tests, imports, or live limited-user probe) showing
+  authenticated-but-unauthorized callers denied (measuredAt ≤90 days). Authn-only
+  get_verified_user routes are inventoried but not scored as privileged. Empty inventories
+  without privilegedAiFeatureToolOrRetrievalEntryPointsPresent=false are not N/A. Do not score
+  AUTHN-M1 (unauthenticated rejection) as satisfying this Check.
 live:
   required: false
-  note: Offline collector; optional imports for CI test reports.
+  note: >
+    Optional --base-url with admin credentials (creates a temporary limited user) or
+    --limited-email/--limited-password / APRF_AUTHZ_LIMITED_* for live denial probes.
