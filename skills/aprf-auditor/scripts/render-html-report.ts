@@ -1530,9 +1530,12 @@ function render(a: Assessment): string {
         setTimeout(function () { backdrop.hidden = true; }, 220);
       }
 
-      function openSample(id) {
+      var sampleOpener = null;
+
+      function openSample(id, opener) {
         var sample = passSamples[id];
         if (!sample || !sampleBackdrop || !sampleTitle || !sampleMeta || !sampleCode) return;
+        sampleOpener = opener || null;
         sampleTitle.textContent = sample.filename || "PASS sample";
         sampleMeta.textContent = (sample.hint || "") +
           (sample.destination ? " Destination: " + sample.destination : "");
@@ -1547,7 +1550,13 @@ function render(a: Assessment): string {
       function closeSample() {
         if (!sampleBackdrop) return;
         sampleBackdrop.classList.remove("open");
-        setTimeout(function () { sampleBackdrop.hidden = true; }, 180);
+        setTimeout(function () {
+          sampleBackdrop.hidden = true;
+          if (sampleOpener && typeof sampleOpener.focus === "function") {
+            sampleOpener.focus();
+          }
+          sampleOpener = null;
+        }, 180);
       }
 
       document.querySelectorAll(".control-row, .roadmap-check").forEach(function (row) {
@@ -1568,7 +1577,7 @@ function render(a: Assessment): string {
         if (!btn) return;
         e.preventDefault();
         e.stopPropagation();
-        openSample(btn.getAttribute("data-sample-id"));
+        openSample(btn.getAttribute("data-sample-id"), btn);
       });
       if (sampleClose) sampleClose.addEventListener("click", closeSample);
       if (sampleBackdrop) {

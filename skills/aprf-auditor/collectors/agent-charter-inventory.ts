@@ -107,6 +107,8 @@ export interface AgentCharterInventoryReport {
       | "not_applicable";
   };
   notes: string[];
+  /** Gap-only guidance for assess/report flyouts (excludes informational scan notes). */
+  gapNotes: string[];
 }
 
 function agentHasGovernanceField(
@@ -365,43 +367,49 @@ export function buildAgentCharterInventoryReport(opts: {
   imported: AgentCharterInventoryReport["importedResults"];
 }): AgentCharterInventoryReport {
   const notes: string[] = [];
+  const gapNotes: string[] = [];
+  const pushInfo = (msg: string) => {
+    notes.push(msg);
+  };
+  const pushGap = (msg: string) => {
+    notes.push(msg);
+    gapNotes.push(msg);
+  };
   const allFields = allRequiredFieldsPresent(opts.fields);
 
   if (!opts.agentSignals && !opts.inventory.found && !opts.charters.found) {
-    notes.push(
+    pushInfo(
       "No agent/charter signals — AGN-M1 may be NOT_APPLICABLE if there are no production agents.",
     );
   }
   if (opts.inventory.found) {
-    notes.push(
-      `Inventory refs: ${opts.inventory.refs.slice(0, 4).join(", ")}`,
-    );
+    pushInfo(`Inventory refs: ${opts.inventory.refs.slice(0, 4).join(", ")}`);
   } else {
-    notes.push(
+    pushGap(
       "No agent inventory manifest found (agents.yaml / charters/ / AGENT.md / registry).",
     );
   }
   if (opts.charters.found) {
-    notes.push(`Charter-like refs: ${opts.charters.refs.slice(0, 4).join(", ")}`);
+    pushInfo(`Charter-like refs: ${opts.charters.refs.slice(0, 4).join(", ")}`);
   }
   for (const [k, present] of Object.entries(opts.fields)) {
     if (present) {
-      notes.push(
+      pushInfo(
         `Field ${k}: ${opts.fieldRefs[k]?.slice(0, 2).join(", ") || "present"}`,
       );
     } else {
-      notes.push(`Required charter field missing in repo scan: ${k}`);
+      pushGap(`Required charter field missing in repo scan: ${k}`);
     }
   }
   if (opts.imported.found) {
-    notes.push(
+    pushInfo(
       `Imported: ${opts.imported.sources.join(", ")} (agents=${opts.imported.agentCount}, missingFields=${opts.imported.missingFieldCount}, missingOwners=${opts.imported.missingOwnerCount}, complete=${opts.imported.complete})`,
     );
   } else if (opts.inventory.found || allFields || opts.charters.found || opts.agentSignals) {
-    notes.push(
-      "Repo scan cannot unlock AGN-M1 PASS alone — need a measured inventory export (0 missing governance fields, coversAllProductionAgents, fresh measuredAt ≤90d) under imports/agent-charter-inventory/.",
+    pushGap(
+      "Repo scan cannot unlock AGN-M1 PASS alone — need a measured inventory export (complete=true, 0 missing governance fields, coversAllProductionAgents=true, fresh measuredAt ≤90d) under imports/agent-charter-inventory/.",
     );
-    notes.push(
+    pushGap(
       "Agent count from tags/release branches is not enough: AGN-M1 requires purpose, owner, approved tool policy, data scope, autonomy boundaries, review date, last updated, charter version, and approval status per production agent.",
     );
   }
@@ -421,7 +429,7 @@ export function buildAgentCharterInventoryReport(opts: {
   } else if (measuredFail) {
     statusHint = "fail";
     agnM1Satisfied = false;
-    notes.push(
+    pushGap(
       "Imported inventory has agents missing required governance metadata — AGN-M1 fail.",
     );
   } else if (
@@ -439,19 +447,24 @@ export function buildAgentCharterInventoryReport(opts: {
     statusHint = "partial";
     agnM1Satisfied = false;
     if (opts.imported.found && opts.imported.coversAllProductionAgents !== true) {
-      notes.push(
+      pushGap(
         "Import missing coversAllProductionAgents=true — cannot prove inventory lists every production agent (escalate severity to critical).",
       );
     }
+    if (opts.imported.found && opts.imported.complete !== true) {
+      pushGap(
+        "Import missing complete=true — required to unlock AGN-M1 PASS.",
+      );
+    }
     if (opts.imported.found && !measuredAtFresh(opts.imported.measuredAt)) {
-      notes.push(
+      pushGap(
         "Import missing fresh measuredAt (≤90 days) — required to unlock AGN-M1 PASS.",
       );
     }
   } else if (opts.agentSignals) {
     statusHint = "not_demonstrated";
     agnM1Satisfied = null;
-    notes.push(
+    pushGap(
       "Agent signals present but production agents cannot be enumerated via inventory/charter artifacts (escalate severity to critical).",
     );
   } else {
@@ -469,11 +482,11 @@ export function buildAgentCharterInventoryReport(opts: {
     statusHint !== "pass" &&
     statusHint !== "not_applicable"
   ) {
-    notes.push(
+    pushGap(
       "severityHint=critical — inventory completeness or accountable ownership cannot be demonstrated.",
     );
   } else if (statusHint !== "pass" && statusHint !== "not_applicable") {
-    notes.push(
+    pushInfo(
       "severityHint=high — missing charter/governance metadata on known agents (not an immediate exploit class by default).",
     );
   }
@@ -498,6 +511,7 @@ export function buildAgentCharterInventoryReport(opts: {
       statusHint,
     },
     notes,
+    gapNotes: gapNotes.slice(0, 8),
   };
 }
 

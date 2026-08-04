@@ -78,6 +78,12 @@ owner: platform-oncall
   if (r1.summary.statusHint !== "partial" || !r1.summary.inventoryPresent) {
     throw new Error(`expected partial, got ${JSON.stringify(r1.summary)}`);
   }
+  if (!r1.gapNotes?.some((n) => n.includes("complete=true"))) {
+    throw new Error(`expected gapNotes to state complete=true PASS predicate, got ${JSON.stringify(r1.gapNotes)}`);
+  }
+  if (r1.gapNotes.some((n) => /\bmissingFields\s*=\s*0\b/i.test(n))) {
+    throw new Error("gapNotes should not include informational missingFields=0 lines");
+  }
 
   const out2 = mkdtempSync(join(tmpdir(), "aprf-agn1-2-"));
   mkdirSync(join(out2, "imports", "agent-charter-inventory"), {

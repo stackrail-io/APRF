@@ -20,7 +20,7 @@ import {
   writeFileSync,
   mkdirSync,
 } from "node:fs";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 import {
   getGeneratedCatalog,
   SEVERITY_WEIGHT,
@@ -209,6 +209,7 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
       if (!file.includes("report")) continue;
       let doc: {
         summary?: { statusHint?: unknown; severityHint?: unknown };
+        gapNotes?: unknown;
         notes?: unknown;
       };
       try {
@@ -219,17 +220,27 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
       const hint = normalizeHint(doc.summary?.statusHint);
       if (!hint) continue;
       const reportRef = `imports/${pluginId}/${file}`;
-      const gapNotes = Array.isArray(doc.notes)
-        ? doc.notes
+      // Prefer typed gapNotes from collectors; fall back to a conservative note filter.
+      const typedGaps = Array.isArray(doc.gapNotes)
+        ? doc.gapNotes
             .filter((n): n is string => typeof n === "string" && n.trim().length > 0)
-            .filter(
-              (n) =>
-                /missing|no |not found|required|import |cannot|fail|partial|unlock|absent|unscored|severity/i.test(
-                  n,
-                ),
-            )
             .slice(0, 8)
-        : undefined;
+        : [];
+      const gapNotes =
+        typedGaps.length > 0
+          ? typedGaps
+          : Array.isArray(doc.notes)
+            ? doc.notes
+                .filter((n): n is string => typeof n === "string" && n.trim().length > 0)
+                .filter(
+                  (n) =>
+                    !/\bmissingFields\s*=\s*0\b/i.test(n) &&
+                    /missing(?!Fields\s*=\s*0)|no [a-z]|not found|requir(?:ed|es)|cannot|fail|partial|unlock|absent|unscored|severityHint=critical/i.test(
+                      n,
+                    ),
+                )
+                .slice(0, 8)
+            : undefined;
       const sevRaw =
         typeof doc.summary?.severityHint === "string"
           ? doc.summary.severityHint.trim().toLowerCase()
@@ -540,6 +551,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     }
 
     // Prefer collector gap notes over dumping the full normative evidenceRequired list.
+    const outDirLabel = basename(outDir) || "assessment-output";
     const requiredEvidenceMissing =
       status === "PASS" || status === "NOT_APPLICABLE"
         ? []
@@ -547,7 +559,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
           ? [...mapped.gapNotes]
           : status === "NOT_DEMONSTRATED"
             ? [
-                "No scored collector report for this Check — re-run collect or add measured imports under aprf-assessment/imports/<plugin>/.",
+                `No scored collector report for this Check — re-run collect or add measured imports under ${outDirLabel}/imports/<plugin>/.`,
                 ...(rule.evidenceRequired ?? []).slice(0, 2),
               ]
             : [...(rule.evidenceRequired ?? [])];
