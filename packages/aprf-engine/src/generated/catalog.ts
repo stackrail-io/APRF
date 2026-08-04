@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:541c2c9fa721b3cae0174e13fca9e36bb240bc86a104186706bc70cda6a70fc0",
+  "generatedAt": "sha256:b68d1af21829b4aade5803d908ac68b74a834a3f84d1f2e1aa1c349fd39eed4a",
   "ruleCount": 178,
   "domains": [
     {
@@ -553,7 +553,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "description": "Each production agent (any autonomous or semi-autonomous runtime that plans, loops, or invokes tools on behalf of a product capability—including in-process agents, MCP clients/servers acting as agents, and A2A participants) shall be represented in a version-controlled inventory with a current charter covering purpose, owner, approved tool policy, data scope, autonomy boundaries, review metadata, and approval status.",
       "whyItMatters": "Without a charter, agents become unbounded co-processors: they can pursue undefined goals, touch undeclared tools and corpora, and escalate autonomy without an accountable owner. Missing charters are usually governance debt rather than an immediately exploitable defect—but when production agents cannot be enumerated or have no owner, governance has failed and risk escalates. Charters make allowed agency reviewable before incidents, not reconstructable after.",
       "severity": "high",
-      "weight": 4,
+      "weight": 3,
       "gate": "mandatory",
       "passCondition": "Every production agent is represented in a version-controlled inventory. Each inventory entry references a current charter containing purpose, owner, approved tool policy, data scope, autonomy boundaries, review date, last updated, charter version, and approval status. No production agent is missing any required governance metadata; inventory completeness is attested (coversAllProductionAgents) with measuredAt ≤90 days.",
       "evidenceRequired": [
