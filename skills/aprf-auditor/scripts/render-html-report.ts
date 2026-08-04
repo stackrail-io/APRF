@@ -35,6 +35,11 @@ const SKILL_ROOT = resolve(SCRIPT_DIR, "..");
 const REPO_ROOT = resolve(SKILL_ROOT, "../..");
 const RULES_ROOT = resolve(REPO_ROOT, "packages/aprf-engine/rules/by-domain");
 
+type PassExample = {
+  summary?: string;
+  artifact?: string;
+};
+
 type CatalogRule = {
   id: string;
   category?: string;
@@ -46,6 +51,7 @@ type CatalogRule = {
   recommendedFixes?: string[];
   manualVerification?: string;
   falsePositiveGuidance?: string;
+  passExample?: PassExample;
   gate?: string;
   severity?: string;
   references?: Array<{ title?: string; url?: string } | string>;
@@ -116,6 +122,7 @@ function enrichControlsFromCatalog(
       falsePositiveGuidance:
         rule.falsePositiveGuidance ?? c.falsePositiveGuidance,
       references: rule.references ?? c.references,
+      passExample: rule.passExample ?? c.passExample,
       recommendedAction,
       remediation:
         c.remediation || remFix ?
@@ -164,6 +171,7 @@ type Control = {
   references?: Array<{ title?: string; url?: string } | string>;
   evidenceFound?: Array<{ ref: string; excerpt?: string }>;
   requiredEvidenceMissing?: string[];
+  passExample?: PassExample;
   remediation?: {
     fix: string;
     example?: string;
@@ -750,6 +758,18 @@ function controlDetailBody(c: Control): string {
     c.requiredEvidenceMissing?.length ?
       `<p><strong>Evidence still required</strong></p><ul>${c.requiredEvidenceMissing.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>`
     : "";
+  const statusKey = (c.status || "").toUpperCase().replace(/-/g, "_");
+  const showPassExample =
+    statusKey !== "PASS" &&
+    statusKey !== "NOT_APPLICABLE" &&
+    !!c.passExample?.artifact?.trim();
+  const passExample = showPassExample
+    ? `<div class="pass-example">
+    <p><strong>Example to pass</strong></p>
+    ${c.passExample?.summary ? `<p class="meta">${esc(c.passExample.summary)}</p>` : ""}
+    <pre class="evidence-json" tabindex="0"><code>${esc(c.passExample!.artifact!.trim())}</code></pre>
+  </div>`
+    : "";
   const evidenceRequired =
     c.evidenceRequired?.length ?
       `<p><strong>Evidence required</strong></p><ul>${c.evidenceRequired.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>`
@@ -789,13 +809,16 @@ function controlDetailBody(c: Control): string {
   ${c.falsePositiveGuidance ? `<p><strong>False-positive guidance:</strong> ${esc(c.falsePositiveGuidance)}</p>` : ""}
   ${recommendedFixes}`;
 
-  // Assessment-only block — do not repeat recommendedFixes here.
+  // Assessment-only block — do not repeat recommendedFixes / priority pills here.
+  // Skip placeholder owners (e.g. "unassigned") and empty effort from CLI assess.
+  const ownerRaw = (c.remediation?.owner ?? "").trim();
+  const ownerOk =
+    ownerRaw.length > 0 &&
+    !/^(unassigned|unknown|n\/a|none|-)$/i.test(ownerRaw);
+  const effortRaw = (c.remediation?.estimatedEffort ?? "").trim();
   const remMeta = [
-    c.remediation?.owner ? `owner ${esc(c.remediation.owner)}` : "",
-    c.remediation?.estimatedEffort ?
-      `effort ${esc(c.remediation.estimatedEffort)}`
-    : "",
-    c.priority ? `priority ${esc(c.priority)}` : "",
+    ownerOk ? `owner ${esc(ownerRaw)}` : "",
+    effortRaw ? `effort ${esc(effortRaw)}` : "",
   ]
     .filter(Boolean)
     .join(" · ");
@@ -813,6 +836,7 @@ function controlDetailBody(c: Control): string {
     <h4>This assessment</h4>
     <p><strong>Evidence found</strong></p>${evidence}
     ${missing}
+    ${passExample}
     <p><strong>Reasoning:</strong> ${esc(c.reasoning)}</p>
     ${c.naReason ? `<p><strong>N/A rationale:</strong> ${esc(c.naReason)}</p>` : ""}
     ${rem}
@@ -1271,6 +1295,8 @@ function render(a: Assessment): string {
     .flyout-body p { margin: 0.45rem 0; }
     .flyout-body strong { font-family: var(--sans); font-size: 0.86rem; }
     .assessment-findings { margin: 0.15rem 0 1.15rem; }
+    .pass-example { margin: 0.85rem 0 0.35rem; }
+    .pass-example .evidence-json { margin-top: 0.45rem; max-height: 22rem; }
     .catalog-rule {
       background: #f5f8fa; border: 1px solid var(--line);
       padding: 0.9rem 1rem; margin: 0.35rem 0 0; border-radius: var(--radius);

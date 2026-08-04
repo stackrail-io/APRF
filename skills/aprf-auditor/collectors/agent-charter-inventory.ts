@@ -282,9 +282,12 @@ export function buildAgentCharterInventoryReport(opts: {
     notes.push(
       `Imported: ${opts.imported.sources.join(", ")} (agents=${opts.imported.agentCount}, missingFields=${opts.imported.missingFieldCount}, complete=${opts.imported.complete})`,
     );
-  } else if (opts.inventory.found || allFields) {
+  } else if (opts.inventory.found || allFields || opts.charters.found || opts.agentSignals) {
     notes.push(
-      "Repo charter/inventory signals alone are PARTIAL — import inventory export with 0 missing fields to PASS.",
+      "Repo scan cannot unlock AGN-M1 PASS alone — need a measured inventory export (0 missing charter fields, coversAllProductionAgents, fresh measuredAt ≤90d) under imports/agent-charter-inventory/.",
+    );
+    notes.push(
+      "Agent count from tags/release branches is not enough: AGN-M1 requires purpose, tool allowlist reference, data scope, autonomy limits, and named owner per production agent.",
     );
   }
 

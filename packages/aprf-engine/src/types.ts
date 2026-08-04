@@ -81,6 +81,13 @@ export interface RuleApplicability {
   lenses?: string[];
 }
 
+/** Concrete sample that unlocks PASS — shown in report flyouts on non-pass. */
+export interface RulePassExample {
+  summary: string;
+  /** Copy-paste sample (JSON/YAML/snippet) for the import or repo artifact. */
+  artifact: string;
+}
+
 /**
  * Normative APRF rule. Source of truth is YAML under packages/aprf-engine/rules/.
  */
@@ -108,6 +115,7 @@ export interface AprfRule {
   replacedBy?: string;
   deprecationNote?: string;
   introducedIn?: string;
+  passExample?: RulePassExample;
 }
 
 export interface DomainDef {

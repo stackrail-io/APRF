@@ -111,6 +111,8 @@ type HintHit = {
   hint: HintStatus;
   pluginId: string;
   reportRef: string;
+  /** Collector-specific gap notes (preferred over generic evidenceRequired). */
+  gapNotes?: string[];
 };
 
 type ControlOut = {
@@ -126,6 +128,7 @@ type ControlOut = {
   manualVerification: string;
   falsePositiveGuidance: string;
   references: AprfRule["references"];
+  passExample?: AprfRule["passExample"];
   gate: "mandatory" | "recommended";
   severity: AprfRule["severity"];
   status: ControlStatus;
@@ -203,7 +206,10 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
 
     for (const file of files) {
       if (!file.includes("report")) continue;
-      let doc: { summary?: { statusHint?: unknown } };
+      let doc: {
+        summary?: { statusHint?: unknown };
+        notes?: unknown;
+      };
       try {
         doc = JSON.parse(readFileSync(join(dir, file), "utf8")) as typeof doc;
       } catch {
@@ -212,8 +218,24 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
       const hint = normalizeHint(doc.summary?.statusHint);
       if (!hint) continue;
       const reportRef = `imports/${pluginId}/${file}`;
+      const gapNotes = Array.isArray(doc.notes)
+        ? doc.notes
+            .filter((n): n is string => typeof n === "string" && n.trim().length > 0)
+            .filter(
+              (n) =>
+                /missing|no |not found|required|import |cannot|fail|partial|unlock|absent|unscored/i.test(
+                  n,
+                ),
+            )
+            .slice(0, 8)
+        : undefined;
       for (const checkId of checkIds) {
-        setHint(byCheck, checkId, { hint, pluginId, reportRef });
+        setHint(byCheck, checkId, {
+          hint,
+          pluginId,
+          reportRef,
+          ...(gapNotes?.length ? { gapNotes } : {}),
+        });
       }
     }
   }
@@ -504,10 +526,18 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       });
     }
 
+    // Prefer collector gap notes over dumping the full normative evidenceRequired list.
     const requiredEvidenceMissing =
       status === "PASS" || status === "NOT_APPLICABLE"
         ? []
-        : [...(rule.evidenceRequired ?? [])];
+        : mapped?.gapNotes?.length
+          ? [...mapped.gapNotes]
+          : status === "NOT_DEMONSTRATED"
+            ? [
+                "No scored collector report for this Check — re-run collect or add measured imports under aprf-assessment/imports/<plugin>/.",
+                ...(rule.evidenceRequired ?? []).slice(0, 2),
+              ]
+            : [...(rule.evidenceRequired ?? [])];
 
     const priority = priorityFor(gate, rule.severity, status);
     const domain = domainForCategory(
@@ -516,6 +546,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       categoryDomain,
     );
 
+    const fix = rule.recommendedFixes?.[0] ?? "";
     controls.push({
       checkId,
       title: rule.title,
@@ -529,6 +560,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       manualVerification: rule.manualVerification,
       falsePositiveGuidance: rule.falsePositiveGuidance,
       references: rule.references,
+      ...(rule.passExample ? { passExample: rule.passExample } : {}),
       gate,
       severity: rule.severity,
       status,
@@ -543,12 +575,13 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
         : `No collector statusHint for ${checkId}. Marked NOT_DEMONSTRATED — add imports/ evidence or re-run collect. Manual: ${rule.manualVerification}`,
       recommendedAction: (rule.recommendedFixes ?? []).join("; "),
       priority,
+      // No placeholder owner/effort — those belong to a tracked remediation system, not CLI assess.
       remediation: {
-        fix: rule.recommendedFixes?.[0] ?? "",
+        fix,
         reference: checkId,
-        owner: "unassigned",
+        owner: "",
         priority,
-        estimatedEffort: "M",
+        estimatedEffort: "",
       },
       ...(notApplicable
         ? { naReason: "Collector reported not_applicable (surface absent)." }
