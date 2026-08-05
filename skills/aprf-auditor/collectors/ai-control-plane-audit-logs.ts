@@ -14,6 +14,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -32,9 +33,6 @@ const DETECTOR_ID = "repo-ai-control-plane-audit-logs";
 const INVENTORY_MAX_AGE_DAYS = 90;
 const DEFAULT_POLICY_MIN_DAYS = 365;
 const MAX_APPEAR_MINUTES = 5;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const PATH_RE =
   /(audit[\s_-]*log|control[\s_-]*plane|retention|cloudtrail|siem|audit[\s_-]*trail)/i;
@@ -86,10 +84,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function collectRefs(
   targetPath: string,
   maxFiles: number,
@@ -114,7 +108,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 100_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

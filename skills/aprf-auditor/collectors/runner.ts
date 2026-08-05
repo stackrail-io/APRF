@@ -15,6 +15,8 @@ import { pathToFileURL } from "node:url";
 import { COLLECTORS } from "./index.ts";
 import type { CollectorContext, EvidenceGraph, EvidenceNode } from "./types.ts";
 import {
+  clearWalkSkipAbsoluteDirs,
+  configureWalkSkipForCollect,
   ensureDir,
   projectName,
   tryGitCommit,
@@ -716,19 +718,25 @@ export async function runCollectors(
   const nodes: EvidenceNode[] = [];
   const log = args.log !== false;
 
-  for (const c of selected) {
-    const result = await c.collect(ctx);
-    collectorsMeta.push({
-      pluginId: result.pluginId,
-      status: result.status,
-      detail: result.detail,
-    });
-    nodes.push(...result.nodes);
-    if (log) {
-      console.log(
-        `[${result.status}] ${result.pluginId}: ${result.detail ?? ""} (${result.nodes.length} nodes)`,
-      );
+  // Never treat assessment output under the target as repo evidence.
+  configureWalkSkipForCollect(args.target, args.outDir);
+  try {
+    for (const c of selected) {
+      const result = await c.collect(ctx);
+      collectorsMeta.push({
+        pluginId: result.pluginId,
+        status: result.status,
+        detail: result.detail,
+      });
+      nodes.push(...result.nodes);
+      if (log) {
+        console.log(
+          `[${result.status}] ${result.pluginId}: ${result.detail ?? ""} (${result.nodes.length} nodes)`,
+        );
+      }
     }
+  } finally {
+    clearWalkSkipAbsoluteDirs();
   }
 
   nodes.sort((a, b) => a.id.localeCompare(b.id));
