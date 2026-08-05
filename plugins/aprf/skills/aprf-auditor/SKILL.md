@@ -43,6 +43,12 @@ npx @stackrail-io/aprf@0.1.1 audit --target . --out ./aprf-assessment --profile 
 Variants (same flags on either binary):
 
 ```bash
+# Live collectors (AUTHN-M1 / AUTHZ-M1 / AUTHN-M2) — auto-enables live mode
+… audit --target . --out ./aprf-assessment --profile core \
+  --base-url http://127.0.0.1:8080 \
+  --admin-email "$APRF_ADMIN_EMAIL" \
+  --admin-password "$APRF_ADMIN_PASSWORD"
+
 # Regulated profile
 … audit --target . --profile regulated
 
@@ -52,6 +58,8 @@ Variants (same flags on either binary):
 # Full catalog
 … audit --target . --full
 ```
+
+Optional: `--limited-email` / `--limited-password` for AUTHZ-M1; other evidence via `aprf-assessment/imports/<plugin>/` or env (`GITHUB_TOKEN`, …).
 ## Step-by-step (when not using `audit`)
 
 ```bash

@@ -36,6 +36,15 @@ import {
   mergeOrBool,
   parseMeasuredAt,
 } from "./lib/import-attest.ts";
+import {
+  resolveAdminEmail,
+  resolveAdminPassword,
+  resolveAdminToken,
+  resolveBaseUrl,
+  resolveLiveAdminToken,
+} from "./lib/live-auth.ts";
+
+export { signInForAdminToken } from "./lib/live-auth.ts";
 
 const PLUGIN_ID = "mcp-s2s-inventory";
 const RELATED = ["AUTHN-M2"] as const;
@@ -117,109 +126,6 @@ export interface McpS2sReport {
 
 function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
-}
-
-function resolveBaseUrl(ctx: CollectorContext): string | undefined {
-  const u = ctx.baseUrl?.trim() || process.env.APRF_AUTH_PROBE_BASE_URL?.trim();
-  return u ? u.replace(/\/$/, "") : undefined;
-}
-
-function resolveAdminToken(ctx: CollectorContext): string | undefined {
-  return (
-    ctx.adminToken?.trim() ||
-    process.env.APRF_ADMIN_TOKEN?.trim() ||
-    process.env.APRF_AUTH_PROBE_ADMIN_TOKEN?.trim() ||
-    undefined
-  );
-}
-
-function resolveAdminEmail(ctx: CollectorContext): string | undefined {
-  return (
-    ctx.adminEmail?.trim() ||
-    process.env.APRF_ADMIN_EMAIL?.trim() ||
-    process.env.APRF_ADMIN_USER?.trim() ||
-    undefined
-  );
-}
-
-function resolveAdminPassword(ctx: CollectorContext): string | undefined {
-  return (
-    ctx.adminPassword?.trim() ||
-    process.env.APRF_ADMIN_PASSWORD?.trim() ||
-    undefined
-  );
-}
-
-/**
- * Open WebUI-style password login → JWT bearer token.
- * POST /api/v1/auths/signin { email, password } → { token }
- */
-export async function signInForAdminToken(
-  baseUrl: string,
-  email: string,
-  password: string,
-): Promise<{ token?: string; error?: string }> {
-  const url = `${baseUrl.replace(/\/$/, "")}/api/v1/auths/signin`;
-  try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 15000);
-    const res = await fetch(url, {
-      method: "POST",
-      signal: ctrl.signal,
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        "User-Agent": "aprf-auditor-mcp-s2s-inventory/0.2",
-      },
-      body: JSON.stringify({ email, password }),
-    });
-    clearTimeout(t);
-    const text = await res.text();
-    let data: Record<string, unknown> = {};
-    try {
-      data = text ? (JSON.parse(text) as Record<string, unknown>) : {};
-    } catch {
-      return {
-        error: `signin HTTP ${res.status}: non-JSON body`,
-      };
-    }
-    if (!res.ok) {
-      const detail =
-        (data.detail as string) ||
-        (typeof data.detail === "object" ? JSON.stringify(data.detail) : "") ||
-        text.slice(0, 200);
-      return { error: `signin HTTP ${res.status}: ${detail}` };
-    }
-    const token =
-      (data.token as string) ||
-      (data.access_token as string) ||
-      ((data.data as Record<string, unknown> | undefined)?.token as string);
-    if (!token) {
-      return { error: "signin succeeded but response had no token field" };
-    }
-    return { token };
-  } catch (err) {
-    return {
-      error: err instanceof Error ? err.message : String(err),
-    };
-  }
-}
-
-async function resolveLiveAdminToken(
-  ctx: CollectorContext,
-  baseUrl: string,
-): Promise<{ token?: string; error?: string; via: "token" | "password" | "none" }> {
-  const existing = resolveAdminToken(ctx);
-  if (existing) return { token: existing, via: "token" };
-
-  const email = resolveAdminEmail(ctx);
-  const password = resolveAdminPassword(ctx);
-  if (email && password) {
-    const signed = await signInForAdminToken(baseUrl, email, password);
-    if (signed.token) return { token: signed.token, via: "password" };
-    return { error: signed.error, via: "password" };
-  }
-  return { via: "none" };
 }
 
 function connectionName(c: S2SConnection, index: number): string {

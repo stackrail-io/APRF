@@ -609,14 +609,16 @@ checks:
       - "**/access_control/**"
     naWhen: "No privileged AI feature, tool, or retrieval entry points"
     evaluation: |
-      Prefer collectors/authz-entry-tests (discovers AI entry points + guards + denial-test coverage)
-      or imports/authz-entry-tests/*.json coverage with measuredAt ≤90d.
+      Prefer collectors/authz-entry-tests (privilege-gated AI routes via get_admin_user /
+      has_permission / has_access — not mere get_verified_user) + denial coverage from
+      in-repo tests, imports/authz-entry-tests/*.json, or live limited-user probe
+      (--base-url + admin or APRF_AUTHZ_LIMITED_* credentials).
       PASS if authz-entry-report statusHint=pass / authzM1Satisfied === true (100% server-side
-      guards + denial coverage on privileged AI entry points + measuredAt ≤90d).
+      authz guards + denial coverage on privileged AI entry points + measuredAt ≤90d).
       NOT_APPLICABLE if privilegedAiFeatureToolOrRetrievalEntryPointsPresent=false.
-      Empty inventory without N/A attest is NOT_DEMONSTRATED (not a vacuous PASS).
-      FAIL if any privileged entry point lacks guard and/or denial coverage.
-      PARTIAL if guards exist in code but no authz suite, or measuredAt stale/missing on import-backed coverage.
+      Empty inventory without N/A attest is NOT_DEMONSTRATED (or PARTIAL when only authn-only
+      AI routes exist). FAIL if any privileged entry point lacks guard and/or denial coverage
+      or live probe returns 2xx for a limited user. Typed gapNotes list only missing evidence.
       Do not PASS from code review alone. AUTHN-M1, AUTHZ-M2, AUTHN-M4, and TOL-M1 do not substitute.
   AUTHZ-M2:
     requiredEvidence:

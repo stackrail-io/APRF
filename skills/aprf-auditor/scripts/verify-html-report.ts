@@ -14,6 +14,7 @@ const REQUIRED = [
   "Visual overview",
   "Control status mix",
   "APRF Auditor",
+  'class="brand-logo"',
   "<!DOCTYPE html>",
   "controls-table",
   "control-flyout",

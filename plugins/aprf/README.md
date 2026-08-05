@@ -37,6 +37,12 @@ The plugin skill (`aprf-auditor`) is model-invocable background guidance and is 
 
 ```bash
 npx @stackrail-io/aprf@0.1.1 audit --target . --out ./aprf-assessment --profile core
+
+# Live collectors (AUTHN-M1 / AUTHZ-M1 / AUTHN-M2) — same flags on audit and collect
+npx @stackrail-io/aprf@0.1.1 audit --target . --out ./aprf-assessment --profile core \
+  --base-url http://127.0.0.1:8080 \
+  --admin-email "$APRF_ADMIN_EMAIL" \
+  --admin-password "$APRF_ADMIN_PASSWORD"
 ```
 
 Artifacts land in `./aprf-assessment/` (`evidence-graph.json`, `assessment.json`, `REPORT.html`).

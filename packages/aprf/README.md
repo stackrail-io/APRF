@@ -30,8 +30,31 @@ aprf report --in ./aprf-assessment/assessment.json --out ./aprf-assessment/REPOR
 aprf verify ./aprf-assessment/REPORT.html
 
 # One shot: collect → assess → report → verify
-aprf audit --target /path/to/app --profile core
+aprf audit --target . --out ./aprf-assessment --profile core
 ```
+
+### Live credentials (collect / audit)
+
+Same flags on `collect` and `audit`. Providing `--base-url` or admin/limited creds auto-enables live mode (no separate `--live` required). Passwords/tokens are never written to reports.
+
+```bash
+npx @stackrail-io/aprf audit --target . --out ./aprf-assessment --profile core \
+  --base-url http://127.0.0.1:8080 \
+  --admin-email "$APRF_ADMIN_EMAIL" \
+  --admin-password "$APRF_ADMIN_PASSWORD"
+```
+
+| Flag | Env | Used by |
+| --- | --- | --- |
+| `--base-url` | `APRF_AUTH_PROBE_BASE_URL` | AUTHN-M1, AUTHZ-M1, AUTHN-M2 |
+| `--admin-token` | `APRF_ADMIN_TOKEN` | AUTHN-M2, AUTHZ-M1 (temp user) |
+| `--admin-email` | `APRF_ADMIN_EMAIL` | sign-in → JWT |
+| `--admin-password` | `APRF_ADMIN_PASSWORD` | sign-in → JWT |
+| `--limited-email` | `APRF_AUTHZ_LIMITED_EMAIL` | AUTHZ-M1 denial probe |
+| `--limited-password` | `APRF_AUTHZ_LIMITED_PASSWORD` | AUTHZ-M1 denial probe |
+| `--limited-token` | `APRF_AUTHZ_LIMITED_TOKEN` | AUTHZ-M1 denial probe |
+
+Other collector evidence: drop measured JSON under `./aprf-assessment/imports/<pluginId>/`, or set collector-specific env (e.g. `GITHUB_TOKEN` with live mode for github-actions).
 
 ## Assess engine (deterministic)
 

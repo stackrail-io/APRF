@@ -323,12 +323,22 @@ Scores each connection: `auth_type=none` / static bearer keys fail; named OAuth/
 ### AUTHZ-M1 — Authz entry-point denial tests
 
 ```bash
+# Offline: inventory + authz guards + in-repo denial tests / imports
 npm run aprf:authz-tests -- \
   --target /path/to/app \
   --out /path/to/app/aprf-assessment
+
+# Live: limited-user denial probe (admin can create a temp user, or pass limited creds)
+npm run aprf:authz-tests -- \
+  --target /path/to/app \
+  --out /path/to/app/aprf-assessment \
+  --base-url http://127.0.0.1:8080 \
+  --admin-email "$APRF_ADMIN_EMAIL" \
+  --admin-password "$APRF_ADMIN_PASSWORD"
+# or: --limited-email "$APRF_AUTHZ_LIMITED_EMAIL" --limited-password "$APRF_AUTHZ_LIMITED_PASSWORD"
 ```
 
-Inventories AI routes, detects server-side guards, and scores whether tests assert 401/403 for those paths. Writes `imports/authz-entry-tests/authz-entry-report.json`. Code guards alone ≠ PASS.
+Inventories privilege-gated AI routes (`get_admin_user` / `has_permission` / `has_access` — not mere `get_verified_user`), detects server-side authz guards, and scores denial coverage from in-repo tests, imports, or a live limited-user probe (401/403). Writes `imports/authz-entry-tests/authz-entry-report.json` with typed `gapNotes`. Code guards alone ≠ PASS.
 
 ### AUTHZ-M2 — Cross-tenant attack tests
 

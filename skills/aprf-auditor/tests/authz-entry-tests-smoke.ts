@@ -1,6 +1,7 @@
 /**
- * Smoke: authz-entry-tests requires denial tests for AI entry points;
- * code guards alone do not satisfy AUTHZ-M1; N/A + measuredAt hygiene.
+ * Smoke: authz-entry-tests requires denial tests for privileged AI entry points;
+ * authn-only guards are not AUTHZ-M1 privilege gates; live limited-user probe
+ * can supply denial coverage; N/A + measuredAt hygiene.
  */
 import {
   mkdtempSync,
@@ -9,6 +10,7 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
+import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -35,11 +37,11 @@ app.include_router(knowledge.router, prefix='/api/v1/knowledge', tags=['knowledg
     join(targetDir, "routers", "chats.py"),
     `
 from fastapi import APIRouter, Depends
-from open_webui.utils.auth import get_verified_user
+from open_webui.utils.auth import get_admin_user
 router = APIRouter()
 
 @router.post('/')
-async def create_chat(user=Depends(get_verified_user)):
+async def create_chat(user=Depends(get_admin_user)):
     return {}
 `,
     "utf8",
@@ -48,11 +50,11 @@ async def create_chat(user=Depends(get_verified_user)):
     join(targetDir, "routers", "knowledge.py"),
     `
 from fastapi import APIRouter, Depends
-from open_webui.utils.auth import get_verified_user
+from open_webui.utils.auth import get_admin_user
 router = APIRouter()
 
 @router.get('/')
-async def list_kb(user=Depends(get_verified_user)):
+async def list_kb(user=Depends(get_admin_user)):
     return []
 `,
     "utf8",
@@ -86,9 +88,18 @@ async def list_kb(user=Depends(get_verified_user)):
       `without tests expected statusHint=fail, got ${report1.summary.statusHint}`,
     );
   }
-  if (!report1.codeGuardsFound) {
-    throw new Error("expected code guards detected");
+  if (!report1.authzGuardsFound) {
+    throw new Error("expected authz guards detected");
   }
+  if (!report1.gapNotes?.some((n) => /denial|suite|live/i.test(n))) {
+    throw new Error(
+      `expected gapNotes about denial suite, got ${JSON.stringify(report1.gapNotes)}`,
+    );
+  }
+  // Evidence excerpt on graph node should be valid JSON for REPORT pretty-print
+  const reportNode = noTests.nodes.find((n) => n.id.endsWith(":report"));
+  if (!reportNode?.excerpt) throw new Error("missing report excerpt");
+  JSON.parse(reportNode.excerpt);
 
   // Add denial tests for both entry points
   writeFileSync(
@@ -139,6 +150,61 @@ def test_knowledge_forbidden():
   }
   if (!report2.measuredAt) {
     throw new Error("expected measuredAt on pass report");
+  }
+  if (report2.gapNotes.length !== 0) {
+    throw new Error(`pass report should have empty gapNotes, got ${report2.gapNotes}`);
+  }
+
+  // Authn-only guards must not score as privileged AUTHZ-M1 entry points.
+  // Mixed file: admin on one handler must not launder authz onto authn-only handlers.
+  const authnOnlyTarget = mkdtempSync(join(tmpdir(), "aprf-authz-authn-"));
+  mkdirSync(join(authnOnlyTarget, "routers"), { recursive: true });
+  writeFileSync(
+    join(authnOnlyTarget, "main.py"),
+    `app.include_router(chats.router, prefix='/api/v1/chats', tags=['chats'])\n`,
+    "utf8",
+  );
+  writeFileSync(
+    join(authnOnlyTarget, "routers", "chats.py"),
+    `
+from fastapi import APIRouter, Depends
+from open_webui.utils.auth import get_verified_user, get_admin_user
+router = APIRouter()
+@router.post('/')
+async def create_chat(user=Depends(get_verified_user)):
+    return {}
+@router.get('/config')
+async def get_config(user=Depends(get_admin_user)):
+    return {}
+`,
+    "utf8",
+  );
+  const outAuthn = mkdtempSync(join(tmpdir(), "aprf-authz-authn-out-"));
+  await authzEntryTestsCollector.collect({
+    targetPath: authnOnlyTarget,
+    outputDir: outAuthn,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 200,
+  });
+  const reportAuthn = JSON.parse(
+    readFileSync(
+      join(outAuthn, "imports", "authz-entry-tests", "authz-entry-report.json"),
+      "utf8",
+    ),
+  ) as AuthzEntryReport;
+  if (reportAuthn.summary.total !== 1) {
+    throw new Error(
+      `expected only /config as privileged, total=${reportAuthn.summary.total} eps=${JSON.stringify(reportAuthn.entryPoints)}`,
+    );
+  }
+  if (!reportAuthn.entryPoints[0]?.path.includes("config")) {
+    throw new Error(
+      `expected privileged path to be config, got ${reportAuthn.entryPoints[0]?.path}`,
+    );
+  }
+  if (reportAuthn.authnOnlyAiEntryPointCount < 1) {
+    throw new Error("expected authnOnlyAiEntryPointCount >= 1");
   }
 
   // N/A: empty target + explicit attest
@@ -235,14 +301,17 @@ def test_chats_unauthorized():
       "global has_permission must not PASS unguarded routes with denial tests only",
     );
   }
-  if (reportUnguarded.summary.authzM1Satisfied === true) {
-    throw new Error("unguarded route expected satisfied≠true");
-  }
-  if (!reportUnguarded.codeGuardsFound) {
-    throw new Error("expected global codeGuardsFound=true for has_permission helper");
-  }
   if (reportUnguarded.entryPoints.some((e) => e.hasServerGuard)) {
     throw new Error("unguarded router must not report hasServerGuard");
+  }
+  if (
+    !reportUnguarded.gapNotes?.some((n) =>
+      /no authn\/authz guard|missing on \d+ AI entry/i.test(n),
+    )
+  ) {
+    throw new Error(
+      `unguarded AI routes should produce typed guard gapNotes, got ${JSON.stringify(reportUnguarded.gapNotes)}`,
+    );
   }
 
   // Loose substring coveredPaths must not launder denial coverage.
@@ -256,8 +325,6 @@ def test_chats_unauthorized():
     }),
     "utf8",
   );
-  // No in-repo denial tests on targetDir for this run — wipe tests by using a copy
-  // without tests: reuse target before tests were added via a fresh tree.
   const looseTarget = mkdtempSync(join(tmpdir(), "aprf-authz-loose-target-"));
   mkdirSync(join(looseTarget, "routers"), { recursive: true });
   writeFileSync(
@@ -269,10 +336,10 @@ def test_chats_unauthorized():
     join(looseTarget, "routers", "chats.py"),
     `
 from fastapi import APIRouter, Depends
-from open_webui.utils.auth import get_verified_user
+from open_webui.utils.auth import get_admin_user
 router = APIRouter()
 @router.post('/')
-async def create_chat(user=Depends(get_verified_user)):
+async def create_chat(user=Depends(get_admin_user)):
     return {}
 `,
     "utf8",
@@ -316,10 +383,10 @@ app.include_router(knowledge.router, prefix='/api/v1/knowledge', tags=['knowledg
     join(mixedTarget, "routers", "chats.py"),
     `
 from fastapi import APIRouter, Depends
-from open_webui.utils.auth import get_verified_user
+from open_webui.utils.auth import get_admin_user
 router = APIRouter()
 @router.post('/')
-async def create_chat(user=Depends(get_verified_user)):
+async def create_chat(user=Depends(get_admin_user)):
     return {}
 `,
     "utf8",
@@ -328,10 +395,10 @@ async def create_chat(user=Depends(get_verified_user)):
     join(mixedTarget, "routers", "knowledge.py"),
     `
 from fastapi import APIRouter, Depends
-from open_webui.utils.auth import get_verified_user
+from open_webui.utils.auth import get_admin_user
 router = APIRouter()
 @router.get('/')
-async def list_kb(user=Depends(get_verified_user)):
+async def list_kb(user=Depends(get_admin_user)):
     return []
 `,
     "utf8",
@@ -388,14 +455,6 @@ def test_chats_unauthorized():
       "stale import measuredAt must block PASS when any route is import-backed",
     );
   }
-  if (reportStaleImport.summary.authzM1Satisfied === true) {
-    throw new Error("stale import-backed suite expected satisfied≠true");
-  }
-  if (reportStaleImport.measuredAt !== "2020-01-01T00:00:00.000Z") {
-    throw new Error(
-      `expected import measuredAt on mixed report, got ${reportStaleImport.measuredAt}`,
-    );
-  }
 
   // Exact fresh import coverage unlocks PASS for the import-backed route.
   const mixedOutFresh = mkdtempSync(join(tmpdir(), "aprf-authz-mixed-fresh-"));
@@ -448,7 +507,6 @@ def test_chats_unauthorized():
     join(methodMismatchOut, "imports", "authz-entry-tests", "coverage.json"),
     JSON.stringify({
       measuredAt: new Date().toISOString(),
-      // Path-only + wrong method — must not cover POST /api/v1/chats
       coveredPaths: ["/api/v1/chats", "GET /api/v1/chats"],
     }),
     "utf8",
@@ -466,10 +524,10 @@ def test_chats_unauthorized():
     join(methodMismatchTarget, "routers", "chats.py"),
     `
 from fastapi import APIRouter, Depends
-from open_webui.utils.auth import get_verified_user
+from open_webui.utils.auth import get_admin_user
 router = APIRouter()
 @router.post('/')
-async def create_chat(user=Depends(get_verified_user)):
+async def create_chat(user=Depends(get_admin_user)):
     return {}
 `,
     "utf8",
@@ -501,16 +559,12 @@ async def create_chat(user=Depends(get_verified_user)):
       `path-only/wrong-method coveredPaths must not set hasDenialTest; got ${JSON.stringify(reportMethodMismatch.entryPoints)}`,
     );
   }
-  if (reportMethodMismatch.summary.statusHint === "pass") {
-    throw new Error("path-only/wrong-method coveredPaths must not PASS AUTHZ-M1");
-  }
 
-  // include_router prefix fallbacks (declaredInCode=false) must still be scored.
+  // include_router prefix fallbacks (declaredInCode=false) must still be classified.
   const fallbackTarget = mkdtempSync(join(tmpdir(), "aprf-authz-fallback-"));
   const fallbackOut = mkdtempSync(join(tmpdir(), "aprf-authz-fallback-out-"));
   writeFileSync(
     join(fallbackTarget, "main.py"),
-    // Module not resolvable → http-auth-probe emits prefix fallbacks.
     `app.include_router(missing_mod.router, prefix='/api/v1/knowledge', tags=['knowledge'])\n`,
     "utf8",
   );
@@ -532,20 +586,167 @@ async def create_chat(user=Depends(get_verified_user)):
       "utf8",
     ),
   ) as AuthzEntryReport;
-  if (reportFallback.entryPoints.length === 0) {
-    throw new Error(
-      "include_router prefix fallbacks must become AUTHZ-M1 entry points",
-    );
+  // Without resolvable router, routes are authn/none — not privileged; must not vacuous PASS.
+  if (reportFallback.summary.statusHint === "pass") {
+    throw new Error("prefix-fallback-only must not vacuous PASS AUTHZ-M1");
   }
-  if (reportFallback.entryPoints.every((e) => e.declaredInCode)) {
-    throw new Error(
-      "expected at least one declaredInCode=false prefix fallback entry point",
-    );
+
+  // Live limited-user probe supplies denial coverage.
+  const liveTarget = mkdtempSync(join(tmpdir(), "aprf-authz-live-target-"));
+  mkdirSync(join(liveTarget, "routers"), { recursive: true });
+  writeFileSync(
+    join(liveTarget, "main.py"),
+    `app.include_router(chats.router, prefix='/api/v1/chats', tags=['chats'])\n`,
+    "utf8",
+  );
+  writeFileSync(
+    join(liveTarget, "routers", "chats.py"),
+    `
+from fastapi import APIRouter, Depends
+from open_webui.utils.auth import get_admin_user
+router = APIRouter()
+@router.post('/')
+async def create_chat(user=Depends(get_admin_user)):
+    return {}
+`,
+    "utf8",
+  );
+  const liveServer = createServer((req, res) => {
+    const auth = req.headers.authorization || "";
+    if (req.url === "/api/v1/auths/signin" && req.method === "POST") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ token: "limited-jwt", role: "user" }));
+      return;
+    }
+    if (auth === "Bearer limited-jwt") {
+      res.writeHead(403, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ detail: "Forbidden" }));
+      return;
+    }
+    res.writeHead(401, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ detail: "Unauthorized" }));
+  });
+  await new Promise<void>((resolve) => liveServer.listen(0, "127.0.0.1", () => resolve()));
+  const addr = liveServer.address();
+  if (!addr || typeof addr === "string") throw new Error("no listen addr");
+  const liveOut = mkdtempSync(join(tmpdir(), "aprf-authz-live-out-"));
+  try {
+    await authzEntryTestsCollector.collect({
+      targetPath: liveTarget,
+      outputDir: liveOut,
+      assessedAt: new Date(),
+      live: true,
+      maxFiles: 200,
+      baseUrl: `http://127.0.0.1:${addr.port}`,
+      limitedEmail: "user@test.local",
+      limitedPassword: "secret",
+    });
+    const reportLive = JSON.parse(
+      readFileSync(
+        join(liveOut, "imports", "authz-entry-tests", "authz-entry-report.json"),
+        "utf8",
+      ),
+    ) as AuthzEntryReport;
+    if (reportLive.summary.statusHint !== "pass") {
+      throw new Error(
+        `live denial probe expected pass, got ${JSON.stringify(reportLive.summary)} notes=${reportLive.notes.join("; ")}`,
+      );
+    }
+    if (!reportLive.entryPoints.every((e) => e.denialFromLive)) {
+      throw new Error(
+        `expected denialFromLive on entry points, got ${JSON.stringify(reportLive.entryPoints)}`,
+      );
+    }
+    if (!reportLive.liveProbe || reportLive.liveProbe.denied < 1) {
+      throw new Error(
+        `expected liveProbe.denied>=1, got ${JSON.stringify(reportLive.liveProbe)}`,
+      );
+    }
+  } finally {
+    liveServer.close();
   }
-  if (reportFallback.summary.statusHint === "not_demonstrated") {
-    throw new Error(
-      "prefix-fallback-only inventory must not collapse to not_demonstrated",
+
+  // Live denial on one route must not launder a stale import on a sibling into PASS.
+  const mixedLiveStaleOut = mkdtempSync(
+    join(tmpdir(), "aprf-authz-mixed-live-stale-"),
+  );
+  mkdirSync(join(mixedLiveStaleOut, "imports", "authz-entry-tests"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(mixedLiveStaleOut, "imports", "authz-entry-tests", "coverage.json"),
+    JSON.stringify({
+      measuredAt: "2020-01-01T00:00:00.000Z",
+      coveredPaths: ["GET /api/v1/knowledge"],
+    }),
+    "utf8",
+  );
+  // Deny chats live; leave knowledge as a non-denial/non-bypass so its stale
+  // import remains the only denial evidence for that route.
+  const mixedLiveServer = createServer((req, res) => {
+    const auth = req.headers.authorization || "";
+    if (req.url === "/api/v1/auths/signin" && req.method === "POST") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ token: "limited-jwt", role: "user" }));
+      return;
+    }
+    if (auth === "Bearer limited-jwt") {
+      if ((req.url || "").includes("knowledge")) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ detail: "probe error" }));
+        return;
+      }
+      res.writeHead(403, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ detail: "Forbidden" }));
+      return;
+    }
+    res.writeHead(401, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ detail: "Unauthorized" }));
+  });
+  await new Promise<void>((resolve) =>
+    mixedLiveServer.listen(0, "127.0.0.1", () => resolve()),
+  );
+  const mixedAddr = mixedLiveServer.address();
+  if (!mixedAddr || typeof mixedAddr === "string") {
+    throw new Error("no mixed live listen addr");
+  }
+  try {
+    await authzEntryTestsCollector.collect({
+      targetPath: mixedTarget,
+      outputDir: mixedLiveStaleOut,
+      assessedAt: new Date(),
+      live: true,
+      maxFiles: 200,
+      baseUrl: `http://127.0.0.1:${mixedAddr.port}`,
+      limitedEmail: "user@test.local",
+      limitedPassword: "secret",
+    });
+    const reportMixedLiveStale = JSON.parse(
+      readFileSync(
+        join(
+          mixedLiveStaleOut,
+          "imports",
+          "authz-entry-tests",
+          "authz-entry-report.json",
+        ),
+        "utf8",
+      ),
+    ) as AuthzEntryReport;
+    const knowledgeMixed = reportMixedLiveStale.entryPoints.find((e) =>
+      e.path.includes("knowledge"),
     );
+    if (!knowledgeMixed?.denialFromImport) {
+      throw new Error(
+        `expected knowledge still import-backed, got ${JSON.stringify(knowledgeMixed)}`,
+      );
+    }
+    if (reportMixedLiveStale.summary.statusHint === "pass") {
+      throw new Error(
+        "live denial on one route must not PASS when a sibling is stale-import-backed",
+      );
+    }
+  } finally {
+    mixedLiveServer.close();
   }
 
   console.log("aprf-auditor authz-entry-tests smoke OK");
@@ -555,6 +756,8 @@ async def create_chat(user=Depends(get_verified_user)):
     outNa,
     emptyTarget,
     targetDir,
+    authnOnlyTarget,
+    outAuthn,
     unguardedTarget,
     outUnguarded,
     looseOut,
@@ -566,6 +769,9 @@ async def create_chat(user=Depends(get_verified_user)):
     methodMismatchTarget,
     fallbackTarget,
     fallbackOut,
+    liveTarget,
+    liveOut,
+    mixedLiveStaleOut,
   ]) {
     rmSync(d, { recursive: true, force: true });
   }

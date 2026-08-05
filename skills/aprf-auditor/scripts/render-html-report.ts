@@ -36,6 +36,33 @@ const SKILL_ROOT = resolve(SCRIPT_DIR, "..");
 const REPO_ROOT = resolve(SKILL_ROOT, "../..");
 const RULES_ROOT = resolve(REPO_ROOT, "packages/aprf-engine/rules/by-domain");
 
+/** Resolve StackRail owl mark for self-contained REPORT.html embedding. */
+function resolveOwlMarkPath(): string | null {
+  const candidates = [
+    join(SCRIPT_DIR, "assets", "owl-mark.png"), // packages/aprf/dist/assets (bundled CLI)
+    join(SCRIPT_DIR, "..", "assets", "owl-mark.png"), // skills/aprf-auditor/assets
+    join(REPO_ROOT, "plugins", "aprf", "assets", "owl-mark.png"),
+    join(process.cwd(), "plugins", "aprf", "assets", "owl-mark.png"),
+    // From dist/cli.js → ../../../plugins/aprf/assets
+    join(SCRIPT_DIR, "..", "..", "..", "plugins", "aprf", "assets", "owl-mark.png"),
+  ];
+  for (const p of candidates) {
+    if (existsSync(p)) return p;
+  }
+  return null;
+}
+
+function brandLogoDataUri(): string | null {
+  const path = resolveOwlMarkPath();
+  if (!path) return null;
+  try {
+    const buf = readFileSync(path);
+    return `data:image/png;base64,${buf.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
 type CatalogRule = {
   id: string;
   category?: string;
@@ -267,6 +294,11 @@ function formatEvidenceExcerpt(excerpt: string): string {
     if (pretty != null) {
       const lead = prefix ? `<span class="evidence-lead">${esc(prefix)}</span>` : "";
       return `${lead}<pre class="evidence-json" tabindex="0"><code>${esc(pretty)}</code></pre>`;
+    }
+    // Truncated JSON (assess used to slice mid-object): show in a code block anyway.
+    if (/^[\[{]/.test(jsonRaw) && (jsonRaw.includes('"') || jsonRaw.includes(":"))) {
+      const lead = prefix ? `<span class="evidence-lead">${esc(prefix)}</span>` : "";
+      return `${lead}<pre class="evidence-json" tabindex="0"><code>${esc(jsonRaw)}</code></pre>`;
     }
   }
 
@@ -992,6 +1024,13 @@ function render(a: Assessment): string {
       ]),
     ),
   );
+  const logoUri = brandLogoDataUri();
+  const brandLogo = logoUri
+    ? `<img class="brand-logo" src="${logoUri}" width="32" height="32" alt="StackRail" />`
+    : "";
+  const favicon = logoUri
+    ? `<link rel="icon" type="image/png" href="${logoUri}" />`
+    : "";
   const excluded =
     a.scope.excludedCheckIds?.length ?
       `<ul>${a.scope.excludedCheckIds.map((e) => `<li><strong>${esc(e.id)}</strong> — ${esc(e.reason)}</li>`).join("")}</ul>`
@@ -1005,6 +1044,7 @@ function render(a: Assessment): string {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>APRF Assessment — ${esc(a.subject.name)}</title>
+  ${favicon}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
@@ -1067,8 +1107,14 @@ function render(a: Assessment): string {
       gap: 0.75rem 1.25rem; margin-bottom: 0.85rem;
     }
     .brand {
+      display: inline-flex; align-items: center; gap: 0.6rem;
       letter-spacing: 0.1em; text-transform: uppercase;
       font-size: 0.72rem; color: var(--accent); font-weight: 700;
+    }
+    .brand-logo {
+      width: 32px; height: 32px; display: block; flex: 0 0 auto;
+      border-radius: 8px; object-fit: contain;
+      background: #0f1c26; padding: 3px; box-sizing: border-box;
     }
     .brand a { color: inherit; text-decoration: none; }
     .gate-badge {
@@ -1322,31 +1368,54 @@ function render(a: Assessment): string {
     }
     .pass-sample-open:hover { background: var(--bg); border-color: var(--accent, #2f6f7e); }
     .sample-modal-backdrop {
-      position: fixed; inset: 0; background: rgba(15, 28, 38, 0.45);
+      position: fixed; inset: 0; background: rgba(15, 28, 38, 0.55);
       z-index: 80; display: flex; align-items: center; justify-content: center;
       padding: 1.25rem; opacity: 0; pointer-events: none; transition: opacity 0.18s ease;
     }
     .sample-modal-backdrop.open { opacity: 1; pointer-events: auto; }
     .sample-modal {
-      width: min(640px, 96vw); max-height: min(80vh, 720px);
+      width: min(760px, 96vw); max-height: min(88vh, 860px);
       background: var(--card); border: 1px solid var(--line); border-radius: 12px;
       box-shadow: 0 24px 60px rgba(15, 28, 38, 0.28);
       display: flex; flex-direction: column; overflow: hidden;
+      isolation: isolate;
     }
     .sample-modal-header {
       display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;
-      padding: 1rem 1.15rem; border-bottom: 1px solid var(--line);
-      background: linear-gradient(180deg, #f7fafb 0%, #fff 100%);
+      padding: 0.9rem 1.15rem; border-bottom: 1px solid var(--line);
+      background: #fff; flex: 0 0 auto; position: relative; z-index: 1;
     }
     .sample-modal-header h3 {
       margin: 0; font-size: 0.98rem; line-height: 1.35; font-weight: 700;
     }
-    .sample-modal-header .meta { margin: 0.25rem 0 0; }
-    .sample-modal-body {
-      margin: 0; padding: 1rem 1.15rem 1.25rem; overflow: auto; flex: 1;
-      background: #0f1c26; color: #e8eef2; font-size: 0.78rem; line-height: 1.45;
+    .sample-modal-header .meta { margin: 0.35rem 0 0; max-width: 52rem; }
+    .sample-modal-dest {
+      display: block; margin-top: 0.35rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.74rem; color: var(--ink); word-break: break-all;
     }
-    .sample-modal-body code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre; }
+    .sample-modal-actions {
+      display: flex; gap: 0.4rem; flex: 0 0 auto; align-items: center;
+    }
+    .sample-modal-copy {
+      border: 1px solid var(--line); background: #fff; color: var(--ink);
+      font-family: var(--sans); font-size: 0.82rem; font-weight: 600;
+      padding: 0.4rem 0.7rem; cursor: pointer; border-radius: 8px;
+    }
+    .sample-modal-copy:hover { background: var(--bg); }
+    .sample-modal-scroll {
+      margin: 0; flex: 1 1 auto; min-height: 0; overflow: auto;
+      overscroll-behavior: contain; background: #0f1c26;
+      -webkit-overflow-scrolling: touch;
+    }
+    .sample-modal-body {
+      margin: 0; padding: 1rem 1.15rem 1.35rem;
+      color: #e8eef2; font-size: 0.78rem; line-height: 1.45;
+      background: transparent;
+    }
+    .sample-modal-body code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      white-space: pre; color: inherit; background: transparent;
+    }
     .catalog-rule {
       background: #f5f8fa; border: 1px solid var(--line);
       padding: 0.9rem 1rem; margin: 0.35rem 0 0; border-radius: var(--radius);
@@ -1372,7 +1441,7 @@ function render(a: Assessment): string {
   <div class="shell">
   <header class="hero">
     <div class="brand-row">
-      <div class="brand">APRF Auditor · <a href="${STACKRAIL.home}" rel="noopener">StackRail</a></div>
+      <div class="brand">${brandLogo}<span>APRF Auditor · <a href="${STACKRAIL.home}" rel="noopener">StackRail</a></span></div>
       <div class="gate-badge ${gateClass}" title="Overall mandatory gate">Gate ${gate}</div>
     </div>
     <h1>${esc(a.subject.name)}</h1>
@@ -1473,10 +1542,16 @@ function render(a: Assessment): string {
         <div>
           <h3 id="sample-modal-title">PASS sample</h3>
           <p class="meta" id="sample-modal-meta"></p>
+          <code class="sample-modal-dest" id="sample-modal-dest" hidden></code>
         </div>
-        <button type="button" class="flyout-close" id="sample-modal-close" aria-label="Close sample">Close</button>
+        <div class="sample-modal-actions">
+          <button type="button" class="sample-modal-copy" id="sample-modal-copy">Copy</button>
+          <button type="button" class="flyout-close" id="sample-modal-close" aria-label="Close sample">Close</button>
+        </div>
       </div>
-      <pre class="sample-modal-body" tabindex="0"><code id="sample-modal-code"></code></pre>
+      <div class="sample-modal-scroll" id="sample-modal-scroll">
+        <pre class="sample-modal-body" tabindex="0"><code id="sample-modal-code"></code></pre>
+      </div>
     </div>
   </div>
   <script type="application/json" id="pass-samples-data">${passSamplesPayload.replace(/</g, "\\u003c")}</script>
@@ -1492,8 +1567,11 @@ function render(a: Assessment): string {
       var sampleBackdrop = document.getElementById("sample-modal-backdrop");
       var sampleTitle = document.getElementById("sample-modal-title");
       var sampleMeta = document.getElementById("sample-modal-meta");
+      var sampleDest = document.getElementById("sample-modal-dest");
+      var sampleScroll = document.getElementById("sample-modal-scroll");
       var sampleCode = document.getElementById("sample-modal-code");
       var sampleClose = document.getElementById("sample-modal-close");
+      var sampleCopy = document.getElementById("sample-modal-copy");
       var samplesEl = document.getElementById("pass-samples-data");
       var passSamples = {};
       try {
@@ -1537,12 +1615,22 @@ function render(a: Assessment): string {
         if (!sample || !sampleBackdrop || !sampleTitle || !sampleMeta || !sampleCode) return;
         sampleOpener = opener || null;
         sampleTitle.textContent = sample.filename || "PASS sample";
-        sampleMeta.textContent = (sample.hint || "") +
-          (sample.destination ? " Destination: " + sample.destination : "");
+        sampleMeta.textContent = sample.hint || "";
+        if (sampleDest) {
+          if (sample.destination) {
+            sampleDest.hidden = false;
+            sampleDest.textContent = "→ " + sample.destination;
+          } else {
+            sampleDest.hidden = true;
+            sampleDest.textContent = "";
+          }
+        }
         sampleCode.textContent = sample.content || "";
+        if (sampleCopy) sampleCopy.textContent = "Copy";
         sampleBackdrop.hidden = false;
         requestAnimationFrame(function () {
           sampleBackdrop.classList.add("open");
+          if (sampleScroll) sampleScroll.scrollTop = 0;
         });
         if (sampleClose) sampleClose.focus();
       }
@@ -1557,6 +1645,43 @@ function render(a: Assessment): string {
           }
           sampleOpener = null;
         }, 180);
+      }
+
+      if (sampleCopy) {
+        sampleCopy.addEventListener("click", function () {
+          var text = sampleCode ? sampleCode.textContent || "" : "";
+          if (!text) return;
+          var done = function () {
+            sampleCopy.textContent = "Copied";
+            setTimeout(function () { sampleCopy.textContent = "Copy"; }, 1200);
+          };
+          var fail = function () {
+            sampleCopy.textContent = "Copy failed";
+            setTimeout(function () { sampleCopy.textContent = "Copy"; }, 1200);
+          };
+          var fallback = function () {
+            var ta = document.createElement("textarea");
+            try {
+              ta.value = text;
+              ta.setAttribute("readonly", "");
+              ta.style.position = "fixed";
+              ta.style.left = "-9999px";
+              document.body.appendChild(ta);
+              ta.select();
+              if (document.execCommand("copy")) done();
+              else fail();
+            } catch (err) {
+              fail();
+            } finally {
+              if (ta.parentNode) document.body.removeChild(ta);
+            }
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done).catch(fallback);
+          } else {
+            fallback();
+          }
+        });
       }
 
       document.querySelectorAll(".control-row, .roadmap-check").forEach(function (row) {
