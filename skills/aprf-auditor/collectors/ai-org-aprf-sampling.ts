@@ -11,6 +11,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -28,8 +29,6 @@ const RELATED = ["ORG-R5"] as const;
 const DETECTOR_ID = "repo-ai-org-aprf-sampling";
 const ASSESSMENT_MAX_AGE_DAYS = 365;
 const IMPORT_MAX_AGE_DAYS = 90;
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 const PATH_RE =
   /(internal[\s_-]*audit|independent[\s_-]*assess|aprf[\s_-]*sampl|evidence[\s_-]*sampl)/i;
 const SAMPLE_RE =
@@ -81,9 +80,6 @@ function daysSince(iso: string | null | undefined, now: Date): number | null {
   if (!Number.isFinite(t)) return null;
   return Math.floor((now.getTime() - t) / (24 * 60 * 60 * 1000));
 }
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
 function collectRefs(
   targetPath: string,
   maxFiles: number,
@@ -96,7 +92,7 @@ function collectRefs(
     extensions: [".yml", ".yaml", ".json", ".md", ".txt"],
   })) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 100_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

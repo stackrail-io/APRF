@@ -15,6 +15,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -26,9 +27,6 @@ import { measuredAtFresh, parseMeasuredAt } from "./lib/import-attest.ts";
 const PLUGIN_ID = "a2a-peer-auth";
 const RELATED = ["AGN-M4"] as const;
 const DETECTOR_ID = "repo-a2a-config";
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const A2A_PATH_RE =
   /(a2a|agent.?to.?agent|multi.?agent|handoff|peer.?agent|supervisor|sub.?agent)/i;
@@ -78,10 +76,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function collectRefs(
   targetPath: string,
   maxFiles: number,
@@ -106,7 +100,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

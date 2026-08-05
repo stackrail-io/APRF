@@ -15,6 +15,8 @@ import { pathToFileURL } from "node:url";
 import { COLLECTORS } from "./index.ts";
 import type { CollectorContext, EvidenceGraph, EvidenceNode } from "./types.ts";
 import {
+  clearWalkSkipAbsoluteDirs,
+  configureWalkSkipForCollect,
   ensureDir,
   projectName,
   tryGitCommit,
@@ -687,14 +689,22 @@ export type CollectOptions = {
 export async function runCollectors(
   args: CollectOptions,
 ): Promise<EvidenceGraph> {
-  ensureDir(args.outDir);
-  ensureDir(resolve(args.outDir, "imports"));
+  const target = resolve(args.target);
+  const outDir = resolve(args.outDir);
+  if (outDir === target) {
+    throw new Error(
+      `--out must not equal --target (would skip the whole repository from evidence walks); use a subdirectory such as ./aprf-assessment`,
+    );
+  }
+
+  ensureDir(outDir);
+  ensureDir(resolve(outDir, "imports"));
 
   const assessedAt = new Date();
-  const gitCommit = tryGitCommit(args.target);
+  const gitCommit = tryGitCommit(target);
   const ctx: CollectorContext = {
-    targetPath: args.target,
-    outputDir: args.outDir,
+    targetPath: target,
+    outputDir: outDir,
     assessedAt,
     gitCommit,
     live: args.live,
@@ -716,19 +726,27 @@ export async function runCollectors(
   const nodes: EvidenceNode[] = [];
   const log = args.log !== false;
 
-  for (const c of selected) {
-    const result = await c.collect(ctx);
-    collectorsMeta.push({
-      pluginId: result.pluginId,
-      status: result.status,
-      detail: result.detail,
-    });
-    nodes.push(...result.nodes);
-    if (log) {
-      console.log(
-        `[${result.status}] ${result.pluginId}: ${result.detail ?? ""} (${result.nodes.length} nodes)`,
-      );
+  // Never treat assessment output under the target as repo evidence.
+  configureWalkSkipForCollect(target, outDir);
+  try {
+    for (const c of selected) {
+      // Re-assert after each collector in case a collect path mutated module skips.
+      configureWalkSkipForCollect(target, outDir);
+      const result = await c.collect(ctx);
+      collectorsMeta.push({
+        pluginId: result.pluginId,
+        status: result.status,
+        detail: result.detail,
+      });
+      nodes.push(...result.nodes);
+      if (log) {
+        console.log(
+          `[${result.status}] ${result.pluginId}: ${result.detail ?? ""} (${result.nodes.length} nodes)`,
+        );
+      }
     }
+  } finally {
+    clearWalkSkipAbsoluteDirs();
   }
 
   nodes.sort((a, b) => a.id.localeCompare(b.id));

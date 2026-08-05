@@ -20,6 +20,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -38,9 +39,6 @@ const DETECTOR_ID = "repo-abuse-injection-release-gate";
 const IMPORT_MAX_AGE_DAYS = 90;
 const RELEASE_WINDOW_DAYS = 30;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const SUITE_RE =
   /\b(abuse[_-]?(eval|suite|test|gate)|jailbreak[_-]?(eval|suite|test|redteam)|prompt[_-]?injection[_-]?(eval|suite|test|corpus)|injection[_-]?(eval|suite|test|corpus)|adversarial[_-]?(security|eval|suite)|security[_-]?(redteam|suite|eval))\b/i;
@@ -94,10 +92,6 @@ export interface AbuseInjectionReleaseGateReport {
 
 function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
-}
-
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
 }
 
 function asNum(v: unknown): number | null {
@@ -224,7 +218,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

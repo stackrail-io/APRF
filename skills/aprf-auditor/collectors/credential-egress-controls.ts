@@ -15,6 +15,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -35,9 +36,6 @@ const PLUGIN_ID = "credential-egress-controls";
 const RELATED = ["SEC2-R2"] as const;
 const DETECTOR_ID = "repo-credential-egress-controls";
 const IMPORT_MAX_AGE_DAYS = 90;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const EGRESS_POLICY_RE =
   /\b(egress[_-]?(allowlist|allow[_-]?list|policy|filter|control)|network[_-]?policy|cilium[_-]?network|istio[_-]?(authorization|egress)|egress[_-]?gateway|destination[_-]?rule|vpc[_-]?egress|outbound[_-]?(allowlist|proxy)|credential[_-]?egress)\b/i;
@@ -90,10 +88,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function asNum(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
@@ -122,7 +116,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

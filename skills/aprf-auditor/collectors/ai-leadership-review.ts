@@ -11,6 +11,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -28,8 +29,6 @@ const RELATED = ["ORG-R1"] as const;
 const DETECTOR_ID = "repo-ai-leadership-review";
 const REVIEW_MAX_AGE_DAYS = 90;
 const IMPORT_MAX_AGE_DAYS = 90;
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 const PATH_RE =
   /(leadership|board[\s_-]*pack|ai[\s_-]*risk|aprf[\s_-]*maturity|executive[\s_-]*review)/i;
 const REVIEW_RE =
@@ -80,9 +79,6 @@ function daysSince(iso: string | null | undefined, now: Date): number | null {
   if (!Number.isFinite(t)) return null;
   return Math.floor((now.getTime() - t) / (24 * 60 * 60 * 1000));
 }
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
 function collectRefs(
   targetPath: string,
   maxFiles: number,
@@ -95,7 +91,7 @@ function collectRefs(
     extensions: [".yml", ".yaml", ".json", ".md", ".txt"],
   })) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 100_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

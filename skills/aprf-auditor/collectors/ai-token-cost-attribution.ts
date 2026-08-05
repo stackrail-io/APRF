@@ -16,6 +16,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -34,9 +35,6 @@ const DETECTOR_ID = "repo-ai-token-cost-attribution";
 const IMPORT_MAX_AGE_DAYS = 90;
 const ATTR_PCT_MIN = 95;
 const SAMPLE_WINDOW_HOURS_MIN = 24;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const TOKEN_COST_RE =
   /\b(token[\s_-]*(usage|cost|metric)|cost[\s_-]*per[\s_-]*(request|call)|billed[\s_-]*model|model[\s_-]*spend|finops[\s_-]*label)\b/i;
@@ -88,10 +86,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function asNum(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
@@ -119,7 +113,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;
