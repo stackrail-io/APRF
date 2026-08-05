@@ -53,9 +53,10 @@ manualVerification: >
 falsePositiveGuidance: >
   Do not pass auth middleware presence without a fresh probe report. Do not
   pass partial catalogs that omit privileged AI routes. Do not fail public
-  health, docs, or sign-in paths that are not AI surfaces. Do not score
-  AUTHZ-M1 or AUTHN-M2 as substitutes. Named exceptions need owner and
-  expiry ≤90 days.
+  health, docs, or sign-in paths that are not AI surfaces. Do not fail
+  undeclared advisory GET probes that hit SPA/static catch-alls—only
+  declared production methods gate this check. Do not score AUTHZ-M1 or
+  AUTHN-M2 as substitutes. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
   - "Require authentication on every customer-facing AI HTTP/RPC route"
   - "Maintain a production AI route catalog and probe it without credentials"

@@ -349,7 +349,13 @@ function resolveProfile(profileId: string): AprfProfile {
   if (profileId === PROFILE_ID_CORE || profileId === "core") {
     return PROFILE_CORE;
   }
-  return getProfileById(profileId) ?? PROFILE_CORE;
+  const profile = getProfileById(profileId);
+  if (!profile) {
+    throw new Error(
+      `Unknown APRF profile: ${profileId}. Use "core", "regulated", or a catalog profile id.`,
+    );
+  }
+  return profile;
 }
 
 function resolveLenses(lensIds: string[]): AprfLens[] {
@@ -376,9 +382,39 @@ function domainForCategory(
   return category;
 }
 
+/** Top-level report keys that are never signal groups (even if shaped like {found,refs}). */
+const REPORT_NON_SIGNAL_KEYS = new Set([
+  "schemaVersion",
+  "pluginId",
+  "detectorId",
+  "relatedCheckIds",
+  "assessedAt",
+  "measuredAt",
+  "probedAt",
+  "importedResults",
+  "importedScope",
+  "summary",
+  "notes",
+  "gapNotes",
+  "results",
+  "signals",
+  "catalogSource",
+  "expectStatus",
+  "baseUrl",
+]);
+
+function isFoundRefsGroup(
+  v: unknown,
+): v is { found: boolean; refs: unknown[] } {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return false;
+  const o = v as { found?: unknown; refs?: unknown };
+  return typeof o.found === "boolean" && Array.isArray(o.refs);
+}
+
 /**
  * Prefer Evidence found from collector report `signals.<name>.found === true`
- * refs. Skip found=false groups entirely.
+ * refs. If `signals` is absent, fall back to top-level `{ found, refs }` groups
+ * (legacy collector shape). Skip found=false groups entirely.
  */
 function evidenceFromFoundSignals(
   outDir: string,
@@ -388,23 +424,35 @@ function evidenceFromFoundSignals(
   const path = join(outDir, reportRef);
   if (!existsSync(path)) return [];
   try {
-    const doc = JSON.parse(readFileSync(path, "utf8")) as {
-      signals?: Record<string, unknown>;
-    };
-    if (!doc.signals || typeof doc.signals !== "object" || Array.isArray(doc.signals)) {
-      return [];
+    const doc = JSON.parse(readFileSync(path, "utf8")) as Record<
+      string,
+      unknown
+    >;
+    let signalMap: Record<string, unknown> | null = null;
+    if (
+      doc.signals &&
+      typeof doc.signals === "object" &&
+      !Array.isArray(doc.signals)
+    ) {
+      signalMap = doc.signals as Record<string, unknown>;
+    } else {
+      // Legacy reports nest found/refs at the top level (e.g. maxSteps, wallClock).
+      const legacy: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(doc)) {
+        if (REPORT_NON_SIGNAL_KEYS.has(k)) continue;
+        if (isFoundRefsGroup(v)) legacy[k] = v;
+      }
+      if (Object.keys(legacy).length) signalMap = legacy;
     }
+    if (!signalMap) return [];
+
     const out: Array<{ ref: string; excerpt?: string }> = [];
     const seen = new Set<string>();
-    for (const [name, raw] of Object.entries(doc.signals)) {
-      if (!raw || typeof raw !== "object" || Array.isArray(raw)) continue;
-      const sig = raw as { found?: unknown; refs?: unknown };
-      if (sig.found !== true) continue;
-      const refs = Array.isArray(sig.refs)
-        ? sig.refs.filter(
-            (r): r is string => typeof r === "string" && r.trim().length > 0,
-          )
-        : [];
+    for (const [name, raw] of Object.entries(signalMap)) {
+      if (!isFoundRefsGroup(raw) || raw.found !== true) continue;
+      const refs = raw.refs.filter(
+        (r): r is string => typeof r === "string" && r.trim().length > 0,
+      );
       if (refs.length === 0) {
         const key = `${reportRef}#${name}`;
         if (seen.has(key)) continue;
@@ -416,7 +464,15 @@ function evidenceFromFoundSignals(
       for (const r of refs) {
         if (seen.has(r)) continue;
         seen.add(r);
-        out.push({ ref: r, excerpt: `${name}: found=true` });
+        // Route/finding refs (e.g. "GET /api → HTTP 200 [file.py]") are
+        // customer-facing; keep a short label instead of burying the finding.
+        const looksLikeFinding = /→|HTTP\s+\d{3}/i.test(r);
+        out.push({
+          ref: r,
+          excerpt: looksLikeFinding
+            ? `${name}: found=true — unauthenticated caller not rejected`
+            : `${name}: found=true`,
+        });
         if (out.length >= 12) return out;
       }
     }
@@ -444,11 +500,27 @@ function nodesForCheck(
   checkId: string,
 ): EvidenceNode[] {
   if (!graph?.nodes?.length) return [];
+  const excerptRank = (n: EvidenceNode): number => {
+    const ex = (n.excerpt ?? "").trim();
+    if (!ex) return 0;
+    // Prefer customer prose over truncated JSON dumps in the flyout.
+    if (ex.startsWith("{") || ex.startsWith("[")) return 1;
+    if (/:\s*found=true|accept unauthenticated|declared route/i.test(ex)) {
+      return 3;
+    }
+    return 2;
+  };
+  const idRank = (n: EvidenceNode): number =>
+    /:report(?:$|:)/i.test(n.id) ? 2 : /:catalog(?:$|:)/i.test(n.id) ? 0 : 1;
   return graph.nodes
     .filter((n) => n.relatedCheckIds?.includes(checkId))
     .sort((a, b) => {
       const pr = (PRECEDENCE[b.class] ?? 0) - (PRECEDENCE[a.class] ?? 0);
       if (pr !== 0) return pr;
+      const er = excerptRank(b) - excerptRank(a);
+      if (er !== 0) return er;
+      const ir = idRank(b) - idRank(a);
+      if (ir !== 0) return ir;
       return a.ref.localeCompare(b.ref);
     });
 }
@@ -505,7 +577,7 @@ function priorityFor(
 
 function overallGrade(args: {
   gatePass: boolean;
-  recommendedScore: number;
+  recommendedScore: number | null;
   criticalBlockers: ControlOut[];
   mandatoryFails: number;
   criticalNd: number;
@@ -519,6 +591,8 @@ function overallGrade(args: {
     if (criticalBlockers.length || criticalNd) return "F";
     return "D";
   }
+  // No recommended Checks in scope (profile-only assess) → gate PASS only → C.
+  if (recommendedScore == null) return "C";
   if (recommendedScore >= 85 && criticalNd === 0) return "A";
   if (recommendedScore >= 70) return "B";
   return "C";
@@ -603,9 +677,9 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       if (r.status !== "deprecated") checkIds.add(r.id);
     }
   } else {
+    // Profile (+ lenses) only. Collector hints outside the gate must not expand
+    // the scored set — use --full for the whole catalog.
     for (const id of mandatoryIds) checkIds.add(id);
-    // Include any Check with a collector hint (recommended or extra).
-    for (const id of hints.keys()) checkIds.add(id);
   }
 
   const controls: ControlOut[] = [];
@@ -636,11 +710,17 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       }
     }
     if (evidenceFound.length === 0) {
+      // Prefer :report / prose excerpts; skip raw JSON when a better node exists.
+      const hasProse = related.some((n) => {
+        const ex = (n.excerpt ?? "").trim();
+        return ex.length > 0 && !ex.startsWith("{") && !ex.startsWith("[");
+      });
       for (const n of related.slice(0, 8)) {
         if (evidenceFound.some((e) => e.ref === n.ref)) continue;
         const raw = n.excerpt?.trim() ?? "";
         const looksJson = raw.startsWith("{") || raw.startsWith("[");
-        const maxLen = looksJson ? 4000 : 240;
+        if (hasProse && looksJson) continue;
+        const maxLen = looksJson ? 4000 : 400;
         const excerpt =
           raw.length > 0
             ? raw.length > maxLen
@@ -660,6 +740,17 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       evidenceFound.push({ ref: mapped.reportRef });
     }
 
+    // NOT_DEMONSTRATED: "no signals" collector notes are not Evidence found —
+    // show a clear default; actionable asks belong in Evidence still required.
+    if (status === "NOT_DEMONSTRATED") {
+      evidenceFound.length = 0;
+      evidenceFound.push({
+        ref: "not-demonstrated",
+        excerpt:
+          "No evidence demonstrated yet for this Check. Add the required imports or re-run collect with the needed signals.",
+      });
+    }
+
     // Prefer collector gap notes over dumping the full normative evidenceRequired list.
     const outDirLabel = basename(outDir) || "assessment-output";
     const requiredEvidenceMissing =
@@ -669,7 +760,9 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
           ? [...mapped.gapNotes]
           : status === "NOT_DEMONSTRATED"
             ? [
-                `No scored collector report for this Check — re-run collect or add measured imports under ${outDirLabel}/imports/<plugin>/.`,
+                mapped
+                  ? `Evidence not yet demonstrated — import measured results under ${outDirLabel}/imports/${mapped.pluginId}/, or attest N/A when the surface is absent.`
+                  : `No scored collector report for this Check — re-run collect or add measured imports under ${outDirLabel}/imports/<plugin>/.`,
                 ...(rule.evidenceRequired ?? []).slice(0, 2),
               ]
             : [...(rule.evidenceRequired ?? [])];
@@ -741,7 +834,8 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     (c) => c.status === "FAIL" && c.severity === "critical",
   ).length;
 
-  // recommendedScore — recommended Checks only, severity-weighted
+  // recommendedScore — recommended Checks only, severity-weighted.
+  // Profile-only assess has no recommended Checks in scope → null (not 100).
   const recommended = controls.filter(
     (c) => c.gate === "recommended" && c.status !== "NOT_APPLICABLE",
   );
@@ -752,8 +846,8 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     recWeight += w;
     if (c.status === "PASS") recPassWeight += w;
   }
-  const recommendedScore =
-    recWeight === 0 ? 100 : Math.round((recPassWeight / recWeight) * 100);
+  const recommendedScore: number | null =
+    recWeight === 0 ? null : Math.round((recPassWeight / recWeight) * 100);
 
   const byDomain = new Map<
     string,
@@ -780,11 +874,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     row.applicable += 1;
     if (c.status === "PASS") row.satisfied += 1;
     if (c.status === "NOT_DEMONSTRATED") row.notDemonstrated += 1;
-    if (
-      c.gate === "mandatory" &&
-      c.status !== "PASS" &&
-      c.status !== "NOT_APPLICABLE"
-    ) {
+    if (c.gate === "mandatory" && c.status !== "PASS") {
       row.failGate = true;
     }
     byDomain.set(d, row);
@@ -890,7 +980,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       recommendedScore,
       blockerCount: blockers.length,
       criticalBlockerCount: criticalBlockers.length,
-      narrative: `APRF CLI assess against ${profile.name}${lenses.length ? ` + lenses [${lenses.map((l) => l.name).join(", ")}]` : ""}: ${hintedCount}/${controls.length} Checks scored from collector statusHints; unscored → NOT_DEMONSTRATED. Gate ${overallGatePassed ? "PASS" : "FAIL"} (${blockers.length} mandatory blockers, ${criticalBlockers.length} critical). recommendedScore=${recommendedScore} (prioritization only).`,
+      narrative: `APRF CLI assess against ${profile.name}${lenses.length ? ` + lenses [${lenses.map((l) => l.name).join(", ")}]` : ""}: ${hintedCount}/${controls.length} Checks scored from collector statusHints; unscored → NOT_DEMONSTRATED. Gate ${overallGatePassed ? "PASS" : "FAIL"} (${blockers.length} mandatory blockers, ${criticalBlockers.length} critical). recommendedScore=${recommendedScore == null ? "n/a" : recommendedScore} (prioritization only).`,
     },
     domainScores,
     controls,

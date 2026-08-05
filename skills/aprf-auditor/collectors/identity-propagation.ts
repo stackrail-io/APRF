@@ -17,6 +17,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -38,9 +39,6 @@ const PLUGIN_ID = "identity-propagation";
 const RELATED = ["AUTHN-M4"] as const;
 const DETECTOR_ID = "repo-identity-propagation";
 const IMPORT_MAX_AGE_DAYS = 90;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const DESIGN_RE =
   /\b(identity[_-]?propagat|subject[_-]?(propagat|binding|claim)|end[_-]?user[_-]?subject|delegated[_-]?(identity|credential)|token[_-]?exchange|on[_-]?behalf[_-]?of|auth[_-]?context[_-]?(propagat|forward))\b/i;
@@ -94,10 +92,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function asNum(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
@@ -125,7 +119,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

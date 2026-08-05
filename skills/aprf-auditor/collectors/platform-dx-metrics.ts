@@ -15,6 +15,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -30,9 +31,6 @@ import {
 const PLUGIN_ID = "platform-dx-metrics";
 const RELATED = ["DX-R3"] as const;
 const DETECTOR_ID = "repo-dx-metrics";
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const AI_PLATFORM_RE =
   /(ai[\s_-]*platform|paved[\s_-]*road|golden[\s_-]*path|platform[\s_-]*dx|devtools|inner[\s_-]*loop)/i;
@@ -99,10 +97,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function collectRefs(
   targetPath: string,
   maxFiles: number,
@@ -126,7 +120,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 100_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

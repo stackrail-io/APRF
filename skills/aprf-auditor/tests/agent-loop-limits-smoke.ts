@@ -73,11 +73,66 @@ def test_abort_on_spawn_depth():
     "utf8",
   );
 
+  // Prior audit output under the target must not launder as repo evidence.
+  mkdirSync(join(targetDir, "aprf-assessment", "imports", "agent-loop-limits"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(targetDir, "aprf-assessment", "assessment.json"),
+    JSON.stringify({
+      notes: [
+        "max_steps wall_clock_timeout spawn_depth abort enforcement",
+      ],
+    }),
+    "utf8",
+  );
+  writeFileSync(
+    join(
+      targetDir,
+      "aprf-assessment",
+      "imports",
+      "agent-loop-limits",
+      "agent-loop-limits-report.json",
+    ),
+    JSON.stringify({
+      maxSteps: { found: true },
+      wallClock: { found: true },
+      spawnDepth: { found: true },
+      notes: ["max_steps wall_clock spawn_depth"],
+    }),
+    "utf8",
+  );
+
   const out1 = mkdtempSync(join(tmpdir(), "aprf-agn2-1-"));
-  await agentLoopLimitsCollector.collect({ ...baseCtx, outputDir: out1 });
-  const r1 = readReport(out1);
+  await agentLoopLimitsCollector.collect({
+    ...baseCtx,
+    // Simulate writing assessment inside the scanned target.
+    outputDir: join(targetDir, "aprf-assessment"),
+  });
+  const r1 = readReport(join(targetDir, "aprf-assessment"));
   if (r1.summary.statusHint !== "partial" || !r1.summary.allThreeLimitsPresent) {
     throw new Error(`expected partial with 3 limits, got ${JSON.stringify(r1.summary)}`);
+  }
+  for (const key of ["maxSteps", "wallClock", "spawnDepth"] as const) {
+    const bad = r1[key].refs.filter((r) => r.includes("aprf-assessment"));
+    if (bad.length) {
+      throw new Error(`${key} must not cite aprf-assessment output, got ${bad}`);
+    }
+  }
+  if (!r1.maxSteps.refs.some((r) => r.includes("agents/runtime.yaml"))) {
+    throw new Error(
+      `expected repo runtime.yaml in maxSteps refs, got ${JSON.stringify(r1.maxSteps.refs)}`,
+    );
+  }
+  if (r1.signals?.maxSteps?.found !== true) {
+    throw new Error(
+      `expected signals.maxSteps.found for Evidence found, got ${JSON.stringify(r1.signals)}`,
+    );
+  }
+  if (!r1.gapNotes?.some((n) => /enforcement|abort/i.test(n))) {
+    throw new Error(
+      `expected gapNotes about enforcement/abort, got ${JSON.stringify(r1.gapNotes)}`,
+    );
   }
 
   const out2 = mkdtempSync(join(tmpdir(), "aprf-agn2-2-"));

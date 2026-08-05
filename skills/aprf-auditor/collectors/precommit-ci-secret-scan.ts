@@ -15,6 +15,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -35,9 +36,6 @@ const RELATED = ["SEC2-R1"] as const;
 const DETECTOR_ID = "repo-precommit-ci-secret-scan";
 /** Matches passCondition: last green main/PR-merge scan ≤7 days. */
 const IMPORT_MAX_AGE_DAYS = 7;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const SCANNER_RE =
   /\b(gitleaks|trufflehog|detect[_-]?secrets|git[_-]?secrets|talisman|secret[_-]?scan|secrets[_-]?scan)\b/i;
@@ -101,10 +99,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function collectScanRefs(
   targetPath: string,
   maxFiles: number,
@@ -149,7 +143,7 @@ function collectScanRefs(
 
   for (const f of all) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     const hasScanner = SCANNER_RE.test(r) || SCANNER_RE.test(text);
     const isScannerConfigFile = SCANNER_CONFIG_FILE_RE.test(r);

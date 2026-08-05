@@ -57,6 +57,24 @@ async function main() {
     ) {
       throw new Error(`partial expected: ${JSON.stringify(r1.summary)}`);
     }
+    if (
+      !r1.gapNotes?.some((n) =>
+        /Document the non-prod→prod promotion path/i.test(n),
+      )
+    ) {
+      throw new Error(
+        `expected customer-facing gapNotes, got ${JSON.stringify(r1.gapNotes)}`,
+      );
+    }
+    if (
+      r1.gapNotes?.some((n) =>
+        /promotionPathDocumented|releasesThroughPromotionPathPct/i.test(n),
+      )
+    ) {
+      throw new Error(
+        `gapNotes must not expose raw import field names: ${JSON.stringify(r1.gapNotes)}`,
+      );
+    }
 
     const t2 = join(root, "t2");
     mkdirSync(join(t2, ".github", "workflows"), { recursive: true });

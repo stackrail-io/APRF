@@ -15,6 +15,7 @@ mkdirSync(join(root, "imports", "ai-harm-policy"), { recursive: true });
 mkdirSync(join(root, "imports", "workload-identity-runtimes"), {
   recursive: true,
 });
+mkdirSync(join(root, "imports", "http-auth-probe"), { recursive: true });
 
 mkdirSync(join(root, "imports", "aws"), { recursive: true });
 writeFileSync(
@@ -77,6 +78,62 @@ writeFileSync(
 );
 
 writeFileSync(
+  join(root, "imports", "http-auth-probe", "auth-probe-report.json"),
+  JSON.stringify({
+    pluginId: "http-auth-probe",
+    summary: {
+      statusHint: "fail",
+      authnM1Satisfied: false,
+      pass: 1,
+      fail: 1,
+      probeInventoryMatchesRouteCatalog: true,
+    },
+    signals: {
+      unauthenticatedDeclaredRoutes: {
+        found: true,
+        refs: [
+          "GET /api/v1/chats [backend/open_webui/routers/chats.py] → HTTP 200",
+        ],
+      },
+      declaredRouteCatalog: { found: false, refs: [] },
+    },
+    gapNotes: [
+      "GET /api/v1/chats [backend/open_webui/routers/chats.py] → HTTP 200 without credentials — must reject with 401/403",
+    ],
+    notes: [
+      "GET /api/v1/chats [backend/open_webui/routers/chats.py] → HTTP 200 without credentials — must reject with 401/403",
+    ],
+    results: [],
+  }),
+);
+
+// Legacy shape: top-level {found,refs} without a signals{} wrapper (AGN-M2 older reports).
+mkdirSync(join(root, "imports", "agent-loop-limits"), { recursive: true });
+writeFileSync(
+  join(root, "imports", "agent-loop-limits", "agent-loop-limits-report.json"),
+  JSON.stringify({
+    pluginId: "agent-loop-limits",
+    summary: {
+      statusHint: "partial",
+      agnM2Satisfied: false,
+      agentSignalsPresent: true,
+      allThreeLimitsPresent: false,
+    },
+    maxSteps: {
+      found: true,
+      refs: [
+        "backend/open_webui/routers/configs.py",
+        "backend/open_webui/utils/subagents.py",
+      ],
+    },
+    wallClock: { found: false, refs: [] },
+    spawnDepth: { found: false, refs: [] },
+    enforcementTests: { found: false, refs: [] },
+    notes: ["max-steps signals: backend/open_webui/routers/configs.py"],
+  }),
+);
+
+writeFileSync(
   join(root, "evidence-graph.json"),
   JSON.stringify({
     schemaVersion: "0.2.0",
@@ -96,7 +153,7 @@ writeFileSync(
       {
         pluginId: "http-auth-probe",
         status: "ran",
-        detail: "AUTHN-M1 status=partial",
+        detail: "AUTHN-M1 status=fail",
       },
       {
         pluginId: "workload-identity-runtimes",
@@ -128,8 +185,9 @@ const a = JSON.parse(readFileSync(assessmentPath, "utf8")) as {
   executiveSummary: {
     overallGatePassed: boolean;
     criticalityName: string;
-    recommendedScore: number;
+    recommendedScore: number | null;
   };
+  scope?: { checkIds?: string[]; profileId?: string };
   controls: Array<{
     checkId: string;
     status: string;
@@ -152,8 +210,30 @@ function assert(cond: unknown, msg: string) {
   }
 }
 
+const CORE_MANDATORY_COUNT = 39;
+
 assert(a.executiveSummary.criticalityName === "Production", "criticality name");
 assert(a.executiveSummary.overallGatePassed === false, "gate must fail");
+assert(
+  a.controls.length === CORE_MANDATORY_COUNT,
+  `core profile must score ${CORE_MANDATORY_COUNT} Checks, got ${a.controls.length}`,
+);
+assert(
+  a.controls.every((c) => c.gate === "mandatory"),
+  "core profile assess must not expand into recommended Checks from collector hints",
+);
+assert(
+  a.executiveSummary.recommendedScore === null,
+  `core profile recommendedScore must be null (not scored), got ${a.executiveSummary.recommendedScore}`,
+);
+assert(
+  /recommendedScore=n\/a/i.test(a.executiveSummary.narrative),
+  `narrative must say recommendedScore=n/a; got ${a.executiveSummary.narrative}`,
+);
+assert(
+  !byId.has("AUTHN-R2"),
+  "AUTHN-R2 is not a core mandatory — must require --full",
+);
 
 const sec2 = byId.get("SEC2-M1");
 assert(sec2?.status === "FAIL", "SEC2-M1 FAIL from statusHint");
@@ -178,13 +258,91 @@ assert(saf?.status === "NOT_APPLICABLE", "SAF-M1 N/A");
 assert(saf?.passed === false, "N/A must not set passed=true (scoring.yaml)");
 assert(saf?.notApplicable === true, "notApplicable flag");
 
-const authn = byId.get("AUTHN-M1");
+const authnM3 = byId.get("AUTHN-M3");
 assert(
-  authn?.status === "PARTIAL",
-  "AUTHN-M1 PARTIAL from collector detail fallback",
+  authnM3?.status === "NOT_DEMONSTRATED",
+  `AUTHN-M3 expected NOT_DEMONSTRATED without MFA imports, got ${authnM3?.status}`,
+);
+assert(
+  authnM3?.evidenceFound?.some(
+    (e) =>
+      typeof e === "object" &&
+      e &&
+      "ref" in e &&
+      (e as { ref: string }).ref === "not-demonstrated" &&
+      /No evidence demonstrated yet/i.test(
+        String((e as { excerpt?: string }).excerpt ?? ""),
+      ),
+  ),
+  `NOT_DEMONSTRATED must use default Evidence found message; got ${JSON.stringify(authnM3?.evidenceFound)}`,
+);
+assert(
+  !authnM3?.evidenceFound?.some(
+    (e) =>
+      typeof e === "object" &&
+      e &&
+      "ref" in e &&
+      /ai-admin-mfa-report\.json/i.test(String((e as { ref: string }).ref)),
+  ),
+  "NOT_DEMONSTRATED must not list empty collector reports as Evidence found",
 );
 
-const authnR2 = byId.get("AUTHN-R2");
+const agnM2 = byId.get("AGN-M2");
+assert(agnM2?.status === "PARTIAL", "AGN-M2 PARTIAL from legacy top-level found/refs");
+assert(
+  agnM2?.evidenceFound?.some(
+    (e) =>
+      typeof e === "object" &&
+      e &&
+      "ref" in e &&
+      String((e as { ref: string }).ref).includes(
+        "backend/open_webui/routers/configs.py",
+      ),
+  ),
+  `AGN-M2 Evidence found must surface maxSteps refs from legacy report shape; got ${JSON.stringify(agnM2?.evidenceFound)}`,
+);
+
+const authn = byId.get("AUTHN-M1");
+assert(authn?.status === "FAIL", "AUTHN-M1 FAIL from import statusHint");
+assert(
+  authn?.requiredEvidenceMissing?.some((n) =>
+    /GET \/api\/v1\/chats.*must reject/i.test(n),
+  ),
+  `AUTHN-M1 Evidence still required must list declared route gapNotes; got ${JSON.stringify(authn?.requiredEvidenceMissing)}`,
+);
+assert(
+  !authn?.requiredEvidenceMissing?.some((n) =>
+    /APRF_AUTH_PROBE_MAX_ROUTES/i.test(n),
+  ),
+  "AUTHN-M1 Evidence still required must not expose APRF_AUTH_PROBE_MAX_ROUTES",
+);
+assert(
+  authn?.evidenceFound?.some(
+    (e) =>
+      typeof e === "object" &&
+      e &&
+      "ref" in e &&
+      /GET \/api\/v1\/chats/.test(String((e as { ref: string }).ref)),
+  ),
+  `AUTHN-M1 Evidence found should list unauthenticated route refs; got ${JSON.stringify(authn?.evidenceFound)}`,
+);
+
+const { path: fullPath } = writeAssessment({
+  outDir: root,
+  profileId: "core",
+  fullCatalog: true,
+});
+const full = JSON.parse(readFileSync(fullPath, "utf8")) as typeof a;
+const fullById = new Map(full.controls.map((c) => [c.checkId, c]));
+assert(
+  full.controls.length > CORE_MANDATORY_COUNT,
+  `full catalog must score more than core mandatories, got ${full.controls.length}`,
+);
+assert(
+  typeof full.executiveSummary.recommendedScore === "number",
+  `full catalog must score recommended Checks; got ${full.executiveSummary.recommendedScore}`,
+);
+const authnR2 = fullById.get("AUTHN-R2");
 assert(authnR2?.status === "PARTIAL", "AUTHN-R2 PARTIAL from statusHint");
 assert(
   authnR2?.requiredEvidenceMissing?.some((n) =>
@@ -225,6 +383,16 @@ const htmlPath = resolve(root, "REPORT.html");
 writeAssessmentHtmlReport(assessmentPath, htmlPath);
 const verify = verifyHtmlReport(htmlPath);
 assert(verify.ok, `html verify: ${JSON.stringify(verify)}`);
+const html = readFileSync(htmlPath, "utf8");
+assert(
+  html.includes("GET /api/v1/chats") &&
+    html.includes("unauthenticated caller not rejected"),
+  "REPORT.html should show declared route finding, not raw probe JSON",
+);
+assert(
+  !html.includes("APRF_AUTH_PROBE_MAX_ROUTES"),
+  "REPORT.html must not show APRF_AUTH_PROBE_MAX_ROUTES in evidence gaps",
+);
 
 console.log(`aprf assess engine smoke OK → ${htmlPath}`);
 rmSync(root, { recursive: true, force: true });

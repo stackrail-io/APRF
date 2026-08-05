@@ -17,6 +17,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -33,9 +34,6 @@ const PLUGIN_ID = "ai-artifact-promotion-path";
 const RELATED = ["DEP-M1"] as const;
 const DETECTOR_ID = "repo-ai-artifact-promotion-path";
 const IMPORT_MAX_AGE_DAYS = 90;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const AI_ARTIFACT_RE =
   /(prompt|prompts|model[\s_-]*pin|model[\s_-]*version|tool[\s_-]*catalog|llm|openai|anthropic|bedrock|vertex)/i;
@@ -81,14 +79,12 @@ export interface AiArtifactPromotionPathReport {
       | "not_applicable";
   };
   notes: string[];
+  /** Customer-facing asks for REPORT.html Evidence still required. */
+  gapNotes: string[];
 }
 
 function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
-}
-
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
 }
 
 function asNum(v: unknown): number | null {
@@ -119,7 +115,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;
@@ -220,7 +216,7 @@ export function buildAiArtifactPromotionPathReport(opts: {
 
   if (!opts.aiArtifactSignals && !promotionSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No AI-artifact/promotion signals — DEP-M1 may be NOT_APPLICABLE if no prompt/model/tool releases ship to production.",
+      "No prompt/model/tool release surface found — DEP-M1 is NOT_APPLICABLE when nothing ships to production.",
     );
   }
   if (opts.promotion.found) {
@@ -233,11 +229,11 @@ export function buildAiArtifactPromotionPathReport(opts: {
   }
   if (opts.imported.found) {
     notes.push(
-      `Imported: ${opts.imported.sources.join(", ")} (documented=${opts.imported.promotionPathDocumented}, throughPct=${opts.imported.releasesThroughPromotionPathPct}, missing=${opts.imported.productionReleasesMissingPromotionPath}, hotEdits=${opts.imported.productionHotEditsWithoutChangeRecord})`,
+      `Imported coverage from ${opts.imported.sources.join(", ")} (measuredAt=${opts.imported.measuredAt})`,
     );
   } else if (promotionSignalsPresent) {
     notes.push(
-      "Promotion signals alone are PARTIAL — import promotionPathDocumented=true + releasesThroughPromotionPathPct=100 (or productionReleasesMissingPromotionPath=0) + productionHotEditsWithoutChangeRecord=0 (measuredAt ≤90d) under imports/ai-artifact-promotion-path/ to PASS.",
+      "Repo mentions a promotion path, but measured release coverage is not imported yet — status remains PARTIAL.",
     );
   }
 
@@ -276,7 +272,7 @@ export function buildAiArtifactPromotionPathReport(opts: {
     statusHint = "fail";
     depM1Satisfied = false;
     notes.push(
-      "Imported evidence shows missing promotion path, incomplete last-30-day coverage, hot-edits without change records, or evidence older than 90 days — DEP-M1 fail.",
+      "Imported coverage shows gaps in the promotion path, incomplete release coverage, undocumented prod hot-edits, or evidence older than 90 days.",
     );
   } else if (
     (promotionSignalsPresent || opts.imported.found) &&
@@ -292,35 +288,54 @@ export function buildAiArtifactPromotionPathReport(opts: {
   } else if (promotionSignalsPresent || opts.imported.found) {
     statusHint = "partial";
     depM1Satisfied = false;
-    if (opts.imported.found && !pathOk) {
-      notes.push(
-        "Import must show promotionPathDocumented=true (or repo promotion signals).",
-      );
-    }
-    if (opts.imported.found && !coverageOk) {
-      notes.push(
-        "Import must show releasesThroughPromotionPathPct=100 or productionReleasesMissingPromotionPath=0 for last 30 days.",
-      );
-    }
-    if (opts.imported.found && !hotEditOk) {
-      notes.push(
-        "Import must show productionHotEditsWithoutChangeRecord=0.",
-      );
-    }
-    if (opts.imported.found && !importFresh) {
-      notes.push(
-        "Import missing fresh measuredAt (≤90 days) — required to unlock DEP-M1 PASS.",
-      );
-    }
   } else if (opts.aiArtifactSignals) {
     statusHint = "not_demonstrated";
     depM1Satisfied = null;
     notes.push(
-      "AI artifact signals present but no promotion-path / hot-edit policy evidence found.",
+      "Prompts/models/tools appear in the repo, but no non-prod→prod promotion path evidence was found.",
     );
   } else {
     statusHint = "not_demonstrated";
     depM1Satisfied = null;
+  }
+
+  const gapNotes: string[] = [];
+  if (statusHint !== "pass" && statusHint !== "not_applicable") {
+    if (!opts.imported.found && promotionSignalsPresent) {
+      gapNotes.push(
+        "Document the non-prod→prod promotion path for prompts, models, and tools, then provide ≤90-day evidence that 100% of production releases used it and that 0 production hot-edits lacked a change record (place measured coverage under imports/ai-artifact-promotion-path/)",
+      );
+    }
+    if (opts.imported.found && !pathOk) {
+      gapNotes.push(
+        "Document a non-prod→prod promotion path for prompts, models, and tools (or keep clear promotion workflow evidence in the repo)",
+      );
+    }
+    if (opts.imported.found && !coverageOk) {
+      gapNotes.push(
+        "Show that 100% of recent production releases for prompts/models/tools went through the promotion path (0 releases that skipped it)",
+      );
+    }
+    if (opts.imported.found && !hotEditOk) {
+      gapNotes.push(
+        "Show 0 production hot-edits of prompts/models/tools without a linked change record",
+      );
+    }
+    if (opts.imported.found && !importFresh) {
+      gapNotes.push(
+        "Refresh promotion-path coverage evidence (measured within the last 90 days)",
+      );
+    }
+    if (statusHint === "not_demonstrated") {
+      gapNotes.push(
+        "Define a promotion path from non-prod to prod for prompts, models, and tools, and import ≤90-day release coverage under imports/ai-artifact-promotion-path/",
+      );
+    }
+    if (explicitFail && gapNotes.length === 0) {
+      gapNotes.push(
+        "Fix promotion-path gaps in the imported coverage: path documented, 100% of prod releases through the path, and 0 undocumented prod hot-edits (measuredAt ≤90 days)",
+      );
+    }
   }
 
   return {
@@ -341,6 +356,7 @@ export function buildAiArtifactPromotionPathReport(opts: {
       statusHint,
     },
     notes,
+    gapNotes: gapNotes.slice(0, 8),
   };
 }
 
@@ -407,7 +423,11 @@ export const aiArtifactPromotionPathCollector: Collector = {
           DETECTOR_ID,
           ...(report.summary.depM1Satisfied ? ["dep-m1-satisfied"] : []),
         ],
-        excerpt: redact(report.notes.slice(0, 3).join(" | ").slice(0, 400)),
+        excerpt: redact(
+          report.signals.promotion.refs.length
+            ? `DEP-M1 ${report.summary.statusHint}: promotion path refs — ${report.signals.promotion.refs.slice(0, 4).join("; ")}`
+            : `DEP-M1 ${report.summary.statusHint}: ${report.gapNotes[0] ?? report.notes[0] ?? "no promotion-path evidence yet"}`,
+        ),
         relatedCheckIds: [...RELATED],
       },
     ];

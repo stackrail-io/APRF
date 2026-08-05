@@ -227,7 +227,7 @@ type Assessment = {
     overallGrade?: string;
     riskLevel?: string;
     assessmentConfidence: string;
-    recommendedScore: number;
+    recommendedScore: number | null;
     blockerCount: number;
     criticalBlockerCount: number;
     narrative: string;
@@ -302,12 +302,42 @@ function formatEvidenceExcerpt(excerpt: string): string {
     }
   }
 
+  // Semicolon-separated findings → readable list (declared route failures, etc.)
+  if (trimmed.includes("; ") && /→|HTTP\s+\d{3}|declared route/i.test(trimmed)) {
+    const parts = trimmed.split(/;\s+/).map((p) => p.trim()).filter(Boolean);
+    if (parts.length >= 2) {
+      return `<ul class="evidence-findings">${parts
+        .map((p) => `<li>${esc(p)}</li>`)
+        .join("")}</ul>`;
+    }
+  }
+
   return ` — ${esc(excerpt)}`;
 }
 
 function formatEvidenceItem(e: { ref: string; excerpt?: string }): string {
-  const excerptHtml = e.excerpt ? formatEvidenceExcerpt(e.excerpt) : "";
-  const hasBlock = excerptHtml.includes('class="evidence-json"');
+  const excerpt = (e.excerpt ?? "").trim();
+  // Default placeholder for NOT_DEMONSTRATED (not a real artifact ref).
+  if (e.ref === "not-demonstrated") {
+    return `<li class="evidence-item evidence-none">${esc(
+      excerpt ||
+        "No evidence demonstrated yet for this Check. Add the required imports or re-run collect with the needed signals.",
+    )}</li>`;
+  }
+  // Signal refs that are already the finding (METHOD path → status [file])
+  const findingRef = /→|HTTP\s+\d{3}/i.test(e.ref);
+  const foundMatch = excerpt.match(
+    /^([A-Za-z0-9_-]+):\s*found=true(?:\s*[—–-]\s*(.+))?$/i,
+  );
+  if (findingRef && foundMatch) {
+    const detail = (foundMatch[2] ?? "unauthenticated caller not rejected").trim();
+    return `<li class="evidence-item evidence-finding"><code>${esc(e.ref)}</code><span class="evidence-detail"> — ${esc(detail)}</span></li>`;
+  }
+
+  const excerptHtml = excerpt ? formatEvidenceExcerpt(excerpt) : "";
+  const hasBlock =
+    excerptHtml.includes('class="evidence-json"') ||
+    excerptHtml.includes('class="evidence-findings"');
   if (hasBlock) {
     return `<li class="evidence-item"><div class="evidence-ref"><code>${esc(e.ref)}</code></div>${excerptHtml}</li>`;
   }
@@ -535,7 +565,19 @@ function severityBars(counts: Record<string, number>): string {
 </div>`;
 }
 
-function scoreGauge(score: number, gatePass: boolean): string {
+function scoreGauge(score: number | null, gatePass: boolean): string {
+  if (score == null) {
+    return `<div class="viz-card">
+  <h3>Recommended score <span class="meta">(non-gate)</span></h3>
+  <div class="gauge-wrap">
+    <svg viewBox="0 0 120 70" class="gauge" role="img" aria-label="Recommended score not scored">
+      <path d="M 14 60 A 46 46 0 0 1 106 60" fill="none" stroke="#e8ecef" stroke-width="10" stroke-linecap="round"/>
+      <text x="60" y="58" text-anchor="middle" class="gauge-val">n/a</text>
+    </svg>
+    <p class="meta">Gate ${gatePass ? "PASS" : "FAIL"} · recommended Checks not in scope (use --full)</p>
+  </div>
+</div>`;
+  }
   const s = Math.max(0, Math.min(100, score));
   const r = 46;
   const c = Math.PI * r; // half circle
@@ -775,15 +817,17 @@ function tagPills(tags: string[]): string {
 }
 
 function controlDetailBody(c: Control): string {
+  const statusKey = (c.status || "").toUpperCase().replace(/-/g, "_");
   const evidence =
     c.evidenceFound?.length ?
       `<ul class="evidence-list">${c.evidenceFound.map(formatEvidenceItem).join("")}</ul>`
-    : `<p class="empty">None</p>`;
+    : statusKey === "NOT_DEMONSTRATED"
+      ? `<p class="empty">No evidence demonstrated yet for this Check.</p>`
+      : `<p class="empty">None</p>`;
   const missing =
     c.requiredEvidenceMissing?.length ?
       `<p><strong>Evidence still required</strong></p><ul>${c.requiredEvidenceMissing.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>`
     : "";
-  const statusKey = (c.status || "").toUpperCase().replace(/-/g, "_");
   const samples = getPassSamples(c.checkId);
   const showPassSample =
     samples.length > 0 && statusKey !== "PASS" && statusKey !== "NOT_APPLICABLE";
@@ -1280,6 +1324,11 @@ function render(a: Assessment): string {
     ul { padding-left: 1.15rem; }
     .evidence-list { margin: 0.35rem 0 0.65rem; padding-left: 1.15rem; }
     .evidence-item { margin: 0.45rem 0; word-break: break-word; }
+    .evidence-finding code { font-size: 0.92em; }
+    .evidence-detail { color: var(--muted, #5c6570); }
+    .evidence-findings { margin: 0.35rem 0 0; padding-left: 1.1rem; }
+    .evidence-findings li { margin: 0.2rem 0; }
+    .evidence-none { color: var(--muted, #5c6570); list-style: disc; }
     .evidence-ref { margin-bottom: 0.3rem; }
     .evidence-lead {
       display: block; font-family: var(--sans); font-size: 0.84rem;
@@ -1447,8 +1496,8 @@ function render(a: Assessment): string {
     <h1>${esc(a.subject.name)}</h1>
     ${stackrailLinks()}
     <div class="meta-chips">
-      <span class="chip">APRF ${esc(a.aprfVersion)}</span>
-      <span class="chip">skill ${esc(a.skillVersion)}</span>
+      <span class="chip" title="Check catalog (@stackrail-io/aprf-engine)">catalog ${esc(a.aprfVersion)}</span>
+      <span class="chip" title="CLI (@stackrail-io/aprf)">cli ${esc(a.skillVersion)}</span>
       <span class="chip">${esc(a.scope.profileId)}${a.scope.scopeId ? ` · ${esc(a.scope.scopeId)}` : ""}</span>
       <span class="chip">tier ${esc(a.scope.criticality)}</span>
       <span class="chip">${esc(a.scope.systemType ?? "—")}</span>
@@ -1466,7 +1515,7 @@ function render(a: Assessment): string {
       <div class="stat"><div class="label">Required capability</div><div class="value" style="font-size:1.05rem">${esc(capabilityLabel(a))}</div></div>
       <div class="stat"><div class="label">Confidence</div><div class="value">${esc(a.executiveSummary.assessmentConfidence)}</div></div>
       <div class="stat"><div class="label">Blockers</div><div class="value">${esc(a.executiveSummary.blockerCount)} <span class="meta">(${esc(a.executiveSummary.criticalBlockerCount)} critical)</span></div></div>
-      <div class="stat"><div class="label">Recommended (non-gate)</div><div class="value">${esc(a.executiveSummary.recommendedScore)}</div></div>
+      <div class="stat"><div class="label">Recommended (non-gate)</div><div class="value">${esc(a.executiveSummary.recommendedScore == null ? "n/a" : a.executiveSummary.recommendedScore)}</div></div>
     </div>
     <p class="meta">Maturity model: <a href="${a.executiveSummary.maturityUrl ?? "https://stackrail.io/aprf/how/#maturity"}" rel="noopener">stackrail.io/aprf/how/#maturity</a>
       ${a.executiveSummary.overallGrade != null ? ` · Grade (secondary): ${esc(a.executiveSummary.overallGrade)}` : ""}

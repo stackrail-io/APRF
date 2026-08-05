@@ -13,13 +13,13 @@ Run a **local** APRF assessment on the current workspace using the open CLI.
 2. Shell (offline / code-only):
 
 ```bash
-npx @stackrail-io/aprf@0.1.1 audit --target . --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.3 audit --target . --out ./aprf-assessment --profile core
 ```
 
 3. If a running app is available, pass live credentials (auto-enables live collectors; passwords never persisted):
 
 ```bash
-npx @stackrail-io/aprf@0.1.1 audit --target . --out ./aprf-assessment --profile core \
+npx @stackrail-io/aprf@0.1.3 audit --target . --out ./aprf-assessment --profile core \
   --base-url http://127.0.0.1:8080 \
   --admin-email "$APRF_ADMIN_EMAIL" \
   --admin-password "$APRF_ADMIN_PASSWORD"
@@ -28,7 +28,7 @@ npx @stackrail-io/aprf@0.1.1 audit --target . --out ./aprf-assessment --profile 
 Optional AUTHZ-M1 limited user (otherwise admin may create a temporary non-admin user):
 
 ```bash
-npx @stackrail-io/aprf@0.1.1 audit --target . --out ./aprf-assessment --profile core \
+npx @stackrail-io/aprf@0.1.3 audit --target . --out ./aprf-assessment --profile core \
   --base-url http://127.0.0.1:8080 \
   --admin-email "$APRF_ADMIN_EMAIL" \
   --admin-password "$APRF_ADMIN_PASSWORD" \

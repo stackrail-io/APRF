@@ -144,7 +144,13 @@
           "type": "string",
           "enum": ["high", "medium", "low"]
         },
-        "recommendedScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "recommendedScore": {
+          "anyOf": [
+            { "type": "number", "minimum": 0, "maximum": 100 },
+            { "type": "null" }
+          ],
+          "description": "Severity-weighted recommended Checks only; null when none are in scope (profile-only assess)"
+        },
         "blockerCount": { "type": "integer", "minimum": 0 },
         "criticalBlockerCount": { "type": "integer", "minimum": 0 },
         "narrative": { "type": "string" }

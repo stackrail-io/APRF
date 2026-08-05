@@ -2119,7 +2119,7 @@
           "id": "AUTHN-M1",
           "requirement": "Customer-facing AI HTTP/RPC APIs shall reject callers that present no valid credentials—so anonymous traffic cannot invoke model, tool, retrieval, or other privileged AI surfaces.",
           "artifact": "Production AI HTTP/RPC route catalog + unauthenticated auth-probe report (401/403) matching the catalog",
-          "passCondition": "100% of declared production AI HTTP/RPC routes in the probe inventory return 401/403 without credentials; every declared AI route in the production route catalog was probed (measuredAt ≤90 days). NOT_APPLICABLE if no customer-facing AI HTTP/RPC APIs.",
+          "passCondition": "100% of declared production AI HTTP/RPC routes in the probe inventory return 401/403 without credentials; every declared AI route in the production route catalog was probed (measuredAt ≤90 days). If no customer-facing AI HTTP/RPC APIs exist, score NOT_APPLICABLE.",
           "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2

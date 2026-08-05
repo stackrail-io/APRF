@@ -22,7 +22,7 @@ Requires **Node.js ≥ 22**.
 # Collect evidence graph + per-plugin import reports
 aprf collect --target /path/to/app --out ./aprf-assessment
 
-# Score profile mandatories from collector statusHints (v0)
+# Score profile mandatories only (39 for core). Use --full for the whole catalog.
 aprf assess --out ./aprf-assessment --profile core
 
 # Render + verify HTML
@@ -64,8 +64,10 @@ Aligned with auditor `scoring.yaml` / `confidence.yaml` / `evidence-precedence.y
 - Evidence-graph nodes with `relatedCheckIds` attached (precedence-ranked)
 - Mandatory gate: every applicable mandatory is `PASS` or `NOT_APPLICABLE`
 - `NOT_APPLICABLE` is excluded (`passed: false`) — not a vanity pass
+- Default assess scores **profile mandatories only** (collector hints outside the gate are ignored). `--full` scores the non-deprecated catalog.
 - Unscored profile Checks → `NOT_DEMONSTRATED` (blocker if mandatory)
-- `recommendedScore` = severity-weighted recommended Checks only
+- `recommendedScore` = severity-weighted recommended Checks only (`null` / n/a under default profile assess; use `--full` to score recommended)
+- `audit` without `--plugins` / `--full` collects only plugins that map to the profile gate
 - Optional `--lens rag,agents,voice,coding`
 
 Agent YES/NO/DON'T KNOW attestation fills remain in [`skills/aprf-auditor`](../../skills/aprf-auditor/).

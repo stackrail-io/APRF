@@ -15,6 +15,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -32,9 +33,6 @@ const RELATED = ["MEM-M1"] as const;
 const DETECTOR_ID = "repo-memory-isolation";
 const MIN_ATTACK_CASES = 10;
 const INVENTORY_MAX_AGE_DAYS = 90;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const MEMORY_PATH_RE =
   /(memory|memories|conversation|chat[\s_-]*history|vector|embedding|retriev|durable[\s_-]*mem|session[\s_-]*mem|rag)/i;
@@ -86,10 +84,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function collectRefs(
   targetPath: string,
   maxFiles: number,
@@ -114,7 +108,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 100_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;
@@ -140,7 +134,7 @@ function countTestCases(targetPath: string, maxFiles: number): {
   for (const f of files) {
     if (!TEST_FILE_RE.test(f)) continue;
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 200_000) || "";
     if (!MEMORY_PATH_RE.test(r) && !MEMORY_PATH_RE.test(text)) continue;
     if (!CROSS_BOUNDARY_TEST_RE.test(text) && !ISOLATION_RE.test(text)) continue;
