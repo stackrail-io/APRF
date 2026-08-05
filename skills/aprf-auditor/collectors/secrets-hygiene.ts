@@ -16,6 +16,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -69,9 +70,6 @@ const EMBEDDED_PATTERNS: Array<{ id: string; re: RegExp }> = [
     re: /\b(api[_-]?key|secret[_-]?key|access[_-]?token)\s*[=:]\s*['"][A-Za-z0-9_\-]{24,}['"]/gi,
   },
 ];
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const PROMPT_FIXTURE_HINT =
   /(prompt|fixture|notebook|\.ipynb|eval|testdata|sample)/i;
@@ -135,7 +133,7 @@ function importDir(ctx: CollectorContext): string {
 
 function isSkippable(path: string): boolean {
   return (
-    SKIP_DIR_HINT.test(path) ||
+    isSkippedScanRelPath(path) ||
     /\.(min\.js|map|lock|png|jpg|gif|webp|woff2?)$/i.test(path)
   );
 }

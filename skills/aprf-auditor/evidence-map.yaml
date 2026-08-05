@@ -490,9 +490,12 @@ checks:
       Discover HTTP methods from FastAPI @router.get/post/… (not GET-only guessing).
       PASS if report.summary.statusHint=pass / authnM1Satisfied === true (declared AI methods → 401/403, catalog matched, measuredAt ≤90d).
       NOT_APPLICABLE if customerFacingAiHttpApisPresent=false.
-      Advisory GET on paths with no declared GET: 405 is note-only (does not fail AUTHN-M1 when
-      declared methods pass); advisory GET 2xx without credentials does fail.
-      FAIL if any scored declared method returns 2xx without credentials (or advisory GET 2xx).
+      Advisory GET on paths with no declared GET is hardening-only (405 or 2xx/SPA
+      catch-all) — never scored for AUTHN-M1; only declared methods from the repo gate the check.
+      FAIL if any scored declared method returns non-401/403 without credentials.
+      REPORT.html: Evidence found from signals.unauthenticatedDeclaredRoutes refs
+      (METHOD path [source] → HTTP status); Evidence still required from typed gapNotes
+      (declared-route fixes / routes.json), not raw probe JSON or env var names.
       PARTIAL if auth middleware exists in code but no fresh probe report.
       NOT_DEMONSTRATED if no base URL, unreachable target, and no prior report — ask user to start the app or provide URL.
       Do not PASS from code review alone. AUTHZ-M1 and AUTHN-M2 do not substitute.

@@ -15,6 +15,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -26,9 +27,6 @@ import { measuredAtFresh, parseMeasuredAt } from "./lib/import-attest.ts";
 const PLUGIN_ID = "agent-loop-limits";
 const RELATED = ["AGN-M2"] as const;
 const DETECTOR_ID = "repo-agent-loop-limits";
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const AGENT_PATH_RE =
   /(agent|orchestr|autonom|langgraph|crewai|autogen|swarm|planner|a2a)/i;
@@ -54,10 +52,21 @@ export interface AgentLoopLimitsReport {
   detectorId: typeof DETECTOR_ID;
   relatedCheckIds: string[];
   assessedAt: string;
+  /** @deprecated Prefer signals.* — kept for older report consumers / smokes. */
   maxSteps: { found: boolean; refs: string[] };
+  /** @deprecated Prefer signals.* */
   wallClock: { found: boolean; refs: string[] };
+  /** @deprecated Prefer signals.* */
   spawnDepth: { found: boolean; refs: string[] };
+  /** @deprecated Prefer signals.* */
   enforcementTests: { found: boolean; refs: string[] };
+  /** Drives REPORT.html Evidence found via assess (found=true refs only). */
+  signals: {
+    maxSteps: { found: boolean; refs: string[] };
+    wallClock: { found: boolean; refs: string[] };
+    spawnDepth: { found: boolean; refs: string[] };
+    enforcementTests: { found: boolean; refs: string[] };
+  };
   importedResults: {
     found: boolean;
     agentsCovered: number | null;
@@ -74,14 +83,12 @@ export interface AgentLoopLimitsReport {
     statusHint: "pass" | "partial" | "fail" | "not_demonstrated" | "not_applicable";
   };
   notes: string[];
+  /** Typed gaps for REPORT.html Evidence still required. */
+  gapNotes: string[];
 }
 
 function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
-}
-
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
 }
 
 function collectLimitRefs(
@@ -108,7 +115,7 @@ function collectLimitRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     const agentish = AGENT_PATH_RE.test(r) || AGENT_PATH_RE.test(text);
     if (pattern.test(r) || (pattern.test(text) && agentish)) {
@@ -127,7 +134,7 @@ function detectEnforcementTests(targetPath: string, maxFiles: number) {
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     if (!TEST_PATH_RE.test(r) && !/\.test\.|\.spec\./i.test(basename(f))) {
       continue;
     }
@@ -152,7 +159,7 @@ function detectAgentSignals(targetPath: string, maxFiles: number): boolean {
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     if (AGENT_PATH_RE.test(r)) return true;
     const text = readText(f, 20_000) || "";
     if (
@@ -325,6 +332,30 @@ export function buildAgentLoopLimitsReport(opts: {
     agnM2Satisfied = null;
   }
 
+  const gapNotes: string[] = [];
+  if (statusHint !== "pass" && statusHint !== "not_applicable") {
+    if (!opts.maxSteps.found) {
+      gapNotes.push(
+        "Max-steps / iteration limit config for agent runtimes (repo or import)",
+      );
+    }
+    if (!opts.wallClock.found) {
+      gapNotes.push(
+        "Wall-clock / run timeout config for agent runtimes (repo or import)",
+      );
+    }
+    if (!opts.spawnDepth.found) {
+      gapNotes.push(
+        "Spawn-depth / child-agent limit config (repo or import)",
+      );
+    }
+    if (!opts.imported.found || opts.imported.limitsEnforcedAbort !== true) {
+      gapNotes.push(
+        "Measured abort-on-exceed results under imports/agent-loop-limits/ (limitsEnforcedAbort=true, measuredAt ≤90d) — config/tests alone cannot PASS",
+      );
+    }
+  }
+
   return {
     schemaVersion: "0.2.0",
     pluginId: PLUGIN_ID,
@@ -335,6 +366,12 @@ export function buildAgentLoopLimitsReport(opts: {
     wallClock: opts.wallClock,
     spawnDepth: opts.spawnDepth,
     enforcementTests: opts.enforcementTests,
+    signals: {
+      maxSteps: opts.maxSteps,
+      wallClock: opts.wallClock,
+      spawnDepth: opts.spawnDepth,
+      enforcementTests: opts.enforcementTests,
+    },
     importedResults: opts.imported,
     summary: {
       allThreeLimitsPresent: allThree,
@@ -344,6 +381,7 @@ export function buildAgentLoopLimitsReport(opts: {
       statusHint,
     },
     notes,
+    gapNotes: gapNotes.slice(0, 8),
   };
 }
 
@@ -387,17 +425,23 @@ export const agentLoopLimitsCollector: Collector = {
       "utf8",
     );
 
+    const foundRefs = [
+      ...report.signals.maxSteps.refs.map((r) => `maxSteps: ${r}`),
+      ...report.signals.wallClock.refs.map((r) => `wallClock: ${r}`),
+      ...report.signals.spawnDepth.refs.map((r) => `spawnDepth: ${r}`),
+      ...report.signals.enforcementTests.refs.map(
+        (r) => `enforcementTests: ${r}`,
+      ),
+    ].slice(0, 8);
     const nodes: EvidenceNode[] = [
       {
         id: `${PLUGIN_ID}:report`,
         class: "runtime-config",
         ref: `imports/${PLUGIN_ID}/agent-loop-limits-report.json`,
         excerpt: redact(
-          JSON.stringify(
-            { summary: report.summary, notes: report.notes.slice(0, 5) },
-            null,
-            2,
-          ).slice(0, 1200),
+          foundRefs.length
+            ? `AGN-M2 ${report.summary.statusHint}: ${foundRefs.join("; ")}`
+            : `AGN-M2 ${report.summary.statusHint}: no limit config refs yet`,
         ),
         pluginId: PLUGIN_ID,
         gitCommit: ctx.gitCommit,

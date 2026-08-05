@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:b68d1af21829b4aade5803d908ac68b74a834a3f84d1f2e1aa1c349fd39eed4a",
+  "generatedAt": "sha256:c1048a2d0256e121f48efc4a4a1763fec7379c754782c23b9fa7781163a90545",
   "ruleCount": 178,
   "domains": [
     {
@@ -1144,7 +1144,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         ]
       },
       "manualVerification": "1) Confirm customer-facing AI HTTP/RPC APIs exist. If none, score NOT_APPLICABLE. 2) Obtain the production AI route catalog (OpenAPI, framework routers, or equivalent). 3) Run or review an unauthenticated probe covering every declared AI route—expect 401/403; do not pass from auth middleware code alone. 4) Confirm the probe inventory matches the catalog (no silently omitted privileged routes). 5) PASS only if catalog + full probe + 401/403 hold with measuredAt ≤90 days. AUTHZ-M1 suites (authenticated-but-unauthorized) alone do not prove unauthenticated rejection. AUTHN-M2 MCP/S2S inventories alone do not prove customer-facing HTTP rejection. Public health/docs/signin routes are out of AI-surface scope.\n",
-      "falsePositiveGuidance": "Do not pass auth middleware presence without a fresh probe report. Do not pass partial catalogs that omit privileged AI routes. Do not fail public health, docs, or sign-in paths that are not AI surfaces. Do not score AUTHZ-M1 or AUTHN-M2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
+      "falsePositiveGuidance": "Do not pass auth middleware presence without a fresh probe report. Do not pass partial catalogs that omit privileged AI routes. Do not fail public health, docs, or sign-in paths that are not AI surfaces. Do not fail undeclared advisory GET probes that hit SPA/static catch-alls—only declared production methods gate this check. Do not score AUTHZ-M1 or AUTHN-M2 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Require authentication on every customer-facing AI HTTP/RPC route",
         "Maintain a production AI route catalog and probe it without credentials",

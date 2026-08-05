@@ -15,6 +15,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -33,9 +34,6 @@ import {
 const PLUGIN_ID = "high-priv-agent-review";
 const RELATED = ["AUTHZ-R2"] as const;
 const IMPORT_MAX_AGE_DAYS = 90;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const HIGH_PRIV_AGENT_RE =
   /\b(high[_-]?priv(ilege)?[_-]?agent|privileged[_-]?agent|admin[_-]?agent|superuser[_-]?agent|agent[_-]?(admin|owner|root))\b/i;
@@ -83,10 +81,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function collectRefs(
   targetPath: string,
   maxFiles: number,
@@ -111,7 +105,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

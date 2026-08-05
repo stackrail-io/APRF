@@ -14,6 +14,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -31,9 +32,6 @@ const RELATED = ["DX-R2"] as const;
 const DETECTOR_ID = "repo-inner-loop-evals";
 /** Spec: sampled AI PR ≤30 days. */
 const SAMPLE_MAX_AGE_DAYS = 30;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const AI_PATH_RE =
   /(openai|anthropic|bedrock|vertex|azure.?openai|llm|model|agent|genai|promptfoo|eval)/i;
@@ -85,10 +83,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function collectRefs(
   targetPath: string,
   maxFiles: number,
@@ -120,7 +114,7 @@ function collectRefs(
   const all = [...new Set([...files, ...named])];
   for (const f of all) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 100_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

@@ -15,6 +15,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -48,9 +49,6 @@ const CANARY_TEST_RE =
 
 const TEST_FILE_RE =
   /(^|[/\\])(tests?|__tests__|spec)([/\\]|$)|[._-](test|spec)\.(py|ts|tsx|js|jsx|mjs|cjs)$/i;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 export interface SecretRedactionReport {
   schemaVersion: "0.2.0";
@@ -94,10 +92,6 @@ export interface SecretRedactionReport {
 
 function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
-}
-
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
 }
 
 function asNum(v: unknown): number | null {
@@ -145,7 +139,7 @@ function detectRedactionConfig(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     if (
       /redact|scrub|mask.?secret|sensitive.?data/i.test(basename(f)) &&
       !/thinking/i.test(basename(f))
@@ -175,7 +169,7 @@ function detectCanaryTests(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     if (!TEST_FILE_RE.test(f) && !CANARY_TEST_RE.test(r)) continue;
     const text = readText(f, 300_000);
     if (!text) continue;

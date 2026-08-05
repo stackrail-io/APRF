@@ -109,8 +109,8 @@ export interface ProbeRoute {
   declaredInCode?: boolean;
   /**
    * Extra GET probe on a path that has no declared GET.
-   * 405 → advisory note only (does not fail AUTHN-M1);
-   * 401/403 → ok; 2xx → fail.
+   * Hardening-only: never scored for AUTHN-M1 (declared methods gate the check).
+   * 401/403 → good hardening; 405 / 2xx / other → advisory notes only.
    */
   advisoryGet?: boolean;
 }
@@ -152,7 +152,10 @@ export interface AuthProbeReport {
     fail: number;
     skipped: number;
     errors: number;
+    /** Undeclared GET returned 405 (method not allowed) — hardening note only. */
     advisoryGet405: number;
+    /** Undeclared GET returned 2xx (often SPA/static catch-all) — hardening note only. */
+    advisoryGetOpen: number;
     probeInventoryMatchesRouteCatalog: boolean | null;
     /** true iff every scored declared route returned 401/403, catalog matched, and measuredAt fresh */
     authnM1Satisfied: boolean | null;
@@ -163,8 +166,21 @@ export interface AuthProbeReport {
       | "not_demonstrated"
       | "not_applicable";
   };
-  /** Soft recommendations (e.g. GET returned 405 — should also return 401/403). */
+  /**
+   * Customer-facing findings first (declared routes that failed), then
+   * catalog/hardening notes. Advisory GET rows are not listed per-path.
+   */
   notes: string[];
+  /** Typed gaps for REPORT.html "Evidence still required". */
+  gapNotes: string[];
+  /**
+   * found=true groups drive REPORT.html "Evidence found" via assess.
+   * Prefer unauthenticatedDeclaredRoutes over raw JSON excerpts.
+   */
+  signals: {
+    unauthenticatedDeclaredRoutes: { found: boolean; refs: string[] };
+    declaredRouteCatalog: { found: boolean; refs: string[] };
+  };
   results: ProbeResultRow[];
 }
 
@@ -557,15 +573,16 @@ async function probeOne(
     const status = res.status;
     const latencyMs = Date.now() - started;
 
-    // Advisory GET: 405 → note only; 401/403 → ok; 2xx → fail
+    // Advisory GET: never scored for AUTHN-M1 (declared methods gate the check).
     if (route.advisoryGet) {
       if (EXPECT_STATUS.has(status)) {
         return {
           ...baseRow,
           status,
-          ok: true,
+          ok: null,
+          skipped: true,
+          skipReason: "advisory-get-rejects",
           latencyMs,
-          note: "Advisory GET correctly rejects unauthenticated callers",
         };
       }
       if (status === 405) {
@@ -576,28 +593,33 @@ async function probeOne(
           skipped: true,
           skipReason: "advisory-get-405",
           latencyMs,
-          note: `GET ${route.path} returned 405; declared methods are scored for AUTHN-M1. GET should also return 401/403 for unauthenticated callers.`,
         };
       }
       if (status !== null && status >= 200 && status < 400) {
         return {
           ...baseRow,
           status,
-          ok: false,
+          ok: null,
+          skipped: true,
+          skipReason: "advisory-get-open",
           latencyMs,
-          note: `Advisory GET ${route.path} returned ${status} without credentials — must reject with 401/403`,
         };
       }
       return {
         ...baseRow,
         status,
-        ok: false,
+        ok: null,
+        skipped: true,
+        skipReason: "advisory-get-other",
         latencyMs,
-        note: `Advisory GET ${route.path} returned ${status}; expected 401/403`,
       };
     }
 
     const ok = EXPECT_STATUS.has(status);
+    const where =
+      route.source && route.source !== "advisory-get"
+        ? ` [${route.source}]`
+        : "";
     return {
       ...baseRow,
       status,
@@ -606,8 +628,8 @@ async function probeOne(
       note: ok
         ? undefined
         : status === 405
-          ? `${route.method} ${route.path} returned 405 (method not allowed) without auth — expected 401/403 for declared method`
-          : undefined,
+          ? `${route.method} ${route.path}${where} → 405 without credentials — expected 401/403 for this declared method`
+          : `${route.method} ${route.path}${where} → HTTP ${status} without credentials — must reject with 401/403`,
     };
   } catch (err) {
     return {
@@ -656,27 +678,45 @@ export async function runAuthProbe(
     `${a.method} ${a.path}`.localeCompare(`${b.method} ${b.path}`),
   );
 
-  const notes = [
+  // Score only declared methods — advisory GET is hardening, not the gate.
+  const scored = results.filter(
+    (r) => !r.skipped && r.ok !== null && !r.advisoryGet,
+  );
+  const pass = scored.filter((r) => r.ok === true).length;
+  const fail = scored.filter((r) => r.ok === false && !r.error).length;
+  const errors = results.filter(
+    (r) => Boolean(r.error) && !r.advisoryGet,
+  ).length;
+  const skipped = results.filter((r) => r.skipped).length;
+  const get405 = results.filter(
+    (r) => r.advisoryGet && r.skipReason === "advisory-get-405",
+  );
+  const getOpen = results.filter(
+    (r) => r.advisoryGet && r.skipReason === "advisory-get-open",
+  );
+  const advisoryGet405 = get405.length;
+  const advisoryGetOpen = getOpen.length;
+
+  // Customer-facing notes: declared failures first (repo path + HTTP status).
+  const notes: string[] = [
     ...new Set(
-      results.map((r) => r.note).filter((n): n is string => Boolean(n)),
+      scored
+        .filter((r) => r.ok === false)
+        .map((r) => r.note)
+        .filter((n): n is string => Boolean(n)),
     ),
   ];
-  // Prefer surfacing the GET-should-401 guidance once as a summary note
-  const get405 = results.filter(
-    (r) => r.advisoryGet && r.status === 405 && r.skipReason === "advisory-get-405",
-  );
   if (get405.length) {
-    notes.unshift(
-      `${get405.length} path(s) returned GET 405 while declared methods were probed. GET should also return 401/403 for unauthenticated callers (AUTHN-M1 hardening).`,
+    notes.push(
+      `${get405.length} path(s) have no declared GET and returned 405. Hardening only — GET should also return 401/403; AUTHN-M1 is gated by declared methods from the repo.`,
+    );
+  }
+  if (getOpen.length) {
+    notes.push(
+      `${getOpen.length} undeclared GET probe(s) returned 2xx (often SPA/static catch-all). Not scored for AUTHN-M1 — only declared methods from the repo gate this check.`,
     );
   }
 
-  const scored = results.filter((r) => !r.skipped && r.ok !== null);
-  const pass = scored.filter((r) => r.ok === true).length;
-  const fail = scored.filter((r) => r.ok === false && !r.error).length;
-  const errors = results.filter((r) => Boolean(r.error)).length;
-  const skipped = results.filter((r) => r.skipped).length;
-  const advisoryGet405 = get405.length;
   const probedAt = ctx.assessedAt.toISOString();
   const fresh = measuredAtFresh(probedAt, ctx.assessedAt, IMPORT_MAX_AGE_DAYS);
   // Catalog match / PASS only over declared-in-code AI routes — builtin seed
@@ -687,7 +727,7 @@ export async function runAuthProbe(
   const truncated = opts.declaredAiRoutesTruncated === true;
   if (truncated) {
     notes.push(
-      `Declared AI route catalog truncated for probe runtime (${opts.declaredAiRouteTotal ?? "?"} > APRF_AUTH_PROBE_MAX_ROUTES) — raise the cap or supply routes.json; truncated catalogs cannot PASS AUTHN-M1.`,
+      `Declared AI route catalog incomplete for probing (${opts.declaredAiRouteTotal ?? "?"} routes) — provide imports/http-auth-probe/routes.json or raise the probe route limit; incomplete catalogs cannot PASS AUTHN-M1.`,
     );
   }
   const catalogMatch = truncated
@@ -701,9 +741,9 @@ export async function runAuthProbe(
             ),
           );
           const probedKeys = new Set(
-            scored
-              .filter((r) => !r.advisoryGet)
-              .map((r) => `${r.method.toUpperCase()} ${normalizePath(r.path)}`),
+            scored.map(
+              (r) => `${r.method.toUpperCase()} ${normalizePath(r.path)}`,
+            ),
           );
           return [...declaredKeys].every((k) => probedKeys.has(k));
         })();
@@ -773,7 +813,7 @@ export async function runAuthProbe(
     }
   }
 
-  return {
+  const draft: AuthProbeReport = {
     schemaVersion: "0.2.0",
     pluginId: PLUGIN_ID,
     relatedCheckIds: [...RELATED],
@@ -791,13 +831,146 @@ export async function runAuthProbe(
       skipped,
       errors,
       advisoryGet405,
+      advisoryGetOpen,
       probeInventoryMatchesRouteCatalog: catalogMatch,
       authnM1Satisfied,
       statusHint,
     },
     notes,
+    gapNotes: [],
+    signals: {
+      unauthenticatedDeclaredRoutes: { found: false, refs: [] },
+      declaredRouteCatalog: { found: false, refs: [] },
+    },
     results,
   };
+  return attachCustomerFacingFields(draft, {
+    truncated,
+    declaredAiRouteTotal: opts.declaredAiRouteTotal,
+    fresh,
+  });
+}
+
+function formatDeclaredFailRef(r: ProbeResultRow): string {
+  const where =
+    r.source && r.source !== "advisory-get" ? ` [${r.source}]` : "";
+  const status = r.error ? `error` : `HTTP ${r.status}`;
+  return `${r.method} ${r.path}${where} → ${status}`;
+}
+
+/** Populate gapNotes + signals for REPORT.html Evidence sections. */
+function attachCustomerFacingFields(
+  report: AuthProbeReport,
+  opts?: {
+    truncated?: boolean;
+    declaredAiRouteTotal?: number;
+    fresh?: boolean;
+  },
+): AuthProbeReport {
+  const declaredFails = (report.results ?? []).filter(
+    (r) => !r.advisoryGet && !r.skipped && r.ok === false,
+  );
+  const failRefs = declaredFails.slice(0, 12).map(formatDeclaredFailRef);
+  const catalogRefs = [
+    ...new Set(
+      (report.results ?? [])
+        .filter((r) => r.declaredInCode && !r.advisoryGet && r.source)
+        .map((r) => r.source)
+        .filter((s) => s !== "advisory-get"),
+    ),
+  ].slice(0, 8);
+
+  const statusHint = report.summary.statusHint;
+  const gapNotes: string[] = [];
+  if (statusHint !== "pass" && statusHint !== "not_applicable") {
+    for (const n of declaredFails
+      .map((r) => r.note)
+      .filter((n): n is string => Boolean(n))
+      .slice(0, 8)) {
+      gapNotes.push(n);
+    }
+    const truncated =
+      opts?.truncated === true ||
+      (report.notes ?? []).some((n) =>
+        /route catalog incomplete for probing|truncated for probe/i.test(n),
+      );
+    if (truncated) {
+      const total =
+        opts?.declaredAiRouteTotal ??
+        report.routesDiscovered ??
+        "many";
+      gapNotes.push(
+        `Production AI route catalog is incomplete for probing (${total} declared routes). Provide imports/http-auth-probe/routes.json with the customer-facing AI routes, or raise the probe route limit — incomplete catalogs cannot PASS.`,
+      );
+    } else if (report.summary.probeInventoryMatchesRouteCatalog === false) {
+      gapNotes.push(
+        "Probe inventory does not cover every declared AI route in the production catalog — re-probe with --base-url after updating the catalog or routes.json.",
+      );
+    }
+    if (opts?.fresh === false) {
+      gapNotes.push(
+        "Unauthenticated probe evidence is older than 90 days (or missing measuredAt) — re-probe with --base-url to unlock PASS.",
+      );
+    }
+    if (statusHint === "not_demonstrated" && gapNotes.length === 0) {
+      gapNotes.push(
+        "No unauthenticated probe of declared AI routes yet — provide --base-url to a running instance, or import auth-probe-report.json under imports/http-auth-probe/. Set customerFacingAiHttpApisPresent=false if no customer-facing AI HTTP APIs exist.",
+      );
+    }
+    if (
+      failRefs.length === 0 &&
+      !truncated &&
+      statusHint === "fail" &&
+      (report.summary.errors ?? 0) > 0
+    ) {
+      gapNotes.push(
+        "One or more declared AI route probes errored (network/timeout) — fix reachability and re-probe with --base-url.",
+      );
+    }
+  }
+
+  return {
+    ...report,
+    gapNotes: [...new Set(gapNotes)].slice(0, 8),
+    signals: {
+      unauthenticatedDeclaredRoutes: {
+        found: failRefs.length > 0,
+        refs: failRefs,
+      },
+      // When routes failed auth, surface those; otherwise show catalog source files.
+      declaredRouteCatalog: {
+        found: failRefs.length === 0 && catalogRefs.length > 0,
+        refs: catalogRefs,
+      },
+    },
+  };
+}
+
+/** Evidence excerpt: declared-route failures customers care about, not advisory GET noise. */
+function reportCustomerExcerpt(report: AuthProbeReport, baseUrl: string): string {
+  const declaredFails = report.results.filter(
+    (r) => !r.advisoryGet && !r.skipped && r.ok === false,
+  );
+  if (declaredFails.length) {
+    const samples = declaredFails
+      .slice(0, 8)
+      .map((r) => {
+        const where =
+          r.source && r.source !== "advisory-get" ? ` (${r.source})` : "";
+        return `${r.method} ${r.path} → ${r.status ?? "err"}${where}`;
+      })
+      .join("; ");
+    const more =
+      declaredFails.length > 8
+        ? ` (+${declaredFails.length - 8} more)`
+        : "";
+    return redact(
+      `AUTHN-M1 ${report.summary.statusHint}: ${declaredFails.length} declared route(s) accept unauthenticated callers: ${samples}${more}`,
+    );
+  }
+  return redact(
+    `AUTHN-M1 probe ${baseUrl}: status=${report.summary.statusHint} pass=${report.summary.pass} fail=${report.summary.fail} errors=${report.summary.errors} advisoryGetOpen=${report.summary.advisoryGetOpen ?? 0} satisfied=${report.summary.authnM1Satisfied}`,
+  );
 }
 
 function loadScopeImport(
@@ -913,19 +1086,28 @@ function evaluatePriorReport(
       );
     }
 
-    return {
-      ...data,
-      probedAt: measuredAt ?? data.probedAt,
-      measuredAt: measuredAt ?? data.measuredAt ?? data.probedAt,
-      importedScope: scope,
-      summary: {
-        ...data.summary,
-        probeInventoryMatchesRouteCatalog: catalogMatch,
-        authnM1Satisfied,
-        statusHint,
+    return attachCustomerFacingFields(
+      {
+        ...data,
+        probedAt: measuredAt ?? data.probedAt,
+        measuredAt: measuredAt ?? data.measuredAt ?? data.probedAt,
+        importedScope: scope,
+        summary: {
+          ...data.summary,
+          probeInventoryMatchesRouteCatalog: catalogMatch,
+          authnM1Satisfied,
+          statusHint,
+        },
+        notes,
+        gapNotes: data.gapNotes ?? [],
+        signals: data.signals ?? {
+          unauthenticatedDeclaredRoutes: { found: false, refs: [] },
+          declaredRouteCatalog: { found: false, refs: [] },
+        },
+        results: data.results ?? [],
       },
-      notes,
-    };
+      { fresh },
+    );
   } catch {
     return null;
   }
@@ -938,11 +1120,32 @@ function ingestPriorReports(ctx: CollectorContext): EvidenceNode[] {
   return files.map((file, i) => {
     const text = readText(file, 16_000) ?? "";
     const mt = mtimeDate(file);
+    let excerpt = redact(text.slice(0, 400));
+    try {
+      const parsed = JSON.parse(text) as AuthProbeReport;
+      if (parsed?.summary) {
+        excerpt = reportCustomerExcerpt(
+          attachCustomerFacingFields({
+            ...parsed,
+            gapNotes: parsed.gapNotes ?? [],
+            signals: parsed.signals ?? {
+              unauthenticatedDeclaredRoutes: { found: false, refs: [] },
+              declaredRouteCatalog: { found: false, refs: [] },
+            },
+            results: parsed.results ?? [],
+            notes: parsed.notes ?? [],
+          }),
+          parsed.baseUrl ?? "imported",
+        );
+      }
+    } catch {
+      /* keep raw slice */
+    }
     return {
       id: `${PLUGIN_ID}:import:${i}`,
       class: "runtime" as const,
       ref: rel(ctx.outputDir, file),
-      excerpt: redact(text.slice(0, 400)),
+      excerpt,
       pluginId: PLUGIN_ID,
       lastModified: mtimeIso(file),
       gitCommit: ctx.gitCommit,
@@ -976,16 +1179,20 @@ export const httpAuthProbeCollector: Collector = {
     const nodes: EvidenceNode[] = [...prior];
 
     // Always emit catalog discovery (code / config inventory)
+    const declaredAi = routes.filter(
+      (r) => r.aiSurface && r.declaredInCode && !r.advisoryGet,
+    );
+    const catalogSamples = declaredAi
+      .slice(0, 6)
+      .map((r) => `${r.method} ${r.path}${r.source ? ` [${r.source}]` : ""}`)
+      .join("; ");
     const catalogExcerpt = redact(
-      JSON.stringify(
-        {
-          sources,
-          aiRoutes: routes.filter((r) => r.aiSurface).slice(0, 40),
-          total: routes.length,
-        },
-        null,
-        2,
-      ).slice(0, 600),
+      `${declaredAi.length} declared AI routes from ${sources.join(", ") || "none"}${
+        catalogSamples ? `: ${catalogSamples}` : ""
+      }${declaredAi.length > 6 ? ` (+${declaredAi.length - 6} more)` : ""}`.slice(
+        0,
+        600,
+      ),
     );
     nodes.push({
       id: `${PLUGIN_ID}:catalog`,
@@ -1023,6 +1230,7 @@ export const httpAuthProbeCollector: Collector = {
             skipped: 0,
             errors: 0,
             advisoryGet405: 0,
+            advisoryGetOpen: 0,
             probeInventoryMatchesRouteCatalog: null,
             authnM1Satisfied: null,
             statusHint: "not_applicable",
@@ -1030,6 +1238,11 @@ export const httpAuthProbeCollector: Collector = {
           notes: [
             "Imported customerFacingAiHttpApisPresent=false — AUTHN-M1 NOT_APPLICABLE.",
           ],
+          gapNotes: [],
+          signals: {
+            unauthenticatedDeclaredRoutes: { found: false, refs: [] },
+            declaredRouteCatalog: { found: false, refs: [] },
+          },
           results: [],
         };
         const reportPath = join(importDir(ctx), "auth-probe-report.json");
@@ -1083,8 +1296,9 @@ export const httpAuthProbeCollector: Collector = {
             id: `${PLUGIN_ID}:report`,
             class: "runtime",
             ref: rel(ctx.outputDir, reportPath),
-            excerpt: redact(
-              `AUTHN-M1 prior report status=${evaluated.summary.statusHint} satisfied=${satisfied}`,
+            excerpt: reportCustomerExcerpt(
+              evaluated,
+              evaluated.baseUrl ?? "imported",
             ),
             pluginId: PLUGIN_ID,
             gitCommit: ctx.gitCommit,
@@ -1102,7 +1316,7 @@ export const httpAuthProbeCollector: Collector = {
         return {
           pluginId: PLUGIN_ID,
           status: "ran",
-          detail: `Ingested ${prior.length} prior probe report(s); no --base-url (set APRF_AUTH_PROBE_BASE_URL to re-probe). Catalog: ${routes.filter((r) => r.aiSurface).length} AI routes; status=${evaluated?.summary.statusHint ?? "partial"}`,
+          detail: `AUTHN-M1 status=${evaluated?.summary.statusHint ?? "partial"}; ingested ${prior.length} prior probe report(s); no --base-url (set APRF_AUTH_PROBE_BASE_URL to re-probe). Catalog: ${routes.filter((r) => r.aiSurface).length} AI routes`,
           nodes,
         };
       }
@@ -1144,9 +1358,7 @@ export const httpAuthProbeCollector: Collector = {
       id: `${PLUGIN_ID}:report`,
       class: "runtime",
       ref: rel(ctx.outputDir, reportPath),
-      excerpt: redact(
-        `AUTHN-M1 probe ${baseUrl}: status=${report.summary.statusHint} pass=${report.summary.pass} fail=${report.summary.fail} errors=${report.summary.errors} advisoryGet405=${report.summary.advisoryGet405} satisfied=${satisfied}`,
-      ),
+      excerpt: reportCustomerExcerpt(report, baseUrl),
       pluginId: PLUGIN_ID,
       lastModified: new Date().toISOString(),
       gitCommit: ctx.gitCommit,
@@ -1164,7 +1376,7 @@ export const httpAuthProbeCollector: Collector = {
     return {
       pluginId: PLUGIN_ID,
       status: "ran",
-      detail: `Probed ${report.routesProbed} AI routes at ${baseUrl} → status=${report.summary.statusHint} pass=${report.summary.pass} fail=${report.summary.fail} errors=${report.summary.errors} advisoryGet405=${report.summary.advisoryGet405}; report=${rel(ctx.outputDir, reportPath)}; AUTHN-M1 satisfied=${satisfied}`,
+      detail: `AUTHN-M1 status=${report.summary.statusHint} pass=${report.summary.pass} fail=${report.summary.fail} errors=${report.summary.errors} advisoryGetOpen=${report.summary.advisoryGetOpen ?? 0}; report=${rel(ctx.outputDir, reportPath)}; satisfied=${satisfied}`,
       nodes,
     };
   },
@@ -1183,7 +1395,7 @@ export function startFixtureAuthServer(
         res.end(JSON.stringify({ ok: true }));
         return;
       }
-      // Declared POST rejects; GET returns 405 (advisory — should be 401/403)
+      // Declared POST rejects; GET returns SPA-like 200 (advisory — not scored)
       if (url.startsWith("/api/v1/chats")) {
         if (method === "POST") {
           res.writeHead(401, { "content-type": "application/json" });
@@ -1191,8 +1403,8 @@ export function startFixtureAuthServer(
           return;
         }
         if (method === "GET") {
-          res.writeHead(405, { Allow: "POST" });
-          res.end();
+          res.writeHead(200, { "content-type": "text/html" });
+          res.end("<!doctype html><html><body>spa</body></html>");
           return;
         }
       }

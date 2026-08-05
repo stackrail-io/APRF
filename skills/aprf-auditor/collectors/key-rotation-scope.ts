@@ -15,6 +15,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -35,9 +36,6 @@ const PLUGIN_ID = "key-rotation-scope";
 const RELATED = ["SEC2-M3"] as const;
 const DETECTOR_ID = "repo-key-rotation-scope";
 const IMPORT_MAX_AGE_DAYS = 90;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 // No trailing \b — filenames like key_rotation_policy.md / api_key_inventory.yaml
 // treat `_` as a word char, so end-boundaries falsely miss path matches.
@@ -91,10 +89,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function asNum(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
@@ -126,7 +120,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

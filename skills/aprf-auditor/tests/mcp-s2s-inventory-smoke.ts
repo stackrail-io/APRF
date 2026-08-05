@@ -238,6 +238,20 @@ if auth_type == 'bearer':
       `empty inventory without N/A should be partial, got ${JSON.stringify(emptyReport.summary)}`,
     );
   }
+  if (emptyReport.signals?.inventorySources?.found !== true) {
+    throw new Error(
+      `empty inventory should expose inventorySources for Evidence found, got ${JSON.stringify(emptyReport.signals)}`,
+    );
+  }
+  if (
+    !emptyReport.gapNotes?.some((n) =>
+      /No production MCP\/AI S2S connections listed/i.test(n),
+    )
+  ) {
+    throw new Error(
+      `empty inventory should gapNotes N/A-or-export guidance, got ${JSON.stringify(emptyReport.gapNotes)}`,
+    );
+  }
 
   // Explicit N/A
   const naReport = buildReport(baseCtx, {

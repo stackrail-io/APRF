@@ -14,6 +14,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -30,9 +31,6 @@ const PLUGIN_ID = "memory-retention";
 const RELATED = ["MEM-M2"] as const;
 const DETECTOR_ID = "repo-memory-retention";
 const INVENTORY_MAX_AGE_DAYS = 90;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const MEMORY_PATH_RE =
   /(memory|memories|conversation|vector|embedding|retriev|durable[\s_-]*mem|session[\s_-]*mem|rag)/i;
@@ -84,10 +82,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function collectRefs(
   targetPath: string,
   maxFiles: number,
@@ -111,7 +105,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 100_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;
