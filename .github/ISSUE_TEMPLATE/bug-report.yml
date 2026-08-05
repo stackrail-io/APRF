@@ -1,5 +1,5 @@
 name: Catalog / package bug
-description: Report a bug in the YAML catalog, schemas, packages, or CI
+description: Report a bug in the YAML catalog, schemas, packages, CLI, or CI
 title: "[Bug] "
 labels: ["bug"]
 body:
@@ -10,8 +10,12 @@ body:
       options:
         - Check YAML / catalog
         - JSON Schema
+        - "@stackrail-io/aprf (CLI)"
         - "@stackrail-io/aprf-engine"
         - "@stackrail-io/aprf-framework-definition"
+        - Cursor plugin / marketplace
+        - Auditor skill / collectors
+        - HTML report
         - CI / integrity
         - Docs
     validations:
@@ -20,13 +24,16 @@ body:
     id: repro
     attributes:
       label: Reproduction
-      description: Steps, expected vs actual, relevant Check IDs
+      description: Steps, expected vs actual, relevant Check IDs. For CLI issues, include the command and `npx @stackrail-io/aprf@0.1.1 version` output.
     validations:
       required: true
   - type: input
     id: version
     attributes:
-      label: Framework / package version
-      placeholder: 0.11.0
+      label: Package / catalog version
+      description: >
+        CLI version (e.g. 0.1.1) and/or catalog version from `aprf version`
+        (e.g. catalog 0.11.1, framework 0.11.0).
+      placeholder: "cli 0.1.1 · catalog 0.11.1"
     validations:
       required: true

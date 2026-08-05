@@ -7,10 +7,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ## [Unreleased]
 
+## [Catalog 0.11.1] / [@stackrail-io/aprf@0.1.1] — 2026-08-04
+
+Patch release for the Check catalog and first public CLI publish aligned to that catalog.
+
+Published on npm as:
+- `@stackrail-io/aprf-engine@0.11.1`
+- `@stackrail-io/aprf@0.1.1` (pins engine `0.11.1`, framework-definition `0.11.0`)
+
+Framework package remains `@stackrail-io/aprf-framework-definition@0.11.0`. Spec `governance.version` stays **0.11.0** (no framework SemVer bump).
+
 ### Added
-- `@stackrail-io/aprf` CLI package (`aprf collect|assess|report|verify|audit|version`): bundles collectors + HTML renderer, pins `@stackrail-io/aprf-engine` catalog.
-- Deterministic **assess engine**: `statusHint` + collector-detail fallback + evidence-graph attachment; gate/grade/risk/`recommendedScore`/priority per auditor `scoring.yaml`; lenses via `--lens`; N/A ≠ pass.
-- **Cursor plugin** [`plugins/aprf/`](plugins/aprf/) + root [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json): CLI-first `@aprf-auditor` skill and `/aprf-audit` / `/aprf-collect` / `/aprf-report` commands (Team Marketplace / local `~/.cursor/plugins/local`).
+- `@stackrail-io/aprf` CLI (`aprf collect|assess|report|verify|audit|version`): bundles collectors + HTML renderer; first public npm release at **0.1.1**.
+- Deterministic **assess engine** in the CLI: `statusHint` + collector-detail fallback + evidence-graph attachment; gate/grade/risk/`recommendedScore`/priority; lenses via `--lens`; N/A ≠ pass.
+- **Cursor plugin** [`plugins/aprf/`](plugins/aprf/) + [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json): CLI-first `@aprf-auditor` skill and `/aprf-audit` / `/aprf-collect` / `/aprf-report`.
+- AGN-M1 **agent charter specification** and filled example under [`skills/aprf-auditor/examples/agent-charter/`](skills/aprf-auditor/examples/agent-charter/) (`agentVersion`, `allowedTools`, `autonomy`, policies, `reviewDate` / `expiryDate`, …).
+- HTML report flyout **PASS sample attachments** (inventory + charter spec + example) with modal preview for AGN-M1.
+
+### Changed
+- **AGN-M1**: default severity **high** / weight **3** (was critical / 4); tightened measurable pass condition (review date, last updated, charter version, approval status); Critical escalation when inventory completeness or ownership cannot be demonstrated (`severityHint`).
+- Assess prefers typed collector `gapNotes` over dumping full normative `evidenceRequired`; omits placeholder remediation owner/effort.
+- Issue template [`.github/ISSUE_TEMPLATE/bug-report.yml`](.github/ISSUE_TEMPLATE/bug-report.yml): CLI / report areas and `cli 0.1.1 · catalog 0.11.1` version guidance.
 
 ## [0.11.0] — 2026-08-02
 
