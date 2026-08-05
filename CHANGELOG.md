@@ -7,7 +7,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ## [Unreleased]
 
-## [0.11.1] / [@stackrail-io/aprf@0.1.1] — 2026-08-04
+## [Catalog 0.11.1] / [@stackrail-io/aprf@0.1.1] — 2026-08-04
 
 Patch release for the Check catalog and first public CLI publish aligned to that catalog.
 
