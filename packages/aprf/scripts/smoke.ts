@@ -185,7 +185,7 @@ const a = JSON.parse(readFileSync(assessmentPath, "utf8")) as {
   executiveSummary: {
     overallGatePassed: boolean;
     criticalityName: string;
-    recommendedScore: number;
+    recommendedScore: number | null;
   };
   scope?: { checkIds?: string[]; profileId?: string };
   controls: Array<{
@@ -210,15 +210,25 @@ function assert(cond: unknown, msg: string) {
   }
 }
 
+const CORE_MANDATORY_COUNT = 39;
+
 assert(a.executiveSummary.criticalityName === "Production", "criticality name");
 assert(a.executiveSummary.overallGatePassed === false, "gate must fail");
 assert(
-  a.controls.length === 39,
-  `core profile must score 39 Checks, got ${a.controls.length}`,
+  a.controls.length === CORE_MANDATORY_COUNT,
+  `core profile must score ${CORE_MANDATORY_COUNT} Checks, got ${a.controls.length}`,
 );
 assert(
   a.controls.every((c) => c.gate === "mandatory"),
   "core profile assess must not expand into recommended Checks from collector hints",
+);
+assert(
+  a.executiveSummary.recommendedScore === null,
+  `core profile recommendedScore must be null (not scored), got ${a.executiveSummary.recommendedScore}`,
+);
+assert(
+  /recommendedScore=n\/a/i.test(a.executiveSummary.narrative),
+  `narrative must say recommendedScore=n/a; got ${a.executiveSummary.narrative}`,
 );
 assert(
   !byId.has("AUTHN-R2"),
@@ -325,8 +335,12 @@ const { path: fullPath } = writeAssessment({
 const full = JSON.parse(readFileSync(fullPath, "utf8")) as typeof a;
 const fullById = new Map(full.controls.map((c) => [c.checkId, c]));
 assert(
-  full.controls.length > 39,
+  full.controls.length > CORE_MANDATORY_COUNT,
   `full catalog must score more than core mandatories, got ${full.controls.length}`,
+);
+assert(
+  typeof full.executiveSummary.recommendedScore === "number",
+  `full catalog must score recommended Checks; got ${full.executiveSummary.recommendedScore}`,
 );
 const authnR2 = fullById.get("AUTHN-R2");
 assert(authnR2?.status === "PARTIAL", "AUTHN-R2 PARTIAL from statusHint");

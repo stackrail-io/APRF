@@ -24,7 +24,16 @@ function readJsonVersion(pkgPath: string): string | undefined {
  * Works from both src/ (tsx) and dist/ (bundled CLI).
  */
 function readWorkspaceSiblingVersion(dirName: string): string | undefined {
-  return readJsonVersion(resolve(HERE, `../${dirName}/package.json`));
+  // HERE is packages/aprf/src or packages/aprf/dist → siblings are ../../<dir>
+  // (also probe ../../../ for unusual bundle layouts).
+  for (const rel of [
+    `../../${dirName}/package.json`,
+    `../../../${dirName}/package.json`,
+  ]) {
+    const v = readJsonVersion(resolve(HERE, rel));
+    if (v) return v;
+  }
+  return undefined;
 }
 
 function readPkgVersion(name: string): string {

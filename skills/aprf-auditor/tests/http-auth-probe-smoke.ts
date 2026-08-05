@@ -13,6 +13,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   httpAuthProbeCollector,
+  runAuthProbe,
   startFixtureAuthServer,
   type AuthProbeReport,
 } from "../collectors/http-auth-probe.ts";
@@ -450,6 +451,107 @@ async def chat():
     }
     rmSync(outScope, { recursive: true, force: true });
     rmSync(emptyTarget, { recursive: true, force: true });
+
+    // Imported fail report with gapNotes but no results[] must keep operator notes.
+    const outImportGaps = mkdtempSync(join(tmpdir(), "aprf-auth-import-gaps-"));
+    mkdirSync(join(outImportGaps, "imports", "http-auth-probe"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outImportGaps, "imports", "http-auth-probe", "auth-probe-report.json"),
+      JSON.stringify({
+        pluginId: "http-auth-probe",
+        summary: {
+          statusHint: "fail",
+          authnM1Satisfied: false,
+          pass: 0,
+          fail: 1,
+          errors: 0,
+          probeInventoryMatchesRouteCatalog: true,
+        },
+        gapNotes: [
+          "GET /api/v1/chats → HTTP 200 without credentials — must reject with 401/403",
+        ],
+        notes: [],
+        results: [],
+        signals: {
+          unauthenticatedDeclaredRoutes: { found: false, refs: [] },
+          declaredRouteCatalog: { found: false, refs: [] },
+        },
+      }),
+    );
+    const importGaps = await httpAuthProbeCollector.collect({
+      targetPath: targetDir,
+      outputDir: outImportGaps,
+      assessedAt,
+      live: false,
+    });
+    if (importGaps.status !== "ran") {
+      throw new Error(
+        `import gapNotes fixture expected ran, got ${importGaps.status}`,
+      );
+    }
+    const importGapsReport = JSON.parse(
+      readFileSync(
+        join(
+          outImportGaps,
+          "imports",
+          "http-auth-probe",
+          "auth-probe-report.json",
+        ),
+        "utf8",
+      ),
+    ) as AuthProbeReport;
+    if (
+      !importGapsReport.gapNotes?.some((n) =>
+        /must reject with 401\/403/i.test(n),
+      )
+    ) {
+      throw new Error(
+        `imported gapNotes must be preserved when results[] is empty: ${JSON.stringify(importGapsReport.gapNotes)}`,
+      );
+    }
+    rmSync(outImportGaps, { recursive: true, force: true });
+
+    // Unreachable base URL → probe errors must not look like open routes.
+    const errorReport = await runAuthProbe(
+      {
+        targetPath: targetDir,
+        outputDir: outDir,
+        assessedAt,
+        live: true,
+        maxFiles: 100,
+      },
+      "http://127.0.0.1:9",
+      [
+        {
+          method: "POST",
+          path: "/api/v1/chats/",
+          aiSurface: true,
+          declaredInCode: true,
+          source: "routers/chats.py",
+        },
+      ],
+      ["routers/chats.py"],
+      { customerFacingAiHttpApisPresent: true },
+    );
+    if ((errorReport.summary.errors ?? 0) < 1) {
+      throw new Error(
+        `expected probe errors against closed port, got ${JSON.stringify(errorReport.summary)}`,
+      );
+    }
+    if (errorReport.signals?.unauthenticatedDeclaredRoutes?.found) {
+      throw new Error(
+        `probe errors must not set unauthenticatedDeclaredRoutes: ${JSON.stringify(errorReport.signals)}`,
+      );
+    }
+    if (
+      !errorReport.gapNotes?.some((n) => /errored \(network\/timeout\)/i.test(n))
+    ) {
+      throw new Error(
+        `expected reachability gapNote, got ${JSON.stringify(errorReport.gapNotes)}`,
+      );
+    }
   } finally {
     await fixture.close();
   }

@@ -68,7 +68,7 @@ async function main() {
     }
     if (
       r1.gapNotes?.some((n) =>
-        /promotionPathDocumented=true|releasesThroughPromotionPathPct/i.test(n),
+        /promotionPathDocumented|releasesThroughPromotionPathPct/i.test(n),
       )
     ) {
       throw new Error(

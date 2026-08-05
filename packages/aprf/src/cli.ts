@@ -36,7 +36,13 @@ function resolveCliProfile(profileId: string) {
   if (profileId === PROFILE_ID_CORE || profileId === "core") {
     return PROFILE_CORE;
   }
-  return getProfileById(profileId) ?? PROFILE_CORE;
+  const profile = getProfileById(profileId);
+  if (!profile) {
+    throw new Error(
+      `Unknown APRF profile: ${profileId}. Use "core", "regulated", or a catalog profile id.`,
+    );
+  }
+  return profile;
 }
 
 /** Collectors that map to at least one Check in `checkIds` (plus catch-alls). */

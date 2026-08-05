@@ -66,7 +66,7 @@ Aligned with auditor `scoring.yaml` / `confidence.yaml` / `evidence-precedence.y
 - `NOT_APPLICABLE` is excluded (`passed: false`) — not a vanity pass
 - Default assess scores **profile mandatories only** (collector hints outside the gate are ignored). `--full` scores the non-deprecated catalog.
 - Unscored profile Checks → `NOT_DEMONSTRATED` (blocker if mandatory)
-- `recommendedScore` = severity-weighted recommended Checks only (empty under default profile assess)
+- `recommendedScore` = severity-weighted recommended Checks only (`null` / n/a under default profile assess; use `--full` to score recommended)
 - `audit` without `--plugins` / `--full` collects only plugins that map to the profile gate
 - Optional `--lens rag,agents,voice,coding`
 

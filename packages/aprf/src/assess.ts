@@ -349,7 +349,13 @@ function resolveProfile(profileId: string): AprfProfile {
   if (profileId === PROFILE_ID_CORE || profileId === "core") {
     return PROFILE_CORE;
   }
-  return getProfileById(profileId) ?? PROFILE_CORE;
+  const profile = getProfileById(profileId);
+  if (!profile) {
+    throw new Error(
+      `Unknown APRF profile: ${profileId}. Use "core", "regulated", or a catalog profile id.`,
+    );
+  }
+  return profile;
 }
 
 function resolveLenses(lensIds: string[]): AprfLens[] {
@@ -571,7 +577,7 @@ function priorityFor(
 
 function overallGrade(args: {
   gatePass: boolean;
-  recommendedScore: number;
+  recommendedScore: number | null;
   criticalBlockers: ControlOut[];
   mandatoryFails: number;
   criticalNd: number;
@@ -585,6 +591,8 @@ function overallGrade(args: {
     if (criticalBlockers.length || criticalNd) return "F";
     return "D";
   }
+  // No recommended Checks in scope (profile-only assess) → gate PASS only → C.
+  if (recommendedScore == null) return "C";
   if (recommendedScore >= 85 && criticalNd === 0) return "A";
   if (recommendedScore >= 70) return "B";
   return "C";
@@ -826,7 +834,8 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     (c) => c.status === "FAIL" && c.severity === "critical",
   ).length;
 
-  // recommendedScore — recommended Checks only, severity-weighted
+  // recommendedScore — recommended Checks only, severity-weighted.
+  // Profile-only assess has no recommended Checks in scope → null (not 100).
   const recommended = controls.filter(
     (c) => c.gate === "recommended" && c.status !== "NOT_APPLICABLE",
   );
@@ -837,8 +846,8 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     recWeight += w;
     if (c.status === "PASS") recPassWeight += w;
   }
-  const recommendedScore =
-    recWeight === 0 ? 100 : Math.round((recPassWeight / recWeight) * 100);
+  const recommendedScore: number | null =
+    recWeight === 0 ? null : Math.round((recPassWeight / recWeight) * 100);
 
   const byDomain = new Map<
     string,
@@ -971,7 +980,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       recommendedScore,
       blockerCount: blockers.length,
       criticalBlockerCount: criticalBlockers.length,
-      narrative: `APRF CLI assess against ${profile.name}${lenses.length ? ` + lenses [${lenses.map((l) => l.name).join(", ")}]` : ""}: ${hintedCount}/${controls.length} Checks scored from collector statusHints; unscored → NOT_DEMONSTRATED. Gate ${overallGatePassed ? "PASS" : "FAIL"} (${blockers.length} mandatory blockers, ${criticalBlockers.length} critical). recommendedScore=${recommendedScore} (prioritization only).`,
+      narrative: `APRF CLI assess against ${profile.name}${lenses.length ? ` + lenses [${lenses.map((l) => l.name).join(", ")}]` : ""}: ${hintedCount}/${controls.length} Checks scored from collector statusHints; unscored → NOT_DEMONSTRATED. Gate ${overallGatePassed ? "PASS" : "FAIL"} (${blockers.length} mandatory blockers, ${criticalBlockers.length} critical). recommendedScore=${recommendedScore == null ? "n/a" : recommendedScore} (prioritization only).`,
     },
     domainScores,
     controls,

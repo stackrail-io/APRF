@@ -227,7 +227,7 @@ type Assessment = {
     overallGrade?: string;
     riskLevel?: string;
     assessmentConfidence: string;
-    recommendedScore: number;
+    recommendedScore: number | null;
     blockerCount: number;
     criticalBlockerCount: number;
     narrative: string;
@@ -565,7 +565,19 @@ function severityBars(counts: Record<string, number>): string {
 </div>`;
 }
 
-function scoreGauge(score: number, gatePass: boolean): string {
+function scoreGauge(score: number | null, gatePass: boolean): string {
+  if (score == null) {
+    return `<div class="viz-card">
+  <h3>Recommended score <span class="meta">(non-gate)</span></h3>
+  <div class="gauge-wrap">
+    <svg viewBox="0 0 120 70" class="gauge" role="img" aria-label="Recommended score not scored">
+      <path d="M 14 60 A 46 46 0 0 1 106 60" fill="none" stroke="#e8ecef" stroke-width="10" stroke-linecap="round"/>
+      <text x="60" y="58" text-anchor="middle" class="gauge-val">n/a</text>
+    </svg>
+    <p class="meta">Gate ${gatePass ? "PASS" : "FAIL"} · recommended Checks not in scope (use --full)</p>
+  </div>
+</div>`;
+  }
   const s = Math.max(0, Math.min(100, score));
   const r = 46;
   const c = Math.PI * r; // half circle
@@ -1503,7 +1515,7 @@ function render(a: Assessment): string {
       <div class="stat"><div class="label">Required capability</div><div class="value" style="font-size:1.05rem">${esc(capabilityLabel(a))}</div></div>
       <div class="stat"><div class="label">Confidence</div><div class="value">${esc(a.executiveSummary.assessmentConfidence)}</div></div>
       <div class="stat"><div class="label">Blockers</div><div class="value">${esc(a.executiveSummary.blockerCount)} <span class="meta">(${esc(a.executiveSummary.criticalBlockerCount)} critical)</span></div></div>
-      <div class="stat"><div class="label">Recommended (non-gate)</div><div class="value">${esc(a.executiveSummary.recommendedScore)}</div></div>
+      <div class="stat"><div class="label">Recommended (non-gate)</div><div class="value">${esc(a.executiveSummary.recommendedScore == null ? "n/a" : a.executiveSummary.recommendedScore)}</div></div>
     </div>
     <p class="meta">Maturity model: <a href="${a.executiveSummary.maturityUrl ?? "https://stackrail.io/aprf/how/#maturity"}" rel="noopener">stackrail.io/aprf/how/#maturity</a>
       ${a.executiveSummary.overallGrade != null ? ` · Grade (secondary): ${esc(a.executiveSummary.overallGrade)}` : ""}

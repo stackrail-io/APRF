@@ -867,8 +867,12 @@ function attachCustomerFacingFields(
     fresh?: boolean;
   },
 ): AuthProbeReport {
+  // Network/timeout rows are ok:false + error — not open-route findings.
   const declaredFails = (report.results ?? []).filter(
-    (r) => !r.advisoryGet && !r.skipped && r.ok === false,
+    (r) => !r.advisoryGet && !r.skipped && r.ok === false && !r.error,
+  );
+  const declaredErrors = (report.results ?? []).filter(
+    (r) => !r.advisoryGet && !r.skipped && r.ok === false && Boolean(r.error),
   );
   const failRefs = declaredFails.slice(0, 12).map(formatDeclaredFailRef);
   const catalogRefs = [
@@ -918,10 +922,11 @@ function attachCustomerFacingFields(
       );
     }
     if (
-      failRefs.length === 0 &&
-      !truncated &&
-      statusHint === "fail" &&
-      (report.summary.errors ?? 0) > 0
+      declaredErrors.length > 0 ||
+      (failRefs.length === 0 &&
+        !truncated &&
+        statusHint === "fail" &&
+        (report.summary.errors ?? 0) > 0)
     ) {
       gapNotes.push(
         "One or more declared AI route probes errored (network/timeout) — fix reachability and re-probe with --base-url.",
@@ -929,17 +934,29 @@ function attachCustomerFacingFields(
     }
   }
 
+  // Union recomputed notes with any operator-provided import notes (imports may
+  // omit results[] while still carrying actionable gapNotes / signal refs).
+  const merged = [...(report.gapNotes ?? []), ...gapNotes];
+  const importedUnauth = report.signals?.unauthenticatedDeclaredRoutes;
+  const unauthRoutes =
+    failRefs.length > 0
+      ? { found: true as const, refs: failRefs }
+      : importedUnauth?.found && (importedUnauth.refs?.length ?? 0) > 0
+        ? {
+            found: true as const,
+            refs: importedUnauth.refs.filter(
+              (r): r is string => typeof r === "string" && r.trim().length > 0,
+            ).slice(0, 12),
+          }
+        : { found: false as const, refs: [] as string[] };
   return {
     ...report,
-    gapNotes: [...new Set(gapNotes)].slice(0, 8),
+    gapNotes: [...new Set(merged)].slice(0, 8),
     signals: {
-      unauthenticatedDeclaredRoutes: {
-        found: failRefs.length > 0,
-        refs: failRefs,
-      },
+      unauthenticatedDeclaredRoutes: unauthRoutes,
       // When routes failed auth, surface those; otherwise show catalog source files.
       declaredRouteCatalog: {
-        found: failRefs.length === 0 && catalogRefs.length > 0,
+        found: unauthRoutes.found === false && catalogRefs.length > 0,
         refs: catalogRefs,
       },
     },
@@ -948,8 +965,8 @@ function attachCustomerFacingFields(
 
 /** Evidence excerpt: declared-route failures customers care about, not advisory GET noise. */
 function reportCustomerExcerpt(report: AuthProbeReport, baseUrl: string): string {
-  const declaredFails = report.results.filter(
-    (r) => !r.advisoryGet && !r.skipped && r.ok === false,
+  const declaredFails = (report.results ?? []).filter(
+    (r) => !r.advisoryGet && !r.skipped && r.ok === false && !r.error,
   );
   if (declaredFails.length) {
     const samples = declaredFails
@@ -1118,7 +1135,7 @@ function ingestPriorReports(ctx: CollectorContext): EvidenceNode[] {
     /(?:^|[/\\])(?:auth-probe-report\.json|probe[^/\\]*\.json)$/i.test(f),
   );
   return files.map((file, i) => {
-    const text = readText(file, 16_000) ?? "";
+    const text = readText(file, 2_000_000) ?? "";
     const mt = mtimeDate(file);
     let excerpt = redact(text.slice(0, 400));
     try {
