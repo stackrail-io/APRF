@@ -10,7 +10,7 @@
  * are anonymous or shared long-lived static keys.
  */
 import { writeFileSync, existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import type {
   Collector,
   CollectorContext,
@@ -122,6 +122,15 @@ export interface McpS2sReport {
       | "not_applicable";
   };
   notes: string[];
+  /** Typed gaps for REPORT.html Evidence still required. */
+  gapNotes: string[];
+  /** Drives REPORT.html Evidence found (found=true refs only). */
+  signals: {
+    inventorySources: { found: boolean; refs: string[] };
+    strongMachineIdentityConnections: { found: boolean; refs: string[] };
+    weakOrAnonymousConnections: { found: boolean; refs: string[] };
+    codeAllowsAnonymousAuthType: { found: boolean; refs: string[] };
+  };
 }
 
 function importDir(ctx: CollectorContext): string {
@@ -554,6 +563,43 @@ export function buildReport(
     authnM2Satisfied = null;
   }
 
+  const strongRefs = scored
+    .filter((c) => c.ok)
+    .map((c) => `${c.name} [${c.auth_type}] (${c.source})`)
+    .slice(0, 12);
+  const weakRefs = scored
+    .filter((c) => !c.ok)
+    .map((c) => `${c.name} — ${c.reason}`)
+    .slice(0, 12);
+  const gapNotes: string[] = [];
+  if (statusHint !== "pass" && statusHint !== "not_applicable") {
+    if (scored.length === 0 && opts.inventorySource.length > 0) {
+      gapNotes.push(
+        "No production MCP/AI S2S connections listed — import productionMcpOrAiS2sConnectionsPresent=false for NOT_APPLICABLE, or export the connection inventory with named machine identity (measuredAt ≤90d)",
+      );
+    }
+    if (fail > 0) {
+      gapNotes.push(
+        `${fail} connection(s) use anonymous, session, or shared static keys — require OAuth/OIDC/mTLS/workload identity per connection`,
+      );
+    }
+    if (opts.codePolicy.allowsAnonymousAuthType && scored.length === 0) {
+      gapNotes.push(
+        "Code allows auth_type=none for MCP/tool servers — ensure production configs do not use anonymous connections",
+      );
+    }
+    if (scored.length > 0 && !importFresh) {
+      gapNotes.push(
+        "Inventory measuredAt older than 90 days (or missing) — refresh live fetch or import",
+      );
+    }
+    if (opts.inventorySource.length === 0 && scored.length === 0) {
+      gapNotes.push(
+        "No MCP/S2S inventory yet — provide --base-url + admin credentials, or import tool_servers JSON under imports/mcp-s2s-inventory/",
+      );
+    }
+  }
+
   return {
     schemaVersion: "0.2.0",
     pluginId: PLUGIN_ID,
@@ -574,7 +620,46 @@ export function buildReport(
       statusHint,
     },
     notes,
+    gapNotes: gapNotes.slice(0, 8),
+    signals: {
+      // Prefer weak connections first so Evidence found surfaces failures.
+      weakOrAnonymousConnections: {
+        found: weakRefs.length > 0,
+        refs: weakRefs,
+      },
+      strongMachineIdentityConnections: {
+        found: strongRefs.length > 0 && weakRefs.length === 0,
+        refs: strongRefs,
+      },
+      inventorySources: {
+        found: opts.inventorySource.length > 0 && scored.length === 0,
+        refs: opts.inventorySource
+          .slice(0, 8)
+          .map((s) => `${s} — 0 MCP/S2S connections listed`),
+      },
+      codeAllowsAnonymousAuthType: {
+        found: opts.codePolicy.allowsAnonymousAuthType,
+        refs: opts.codePolicy.refs.slice(0, 8),
+      },
+    },
   };
+}
+
+function reportCustomerExcerpt(report: McpS2sReport): string {
+  const { statusHint, total, fail } = report.summary;
+  if (fail > 0) {
+    const samples = report.signals.weakOrAnonymousConnections.refs
+      .slice(0, 4)
+      .join("; ");
+    return `AUTHN-M2 ${statusHint}: ${fail}/${total} connection(s) lack strong machine identity${samples ? `: ${samples}` : ""}`;
+  }
+  if (total === 0 && report.inventorySource.length > 0) {
+    return `AUTHN-M2 ${statusHint}: inventory fetched from ${report.inventorySource.join(", ")} but listed 0 connections — attest N/A if none exist in production`;
+  }
+  if (total > 0) {
+    return `AUTHN-M2 ${statusHint}: ${report.summary.pass}/${total} connection(s) use named machine identity`;
+  }
+  return `AUTHN-M2 ${statusHint}: no inventory yet`;
 }
 
 export const mcpS2sInventoryCollector: Collector = {
@@ -760,9 +845,7 @@ export const mcpS2sInventoryCollector: Collector = {
       id: `${PLUGIN_ID}:report`,
       class: "runtime",
       ref: rel(ctx.outputDir, reportPath),
-      excerpt: redact(
-        `AUTHN-M2 inventory: status=${report.summary.statusHint} total=${report.summary.total} pass=${report.summary.pass} fail=${report.summary.fail} satisfied=${satisfied}; sources=${inventorySource.join(",")}`,
-      ),
+      excerpt: redact(reportCustomerExcerpt(report)),
       pluginId: PLUGIN_ID,
       lastModified: new Date().toISOString(),
       gitCommit: ctx.gitCommit,
@@ -776,16 +859,21 @@ export const mcpS2sInventoryCollector: Collector = {
       relatedCheckIds: [...RELATED],
     });
 
-    // Also attach import file nodes
+    // Attach non-report import artifacts (connection exports), not the report itself.
     for (const [i, file] of listImportFiles(ctx.outputDir, PLUGIN_ID)
-      .filter((f) => /\.json$/i.test(f))
+      .filter(
+        (f) =>
+          /\.json$/i.test(f) && !/mcp-s2s-inventory-report\.json$/i.test(f),
+      )
       .entries()) {
       const mt = mtimeDate(file);
       nodes.push({
         id: `${PLUGIN_ID}:import:${i}`,
         class: "runtime",
         ref: rel(ctx.outputDir, file),
-        excerpt: redact((readText(file, 400) ?? "").slice(0, 200)),
+        excerpt: redact(
+          `Imported MCP/S2S inventory artifact (${basename(file)})`,
+        ),
         pluginId: PLUGIN_ID,
         lastModified: mtimeIso(file),
         gitCommit: ctx.gitCommit,

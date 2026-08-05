@@ -15,6 +15,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -35,9 +36,6 @@ const PLUGIN_ID = "dataset-secret-scan-gate";
 const RELATED = ["SEC2-R3"] as const;
 const DETECTOR_ID = "repo-dataset-secret-scan-gate";
 const IMPORT_MAX_AGE_DAYS = 90;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const CORPUS_PUBLISH_RE =
   /\b(fine[_-]?tun(e|ing)|eval[_-]?(corpus|dataset|set)|training[_-]?(corpus|dataset)|corpus[_-]?publish|publish[_-]?(corpus|dataset)|dataset[_-]?publish)\b/i;
@@ -92,10 +90,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function asNum(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
@@ -123,7 +117,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

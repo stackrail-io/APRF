@@ -17,6 +17,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -33,9 +34,6 @@ const PLUGIN_ID = "ai-interaction-disclosure";
 const RELATED = ["SAF-M3"] as const;
 const DETECTOR_ID = "repo-ai-interaction-disclosure";
 const IMPORT_MAX_AGE_DAYS = 90;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const DISCLOSURE_RE =
   /\b(ai[_-]?(disclosure|disclaimer|notice|label)|interacting[_-]?with[_-]?ai|you[_-]?are[_-]?(chatting|speaking|talking)[_-]?with[_-]?(an[_-]?)?ai|powered[_-]?by[_-]?ai|ai[_-]?generated|chatbot[_-]?disclosure|bot[_-]?disclosure)\b/i;
@@ -83,10 +81,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function asNum(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
@@ -117,7 +111,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

@@ -17,6 +17,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -34,9 +35,6 @@ const RELATED = ["SAF-M1"] as const;
 const DETECTOR_ID = "repo-ai-harm-policy";
 const REVIEW_MAX_AGE_DAYS = 365;
 const IMPORT_MAX_AGE_DAYS = 90;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const TAXONOMY_RE =
   /\b(harm[_-]?(taxonomy|categories|policy)|content[_-]?safety[_-]?(policy|taxonomy)|refusal[_-]?(policy|matrix)|escalation[_-]?(policy|matrix)|refuse[_-]?(vs|versus|or)[_-]?escalate)\b/i;
@@ -89,10 +87,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function asNum(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
@@ -110,7 +104,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 100_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

@@ -16,6 +16,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -33,9 +34,6 @@ const RELATED = ["PERF-R4"] as const;
 const DETECTOR_ID = "repo-ai-ops-dashboards";
 const IMPORT_MAX_AGE_DAYS = 90;
 const FRESHNESS_MAX_MINUTES = 15;
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const DASHBOARD_RE =
   /\b(grafana|datadog[\s_-]*dashboard|ops[\s_-]*dashboard|slo[\s_-]*dashboard|ai[\s_-]*dashboard|llm[\s_-]*dashboard)\b/i;
@@ -93,10 +91,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function asNum(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
@@ -114,7 +108,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

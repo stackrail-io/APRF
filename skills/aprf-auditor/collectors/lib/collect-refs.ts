@@ -1,10 +1,7 @@
 /**
  * Shared path/text ref collection for hybrid auditors.
  */
-import { readText, rel, walkFiles } from "./fs.ts";
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
+import { isSkippedScanRelPath, readText, rel, walkFiles } from "./fs.ts";
 
 const DEFAULT_EXTENSIONS = [
   ".yml",
@@ -33,7 +30,7 @@ export function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (SKIP_DIR_HINT.test(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

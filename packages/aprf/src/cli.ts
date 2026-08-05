@@ -10,13 +10,44 @@
  */
 import { resolve } from "node:path";
 import {
+  PROFILE_CORE,
+  PROFILE_REGULATED,
+  PROFILE_ID_CORE,
+  PROFILE_ID_REGULATED,
+  getProfileById,
+  unionProfileAndLenses,
+} from "@stackrail-io/aprf-framework-definition";
+import {
   runCollectors,
   type CollectOptions,
 } from "../../../skills/aprf-auditor/collectors/runner.ts";
 import { writeAssessmentHtmlReport } from "../../../skills/aprf-auditor/scripts/render-html-report.ts";
 import { verifyHtmlReport } from "../../../skills/aprf-auditor/scripts/verify-html-report.ts";
 import { writeAssessment } from "./assess.ts";
+import pluginCheckMap from "./generated/plugin-check-map.json" with {
+  type: "json",
+};
 import { catalogVersion, cliVersion, frameworkVersion } from "./versions.ts";
+
+function resolveCliProfile(profileId: string) {
+  if (profileId === PROFILE_ID_REGULATED || profileId === "regulated") {
+    return PROFILE_REGULATED;
+  }
+  if (profileId === PROFILE_ID_CORE || profileId === "core") {
+    return PROFILE_CORE;
+  }
+  return getProfileById(profileId) ?? PROFILE_CORE;
+}
+
+/** Collectors that map to at least one Check in `checkIds` (plus catch-alls). */
+function pluginsForCheckIds(checkIds: Set<string>): string[] {
+  return Object.entries(pluginCheckMap as Record<string, string[]>)
+    .filter(([, checks]) =>
+      checks.some((c) => checkIds.has(c) || c === "*"),
+    )
+    .map(([id]) => id)
+    .sort();
+}
 
 function usage(exitCode = 0): never {
   console.log(`APRF CLI v${cliVersion()} (catalog ${catalogVersion()})
@@ -56,7 +87,7 @@ Collect / audit options (live credentials are never written to reports):
 Assess / audit options:
   --profile <id>         aprf-profile-core | aprf-profile-regulated | core | regulated
   --lens a,b             Optional lenses: rag, agents, voice, coding
-  --full                 Score full catalog (not only profile mandatories + hinted Checks)
+  --full                 Score full catalog (default: profile mandatories only)
 
 Other collector evidence (no extra CLI flags required):
   Drop measured JSON under ./aprf-assessment/imports/<pluginId>/ before or after collect.
@@ -201,6 +232,30 @@ function cmdVersion() {
 
 async function cmdAudit(argv: string[]) {
   const collectOpts = parseCollectOptions(argv);
+  const profileId = takeFlag(argv, "--profile") ?? "core";
+  const lensIds = takeFlag(argv, "--lens")?.split(",").filter(Boolean) ?? [];
+  const fullCatalog = hasFlag(argv, "--full");
+  // Default audit collect is scoped to the profile gate (not the full collector set).
+  if (!collectOpts.plugins?.length && !fullCatalog) {
+    const profile = resolveCliProfile(profileId);
+    const normalizedLensIds = lensIds.map((raw) =>
+      raw.startsWith("aprf-lens-")
+        ? raw
+        : `aprf-lens-${raw.replace(/^lens-/, "")}`,
+    );
+    const mandatoryIds = new Set(
+      normalizedLensIds.length
+        ? unionProfileAndLenses(
+            profile.mandatoryCheckIds,
+            normalizedLensIds,
+          )
+        : [...profile.mandatoryCheckIds],
+    );
+    collectOpts.plugins = pluginsForCheckIds(mandatoryIds);
+    console.log(
+      `Collect scoped to ${collectOpts.plugins.length} plugins for ${profile.id} (${mandatoryIds.size} Checks). Pass --plugins or --full to override.`,
+    );
+  }
   if (collectOpts.baseUrl) {
     console.log(
       `Live collect: base-url=${collectOpts.baseUrl}` +

@@ -15,6 +15,7 @@ import type {
 } from "./types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -30,9 +31,6 @@ import {
 const PLUGIN_ID = "dataset-provenance-governance";
 const RELATED = ["DG-M2"] as const;
 const DETECTOR_ID = "repo-dataset-provenance";
-
-const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
 
 const DATASET_PATH_RE =
   /(dataset|datasheet|data[\s_-]*card|eval[\s_-]*set|finetune|fine[\s_-]*tune|training[\s_-]*data|huggingface|hf[\s_-]*hub)/i;
@@ -90,10 +88,6 @@ function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
 
-function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
-
 function collectRefs(
   targetPath: string,
   maxFiles: number,
@@ -117,7 +111,7 @@ function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 100_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

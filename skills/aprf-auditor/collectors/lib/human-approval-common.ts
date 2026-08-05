@@ -11,6 +11,7 @@ import type {
 } from "../types.ts";
 import {
   ensureDir,
+  isSkippedScanRelPath,
   listImportFiles,
   readText,
   redact,
@@ -23,15 +24,8 @@ import {
   parseMeasuredAt,
 } from "./import-attest.ts";
 
-export const SKIP_DIR_HINT =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.venv|venv|__pycache__|vendor)([/\\]|$)/i;
-
 export const AGENT_OR_APPROVAL_PATH_RE =
   /(agent|orchestr|approv|hitl|human.?in.?the.?loop|tool.?gate|high.?impact)/i;
-
-export function isSkippable(path: string): boolean {
-  return SKIP_DIR_HINT.test(path);
-}
 
 export function collectRefs(
   targetPath: string,
@@ -56,7 +50,7 @@ export function collectRefs(
   });
   for (const f of files) {
     const r = rel(targetPath, f);
-    if (isSkippable(r)) continue;
+    if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     if (match(r, text)) refs.push(r);
     if (refs.length >= limit) break;

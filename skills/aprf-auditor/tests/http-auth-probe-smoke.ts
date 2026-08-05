@@ -1,6 +1,6 @@
 /**
- * Smoke: http-auth-probe discovers declared FastAPI methods, treats GET 405 as
- * advisory (GET should also return 401/403), and PASSes when declared methods reject.
+ * Smoke: http-auth-probe discovers declared FastAPI methods, treats undeclared
+ * GET (405 or SPA 2xx) as hardening-only, and PASSes when declared methods reject.
  */
 import {
   mkdtempSync,
@@ -120,13 +120,32 @@ async def signin():
     if (!report.measuredAt) {
       throw new Error("expected measuredAt on report");
     }
-    if ((report.summary.advisoryGet405 ?? 0) < 1) {
+    if ((report.summary.advisoryGetOpen ?? 0) < 1) {
       throw new Error(
-        `expected advisoryGet405 >= 1, got ${report.summary.advisoryGet405}`,
+        `expected advisoryGetOpen >= 1 (SPA-like GET 200), got ${report.summary.advisoryGetOpen}`,
       );
     }
-    if (!report.notes?.some((n) => /GET should also return 401\/403/i.test(n))) {
-      throw new Error(`expected GET hardening note, got ${JSON.stringify(report.notes)}`);
+    if (
+      !report.notes?.some((n) =>
+        /undeclared GET probe|Not scored for AUTHN-M1/i.test(n),
+      )
+    ) {
+      throw new Error(
+        `expected advisory GET hardening note, got ${JSON.stringify(report.notes)}`,
+      );
+    }
+    if ((report.gapNotes?.length ?? 0) !== 0) {
+      throw new Error(
+        `pass report should have empty gapNotes, got ${JSON.stringify(report.gapNotes)}`,
+      );
+    }
+    if (report.signals?.unauthenticatedDeclaredRoutes?.found !== false) {
+      throw new Error(
+        `pass should not flag unauthenticatedDeclaredRoutes, got ${JSON.stringify(report.signals)}`,
+      );
+    }
+    if (report.notes?.some((n) => /APRF_AUTH_PROBE_MAX_ROUTES/i.test(n))) {
+      throw new Error("customer notes must not mention APRF_AUTH_PROBE_MAX_ROUTES");
     }
     if (!live.nodes.some((n) => n.signals?.includes("authn-m1-pass-signal"))) {
       throw new Error("missing authn-m1-pass-signal on report node");
