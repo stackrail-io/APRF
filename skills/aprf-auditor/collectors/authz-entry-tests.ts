@@ -60,6 +60,16 @@ const TEST_FILE_RE =
 
 const EXPECT_DENIAL = new Set([401, 403]);
 
+/** Only a 2xx proves the limited user reached the privileged route (3xx ≠ bypass). */
+function isAuthzBypassStatus(status: number | null | undefined): boolean {
+  return status != null && status >= 200 && status < 300;
+}
+
+function toPositiveInt(raw: string | undefined, fallback: number): number {
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
+}
+
 export interface AuthzEntryPoint {
   method: string;
   path: string;
@@ -426,7 +436,7 @@ function routeHasGuard(
       if (cached.handlers.length > 0) {
         return {
           hasAuthz: false,
-          hasAuthn: cached.fileAuthn && !cached.fileAuthz ? true : cached.fileAuthn,
+          hasAuthn: cached.fileAuthn,
           refs,
         };
       }
@@ -593,10 +603,13 @@ export async function runLiveAuthzDenialProbe(
   meta: AuthzLiveProbeMeta;
   cleanup?: () => Promise<void>;
 }> {
-  const timeoutMs = Number(process.env.APRF_AUTHZ_PROBE_TIMEOUT_MS ?? 8000);
+  const timeoutMs = toPositiveInt(
+    process.env.APRF_AUTHZ_PROBE_TIMEOUT_MS,
+    8000,
+  );
   const concurrency = Math.max(
     1,
-    Math.min(6, Number(process.env.APRF_AUTHZ_PROBE_CONCURRENCY ?? 4)),
+    Math.min(6, toPositiveInt(process.env.APRF_AUTHZ_PROBE_CONCURRENCY, 4)),
   );
   const limited = await resolveLimitedUserToken(ctx, baseUrl);
   if (!limited.token) {
@@ -616,6 +629,7 @@ export async function runLiveAuthzDenialProbe(
 
   const denials: LiveDenialMap = new Map();
   const queue = [...privilegedRoutes];
+  let probed = 0;
   let denied = 0;
   let bypass = 0;
   let errors = 0;
@@ -625,6 +639,7 @@ export async function runLiveAuthzDenialProbe(
       const route = queue.shift();
       if (!route) return;
       const key = `${route.method} ${route.path}`;
+      probed += 1;
       const row = await probeOneWithToken(
         baseUrl,
         route.method,
@@ -643,7 +658,7 @@ export async function runLiveAuthzDenialProbe(
       }
       const isDenied = EXPECT_DENIAL.has(row.status);
       if (isDenied) denied += 1;
-      else if (row.status >= 200 && row.status < 400) bypass += 1;
+      else if (isAuthzBypassStatus(row.status)) bypass += 1;
       else errors += 1;
       denials.set(key, { status: row.status, denied: isDenied });
     }
@@ -667,7 +682,7 @@ export async function runLiveAuthzDenialProbe(
     meta: {
       baseUrl,
       via: limited.via,
-      probed: privilegedRoutes.length,
+      probed,
       denied,
       bypass,
       errors,
@@ -694,9 +709,10 @@ export function buildAuthzReport(
     privilegedAiFeatureToolOrRetrievalEntryPointsPresent: boolean | null;
     liveDenials?: LiveDenialMap;
     liveMeta?: AuthzLiveProbeMeta | null;
+    fileGuardCache?: Map<string, FileGuardIndex>;
   },
 ): AuthzEntryReport {
-  const fileGuardCache = new Map<string, FileGuardIndex>();
+  const fileGuardCache = opts.fileGuardCache ?? new Map<string, FileGuardIndex>();
   const contentCache = new Map<string, string>();
   const notes: string[] = [];
   const gapNotes: string[] = [];
@@ -738,11 +754,7 @@ export function buildAuthzReport(
     const hasServerGuard = guard.hasAuthz;
 
     // Guard + denial coverage; live 2xx for a limited user is an authz bypass.
-    const liveBypass =
-      live != null &&
-      live.status != null &&
-      live.status >= 200 &&
-      live.status < 400;
+    const liveBypass = live != null && isAuthzBypassStatus(live.status);
     const finalOk = hasServerGuard && hasDenialTest && !liveBypass;
 
     allClassified.push({
@@ -841,9 +853,10 @@ export function buildAuthzReport(
   }
 
   const importBackedDenial = entryPoints.some((e) => e.denialFromImport);
-  const liveBackedDenial = entryPoints.some((e) => e.denialFromLive);
   let measuredAt: string | null = ctx.assessedAt.toISOString();
-  if (importBackedDenial && !liveBackedDenial) {
+  // Any import-backed route must satisfy freshness on its own timestamp;
+  // a fresh live probe on a sibling route does not refresh it.
+  if (importBackedDenial) {
     measuredAt = opts.importedMeasuredAt;
     if (!opts.importedMeasuredAt) {
       notes.push(
@@ -896,7 +909,7 @@ export function buildAuthzReport(
   } else if (
     fail === 0 &&
     withDenialTest === entryPoints.length &&
-    withServerGuard === entryPoints.length &&
+    unguardedAi.length === 0 &&
     fresh
   ) {
     statusHint = "pass";
@@ -918,9 +931,9 @@ export function buildAuthzReport(
         "Inventory of privileged AI feature, tool, and retrieval entry points — none discovered with authz guards",
       );
     }
-    if (entryPoints.length > 0 && withServerGuard < entryPoints.length) {
+    if (unguardedAi.length > 0) {
       gapNotes.push(
-        `Server-side authz middleware/policy missing on ${entryPoints.length - withServerGuard}/${entryPoints.length} privileged AI entry point(s)`,
+        `Server-side authz middleware/policy missing on ${unguardedAi.length} AI entry point(s) with no authn/authz guard`,
       );
     }
     if (entryPoints.length > 0 && withDenialTest < entryPoints.length) {
@@ -928,9 +941,8 @@ export function buildAuthzReport(
         `Authz suite / live limited-user denial missing on ${entryPoints.length - withDenialTest}/${entryPoints.length} privileged entry point(s) (measuredAt ≤90 days). Re-run with --base-url + admin or limited-user credentials, add denial tests, or import coverage under imports/authz-entry-tests/`,
       );
     }
-    const liveBypasses = entryPoints.filter(
-      (e) =>
-        e.liveStatus != null && e.liveStatus >= 200 && e.liveStatus < 400,
+    const liveBypasses = entryPoints.filter((e) =>
+      isAuthzBypassStatus(e.liveStatus),
     );
     if (liveBypasses.length) {
       gapNotes.push(
@@ -1059,22 +1071,26 @@ export const authzEntryTestsCollector: Collector = {
       }
     }
 
-    const report = buildAuthzReport(ctx, {
-      routes,
-      catalogSource: sources,
-      codeGuards,
-      testFiles,
-      importedCovered: imported.coveredPaths,
-      importedSources: imported.sources,
-      importedMeasuredAt: imported.measuredAt,
-      privilegedAiFeatureToolOrRetrievalEntryPointsPresent:
-        imported.privilegedAiFeatureToolOrRetrievalEntryPointsPresent,
-      liveDenials,
-      liveMeta,
-    });
-
-    if (cleanup) {
-      await cleanup().catch(() => undefined);
+    let report: AuthzEntryReport;
+    try {
+      report = buildAuthzReport(ctx, {
+        routes,
+        catalogSource: sources,
+        codeGuards,
+        testFiles,
+        importedCovered: imported.coveredPaths,
+        importedSources: imported.sources,
+        importedMeasuredAt: imported.measuredAt,
+        privilegedAiFeatureToolOrRetrievalEntryPointsPresent:
+          imported.privilegedAiFeatureToolOrRetrievalEntryPointsPresent,
+        liveDenials,
+        liveMeta,
+        fileGuardCache,
+      });
+    } finally {
+      if (cleanup) {
+        await cleanup().catch(() => undefined);
+      }
     }
 
     ensureDir(importDir(ctx));
@@ -1103,7 +1119,7 @@ export const authzEntryTestsCollector: Collector = {
             : ["authz-m1-fail-or-incomplete"]),
           ...(report.authzGuardsFound ? ["authz-guard"] : []),
           ...(report.summary.fail > 0 ? ["authz-test-gap"] : []),
-          ...(liveMeta && liveMeta.denied > 0 ? ["authz-live-probe"] : []),
+          ...(liveMeta && liveMeta.probed > 0 ? ["authz-live-probe"] : []),
         ],
         relatedCheckIds: [...RELATED],
       },

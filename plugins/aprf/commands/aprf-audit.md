@@ -28,6 +28,10 @@ npx @stackrail-io/aprf@0.1.1 audit --target . --out ./aprf-assessment --profile 
 Optional AUTHZ-M1 limited user (otherwise admin may create a temporary non-admin user):
 
 ```bash
+npx @stackrail-io/aprf@0.1.1 audit --target . --out ./aprf-assessment --profile core \
+  --base-url http://127.0.0.1:8080 \
+  --admin-email "$APRF_ADMIN_EMAIL" \
+  --admin-password "$APRF_ADMIN_PASSWORD" \
   --limited-email "$APRF_AUTHZ_LIMITED_EMAIL" \
   --limited-password "$APRF_AUTHZ_LIMITED_PASSWORD"
 ```

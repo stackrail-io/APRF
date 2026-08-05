@@ -16,11 +16,29 @@ mkdirSync(join(root, "imports", "workload-identity-runtimes"), {
   recursive: true,
 });
 
+mkdirSync(join(root, "imports", "aws"), { recursive: true });
 writeFileSync(
   join(root, "imports", "secrets-hygiene", "secrets-hygiene-report.json"),
   JSON.stringify({
     pluginId: "secrets-hygiene",
-    summary: { statusHint: "fail", sec2M1Satisfied: false },
+    summary: {
+      statusHint: "fail",
+      sec2M1Satisfied: false,
+      severityHint: "medium",
+    },
+    gapNotes: ["gap-from-secrets-hygiene"],
+  }),
+);
+writeFileSync(
+  join(root, "imports", "aws", "aws-report.json"),
+  JSON.stringify({
+    pluginId: "aws",
+    summary: {
+      statusHint: "fail",
+      sec2M1Satisfied: false,
+      severityHint: "critical",
+    },
+    gapNotes: ["gap-from-aws"],
   }),
 );
 
@@ -118,6 +136,7 @@ const a = JSON.parse(readFileSync(assessmentPath, "utf8")) as {
     passed: boolean;
     notApplicable?: boolean;
     domain: string;
+    severity?: string;
     evidenceFound: unknown[];
     requiredEvidenceMissing?: string[];
     gate: string;
@@ -143,6 +162,15 @@ assert((sec2?.evidenceFound?.length ?? 0) >= 1, "SEC2-M1 has evidence");
 assert(
   sec2?.domain && sec2.domain !== "secrets",
   `SEC2-M1 domain should be taxonomy name, got ${sec2?.domain}`,
+);
+assert(
+  sec2?.requiredEvidenceMissing?.includes("gap-from-secrets-hygiene") &&
+    sec2?.requiredEvidenceMissing?.includes("gap-from-aws"),
+  `equal-status merge must keep both gapNotes; got ${JSON.stringify(sec2?.requiredEvidenceMissing)}`,
+);
+assert(
+  sec2?.severity === "critical",
+  `equal-status merge must keep worse severityHint; got ${sec2?.severity}`,
 );
 
 const saf = byId.get("SAF-M1");

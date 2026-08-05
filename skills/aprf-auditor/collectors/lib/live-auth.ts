@@ -2,6 +2,7 @@
  * Shared live auth helpers for credentialed collectors (AUTHN-M2, AUTHZ-M1, …).
  * Passwords/tokens are never logged or written to reports by these helpers.
  */
+import { randomBytes } from "node:crypto";
 import type { CollectorContext } from "../types.ts";
 
 export function resolveBaseUrl(ctx: CollectorContext): string | undefined {
@@ -75,12 +76,13 @@ export async function signInForToken(
   userAgent = "aprf-auditor-live-auth/0.2",
 ): Promise<{ token?: string; error?: string; role?: string }> {
   const url = `${baseUrl.replace(/\/$/, "")}/api/v1/auths/signin`;
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 15000);
   try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 15000);
     const res = await fetch(url, {
       method: "POST",
       signal: ctrl.signal,
+      redirect: "error",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -88,7 +90,6 @@ export async function signInForToken(
       },
       body: JSON.stringify({ email, password }),
     });
-    clearTimeout(t);
     const text = await res.text();
     let data: Record<string, unknown> = {};
     try {
@@ -120,6 +121,8 @@ export async function signInForToken(
     return { token, role };
   } catch (err) {
     return { error: err instanceof Error ? err.message : String(err) };
+  } finally {
+    clearTimeout(t);
   }
 }
 
@@ -194,14 +197,15 @@ export async function resolveLimitedUserToken(
   }
 
   const tempEmail = `aprf-authz-limited-${Date.now()}@aprf.local`;
-  const tempPassword = `AprfAuthz!${Date.now().toString(36)}A1`;
+  const tempPassword = `AprfAuthz!${randomBytes(12).toString("base64url")}A1`;
   const addUrl = `${baseUrl.replace(/\/$/, "")}/api/v1/auths/add`;
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 15000);
   try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 15000);
     const res = await fetch(addUrl, {
       method: "POST",
       signal: ctrl.signal,
+      redirect: "error",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -216,7 +220,6 @@ export async function resolveLimitedUserToken(
         profile_image_url: "/user.png",
       }),
     });
-    clearTimeout(t);
     const text = await res.text();
     let data: Record<string, unknown> = {};
     try {
@@ -270,6 +273,8 @@ export async function resolveLimitedUserToken(
       via: "admin-create",
       error: err instanceof Error ? err.message : String(err),
     };
+  } finally {
+    clearTimeout(t);
   }
 }
 
@@ -280,20 +285,22 @@ export async function deleteUserBestEffort(
   userId: string,
 ): Promise<void> {
   const url = `${baseUrl.replace(/\/$/, "")}/api/v1/users/${userId}`;
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 10000);
   try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 10000);
     await fetch(url, {
       method: "DELETE",
       signal: ctrl.signal,
+      redirect: "error",
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${adminToken}`,
         "User-Agent": "aprf-auditor-authz-entry-tests/0.3",
       },
     });
-    clearTimeout(t);
   } catch {
     /* best-effort */
+  } finally {
+    clearTimeout(t);
   }
 }

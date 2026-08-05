@@ -304,6 +304,15 @@ def test_chats_unauthorized():
   if (reportUnguarded.entryPoints.some((e) => e.hasServerGuard)) {
     throw new Error("unguarded router must not report hasServerGuard");
   }
+  if (
+    !reportUnguarded.gapNotes?.some((n) =>
+      /no authn\/authz guard|missing on \d+ AI entry/i.test(n),
+    )
+  ) {
+    throw new Error(
+      `unguarded AI routes should produce typed guard gapNotes, got ${JSON.stringify(reportUnguarded.gapNotes)}`,
+    );
+  }
 
   // Loose substring coveredPaths must not launder denial coverage.
   const looseOut = mkdtempSync(join(tmpdir(), "aprf-authz-loose-"));
@@ -621,36 +630,124 @@ async def create_chat(user=Depends(get_admin_user)):
   const addr = liveServer.address();
   if (!addr || typeof addr === "string") throw new Error("no listen addr");
   const liveOut = mkdtempSync(join(tmpdir(), "aprf-authz-live-out-"));
-  await authzEntryTestsCollector.collect({
-    targetPath: liveTarget,
-    outputDir: liveOut,
-    assessedAt: new Date(),
-    live: true,
-    maxFiles: 200,
-    baseUrl: `http://127.0.0.1:${addr.port}`,
-    limitedEmail: "user@test.local",
-    limitedPassword: "secret",
+  try {
+    await authzEntryTestsCollector.collect({
+      targetPath: liveTarget,
+      outputDir: liveOut,
+      assessedAt: new Date(),
+      live: true,
+      maxFiles: 200,
+      baseUrl: `http://127.0.0.1:${addr.port}`,
+      limitedEmail: "user@test.local",
+      limitedPassword: "secret",
+    });
+    const reportLive = JSON.parse(
+      readFileSync(
+        join(liveOut, "imports", "authz-entry-tests", "authz-entry-report.json"),
+        "utf8",
+      ),
+    ) as AuthzEntryReport;
+    if (reportLive.summary.statusHint !== "pass") {
+      throw new Error(
+        `live denial probe expected pass, got ${JSON.stringify(reportLive.summary)} notes=${reportLive.notes.join("; ")}`,
+      );
+    }
+    if (!reportLive.entryPoints.every((e) => e.denialFromLive)) {
+      throw new Error(
+        `expected denialFromLive on entry points, got ${JSON.stringify(reportLive.entryPoints)}`,
+      );
+    }
+    if (!reportLive.liveProbe || reportLive.liveProbe.denied < 1) {
+      throw new Error(
+        `expected liveProbe.denied>=1, got ${JSON.stringify(reportLive.liveProbe)}`,
+      );
+    }
+  } finally {
+    liveServer.close();
+  }
+
+  // Live denial on one route must not launder a stale import on a sibling into PASS.
+  const mixedLiveStaleOut = mkdtempSync(
+    join(tmpdir(), "aprf-authz-mixed-live-stale-"),
+  );
+  mkdirSync(join(mixedLiveStaleOut, "imports", "authz-entry-tests"), {
+    recursive: true,
   });
-  const reportLive = JSON.parse(
-    readFileSync(
-      join(liveOut, "imports", "authz-entry-tests", "authz-entry-report.json"),
-      "utf8",
-    ),
-  ) as AuthzEntryReport;
-  if (reportLive.summary.statusHint !== "pass") {
-    throw new Error(
-      `live denial probe expected pass, got ${JSON.stringify(reportLive.summary)} notes=${reportLive.notes.join("; ")}`,
+  writeFileSync(
+    join(mixedLiveStaleOut, "imports", "authz-entry-tests", "coverage.json"),
+    JSON.stringify({
+      measuredAt: "2020-01-01T00:00:00.000Z",
+      coveredPaths: ["GET /api/v1/knowledge"],
+    }),
+    "utf8",
+  );
+  // Deny chats live; leave knowledge as a non-denial/non-bypass so its stale
+  // import remains the only denial evidence for that route.
+  const mixedLiveServer = createServer((req, res) => {
+    const auth = req.headers.authorization || "";
+    if (req.url === "/api/v1/auths/signin" && req.method === "POST") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ token: "limited-jwt", role: "user" }));
+      return;
+    }
+    if (auth === "Bearer limited-jwt") {
+      if ((req.url || "").includes("knowledge")) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ detail: "probe error" }));
+        return;
+      }
+      res.writeHead(403, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ detail: "Forbidden" }));
+      return;
+    }
+    res.writeHead(401, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ detail: "Unauthorized" }));
+  });
+  await new Promise<void>((resolve) =>
+    mixedLiveServer.listen(0, "127.0.0.1", () => resolve()),
+  );
+  const mixedAddr = mixedLiveServer.address();
+  if (!mixedAddr || typeof mixedAddr === "string") {
+    throw new Error("no mixed live listen addr");
+  }
+  try {
+    await authzEntryTestsCollector.collect({
+      targetPath: mixedTarget,
+      outputDir: mixedLiveStaleOut,
+      assessedAt: new Date(),
+      live: true,
+      maxFiles: 200,
+      baseUrl: `http://127.0.0.1:${mixedAddr.port}`,
+      limitedEmail: "user@test.local",
+      limitedPassword: "secret",
+    });
+    const reportMixedLiveStale = JSON.parse(
+      readFileSync(
+        join(
+          mixedLiveStaleOut,
+          "imports",
+          "authz-entry-tests",
+          "authz-entry-report.json",
+        ),
+        "utf8",
+      ),
+    ) as AuthzEntryReport;
+    const knowledgeMixed = reportMixedLiveStale.entryPoints.find((e) =>
+      e.path.includes("knowledge"),
     );
+    if (!knowledgeMixed?.denialFromImport) {
+      throw new Error(
+        `expected knowledge still import-backed, got ${JSON.stringify(knowledgeMixed)}`,
+      );
+    }
+    if (reportMixedLiveStale.summary.statusHint === "pass") {
+      throw new Error(
+        "live denial on one route must not PASS when a sibling is stale-import-backed",
+      );
+    }
+  } finally {
+    mixedLiveServer.close();
   }
-  if (!reportLive.entryPoints.every((e) => e.denialFromLive)) {
-    throw new Error(
-      `expected denialFromLive on entry points, got ${JSON.stringify(reportLive.entryPoints)}`,
-    );
-  }
-  if (!reportLive.liveProbe || reportLive.liveProbe.denied < 1) {
-    throw new Error(`expected liveProbe.denied>=1, got ${JSON.stringify(reportLive.liveProbe)}`);
-  }
-  liveServer.close();
 
   console.log("aprf-auditor authz-entry-tests smoke OK");
   for (const d of [
@@ -674,6 +771,7 @@ async def create_chat(user=Depends(get_admin_user)):
     fallbackOut,
     liveTarget,
     liveOut,
+    mixedLiveStaleOut,
   ]) {
     rmSync(d, { recursive: true, force: true });
   }

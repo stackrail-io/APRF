@@ -1655,19 +1655,26 @@ function render(a: Assessment): string {
             sampleCopy.textContent = "Copied";
             setTimeout(function () { sampleCopy.textContent = "Copy"; }, 1200);
           };
+          var fail = function () {
+            sampleCopy.textContent = "Copy failed";
+            setTimeout(function () { sampleCopy.textContent = "Copy"; }, 1200);
+          };
           var fallback = function () {
+            var ta = document.createElement("textarea");
             try {
-              var ta = document.createElement("textarea");
               ta.value = text;
               ta.setAttribute("readonly", "");
               ta.style.position = "fixed";
               ta.style.left = "-9999px";
               document.body.appendChild(ta);
               ta.select();
-              document.execCommand("copy");
-              document.body.removeChild(ta);
-              done();
-            } catch (err) { /* ignore */ }
+              if (document.execCommand("copy")) done();
+              else fail();
+            } catch (err) {
+              fail();
+            } finally {
+              if (ta.parentNode) document.body.removeChild(ta);
+            }
           };
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).then(done).catch(fallback);

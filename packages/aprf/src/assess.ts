@@ -196,13 +196,26 @@ function setHint(
     return;
   }
   if (hitRank < prevRank) return;
-  // Same status: keep the richer metadata (gapNotes + imports/ reportRef).
+  // Same status: merge gapNotes; keep imports/ reportRef; take worse severityHint.
   // evidence-graph collector details must not clobber import gapNotes.
-  const gapNotes = hit.gapNotes?.length
-    ? hit.gapNotes
-    : prev.gapNotes;
+  const gapNotes = [...(prev.gapNotes ?? []), ...(hit.gapNotes ?? [])]
+    .map((n) => n.trim())
+    .filter((n, i, arr) => n.length > 0 && arr.indexOf(n) === i)
+    .slice(0, 8);
   const preferHitRef = hit.reportRef.startsWith("imports/");
   const preferPrevRef = prev.reportRef.startsWith("imports/");
+  const hitSev = hit.severityHint
+    ? (SEVERITY_WEIGHT[hit.severityHint] ?? 0)
+    : 0;
+  const prevSev = prev.severityHint
+    ? (SEVERITY_WEIGHT[prev.severityHint] ?? 0)
+    : 0;
+  const severityHint =
+    hitSev > prevSev
+      ? hit.severityHint
+      : prevSev > hitSev
+        ? prev.severityHint
+        : (hit.severityHint ?? prev.severityHint);
   byCheck.set(checkId, {
     hint: hit.hint,
     pluginId: preferHitRef
@@ -215,10 +228,8 @@ function setHint(
       : preferPrevRef
         ? prev.reportRef
         : hit.reportRef,
-    ...(gapNotes?.length ? { gapNotes } : {}),
-    ...(hit.severityHint || prev.severityHint
-      ? { severityHint: hit.severityHint ?? prev.severityHint }
-      : {}),
+    ...(gapNotes.length ? { gapNotes } : {}),
+    ...(severityHint ? { severityHint } : {}),
   });
 }
 
@@ -399,6 +410,7 @@ function evidenceFromFoundSignals(
         if (seen.has(key)) continue;
         seen.add(key);
         out.push({ ref: reportRef, excerpt: `${name}: found=true` });
+        if (out.length >= 12) return out;
         continue;
       }
       for (const r of refs) {
