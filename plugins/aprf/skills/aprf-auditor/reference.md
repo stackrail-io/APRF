@@ -35,7 +35,7 @@ Package: `@stackrail-io/aprf` (Node ≥ 22)
 ## Live audit example
 
 ```bash
-npx @stackrail-io/aprf@0.1.2 audit --target . --out ./aprf-assessment --profile core \
+npx @stackrail-io/aprf@0.1.3 audit --target . --out ./aprf-assessment --profile core \
   --base-url http://127.0.0.1:8080 \
   --admin-email "$APRF_ADMIN_EMAIL" \
   --admin-password "$APRF_ADMIN_PASSWORD"
@@ -46,7 +46,7 @@ Other evidence: `./aprf-assessment/imports/<pluginId>/*.json`, or env such as `G
 ## npm
 
 ```bash
-npx @stackrail-io/aprf@0.1.2 <command> …
+npx @stackrail-io/aprf@0.1.3 <command> …
 # or after publish:
 npm install -g @stackrail-io/aprf
 aprf audit --target . --profile core
