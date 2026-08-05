@@ -99,8 +99,10 @@ function isUnderSkipAbsoluteDir(absPath: string): boolean {
 }
 
 /**
- * When --out lives inside --target, prune that tree from repo evidence walks.
- * Safe no-op when outDir is outside the target.
+ * When --out lives inside --target (as a subdirectory), prune that tree from
+ * repo evidence walks. No-op when outDir is outside the target, or when outDir
+ * equals the target (callers should reject that configuration — skipping the
+ * target root would suppress all evidence).
  */
 export function configureWalkSkipForCollect(
   targetPath: string,
@@ -108,7 +110,7 @@ export function configureWalkSkipForCollect(
 ): void {
   const target = resolve(targetPath);
   const out = resolve(outputDir);
-  if (out === target || out.startsWith(target + sep)) {
+  if (out !== target && out.startsWith(target + sep)) {
     setWalkSkipAbsoluteDirs([out]);
   } else {
     clearWalkSkipAbsoluteDirs();
@@ -130,7 +132,8 @@ export function walkFiles(
   const callSkips = (opts.skipAbsoluteDirs ?? []).map((d) => resolve(d));
 
   const shouldSkipDir = (absDir: string, name: string): boolean => {
-    if (SKIP_DIRS.has(name)) return true;
+    // Match SKIP_SCAN_DIR_RE's case-insensitive rule (e.g. APRF-ASSESSMENT).
+    if (SKIP_DIRS.has(name.toLowerCase())) return true;
     if (isUnderSkipAbsoluteDir(absDir)) return true;
     for (const skip of callSkips) {
       if (absDir === skip || absDir.startsWith(skip + sep)) return true;
