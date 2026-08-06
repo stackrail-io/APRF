@@ -260,7 +260,7 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
 
   if (!gateSignalsPresent && !opts.imported.found) {
     pushGap(
-      "No self-hosted runtime / workload-identity signals — AUTHN-R2 remains not demonstrated until inventory evidence or an explicit N/A attest (selfHostedModelRuntimesPresent=false) is imported.",
+      "No self-hosted model runtime evidence yet. Add a recent inventory under imports/workload-identity-runtimes/, or attest that you have no self-hosted model runtimes if that surface does not apply.",
     );
   }
   if (opts.runtimes.found) {
@@ -284,7 +284,10 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
     );
   } else if (gateSignalsPresent) {
     pushGap(
-      "Signals alone are PARTIAL — import selfHostedModelRuntimesWithWorkloadIdentityPct=100 + staticSharedKeysInRuntimeInventory=0 + sampleAuthenticatedCallsPresent=true (measuredAt ≤90d) under imports/workload-identity-runtimes/ to PASS. Set selfHostedModelRuntimesPresent=false for NOT_APPLICABLE.",
+      "We found self-hosted model runtime signals, but still need recent measured evidence (within 90 days) under imports/workload-identity-runtimes/ showing 100% workload identity coverage, zero static shared keys in the inventory, and sample authenticated calls.",
+    );
+    pushGap(
+      "If you have no self-hosted model runtimes, place an out-of-scope attestation under imports/workload-identity-runtimes/.",
     );
   }
 
@@ -362,27 +365,27 @@ export function buildWorkloadIdentityRuntimesReport(opts: {
     authnR2Satisfied = false;
     if (opts.imported.found && !surfaceOk) {
       pushGap(
-        "Import must set selfHostedModelRuntimesPresent=true (or discover in-repo runtime/WI signals) — coverage metrics alone without an attested surface cannot unlock PASS.",
+        "Confirm you operate self-hosted model runtimes (or keep in-repo runtime/workload-identity signals) — coverage metrics alone are not enough to pass.",
       );
     }
     if (opts.imported.found && !wiOk) {
       pushGap(
-        "Import must show selfHostedModelRuntimesWithWorkloadIdentityPct=100.",
+        "Show that 100% of inventoried self-hosted model runtimes use workload identity",
       );
     }
     if (opts.imported.found && !staticOk) {
       pushGap(
-        "Import must show staticSharedKeysInRuntimeInventory=0.",
+        "Show zero static shared keys in the self-hosted runtime inventory",
       );
     }
     if (opts.imported.found && !sampleOk) {
       pushGap(
-        "Import must show sampleAuthenticatedCallsPresent=true — in-repo trace regex alone does not unlock AUTHN-R2 PASS.",
+        "Include sample authenticated calls in the imported evidence — repo trace regex alone is not enough to pass",
       );
     }
     if (opts.imported.found && !importFresh) {
       pushGap(
-        "Import missing fresh measuredAt (≤90 days) — required to unlock AUTHN-R2 PASS.",
+        "Refresh the workload-identity evidence so it was measured within the last 90 days",
       );
     }
   } else {

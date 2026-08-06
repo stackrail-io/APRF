@@ -513,6 +513,75 @@ async def chat():
     }
     rmSync(outImportGaps, { recursive: true, force: true });
 
+    // SPA catch-all: declared route returning the unmatched-route HTML index is skipped.
+    const spaSkip = await runAuthProbe(
+      {
+        targetPath: targetDir,
+        outputDir: outDir,
+        assessedAt,
+        live: true,
+        maxFiles: 100,
+      },
+      fixture.baseUrl,
+      [
+        {
+          method: "GET",
+          path: "/api/v1/chats/missing-resource",
+          aiSurface: true,
+          declaredInCode: true,
+          source: "routers/chats.py",
+        },
+      ],
+      ["routers/chats.py"],
+      { customerFacingAiHttpApisPresent: true },
+    );
+    if (
+      spaSkip.results[0]?.skipReason !== "spa-html-fallback" ||
+      spaSkip.summary.fail !== 0
+    ) {
+      throw new Error(
+        `SPA baseline match must skip, not fail: ${JSON.stringify(spaSkip.results)} / ${JSON.stringify(spaSkip.summary)}`,
+      );
+    }
+
+    // Distinct privileged HTML must still fail AUTHN-M1 (not treated as SPA).
+    const privFixture = await startFixtureAuthServer(0, {
+      privilegedHtmlPath: "/api/v1/memories",
+    });
+    try {
+      const privHtml = await runAuthProbe(
+        {
+          targetPath: targetDir,
+          outputDir: outDir,
+          assessedAt,
+          live: true,
+          maxFiles: 100,
+        },
+        privFixture.baseUrl,
+        [
+          {
+            method: "GET",
+            path: "/api/v1/memories/",
+            aiSurface: true,
+            declaredInCode: true,
+            source: "routers/memories.py",
+          },
+        ],
+        ["routers/memories.py"],
+        { customerFacingAiHttpApisPresent: true },
+      );
+      if (
+        privHtml.summary.fail < 1 ||
+        privHtml.results[0]?.skipReason === "spa-html-fallback"
+      ) {
+        throw new Error(
+          `privileged HTML must fail AUTHN-M1, not skip as SPA: ${JSON.stringify(privHtml.results)} / ${JSON.stringify(privHtml.summary)}`,
+        );
+      }
+    } finally {
+      await privFixture.close();
+    }
+
     // Unreachable base URL → probe errors must not look like open routes.
     const errorReport = await runAuthProbe(
       {

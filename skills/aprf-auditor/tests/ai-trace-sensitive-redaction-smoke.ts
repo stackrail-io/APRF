@@ -14,6 +14,7 @@ import {
   aiTraceSensitiveRedactionCollector,
   type AiTraceSensitiveRedactionReport,
 } from "../collectors/ai-trace-sensitive-redaction.ts";
+import { customerFacingGap } from "../collectors/lib/customer-gaps.ts";
 import type { CollectorContext } from "../collectors/types.ts";
 
 async function run(
@@ -56,6 +57,26 @@ async function main() {
       r1.summary.obsM2Satisfied !== false
     ) {
       throw new Error(`partial expected: ${JSON.stringify(r1.summary)}`);
+    }
+    if (
+      !r1.gapNotes?.some((n) =>
+        /recent measured result|100% redaction/i.test(n),
+      )
+    ) {
+      throw new Error(
+        `expected customer-facing gapNotes, got ${JSON.stringify(r1.gapNotes)}`,
+      );
+    }
+    if (
+      r1.gapNotes?.some((n) =>
+        /syntheticSensitiveFieldRedactionOrAclPct|tracesContainSecretsOrSensitiveData|Control signals alone/i.test(
+          n,
+        ),
+      )
+    ) {
+      throw new Error(
+        `gapNotes must not expose raw import field names: ${JSON.stringify(r1.gapNotes)}`,
+      );
     }
 
     const t2 = join(root, "t2");
@@ -120,6 +141,15 @@ async function main() {
     const r4 = await run(t4, out4);
     if (r4.summary.statusHint !== "fail" || r4.summary.obsM2Satisfied !== false) {
       throw new Error(`fail expected: ${JSON.stringify(r4.summary)}`);
+    }
+
+    const preserved = customerFacingGap(
+      "Provide recent measured evidence of AI-trace sensitive-field redaction under imports/ai-trace-sensitive-redaction/, or attest that traces cannot carry secrets/sensitive data",
+    );
+    if (!/sensitive-field redaction/i.test(preserved)) {
+      throw new Error(
+        `customerFacingGap must preserve substantive evidence asks, got ${JSON.stringify(preserved)}`,
+      );
     }
 
     console.log("ai-trace-sensitive-redaction smoke OK");

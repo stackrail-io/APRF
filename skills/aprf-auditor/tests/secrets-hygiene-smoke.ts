@@ -242,6 +242,113 @@ jobs:
       );
     }
 
+    // Fixture-only heuristic embeds must not block N/A (production-scoped only).
+    const tFixtureLeak = join(root, "t-fixture-leak");
+    mkdirSync(join(tFixtureLeak, "tests"), { recursive: true });
+    // AKIA + 16 alnum chars (same shape as the production leak case above).
+    const fakeFixtureKey = ["AKIA", "JFIXTUREKEYNOTR0"].join("");
+    writeFileSync(
+      join(tFixtureLeak, "tests", "sample_secrets.py"),
+      `KEY = "${fakeFixtureKey}"\n`,
+    );
+    const outFixtureNa = join(root, "o-fixture-na");
+    mkdirSync(join(outFixtureNa, "imports", "secrets-hygiene"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outFixtureNa, "imports", "secrets-hygiene", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionRuntimeSecretsPresent: false,
+      }),
+    );
+    const rFixtureNa = await run(tFixtureLeak, outFixtureNa);
+    if (rFixtureNa.summary.statusHint !== "not_applicable") {
+      throw new Error(
+        `fixture-only embeds must allow N/A, got ${JSON.stringify(rFixtureNa.summary)}`,
+      );
+    }
+    if ((rFixtureNa.summary.embeddedCount ?? 0) < 1) {
+      throw new Error(
+        "fixture embeds should remain visible in embeddedCount even when N/A",
+      );
+    }
+
+    // Fixture-only SARIF findings must not gate FAIL / block N/A.
+    const outSarifFixture = join(root, "o-sarif-fixture");
+    mkdirSync(join(outSarifFixture, "imports", "secrets-hygiene"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outSarifFixture, "imports", "secrets-hygiene", "scan.sarif.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionRuntimeSecretsPresent: false,
+        runs: [
+          {
+            results: [
+              {
+                locations: [
+                  {
+                    physicalLocation: {
+                      artifactLocation: {
+                        uri: "tests/sample_secrets.py",
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    );
+    const rSarifFixture = await run(tEmpty, outSarifFixture);
+    if (rSarifFixture.summary.statusHint !== "not_applicable") {
+      throw new Error(
+        `fixture-only SARIF must allow N/A, got ${JSON.stringify(rSarifFixture.summary)} imported=${JSON.stringify(rSarifFixture.importedResults)}`,
+      );
+    }
+    if (
+      (rSarifFixture.importedResults.importedFixtureFindingCount ?? 0) < 1
+    ) {
+      throw new Error(
+        "fixture SARIF findings should remain visible as importedFixtureFindingCount",
+      );
+    }
+    if (
+      (rSarifFixture.importedResults
+        .privilegedSecretsInReposPromptsOrClientBundles ?? 0) > 0
+    ) {
+      throw new Error(
+        "fixture SARIF findings must not raise the production gate metric",
+      );
+    }
+
+    // Fixture-only heuristic embeds must not block PASS when coverage is clean.
+    mkdirSync(join(tPartial, "tests"), { recursive: true });
+    writeFileSync(
+      join(tPartial, "tests", "sample_secrets.py"),
+      `KEY = "${fakeFixtureKey}"\n`,
+    );
+    const outFixturePass = join(root, "o-fixture-pass");
+    mkdirSync(join(outFixturePass, "imports", "secrets-hygiene"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outFixturePass, "imports", "secrets-hygiene", "coverage.json"),
+      coverage(),
+    );
+    const rFixturePass = await run(tPartial, outFixturePass);
+    if (
+      rFixturePass.summary.statusHint !== "pass" ||
+      rFixturePass.summary.sec2M1Satisfied !== true
+    ) {
+      throw new Error(
+        `fixture-only embeds must not block PASS: ${JSON.stringify(rFixturePass.summary)}`,
+      );
+    }
+
     console.log("aprf-auditor secrets-hygiene smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

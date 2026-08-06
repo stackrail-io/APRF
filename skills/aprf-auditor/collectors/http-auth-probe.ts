@@ -8,6 +8,7 @@
  *
  * Without a base URL: emits a route-catalog node and returns needs-user.
  */
+import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 import { writeFileSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -201,10 +202,89 @@ function isAiSurface(path: string): boolean {
   );
 }
 
+/** Sentinel substituted for path params — distinct so a real "/probe" route is not mistaken for one. */
+const PATH_PARAM_STUB = "aprfprobe";
+
 function normalizePath(path: string): string {
   if (!path.startsWith("/")) path = "/" + path;
   // Strip FastAPI path params to a probeable stub
-  return path.replace(/\{[^}]+\}/g, "probe").replace(/:([A-Za-z_][\w]*)/g, "probe");
+  return path
+    .replace(/\{[^}]+\}/g, PATH_PARAM_STUB)
+    .replace(/:([A-Za-z_][\w]*)/g, PATH_PARAM_STUB);
+}
+
+/** True when the probed URL contains fabricated path-parameter values. */
+function hasStubbedPathParam(path: string): boolean {
+  return path.split("/").includes(PATH_PARAM_STUB);
+}
+
+/** Fingerprint of an unmatched-route SPA catch-all response. */
+type SpaBaseline = {
+  status: number;
+  contentType: string;
+  bodyHash: string;
+};
+
+function hashHtmlBody(body: string): string {
+  // Normalize trivial whitespace so tokenized HTML still matches the index doc.
+  const normalized = body.replace(/\s+/g, " ").trim().slice(0, 8192);
+  return createHash("sha256").update(normalized).digest("hex");
+}
+
+/**
+ * Probe a path that cannot exist in the app. When the server returns the same
+ * HTML document for any unmatched route (SPA catch-all), that response becomes
+ * the baseline for skipping declared-route HTML lookalikes.
+ */
+async function captureSpaBaseline(
+  baseUrl: string,
+  timeoutMs: number,
+): Promise<SpaBaseline | null> {
+  const sentinel = `/__aprf_unmatched_${Date.now().toString(36)}__/`;
+  const url = new URL(
+    sentinel.slice(1),
+    baseUrl.endsWith("/") ? baseUrl : baseUrl + "/",
+  ).toString();
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      redirect: "manual",
+      signal: ctrl.signal,
+      headers: {
+        Accept: "text/html,application/xhtml+xml,*/*",
+        "User-Agent": "aprf-auditor-http-auth-probe/0.2",
+      },
+    });
+    const status = res.status;
+    const contentType = res.headers.get("content-type") ?? "";
+    if (!(status >= 200 && status < 400 && /^text\/html\b/i.test(contentType))) {
+      return null;
+    }
+    const body = await res.text();
+    if (!body || body.length < 16) return null;
+    return {
+      status,
+      contentType: contentType.split(";")[0]!.trim().toLowerCase(),
+      bodyHash: hashHtmlBody(body),
+    };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function matchesSpaBaseline(
+  status: number,
+  contentType: string,
+  body: string,
+  baseline: SpaBaseline,
+): boolean {
+  if (!(status >= 200 && status < 400)) return false;
+  if (!/^text\/html\b/i.test(contentType)) return false;
+  return hashHtmlBody(body) === baseline.bodyHash;
 }
 
 function joinUrlPath(prefix: string, sub: string): string {
@@ -521,6 +601,7 @@ async function probeOne(
   baseUrl: string,
   route: ProbeRoute,
   timeoutMs: number,
+  spaBaseline: SpaBaseline | null = null,
 ): Promise<ProbeResultRow> {
   const url = new URL(
     route.path.startsWith("/") ? route.path.slice(1) : route.path,
@@ -572,6 +653,7 @@ async function probeOne(
     });
     const status = res.status;
     const latencyMs = Date.now() - started;
+    const contentType = res.headers.get("content-type") ?? "";
 
     // Advisory GET: never scored for AUTHN-M1 (declared methods gate the check).
     if (route.advisoryGet) {
@@ -611,6 +693,43 @@ async function probeOne(
         ok: null,
         skipped: true,
         skipReason: "advisory-get-other",
+        latencyMs,
+      };
+    }
+
+    // SPA catch-all: only skip when this response matches the unmatched-route
+    // baseline (same HTML index document). A declared route that returns its
+    // own privileged HTML without auth must still fail AUTHN-M1.
+    if (
+      spaBaseline &&
+      status >= 200 &&
+      status < 400 &&
+      /^text\/html\b/i.test(contentType)
+    ) {
+      const body = await res.text();
+      if (matchesSpaBaseline(status, contentType, body, spaBaseline)) {
+        return {
+          ...baseRow,
+          status,
+          ok: null,
+          skipped: true,
+          skipReason: "spa-html-fallback",
+          latencyMs,
+        };
+      }
+      // Distinct HTML body — score as an unauthenticated success below.
+    }
+
+    // Fabricated path params cannot address a real resource, so 404/422 means the
+    // request died on routing or body validation before any authorization
+    // decision. That is not evidence the route serves unauthenticated callers.
+    if (hasStubbedPathParam(route.path) && (status === 404 || status === 422)) {
+      return {
+        ...baseRow,
+        status,
+        ok: null,
+        skipped: true,
+        skipReason: "stubbed-path-param-inconclusive",
         latencyMs,
       };
     }
@@ -662,6 +781,7 @@ export async function runAuthProbe(
     1,
     Math.min(8, Number(process.env.APRF_AUTH_PROBE_CONCURRENCY ?? 4)),
   );
+  const spaBaseline = await captureSpaBaseline(baseUrl, timeoutMs);
   const results: ProbeResultRow[] = [];
   const queue = [...routes];
 
@@ -669,7 +789,7 @@ export async function runAuthProbe(
     while (queue.length) {
       const route = queue.shift();
       if (!route) return;
-      results.push(await probeOne(baseUrl, route, timeoutMs));
+      results.push(await probeOne(baseUrl, route, timeoutMs, spaBaseline));
     }
   }
 
@@ -1399,9 +1519,13 @@ export const httpAuthProbeCollector: Collector = {
   },
 };
 
+const FIXTURE_SPA_HTML =
+  "<!doctype html><html><body>spa-index</body></html>";
+
 /** Test helper: local ephemeral server (not used by default collect). */
 export function startFixtureAuthServer(
   port = 0,
+  opts: { privilegedHtmlPath?: string } = {},
 ): Promise<{ baseUrl: string; close: () => Promise<void> }> {
   return new Promise((resolvePromise) => {
     const server = createServer((req, res) => {
@@ -1410,6 +1534,17 @@ export function startFixtureAuthServer(
       if (url.startsWith("/health")) {
         res.writeHead(200, { "content-type": "application/json" });
         res.end(JSON.stringify({ ok: true }));
+        return;
+      }
+      // Distinct privileged HTML — must NOT match the SPA baseline fingerprint.
+      if (
+        opts.privilegedHtmlPath &&
+        url.startsWith(opts.privilegedHtmlPath)
+      ) {
+        res.writeHead(200, { "content-type": "text/html" });
+        res.end(
+          "<!doctype html><html><body>secret admin panel</body></html>",
+        );
         return;
       }
       // Declared POST rejects; GET returns SPA-like 200 (advisory — not scored)
@@ -1421,7 +1556,7 @@ export function startFixtureAuthServer(
         }
         if (method === "GET") {
           res.writeHead(200, { "content-type": "text/html" });
-          res.end("<!doctype html><html><body>spa</body></html>");
+          res.end(FIXTURE_SPA_HTML);
           return;
         }
       }
@@ -1433,6 +1568,12 @@ export function startFixtureAuthServer(
       if (url.startsWith("/api/v1/open")) {
         res.writeHead(200, { "content-type": "application/json" });
         res.end(JSON.stringify({ leaked: true }));
+        return;
+      }
+      // Unmatched routes serve the SPA index (baseline for spa-html-fallback).
+      if (method === "GET") {
+        res.writeHead(200, { "content-type": "text/html" });
+        res.end(FIXTURE_SPA_HTML);
         return;
       }
       res.writeHead(404);

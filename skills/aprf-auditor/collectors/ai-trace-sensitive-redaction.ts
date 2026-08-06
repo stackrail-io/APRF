@@ -78,6 +78,8 @@ export interface AiTraceSensitiveRedactionReport {
       | "not_demonstrated"
       | "not_applicable";
   };
+  /** Customer-facing asks for REPORT.html "What you need next". */
+  gapNotes: string[];
   notes: string[];
 }
 
@@ -172,6 +174,7 @@ export function buildAiTraceSensitiveRedactionReport(opts: {
   imported: AiTraceSensitiveRedactionReport["importedResults"];
 }): AiTraceSensitiveRedactionReport {
   const notes: string[] = [];
+  const gapNotes: string[] = [];
   const controlSignalsPresent =
     opts.redaction.found ||
     opts.sensitiveClass.found ||
@@ -180,7 +183,7 @@ export function buildAiTraceSensitiveRedactionReport(opts: {
 
   if (!controlSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No AI trace sensitive-redaction signals — OBS-M2 may be NOT_APPLICABLE if no production tracing is in scope, or if traces cannot carry secrets/sensitive data (attest tracesContainSecretsOrSensitiveData=false).",
+      "No AI trace sensitive-redaction signals — OBS-M2 may be not applicable if no production tracing is in scope, or if traces cannot carry secrets/sensitive data.",
     );
   }
   if (opts.redaction.found) {
@@ -197,10 +200,6 @@ export function buildAiTraceSensitiveRedactionReport(opts: {
   if (opts.imported.found) {
     notes.push(
       `Imported: ${opts.imported.sources.join(", ")} (sensitiveInTraces=${opts.imported.tracesContainSecretsOrSensitiveData}, redactionPct=${opts.imported.syntheticSensitiveFieldRedactionOrAclPct})`,
-    );
-  } else if (controlSignalsPresent) {
-    notes.push(
-      "Control signals alone are PARTIAL — import syntheticSensitiveFieldRedactionOrAclPct=100 with tracesContainSecretsOrSensitiveData=true (or =false for N/A) and measuredAt ≤90d under imports/ai-trace-sensitive-redaction/ to unlock.",
     );
   }
 
@@ -236,7 +235,7 @@ export function buildAiTraceSensitiveRedactionReport(opts: {
     statusHint = "not_applicable";
     obsM2Satisfied = null;
     notes.push(
-      "tracesContainSecretsOrSensitiveData=false — OBS-M2 NOT_APPLICABLE (traces cannot carry secrets/regulated sensitive data).",
+      "Imported attestation: traces cannot carry secrets/regulated sensitive data — OBS-M2 not applicable.",
     );
   } else if (!controlSignalsPresent && !opts.imported.found) {
     statusHint = "not_applicable";
@@ -245,7 +244,10 @@ export function buildAiTraceSensitiveRedactionReport(opts: {
     statusHint = "fail";
     obsM2Satisfied = false;
     notes.push(
-      "Imported evidence shows synthetic redaction/ACL <100% or evidence older than 90 days — OBS-M2 fail.",
+      "Imported evidence shows synthetic redaction/ACL below 100% or evidence older than 90 days — OBS-M2 fail.",
+    );
+    gapNotes.push(
+      "Show that synthetic sensitive fields in traces are redacted or ACL-denied at 100%, with evidence measured within the last 90 days (place results under imports/ai-trace-sensitive-redaction/)",
     );
   } else if (
     (controlSignalsPresent || opts.imported.found) &&
@@ -260,24 +262,35 @@ export function buildAiTraceSensitiveRedactionReport(opts: {
   } else if (controlSignalsPresent || opts.imported.found) {
     statusHint = "partial";
     obsM2Satisfied = false;
+    if (!opts.imported.found && controlSignalsPresent) {
+      gapNotes.push(
+        "We found redaction or ACL controls for AI traces, but still need a recent measured result (within 90 days) showing 100% redaction or deny of synthetic sensitive fields — place it under imports/ai-trace-sensitive-redaction/",
+      );
+      gapNotes.push(
+        "If production traces cannot contain secrets or regulated sensitive data, attest that under imports/ai-trace-sensitive-redaction/ so this check can be marked not applicable",
+      );
+    }
     if (opts.imported.found && opts.imported.tracesContainSecretsOrSensitiveData === null) {
-      notes.push(
-        "Import should set tracesContainSecretsOrSensitiveData=true (in scope) or false (NOT_APPLICABLE).",
+      gapNotes.push(
+        "Say whether production traces can contain secrets or regulated sensitive data (yes → measure redaction; no → mark not applicable)",
       );
     }
     if (opts.imported.found && !redactionOk) {
-      notes.push(
-        "Import must show syntheticSensitiveFieldRedactionOrAclPct=100 when sensitive traces are in scope.",
+      gapNotes.push(
+        "Show that synthetic sensitive fields in traces are redacted or ACL-denied at 100%",
       );
     }
     if (opts.imported.found && !importFresh) {
-      notes.push(
-        "Import missing fresh measuredAt (≤90 days) — required to unlock OBS-M2 PASS.",
+      gapNotes.push(
+        "Refresh the redaction evidence so it was measured within the last 90 days",
       );
     }
   } else {
     statusHint = "not_demonstrated";
     obsM2Satisfied = null;
+    gapNotes.push(
+      "Provide recent measured evidence of AI-trace sensitive-field redaction under imports/ai-trace-sensitive-redaction/, or attest that traces cannot carry secrets/sensitive data",
+    );
   }
 
   return {
@@ -298,6 +311,7 @@ export function buildAiTraceSensitiveRedactionReport(opts: {
       obsM2Satisfied,
       statusHint,
     },
+    gapNotes: gapNotes.slice(0, 8),
     notes,
   };
 }

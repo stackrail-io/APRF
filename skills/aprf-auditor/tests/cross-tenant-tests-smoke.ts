@@ -387,6 +387,108 @@ def test_cross_tenant_memory_leak():
     );
   }
 
+  // One imported case + many inferred cases must not unlock PASS.
+  const padTarget = mkdtempSync(join(tmpdir(), "aprf-xtenant-pad-tgt-"));
+  mkdirSync(join(padTarget, "tests"), { recursive: true });
+  for (let i = 0; i < 12; i++) {
+    writeFileSync(
+      join(padTarget, "tests", `test_cross_tenant_iso_${i}.py`),
+      `
+def test_cross_tenant_isolation_${i}():
+    # deny other_tenant memory read
+    assert response.status_code in (401, 403)
+`,
+      "utf8",
+    );
+  }
+  const outPad = mkdtempSync(join(tmpdir(), "aprf-xtenant-pad-"));
+  mkdirSync(join(outPad, "imports", "cross-tenant-tests"), { recursive: true });
+  writeFileSync(
+    join(outPad, "imports", "cross-tenant-tests", "suite.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      cases: [
+        {
+          id: "imported-only",
+          result: "pass",
+          aiDataPathHint: "memories",
+        },
+      ],
+    }),
+    "utf8",
+  );
+  await crossTenantTestsCollector.collect({
+    targetPath: padTarget,
+    outputDir: outPad,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 200,
+  });
+  const reportPad = JSON.parse(
+    readFileSync(
+      join(
+        outPad,
+        "imports",
+        "cross-tenant-tests",
+        "cross-tenant-report.json",
+      ),
+      "utf8",
+    ),
+  ) as CrossTenantReport;
+  if (reportPad.summary.statusHint === "pass") {
+    throw new Error(
+      "one imported case plus inferred repo cases must not PASS AUTHZ-M2",
+    );
+  }
+
+  // Inferred unauthorized success + unrelated import must not FAIL.
+  const outInferFail = mkdtempSync(join(tmpdir(), "aprf-xtenant-infer-fail-"));
+  mkdirSync(join(outInferFail, "imports", "cross-tenant-tests"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(outInferFail, "imports", "cross-tenant-tests", "suite.json"),
+    JSON.stringify({
+      measuredAt: new Date().toISOString(),
+      cases: [
+        {
+          id: "unrelated-pass",
+          result: "pass",
+          aiDataPathHint: "chats",
+        },
+      ],
+    }),
+    "utf8",
+  );
+  await crossTenantTestsCollector.collect({
+    targetPath: leakTarget,
+    outputDir: outInferFail,
+    assessedAt: new Date(),
+    live: false,
+    maxFiles: 200,
+  });
+  const reportInferFail = JSON.parse(
+    readFileSync(
+      join(
+        outInferFail,
+        "imports",
+        "cross-tenant-tests",
+        "cross-tenant-report.json",
+      ),
+      "utf8",
+    ),
+  ) as CrossTenantReport;
+  if (reportInferFail.summary.statusHint === "fail") {
+    throw new Error(
+      "inferred unauthorized success must not FAIL when import has no unauthorized successes",
+    );
+  }
+  if (reportInferFail.summary.statusHint !== "partial") {
+    throw new Error(
+      `expected partial for mixed inferred leak + thin import, got ${reportInferFail.summary.statusHint}`,
+    );
+  }
+
   console.log("aprf-auditor cross-tenant-tests smoke OK");
   for (const d of [
     outDir,
@@ -401,6 +503,9 @@ def test_cross_tenant_memory_leak():
     outOkFalse,
     leakTarget,
     outMask,
+    padTarget,
+    outPad,
+    outInferFail,
   ]) {
     rmSync(d, { recursive: true, force: true });
   }

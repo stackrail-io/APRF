@@ -346,6 +346,18 @@ export function buildCrossTenantReport(
     .length;
   const pass = cases.filter((c) => c.ok).length;
   const fail = cases.length - pass;
+  // PASS/FAIL are gated on imported cases only. Repo-inferred cases can pad
+  // diagnostics but must not unlock PASS, and an unrelated import must not turn
+  // an inferred unauthorized-success into FAIL.
+  const importedUnauthorized = opts.importedCases.filter(
+    (c) => c.unauthorizedSuccess,
+  ).length;
+  const importedFail =
+    opts.importedCases.length -
+    opts.importedCases.filter((c) => c.ok).length;
+  const repoUnauthorized = opts.repoCases.filter(
+    (c) => c.unauthorizedSuccess,
+  ).length;
 
   if (opts.isolation.found) {
     notes.push(
@@ -413,14 +425,16 @@ export function buildCrossTenantReport(
     notes.push(
       "Imported multiTenantAiDataOrMemoryPathsPresent=false — AUTHZ-M2 NOT_APPLICABLE.",
     );
-  } else if (unauthorizedSuccesses > 0) {
+  } else if (importedUnauthorized > 0) {
     statusHint = "fail";
     authzM2Satisfied = false;
   } else if (
-    cases.length >= MIN_ATTACK_CASES &&
-    unauthorizedSuccesses === 0 &&
-    fail === 0 &&
-    fresh
+    opts.importedCases.length >= MIN_ATTACK_CASES &&
+    importedUnauthorized === 0 &&
+    importedFail === 0 &&
+    fresh &&
+    usedImport &&
+    repoUnauthorized === 0
   ) {
     statusHint = "pass";
     authzM2Satisfied = true;
@@ -432,12 +446,42 @@ export function buildCrossTenantReport(
   ) {
     statusHint = "partial";
     authzM2Satisfied = cases.length === 0 ? null : false;
-    if (cases.length >= MIN_ATTACK_CASES && fail > 0) {
+    if (
+      opts.importedCases.length >= MIN_ATTACK_CASES &&
+      importedUnauthorized === 0 &&
+      importedFail === 0 &&
+      fresh &&
+      usedImport &&
+      repoUnauthorized > 0
+    ) {
       notes.push(
-        `${fail} attack case(s) lack denial assertions — AUTHZ-M2 requires expectsDenial on each case.`,
+        `Imported suite meets AUTHZ-M2 thresholds, but ${repoUnauthorized} in-repo inferred case(s) indicate unauthorized cross-tenant success — investigate or refresh the imported suite; cannot PASS while those signals remain.`,
       );
     }
-    if (cases.length >= MIN_ATTACK_CASES && fail === 0 && !fresh) {
+    if (cases.length >= MIN_ATTACK_CASES && !usedImport) {
+      notes.push(
+        `Cases were inferred from in-repo test names, not from a measured cross-tenant suite. That heuristic is too weak to establish either a PASS or a FAIL, so AUTHZ-M2 stays PARTIAL: import a suite under imports/${PLUGIN_ID}/ recording explicit attack cases and unauthorized-success counts to score it.`,
+      );
+    }
+    if (
+      usedImport &&
+      opts.importedCases.length > 0 &&
+      opts.importedCases.length < MIN_ATTACK_CASES
+    ) {
+      notes.push(
+        `Only ${opts.importedCases.length} imported attack case(s); need ≥${MIN_ATTACK_CASES} measured cases under imports/${PLUGIN_ID}/ (in-repo name heuristics do not count toward PASS).`,
+      );
+    }
+    if (opts.importedCases.length >= MIN_ATTACK_CASES && importedFail > 0) {
+      notes.push(
+        `${importedFail} imported attack case(s) lack denial assertions — AUTHZ-M2 requires expectsDenial on each case.`,
+      );
+    }
+    if (
+      opts.importedCases.length >= MIN_ATTACK_CASES &&
+      importedFail === 0 &&
+      !fresh
+    ) {
       notes.push(
         "Suite measuredAt older than 90 days (or missing) — required to unlock AUTHZ-M2 PASS.",
       );

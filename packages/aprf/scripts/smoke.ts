@@ -72,7 +72,7 @@ writeFileSync(
       "Signals alone are PARTIAL — import selfHostedModelRuntimesWithWorkloadIdentityPct=100 under imports/workload-identity-runtimes/ to PASS.",
     ],
     gapNotes: [
-      "Signals alone are PARTIAL — import selfHostedModelRuntimesWithWorkloadIdentityPct=100 + staticSharedKeysInRuntimeInventory=0 + sampleAuthenticatedCallsPresent=true (measuredAt ≤90d) under imports/workload-identity-runtimes/ to PASS. Set selfHostedModelRuntimesPresent=false for NOT_APPLICABLE.",
+      "We found self-hosted model runtime signals, but still need recent measured evidence (within 90 days) under imports/workload-identity-runtimes/ showing 100% workload identity coverage, zero static shared keys in the inventory, and sample authenticated calls.",
     ],
   }),
 );
@@ -346,15 +346,17 @@ const authnR2 = fullById.get("AUTHN-R2");
 assert(authnR2?.status === "PARTIAL", "AUTHN-R2 PARTIAL from statusHint");
 assert(
   authnR2?.requiredEvidenceMissing?.some((n) =>
-    /Signals alone are PARTIAL/i.test(n),
+    /recent measured evidence|workload identity coverage/i.test(n),
   ),
-  `AUTHN-R2 Evidence still required must use collector gapNotes, not YAML dump; got ${JSON.stringify(authnR2?.requiredEvidenceMissing)}`,
+  `AUTHN-R2 What you need next must use customer-facing gapNotes, not YAML dump; got ${JSON.stringify(authnR2?.requiredEvidenceMissing)}`,
 );
 assert(
   !authnR2?.requiredEvidenceMissing?.some((n) =>
-    /Inventory of self-hosted model runtimes/i.test(n),
+    /selfHostedModelRuntimesWithWorkloadIdentityPct|Signals alone are PARTIAL|Inventory of self-hosted model runtimes/i.test(
+      n,
+    ),
   ),
-  "AUTHN-R2 must not dump normative evidenceRequired when gapNotes exist",
+  "AUTHN-R2 must not expose camelCase import recipes or dump normative evidenceRequired when gapNotes exist",
 );
 assert(
   authnR2?.evidenceFound?.some(
