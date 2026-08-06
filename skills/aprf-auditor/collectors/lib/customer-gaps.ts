@@ -11,9 +11,13 @@
  * time, so older assessment.json still reads well).
  */
 
-/** camelCase import field, with or without an =/≥/≤ comparison. */
+/**
+ * camelCase import field, with or without an =/≥/≤ comparison.
+ * Lowercase/digit runs and Uppercase segments use disjoint classes so the
+ * pattern cannot exponentially backtrack on long uppercase strings.
+ */
 const FIELD_TOKEN_RE =
-  /\b[a-z][a-zA-Z0-9]*(?:[A-Z][a-zA-Z0-9]*)+\b(?:\s*(?:>=|<=|[=≥≤])\s*[^\s,;.()]+)?/g;
+  /\b[a-z][a-z0-9]*(?:[A-Z][a-z0-9]*)+\b(?:\s*(?:>=|<=|[=≥≤])\s*[^\s,;.()]+)?/g;
 
 /** Words that carry no signal when deciding whether an ask is substantive. */
 const STOPWORDS = new Set([
@@ -70,7 +74,6 @@ export function isImportFieldRecipe(note: string): boolean {
   if (!n) return false;
   if (/\bstatusHint\s*=|\bseverityHint\s*=/i.test(n)) return true;
   if (/^We found related controls in the repository/i.test(n)) return true;
-  if (/^Provide recent measured evidence/i.test(n)) return true;
   const scaffolded =
     /\balone (?:is|are) PARTIAL\b/i.test(n) ||
     /\bimport .{0,200}to (?:PASS|unlock)\b/i.test(n) ||
@@ -137,12 +140,19 @@ export function customerFacingGap(
   if (!n) return "";
   const plugin = fallbackPlugin ?? pluginIdFromText(n);
 
+  // Boilerplate-only notes → generic import ask. Substantive "Provide recent
+  // measured evidence of …" notes (e.g. sensitive-field redaction) continue
+  // through the normal strip path below.
   if (
     /^We found related controls in the repository/i.test(n) ||
-    /^Provide recent measured evidence/i.test(n) ||
     /\bstatusHint\s*=|\bseverityHint\s*=/i.test(n)
   ) {
     return customerFacingImportGap(plugin);
+  }
+  if (/^Provide recent measured evidence\b/i.test(n)) {
+    const stripped = stripFieldTokens(n);
+    if (!isSubstantive(stripped)) return customerFacingImportGap(plugin);
+    return softenGapJargon(stripped);
   }
 
   // "<X> alone is PARTIAL — import <ASK> under imports/<plugin>/ to PASS."

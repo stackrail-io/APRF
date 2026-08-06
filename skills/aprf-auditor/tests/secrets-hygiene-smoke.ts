@@ -242,6 +242,38 @@ jobs:
       );
     }
 
+    // Fixture-only heuristic embeds must not block N/A (production-scoped only).
+    const tFixtureLeak = join(root, "t-fixture-leak");
+    mkdirSync(join(tFixtureLeak, "tests"), { recursive: true });
+    // AKIA + 16 alnum chars (same shape as the production leak case above).
+    const fakeFixtureKey = ["AKIA", "JFIXTUREKEYNOTR0"].join("");
+    writeFileSync(
+      join(tFixtureLeak, "tests", "sample_secrets.py"),
+      `KEY = "${fakeFixtureKey}"\n`,
+    );
+    const outFixtureNa = join(root, "o-fixture-na");
+    mkdirSync(join(outFixtureNa, "imports", "secrets-hygiene"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(outFixtureNa, "imports", "secrets-hygiene", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionRuntimeSecretsPresent: false,
+      }),
+    );
+    const rFixtureNa = await run(tFixtureLeak, outFixtureNa);
+    if (rFixtureNa.summary.statusHint !== "not_applicable") {
+      throw new Error(
+        `fixture-only embeds must allow N/A, got ${JSON.stringify(rFixtureNa.summary)}`,
+      );
+    }
+    if ((rFixtureNa.summary.embeddedCount ?? 0) < 1) {
+      throw new Error(
+        "fixture embeds should remain visible in embeddedCount even when N/A",
+      );
+    }
+
     console.log("aprf-auditor secrets-hygiene smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

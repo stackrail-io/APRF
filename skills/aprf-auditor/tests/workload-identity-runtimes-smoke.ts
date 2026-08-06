@@ -57,9 +57,24 @@ async function main() {
     ) {
       throw new Error(`partial expected: ${JSON.stringify(r1.summary)}`);
     }
-    if (!r1.gapNotes?.some((n) => /Signals alone are PARTIAL/i.test(n))) {
+    if (
+      !r1.gapNotes?.some((n) =>
+        /recent measured evidence|workload identity coverage/i.test(n),
+      )
+    ) {
       throw new Error(
-        `expected gapNotes with Signals alone PARTIAL guidance, got ${JSON.stringify(r1.gapNotes)}`,
+        `expected customer-facing gapNotes asking for measured evidence, got ${JSON.stringify(r1.gapNotes)}`,
+      );
+    }
+    if (
+      r1.gapNotes?.some((n) =>
+        /selfHostedModelRuntimesWithWorkloadIdentityPct|Signals alone are PARTIAL/i.test(
+          n,
+        ),
+      )
+    ) {
+      throw new Error(
+        `gapNotes must not expose camelCase import recipes: ${JSON.stringify(r1.gapNotes)}`,
       );
     }
 

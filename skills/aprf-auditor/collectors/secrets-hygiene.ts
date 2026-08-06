@@ -416,9 +416,6 @@ export function buildSecretsReport(opts: {
 }): SecretsHygieneReport {
   const notes: string[] = [];
   const gateSignalsPresent = opts.manager.found || opts.scan.found;
-  // Heuristic embeds prove privileged secrets exist — never allow N/A launder.
-  const surfaceProvedForNaOverride =
-    opts.manager.found || opts.embedded.length > 0;
   const secretsManagerPresent =
     opts.manager.found ||
     opts.imported.secretsManagerWiringPresent === true;
@@ -427,10 +424,13 @@ export function buildSecretsReport(opts: {
   const embeddedInPrompts = opts.embedded.filter((f) => f.inPromptOrFixture)
     .length;
   // SEC2-M1 governs *production* runtime secrets. Test and fixture material is
-  // reported for visibility but must not fail the control on its own.
+  // reported for visibility but must not fail the control or block N/A on its own.
   const embeddedProductionCount = opts.embedded.filter(
     (f) => !f.inPromptOrFixture,
   ).length;
+  // Only production-path embeds (or manager wiring) prove the surface exists.
+  const surfaceProvedForNaOverride =
+    opts.manager.found || embeddedProductionCount > 0;
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
