@@ -105,7 +105,10 @@ export interface SecretsHygieneReport {
     productionRuntimeSecretsPresent: boolean | null;
     secretsManagerWiringPresent: boolean | null;
     productionRuntimeSecretsResolvedFromSecretsManagerPct: number | null;
+    /** Production-path privileged findings (gates FAIL/PASS/N/A). */
     privilegedSecretsInReposPromptsOrClientBundles: number | null;
+    /** Fixture/test-path findings from structural imports — visibility only. */
+    importedFixtureFindingCount: number | null;
     secretScanCoversPromptsAndFixtures: boolean | null;
     measuredAt: string | null;
     sources: string[];
@@ -306,6 +309,65 @@ function heuristicEmbeddedScan(
   return findings;
 }
 
+/** Best-effort file path from a SARIF/scan finding for fixture vs production split. */
+function findingPathHint(finding: unknown): string {
+  if (!finding || typeof finding !== "object") return "";
+  const f = finding as Record<string, unknown>;
+  if (typeof f.path === "string") return f.path;
+  if (typeof f.file === "string") return f.file;
+  if (typeof f.uri === "string") return f.uri;
+  const locations = f.locations;
+  if (!Array.isArray(locations) || locations.length === 0) return "";
+  const loc = locations[0] as Record<string, unknown>;
+  const physical = loc.physicalLocation as Record<string, unknown> | undefined;
+  const artifact = physical?.artifactLocation as
+    | Record<string, unknown>
+    | undefined;
+  if (typeof artifact?.uri === "string") return artifact.uri;
+  if (typeof loc.uri === "string") return loc.uri;
+  return "";
+}
+
+/**
+ * Count structural scan findings, splitting fixture/test paths from production.
+ * Only production-path findings raise the SEC2-M1 gate metric; fixture hits
+ * stay visible via the returned fixture count.
+ */
+function countStructuralFindings(data: Record<string, unknown>): {
+  production: number;
+  fixture: number;
+} {
+  let items: unknown[] = [];
+  if (Array.isArray(data.runs)) {
+    for (const run of data.runs as Array<{ results?: unknown[] }>) {
+      if (Array.isArray(run.results)) items.push(...run.results);
+    }
+  } else if (Array.isArray(data.findings)) {
+    items = data.findings;
+  } else if (Array.isArray(data.results)) {
+    items = data.results;
+  } else if (
+    typeof data.embeddedCount === "number" &&
+    data.embeddedCount > 0
+  ) {
+    // Opaque count with no paths — treat as production (cannot prove fixture-only).
+    return { production: data.embeddedCount, fixture: 0 };
+  } else if (typeof data.findings === "number" && data.findings > 0) {
+    return { production: data.findings, fixture: 0 };
+  }
+
+  if (items.length === 0) return { production: 0, fixture: 0 };
+
+  let production = 0;
+  let fixture = 0;
+  for (const item of items) {
+    const path = findingPathHint(item);
+    if (path && PROMPT_FIXTURE_HINT.test(path)) fixture += 1;
+    else production += 1;
+  }
+  return { production, fixture };
+}
+
 function loadImported(
   ctx: CollectorContext,
 ): SecretsHygieneReport["importedResults"] {
@@ -315,6 +377,7 @@ function loadImported(
   let productionRuntimeSecretsResolvedFromSecretsManagerPct: number | null =
     null;
   let privilegedSecretsInReposPromptsOrClientBundles: number | null = null;
+  let importedFixtureFindingCount: number | null = null;
   let secretScanCoversPromptsAndFixtures: boolean | null = null;
   let measuredAt: string | null = null;
 
@@ -348,6 +411,7 @@ function loadImported(
           ) ??
           asNum(data.resolvedFromSecretsManagerPct),
       );
+      // Explicit gate field = production privileged findings (catalog contract).
       privilegedSecretsInReposPromptsOrClientBundles = mergeMaxNum(
         privilegedSecretsInReposPromptsOrClientBundles,
         asNum(data.privilegedSecretsInReposPromptsOrClientBundles) ??
@@ -361,33 +425,21 @@ function loadImported(
           asBool(data.scanCoversPromptsAndFixtures),
       );
 
-      // Structural scan payloads (SARIF runs / findings / results arrays) only
-      // raise the privileged-secrets metric when they contain findings.
+      // Structural scan payloads (SARIF / findings arrays): only production-path
+      // results raise the gate metric. Fixture/test hits are visibility-only.
       // Empty runs/results must not attest privilegedSecrets…=0 — that requires
       // the explicit field above.
-      let structuralFindingCount: number | null = null;
-      if (Array.isArray(data.runs)) {
-        let n = 0;
-        for (const run of data.runs as Array<{ results?: unknown[] }>) {
-          n += run.results?.length ?? 0;
-        }
-        if (n > 0) structuralFindingCount = n;
-      } else if (Array.isArray(data.findings) && data.findings.length > 0) {
-        structuralFindingCount = data.findings.length;
-      } else if (Array.isArray(data.results) && data.results.length > 0) {
-        structuralFindingCount = data.results.length;
-      } else if (
-        typeof data.embeddedCount === "number" &&
-        data.embeddedCount > 0
-      ) {
-        structuralFindingCount = data.embeddedCount;
-      } else if (typeof data.findings === "number" && data.findings > 0) {
-        structuralFindingCount = data.findings;
-      }
-      if (structuralFindingCount !== null) {
+      const structural = countStructuralFindings(data);
+      if (structural.production > 0) {
         privilegedSecretsInReposPromptsOrClientBundles = mergeMaxNum(
           privilegedSecretsInReposPromptsOrClientBundles,
-          structuralFindingCount,
+          structural.production,
+        );
+      }
+      if (structural.fixture > 0) {
+        importedFixtureFindingCount = mergeMaxNum(
+          importedFixtureFindingCount,
+          structural.fixture,
         );
       }
     } catch {
@@ -401,6 +453,7 @@ function loadImported(
     secretsManagerWiringPresent,
     productionRuntimeSecretsResolvedFromSecretsManagerPct,
     privilegedSecretsInReposPromptsOrClientBundles,
+    importedFixtureFindingCount,
     secretScanCoversPromptsAndFixtures,
     measuredAt,
     sources,
@@ -452,8 +505,12 @@ export function buildSecretsReport(opts: {
     );
   }
   if (opts.imported.found) {
+    const fixtureNote =
+      (opts.imported.importedFixtureFindingCount ?? 0) > 0
+        ? `, fixtureFindings=${opts.imported.importedFixtureFindingCount}`
+        : "";
     notes.push(
-      `Imported: ${opts.imported.sources.join(", ")} (scopePresent=${opts.imported.productionRuntimeSecretsPresent}, manager=${opts.imported.secretsManagerWiringPresent}, resolvedPct=${opts.imported.productionRuntimeSecretsResolvedFromSecretsManagerPct}, privilegedFindings=${opts.imported.privilegedSecretsInReposPromptsOrClientBundles}, coversPrompts=${opts.imported.secretScanCoversPromptsAndFixtures}, measuredAt=${opts.imported.measuredAt})`,
+      `Imported: ${opts.imported.sources.join(", ")} (scopePresent=${opts.imported.productionRuntimeSecretsPresent}, manager=${opts.imported.secretsManagerWiringPresent}, resolvedPct=${opts.imported.productionRuntimeSecretsResolvedFromSecretsManagerPct}, privilegedFindings=${opts.imported.privilegedSecretsInReposPromptsOrClientBundles}${fixtureNote}, coversPrompts=${opts.imported.secretScanCoversPromptsAndFixtures}, measuredAt=${opts.imported.measuredAt})`,
     );
   } else if (gateSignalsPresent) {
     notes.push(
@@ -580,7 +637,7 @@ export function buildSecretsReport(opts: {
     coversOk &&
     importFresh &&
     opts.imported.found &&
-    embeddedCount === 0
+    embeddedProductionCount === 0
   ) {
     statusHint = "pass";
     sec2M1Satisfied = true;
