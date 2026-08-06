@@ -51,7 +51,7 @@ Or personal: `ln -sf … ~/.cursor/skills/aprf-auditor`
 
 - Files under `./aprf-assessment/` (`evidence-graph.json`, `assessment.json`, `REPORT.html`, …)
 - `REPORT.html` contains `stackrail.io` and `Visual overview`
-- Agent **asked** for missing base URL / imports when Checks are undemonstrated or PARTIAL — not gap summaries alone
+- Agent **asked** for missing base URLs, credentials, or import paths when Checks are undemonstrated or PARTIAL — not gap summaries alone
 - **No** `http://127.0.0.1:3001`, **no** product `run_*` IDs
 
 Verify:
