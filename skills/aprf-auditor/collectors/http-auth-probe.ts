@@ -201,10 +201,20 @@ function isAiSurface(path: string): boolean {
   );
 }
 
+/** Sentinel substituted for path params — distinct so a real "/probe" route is not mistaken for one. */
+const PATH_PARAM_STUB = "aprfprobe";
+
 function normalizePath(path: string): string {
   if (!path.startsWith("/")) path = "/" + path;
   // Strip FastAPI path params to a probeable stub
-  return path.replace(/\{[^}]+\}/g, "probe").replace(/:([A-Za-z_][\w]*)/g, "probe");
+  return path
+    .replace(/\{[^}]+\}/g, PATH_PARAM_STUB)
+    .replace(/:([A-Za-z_][\w]*)/g, PATH_PARAM_STUB);
+}
+
+/** True when the probed URL contains fabricated path-parameter values. */
+function hasStubbedPathParam(path: string): boolean {
+  return path.split("/").includes(PATH_PARAM_STUB);
 }
 
 function joinUrlPath(prefix: string, sub: string): string {
@@ -611,6 +621,38 @@ async function probeOne(
         ok: null,
         skipped: true,
         skipReason: "advisory-get-other",
+        latencyMs,
+      };
+    }
+
+    // SPA catch-all: an unmatched path falls through to the frontend router and
+    // returns the index document. That is a routing miss, not an API surface
+    // serving data to an unauthenticated caller, so it cannot score AUTHN-M1.
+    if (
+      status >= 200 &&
+      status < 400 &&
+      /^text\/html\b/i.test(res.headers.get("content-type") ?? "")
+    ) {
+      return {
+        ...baseRow,
+        status,
+        ok: null,
+        skipped: true,
+        skipReason: "spa-html-fallback",
+        latencyMs,
+      };
+    }
+
+    // Fabricated path params cannot address a real resource, so 404/422 means the
+    // request died on routing or body validation before any authorization
+    // decision. That is not evidence the route serves unauthenticated callers.
+    if (hasStubbedPathParam(route.path) && (status === 404 || status === 422)) {
+      return {
+        ...baseRow,
+        status,
+        ok: null,
+        skipped: true,
+        skipReason: "stubbed-path-param-inconclusive",
         latencyMs,
       };
     }

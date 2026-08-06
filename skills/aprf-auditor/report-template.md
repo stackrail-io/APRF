@@ -107,7 +107,9 @@ List every in-scope control once. Tags on the listing: `Production blocker` · `
 {{/evidenceFound}}
 
 {{#requiredEvidenceMissing}}
-**Evidence still required to pass**
+**What you need next**
+
+Plain-English next steps for the customer (no camelCase import field names).
 
 {{#requiredEvidenceMissing}}
 - {{.}}

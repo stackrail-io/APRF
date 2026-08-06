@@ -72,7 +72,7 @@ const EMBEDDED_PATTERNS: Array<{ id: string; re: RegExp }> = [
 ];
 
 const PROMPT_FIXTURE_HINT =
-  /(prompt|fixture|notebook|\.ipynb|eval|testdata|sample)/i;
+  /(prompt|fixture|notebook|\.ipynb|eval|testdata|sample|__tests__|__mocks__|\.test\.|\.spec\.|(^|[/\\])(tests?|specs?|e2e|mocks?)[/\\])/i;
 
 export interface EmbeddedFinding {
   patternId: string;
@@ -264,11 +264,33 @@ function heuristicEmbeddedScan(
         if (
           /your[_-]?api[_-]?key|changeme|example|xxx+|placeholder|<.*>|\$\{|process\.env|os\.environ|secrets\./i.test(
             matched,
+          ) ||
+          // Placeholders that name the credential mid-string, e.g.
+          // 'your-openai-api-key-here' or 'my_replace_me_token'.
+          /\b(your|my|replace|dummy|fake|test|sample)[-_].*(key|token|secret)|[-_]here['"]?$/i.test(
+            matched,
+          )
+        ) {
+          continue;
+        }
+        // Patterns that match only a prefix (e.g. a PEM header) reveal nothing
+        // about what follows, so inspect a short trailing window: an elided or
+        // placeholder body means this is documentation, not a real key.
+        if (
+          /\.\.\.|your[_-]|changeme|example|placeholder|<[^>]*>/i.test(
+            text.slice(m.index + matched.length, m.index + matched.length + 40),
           )
         ) {
           continue;
         }
         if (/\.env\.example$/i.test(r) && id === "generic-api-key-assign") {
+          continue;
+        }
+        // Markdown documents usage; an assignment in prose is an illustrative
+        // example, not a production runtime secret. Same rationale as
+        // .env.example above. Higher-entropy provider patterns (aws-access-key,
+        // slack-token, private-key-block) still count wherever they appear.
+        if (/\.md$/i.test(r) && id === "generic-api-key-assign") {
           continue;
         }
         findings.push({
@@ -404,6 +426,11 @@ export function buildSecretsReport(opts: {
   const embeddedCount = opts.embedded.length;
   const embeddedInPrompts = opts.embedded.filter((f) => f.inPromptOrFixture)
     .length;
+  // SEC2-M1 governs *production* runtime secrets. Test and fixture material is
+  // reported for visibility but must not fail the control on its own.
+  const embeddedProductionCount = opts.embedded.filter(
+    (f) => !f.inPromptOrFixture,
+  ).length;
 
   if (!gateSignalsPresent && !opts.imported.found) {
     notes.push(
@@ -435,7 +462,7 @@ export function buildSecretsReport(opts: {
   }
   if (embeddedCount > 0) {
     notes.push(
-      `Heuristic scan found ${embeddedCount} high-confidence embedded secret pattern(s) (values redacted; ${embeddedInPrompts} in prompt/fixture paths).`,
+      `Heuristic scan found ${embeddedCount} high-confidence embedded secret pattern(s) (values redacted; ${embeddedInPrompts} in prompt/fixture/test paths, ${embeddedProductionCount} in production paths). Only production-path findings fail SEC2-M1.`,
     );
   }
 
@@ -479,7 +506,7 @@ export function buildSecretsReport(opts: {
 
   const naOverrideReasons: string[] = [];
   if (opts.manager.found) naOverrideReasons.push("secrets-manager wiring");
-  if (embeddedCount > 0) {
+  if (embeddedProductionCount > 0) {
     naOverrideReasons.push("heuristic embedded privileged secrets");
   }
   const naOverrideNote =
@@ -488,7 +515,7 @@ export function buildSecretsReport(opts: {
       : "Imported productionRuntimeSecretsPresent=false ignored — in-repo signals prove the surface exists.";
 
   // Heuristic embeds + contradicting fail metrics beat N/A.
-  if (embeddedCount > 0) {
+  if (embeddedProductionCount > 0) {
     statusHint = "fail";
     sec2M1Satisfied = false;
     if (

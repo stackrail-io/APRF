@@ -413,14 +413,15 @@ export function buildCrossTenantReport(
     notes.push(
       "Imported multiTenantAiDataOrMemoryPathsPresent=false — AUTHZ-M2 NOT_APPLICABLE.",
     );
-  } else if (unauthorizedSuccesses > 0) {
+  } else if (unauthorizedSuccesses > 0 && usedImport) {
     statusHint = "fail";
     authzM2Satisfied = false;
   } else if (
     cases.length >= MIN_ATTACK_CASES &&
     unauthorizedSuccesses === 0 &&
     fail === 0 &&
-    fresh
+    fresh &&
+    usedImport
   ) {
     statusHint = "pass";
     authzM2Satisfied = true;
@@ -432,6 +433,11 @@ export function buildCrossTenantReport(
   ) {
     statusHint = "partial";
     authzM2Satisfied = cases.length === 0 ? null : false;
+    if (cases.length >= MIN_ATTACK_CASES && !usedImport) {
+      notes.push(
+        `Cases were inferred from in-repo test names, not from a measured cross-tenant suite. That heuristic is too weak to establish either a PASS or a FAIL, so AUTHZ-M2 stays PARTIAL: import a suite under imports/${PLUGIN_ID}/ recording explicit attack cases and unauthorized-success counts to score it.`,
+      );
+    }
     if (cases.length >= MIN_ATTACK_CASES && fail > 0) {
       notes.push(
         `${fail} attack case(s) lack denial assertions — AUTHZ-M2 requires expectsDenial on each case.`,

@@ -22,6 +22,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { getGeneratedCatalog } from "@stackrail-io/aprf-engine";
 import { allPassSamples, getPassSamples } from "./pass-samples.ts";
+import {
+  customerFacingGap,
+  pluginIdFromText,
+} from "../collectors/lib/customer-gaps.ts";
 
 const STACKRAIL = {
   home: "https://stackrail.io",
@@ -448,6 +452,22 @@ function renderRoadmapBucket(label: string, items: RoadmapRef[]): string {
   return `<section class="block"><h3>${esc(label)}</h3><ul class="roadmap-list">${lis}</ul></section>`;
 }
 
+const NEEDS_VERIFICATION_LABEL = "Implemented — needs verification";
+
+/**
+ * PARTIAL with real in-repo/import evidence means the control exists but the
+ * measured proof the Check requires is missing. Display-only: status, gate
+ * contribution, and scoring are unchanged.
+ */
+function needsVerification(c: Control): boolean {
+  if ((c.status || "").toUpperCase().replace(/-/g, "_") !== "PARTIAL") {
+    return false;
+  }
+  return (c.evidenceFound ?? []).some(
+    (e) => e?.ref && e.ref !== "not-demonstrated",
+  );
+}
+
 function statusClass(status: string): string {
   switch (status) {
     case "PASS":
@@ -816,18 +836,129 @@ function tagPills(tags: string[]): string {
     .join(" ");
 }
 
+/** checkId → collector plugin ids (from generated plugin-check-map). */
+let checkToPluginsCache: Map<string, string[]> | null = null;
+function checkToPluginsMap(): Map<string, string[]> {
+  if (checkToPluginsCache) return checkToPluginsCache;
+  const map = new Map<string, string[]>();
+  const candidates = [
+    join(REPO_ROOT, "packages/aprf/src/generated/plugin-check-map.json"),
+    join(SCRIPT_DIR, "generated/plugin-check-map.json"),
+    join(SCRIPT_DIR, "../generated/plugin-check-map.json"),
+  ];
+  for (const p of candidates) {
+    if (!existsSync(p)) continue;
+    try {
+      const raw = JSON.parse(readFileSync(p, "utf8")) as Record<string, string[]>;
+      for (const [pluginId, checks] of Object.entries(raw)) {
+        for (const checkId of checks ?? []) {
+          const cur = map.get(checkId) ?? [];
+          if (!cur.includes(pluginId)) cur.push(pluginId);
+          map.set(checkId, cur);
+        }
+      }
+      break;
+    } catch {
+      /* try next */
+    }
+  }
+  checkToPluginsCache = map;
+  return map;
+}
+
+const CLOUD_IMPORT_PLUGINS = new Set(["aws", "azure", "gcp"]);
+
+/** Pick the most useful imports/ folder when several collectors map to one Check. */
+function pickPrimaryPlugin(plugins: string[]): string | undefined {
+  if (plugins.length === 0) return undefined;
+  if (plugins.length === 1) return plugins[0];
+  const nonCloud = plugins.filter((p) => !CLOUD_IMPORT_PLUGINS.has(p));
+  const pool = nonCloud.length > 0 ? nonCloud : plugins;
+  const score = (p: string) => {
+    let s = 0;
+    if (
+      /hygiene|probe|inventory|redaction|limits|gate|charter|authz|authn|secrets/.test(
+        p,
+      )
+    ) {
+      s += 20;
+    }
+    if (p === "github-actions") s -= 8;
+    if (CLOUD_IMPORT_PLUGINS.has(p)) s -= 20;
+    s += Math.min(p.length, 40) * 0.01;
+    return s;
+  };
+  return [...pool].sort((a, b) => score(b) - score(a) || a.localeCompare(b))[0];
+}
+
+function pluginForControl(c: Control): string | undefined {
+  const mapped = checkToPluginsMap().get(c.checkId) ?? [];
+  // Prefer an imports/ path already present on evidence for this control.
+  for (const e of c.evidenceFound ?? []) {
+    const id = pluginIdFromText(String(e.ref ?? ""));
+    if (id && (mapped.length === 0 || mapped.includes(id))) return id;
+  }
+  for (const n of c.requiredEvidenceMissing ?? []) {
+    const id = pluginIdFromText(n);
+    if (
+      id &&
+      !CLOUD_IMPORT_PLUGINS.has(id) &&
+      (mapped.length === 0 || mapped.includes(id))
+    ) {
+      return id;
+    }
+  }
+  return pickPrimaryPlugin(mapped);
+}
+
+/** Soften leftover assess jargon for customer-facing REPORT.html. */
+function customerFacingRequiredEvidence(
+  note: string,
+  fallbackPlugin?: string,
+): string {
+  const n = note.trim();
+  // Prefer the Check's collector plugin over a path mentioned in a merged note.
+  const plugin = fallbackPlugin ?? pluginIdFromText(n);
+  if (/Evidence not yet demonstrated — import measured results/i.test(n)) {
+    return plugin
+      ? `No measured evidence yet for this check. Add recent results under imports/${plugin}/, or attest that this surface is out of scope.`
+      : "No measured evidence yet for this check. Add recent measured results, or attest that this surface is out of scope.";
+  }
+  if (/No scored collector report for this Check/i.test(n)) {
+    return plugin
+      ? `No scored collector report for this check yet. Re-run collect, or add measured evidence under imports/${plugin}/.`
+      : "No scored collector report for this check yet. Re-run collect, or add measured evidence under imports/<plugin>/.";
+  }
+  return customerFacingGap(n, plugin);
+}
+
+/**
+ * One de-duplicated, customer-facing list for "What you need next".
+ * Catalog recommendedFixes are deliberately NOT mixed in here — they render in
+ * their own section and describe the whole control, not the remaining gap.
+ */
+function nextStepsForControl(c: Control): string[] {
+  const plugin = pluginForControl(c);
+  const steps = (c.requiredEvidenceMissing ?? [])
+    .map((m) => customerFacingRequiredEvidence(m, plugin))
+    .map((m) => m.trim())
+    .filter((m) => m.length > 0);
+  return [...new Set(steps)];
+}
+
 function controlDetailBody(c: Control): string {
   const statusKey = (c.status || "").toUpperCase().replace(/-/g, "_");
   const evidence =
     c.evidenceFound?.length ?
       `<ul class="evidence-list">${c.evidenceFound.map(formatEvidenceItem).join("")}</ul>`
     : statusKey === "NOT_DEMONSTRATED"
-      ? `<p class="empty">No evidence demonstrated yet for this Check.</p>`
+      ? `<p class="empty">No evidence demonstrated yet for this check.</p>`
       : `<p class="empty">None</p>`;
+  const steps = nextStepsForControl(c);
   const missing =
-    c.requiredEvidenceMissing?.length ?
-      `<p><strong>Evidence still required</strong></p><ul>${c.requiredEvidenceMissing.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>`
-    : "";
+    steps.length > 0
+      ? `<p><strong>What you need next</strong></p><ul>${steps.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>`
+      : "";
   const samples = getPassSamples(c.checkId);
   const showPassSample =
     samples.length > 0 && statusKey !== "PASS" && statusKey !== "NOT_APPLICABLE";
@@ -910,6 +1041,11 @@ function controlDetailBody(c: Control): string {
     <span class="pill ${statusClass(c.status)}">${esc(c.status)}</span> ·
     confidence ${esc(c.confidence)}${c.confidenceScore != null ? ` (${esc(c.confidenceScore)})` : ""} ·
     ${esc(c.priority)}</p>
+  ${
+    needsVerification(c)
+      ? `<p class="verify-callout"><strong>${esc(NEEDS_VERIFICATION_LABEL)}</strong> — we found the control in this repository, but this Check requires measured proof that it holds. It stays ${esc(c.status)} until that evidence exists.</p>`
+      : ""
+  }
   <section class="assessment-findings">
     <h4>This assessment</h4>
     <p><strong>Evidence found</strong></p>${evidence}
@@ -934,11 +1070,12 @@ function controlsTableAndFlyout(
   const rows = ordered
     .map((c) => {
       const tags = tagsById.get(c.checkId) ?? [];
-      return `<tr class="control-row" tabindex="0" role="button" data-control-id="${esc(c.checkId)}" data-status="${esc(c.status)}" aria-label="Open details for ${esc(c.checkId)}">
+      const verify = needsVerification(c);
+      return `<tr class="control-row" tabindex="0" role="button" data-control-id="${esc(c.checkId)}" data-status="${esc(c.status)}"${verify ? ` data-verify="1"` : ""} aria-label="Open details for ${esc(c.checkId)}">
   <td><code>${esc(c.checkId)}</code></td>
   <td>${esc(c.title)}</td>
   <td>${esc(controlCategory(c))}<span class="domain-sub">${esc(controlDomain(c))} domain</span></td>
-  <td><span class="pill ${statusClass(c.status)}">${esc(c.status)}</span></td>
+  <td><span class="pill ${statusClass(c.status)}">${esc(c.status)}</span>${verify ? `<span class="verify-sub">${esc(NEEDS_VERIFICATION_LABEL)}</span>` : ""}</td>
   <td>${esc(c.confidence)}${c.confidenceScore != null ? ` <span class="meta">(${esc(c.confidenceScore)})</span>` : ""}</td>
   <td>${tagPills(tags) || `<span class="empty">—</span>`}</td>
   <td>${esc(c.priority)}</td>
@@ -951,6 +1088,7 @@ function controlsTableAndFlyout(
   <button type="button" class="filter-chip" data-filter="PASS">Passed <strong>${statusCounts.PASS ?? 0}</strong></button>
   <button type="button" class="filter-chip" data-filter="FAIL">Failed <strong>${statusCounts.FAIL ?? 0}</strong></button>
   <button type="button" class="filter-chip" data-filter="PARTIAL">Partial <strong>${statusCounts.PARTIAL ?? 0}</strong></button>
+  <button type="button" class="filter-chip" data-filter="NEEDS_VERIFICATION">Needs verification <strong>${ordered.filter(needsVerification).length}</strong></button>
   <button type="button" class="filter-chip" data-filter="NOT_DEMONSTRATED">Not demonstrated <strong>${statusCounts.NOT_DEMONSTRATED ?? 0}</strong></button>
   <button type="button" class="filter-chip" data-filter="NOT_APPLICABLE">N/A <strong>${statusCounts.NOT_APPLICABLE ?? 0}</strong></button>
 </div>
@@ -1038,6 +1176,7 @@ function render(a: Assessment): string {
 
   const statusCounts = countByStatus(a.controls);
   const severityCounts = countBySeverity(a.controls);
+  const needsVerificationCount = a.controls.filter(needsVerification).length;
 
   // Prefer rollup from controls so category slugs never appear as "domains"
   const domainScores = domainScoresFromControls(a.controls);
@@ -1267,6 +1406,16 @@ function render(a: Assessment): string {
     .controls-table { margin: 0; }
     .controls-table td:nth-child(2) { min-width: 16rem; max-width: 28rem; font-weight: 500; line-height: 1.4; }
     .controls-table .domain-sub { display: block; margin-top: 0.2rem; font-size: 0.75rem; color: var(--muted); font-weight: 500; }
+    .verify-sub {
+      display: block; margin-top: 0.25rem; font-size: 0.7rem; line-height: 1.3;
+      color: var(--muted); font-weight: 600; max-width: 11rem;
+    }
+    .verify-callout {
+      margin: 0.5rem 0 0.15rem; padding: 0.55rem 0.7rem;
+      background: var(--warn-bg); border-left: 3px solid var(--warn);
+      border-radius: 6px; font-family: var(--sans); font-size: 0.84rem;
+      line-height: 1.45;
+    }
     .control-row { cursor: pointer; transition: background 0.12s ease; }
     .control-row:hover, .control-row:focus { background: #f3f8fa; outline: none; }
     .control-row:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
@@ -1522,6 +1671,11 @@ function render(a: Assessment): string {
       ${a.executiveSummary.riskLevel != null ? ` · Risk (secondary): ${esc(a.executiveSummary.riskLevel)}` : ""}
     </p>
     <p class="lede" style="max-width:72ch">${esc(a.executiveSummary.narrative)}</p>
+    ${
+      needsVerificationCount > 0
+        ? `<p class="verify-callout" style="max-width:72ch"><strong>${needsVerificationCount} check${needsVerificationCount === 1 ? "" : "s"} ${needsVerificationCount === 1 ? "is" : "are"} implemented but unverified.</strong> The control was found in this repository, but the Check requires measured proof (a test, drill, or probe result) before it can pass. These are the shortest path to closing the gate — filter the table by <em>Needs verification</em> to see them.</p>`
+        : ""
+    }
 
     <h2>Visual overview</h2>
     <div class="viz-grid">
@@ -1546,9 +1700,9 @@ function render(a: Assessment): string {
       "optional / tech-dependent — not a defect by itself",
     )}
     ${discoveryList(
-      "Required evidence missing",
-      a.discovery?.requiredEvidenceMissing,
-      "in-scope Checks — gate-relevant",
+      "What you need next",
+      [...new Set((a.discovery?.requiredEvidenceMissing ?? []).map((n) => customerFacingRequiredEvidence(n)))],
+      "in-scope checks — gate-relevant",
     )}
 
     <h2>Controls &amp; Findings <span class="hint">Click a row for details</span></h2>
@@ -1776,7 +1930,12 @@ function render(a: Assessment): string {
           });
           document.querySelectorAll(".control-row").forEach(function (row) {
             var status = row.getAttribute("data-status");
-            if (filter === "all" || status === filter) row.removeAttribute("hidden");
+            var match =
+              filter === "all" ||
+              (filter === "NEEDS_VERIFICATION"
+                ? row.getAttribute("data-verify") === "1"
+                : status === filter);
+            if (match) row.removeAttribute("hidden");
             else row.setAttribute("hidden", "");
           });
         });
