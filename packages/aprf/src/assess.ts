@@ -121,6 +121,8 @@ type HintHit = {
   gapNotes?: string[];
   /** Optional finding severity override (e.g. AGN-M1 high→critical escalation). */
   severityHint?: AprfRule["severity"];
+  /** Collector-provided NOT_APPLICABLE reason (e.g. scope / appliesTo). */
+  naReason?: string;
 };
 
 type ControlOut = {
@@ -227,6 +229,7 @@ function setHint(
       : prevSev > hitSev
         ? prev.severityHint
         : (hit.severityHint ?? prev.severityHint);
+  const naReason = hit.naReason ?? prev.naReason;
   byCheck.set(checkId, {
     hint: hit.hint,
     pluginId,
@@ -237,6 +240,7 @@ function setHint(
         : hit.reportRef,
     ...(gapNotes.length ? { gapNotes } : {}),
     ...(severityHint ? { severityHint } : {}),
+    ...(naReason ? { naReason } : {}),
   });
 }
 
@@ -259,7 +263,11 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
     for (const file of files) {
       if (!file.includes("report")) continue;
       let doc: {
-        summary?: { statusHint?: unknown; severityHint?: unknown };
+        summary?: {
+          statusHint?: unknown;
+          severityHint?: unknown;
+          naReason?: unknown;
+        };
         gapNotes?: unknown;
         notes?: unknown;
       };
@@ -308,6 +316,11 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
         sevRaw === "low"
           ? (sevRaw as AprfRule["severity"])
           : undefined;
+      const naReason =
+        typeof doc.summary?.naReason === "string" &&
+        doc.summary.naReason.trim().length > 0
+          ? doc.summary.naReason.trim()
+          : undefined;
       for (const checkId of checkIds) {
         setHint(byCheck, checkId, {
           hint,
@@ -315,6 +328,7 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
           reportRef,
           ...(gapNotes?.length ? { gapNotes } : {}),
           ...(severityHint ? { severityHint } : {}),
+          ...(naReason ? { naReason } : {}),
         });
       }
     }
@@ -827,7 +841,11 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
         estimatedEffort: "",
       },
       ...(notApplicable
-        ? { naReason: "Collector reported not_applicable (surface absent)." }
+        ? {
+            naReason:
+              mapped?.naReason ??
+              "Collector reported not_applicable (surface absent).",
+          }
         : {}),
     });
   }

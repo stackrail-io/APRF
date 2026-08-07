@@ -8,7 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
-- Rewrote **AGN-M2** as technology-neutral **Execution Bounds**: iteration + duration always; recursion/delegation depth required only when spawn/sub-agent capability is supported (otherwise N/A). Clarified Critical rationale, continue-after-abort failure, context-window ≠ execution limit, platform defaults that cannot be disabled without governance exception, and preferred runtime termination logs. Added structured `applicability.appliesTo` / `notApplicableTo` (keeps `technologies: []` technology-agnostic). Updated `agent-loop-limits` collector (agent-scoped `timeout:`, no doc-only spawn capability, dropped bare `max_depth`), evidence-map, `aprf-spec.json`; AGN-M1 autonomy wording aligned.
+- Rewrote **AGN-M2** as technology-neutral **Execution Bounds**: iteration + duration always; recursion/delegation depth required only when spawn/sub-agent capability is supported (otherwise N/A). Clarified Critical rationale, continue-after-abort failure, context-window ≠ execution limit, platform defaults that cannot be disabled without governance exception, and preferred runtime termination logs. Added structured `applicability.appliesTo` / `notApplicableTo` (keeps `technologies: []` technology-agnostic); collector sets `summary.inScope` / `summary.naReason` and assess copies `naReason` so out-of-scope targets are `NOT_APPLICABLE` (excluded from gate). Updated `agent-loop-limits` collector (agent-scoped `timeout:`, no doc-only spawn capability, dropped bare `max_depth`), evidence-map, `aprf-spec.json`; AGN-M1 autonomy wording aligned.
 
 ## [Catalog 0.11.1] / [@stackrail-io/aprf@0.1.1] — 2026-08-04
 

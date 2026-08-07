@@ -38,11 +38,34 @@ async function main() {
 
   await agentLoopLimitsCollector.collect(baseCtx);
   const r0 = readReport(outEmpty);
-  if (
-    r0.summary.statusHint !== "not_applicable" &&
-    r0.summary.statusHint !== "not_demonstrated"
-  ) {
-    throw new Error(`expected na/nd, got ${r0.summary.statusHint}`);
+  if (r0.summary.statusHint !== "not_applicable" || r0.summary.inScope !== false) {
+    throw new Error(
+      `expected not_applicable inScope=false, got ${JSON.stringify(r0.summary)}`,
+    );
+  }
+  if (!r0.summary.naReason || !/NOT_APPLICABLE/i.test(r0.summary.naReason)) {
+    throw new Error(`expected summary.naReason, got ${r0.summary.naReason}`);
+  }
+
+  // Embeddings-only / chat-completion surface → still N/A (not an agent runtime).
+  const embedDir = mkdtempSync(join(tmpdir(), "aprf-agn2-emb-"));
+  mkdirSync(join(embedDir, "src"), { recursive: true });
+  writeFileSync(
+    join(embedDir, "src", "embed.py"),
+    "def run():\n    return client.embeddings.create(model='text-embedding-3')\n",
+    "utf8",
+  );
+  const outEmb = mkdtempSync(join(tmpdir(), "aprf-agn2-emb-o-"));
+  await agentLoopLimitsCollector.collect({
+    ...baseCtx,
+    targetPath: embedDir,
+    outputDir: outEmb,
+  });
+  const rEmb = readReport(outEmb);
+  if (rEmb.summary.statusHint !== "not_applicable" || rEmb.summary.inScope) {
+    throw new Error(
+      `expected embeddings-only N/A, got ${JSON.stringify(rEmb.summary)}`,
+    );
   }
 
   // --- Case A: iteration + bare timeout: only (no spawn capability) ---

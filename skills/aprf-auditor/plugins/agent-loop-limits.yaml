@@ -30,8 +30,10 @@ whenUnavailable: >
   showing abort/fail-closed when each applicable bound is exceeded
   (continuesAfterAbort=false, 0 prompt-only limits) plus measuredAt ≤90 days.
   Recursion/delegation depth is required only when spawn/sub-agent capability
-  is present; otherwise that bound is N/A. No agent signals → NOT_APPLICABLE
-  (chat-only / single-inference / embeddings / classifiers / rerankers).
+  is present; otherwise that bound is N/A. No in-scope agent-runtime signals
+  (or import productionAgentRuntimesPresent=false) → NOT_APPLICABLE with
+  summary.naReason citing appliesTo / notApplicableTo; assess excludes N/A
+  from the mandatory gate.
 live:
   required: false
   note: Offline repo heuristics + optional imported enforcement suite JSON.

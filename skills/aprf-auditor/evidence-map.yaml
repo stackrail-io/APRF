@@ -2241,14 +2241,16 @@ checks:
       - "**/*iteration*"
       - "**/*delegation*"
     plugins: [agent-loop-limits, repo-filesystem]
-    naWhen: "No production agent runtime (chat-only / single-inference / embeddings / classifiers / rerankers)"
+    naWhen: "No production agent runtime (chat-only / single-inference / embeddings / classifiers / rerankers), or import productionAgentRuntimesPresent=false"
     evaluation: |
       PASS if agent-loop-limits report statusHint=pass (required bounds present + measured abort +
       continuesAfterAbort=false + measuredAt ≤90d). Recursion/delegation depth required only when
       spawn/sub-agent capability signals are present; otherwise that bound is N/A.
       PARTIAL if configs or tests found without measured abort suite.
       FAIL if continue-after-abort or prompt-only limits.
-      NOT_APPLICABLE when report statusHint=not_applicable (no agent signals).
+      NOT_APPLICABLE when summary.inScope=false (no agent-runtime signals / out-of-scope-only
+      surfaces / import attested absent); summary.naReason is copied to assessment.naReason
+      and N/A is excluded from the mandatory gate.
   AGN-M3:
     requiredEvidence:
       - "Operator kill/pause API or console control with authz (not model-invoked)"

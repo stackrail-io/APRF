@@ -120,6 +120,7 @@ AGN-M1 agent charters:
 AGN-M2 agent execution bounds (iteration + duration; recursion/delegation when supported):
   npm run aprf:agent-limits -- --target <app> --out <app>/aprf-assessment
   # PASS needs measured abort suite (continuesAfterAbort=false) under imports/agent-loop-limits/
+  # N/A when no agent-runtime signals, or import productionAgentRuntimesPresent=false
 
 AGN-M3 agent kill switch:
   npm run aprf:agent-kill -- --target <app> --out <app>/aprf-assessment

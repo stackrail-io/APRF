@@ -28,8 +28,39 @@ const PLUGIN_ID = "agent-loop-limits";
 const RELATED = ["AGN-M2"] as const;
 const DETECTOR_ID = "repo-agent-loop-limits";
 
+/** Mirrors AGN-M2 applicability.appliesTo / notApplicableTo (catalog metadata). */
+const APPLIES_TO = [
+  "agent frameworks",
+  "orchestration frameworks",
+  "workflow engines",
+  "MCP clients",
+  "MCP servers acting autonomously",
+  "A2A runtimes",
+  "multi-agent systems",
+] as const;
+
+const NOT_APPLICABLE_TO = [
+  "simple chat completion APIs",
+  "single inference endpoints",
+  "embeddings",
+  "classifiers",
+  "rerankers",
+] as const;
+
+/** Path segments that imply an agent/orchestration tree (scope + config association). */
 const AGENT_PATH_RE =
-  /(agent|orchestr|autonom|langgraph|crewai|autogen|swarm|planner|a2a|mcp)/i;
+  /(^|[/\\])(agents?|orchestrat\w*|autonom\w*|langgraph|crewai|autogen|swarm|planner|a2a)([/\\]|$)/i;
+
+/** Broader text cue used only to associate limit keys with agentish files. */
+const AGENTISH_TEXT_RE =
+  /\b(agent|orchestrat\w*|autonom\w*|langgraph|crewai|autogen|swarm|planner|a2a|mcp)\b/i;
+
+const STRONG_AGENT_RE =
+  /\b(AgentExecutor|create_react_agent|langgraph|CrewAI|AutoGen|OpenAIAgents|BrowserUse|multi[_-]?agent|agent[_-]?runtime|agent[_-]?loop|tool[_-]?calling[_-]?agent|ReAct\s*agent|mcp[_-]?(client|server|host)|a2a[_-]?(runtime|peer|agent))\b/i;
+
+/** Surfaces that are out of AGN-M2 scope when no agent runtime is present. */
+const OUT_OF_SCOPE_RE =
+  /\b(chat[_-]?completions?|embeddings?|text[_-]?embedding|classifier|classification[_-]?(model|endpoint)|rerank(?:er|ing)?|single[_-]?inference)\b/i;
 
 /** Iteration bound concepts (reasoning/tool iterations). */
 const MAX_STEPS_RE =
@@ -90,6 +121,8 @@ export interface AgentLoopLimitsReport {
     promptOnlyLimits: number | null;
     continuesAfterAbort: boolean | null;
     terminationLogsPresent: boolean | null;
+    /** Explicit scope attestation; false forces NOT_APPLICABLE. */
+    productionAgentRuntimesPresent: boolean | null;
     measuredAt: string | null;
     sources: string[];
   };
@@ -100,6 +133,11 @@ export interface AgentLoopLimitsReport {
     spawnDepthApplicable: boolean;
     enforcementPresent: boolean;
     agentSignalsPresent: boolean;
+    /** False → CLI assess scores AGN-M2 NOT_APPLICABLE (excluded from gate). */
+    inScope: boolean;
+    naReason: string | null;
+    appliesTo: string[];
+    notApplicableTo: string[];
     agnM2Satisfied: boolean | null;
     statusHint: "pass" | "partial" | "fail" | "not_demonstrated" | "not_applicable";
   };
@@ -139,7 +177,7 @@ function collectLimitRefs(
     const r = rel(targetPath, f);
     if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
-    const agentish = AGENT_PATH_RE.test(r) || AGENT_PATH_RE.test(text);
+    const agentish = AGENT_PATH_RE.test(r) || AGENTISH_TEXT_RE.test(text);
     const textHit =
       pattern.test(text) ||
       (opts?.alsoMatchTimeoutAssign === true && TIMEOUT_ASSIGN_RE.test(text));
@@ -175,7 +213,7 @@ function collectSpawnCapability(
     // Docs/marketing alone must not force recursion/delegation bounds.
     if (DOC_ONLY_EXT_RE.test(r)) continue;
     const text = readText(f, 80_000) || "";
-    const agentish = AGENT_PATH_RE.test(r) || AGENT_PATH_RE.test(text);
+    const agentish = AGENT_PATH_RE.test(r) || AGENTISH_TEXT_RE.test(text);
     if (
       SPAWN_CAPABILITY_RE.test(r) ||
       (SPAWN_CAPABILITY_RE.test(text) && agentish)
@@ -204,7 +242,7 @@ function detectEnforcementTests(targetPath: string, maxFiles: number) {
       MAX_STEPS_RE.test(text) ||
       WALL_CLOCK_RE.test(text) ||
       SPAWN_DEPTH_RE.test(text) ||
-      AGENT_PATH_RE.test(text);
+      AGENTISH_TEXT_RE.test(text);
     if (mentionsLimits && ENFORCE_TEST_RE.test(text)) {
       refs.push(r);
     }
@@ -213,25 +251,36 @@ function detectEnforcementTests(targetPath: string, maxFiles: number) {
   return { found: refs.length > 0, refs };
 }
 
-function detectAgentSignals(targetPath: string, maxFiles: number): boolean {
+function detectScopeSignals(
+  targetPath: string,
+  maxFiles: number,
+): { agent: boolean; agentRefs: string[]; outOfScopeRefs: string[] } {
+  const agentRefs: string[] = [];
+  const outOfScopeRefs: string[] = [];
   const files = walkFiles(targetPath, {
     maxFiles: Math.min(maxFiles, 2000),
-    extensions: [".py", ".ts", ".js", ".yml", ".yaml", ".json", ".md"],
+    extensions: [".py", ".ts", ".js", ".yml", ".yaml", ".json"],
   });
   for (const f of files) {
     const r = rel(targetPath, f);
     if (isSkippedScanRelPath(r)) continue;
-    if (AGENT_PATH_RE.test(r)) return true;
-    const text = readText(f, 20_000) || "";
-    if (
-      /\b(AgentExecutor|create_react_agent|langgraph|CrewAI|AutoGen|multi-?agent|OpenAIAgents|BrowserUse)\b/i.test(
-        text,
-      )
-    ) {
-      return true;
+    if (AGENT_PATH_RE.test(r)) {
+      agentRefs.push(r);
     }
+    const text = readText(f, 20_000) || "";
+    if (STRONG_AGENT_RE.test(text) || STRONG_AGENT_RE.test(r)) {
+      agentRefs.push(r);
+    }
+    if (OUT_OF_SCOPE_RE.test(text) || OUT_OF_SCOPE_RE.test(r)) {
+      outOfScopeRefs.push(r);
+    }
+    if (agentRefs.length >= 8 && outOfScopeRefs.length >= 8) break;
   }
-  return false;
+  return {
+    agent: agentRefs.length > 0,
+    agentRefs: [...new Set(agentRefs)].slice(0, 8),
+    outOfScopeRefs: [...new Set(outOfScopeRefs)].slice(0, 8),
+  };
 }
 
 function asBool(v: unknown): boolean | null {
@@ -246,6 +295,7 @@ function loadImported(ctx: CollectorContext): AgentLoopLimitsReport["importedRes
   let promptOnlyLimits: number | null = null;
   let continuesAfterAbort: boolean | null = null;
   let terminationLogsPresent: boolean | null = null;
+  let productionAgentRuntimesPresent: boolean | null = null;
   let measuredAt: string | null = null;
 
   for (const f of listImportFiles(ctx.outputDir, PLUGIN_ID)) {
@@ -264,6 +314,14 @@ function loadImported(ctx: CollectorContext): AgentLoopLimitsReport["importedRes
       }
       if (typeof data.promptOnlyLimits === "number") {
         promptOnlyLimits = data.promptOnlyLimits;
+      }
+      const scope = asBool(
+        data.productionAgentRuntimesPresent ?? data.agentRuntimesPresent,
+      );
+      if (scope !== null) {
+        // true wins across files; explicit false only sticks if never true.
+        productionAgentRuntimesPresent =
+          productionAgentRuntimesPresent === true ? true : scope;
       }
       const cont = asBool(data.continuesAfterAbort);
       if (cont !== null) {
@@ -326,9 +384,24 @@ function loadImported(ctx: CollectorContext): AgentLoopLimitsReport["importedRes
     promptOnlyLimits,
     continuesAfterAbort,
     terminationLogsPresent,
+    productionAgentRuntimesPresent,
     measuredAt,
     sources,
   };
+}
+
+function buildNaReason(opts: {
+  outOfScopeRefs: string[];
+  importSaysAbsent: boolean;
+}): string {
+  const classes = NOT_APPLICABLE_TO.join(", ");
+  if (opts.importSaysAbsent) {
+    return `NOT_APPLICABLE: import attested productionAgentRuntimesPresent=false. AGN-M2 applies to ${APPLIES_TO.join(", ")}; not to ${classes}.`;
+  }
+  if (opts.outOfScopeRefs.length > 0) {
+    return `NOT_APPLICABLE: no production agent-runtime signals; out-of-scope surfaces found (${opts.outOfScopeRefs.slice(0, 3).join(", ")}). Applies to ${APPLIES_TO.join(", ")}; not to ${classes}.`;
+  }
+  return `NOT_APPLICABLE: no production agent-runtime signals. Applies to ${APPLIES_TO.join(", ")}; not to ${classes}.`;
 }
 
 export function buildAgentLoopLimitsReport(opts: {
@@ -339,6 +412,7 @@ export function buildAgentLoopLimitsReport(opts: {
   spawnCapability: { found: boolean; refs: string[] };
   enforcementTests: { found: boolean; refs: string[] };
   agentSignals: boolean;
+  outOfScopeRefs: string[];
   imported: AgentLoopLimitsReport["importedResults"];
 }): AgentLoopLimitsReport {
   const notes: string[] = [];
@@ -351,11 +425,21 @@ export function buildAgentLoopLimitsReport(opts: {
   const allThree = requiredBoundsPresent;
   const enforcementPresent =
     opts.enforcementTests.found || opts.imported.found;
+  const importSaysAbsent =
+    opts.imported.productionAgentRuntimesPresent === false;
+  const importSaysPresent =
+    opts.imported.productionAgentRuntimesPresent === true;
+  const inScope =
+    !importSaysAbsent &&
+    (opts.agentSignals ||
+      requiredBoundsPresent ||
+      enforcementPresent ||
+      importSaysPresent);
 
-  if (!opts.agentSignals && !requiredBoundsPresent && !enforcementPresent) {
-    notes.push(
-      "No agent/autonomy signals found — AGN-M2 may be NOT_APPLICABLE if the system has no production agent runtimes (chat-only / single-inference / embeddings / classifiers / rerankers).",
-    );
+  if (!inScope) {
+    notes.push(buildNaReason({ outOfScopeRefs: opts.outOfScopeRefs, importSaysAbsent }));
+  } else if (opts.agentSignals) {
+    notes.push("In scope: production agent-runtime / orchestration signals present.");
   }
 
   if (opts.maxSteps.found) {
@@ -406,14 +490,23 @@ export function buildAgentLoopLimitsReport(opts: {
 
   let statusHint: AgentLoopLimitsReport["summary"]["statusHint"];
   let agnM2Satisfied: boolean | null = null;
+  let naReason: string | null = null;
 
   const measuredFail =
-    (opts.imported.promptOnlyLimits !== null &&
+    inScope &&
+    ((opts.imported.promptOnlyLimits !== null &&
       opts.imported.promptOnlyLimits > 0) ||
-    (opts.imported.limitsEnforcedAbort === false && opts.imported.found) ||
-    opts.imported.continuesAfterAbort === true;
+      (opts.imported.limitsEnforcedAbort === false && opts.imported.found) ||
+      opts.imported.continuesAfterAbort === true);
 
-  if (measuredFail) {
+  if (!inScope) {
+    statusHint = "not_applicable";
+    agnM2Satisfied = null;
+    naReason = buildNaReason({
+      outOfScopeRefs: opts.outOfScopeRefs,
+      importSaysAbsent,
+    });
+  } else if (measuredFail) {
     statusHint = "fail";
     agnM2Satisfied = false;
     if (opts.imported.continuesAfterAbort === true) {
@@ -445,7 +538,7 @@ export function buildAgentLoopLimitsReport(opts: {
     requiredBoundsPresent ||
     enforcementPresent ||
     opts.maxSteps.found ||
-    opts.imported.found
+    (opts.imported.found && !importSaysAbsent)
   ) {
     statusHint = "partial";
     agnM2Satisfied = false;
@@ -459,9 +552,6 @@ export function buildAgentLoopLimitsReport(opts: {
         "Import missing fresh measuredAt (≤90 days) — required to unlock AGN-M2 PASS.",
       );
     }
-  } else if (!opts.agentSignals) {
-    statusHint = "not_applicable";
-    agnM2Satisfied = null;
   } else {
     statusHint = "not_demonstrated";
     agnM2Satisfied = null;
@@ -519,6 +609,10 @@ export function buildAgentLoopLimitsReport(opts: {
       spawnDepthApplicable,
       enforcementPresent,
       agentSignalsPresent: opts.agentSignals,
+      inScope,
+      naReason,
+      appliesTo: [...APPLIES_TO],
+      notApplicableTo: [...NOT_APPLICABLE_TO],
       agnM2Satisfied,
       statusHint,
     },
@@ -550,7 +644,7 @@ export const agentLoopLimitsCollector: Collector = {
     spawnDepth.found = spawnDepth.refs.length > 0;
     const spawnCapability = collectSpawnCapability(ctx.targetPath, maxFiles);
     const enforcementTests = detectEnforcementTests(ctx.targetPath, maxFiles);
-    const agentSignals = detectAgentSignals(ctx.targetPath, maxFiles);
+    const scope = detectScopeSignals(ctx.targetPath, maxFiles);
     const imported = loadImported(ctx);
 
     const report = buildAgentLoopLimitsReport({
@@ -560,7 +654,8 @@ export const agentLoopLimitsCollector: Collector = {
       spawnDepth,
       spawnCapability,
       enforcementTests,
-      agentSignals,
+      agentSignals: scope.agent,
+      outOfScopeRefs: scope.outOfScopeRefs,
       imported,
     });
 
@@ -613,7 +708,7 @@ export const agentLoopLimitsCollector: Collector = {
     return {
       pluginId: PLUGIN_ID,
       status: "ran",
-      detail: `AGN-M2 status=${report.summary.statusHint} requiredBounds=${report.summary.requiredBoundsPresent} spawnApplicable=${report.summary.spawnDepthApplicable} enforce=${report.summary.enforcementPresent} satisfied=${report.summary.agnM2Satisfied}; report=imports/${PLUGIN_ID}/agent-loop-limits-report.json`,
+      detail: `AGN-M2 status=${report.summary.statusHint} inScope=${report.summary.inScope} requiredBounds=${report.summary.requiredBoundsPresent} spawnApplicable=${report.summary.spawnDepthApplicable} enforce=${report.summary.enforcementPresent} satisfied=${report.summary.agnM2Satisfied}; report=imports/${PLUGIN_ID}/agent-loop-limits-report.json`,
       nodes,
     };
   },
