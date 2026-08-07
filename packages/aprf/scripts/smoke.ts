@@ -262,16 +262,20 @@ assert(
   ),
   `crosswalk relations must come from the spec vocabulary; got ${JSON.stringify(agnCrosswalks)}`,
 );
-// AUTHN-M3 has no spec mapping — must stay empty rather than invent alignment.
+// AUTHN-M3 is not listed by Check ID, but authentication is a pillar-only
+// mapping — expand through category so pillar rows are not silently dropped.
 assert(
-  byId.get("AUTHN-M3")?.crosswalks?.length === 0,
-  `unmapped Checks must have no crosswalks; got ${JSON.stringify(byId.get("AUTHN-M3")?.crosswalks)}`,
+  (byId.get("AUTHN-M3")?.crosswalks ?? []).some((x) =>
+    /NIST/i.test(x.framework),
+  ),
+  `AUTHN-M3 must inherit pillar-only NIST crosswalks; got ${JSON.stringify(byId.get("AUTHN-M3")?.crosswalks)}`,
 );
 
 // Threat intel is informative context from spec/aprf-threat-map.yaml.
 const withoutIntel = [...byId.entries()].filter(
   ([, c]) =>
     !c.threatIntel?.securityIntent ||
+    !c.threatIntel?.mappingRationale?.trim() ||
     !c.threatIntel.threats?.length ||
     !c.threatIntel.protects?.length ||
     !Array.isArray(c.threatIntel.mitre?.atlas) ||
@@ -279,7 +283,7 @@ const withoutIntel = [...byId.entries()].filter(
 );
 assert(
   withoutIntel.length === 0,
-  `every control needs threat intel with threats, protects, and mitre arrays; missing on ${withoutIntel
+  `every control needs threat intel with a rationale, threats, protects, and mitre arrays; missing on ${withoutIntel
     .map(([id]) => id)
     .join(", ")}`,
 );

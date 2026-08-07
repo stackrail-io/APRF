@@ -31,23 +31,40 @@ export interface CheckCrosswalk {
 let crosswalkIndex: Map<string, CheckCrosswalk[]> | null = null;
 
 function buildCrosswalkIndex(): Map<string, CheckCrosswalk[]> {
+  const catalog = getGeneratedCatalog();
+  // Check YAML `category` is the pillar slug; pillar-only mappings expand through it.
+  const rulesByPillar = new Map<string, string[]>();
+  for (const rule of catalog.rules) {
+    const list = rulesByPillar.get(rule.category) ?? [];
+    list.push(rule.id);
+    rulesByPillar.set(rule.category, list);
+  }
+
   const index = new Map<string, CheckCrosswalk[]>();
-  for (const framework of getGeneratedCatalog().crosswalks ?? []) {
+  for (const framework of catalog.crosswalks ?? []) {
     const controls = new Map(framework.controls.map((c) => [c.id, c]));
     for (const mapping of framework.mappings ?? []) {
       const control = controls.get(mapping.peerControlId);
       if (!control) continue;
-      for (const checkId of mapping.aprfCheckIds ?? []) {
-        const entry: CheckCrosswalk = {
-          frameworkId: framework.id,
-          framework: framework.name,
-          peerVersion: framework.peerVersion,
-          url: framework.url,
-          disclaimer: framework.disclaimer,
-          controlRef: control.ref,
-          controlTitle: control.title,
-          relation: mapping.relation,
-        };
+
+      // Union explicit Check IDs with every Check under named pillars so
+      // pillar-only rows in aprf-spec.json are not silently dropped.
+      const checkIds = new Set<string>(mapping.aprfCheckIds ?? []);
+      for (const slug of mapping.aprfPillarSlugs ?? []) {
+        for (const id of rulesByPillar.get(slug) ?? []) checkIds.add(id);
+      }
+
+      const entry: CheckCrosswalk = {
+        frameworkId: framework.id,
+        framework: framework.name,
+        peerVersion: framework.peerVersion,
+        url: framework.url,
+        disclaimer: framework.disclaimer,
+        controlRef: control.ref,
+        controlTitle: control.title,
+        relation: mapping.relation,
+      };
+      for (const checkId of checkIds) {
         const list = index.get(checkId);
         if (list) list.push(entry);
         else index.set(checkId, [entry]);

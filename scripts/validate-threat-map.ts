@@ -128,6 +128,10 @@ for (const [id, entry] of Object.entries(entries)) {
   check(Array.isArray(attack), `${id}: mitre.attack must be an array (use [] when unmapped)`);
 
   if (Array.isArray(atlas)) {
+    check(
+      new Set(atlas).size === atlas.length,
+      `${id}: duplicate entries in mitre.atlas`,
+    );
     for (const t of atlas) {
       check(
         atlasIds.has(t as string),
@@ -136,6 +140,10 @@ for (const [id, entry] of Object.entries(entries)) {
     }
   }
   if (Array.isArray(attack)) {
+    check(
+      new Set(attack).size === attack.length,
+      `${id}: duplicate entries in mitre.attack`,
+    );
     for (const t of attack) {
       check(
         attackIds.has(t as string),

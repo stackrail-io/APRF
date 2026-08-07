@@ -974,7 +974,8 @@ function nextStepsForControl(c: Control): string[] {
  * and falls back to the shipped catalog for assessments that predate the field.
  */
 function crosswalksForControl(c: Control): NonNullable<Control["crosswalks"]> {
-  if (c.crosswalks?.length) return c.crosswalks;
+  // Distinguish absent (legacy assessment) from recorded empty (no mapping then).
+  if (c.crosswalks !== undefined) return c.crosswalks;
   return getCrosswalksForCheck(c.checkId).map((x) => ({
     framework: x.framework,
     frameworkId: x.frameworkId,
@@ -1069,7 +1070,7 @@ function topThreatExposure(controls: Control[], limit = 6): ThreatExposure[] {
     // Gate-blocking controls count double: they hold production readiness open.
     const weight = (SEVERITY_WEIGHT[severity] ?? 1) * (mandatory ? 2 : 1);
 
-    for (const threat of threats) {
+    for (const threat of new Set(threats)) {
       const entry = byThreat.get(threat) ?? {
         threat,
         checkIds: [],
