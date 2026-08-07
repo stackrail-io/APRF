@@ -1,21 +1,13 @@
 /**
  * Shared path/text ref collection for hybrid auditors.
  */
-import { isSkippedScanRelPath, readText, rel, walkFiles } from "./fs.ts";
-
-const DEFAULT_EXTENSIONS = [
-  ".yml",
-  ".yaml",
-  ".json",
-  ".md",
-  ".toml",
-  ".sh",
-  ".ts",
-  ".js",
-  ".py",
-  ".tf",
-  ".rego",
-];
+import {
+  isSkippedScanRelPath,
+  readText,
+  rel,
+  SCAN_EXTENSIONS_INFRA,
+  walkFiles,
+} from "./fs.ts";
 
 export function collectRefs(
   targetPath: string,
@@ -26,7 +18,7 @@ export function collectRefs(
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
     maxFiles,
-    extensions: DEFAULT_EXTENSIONS,
+    extensions: [...SCAN_EXTENSIONS_INFRA],
   });
   for (const f of files) {
     const r = rel(targetPath, f);
