@@ -5,6 +5,13 @@ agentVersion: 1
 
 id: support-agent
 
+environment: prod
+system: customer-support
+application: support-triage
+deploymentId: support-triage-prod-01
+
+lifecycleStatus: Active
+
 owner: engineering
 
 purpose: >
@@ -40,9 +47,21 @@ autonomy:
   spawnDepth: 0
   notes: No child agents; escalate to human on confidence < 0.6 or PII uncertainty.
 
-approvalPolicy: >
-  Charter status: approved. Customer-facing sends and refunds require human
-  approval (HUM-M1). Charter re-approval required on expiryDate.
+approval:
+  approvedBy: platform-governance
+  approvalDate: "2026-07-01"
+  approvalStatus: approved
+
+changeJustification: >
+  Initial production charter. Autonomy capped at 8 steps / 120s; no spawn;
+  customer-facing send removed from allowlist.
+
+revisionHistory:
+  - date: "2026-07-01"
+    author: platform-governance
+    summary: Initial approved charter for support-triage prod.
+
+riskLevel: Medium
 
 identityPolicy: >
   Privileged tool calls must carry the end-user or documented service subject
@@ -57,3 +76,5 @@ reviewDate: "2026-07-01"
 lastUpdated: "2026-07-10T09:00:00Z"
 
 expiryDate: "2027-07-01"
+
+exceptions: []

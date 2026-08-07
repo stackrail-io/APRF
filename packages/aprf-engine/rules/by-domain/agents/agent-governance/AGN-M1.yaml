@@ -4,26 +4,40 @@ title: "Every production agent must have a documented charter"
 description: "Each production agent (any autonomous or semi-autonomous runtime that plans, loops, or
   invokes tools on behalf of a product capability—including in-process agents, MCP clients/servers
   acting as agents, and A2A participants) shall be represented in a version-controlled inventory
-  with a current charter covering purpose, owner, approved tool policy, data scope, autonomy
-  boundaries, review metadata, and approval status."
+  with a current charter covering purpose, owner, production identifier, lifecycle status, approved
+  tool policy, data scope, autonomy boundaries, change control, review metadata, and structured
+  approval. Runtime configuration shall be consistent with the approved charter; material deviations
+  require charter review before deployment. Applies to deployed production agent runtimes, not to
+  agent frameworks, SDKs, or libraries in isolation."
 whyItMatters: "Without a charter, agents become unbounded co-processors: they can pursue undefined
   goals, touch undeclared tools and corpora, and escalate autonomy without an accountable owner.
   Missing charters are usually governance debt rather than an immediately exploitable defect—but
   when production agents cannot be enumerated or have no owner, governance has failed and risk
-  escalates. Charters make allowed agency reviewable before incidents, not reconstructable after."
+  escalates. Charters make allowed agency reviewable before incidents, not reconstructable after.
+  Lifecycle status and change justification stop abandoned or silently mutated agents from lingering
+  in inventories; production identifiers disambiguate identically named agents across products."
 severity: "high"
 weight: 3
 gate: "mandatory"
 passCondition: "Every production agent is represented in a version-controlled inventory. Each inventory
-  entry references a current charter containing purpose, owner, approved tool policy, data scope,
-  autonomy boundaries, review date, last updated, charter version, and approval status. No
-  production agent is missing any required governance metadata; inventory completeness is attested
-  (coversAllProductionAgents) with measuredAt ≤90 days."
+  entry references a current charter containing purpose, owner, production identifier (environment,
+  system, application, or deployment id), lifecycle status (Active, Deprecated, Retired, or
+  Experimental), approved tool policy, data scope, autonomy boundaries, change justification or
+  revision history, review date, last updated, charter version, and structured approval
+  (approvedBy, approvalDate, approvalStatus). Inventory completeness is demonstrated by at least
+  one of: runtime registry, deployment manifest, CMDB, platform registry, or approved attestation
+  (coversAllProductionAgents with measuredAt ≤90 days). Named exceptions include business
+  justification, approver, expiry ≤90 days, and compensating controls. No production agent is missing
+  required governance metadata. Runtime configuration is consistent with the approved charter."
 evidenceRequired:
-  - "Version-controlled agent inventory listing every production agent with owner and charter URI/id"
-  - "Per-agent charter documents (or equivalent structured records) covering purpose, owner, approved
-    tool policy reference, data scope, autonomy boundaries, review date, last updated, charter
-    version, and approval status"
+  - "Version-controlled agent inventory listing every production agent with owner, production
+    identifier, lifecycle status, and charter URI/id"
+  - "Per-agent charter documents (or equivalent structured records) covering purpose, owner,
+    production identifier, lifecycle status, approved tool policy reference, data scope, autonomy
+    boundaries, change justification or revision history, review date, last updated, charter
+    version, and structured approval (approvedBy, approvalDate, approvalStatus)"
+  - "Inventory completeness evidence: runtime registry, deployment manifest, CMDB, platform
+    registry, or approved attestation with measuredAt ≤90 days"
 detection:
   capability: "automated"
   detectors:
@@ -35,11 +49,22 @@ detection:
           - "data-scope"
           - "autonomy-limits"
           - "owner"
+          - "production-identifier"
+          - "lifecycle-status"
+          - "change-control"
           - "review-date"
           - "last-updated"
           - "charter-version"
-          - "approval-status"
+          - "approval"
+        optionalFields:
+          - "risk-level"
         requireInventoryCompleteness: true
+        completenessEvidence:
+          - "runtime-registry"
+          - "deployment-manifest"
+          - "cmdb"
+          - "platform-registry"
+          - "approved-attestation"
         defaultSeverity: "high"
         escalateToCriticalWhen:
           - "inventory-completeness-unproven"
@@ -50,48 +75,63 @@ detection:
       params:
         hint: >
           If automation cannot prove inventory completeness, attest a versioned
-          production-agent inventory with charter fields (purpose, owner, approved
-          tool policy, data scope, autonomy boundaries, review date, last updated,
-          charter version, approval status) and 0 missing rows. Escalate finding
-          severity to critical when completeness or ownership cannot be demonstrated.
-manualVerification: "1) Define “production agent” for this system (any agent runtime reachable from
-  production traffic or scheduled jobs—not only MCP/A2A). Build or export a version-controlled
-  inventory of those agents with owners. 2) For each inventory row, open the linked charter and
-  verify it states: purpose/goals; approved tool policy reference (config id, policy id, or doc
-  URI); data/corpora scope; autonomy boundaries (e.g. execution bounds per AGN-M2—iteration,
-  duration, and recursion/delegation when supported—or escalation rules); named owner; review date; last updated;
-  charter version; approval status. 3) PASS only if the inventory query (or equivalent review) shows
-  0 production agents missing any required field and completeness is attested. Agents in
-  non-production environments may be excluded if the inventory documents the exclusion rule.
-  4) Treat the finding as Critical (not High) when production agents cannot be enumerated, inventory
-  completeness cannot be established, autonomous agents have no accountable owner, or unknown/shadow
-  production agents are present."
-falsePositiveGuidance: "Do not pass on architecture or design docs that name agent types without a
-  current inventory (registry/CMDB/manifest export ≤90 days) of deployed production agents. Do not
-  treat a type-level row as covering every deployed instance. Chatbots without tool/autonomy loops
-  are out of scope unless your documented production-agent definition includes them. A tool
-  allowlist in code does not satisfy this Check unless each charter references it. Stub charters
-  (empty purpose, unset owner, missing autonomy limits, missing review/version/approval metadata)
-  fail. Passing step-limit or kill-switch Checks does not substitute for charters. Do not score
-  Critical solely because a known, owned agent is missing a polished charter while inventory
-  completeness and ownership remain proven—that is High governance debt. Named exceptions need owner
-  and expiry ≤90 days."
+          production-agent inventory with charter fields (purpose, owner, production
+          identifier, lifecycle status, approved tool policy, data scope, autonomy
+          boundaries, change control, review date, last updated, charter version,
+          structured approval) and completeness evidence from a runtime registry,
+          deployment manifest, CMDB, platform registry, or approved attestation.
+          Escalate finding severity to critical when completeness or ownership
+          cannot be demonstrated.
+manualVerification: "1) Confirm this target is a production agent runtime (or multi-agent /
+  autonomous workflow / MCP-or-A2A runtime with autonomous behavior)—not an agent framework, SDK,
+  or library alone. Define “production agent” for this system. 2) Build or export a version-controlled
+  inventory of those agents with owners and a production identifier (environment, system,
+  application, or deployment id). 3) For each inventory row, open the linked charter and verify it
+  states: purpose/goals; lifecycle status (Active / Deprecated / Retired / Experimental); approved
+  tool policy reference; data/corpora scope; autonomy boundaries (e.g. execution bounds per AGN-M2);
+  named owner; change justification or revision history for autonomy/tool-policy changes; review
+  date; last updated; charter version; structured approval (approvedBy, approvalDate,
+  approvalStatus). Optional: riskLevel (Low / Medium / High / Critical) for review cadence. 4) Verify
+  runtime configuration is consistent with the approved charter; material deviations require charter
+  review before deployment. 5) PASS only if completeness is demonstrated via runtime registry,
+  deployment manifest, CMDB, platform registry, or approved attestation (≤90 days) and 0 production
+  agents are missing required fields. Named exceptions need business justification, approver, expiry
+  ≤90 days, and compensating controls. 6) Treat the finding as Critical (not High) when production
+  agents cannot be enumerated, completeness cannot be established, autonomous agents have no
+  accountable owner, or unknown/shadow production agents are present."
+falsePositiveGuidance: "Do not fail agent frameworks, SDKs, libraries, inference-only services,
+  embeddings, classifiers, or rerankers that are not deployed production agent runtimes—score
+  NOT_APPLICABLE. Do not pass on architecture or design docs that name agent types without a current
+  inventory (registry/CMDB/manifest export ≤90 days) of deployed production agents. Do not treat a
+  type-level row as covering every deployed instance. Chatbots without tool/autonomy loops are out of
+  scope unless your documented production-agent definition includes them. A tool allowlist in code
+  does not satisfy this Check unless each charter references it. Stub charters (empty purpose, unset
+  owner, missing autonomy limits, missing lifecycle/change-control/approval metadata) fail. Passing
+  step-limit or kill-switch Checks does not substitute for charters. Do not score Critical solely
+  because a known, owned agent is missing a polished charter while inventory completeness and
+  ownership remain proven—that is High governance debt. Named exceptions need business justification,
+  approver, compensating controls, and expiry ≤90 days—not owner alone."
 recommendedFixes:
   - "Create a single agent inventory (registry, CMDB table, or repo manifest) that lists every
-    production agent with owner and charter link"
+    production agent with owner, production identifier, lifecycle status, and charter link"
   - "Adopt the APRF agent charter spec (skills/aprf-auditor/examples/agent-charter/agent-charter.spec.yaml)
-    with fields agentVersion, id, owner, purpose, allowedTools, forbiddenTools, dataScope,
-    memoryPolicy, networkPolicy, autonomy, approvalPolicy, identityPolicy, loggingPolicy, reviewDate,
-    lastUpdated, expiryDate; migrate existing agents onto it"
-  - "Gate new agent promotion to production on inventory + charter completeness (fail closed when
-    fields are missing)"
-  - "Schedule a recurring inventory audit (≤90 days) with a named owner and retain the report;
-    escalate to Critical when completeness or ownership cannot be demonstrated"
+    with fields agentVersion, id, owner, environment/system/application/deploymentId, lifecycleStatus,
+    purpose, allowedTools, forbiddenTools, dataScope, memoryPolicy, networkPolicy, autonomy,
+    approval.{approvedBy,approvalDate,approvalStatus}, changeJustification or revisionHistory,
+    optional riskLevel, identityPolicy, loggingPolicy, reviewDate, lastUpdated, expiryDate; migrate
+    existing agents onto it"
+  - "Gate new agent promotion to production on inventory + charter completeness and runtime↔charter
+    consistency (fail closed when fields are missing or runtime diverges)"
+  - "Schedule a recurring inventory audit (≤90 days) with a named owner; retire or deprecate abandoned
+    agents via lifecycleStatus; escalate to Critical when completeness or ownership cannot be
+    demonstrated"
 references:
   - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
   - title: "NIST AI Risk Management Framework — Govern"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "NIST SP 800-218 — Secure Software Development Framework (SSDF)"
+    url: "https://csrc.nist.gov/pubs/sp/800/218/final"
   - title: "ISO/IEC 42001 — AI management system (roles, responsibilities, documentation)"
     url: "https://www.iso.org/standard/81230.html"
 relatedRules:
@@ -109,6 +149,21 @@ tags:
   - "inventory"
 applicability:
   technologies: []
+  appliesTo:
+    - "production agent runtimes"
+    - "multi-agent systems"
+    - "autonomous workflows"
+    - "MCP clients with autonomous behavior"
+    - "MCP servers with autonomous behavior"
+    - "A2A runtimes"
+  notApplicableTo:
+    - "agent frameworks"
+    - "SDKs"
+    - "libraries"
+    - "inference-only services"
+    - "embedding services"
+    - "classifiers"
+    - "rerankers"
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"

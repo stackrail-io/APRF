@@ -3,11 +3,13 @@
  *
  * Finds agent inventory + charter artifacts with required governance fields.
  * Import a measured inventory export under imports/agent-charter-inventory/ to
- * unlock PASS (0 missing fields). Default finding severity is high; escalate to
- * critical when inventory completeness or ownership cannot be demonstrated.
+ * unlock PASS (0 missing fields + completeness evidence). Default finding
+ * severity is high; escalate to critical when inventory completeness or
+ * ownership cannot be demonstrated. Frameworks/SDKs/libraries alone are N/A.
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
+import { getGeneratedCatalog } from "@stackrail-io/aprf-engine";
 import type {
   Collector,
   CollectorContext,
@@ -34,11 +36,46 @@ const PLUGIN_ID = "agent-charter-inventory";
 const RELATED = ["AGN-M1"] as const;
 const DETECTOR_ID = "repo-agent-charter-inventory";
 
+const LIFECYCLE_STATUSES = new Set([
+  "active",
+  "deprecated",
+  "retired",
+  "experimental",
+]);
+
+const COMPLETENESS_EVIDENCE = new Set([
+  "runtime-registry",
+  "deployment-manifest",
+  "cmdb",
+  "platform-registry",
+  "approved-attestation",
+]);
+
+/** AGN-M1 applicability from catalog YAML. */
+function agnM1ScopeLists(): {
+  appliesTo: string[];
+  notApplicableTo: string[];
+} {
+  const rule = getGeneratedCatalog().rules.find((r) => r.id === "AGN-M1");
+  return {
+    appliesTo: rule?.applicability.appliesTo ?? [],
+    notApplicableTo: rule?.applicability.notApplicableTo ?? [],
+  };
+}
+
 const AGENT_PATH_RE =
   /(agent|orchestr|autonom|langgraph|crewai|autogen|charter|inventory)/i;
 
 const INVENTORY_PATH_RE =
   /(agent.?inventory|agents\.(ya?ml|json|toml|md)|charters?[/\\]|AGENT\.md|agents[/\\]registry)/i;
+
+/** Framework / SDK / library surfaces — N/A unless production inventory exists. */
+const FRAMEWORK_ONLY_RE =
+  /\b(langgraph|crewai|autogen|openai[_-]?agents([_-]?sdk)?|agents?[_-]?sdk|langchain)\b/i;
+
+/** Agent-specific production runtime cues (not bare k8s/helm/terraform). */
+const PRODUCTION_RUNTIME_RE =
+  /\b(production[_-]?agent|deployed[_-]?agent|agent[_-]?runtime|agent[_-]?fleet|cmdb|service[_-]?catalog|deployment[_-]?manifest)\b/i;
 
 const PURPOSE_RE =
   /\b(purpose|goal|mission|charter|description|objectives?)\b/i;
@@ -56,13 +93,20 @@ const LAST_UPDATED_RE =
   /\b(last[_-]?updated|updated[_-]?at|modified[_-]?at|last[_-]?modified)\b/i;
 const CHARTER_VERSION_RE =
   /\b(agentVersion|agent[_-]?version|charter[_-]?version|version)\b/i;
-const APPROVAL_STATUS_RE =
-  /\b(approvalPolicy|approval[_-]?policy|approval[_-]?status|approved|approval[_-]?state|sign[_-]?off)\b/i;
+const APPROVAL_RE =
+  /\b(approvalPolicy|approval[_-]?policy|approval[_-]?status|approvedBy|approvalDate|approval\s*:)\b/i;
+const LIFECYCLE_RE =
+  /\b(lifecycleStatus|lifecycle[_-]?status|lifecycle)\b/i;
+/** Prefer explicit production-identifier keys over bare "system"/"application". */
+const PRODUCTION_ID_RE =
+  /\b(deploymentId|deployment[_-]?id|productionId|production[_-]?id|environment\s*[:=])\b/i;
+const CHANGE_CONTROL_RE =
+  /\b(changeJustification|change[_-]?justification|revisionHistory|revision[_-]?history)\b/i;
 
 export type AgnM1SeverityHint = "high" | "critical";
 
 export interface AgentCharterInventoryReport {
-  schemaVersion: "0.3.0";
+  schemaVersion: "0.4.0";
   pluginId: typeof PLUGIN_ID;
   detectorId: typeof DETECTOR_ID;
   relatedCheckIds: string[];
@@ -75,10 +119,13 @@ export interface AgentCharterInventoryReport {
     dataScope: boolean;
     autonomyLimits: boolean;
     owner: boolean;
+    productionIdentifier: boolean;
+    lifecycleStatus: boolean;
+    changeControl: boolean;
     reviewDate: boolean;
     lastUpdated: boolean;
     charterVersion: boolean;
-    approvalStatus: boolean;
+    approval: boolean;
   };
   fieldRefs: Record<string, string[]>;
   importedResults: {
@@ -88,6 +135,8 @@ export interface AgentCharterInventoryReport {
     missingOwnerCount: number | null;
     complete: boolean | null;
     coversAllProductionAgents: boolean | null;
+    completenessEvidence: string | null;
+    productionAgentsPresent: boolean | null;
     measuredAt: string | null;
     sources: string[];
   };
@@ -95,6 +144,11 @@ export interface AgentCharterInventoryReport {
     agentSignalsPresent: boolean;
     inventoryPresent: boolean;
     allRequiredFieldsPresent: boolean;
+    completenessProven: boolean;
+    inScope: boolean;
+    naReason: string | null;
+    appliesTo: string[];
+    notApplicableTo: string[];
     agnM1Satisfied: boolean | null;
     /** Catalog default is high; critical when completeness/ownership fails. */
     severityHint: AgnM1SeverityHint;
@@ -124,6 +178,143 @@ function agentHasGovernanceField(
   });
 }
 
+function agentHasLifecycle(a: Record<string, unknown>): boolean {
+  // Do not accept generic `status` (health/deploy fields collide).
+  const raw = a.lifecycleStatus ?? a.lifecycle_status ?? a.lifecycle;
+  if (typeof raw !== "string") return false;
+  return LIFECYCLE_STATUSES.has(raw.trim().toLowerCase());
+}
+
+function agentHasProductionIdentifier(a: Record<string, unknown>): boolean {
+  return agentHasGovernanceField(a, [
+    "environment",
+    "system",
+    "application",
+    "deploymentId",
+    "deployment_id",
+    "productionId",
+    "production_id",
+  ]);
+}
+
+function agentHasChangeControl(a: Record<string, unknown>): boolean {
+  if (
+    agentHasGovernanceField(a, [
+      "changeJustification",
+      "change_justification",
+      "changeReason",
+      "change_reason",
+    ])
+  ) {
+    return true;
+  }
+  const hist = a.revisionHistory ?? a.revision_history;
+  return Array.isArray(hist) && hist.length > 0;
+}
+
+function agentHasStructuredApproval(a: Record<string, unknown>): boolean {
+  const nested = a.approval;
+  if (nested && typeof nested === "object" && !Array.isArray(nested)) {
+    const o = nested as Record<string, unknown>;
+    return (
+      agentHasGovernanceField(o, ["approvedBy", "approved_by"]) &&
+      agentHasGovernanceField(o, [
+        "approvalDate",
+        "approval_date",
+        "approvedAt",
+        "approved_at",
+      ]) &&
+      agentHasGovernanceField(o, [
+        "approvalStatus",
+        "approval_status",
+        "status",
+      ])
+    );
+  }
+  return (
+    agentHasGovernanceField(a, ["approvedBy", "approved_by"]) &&
+    agentHasGovernanceField(a, [
+      "approvalDate",
+      "approval_date",
+      "approvedAt",
+      "approved_at",
+    ]) &&
+    agentHasGovernanceField(a, ["approvalStatus", "approval_status"])
+  );
+}
+
+function exceptionExpiryWithin90d(
+  raw: unknown,
+  measuredAt: string | null,
+  now: Date = new Date(),
+): boolean {
+  if (typeof raw !== "string" || !raw.trim()) return false;
+  const expiryMs = Date.parse(raw.trim());
+  if (Number.isNaN(expiryMs)) return false;
+  const baseMs = measuredAt ? Date.parse(measuredAt) : now.getTime();
+  const grantMs = Number.isNaN(baseMs) ? now.getTime() : baseMs;
+  const windowMs = 90 * 24 * 60 * 60 * 1000;
+  // Expiry must be on/after grant and within 90 days of the grant/measurement.
+  return expiryMs >= grantMs && expiryMs - grantMs <= windowMs;
+}
+
+/**
+ * When exceptions are present, each needs justification, approver, expiry ≤90d
+ * from measuredAt (or now), and compensating controls.
+ */
+function agentExceptionsValid(
+  a: Record<string, unknown>,
+  measuredAt: string | null,
+): boolean {
+  const ex = a.exceptions;
+  if (ex == null) return true;
+  if (!Array.isArray(ex)) return false;
+  if (ex.length === 0) return true;
+  return ex.every((row) => {
+    if (!row || typeof row !== "object") return false;
+    const e = row as Record<string, unknown>;
+    const expiryRaw =
+      e.expiry ?? e.expiryDate ?? e.expiresAt ?? e.expires_at;
+    return (
+      agentHasGovernanceField(e, [
+        "justification",
+        "businessJustification",
+        "business_justification",
+        "reason",
+      ]) &&
+      agentHasGovernanceField(e, ["approver", "approvedBy", "approved_by"]) &&
+      exceptionExpiryWithin90d(expiryRaw, measuredAt) &&
+      agentHasGovernanceField(e, [
+        "compensatingControls",
+        "compensating_controls",
+        "compensatingControl",
+      ])
+    );
+  });
+}
+
+function normalizeCompletenessEvidence(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  // runtimeRegistry / runtime_registry / runtime-registry → runtime-registry
+  const key = raw
+    .trim()
+    .replace(/([a-z])([A-Z])/g, "$1-$2")
+    .toLowerCase()
+    .replace(/[\s_]+/g, "-");
+  return COMPLETENESS_EVIDENCE.has(key) ? key : null;
+}
+
+function completenessProven(imported: {
+  coversAllProductionAgents: boolean | null;
+  completenessEvidence: string | null;
+}): boolean {
+  if (imported.coversAllProductionAgents === true) return true;
+  return (
+    imported.completenessEvidence != null &&
+    COMPLETENESS_EVIDENCE.has(imported.completenessEvidence)
+  );
+}
+
 function importDir(ctx: CollectorContext): string {
   return join(ctx.outputDir, "imports", PLUGIN_ID);
 }
@@ -149,19 +340,44 @@ function collectRefs(
   return [...new Set(refs)];
 }
 
-function detectAgentSignals(targetPath: string, maxFiles: number): boolean {
-  return (
-    collectRefs(
-      targetPath,
-      Math.min(maxFiles, 2000),
-      (path, text) =>
-        AGENT_PATH_RE.test(path) ||
-        /\b(AgentExecutor|create_react_agent|langgraph|CrewAI|AutoGen|multi-?agent)\b/i.test(
-          text,
-        ),
-      5,
-    ).length > 0
-  );
+function detectScopeSignals(
+  targetPath: string,
+  maxFiles: number,
+): {
+  agent: boolean;
+  frameworkOnly: boolean;
+  productionRuntime: boolean;
+} {
+  let agent = false;
+  let framework = false;
+  let productionRuntime = false;
+  const files = walkFiles(targetPath, {
+    maxFiles: Math.min(maxFiles, 2000),
+    extensions: [...SCAN_EXTENSIONS],
+  });
+  for (const f of files) {
+    const r = rel(targetPath, f);
+    if (isSkippedScanRelPath(r)) continue;
+    const text = readText(f, 20_000) || "";
+    if (AGENT_PATH_RE.test(r) || /\b(AgentExecutor|create_react_agent|multi-?agent)\b/i.test(text)) {
+      agent = true;
+    }
+    if (FRAMEWORK_ONLY_RE.test(r) || FRAMEWORK_ONLY_RE.test(text)) {
+      framework = true;
+    }
+    if (
+      PRODUCTION_RUNTIME_RE.test(r) ||
+      PRODUCTION_RUNTIME_RE.test(text) ||
+      INVENTORY_PATH_RE.test(r)
+    ) {
+      productionRuntime = true;
+    }
+  }
+  return {
+    agent: agent || framework,
+    frameworkOnly: framework && !productionRuntime,
+    productionRuntime,
+  };
 }
 
 function loadImported(
@@ -173,6 +389,8 @@ function loadImported(
   let missingOwnerCount: number | null = null;
   let complete: boolean | null = null;
   let coversAllProductionAgents: boolean | null = null;
+  let completenessEvidence: string | null = null;
+  let productionAgentsPresent: boolean | null = null;
   let measuredAt: string | null = null;
 
   for (const f of listImportFiles(ctx.outputDir, PLUGIN_ID)) {
@@ -188,6 +406,14 @@ function loadImported(
         asBool(data.covers_all_production_agents) ??
         asBool(data.inventoryComplete) ??
         coversAllProductionAgents;
+      completenessEvidence =
+        normalizeCompletenessEvidence(data.completenessEvidence) ??
+        normalizeCompletenessEvidence(data.completeness_evidence) ??
+        completenessEvidence;
+      productionAgentsPresent =
+        asBool(data.productionAgentsPresent) ??
+        asBool(data.production_agents_present) ??
+        productionAgentsPresent;
       if (typeof data.agentCount === "number") agentCount = data.agentCount;
       if (typeof data.missingFieldCount === "number") {
         missingFieldCount = data.missingFieldCount;
@@ -257,14 +483,11 @@ function loadImported(
             "charter_version",
             "version",
           ]);
-          const hasApproval = agentHasGovernanceField(a, [
-            "approvalPolicy",
-            "approval_policy",
-            "approvalStatus",
-            "approval_status",
-            "approved",
-            "approvalState",
-          ]);
+          const hasProdId = agentHasProductionIdentifier(a);
+          const hasLifecycle = agentHasLifecycle(a);
+          const hasChange = agentHasChangeControl(a);
+          const hasApproval = agentHasStructuredApproval(a);
+          const exceptionsOk = agentExceptionsValid(a, measuredAt);
           if (!hasOwner) missingOwners++;
           if (
             !hasPurpose ||
@@ -272,10 +495,14 @@ function loadImported(
             !hasData ||
             !hasAutonomy ||
             !hasOwner ||
+            !hasProdId ||
+            !hasLifecycle ||
+            !hasChange ||
             !hasReview ||
             !hasUpdated ||
             !hasVersion ||
-            !hasApproval
+            !hasApproval ||
+            !exceptionsOk
           ) {
             missing++;
           }
@@ -297,6 +524,8 @@ function loadImported(
     missingOwnerCount,
     complete,
     coversAllProductionAgents,
+    completenessEvidence,
+    productionAgentsPresent,
     measuredAt,
     sources,
   };
@@ -305,17 +534,7 @@ function loadImported(
 function allRequiredFieldsPresent(
   fields: AgentCharterInventoryReport["fields"],
 ): boolean {
-  return (
-    fields.purpose &&
-    fields.toolAllowlist &&
-    fields.dataScope &&
-    fields.autonomyLimits &&
-    fields.owner &&
-    fields.reviewDate &&
-    fields.lastUpdated &&
-    fields.charterVersion &&
-    fields.approvalStatus
-  );
+  return Object.values(fields).every(Boolean);
 }
 
 function severityHintFor(
@@ -324,15 +543,18 @@ function severityHintFor(
     agentSignals: boolean;
     inventoryFound: boolean;
     imported: AgentCharterInventoryReport["importedResults"];
+    completenessOk: boolean;
   },
 ): AgnM1SeverityHint {
   if (statusHint === "pass" || statusHint === "not_applicable") return "high";
 
   const completenessUnproven =
-    (opts.imported.found && opts.imported.coversAllProductionAgents !== true) ||
+    (opts.imported.found && !opts.completenessOk) ||
     (!opts.imported.found && opts.agentSignals);
   const unenumerable =
-    statusHint === "not_demonstrated" && opts.agentSignals && !opts.inventoryFound;
+    statusHint === "not_demonstrated" &&
+    opts.agentSignals &&
+    !opts.inventoryFound;
   const ownerless =
     (opts.imported.missingOwnerCount ?? 0) > 0 ||
     (opts.imported.found &&
@@ -350,6 +572,7 @@ export function buildAgentCharterInventoryReport(opts: {
   fields: AgentCharterInventoryReport["fields"];
   fieldRefs: Record<string, string[]>;
   agentSignals: boolean;
+  frameworkOnly: boolean;
   imported: AgentCharterInventoryReport["importedResults"];
 }): AgentCharterInventoryReport {
   const notes: string[] = [];
@@ -362,6 +585,18 @@ export function buildAgentCharterInventoryReport(opts: {
     gapNotes.push(msg);
   };
   const allFields = allRequiredFieldsPresent(opts.fields);
+  const { appliesTo, notApplicableTo } = agnM1ScopeLists();
+  const completenessOk = completenessProven(opts.imported);
+
+  // Infra-only cues must not pull non-agent repos into scope; frameworks/SDKs alone are N/A.
+  const importedAgents =
+    opts.imported.found && (opts.imported.agentCount ?? 0) > 0;
+  const inScope =
+    opts.imported.productionAgentsPresent !== false &&
+    (opts.inventory.found ||
+      opts.charters.found ||
+      importedAgents ||
+      (opts.agentSignals && !opts.frameworkOnly));
 
   if (!opts.agentSignals && !opts.inventory.found && !opts.charters.found) {
     pushInfo(
@@ -370,7 +605,7 @@ export function buildAgentCharterInventoryReport(opts: {
   }
   if (opts.inventory.found) {
     pushInfo(`Inventory refs: ${opts.inventory.refs.slice(0, 4).join(", ")}`);
-  } else {
+  } else if (inScope) {
     pushGap(
       "No agent inventory manifest found (agents.yaml / charters/ / AGENT.md / registry).",
     );
@@ -383,25 +618,32 @@ export function buildAgentCharterInventoryReport(opts: {
       pushInfo(
         `Field ${k}: ${opts.fieldRefs[k]?.slice(0, 2).join(", ") || "present"}`,
       );
-    } else {
+    } else if (inScope) {
       pushGap(`Required charter field missing in repo scan: ${k}`);
     }
   }
   if (opts.imported.found) {
     pushInfo(
-      `Imported: ${opts.imported.sources.join(", ")} (agents=${opts.imported.agentCount}, missingFields=${opts.imported.missingFieldCount}, missingOwners=${opts.imported.missingOwnerCount}, complete=${opts.imported.complete})`,
+      `Imported: ${opts.imported.sources.join(", ")} (agents=${opts.imported.agentCount}, missingFields=${opts.imported.missingFieldCount}, missingOwners=${opts.imported.missingOwnerCount}, complete=${opts.imported.complete}, completenessEvidence=${opts.imported.completenessEvidence})`,
     );
-  } else if (opts.inventory.found || allFields || opts.charters.found || opts.agentSignals) {
+  } else if (
+    inScope &&
+    (opts.inventory.found ||
+      allFields ||
+      opts.charters.found ||
+      opts.agentSignals)
+  ) {
     pushGap(
-      "Repo scan cannot unlock AGN-M1 PASS alone — need a measured inventory export (complete=true, 0 missing governance fields, coversAllProductionAgents=true, fresh measuredAt ≤90d) under imports/agent-charter-inventory/.",
+      "Repo scan cannot unlock AGN-M1 PASS alone — need a measured inventory export (complete=true, 0 missing governance fields, completeness evidence or coversAllProductionAgents=true, fresh measuredAt ≤90d) under imports/agent-charter-inventory/.",
     );
     pushGap(
-      "Agent count from tags/release branches is not enough: AGN-M1 requires purpose, owner, approved tool policy, data scope, autonomy boundaries, review date, last updated, charter version, and approval status per production agent.",
+      "Required per agent: purpose, owner, production identifier, lifecycle status, approved tool policy, data scope, autonomy boundaries, change control, review date, last updated, charter version, and structured approval (approvedBy, approvalDate, approvalStatus).",
     );
   }
 
   let statusHint: AgentCharterInventoryReport["summary"]["statusHint"];
   let agnM1Satisfied: boolean | null = null;
+  let naReason: string | null = null;
 
   const measuredFail =
     opts.imported.found &&
@@ -409,9 +651,22 @@ export function buildAgentCharterInventoryReport(opts: {
       opts.imported.missingFieldCount > 0) ||
       opts.imported.complete === false);
 
-  if (!opts.agentSignals && !opts.inventory.found && !opts.imported.found) {
+  if (!inScope) {
     statusHint = "not_applicable";
     agnM1Satisfied = null;
+    const applies =
+      appliesTo.length > 0
+        ? appliesTo.join(", ")
+        : "production agent runtimes";
+    const excludes =
+      notApplicableTo.length > 0
+        ? notApplicableTo.join(", ")
+        : "agent frameworks, SDKs, libraries";
+    naReason =
+      opts.imported.productionAgentsPresent === false
+        ? `Import attested productionAgentsPresent=false — AGN-M1 applies to ${applies}; not ${excludes}.`
+        : `No production agent inventory/runtime — only framework/SDK/library or empty signals. AGN-M1 applies to ${applies}; not ${excludes}.`;
+    pushInfo(naReason);
   } else if (measuredFail) {
     statusHint = "fail";
     agnM1Satisfied = false;
@@ -423,18 +678,28 @@ export function buildAgentCharterInventoryReport(opts: {
     opts.imported.complete === true &&
     (opts.imported.missingFieldCount === null ||
       opts.imported.missingFieldCount === 0) &&
-    (opts.imported.agentCount === null || opts.imported.agentCount > 0) &&
-    opts.imported.coversAllProductionAgents === true &&
+    (opts.imported.agentCount ?? 0) > 0 &&
+    completenessOk &&
     measuredAtFresh(opts.imported.measuredAt)
   ) {
     statusHint = "pass";
     agnM1Satisfied = true;
-  } else if (opts.inventory.found || opts.charters.found || allFields || opts.imported.found) {
+  } else if (
+    opts.inventory.found ||
+    opts.charters.found ||
+    allFields ||
+    opts.imported.found
+  ) {
     statusHint = "partial";
     agnM1Satisfied = false;
-    if (opts.imported.found && opts.imported.coversAllProductionAgents !== true) {
+    if (opts.imported.found && !completenessOk) {
       pushGap(
-        "Import missing coversAllProductionAgents=true — cannot prove inventory lists every production agent (escalate severity to critical).",
+        "Inventory completeness not proven — provide completenessEvidence (runtime-registry | deployment-manifest | cmdb | platform-registry | approved-attestation) or coversAllProductionAgents=true (escalate severity to critical).",
+      );
+    }
+    if (opts.imported.found && (opts.imported.agentCount ?? 0) <= 0) {
+      pushGap(
+        "Import lists 0 agents — AGN-M1 PASS requires agentCount ≥ 1 (empty inventory is not a vacuous pass).",
       );
     }
     if (opts.imported.found && opts.imported.complete !== true) {
@@ -462,6 +727,7 @@ export function buildAgentCharterInventoryReport(opts: {
     agentSignals: opts.agentSignals,
     inventoryFound: opts.inventory.found,
     imported: opts.imported,
+    completenessOk,
   });
   if (
     severityHint === "critical" &&
@@ -478,7 +744,7 @@ export function buildAgentCharterInventoryReport(opts: {
   }
 
   return {
-    schemaVersion: "0.3.0",
+    schemaVersion: "0.4.0",
     pluginId: PLUGIN_ID,
     detectorId: DETECTOR_ID,
     relatedCheckIds: [...RELATED],
@@ -492,6 +758,11 @@ export function buildAgentCharterInventoryReport(opts: {
       agentSignalsPresent: opts.agentSignals,
       inventoryPresent: opts.inventory.found,
       allRequiredFieldsPresent: allFields,
+      completenessProven: completenessOk,
+      inScope,
+      naReason,
+      appliesTo,
+      notApplicableTo,
       agnM1Satisfied,
       severityHint,
       statusHint,
@@ -552,10 +823,13 @@ export const agentCharterInventoryCollector: Collector = {
     const data = fieldScan(DATA_SCOPE_RE);
     const autonomy = fieldScan(AUTONOMY_RE);
     const owner = fieldScan(OWNER_RE);
+    const productionIdentifier = fieldScan(PRODUCTION_ID_RE);
+    const lifecycleStatus = fieldScan(LIFECYCLE_RE);
+    const changeControl = fieldScan(CHANGE_CONTROL_RE);
     const reviewDate = fieldScan(REVIEW_DATE_RE);
     const lastUpdated = fieldScan(LAST_UPDATED_RE);
     const charterVersion = fieldScan(CHARTER_VERSION_RE);
-    const approvalStatus = fieldScan(APPROVAL_STATUS_RE);
+    const approval = fieldScan(APPROVAL_RE);
 
     const fields = {
       purpose: purpose.found,
@@ -563,10 +837,13 @@ export const agentCharterInventoryCollector: Collector = {
       dataScope: data.found,
       autonomyLimits: autonomy.found,
       owner: owner.found,
+      productionIdentifier: productionIdentifier.found,
+      lifecycleStatus: lifecycleStatus.found,
+      changeControl: changeControl.found,
       reviewDate: reviewDate.found,
       lastUpdated: lastUpdated.found,
       charterVersion: charterVersion.found,
-      approvalStatus: approvalStatus.found,
+      approval: approval.found,
     };
     const fieldRefs: Record<string, string[]> = {
       purpose: purpose.refs,
@@ -574,13 +851,16 @@ export const agentCharterInventoryCollector: Collector = {
       dataScope: data.refs,
       autonomyLimits: autonomy.refs,
       owner: owner.refs,
+      productionIdentifier: productionIdentifier.refs,
+      lifecycleStatus: lifecycleStatus.refs,
+      changeControl: changeControl.refs,
       reviewDate: reviewDate.refs,
       lastUpdated: lastUpdated.refs,
       charterVersion: charterVersion.refs,
-      approvalStatus: approvalStatus.refs,
+      approval: approval.refs,
     };
 
-    const agentSignals = detectAgentSignals(ctx.targetPath, maxFiles);
+    const scope = detectScopeSignals(ctx.targetPath, maxFiles);
     const imported = loadImported(ctx);
 
     const report = buildAgentCharterInventoryReport({
@@ -589,7 +869,8 @@ export const agentCharterInventoryCollector: Collector = {
       charters,
       fields,
       fieldRefs,
-      agentSignals,
+      agentSignals: scope.agent,
+      frameworkOnly: scope.frameworkOnly,
       imported,
     });
 
@@ -622,6 +903,9 @@ export const agentCharterInventoryCollector: Collector = {
           ...(report.summary.agnM1Satisfied
             ? ["agn-m1-satisfied"]
             : ["agn-m1-incomplete"]),
+          ...(report.summary.inScope
+            ? ["production-agent-scope"]
+            : ["framework-or-library-na"]),
         ],
         relatedCheckIds: [...RELATED],
       },
@@ -630,7 +914,7 @@ export const agentCharterInventoryCollector: Collector = {
     return {
       pluginId: PLUGIN_ID,
       status: "ran",
-      detail: `AGN-M1 status=${report.summary.statusHint} severity=${report.summary.severityHint} inventory=${report.summary.inventoryPresent} fields=${report.summary.allRequiredFieldsPresent} satisfied=${report.summary.agnM1Satisfied}; report=imports/${PLUGIN_ID}/agent-charter-inventory-report.json`,
+      detail: `AGN-M1 status=${report.summary.statusHint} severity=${report.summary.severityHint} inScope=${report.summary.inScope} inventory=${report.summary.inventoryPresent} fields=${report.summary.allRequiredFieldsPresent} satisfied=${report.summary.agnM1Satisfied}; report=imports/${PLUGIN_ID}/agent-charter-inventory-report.json`,
       nodes,
     };
   },

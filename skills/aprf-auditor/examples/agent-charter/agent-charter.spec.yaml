@@ -4,19 +4,34 @@
 #
 # Mapping to AGN-M1 required metadata:
 #   agentVersion      → charter version
+#   id + environment/system/application/deploymentId → production identifier
 #   owner             → named owner
+#   lifecycleStatus   → Active | Deprecated | Retired | Experimental
 #   purpose           → purpose
 #   allowedTools      → approved tool policy / allowlist
 #   dataScope         → data scope
 #   autonomy          → autonomy boundaries
-#   approvalPolicy    → approval status / human-approval policy
+#   approval          → structured approval (approvedBy, approvalDate, approvalStatus)
+#   changeJustification / revisionHistory → change control
+#   riskLevel         → optional (Low | Medium | High | Critical)
 #   reviewDate        → review date
 #   lastUpdated       → last updated (APRF audit freshness)
 #   expiryDate        → charter expiry / next mandatory re-approval
+#
+# Runtime configuration shall stay consistent with this charter; material
+# deviations require charter review before deployment.
 
 agentVersion: 1 # integer charter schema / document version
 
-id: "" # stable production agent id (unique in inventory)
+id: "" # stable agent id (unique within environment/system/application)
+
+# At least one production identifier required (disambiguates identically named agents).
+environment: "" # e.g. prod, staging
+system: "" # product / platform name
+application: "" # application or service name
+deploymentId: "" # deployment / release identifier
+
+lifecycleStatus: "" # Active | Deprecated | Retired | Experimental
 
 owner: "" # accountable team or person (email or team id)
 
@@ -38,7 +53,17 @@ autonomy:
   spawnDepth: null # max child / sub-agent depth
   notes: "" # escalation or other autonomy boundaries
 
-approvalPolicy: "" # when human approval is required; approval state for this charter
+approval:
+  approvedBy: "" # person or role that approved this charter
+  approvalDate: "" # ISO date of approval (YYYY-MM-DD)
+  approvalStatus: "" # e.g. approved | pending | rejected
+
+# Change control — provide changeJustification and/or revisionHistory.
+changeJustification: "" # why autonomy / tools / scope last changed
+
+revisionHistory: [] # optional list of { date, author, summary }
+
+riskLevel: "" # optional: Low | Medium | High | Critical
 
 identityPolicy: "" # subject / workload identity expectations on privileged hops
 
@@ -49,3 +74,11 @@ reviewDate: "" # ISO date of last governance review (YYYY-MM-DD)
 lastUpdated: "" # ISO timestamp of last charter edit (required for AGN-M1)
 
 expiryDate: "" # ISO date after which the charter must be re-approved
+
+# Named exceptions (optional). Each row needs justification, approver, expiry ≤90d,
+# and compensating controls.
+exceptions: []
+# - justification: ""
+#   approver: ""
+#   expiry: "" # ISO date ≤90 days from grant
+#   compensatingControls: ""

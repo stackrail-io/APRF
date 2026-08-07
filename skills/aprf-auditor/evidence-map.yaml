@@ -2211,8 +2211,9 @@ checks:
       NOT_APPLICABLE when no structured-context signals.
   AGN-M1:
     requiredEvidence:
-      - "Version-controlled agent inventory with owner + charter link per production agent"
-      - "Charters covering purpose, owner, approved tool policy, data scope, autonomy boundaries, review date, last updated, charter version, approval status"
+      - "Version-controlled agent inventory with owner, production identifier, lifecycle status, and charter link per production agent"
+      - "Charters covering purpose, owner, production identifier, lifecycle status, approved tool policy, data scope, autonomy boundaries, change control, review date, last updated, charter version, structured approval"
+      - "Completeness evidence: runtime-registry | deployment-manifest | cmdb | platform-registry | approved-attestation (or coversAllProductionAgents=true), measuredAt ≤90d"
       - "Optional import: imports/agent-charter-inventory/ (complete inventory export)"
     searchExtra:
       - "**/*agent*"
@@ -2220,14 +2221,17 @@ checks:
       - "**/agents.yaml"
       - "**/AGENT.md"
     plugins: [agent-charter-inventory, repo-filesystem]
-    naWhen: "No production agents / multi-step autonomy in system"
+    naWhen: "No production agent runtime (frameworks/SDKs/libraries/inference-only), or import productionAgentsPresent=false"
     evaluation: |
       PASS if agent-charter-inventory report statusHint=pass (imported inventory
-      0 missing governance fields, coversAllProductionAgents=true, measuredAt ≤90d).
+      0 missing governance fields, completenessProven, measuredAt ≤90d).
+      Completeness via completenessEvidence (runtime-registry | deployment-manifest |
+      cmdb | platform-registry | approved-attestation) or coversAllProductionAgents=true.
       Default finding severity is high; severityHint=critical when inventory
       completeness or accountable ownership cannot be demonstrated.
       PARTIAL if inventory/charter artifacts found without complete attested import.
-      NOT_APPLICABLE when no agent signals.
+      NOT_APPLICABLE when summary.inScope=false (framework/SDK/library-only or
+      productionAgentsPresent=false); summary.naReason is copied to assessment.naReason.
   AGN-M2:
     requiredEvidence:
       - "Runtime/platform Execution Bounds: iteration + duration (+ recursion/delegation when spawn/sub-agents supported)"
