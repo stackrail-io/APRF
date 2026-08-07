@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:6e70259f45d51d0b01a6cfd334ca50c79eba64343c52c567bc2eb39ec3c39b28",
+  "generatedAt": "sha256:80d2664754d5913044aa77abc85ebcb83ffc4798cdaf2582c4898de09d36f631",
   "ruleCount": 178,
   "domains": [
     {
@@ -749,6 +749,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "applicability": {
         "technologies": [],
+        "appliesTo": [
+          "agent frameworks",
+          "orchestration frameworks",
+          "workflow engines",
+          "MCP clients",
+          "MCP servers acting autonomously",
+          "A2A runtimes",
+          "multi-agent systems"
+        ],
+        "notApplicableTo": [
+          "simple chat completion APIs",
+          "single inference endpoints",
+          "embeddings",
+          "classifiers",
+          "rerankers"
+        ],
         "minCriticality": 2,
         "requiredFromLevel": 3
       },

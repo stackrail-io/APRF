@@ -149,6 +149,20 @@ tags:
   - "loop-limits"
 applicability:
   technologies: []
+  appliesTo:
+    - "agent frameworks"
+    - "orchestration frameworks"
+    - "workflow engines"
+    - "MCP clients"
+    - "MCP servers acting autonomously"
+    - "A2A runtimes"
+    - "multi-agent systems"
+  notApplicableTo:
+    - "simple chat completion APIs"
+    - "single inference endpoints"
+    - "embeddings"
+    - "classifiers"
+    - "rerankers"
   minCriticality: 2
   requiredFromLevel: 3
 status: "active"
