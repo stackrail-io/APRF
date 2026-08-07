@@ -64,7 +64,7 @@ plugins/aprf/
 ├── assets/owl-mark.png
 ├── commands/          # /aprf-audit, /aprf-collect, /aprf-report
 ├── skills/aprf-auditor/
-│   ├── SKILL.md       # CLI-first agent instructions
+│   ├── SKILL.md       # CLI + ask-for-missing-evidence agent instructions
 │   └── reference.md
 └── README.md
 ```

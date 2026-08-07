@@ -25,6 +25,7 @@ Framework package remains `@stackrail-io/aprf-framework-definition@0.11.0`. Spec
 - HTML report flyout **PASS sample attachments** (inventory + charter spec + example) with modal preview for AGN-M1.
 
 ### Changed
+
 - **AGN-M1**: default severity **high** / weight **3** (was critical / 4); tightened measurable pass condition (review date, last updated, charter version, approval status); Critical escalation when inventory completeness or ownership cannot be demonstrated (`severityHint`).
 - Assess prefers typed collector `gapNotes` over dumping full normative `evidenceRequired`; omits placeholder remediation owner/effort.
 - Issue template [`.github/ISSUE_TEMPLATE/bug-report.yml`](.github/ISSUE_TEMPLATE/bug-report.yml): CLI / report areas and `cli 0.1.1 · catalog 0.11.1` version guidance.
