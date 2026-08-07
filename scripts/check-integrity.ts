@@ -15,6 +15,7 @@ import {
   unionProfileAndLenses,
   LENS_ID_RAG,
 } from "../packages/framework-definition/src/index.ts";
+import { computeSpecStats } from "./lib/spec-stats.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -42,6 +43,8 @@ const spec = JSON.parse(
   }>;
   profiles?: Array<{ id: string; mandatoryCheckIds?: string[] }>;
   lenses?: Array<{ id: string; additionalMandatoryCheckIds?: string[] }>;
+  crosswalks?: Array<{ mappings?: unknown[] }>;
+  stats?: Record<string, unknown>;
   stewardship?: {
     participation?: { contact?: Record<string, unknown> };
   };
@@ -133,6 +136,13 @@ assert(
   "profile∪lens should be at least profile size",
 );
 assert(union.includes("DG-M1"), "RAG lens adds DG-M1");
+
+const expectedStats = computeSpecStats(catalog, spec);
+assert(spec.stats, "spec.stats missing — run npm run aprf:sync-stats");
+assert(
+  JSON.stringify(spec.stats) === JSON.stringify(expectedStats),
+  `spec.stats drift — run npm run aprf:sync-stats\n  recorded=${JSON.stringify(spec.stats)}\n  expected=${JSON.stringify(expectedStats)}`,
+);
 
 console.log(
   `aprf:integrity OK — catalog=${catalogIds.size} spec=${specIds.size} core=${PROFILE_CORE.mandatoryCheckIds.length} regulated=${PROFILE_REGULATED.mandatoryCheckIds.length} lenses=${APRF_LENSES.length} version=${spec.governance?.version}`,

@@ -7,7 +7,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ## [Unreleased]
 
+## [Catalog 0.11.3] / [@stackrail-io/aprf@0.1.4] — 2026-08-07
+
+Patch release: threat intelligence metadata and peer-framework crosswalks in assessments and HTML reports.
+
+Published on npm as:
+- `@stackrail-io/aprf-engine@0.11.3`
+- `@stackrail-io/aprf@0.1.4` (pins engine `0.11.3`, framework-definition `0.11.0`)
+
+Framework package remains `@stackrail-io/aprf-framework-definition@0.11.0`. Spec `governance.version` stays **0.11.0**.
+
+### Added
+- `spec/aprf-threat-map.yaml` — threat context for all 178 Checks (`securityIntent`, `threats`, `protects`, optional MITRE ATLAS/ATT&CK, `mappingRationale`), with pinned `spec/mitre-technique-index.json` and `aprf:threat-map` CI gate.
+- Threat intel and peer-framework crosswalks embedded in the generated catalog; emitted on each control in `assessment.json` and rendered in `REPORT.html` (per-control blocks, MITRE deep links, executive-summary “Top threat exposure” rollup).
+- Pillar-only crosswalk mappings expand via Check `category` (pillar slug).
+
 ### Changed
+- Catalog build refuses unknown Check IDs, incomplete threat-map coverage, and unknown crosswalk `peerControlId` values.
+- HTML renderer preserves a recorded empty `crosswalks: []` (no silent backfill from a newer catalog).
+
+### Changed (prior Unreleased)
 - Rewrote **AGN-M1** production-agent charters: `appliesTo` / `notApplicableTo` (production runtimes vs frameworks/SDKs/libraries); required lifecycle status, production identifier, change control, and structured approval (`approvedBy` / `approvalDate` / `approvalStatus`); softened inventory completeness (runtime registry, deployment manifest, CMDB, platform registry, or approved attestation); exception governance (justification, approver, expiry ≤90d, compensating controls); runtime↔charter consistency; optional `riskLevel`; NIST SP 800-218 reference. Updated `agent-charter-inventory` collector (schema 0.4.0), charter examples, evidence-map, `aprf-spec.json`, and smoke tests. **Importer note:** AGN-M1 PASS imports now require structured `approval.{approvedBy,approvalDate,approvalStatus}` (string `approvalPolicy` alone ≠ PASS), `lifecycleStatus`, a production identifier, change control, `agentCount ≥ 1`, and completeness evidence or `coversAllProductionAgents=true`; exception rows need expiry within 90 days of `measuredAt`.
 - Rewrote **AGN-M2** as technology-neutral **Execution Bounds**: iteration + duration always; recursion/delegation depth required only when spawn/sub-agent capability is supported (otherwise N/A). Clarified Critical rationale, continue-after-abort failure, context-window ≠ execution limit, platform defaults that cannot be disabled without governance exception, and preferred runtime termination logs. Added structured `applicability.appliesTo` / `notApplicableTo` (keeps `technologies: []` technology-agnostic); collector sets `summary.inScope` / `summary.naReason` and assess copies `naReason` so out-of-scope targets are `NOT_APPLICABLE` (excluded from gate). Updated `agent-loop-limits` collector (agent-scoped `timeout:`, no doc-only spawn capability, dropped bare `max_depth`), evidence-map, `aprf-spec.json`; AGN-M1 autonomy wording aligned.
 

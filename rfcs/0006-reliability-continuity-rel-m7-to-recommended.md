@@ -6,6 +6,7 @@
 | Author(s) | StackRail (working-draft publisher) |
 | Created | 2026-08-01 |
 | SemVer impact | MINOR |
+| Index summary | Demotes REL-M7→REL-R5 (AI-dependency chaos); removes from Regulated mandatories; pre-release ID-removal exception. |
 | Related | [APRF-RFC-0005](0005-reliability-continuity-rel-m4-to-recommended.md), [APRF-RFC-0002](0002-incident-readiness-mandatory-to-recommended.md) (pre-release M→R pattern) |
 
 ## Problem

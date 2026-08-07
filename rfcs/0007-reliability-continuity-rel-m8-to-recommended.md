@@ -6,6 +6,7 @@
 | Author(s) | StackRail (working-draft publisher) |
 | Created | 2026-08-01 |
 | SemVer impact | MINOR |
+| Index summary | Demotes REL-M8→REL-R7 (multi-provider Level-5 continuity); removes from Regulated mandatories; pre-release ID-removal exception. |
 | Related | [APRF-RFC-0006](0006-reliability-continuity-rel-m7-to-recommended.md), [APRF-RFC-0005](0005-reliability-continuity-rel-m4-to-recommended.md) (pre-release M→R pattern) |
 
 ## Problem

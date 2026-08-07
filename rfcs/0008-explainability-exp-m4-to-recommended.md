@@ -6,6 +6,7 @@
 | Author(s) | StackRail (working-draft publisher) |
 | Created | 2026-08-01 |
 | SemVer impact | MINOR |
+| Index summary | Demotes EXP-M4→EXP-R3 (change/counterfactual summaries); removes from Regulated mandatories; pre-release ID-removal exception. |
 | Related | [APRF-RFC-0007](0007-reliability-continuity-rel-m8-to-recommended.md) (pre-release M→R pattern) |
 
 ## Problem

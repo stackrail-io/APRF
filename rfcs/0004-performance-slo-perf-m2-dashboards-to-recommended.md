@@ -6,6 +6,7 @@
 | Author(s) | StackRail (working-draft publisher) |
 | Created | 2026-08-01 |
 | SemVer impact | MINOR |
+| Index summary | Rewrites PERF-M2 as mandatory ops metrics; adds PERF-R4 for near-real-time dashboards as recommended maturity. |
 | Related | [APRF-RFC-0003](0003-observability-obs-m2-to-recommended.md) (recommended dashboards / FinOps maturity pattern) |
 
 ## Problem

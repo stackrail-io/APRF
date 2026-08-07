@@ -6,6 +6,7 @@
 | Author(s) | StackRail (working-draft publisher) |
 | Created | 2026-08-01 |
 | SemVer impact | MINOR |
+| Index summary | Demotes SEC-M5→SEC-R3 (exfiltration detection; canaries optional among equivalents); removes from Regulated mandatories; pre-release ID-removal exception. |
 | Related | [APRF-RFC-0008](0008-explainability-exp-m4-to-recommended.md) (pre-release M→R pattern) |
 
 ## Problem
