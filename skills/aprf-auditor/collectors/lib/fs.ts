@@ -117,6 +117,43 @@ export function configureWalkSkipForCollect(
   }
 }
 
+/**
+ * Default repo walk for hybrid collectors: source + config + light docs.
+ * Prefer this over per-collector copies of the same list.
+ */
+export const SCAN_EXTENSIONS: readonly string[] = [
+  ".py",
+  ".ts",
+  ".tsx",
+  ".js",
+  ".jsx",
+  ".yml",
+  ".yaml",
+  ".json",
+  ".toml",
+  ".md",
+  ".txt",
+];
+
+/** Docs / policy / catalog surfaces (ops, continuity, playbooks). */
+export const SCAN_EXTENSIONS_DOCS: readonly string[] = [
+  ".md",
+  ".txt",
+  ".yml",
+  ".yaml",
+  ".json",
+  ".ts",
+  ".py",
+];
+
+/** CI / IaC-oriented walks (collect-refs default). */
+export const SCAN_EXTENSIONS_INFRA: readonly string[] = [
+  ...SCAN_EXTENSIONS,
+  ".sh",
+  ".tf",
+  ".rego",
+];
+
 export function walkFiles(
   root: string,
   opts: {

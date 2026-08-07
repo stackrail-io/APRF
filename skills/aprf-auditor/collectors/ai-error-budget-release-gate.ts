@@ -22,6 +22,7 @@ import {
   redact,
   rel,
   walkFiles,
+  SCAN_EXTENSIONS_DOCS,
 } from "./lib/fs.ts";
 import {
   asBool,
@@ -96,7 +97,7 @@ function collectRefs(
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
     maxFiles: Math.max(maxFiles, 5000),
-    extensions: [".md", ".txt", ".yml", ".yaml", ".json", ".ts", ".py"],
+    extensions: [...SCAN_EXTENSIONS_DOCS],
   });
   for (const f of files) {
     const r = rel(targetPath, f);

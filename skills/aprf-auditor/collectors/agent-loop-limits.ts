@@ -21,6 +21,7 @@ import {
   readText,
   redact,
   rel,
+  SCAN_EXTENSIONS,
   walkFiles,
 } from "./lib/fs.ts";
 import { measuredAtFresh, parseMeasuredAt } from "./lib/import-attest.ts";
@@ -153,18 +154,7 @@ function collectLimitRefs(
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
     maxFiles: Math.max(maxFiles, 5000),
-    extensions: [
-      ".py",
-      ".ts",
-      ".js",
-      ".tsx",
-      ".jsx",
-      ".yml",
-      ".yaml",
-      ".json",
-      ".toml",
-      ".md",
-    ],
+    extensions: [...SCAN_EXTENSIONS],
   });
   for (const f of files) {
     const r = rel(targetPath, f);
@@ -189,16 +179,7 @@ function collectSpawnCapability(
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
     maxFiles: Math.max(maxFiles, 5000),
-    extensions: [
-      ".py",
-      ".ts",
-      ".js",
-      ".tsx",
-      ".jsx",
-      ".yml",
-      ".yaml",
-      ".json",
-    ],
+    extensions: [...SCAN_EXTENSIONS],
   });
   for (const f of files) {
     const r = rel(targetPath, f);
@@ -222,7 +203,7 @@ function detectEnforcementTests(targetPath: string, maxFiles: number) {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
     maxFiles: Math.max(maxFiles, 5000),
-    extensions: [".py", ".ts", ".js", ".yml", ".yaml", ".md"],
+    extensions: [...SCAN_EXTENSIONS],
   });
   for (const f of files) {
     const r = rel(targetPath, f);
@@ -252,7 +233,7 @@ function detectScopeSignals(
   const outOfScopeRefs: string[] = [];
   const files = walkFiles(targetPath, {
     maxFiles: Math.min(maxFiles, 2000),
-    extensions: [".py", ".ts", ".js", ".yml", ".yaml", ".json"],
+    extensions: [...SCAN_EXTENSIONS],
   });
   for (const f of files) {
     const r = rel(targetPath, f);
