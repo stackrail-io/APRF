@@ -34,12 +34,12 @@ runtime URLs, credentials, and import paths — never finish with gap lists alon
 Classify the target (`ai-application` vs `non-ai-platform`). For an AI app, **ask up front** (do not wait until after a code-only run):
 
 1. **Running base URL?** (e.g. `http://127.0.0.1:8080`) — needed for AUTHN-M1 / live probes.
-2. If tools/MCP look present: **MCP/S2S inventory path** under `./aprf-assessment/imports/mcp-s2s-inventory/`, or admin token (`APRF_ADMIN_TOKEN`) / email+password for live fetch (AUTHN-M2).
-3. Optional for AUTHZ-M1: admin + limited-user creds or tokens (or say you’ll use admin-created temp user).
+2. If tools/MCP look present: **MCP/S2S inventory path** under `./aprf-assessment/imports/mcp-s2s-inventory/`, or confirm live fetch via env (`APRF_ADMIN_TOKEN`, or `APRF_ADMIN_EMAIL` + `APRF_ADMIN_PASSWORD`) for AUTHN-M2.
+3. Optional for AUTHZ-M1: confirm limited-user env (`APRF_AUTHZ_LIMITED_*`) is set (or say you’ll use admin-created temp user).
 
-If the user has no runnable instance, say so and continue offline — do **not** invent PASS for live Checks.
+**Never ask the user to paste passwords or tokens into chat.** Ask only whether the needed `APRF_ADMIN_*` / `APRF_AUTHZ_*` vars are already set in the local shell (secret manager or non-echoing prompt). Do not invent PASS for live Checks when there is no runnable instance.
 
-When they provide a URL/creds, re-run with live inputs (secrets via env — never persisted in artifacts; avoid `--*-password` / `--*-token` on argv).
+When they confirm a URL and/or that credential env vars are available, re-run with live inputs (CLI reads env; secrets never persisted in artifacts; avoid `--*-password` / `--*-token` on argv).
 
 ## Preferred path (one command)
 
@@ -62,10 +62,10 @@ Variants (same flags on either binary):
 
 ```bash
 # Live collectors (AUTHN-M1 / AUTHZ-M1 / AUTHN-M2) — auto-enables live mode
-# Prefer env for secrets (CLI reads APRF_ADMIN_* / APRF_AUTHZ_*); avoid --*-password / --*-token on argv
-export APRF_ADMIN_EMAIL=admin@example.com
-export APRF_ADMIN_PASSWORD='…'
-# Token-only alternative: export APRF_ADMIN_TOKEN='…'
+# Prerequisites (set OUTSIDE chat via secret manager / non-echoing prompt — do not paste secrets here):
+#   APRF_ADMIN_EMAIL + APRF_ADMIN_PASSWORD  — or —  APRF_ADMIN_TOKEN
+# Optional AUTHZ-M1: APRF_AUTHZ_LIMITED_EMAIL + APRF_AUTHZ_LIMITED_PASSWORD  — or —  APRF_AUTHZ_LIMITED_TOKEN
+# Avoid --*-password / --*-token on argv
 … audit --target . --out ./aprf-assessment --profile core \
   --base-url http://127.0.0.1:8080
 
@@ -79,7 +79,7 @@ export APRF_ADMIN_PASSWORD='…'
 … audit --target . --full
 ```
 
-Optional AUTHZ-M1: `APRF_AUTHZ_LIMITED_EMAIL` + `APRF_AUTHZ_LIMITED_PASSWORD`, or `APRF_AUTHZ_LIMITED_TOKEN`. Other evidence via `./aprf-assessment/imports/<plugin>/` or env (`GITHUB_TOKEN`, …).
+Other evidence via `./aprf-assessment/imports/<plugin>/` or env (`GITHUB_TOKEN`, …).
 
 ## Step-by-step (when not using `audit`)
 
@@ -97,10 +97,10 @@ npx @stackrail-io/aprf@0.1.3 verify  ./aprf-assessment/REPORT.html
 3. Summarize: gate PASS/FAIL, blocker count, critical blockers, top P0/P1 from `assessment.json`.
 4. **Ask for missing evidence** — do not stop at a gap list. From `NOT_DEMONSTRATED`, `PARTIAL`, and `needs-user` collectors, batch concrete questions (mandatory / critical first). Prefer short asks tied to Check IDs, e.g.:
    - AUTHN-M1: “What’s the running app base URL to probe?”
-   - AUTHN-M2: “Can you drop a redacted MCP/S2S inventory under `./aprf-assessment/imports/mcp-s2s-inventory/`, or share admin creds/token for live fetch?”
-   - SEC2-M2 (PARTIAL with config only): “Do you have a ≤90d canary harness JSON for `./aprf-assessment/imports/secret-redaction/` (cases + detectionRatePct=100), or should we mark logging/tracing N/A?”
+   - AUTHN-M2: “Can you drop a redacted MCP/S2S inventory under `./aprf-assessment/imports/mcp-s2s-inventory/`, or confirm `APRF_ADMIN_*` is set locally for live fetch? (Do not paste the secret here.)”
+   - SEC2-M2 (PARTIAL with config only): “Do you have a ≤90d canary harness JSON for `./aprf-assessment/imports/secret-redaction/` (cases + detectionRatePct=100)?” Offer `NOT_APPLICABLE` only when scope evidence shows logging/tracing are out of scope; otherwise keep `PARTIAL` / `NOT_DEMONSTRATED` and keep requesting the canary.
    - Other hybrid Checks: ask for the specific `./aprf-assessment/imports/<plugin>/` file or env the collector names in `requiredEvidenceMissing` / collector notes.
-5. When the user answers with a URL, path, or import, re-run collect → assess → report → verify (or full `audit`) with those inputs. Never invent PASS from chat-only YES.
+5. When the user answers with a URL, confirms credential/token env vars, a path, or an import, re-run collect → assess → report → verify (or full `audit`) with those inputs. Never invent PASS from chat-only YES.
 
 Optional runtime exports (langsmith, etc.) that are truly out of scope can stay “optional import — not a failure,” but still **ask once** whether they have an export rather than assuming silence means skip.
 
