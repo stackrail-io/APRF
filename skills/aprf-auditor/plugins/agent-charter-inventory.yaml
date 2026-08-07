@@ -1,6 +1,6 @@
 id: agent-charter-inventory
 title: Agent charter inventory (AGN-M1)
-version: "0.3.0"
+version: "0.4.0"
 executor: collectors/agent-charter-inventory.ts
 evidenceClass: docs
 alsoEmits: [runtime-config, code]
@@ -10,9 +10,10 @@ inputs:
   - "Optional inventory export: aprf-assessment/imports/agent-charter-inventory/*.{json}"
 collect:
   - "Detect agent inventory manifests and charter documents"
-  - "Scan for required fields: purpose, tool policy, data scope, autonomy, owner, review date, last updated, charter version, approval status"
+  - "Scan for required fields: purpose, tool policy, data scope, autonomy, owner, production identifier, lifecycle status, change control, review date, last updated, charter version, structured approval"
   - "Ingest imported inventory exports; write agent-charter-inventory-report.json"
   - "Emit severityHint=high by default; escalate to critical when completeness/ownership unproven"
+  - "NOT_APPLICABLE for frameworks/SDKs/libraries or import productionAgentsPresent=false"
 emits:
   nodeClass: docs
   refPattern: "aprf-assessment/imports/agent-charter-inventory/*"
@@ -24,11 +25,17 @@ emits:
     - inventory
 mapsToChecks: [AGN-M1]
 whenUnavailable: >
-  Repo charter/inventory signals alone are PARTIAL (severity high when inventory
-  exists; critical when completeness or ownership cannot be demonstrated).
-  AGN-M1 PASS needs an imported inventory with complete governance fields
-  (0 missing), coversAllProductionAgents=true, agentCount ≥ 1, and measuredAt
-  ≤90 days. No agent signals → NOT_APPLICABLE.
+  Repo charter/inventory signals alone are PARTIAL (severity critical when
+  completeness or ownership cannot be demonstrated). AGN-M1 PASS needs an
+  imported inventory with complete governance fields (0 missing) including
+  lifecycleStatus, production identifier, change control, and structured
+  approval (approvedBy/approvalDate/approvalStatus — string approvalPolicy
+  alone ≠ PASS), completeness evidence (runtime-registry | deployment-manifest |
+  cmdb | platform-registry | approved-attestation) or coversAllProductionAgents=true,
+  agentCount ≥ 1, and measuredAt ≤90 days. Named exceptions need justification,
+  approver, expiry ≤90d, and compensating controls. Frameworks/SDKs/libraries,
+  infra-only targets, or productionAgentsPresent=false → NOT_APPLICABLE.
+  Agent code signals without inventory → NOT_DEMONSTRATED (critical).
 live:
   required: false
   note: Offline repo heuristics + optional imported inventory JSON.

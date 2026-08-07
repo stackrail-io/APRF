@@ -1,12 +1,18 @@
 {
   "measuredAt": "2026-07-15T12:00:00Z",
   "coversAllProductionAgents": true,
+  "completenessEvidence": "approved-attestation",
   "complete": true,
   "missingFieldCount": 0,
   "agentCount": 1,
   "agents": [
     {
       "id": "support-agent",
+      "environment": "prod",
+      "system": "customer-support",
+      "application": "support-triage",
+      "deploymentId": "support-triage-prod-01",
+      "lifecycleStatus": "Active",
       "owner": "engineering",
       "charterUri": "docs/agents/support-agent.charter.yaml",
       "purpose": "Triage inbound support tickets and draft replies for human review",
@@ -24,13 +30,27 @@
         "wallClockSeconds": 120,
         "spawnDepth": 0
       },
-      "approvalPolicy": "approved; customer-facing sends require human approval",
+      "approval": {
+        "approvedBy": "platform-governance",
+        "approvalDate": "2026-07-01",
+        "approvalStatus": "approved"
+      },
+      "changeJustification": "Initial production charter with capped autonomy and no customer-facing send",
+      "revisionHistory": [
+        {
+          "date": "2026-07-01",
+          "author": "platform-governance",
+          "summary": "Initial approved charter"
+        }
+      ],
+      "riskLevel": "Medium",
       "identityPolicy": "End-user or service subject on privileged hops",
       "loggingPolicy": "Tool, policy decision, ticket id, subject id retained ≥90d",
       "reviewDate": "2026-07-01",
       "lastUpdated": "2026-07-10T09:00:00Z",
       "expiryDate": "2027-07-01",
-      "agentVersion": 1
+      "agentVersion": 1,
+      "exceptions": []
     }
   ]
 }
