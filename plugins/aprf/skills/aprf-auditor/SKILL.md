@@ -5,7 +5,7 @@ name: aprf-auditor
 user-invocable: false
 description: >-
   Local APRF assessment via @stackrail-io/aprf CLI (no StackRail console, no
-  localhost:3001, no run_* IDs). Prefer `npx @stackrail-io/aprf@0.1.3 audit`.
+  localhost:3001, no run_* IDs). Prefer `npx @stackrail-io/aprf@0.1.4 audit`.
   Writes aprf-assessment/ with evidence-graph.json, assessment.json, REPORT.html.
   Ask the user for missing runtime inputs and import evidence; do not only
   summarize gaps. Use for "Run an APRF assessment", "APRF audit", "AI production
@@ -55,7 +55,7 @@ node packages/aprf/dist/cli.js audit --target . --out ./aprf-assessment --profil
 2. **Published npm** (any other project):
 
 ```bash
-npx @stackrail-io/aprf@0.1.3 audit --target . --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.4 audit --target . --out ./aprf-assessment --profile core
 ```
 
 Variants (same flags on either binary):
@@ -84,10 +84,10 @@ Other evidence via `./aprf-assessment/imports/<plugin>/` or env (`GITHUB_TOKEN`,
 ## Step-by-step (when not using `audit`)
 
 ```bash
-npx @stackrail-io/aprf@0.1.3 collect --target . --out ./aprf-assessment
-npx @stackrail-io/aprf@0.1.3 assess  --out ./aprf-assessment --profile core
-npx @stackrail-io/aprf@0.1.3 report  --in ./aprf-assessment/assessment.json --out ./aprf-assessment/REPORT.html
-npx @stackrail-io/aprf@0.1.3 verify  ./aprf-assessment/REPORT.html
+npx @stackrail-io/aprf@0.1.4 collect --target . --out ./aprf-assessment
+npx @stackrail-io/aprf@0.1.4 assess  --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.4 report  --in ./aprf-assessment/assessment.json --out ./aprf-assessment/REPORT.html
+npx @stackrail-io/aprf@0.1.4 verify  ./aprf-assessment/REPORT.html
 ```
 
 ## After the run (summarize, then ask)
@@ -117,7 +117,7 @@ For full YES/NO/DON'T KNOW attestation methodology, see the portable skill in th
 
 ## Wrong pipeline (abort and restart)
 
-If you find yourself opening StackRail Assessments UI, `http://127.0.0.1:3001`, or inventing `run_*` IDs — **stop**. Re-run with this skill and `npx @stackrail-io/aprf@0.1.3 audit`.
+If you find yourself opening StackRail Assessments UI, `http://127.0.0.1:3001`, or inventing `run_*` IDs — **stop**. Re-run with this skill and `npx @stackrail-io/aprf@0.1.4 audit`.
 
 ## Non-AI / platform repos
 

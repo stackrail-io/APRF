@@ -36,10 +36,10 @@ In chat, prefer the slash command:
 The plugin skill (`aprf-auditor`) is model-invocable background guidance and is **not** listed in the `/` menu, so it does not collide with the portable repo skill at `skills/aprf-auditor/` when this checkout is open.
 
 ```bash
-npx @stackrail-io/aprf@0.1.3 audit --target . --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.4 audit --target . --out ./aprf-assessment --profile core
 
 # Live collectors (AUTHN-M1 / AUTHZ-M1 / AUTHN-M2) — same flags on audit and collect
-npx @stackrail-io/aprf@0.1.3 audit --target . --out ./aprf-assessment --profile core \
+npx @stackrail-io/aprf@0.1.4 audit --target . --out ./aprf-assessment --profile core \
   --base-url http://127.0.0.1:8080 \
   --admin-email "$APRF_ADMIN_EMAIL" \
   --admin-password "$APRF_ADMIN_PASSWORD"

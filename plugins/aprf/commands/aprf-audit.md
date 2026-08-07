@@ -17,7 +17,7 @@ runtime inputs and import evidence — do not only summarize gaps.
 3. Shell (offline / code-only) when no URL yet:
 
 ```bash
-npx @stackrail-io/aprf@0.1.3 audit --target . --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.4 audit --target . --out ./aprf-assessment --profile core
 ```
 
 4. When the user provides a running app and confirms credential env vars are available (auto-enables live collectors; secrets never persisted). Prefer **env vars** set outside chat (secret manager or non-echoing prompt) — the CLI reads them without `--*-password` / `--*-token` flags:
@@ -28,7 +28,7 @@ npx @stackrail-io/aprf@0.1.3 audit --target . --out ./aprf-assessment --profile 
 #   — or — token-only: APRF_ADMIN_TOKEN
 # Optional AUTHZ-M1: APRF_AUTHZ_LIMITED_EMAIL + APRF_AUTHZ_LIMITED_PASSWORD
 #   — or — APRF_AUTHZ_LIMITED_TOKEN
-npx @stackrail-io/aprf@0.1.3 audit --target . --out ./aprf-assessment --profile core \
+npx @stackrail-io/aprf@0.1.4 audit --target . --out ./aprf-assessment --profile core \
   --base-url http://127.0.0.1:8080
 ```
 

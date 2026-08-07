@@ -1,7 +1,7 @@
 {
   "name": "aprf",
   "displayName": "APRF Auditor",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Local AI Production Readiness Framework assessments. Runs npx @stackrail-io/aprf (collect \u2192 assess \u2192 REPORT.html). No StackRail console or backend.",
   "author": {
     "name": "StackRail",
