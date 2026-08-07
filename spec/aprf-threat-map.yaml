@@ -1,0 +1,3776 @@
+id: aprf-threat-map
+name: APRF Threat Intelligence Map
+question: Why does each APRF control exist, and what does it defend against?
+
+# This file is ADDITIVE metadata. It never changes a rule's intent, severity,
+# gate, weight, pass condition, or required evidence. Rule definitions remain
+# authoritative in packages/aprf-engine/rules/.
+disclaimer: >-
+  Informative threat context only. Threat and MITRE mappings explain the security
+  rationale behind a control; they are not certification, not a guarantee of
+  mitigation, and not a substitute for the control's evidence requirements.
+  A mapping means "this control reduces exposure to this technique", not
+  "this control fully prevents this technique".
+
+sources:
+  - id: mitre-atlas
+    name: MITRE ATLAS
+    version: "5.6.0"
+    url: https://atlas.mitre.org/
+    note: All AML.T identifiers were validated against the published ATLAS distribution.
+  - id: mitre-attack
+    name: MITRE ATT&CK for Enterprise
+    version: "19.2"
+    url: https://attack.mitre.org/
+    note: All T identifiers were validated against the published ATT&CK STIX bundle.
+  - id: owasp-llm-top-10
+    name: OWASP Top 10 for LLM Applications (2025)
+    url: https://genai.owasp.org/
+    note: Source for extended threat names not present in the core vocabulary.
+
+# Closed vocabularies. Anything outside these lists is a validation error, which
+# keeps threat naming consistent and prevents invented terminology.
+vocabularies:
+  threats:
+    core:
+      - Prompt Injection
+      - Excessive Agency
+      - Data Exfiltration
+      - Tool Abuse
+      - Memory Poisoning
+      - Identity Spoofing
+      - Privilege Escalation
+      - Unsafe Code Execution
+      - Supply Chain Compromise
+      - Hallucinated Actions
+      - Secret Leakage
+      - Denial of Wallet
+      - Denial of Service
+      - Agent Hijacking
+      - Unauthorized Tool Use
+      - Shadow Agents
+      - Unauthorized Memory Access
+    # Standards-anchored additions required to describe governance, privacy,
+    # safety, and reliability controls that the core list does not cover.
+    extended:
+      - Sensitive Information Disclosure # OWASP LLM02:2025
+      - Data and Model Poisoning # OWASP LLM04:2025
+      - System Prompt Leakage # OWASP LLM07:2025
+      - Vector and Embedding Weaknesses # OWASP LLM08:2025
+      - Misinformation # OWASP LLM09:2025
+      - Model Theft # OWASP LLM10 lineage; MITRE ATLAS AML.T0024.002
+      - Jailbreak # MITRE ATLAS AML.T0054
+      - Harmful Content Generation # NIST AI RMF harmful-output risk
+      - Bias and Discrimination # NIST AI RMF / ISO/IEC 42001
+      - Repudiation # STRIDE
+      - Insider Misuse
+      - Configuration Drift
+  protects:
+    - Users
+    - Identity
+    - Memory
+    - Context
+    - Prompts
+    - Models
+    - Tools
+    - External Systems
+    - APIs
+    - Infrastructure
+    - Secrets
+    - Data
+    - Logs
+    - Audit Trail
+    - Runtime
+    - Network
+    - Cost
+    - Availability
+    - Safety
+
+rules:
+  # ---------------------------------------------------------------- agents --
+  AGN-M1:
+    securityIntent: Ensure every production agent has an approved, documented operating boundary so no agent runs unaccounted for.
+    threats:
+      - Shadow Agents
+      - Excessive Agency
+      - Unauthorized Tool Use
+    protects:
+      - Runtime
+      - Tools
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0103
+      attack: []
+    mappingRationale: >-
+      A maintained charter and inventory is what makes an unapproved or forgotten
+      agent detectable, and it is the precondition for every downstream agent
+      control. The mapping is detective: it surfaces adversary-deployed or
+      undocumented agents rather than preventing their deployment.
+
+  AGN-M2:
+    securityIntent: Prevent autonomous agents from executing beyond approved operational limits.
+    threats:
+      - Excessive Agency
+      - Denial of Wallet
+      - Tool Abuse
+      - Denial of Service
+    protects:
+      - Runtime
+      - Tools
+      - Cost
+      - Availability
+    mitre:
+      atlas:
+        - AML.T0034
+        - AML.T0034.002
+        - AML.T0029
+      attack: []
+    mappingRationale: >-
+      Hard loop, step, time, and spend ceilings bound the blast radius of runaway
+      autonomous behaviour and recursive self-invocation. They directly frustrate
+      cost-harvesting and agentic resource-consumption attacks, which depend on
+      execution being unbounded, and preserve capacity for other workloads.
+
+  AGN-M3:
+    securityIntent: Give operators a reliable means to halt agent execution when it behaves unsafely or is under attack.
+    threats:
+      - Agent Hijacking
+      - Excessive Agency
+      - Tool Abuse
+      - Denial of Wallet
+    protects:
+      - Runtime
+      - Tools
+      - Cost
+      - Availability
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0053
+        - AML.T0034.002
+      attack: []
+    mappingRationale: >-
+      A tested kill switch converts an ongoing compromise into a bounded incident
+      by stopping tool invocation and resource consumption mid-run. It is a
+      response control, so it limits impact and duration rather than preventing
+      initial access.
+
+  AGN-M4:
+    securityIntent: Ensure agent-to-agent handoffs authenticate the peer and carry only scoped, least-privilege capabilities.
+    threats:
+      - Identity Spoofing
+      - Agent Hijacking
+      - Privilege Escalation
+      - Unauthorized Tool Use
+    protects:
+      - Identity
+      - Tools
+      - External Systems
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0073
+        - AML.T0012
+      attack:
+        - T1078
+    mappingRationale: >-
+      Authenticating the peer agent prevents an attacker-controlled or spoofed
+      agent from being trusted inside a workflow. Scoping the delegated capability
+      stops privilege from accumulating as a task is handed between agents.
+
+  AGN-R1:
+    securityIntent: Detect conflicting or policy-violating agent goals before a plan is allowed to execute.
+    threats:
+      - Excessive Agency
+      - Hallucinated Actions
+      - Prompt Injection
+    protects:
+      - Runtime
+      - External Systems
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0051
+        - AML.T0051.001
+      attack: []
+    mappingRationale: >-
+      Evaluating the plan against policy before execution catches objectives that
+      were injected through retrieved content or that conflict with the agent's
+      charter. Because the check runs before any side effect, an injected goal is
+      rejected rather than acted on.
+
+  AGN-R2:
+    securityIntent: Validate new agent behaviour in an isolated environment before it can act on production systems.
+    threats:
+      - Excessive Agency
+      - Unsafe Code Execution
+      - Hallucinated Actions
+      - Tool Abuse
+    protects:
+      - Runtime
+      - External Systems
+      - Data
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0050
+        - AML.T0102
+      attack: []
+    mappingRationale: >-
+      Sandboxed rehearsal surfaces destructive or malformed command generation
+      while the effects are contained. It reduces the chance that an unsafe
+      behaviour is first observed against production systems.
+
+  AGN-R3:
+    securityIntent: Establish accountable ownership for every production agent across the teams that operate it.
+    threats:
+      - Shadow Agents
+      - Excessive Agency
+    protects:
+      - Runtime
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Named responsibility ensures agent risk decisions and incident response have
+      an owner who can act. This is an organizational accountability control with
+      no direct adversary technique mapping.
+
+  # ------------------------------------------------------------ ai-security --
+  SEC-M1:
+    securityIntent: Prevent untrusted model input from being treated as an authorization decision for privileged actions.
+    threats:
+      - Prompt Injection
+      - Privilege Escalation
+      - Excessive Agency
+      - Unauthorized Tool Use
+    protects:
+      - Runtime
+      - Tools
+      - External Systems
+      - Identity
+    mitre:
+      atlas:
+        - AML.T0051
+        - AML.T0051.000
+        - AML.T0051.001
+        - AML.T0054
+        - AML.T0053
+      attack: []
+    mappingRationale: >-
+      Direct and indirect prompt injection only produces impact when model output
+      is trusted to authorize a privileged operation. Enforcing authorization
+      server-side, independently of the model, removes the injected instruction's
+      path to a privileged effect, and contains jailbreaks for the same reason.
+
+  SEC-M2:
+    securityIntent: Ensure model output cannot cause side effects until it has been validated against an explicit schema or policy.
+    threats:
+      - Prompt Injection
+      - Unsafe Code Execution
+      - Hallucinated Actions
+      - Tool Abuse
+      - Harmful Content Generation
+    protects:
+      - Runtime
+      - External Systems
+      - Data
+      - Users
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0051.001
+        - AML.T0067
+        - AML.T0077
+        - AML.T0102
+        - AML.T0050
+      attack:
+        - T1059
+    mappingRationale: >-
+      Schema validation and policy filtering break the link between manipulated
+      model output and the downstream executor that acts on it. This blunts
+      rendering and trusted-output-component manipulation, and prevents generated
+      malicious commands from reaching an interpreter unchecked.
+
+  SEC-M3:
+    securityIntent: Prevent releases that regress the system's resistance to jailbreak, abuse, and injection.
+    threats:
+      - Prompt Injection
+      - Jailbreak
+      - Harmful Content Generation
+      - Data Exfiltration
+    protects:
+      - Models
+      - Prompts
+      - Users
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0051
+        - AML.T0054
+        - AML.T0043
+        - AML.T0068
+      attack: []
+    mappingRationale: >-
+      Pre-release adversarial testing detects injection and jailbreak regressions
+      before customers are exposed to them. Covering obfuscated and crafted
+      adversarial inputs is what makes the gate meaningful rather than nominal.
+      It is a release gate, not a runtime defence.
+
+  SEC-M4:
+    securityIntent: Prevent the model and agent path from becoming an unrestricted proxy into internal systems and networks.
+    threats:
+      - Data Exfiltration
+      - Privilege Escalation
+      - Prompt Injection
+      - Tool Abuse
+    protects:
+      - Network
+      - Infrastructure
+      - External Systems
+      - APIs
+      - Data
+    mitre:
+      atlas:
+        - AML.T0025
+        - AML.T0086
+        - AML.T0072
+      attack:
+        - T1090
+        - T1041
+        - T1567
+    mappingRationale: >-
+      Egress and identity boundaries constrain where a compromised model path can
+      send data or open a connection. This directly limits exfiltration over cyber
+      means and via agent tool invocation and denies reverse-shell callbacks. It
+      bounds reach; it does not prevent the initial injection.
+
+  SEC-R1:
+    securityIntent: Validate defences against multi-turn and retrieval-borne indirect prompt injection.
+    threats:
+      - Prompt Injection
+      - Memory Poisoning
+      - Data Exfiltration
+      - Tool Abuse
+    protects:
+      - Context
+      - Memory
+      - Tools
+      - Data
+    mitre:
+      atlas:
+        - AML.T0051.001
+        - AML.T0051.002
+        - AML.T0070
+        - AML.T0071
+        - AML.T0066
+        - AML.T0094
+      attack: []
+    mappingRationale: >-
+      Indirect injection arrives through retrieved or tool-sourced content rather
+      than the user turn, so single-turn testing misses it entirely. Exercising
+      RAG and MCP paths surfaces poisoned-retrieval and delayed-trigger techniques
+      before release.
+
+  SEC-R2:
+    securityIntent: Prevent malicious or unsafe multimodal payloads from reaching the model or downstream systems.
+    threats:
+      - Prompt Injection
+      - Harmful Content Generation
+      - Unsafe Code Execution
+      - Supply Chain Compromise
+    protects:
+      - Models
+      - Context
+      - Runtime
+      - Users
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0051
+        - AML.T0043
+        - AML.T0068
+        - AML.T0011
+      attack: []
+    mappingRationale: >-
+      Images, audio, and documents can carry obfuscated instructions or adversarial
+      perturbations that text-only filters never see. Scanning before ingest
+      removes that delivery channel and blocks malware embedded in uploaded files.
+
+  SEC-R3:
+    securityIntent: Detect attempts to exfiltrate sensitive data through AI request and response paths.
+    threats:
+      - Data Exfiltration
+      - Sensitive Information Disclosure
+      - Secret Leakage
+      - Prompt Injection
+    protects:
+      - Data
+      - Secrets
+      - Context
+      - Logs
+    mitre:
+      atlas:
+        - AML.T0024
+        - AML.T0057
+        - AML.T0056
+        - AML.T0025
+        - AML.T0086
+      attack:
+        - T1041
+        - T1567
+    mappingRationale: >-
+      Monitoring the model path detects inference-API and agent-tool data egress
+      that conventional DLP does not observe, because the data leaves as generated
+      text rather than as a file transfer. The control is detective, so it
+      shortens dwell time rather than preventing the attempt.
+
+  # --------------------------------------------------------- authentication --
+  AUTHN-M1:
+    securityIntent: Ensure no production AI endpoint serves an unauthenticated caller.
+    threats:
+      - Identity Spoofing
+      - Denial of Wallet
+      - Model Theft
+      - Data Exfiltration
+    protects:
+      - APIs
+      - Identity
+      - Models
+      - Data
+      - Cost
+    mitre:
+      atlas:
+        - AML.T0040
+        - AML.T0096
+        - AML.T0024
+        - AML.T0024.002
+        - AML.T0034
+      attack: []
+    mappingRationale: >-
+      An unauthenticated inference endpoint hands an adversary the API access that
+      most ATLAS attack chains require first. Requiring authentication removes free
+      model-extraction and cost-harvesting capability and makes remaining abuse
+      attributable to a principal.
+
+  AUTHN-M2:
+    securityIntent: Ensure every service-to-service and MCP connection proves a strong machine identity rather than a shared static secret.
+    threats:
+      - Identity Spoofing
+      - Privilege Escalation
+      - Unauthorized Tool Use
+      - Supply Chain Compromise
+    protects:
+      - Identity
+      - Tools
+      - APIs
+      - Network
+    mitre:
+      atlas:
+        - AML.T0012
+        - AML.T0073
+        - AML.T0074
+        - AML.T0091
+        - AML.T0091.000
+      attack:
+        - T1078
+        - T1550
+        - T1550.001
+    mappingRationale: >-
+      Mutual, cryptographically verifiable machine identity stops an attacker from
+      presenting a stolen static token as a legitimate service or MCP server. It
+      closes the valid-accounts and alternate-authentication-material paths between
+      AI components.
+
+  AUTHN-M3:
+    securityIntent: Prevent takeover of AI control planes through compromised administrator credentials.
+    threats:
+      - Identity Spoofing
+      - Privilege Escalation
+      - Insider Misuse
+      - Supply Chain Compromise
+    protects:
+      - Identity
+      - Infrastructure
+      - Models
+      - Prompts
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0012
+        - AML.T0081
+      attack:
+        - T1078
+        - T1078.004
+        - T1098
+        - T1556
+    mappingRationale: >-
+      Control-plane admin access lets an adversary change model pins, prompts, and
+      agent configuration directly, bypassing every model-layer defence at once.
+      Phishing-resistant MFA denies the valid-accounts path that these techniques
+      depend on.
+
+  AUTHN-M4:
+    securityIntent: Preserve the end user's identity through agent and tool hops so downstream authorization is evaluated against the real principal.
+    threats:
+      - Privilege Escalation
+      - Identity Spoofing
+      - Unauthorized Tool Use
+      - Data Exfiltration
+    protects:
+      - Identity
+      - Users
+      - Tools
+      - Data
+      - External Systems
+    mitre:
+      atlas:
+        - AML.T0091
+        - AML.T0053
+        - AML.T0086
+      attack:
+        - T1078
+        - T1548
+        - T1550
+    mappingRationale: >-
+      When an agent collapses to a single service identity, every user inherits the
+      agent's privilege and cross-tenant reads become invisible to downstream
+      checks. Propagating the end-user principal keeps those checks meaningful and
+      prevents confused-deputy escalation through tool chains.
+
+  AUTHN-R1:
+    securityIntent: Limit the useful lifetime of agent and tool credentials so leaked material expires quickly.
+    threats:
+      - Secret Leakage
+      - Identity Spoofing
+      - Privilege Escalation
+      - Data Exfiltration
+    protects:
+      - Secrets
+      - Identity
+      - Tools
+      - APIs
+    mitre:
+      atlas:
+        - AML.T0055
+        - AML.T0083
+        - AML.T0098
+        - AML.T0082
+      attack:
+        - T1552
+        - T1552.001
+        - T1078
+    mappingRationale: >-
+      Prompts, agent configuration, and tool definitions are routinely harvested,
+      so any credential placed there should be treated as already disclosed.
+      Short-lived, narrowly scoped tokens shrink the window in which harvested
+      credentials remain usable.
+
+  AUTHN-R2:
+    securityIntent: Ensure self-hosted inference runtimes authenticate as attested workloads rather than with embedded static secrets.
+    threats:
+      - Identity Spoofing
+      - Secret Leakage
+      - Privilege Escalation
+    protects:
+      - Identity
+      - Infrastructure
+      - Models
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0012
+        - AML.T0055
+      attack:
+        - T1078
+        - T1552
+    mappingRationale: >-
+      Workload identity removes long-lived secrets from inference hosts and binds
+      access to an attested runtime. An attacker who reaches the host therefore
+      cannot lift a static key and reuse it elsewhere.
+
+  # ---------------------------------------------------------- authorization --
+  AUTHZ-M1:
+    securityIntent: Ensure every AI feature, tool call, and retrieval is authorized server-side and never by model output alone.
+    threats:
+      - Privilege Escalation
+      - Unauthorized Tool Use
+      - Data Exfiltration
+      - Prompt Injection
+      - Excessive Agency
+    protects:
+      - Tools
+      - Data
+      - APIs
+      - External Systems
+      - Identity
+    mitre:
+      atlas:
+        - AML.T0051
+        - AML.T0053
+        - AML.T0085
+        - AML.T0085.000
+        - AML.T0086
+      attack:
+        - T1078
+        - T1548
+    mappingRationale: >-
+      Server-side authorization makes an injected or hallucinated instruction
+      insufficient on its own to reach data or tools. It is the control that most
+      reliably converts a successful prompt injection into a denied request.
+
+  AUTHZ-M2:
+    securityIntent: Prevent one tenant's data, memory, or retrieval context from reaching another tenant.
+    threats:
+      - Unauthorized Memory Access
+      - Data Exfiltration
+      - Sensitive Information Disclosure
+      - Privilege Escalation
+    protects:
+      - Data
+      - Memory
+      - Context
+      - Users
+    mitre:
+      atlas:
+        - AML.T0085
+        - AML.T0085.000
+        - AML.T0036
+        - AML.T0057
+      attack:
+        - T1213
+        - T1530
+    mappingRationale: >-
+      Vector stores and agent memory are commonly shared substrates where tenant
+      filters are applied late or inconsistently. Tested isolation prevents the
+      cross-tenant retrieval and memory reads that would otherwise leak regulated
+      data into another customer's context.
+
+  AUTHZ-M3:
+    securityIntent: Constrain what an agent identity is permitted to do so that a compromised agent has limited reach.
+    threats:
+      - Privilege Escalation
+      - Excessive Agency
+      - Agent Hijacking
+      - Data Exfiltration
+      - Tool Abuse
+    protects:
+      - Identity
+      - Tools
+      - Data
+      - External Systems
+      - Infrastructure
+    mitre:
+      atlas:
+        - AML.T0012
+        - AML.T0053
+        - AML.T0086
+      attack:
+        - T1078
+        - T1098
+    mappingRationale: >-
+      Agent identities accumulate broad permissions because scoping each tool is
+      more work than granting a wide role. Least-privilege roles cap the blast
+      radius when an agent is hijacked, so a successful injection yields limited
+      rather than administrative reach.
+
+  AUTHZ-M4:
+    securityIntent: Enforce attribute-based restrictions so sensitive document classes cannot enter retrieval or context without authorization.
+    threats:
+      - Data Exfiltration
+      - Sensitive Information Disclosure
+      - Unauthorized Memory Access
+      - Prompt Injection
+    protects:
+      - Data
+      - Context
+      - Users
+    mitre:
+      atlas:
+        - AML.T0085.000
+        - AML.T0036
+        - AML.T0064
+        - AML.T0057
+      attack:
+        - T1213
+    mappingRationale: >-
+      Coarse index-level permissions let a single over-broad query surface
+      regulated documents. Attribute-based controls evaluate classification and
+      clearance per document, keeping restricted classes out of the retrieved
+      context in the first place.
+
+  AUTHZ-R1:
+    securityIntent: Express tool and model access rules as reviewable, testable code rather than ad hoc configuration.
+    threats:
+      - Privilege Escalation
+      - Unauthorized Tool Use
+      - Excessive Agency
+      - Configuration Drift
+    protects:
+      - Tools
+      - Models
+      - Identity
+      - Runtime
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Codified policy makes authorization decisions consistent, diffable, and
+      testable across environments, removing the silent drift that produces
+      over-permissive tool access. Its contribution is assurance quality; the
+      techniques it ultimately blocks are those already mapped under AUTHZ-M1.
+
+  AUTHZ-R2:
+    securityIntent: Detect and remove privilege that high-privilege agent identities accumulate over time.
+    threats:
+      - Privilege Escalation
+      - Excessive Agency
+      - Insider Misuse
+      - Shadow Agents
+    protects:
+      - Identity
+      - Tools
+      - Data
+    mitre:
+      atlas:
+        - AML.T0012
+      attack:
+        - T1078
+        - T1098
+    mappingRationale: >-
+      Agent entitlements grow as new tools are added and are rarely revoked when
+      those tools fall out of use. Periodic recertification removes dormant
+      privilege that would otherwise be available to whoever compromises the agent
+      identity.
+
+  # ------------------------------------------------------ change-management --
+  CHG-M1:
+    securityIntent: Guarantee that a known-good prompt and model state can be restored after a harmful or compromised change.
+    threats:
+      - Configuration Drift
+      - Data and Model Poisoning
+      - Denial of Service
+      - Repudiation
+    protects:
+      - Prompts
+      - Models
+      - Availability
+      - Audit Trail
+    mitre:
+      atlas:
+        - AML.T0018
+        - AML.T0031
+        - AML.T0076
+      attack: []
+    mappingRationale: >-
+      Retained prior versions turn a poisoned or corrupted artifact change into a
+      recoverable event rather than a prolonged outage. This is a recovery
+      capability: it shortens time to restore, and does not prevent the
+      manipulation itself.
+
+  CHG-M2:
+    securityIntent: Ensure the responder on shift can actually reverse a harmful AI change under incident conditions.
+    threats:
+      - Denial of Service
+      - Harmful Content Generation
+      - Configuration Drift
+    protects:
+      - Prompts
+      - Models
+      - Users
+      - Availability
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      A documented, on-call-operable rollback shortens time to containment for
+      safety and quality incidents. It is an operational readiness control with no
+      direct adversary technique mapping.
+
+  CHG-M3:
+    securityIntent: Verify that the rollback capability actually works before it is needed in an incident.
+    threats:
+      - Denial of Service
+      - Configuration Drift
+    protects:
+      - Prompts
+      - Models
+      - Availability
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Untested rollback paths frequently fail at the moment of use, when stale
+      artifacts or missing permissions are discovered under pressure. Drills are an
+      assurance activity with no adversary technique mapping.
+
+  CHG-R1:
+    securityIntent: Reduce time-to-recovery by making rollback a single low-error operation.
+    threats:
+      - Denial of Service
+      - Harmful Content Generation
+      - Configuration Drift
+    protects:
+      - Prompts
+      - Models
+      - Availability
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Fewer manual steps mean faster and more reliable containment during a live
+      incident. The benefit is recovery speed; no adversary technique maps directly.
+
+  CHG-R2:
+    securityIntent: Allow new agent behaviour to be disabled instantly without a redeploy.
+    threats:
+      - Excessive Agency
+      - Tool Abuse
+      - Harmful Content Generation
+      - Denial of Wallet
+    protects:
+      - Runtime
+      - Tools
+      - Cost
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Runtime flags let operators disable a misbehaving agent behaviour in seconds
+      rather than through a release cycle. The security value is containment speed;
+      the techniques involved are mapped under AGN-M3.
+
+  CHG-R3:
+    securityIntent: Automatically revert AI releases that degrade quality or safety beyond agreed thresholds.
+    threats:
+      - Harmful Content Generation
+      - Misinformation
+      - Denial of Service
+    protects:
+      - Users
+      - Availability
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Automated reversion limits user exposure to a bad release without waiting for
+      a human to notice. It responds to quality signals rather than to adversary
+      behaviour.
+
+  DEP-M1:
+    securityIntent: Ensure prompts, models, and tools reach production only through a reviewed promotion path.
+    threats:
+      - Supply Chain Compromise
+      - Configuration Drift
+      - Data and Model Poisoning
+      - Insider Misuse
+    protects:
+      - Models
+      - Prompts
+      - Tools
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0010
+      attack:
+        - T1195
+    mappingRationale: >-
+      A single controlled promotion path removes the side channels through which
+      unreviewed models, prompts, or tools enter production. It is the enforcement
+      point at which supply-chain checks can be applied consistently rather than
+      per team.
+
+  DEP-M2:
+    securityIntent: Maintain an attributable record of every production AI artifact change.
+    threats:
+      - Repudiation
+      - Insider Misuse
+      - Configuration Drift
+      - Supply Chain Compromise
+    protects:
+      - Audit Trail
+      - Logs
+      - Models
+      - Prompts
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Attributable change records make unauthorized or unreviewed production
+      changes detectable and support post-incident reconstruction. The value is
+      forensic and accountability-based rather than preventive.
+
+  DEP-M3:
+    securityIntent: Make AI infrastructure and configuration reviewable and reproducible rather than manually mutated.
+    threats:
+      - Configuration Drift
+      - Privilege Escalation
+      - Insider Misuse
+    protects:
+      - Infrastructure
+      - Runtime
+      - Network
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Declarative configuration makes over-permissive or drifted settings visible
+      in review and reproducible across environments. It is a hygiene control that
+      enables other checks rather than blocking a specific technique.
+
+  DEP-R1:
+    securityIntent: Limit the population exposed to a new AI change until it is proven healthy.
+    threats:
+      - Harmful Content Generation
+      - Misinformation
+      - Denial of Service
+    protects:
+      - Users
+      - Availability
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Progressive exposure bounds how many users a regression can affect and
+      provides an early signal to halt the rollout. No adversary technique maps
+      directly.
+
+  DEP-R2:
+    securityIntent: Ensure the models and tools validated in test are the ones actually serving production traffic.
+    threats:
+      - Configuration Drift
+      - Supply Chain Compromise
+      - Unauthorized Tool Use
+    protects:
+      - Models
+      - Tools
+      - Runtime
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Parity checks catch the common failure where production silently runs a
+      different model pin or tool catalog than the one that was evaluated. The
+      benefit is that evaluation evidence stays valid for what actually serves
+      traffic.
+
+  DEP-R3:
+    securityIntent: Prevent inconsistent or partially migrated retrieval indexes from serving production traffic.
+    threats:
+      - Vector and Embedding Weaknesses
+      - Misinformation
+      - Denial of Service
+    protects:
+      - Data
+      - Context
+      - Availability
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Mixed embedding versions produce silently degraded retrieval that error rates
+      do not reveal. Automated migration keeps index state consistent; the concern
+      is correctness rather than an adversary technique.
+
+  # ------------------------------------------------------------- compliance --
+  CMP-M1:
+    securityIntent: Ensure the legal and regulatory obligations that apply to production AI are identified and owned.
+    threats:
+      - Repudiation
+      - Insider Misuse
+    protects:
+      - Audit Trail
+      - Users
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Obligations that have not been identified cannot be evidenced, tested, or
+      assigned. This is a governance precondition with no adversary technique
+      mapping.
+
+  CMP-M2:
+    securityIntent: Tie each in-scope AI obligation to the concrete evidence artifact that demonstrates it.
+    threats:
+      - Repudiation
+    protects:
+      - Audit Trail
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Mapping obligations to artifacts is what makes a compliance claim verifiable
+      rather than asserted. It is a documentation control with no adversary
+      technique mapping.
+
+  CMP-M3:
+    securityIntent: Preserve an immutable record of AI control-plane changes for detection and investigation.
+    threats:
+      - Repudiation
+      - Insider Misuse
+      - Privilege Escalation
+    protects:
+      - Audit Trail
+      - Logs
+      - Infrastructure
+    mitre:
+      atlas:
+        - AML.T0081
+        - AML.T0107
+      attack:
+        - T1070
+        - T1685
+    mappingRationale: >-
+      Retained, tamper-resistant control-plane logs stop an attacker from erasing
+      evidence of model, prompt, or agent configuration changes. They are the
+      primary detective source for unauthorized control-plane activity and the
+      reason defence-evasion attempts remain visible.
+
+  CMP-R1:
+    securityIntent: Test controls on a cadence and record the exceptions that testing reveals.
+    threats:
+      - Repudiation
+      - Configuration Drift
+    protects:
+      - Audit Trail
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Controls decay silently between audits, and untested controls are indistinguishable
+      from absent ones. Periodic testing with recorded exceptions keeps posture
+      claims honest; no adversary technique maps.
+
+  CMP-R2:
+    securityIntent: Give customers an accurate, published account of the AI controls in place.
+    threats:
+      - Repudiation
+    protects:
+      - Users
+      - Audit Trail
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Published control documentation gives customers a factual basis for their own
+      risk decisions and creates an accountable public statement of posture. It is
+      a transparency control with no adversary technique mapping.
+
+  CMP-R3:
+    securityIntent: Obtain independent verification of control effectiveness for the highest-capability systems.
+    threats:
+      - Repudiation
+      - Insider Misuse
+    protects:
+      - Audit Trail
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Self-assessment tends to overstate maturity, particularly for the systems
+      with the most at stake. Independent assessment corrects that bias; no
+      adversary technique maps.
+
+  # ---------------------------------------------------- context-engineering --
+  CTX-M1:
+    securityIntent: Bound context assembly so oversized or attacker-padded input cannot displace instructions or exhaust resources.
+    threats:
+      - Prompt Injection
+      - Denial of Service
+      - Denial of Wallet
+    protects:
+      - Context
+      - Prompts
+      - Cost
+      - Availability
+    mitre:
+      atlas:
+        - AML.T0046
+        - AML.T0029
+        - AML.T0034.001
+      attack: []
+    mappingRationale: >-
+      Explicit size ceilings and priority rules stop chaff or padded content from
+      crowding out system instructions and grounding facts. They also cap the token
+      cost and latency of any single request, limiting resource-exhaustion abuse.
+
+  CTX-M2:
+    securityIntent: Ensure content entering the context is attributed to a source and authorized for the requesting principal.
+    threats:
+      - Prompt Injection
+      - Data Exfiltration
+      - Unauthorized Memory Access
+      - Sensitive Information Disclosure
+    protects:
+      - Context
+      - Data
+      - Memory
+      - Users
+    mitre:
+      atlas:
+        - AML.T0051.001
+        - AML.T0070
+        - AML.T0071
+        - AML.T0066
+        - AML.T0085.000
+      attack:
+        - T1213
+    mappingRationale: >-
+      Indirect injection arrives as retrieved or tool-returned content that is
+      otherwise indistinguishable from trusted instruction. Labelling provenance
+      and enforcing access at inclusion time keeps unauthorized data out of context
+      and lets the model treat third-party content as data rather than instruction.
+
+  CTX-M3:
+    securityIntent: Prevent secrets and regulated data from entering model context without an explicit approved policy.
+    threats:
+      - Secret Leakage
+      - Sensitive Information Disclosure
+      - Data Exfiltration
+    protects:
+      - Secrets
+      - Data
+      - Context
+      - Prompts
+    mitre:
+      atlas:
+        - AML.T0057
+        - AML.T0024
+        - AML.T0082
+      attack:
+        - T1552
+    mappingRationale: >-
+      Data that never enters the context cannot be elicited by any prompt,
+      injection, or jailbreak. An explicit inclusion policy for secrets and
+      regulated classes is therefore the strongest available mitigation for
+      model-mediated disclosure.
+
+  CTX-R1:
+    securityIntent: Detect context saturation that degrades answer quality or signals abuse.
+    threats:
+      - Denial of Service
+      - Denial of Wallet
+      - Prompt Injection
+    protects:
+      - Context
+      - Cost
+      - Availability
+    mitre:
+      atlas:
+        - AML.T0046
+        - AML.T0034.001
+      attack: []
+    mappingRationale: >-
+      Sustained context saturation is both a quality failure and an indicator of
+      chaff or resource-intensive query abuse. Per-request budget telemetry is what
+      makes that pattern visible before it shows up as cost.
+
+  CTX-R2:
+    securityIntent: Ensure compaction and summarization do not silently discard facts that decisions depend on.
+    threats:
+      - Misinformation
+      - Hallucinated Actions
+    protects:
+      - Context
+      - Users
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Lossy summarization can drop the very constraint that made an answer correct,
+      producing confident and wrong output. Testing critical-fact retention keeps
+      compaction from becoming a silent correctness regression.
+
+  CTX-R3:
+    securityIntent: Make untrusted content structurally distinguishable from system instructions.
+    threats:
+      - Prompt Injection
+      - Agent Hijacking
+    protects:
+      - Context
+      - Prompts
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0051
+        - AML.T0051.001
+        - AML.T0068
+      attack: []
+    mappingRationale: >-
+      Injection exploits the absence of a boundary between instruction and data in
+      a flat prompt. Structured separation reduces the chance that embedded text is
+      followed as an instruction, though it does not eliminate it and must not be
+      relied on alone.
+
+  # ------------------------------------------------------ cost-optimization --
+  COST-M1:
+    securityIntent: Cap the financial and capacity impact of abusive or runaway AI usage.
+    threats:
+      - Denial of Wallet
+      - Denial of Service
+      - Excessive Agency
+    protects:
+      - Cost
+      - Availability
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0034
+        - AML.T0034.000
+        - AML.T0034.001
+        - AML.T0034.002
+        - AML.T0029
+      attack: []
+    mappingRationale: >-
+      Cost-harvesting attacks work by driving billable inference volume against a
+      system with no hard ceiling. Enforced spend and rate limits bound the loss
+      from excessive, resource-intensive, and agentic consumption, and stop one
+      workload from exhausting shared capacity.
+
+  COST-M2:
+    securityIntent: Detect abnormal AI spend early enough to intervene.
+    threats:
+      - Denial of Wallet
+      - Denial of Service
+    protects:
+      - Cost
+      - Availability
+    mitre:
+      atlas:
+        - AML.T0034
+        - AML.T0034.000
+      attack: []
+    mappingRationale: >-
+      Cost anomalies are frequently the first observable signal of automated abuse
+      or a runaway agent loop. Alerting on burn rate shortens the gap between onset
+      and containment; it complements rather than replaces the hard limits in
+      COST-M1.
+
+  COST-M3:
+    securityIntent: Prevent retry and loop logic from amplifying a single request into unbounded cost.
+    threats:
+      - Denial of Wallet
+      - Denial of Service
+      - Excessive Agency
+    protects:
+      - Cost
+      - Availability
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0034.001
+        - AML.T0034.002
+        - AML.T0029
+      attack: []
+    mappingRationale: >-
+      Unbounded retries and agent loops multiply the cost of every failure and can
+      be triggered deliberately by an attacker who induces failures. Bounded
+      policies cap the amplification factor available to both an adversary and a
+      defect.
+
+  COST-R1:
+    securityIntent: Reduce the cost and capacity impact of repeated identical requests.
+    threats:
+      - Denial of Wallet
+      - Denial of Service
+    protects:
+      - Cost
+      - Availability
+    mitre:
+      atlas:
+        - AML.T0034.000
+      attack: []
+    mappingRationale: >-
+      Caching absorbs high-volume repeated queries that would otherwise bill and
+      consume capacity on every call. Shared caches must respect tenancy, or the
+      control itself becomes a cross-tenant disclosure path.
+
+  COST-R2:
+    securityIntent: Reduce unit cost without silently degrading quality on low-risk tasks.
+    threats:
+      - Denial of Wallet
+      - Misinformation
+    protects:
+      - Cost
+      - Users
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Routing to cheaper models saves money only if the cheaper path is evaluated
+      to the same bar for the tasks it serves. This is an economic control; no
+      adversary technique maps.
+
+  COST-R3:
+    securityIntent: Keep AI unit economics under periodic review so structural cost drift is caught.
+    threats:
+      - Denial of Wallet
+    protects:
+      - Cost
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Per-request alerting catches spikes but not the slow drift in cost per unit
+      of value delivered. Periodic FinOps review addresses that; no adversary
+      technique maps.
+
+  # -------------------------------------------------------- data-governance --
+  DG-M1:
+    securityIntent: Establish accountable ownership and version control over the corpora that ground production answers.
+    threats:
+      - Data and Model Poisoning
+      - Memory Poisoning
+      - Misinformation
+    protects:
+      - Data
+      - Context
+    mitre:
+      atlas:
+        - AML.T0070
+        - AML.T0059
+        - AML.T0064
+      attack: []
+    mappingRationale: >-
+      An owned, versioned corpus makes unauthorized content changes attributable
+      and reversible, which is what turns RAG poisoning from a persistent
+      compromise into a recoverable one. Without versioning there is no baseline
+      against which dataset integrity erosion can be detected.
+
+  DG-M2:
+    securityIntent: Ensure data used for evaluation and fine-tuning comes from known, vetted sources.
+    threats:
+      - Data and Model Poisoning
+      - Supply Chain Compromise
+      - Misinformation
+    protects:
+      - Data
+      - Models
+    mitre:
+      atlas:
+        - AML.T0020
+        - AML.T0019
+        - AML.T0059
+        - AML.T0010
+      attack:
+        - T1195
+    mappingRationale: >-
+      Poisoned training and evaluation data is introduced through unvetted
+      third-party sources that look legitimate at ingest time. Documented
+      provenance and acceptance criteria create the checkpoint at which poisoned
+      or low-quality datasets can be rejected.
+
+  DG-M3:
+    securityIntent: Prevent unvetted feedback or memory from being promoted into content that shapes future answers.
+    threats:
+      - Memory Poisoning
+      - Data and Model Poisoning
+      - Misinformation
+    protects:
+      - Memory
+      - Data
+      - Context
+    mitre:
+      atlas:
+        - AML.T0080
+        - AML.T0080.000
+        - AML.T0070
+        - AML.T0031
+      attack: []
+    mappingRationale: >-
+      Automatic promotion of user feedback or session memory hands an attacker a
+      write path into the system's durable knowledge. Governing promotion forces
+      review before content can influence other users' answers, which is the
+      mechanism that makes context poisoning persistent.
+
+  DG-R1:
+    securityIntent: Detect stale or incomplete corpora before they degrade grounded answers.
+    threats:
+      - Misinformation
+      - Data and Model Poisoning
+    protects:
+      - Data
+      - Context
+    mitre:
+      atlas:
+        - AML.T0059
+      attack: []
+    mappingRationale: >-
+      Freshness and coverage telemetry surfaces silent index decay that no error
+      rate reports. Sharp unexplained changes in coverage are also an early
+      indicator of dataset integrity erosion.
+
+  DG-R2:
+    securityIntent: Detect divergence between offline and online pipelines that silently degrades results.
+    threats:
+      - Vector and Embedding Weaknesses
+      - Misinformation
+      - Configuration Drift
+    protects:
+      - Data
+      - Models
+      - Context
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Skew between training and serving pipelines produces degradation that
+      offline evaluation cannot reproduce, because the evaluated features are not
+      the served ones. This is a correctness control with no adversary technique
+      mapping.
+
+  DG-R3:
+    securityIntent: Document dataset purpose, source, and PII handling so downstream reuse is an informed decision.
+    threats:
+      - Data and Model Poisoning
+      - Sensitive Information Disclosure
+    protects:
+      - Data
+      - Audit Trail
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Dataset cards make source and PII handling explicit at the point where a
+      dataset is reused for a new purpose. This is documentation that supports
+      provenance decisions rather than blocking a technique.
+
+  # ----------------------------------------------------------- data-privacy --
+  PRI-M1:
+    securityIntent: Know which data classes reach models so sensitive classes can be handled under explicit rules.
+    threats:
+      - Sensitive Information Disclosure
+      - Data Exfiltration
+      - Secret Leakage
+    protects:
+      - Data
+      - Context
+      - Secrets
+      - Users
+    mitre:
+      atlas:
+        - AML.T0057
+        - AML.T0024
+      attack: []
+    mappingRationale: >-
+      Classification is the precondition for every downstream privacy control,
+      since unclassified flows cannot be restricted or redacted. Knowing which
+      classes reach the model bounds what LLM data leakage is capable of exposing.
+
+  PRI-M2:
+    securityIntent: Ensure data subject deletion and export actually reach AI memory, traces, and logs.
+    threats:
+      - Sensitive Information Disclosure
+      - Unauthorized Memory Access
+      - Repudiation
+    protects:
+      - Data
+      - Memory
+      - Logs
+      - Users
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      AI memory and trace stores are routinely missed by deletion tooling, leaving
+      regulated data live after an erasure request is marked complete. Executable
+      deletion and export paths close that gap; the driver is legal obligation
+      rather than an adversary technique.
+
+  PRI-M3:
+    securityIntent: Prevent regulated workloads from being processed outside their permitted jurisdiction.
+    threats:
+      - Sensitive Information Disclosure
+      - Data Exfiltration
+    protects:
+      - Data
+      - Network
+      - Users
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Provider fallback and multi-region routing can silently move regulated data
+      across borders during an incident, exactly when nobody is checking. Enforced
+      residency routing keeps processing inside the permitted boundary; the risk is
+      regulatory rather than adversarial.
+
+  PRI-R1:
+    securityIntent: Remove or tokenize high-sensitivity fields before they reach a model.
+    threats:
+      - Sensitive Information Disclosure
+      - Data Exfiltration
+      - Secret Leakage
+    protects:
+      - Data
+      - Secrets
+      - Context
+      - Users
+    mitre:
+      atlas:
+        - AML.T0057
+        - AML.T0024
+        - AML.T0025
+      attack: []
+    mappingRationale: >-
+      Redaction at the boundary means the model never holds the sensitive value, so
+      no prompt, injection, or jailbreak can elicit it. This is the most durable
+      available mitigation for model-mediated data leakage.
+
+  PRI-R2:
+    securityIntent: Ensure third-party model provider terms do not permit training on or over-retaining production data.
+    threats:
+      - Sensitive Information Disclosure
+    protects:
+      - Data
+      - Models
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Default provider terms may allow prompt and completion data to be retained or
+      used for training, creating disclosure entirely outside the organization's
+      technical control. Contract review is the only mechanism that constrains
+      this, so no technique maps.
+
+  PRI-R3:
+    securityIntent: Assess privacy and rights impact before a major AI feature reaches production.
+    threats:
+      - Sensitive Information Disclosure
+      - Bias and Discrimination
+    protects:
+      - Users
+      - Data
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      A structured impact assessment surfaces privacy and fairness risk while the
+      design can still change. It is a regulatory governance step with no adversary
+      technique mapping.
+
+  # ------------------------------------------------------------- evaluation --
+  EVL-M1:
+    securityIntent: Detect quality and safety regressions in critical journeys before they reach users.
+    threats:
+      - Misinformation
+      - Hallucinated Actions
+      - Harmful Content Generation
+    protects:
+      - Users
+      - Models
+      - Prompts
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Automated evaluation on change is what makes prompt and model updates
+      reversible, measured decisions rather than blind ones. It targets correctness
+      and safety regression; adversarial robustness is covered separately by
+      SEC-M3 and EVL-R1.
+
+  EVL-M2:
+    securityIntent: Ensure releases cannot proceed when quality or safety metrics fall below agreed minimums.
+    threats:
+      - Misinformation
+      - Harmful Content Generation
+      - Hallucinated Actions
+    protects:
+      - Users
+      - Models
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Evaluation without an enforced numeric threshold is advisory and routinely
+      overridden under delivery pressure. Hard gates make the release decision
+      deterministic; no adversary technique maps directly.
+
+  EVL-M3:
+    securityIntent: Observe real production outcomes, including safety refusals, rather than relying on pre-release testing alone.
+    threats:
+      - Harmful Content Generation
+      - Jailbreak
+      - Prompt Injection
+      - Misinformation
+    protects:
+      - Users
+      - Models
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0054
+        - AML.T0031
+      attack: []
+    mappingRationale: >-
+      Refusal-rate and task-failure telemetry is one of the few live indicators
+      that jailbreak techniques are succeeding at scale. It also surfaces gradual
+      output-quality erosion that offline suites miss. The mapping is detective;
+      these signals do not block the attempt.
+
+  EVL-M4:
+    securityIntent: Compare a candidate AI change against production behaviour before it serves users.
+    threats:
+      - Misinformation
+      - Harmful Content Generation
+      - Denial of Service
+    protects:
+      - Users
+      - Availability
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Shadow comparison exposes regressions under the real traffic distribution,
+      which curated suites do not reproduce. It reduces release risk; no adversary
+      technique maps.
+
+  EVL-R1:
+    securityIntent: Ensure adversarial robustness is measured on its own and not averaged away by aggregate quality scores.
+    threats:
+      - Prompt Injection
+      - Jailbreak
+      - Misinformation
+    protects:
+      - Models
+      - Prompts
+      - Users
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0043
+        - AML.T0051
+        - AML.T0054
+      attack: []
+    mappingRationale: >-
+      Adversarial cases are a small fraction of any blended suite, so a single
+      aggregate score can improve while robustness degrades. A dedicated
+      adversarial track keeps injection and jailbreak resistance visible as its own
+      release signal.
+
+  EVL-R2:
+    securityIntent: Apply human judgement to outputs on a cadence, where automated metrics cannot recognize the harm.
+    threats:
+      - Misinformation
+      - Harmful Content Generation
+      - Bias and Discrimination
+    protects:
+      - Users
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Automated metrics miss harms that require domain expertise to even recognize,
+      such as subtly wrong clinical or legal guidance. Sampled expert review
+      supplies that judgement; no adversary technique maps.
+
+  # --------------------------------------------------------- explainability --
+  EXP-M1:
+    securityIntent: Ensure grounded answers carry verifiable source attribution so claims can be checked.
+    threats:
+      - Misinformation
+      - Hallucinated Actions
+      - Prompt Injection
+    protects:
+      - Users
+      - Context
+      - Data
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0067
+        - AML.T0067.000
+        - AML.T0070
+        - AML.T0071
+      attack: []
+    mappingRationale: >-
+      Verifiable citations let users and reviewers check claims instead of trusting
+      fluent prose. This directly counters manipulation of trusted output
+      components such as fabricated citations, and makes poisoned or false RAG
+      entries traceable back to their source.
+
+  EXP-M2:
+    securityIntent: Make it possible to reconstruct how a specific production AI outcome was reached.
+    threats:
+      - Repudiation
+      - Prompt Injection
+      - Hallucinated Actions
+    protects:
+      - Audit Trail
+      - Logs
+      - Runtime
+      - Users
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      A reconstructable decision path is the basis of incident investigation and of
+      resolving disputes about an AI outcome. The capability is forensic: it
+      supports after-the-fact detection of injection or tool misuse rather than
+      preventing either.
+
+  EXP-M3:
+    securityIntent: Prevent explanation and rationale surfaces from becoming a disclosure channel.
+    threats:
+      - Sensitive Information Disclosure
+      - System Prompt Leakage
+      - Secret Leakage
+      - Data Exfiltration
+    protects:
+      - Secrets
+      - Data
+      - Prompts
+      - Context
+    mitre:
+      atlas:
+        - AML.T0056
+        - AML.T0057
+        - AML.T0069
+        - AML.T0069.002
+      attack: []
+    mappingRationale: >-
+      Rationale and citation surfaces frequently echo system prompt text or quote
+      documents the user is not authorized to read. Constraining explanation
+      content closes a channel that is actively used to extract system prompts and
+      leak unauthorized data.
+
+  EXP-R1:
+    securityIntent: Give users an intelligible reason for material automated decisions that affect them.
+    threats:
+      - Repudiation
+      - Bias and Discrimination
+      - Misinformation
+    protects:
+      - Users
+      - Audit Trail
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Explaining material automated decisions is what lets an affected user contest
+      one, and it is required outright in several regulated contexts. This is a
+      transparency obligation with no adversary technique mapping.
+
+  EXP-R2:
+    securityIntent: Map formal explainability obligations to the regulated features they apply to.
+    threats:
+      - Repudiation
+      - Bias and Discrimination
+    protects:
+      - Users
+      - Audit Trail
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Explainability requirements differ sharply by jurisdiction and feature, so a
+      single generic approach under- or over-delivers. Mapping them per feature
+      makes the obligation testable; no adversary technique maps.
+
+  EXP-R3:
+    securityIntent: Make the behavioural effect of a model or prompt change reviewable rather than inferred.
+    threats:
+      - Configuration Drift
+      - Misinformation
+    protects:
+      - Models
+      - Prompts
+      - Audit Trail
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      A textual diff of a prompt or a changed model pin says little about how
+      behaviour will actually shift. Counterfactual and change summaries give
+      reviewers the real delta; no adversary technique maps.
+
+  # ---------------------------------------------------------- human-approval --
+  HUM-M1:
+    securityIntent: Require a human decision before an AI system performs a high-impact or irreversible action.
+    threats:
+      - Excessive Agency
+      - Hallucinated Actions
+      - Prompt Injection
+      - Agent Hijacking
+      - Tool Abuse
+    protects:
+      - External Systems
+      - Data
+      - Users
+      - Runtime
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0053
+        - AML.T0101
+        - AML.T0086
+        - AML.T0051.001
+        - AML.T0048
+      attack:
+        - T1485
+    mappingRationale: >-
+      Human approval inserts an out-of-band decision that an injected instruction
+      cannot satisfy by itself. It is the last effective barrier before destructive
+      or irreversible tool invocations reach real systems, which is why it is
+      reserved for the inventoried high-impact action classes.
+
+  HUM-M2:
+    securityIntent: Record who approved each high-impact AI action, on what evidence, and with what outcome.
+    threats:
+      - Repudiation
+      - Insider Misuse
+      - Excessive Agency
+    protects:
+      - Audit Trail
+      - Logs
+      - Users
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Approval records establish accountability for actions an AI system took on a
+      human's authority. The value is forensic and accountability-based; no
+      adversary technique maps directly.
+
+  HUM-M3:
+    securityIntent: Ensure no alternate agent, API, or tool path can perform a gated action without approval.
+    threats:
+      - Privilege Escalation
+      - Excessive Agency
+      - Unauthorized Tool Use
+      - Tool Abuse
+    protects:
+      - External Systems
+      - Tools
+      - Data
+      - Runtime
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0053
+        - AML.T0086
+        - AML.T0101
+      attack: []
+    mappingRationale: >-
+      A gate enforced only in the primary UI is trivially evaded by calling the
+      underlying API or routing through a second agent. Enforcing approval at the
+      action boundary removes the bypass path that otherwise makes the control
+      cosmetic. The mapped techniques are the tool invocations the gate stands in
+      front of; the bypass itself is a control-design weakness rather than a named
+      technique.
+
+  HUM-M4:
+    securityIntent: Require two independent human authorizations before irreversible high-severity actions.
+    threats:
+      - Insider Misuse
+      - Excessive Agency
+      - Hallucinated Actions
+      - Agent Hijacking
+    protects:
+      - External Systems
+      - Data
+      - Users
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0101
+        - AML.T0048
+      attack:
+        - T1485
+    mappingRationale: >-
+      Dual control defeats both a single compromised approver and a single
+      manipulated agent path, because two independent principals must agree. It is
+      reserved for irreversible actions precisely because no recovery exists after
+      the fact.
+
+  HUM-R1:
+    securityIntent: Give approvers the context needed to make approval a real decision rather than a reflex.
+    threats:
+      - Excessive Agency
+      - Hallucinated Actions
+      - Prompt Injection
+      - Tool Abuse
+    protects:
+      - Users
+      - External Systems
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0053
+      attack: []
+    mappingRationale: >-
+      Approval without visible tool arguments and diffs degrades into
+      rubber-stamping, which nullifies the gate while leaving it nominally in
+      place. Showing what the tool will actually do restores the reviewer's ability
+      to catch a manipulated invocation.
+
+  HUM-R3:
+    securityIntent: Keep approval queues fast enough that teams do not route around the gate.
+    threats:
+      - Excessive Agency
+      - Insider Misuse
+    protects:
+      - Users
+      - Availability
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Slow approval queues push teams toward bypasses and blanket pre-approvals
+      that quietly erode the control. A queue SLA keeps the gate usable so it stays
+      in the path; no adversary technique maps.
+
+  # ------------------------------------------------------ incident-readiness --
+  INC-M1:
+    securityIntent: Ensure responders have prepared procedures for AI-specific incident classes.
+    threats:
+      - Prompt Injection
+      - Data Exfiltration
+      - Harmful Content Generation
+      - Agent Hijacking
+      - Denial of Service
+    protects:
+      - Users
+      - Data
+      - Availability
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      AI incidents such as leakage through model output or a misbehaving agent do
+      not fit conventional infrastructure playbooks, so responders improvise
+      exactly when speed matters. Prepared procedures reduce time to containment;
+      readiness itself maps to no adversary technique.
+
+  INC-M2:
+    securityIntent: Ensure on-call responders can actually stop AI activity during an incident.
+    threats:
+      - Agent Hijacking
+      - Excessive Agency
+      - Tool Abuse
+      - Data Exfiltration
+      - Denial of Wallet
+    protects:
+      - Runtime
+      - Tools
+      - Data
+      - Cost
+      - Availability
+    mitre:
+      atlas:
+        - AML.T0053
+        - AML.T0086
+        - AML.T0034.002
+      attack: []
+    mappingRationale: >-
+      Containment capability turns an active compromise into a bounded one by
+      cutting tool invocation and agent execution mid-incident. It limits impact
+      and exfiltration duration rather than preventing initial access.
+
+  INC-R1:
+    securityIntent: Page responders on safety and quality signals, not only on infrastructure health.
+    threats:
+      - Harmful Content Generation
+      - Jailbreak
+      - Misinformation
+    protects:
+      - Users
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0054
+      attack: []
+    mappingRationale: >-
+      Infrastructure-only alerting leaves safety and quality failures to be
+      discovered by customers. Paging on refusal-rate and safety-signal anomalies
+      gives responders an early indication that jailbreak or abuse is succeeding at
+      scale.
+
+  INC-R2:
+    securityIntent: Convert incident learning into owned, tracked control improvements.
+    threats:
+      - Repudiation
+    protects:
+      - Audit Trail
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Reviews reduce recurrence only when they produce owned actions that are
+      tracked to completion. This is a continual improvement control with no
+      adversary technique mapping.
+
+  INC-R3:
+    securityIntent: Define in advance when an AI-related event requires customer notification.
+    threats:
+      - Repudiation
+      - Sensitive Information Disclosure
+    protects:
+      - Users
+      - Audit Trail
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Notification criteria decided during an incident are decided badly and late.
+      Pre-agreed thresholds make disclosure consistent and defensible; no adversary
+      technique maps.
+
+  INC-R4:
+    securityIntent: Rehearse AI-specific incident response before a real event tests it.
+    threats:
+      - Prompt Injection
+      - Data Exfiltration
+      - Agent Hijacking
+    protects:
+      - Availability
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Tabletops validate that AI playbooks, containment authority, and escalation
+      paths work under time pressure. This is readiness assurance with no adversary
+      technique mapping.
+
+  # --------------------------------------------------------- infrastructure --
+  INF-M1:
+    securityIntent: Eliminate unauthenticated public exposure of AI data stores and control planes.
+    threats:
+      - Data Exfiltration
+      - Sensitive Information Disclosure
+      - Privilege Escalation
+      - Model Theft
+    protects:
+      - Infrastructure
+      - Network
+      - Data
+      - Memory
+      - Models
+    mitre:
+      atlas:
+        - AML.T0049
+        - AML.T0085
+        - AML.T0085.000
+        - AML.T0035
+        - AML.T0044
+      attack:
+        - T1190
+        - T1530
+    mappingRationale: >-
+      Exposed vector databases, model registries, and agent control planes are
+      harvested directly, without any model-layer attack being needed. Requiring
+      authenticated, non-public access removes this path to AI artifact collection
+      and full model access, which is among the most commonly exploited AI
+      exposures in practice.
+
+  INF-M2:
+    securityIntent: Bound the exposure window for known vulnerabilities in AI runtime environments.
+    threats:
+      - Privilege Escalation
+      - Unsafe Code Execution
+      - Supply Chain Compromise
+    protects:
+      - Infrastructure
+      - Runtime
+      - Models
+    mitre:
+      atlas:
+        - AML.T0049
+        - AML.T0105
+        - AML.T0106
+      attack:
+        - T1190
+        - T1068
+        - T1611
+    mappingRationale: >-
+      Inference servers and agent frameworks have a fast-moving vulnerability
+      surface with publicly available exploits. Enforced patching SLAs shorten the
+      window in which exploitation for privilege escalation, credential access, or
+      host escape is possible.
+
+  INF-M3:
+    securityIntent: Restrict outbound reachability from agent and tool runtimes to an approved set of destinations.
+    threats:
+      - Data Exfiltration
+      - Agent Hijacking
+      - Tool Abuse
+      - Supply Chain Compromise
+    protects:
+      - Network
+      - External Systems
+      - Data
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0025
+        - AML.T0086
+        - AML.T0072
+      attack:
+        - T1041
+        - T1567
+        - T1071
+    mappingRationale: >-
+      Egress allowlisting means a hijacked agent has nowhere to send data and no
+      channel on which to call home. It converts a successful injection into a
+      contained failure rather than a breach.
+
+  INF-M4:
+    securityIntent: Prevent one tenant on shared AI accelerators from reading or starving another.
+    threats:
+      - Data Exfiltration
+      - Unauthorized Memory Access
+      - Denial of Service
+    protects:
+      - Infrastructure
+      - Data
+      - Memory
+      - Availability
+    mitre:
+      atlas:
+        - AML.T0029
+      attack:
+        - T1499
+    mappingRationale: >-
+      Shared accelerator memory and scheduling can leak residual state between
+      workloads or let one workload exhaust capacity for the rest. Enforced
+      isolation and quotas prevent cross-tenant residue and denial of service
+      against co-tenants.
+
+  INF-R1:
+    securityIntent: Ensure only cryptographically verified AI artifacts are allowed to run in production.
+    threats:
+      - Supply Chain Compromise
+      - Data and Model Poisoning
+      - Unsafe Code Execution
+    protects:
+      - Models
+      - Infrastructure
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0010
+        - AML.T0058
+        - AML.T0018.002
+        - AML.T0076
+      attack:
+        - T1195
+        - T1195.002
+    mappingRationale: >-
+      Signature verification at deploy time blocks substituted or tampered models
+      and images, including weights carrying embedded malware. It is the
+      enforcement step that turns a provenance claim into an actual guarantee.
+
+  INF-R3:
+    securityIntent: Catch insecure infrastructure defaults before they are deployed.
+    threats:
+      - Configuration Drift
+      - Privilege Escalation
+      - Data Exfiltration
+    protects:
+      - Infrastructure
+      - Network
+      - Runtime
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Policy-checked declarative infrastructure catches public buckets, open
+      security groups, and permissive roles at review time rather than after
+      exposure. It is preventive hygiene that reduces the likelihood of the
+      exposures INF-M1 addresses.
+
+  # ------------------------------------------------------ memory-management --
+  MEM-M1:
+    securityIntent: Prevent AI memory from being read or influenced across tenant and user boundaries.
+    threats:
+      - Unauthorized Memory Access
+      - Data Exfiltration
+      - Memory Poisoning
+      - Sensitive Information Disclosure
+    protects:
+      - Memory
+      - Data
+      - Context
+      - Users
+    mitre:
+      atlas:
+        - AML.T0080
+        - AML.T0080.000
+        - AML.T0085
+        - AML.T0092
+      attack:
+        - T1213
+    mappingRationale: >-
+      Shared memory stores let one principal's content surface in another's
+      context, which is simultaneously a disclosure and a poisoning vector. Tested
+      isolation boundaries prevent cross-tenant memory reads and cross-user chat
+      history manipulation.
+
+  MEM-M2:
+    securityIntent: Ensure AI memory is retained only as long as policy allows and can actually be deleted.
+    threats:
+      - Sensitive Information Disclosure
+      - Unauthorized Memory Access
+      - Repudiation
+    protects:
+      - Memory
+      - Data
+      - Users
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Memory retained indefinitely expands the blast radius of any future
+      compromise and breaks deletion obligations. Executable retention limits
+      reduce the data available to an attacker; the primary driver is regulatory.
+
+  MEM-M3:
+    securityIntent: Ensure only authorized principals and validated content can write to durable AI memory.
+    threats:
+      - Memory Poisoning
+      - Data and Model Poisoning
+      - Prompt Injection
+      - Misinformation
+    protects:
+      - Memory
+      - Context
+      - Data
+      - Users
+    mitre:
+      atlas:
+        - AML.T0080
+        - AML.T0080.000
+        - AML.T0080.001
+        - AML.T0099
+      attack: []
+    mappingRationale: >-
+      Memory poisoning requires a write path, and unvalidated writes let injected
+      content persist and influence future sessions long after the original request
+      ends. Enforcing who and what may write is the primary preventive control
+      against durable context poisoning.
+
+  MEM-M4:
+    securityIntent: Make tampering with critical memory records detectable.
+    threats:
+      - Memory Poisoning
+      - Unauthorized Memory Access
+      - Repudiation
+    protects:
+      - Memory
+      - Data
+      - Audit Trail
+    mitre:
+      atlas:
+        - AML.T0080.000
+        - AML.T0092
+      attack:
+        - T1565
+    mappingRationale: >-
+      Signed memory records let the system detect modification that occurred after
+      the write-policy check, including direct changes to the underlying store.
+      Integrity protection is detective, so it complements rather than replaces
+      MEM-M3.
+
+  MEM-R1:
+    securityIntent: Verify that memory write and retrieval controls actually resist poisoning attempts.
+    threats:
+      - Memory Poisoning
+      - Prompt Injection
+      - Misinformation
+    protects:
+      - Memory
+      - Context
+      - Users
+    mitre:
+      atlas:
+        - AML.T0080
+        - AML.T0080.000
+        - AML.T0070
+      attack: []
+    mappingRationale: >-
+      Memory controls are easy to specify and easy to regress silently, because
+      normal traffic never exercises the boundary. Adversarial memory tests in the
+      eval suite keep poisoning resistance measured on every relevant change.
+
+  MEM-R3:
+    securityIntent: Prevent transient session content from becoming durable knowledge without an explicit promotion decision.
+    threats:
+      - Memory Poisoning
+      - Unauthorized Memory Access
+      - Misinformation
+    protects:
+      - Memory
+      - Context
+      - Data
+    mitre:
+      atlas:
+        - AML.T0080.000
+        - AML.T0080.001
+      attack: []
+    mappingRationale: >-
+      When working and durable memory share a store, anything said in a session
+      persists by default and can resurface for other users. A promotion boundary
+      confines thread-level poisoning to the session in which it occurred.
+
+  # ------------------------------------------------------- model-governance --
+  MOD-M1:
+    securityIntent: Ensure production behaviour comes from an explicitly chosen, evaluated model version.
+    threats:
+      - Supply Chain Compromise
+      - Configuration Drift
+      - Misinformation
+    protects:
+      - Models
+      - Runtime
+      - Users
+    mitre:
+      atlas:
+        - AML.T0109
+      attack: []
+    mappingRationale: >-
+      Floating aliases such as "latest" let a provider-side or registry-side change
+      alter production behaviour with no review and no evaluation. Pinning defeats
+      rug-pull style substitution and keeps evaluation evidence attached to the
+      artifact that actually serves traffic.
+
+  MOD-M2:
+    securityIntent: Require evaluation evidence before any model change is promoted to production.
+    threats:
+      - Misinformation
+      - Harmful Content Generation
+      - Data and Model Poisoning
+    protects:
+      - Models
+      - Users
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Requiring evaluation evidence stops unmeasured model swaps from reaching
+      users. This is deliberately not mapped to poisoning techniques: behavioural
+      evaluation does not reliably detect backdoored weights, which is why the
+      SCI-M1 provenance controls remain necessary.
+
+  MOD-R1:
+    securityIntent: Manage model and embedding deprecation before a provider withdrawal forces it.
+    threats:
+      - Configuration Drift
+      - Denial of Service
+    protects:
+      - Models
+      - Availability
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Unmanaged provider deprecations cause abrupt production failures when a
+      pinned model is withdrawn on the vendor's schedule. A sunset policy makes
+      migration planned rather than reactive; no adversary technique maps.
+
+  MOD-R2:
+    securityIntent: Grant each workload only the model capabilities it actually needs.
+    threats:
+      - Unsafe Code Execution
+      - Excessive Agency
+      - Prompt Injection
+      - Tool Abuse
+    protects:
+      - Models
+      - Runtime
+      - Tools
+      - Infrastructure
+    mitre:
+      atlas:
+        - AML.T0050
+        - AML.T0102
+        - AML.T0053
+      attack:
+        - T1059
+    mappingRationale: >-
+      Capabilities such as code execution, browsing, and file access turn a text
+      generator into an execution surface. Restricting them per workload means an
+      injection cannot reach an interpreter that was never enabled for that
+      workload.
+
+  MOD-R3:
+    securityIntent: Review the license and provenance of open-weight and fine-tuned models before adoption.
+    threats:
+      - Supply Chain Compromise
+      - Data and Model Poisoning
+    protects:
+      - Models
+      - Data
+    mitre:
+      atlas:
+        - AML.T0058
+        - AML.T0010
+      attack:
+        - T1195
+    mappingRationale: >-
+      Open-weight models from public hubs carry both licensing and poisoning risk
+      that is invisible at inference time. Provenance review is the checkpoint at
+      which published poisoned models can be rejected before they enter the
+      pipeline.
+
+  MOD-R4:
+    securityIntent: Maintain an accurate inventory of the models running in production and their intended use.
+    threats:
+      - Shadow Agents
+      - Configuration Drift
+      - Sensitive Information Disclosure
+    protects:
+      - Models
+      - Data
+      - Audit Trail
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      A model inventory is the precondition for pinning, residency enforcement, and
+      deprecation tracking, none of which can be applied to a model nobody knows
+      about. This is asset management with no direct adversary technique mapping.
+
+  # ---------------------------------------------------------- observability --
+  OBS-M1:
+    securityIntent: Make the full AI execution path observable end to end for detection and investigation.
+    threats:
+      - Repudiation
+      - Prompt Injection
+      - Tool Abuse
+      - Data Exfiltration
+    protects:
+      - Logs
+      - Audit Trail
+      - Runtime
+      - Tools
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Without linked traces, an injected instruction and the tool call it produced
+      appear as unrelated events in separate systems. End-to-end tracing is the
+      forensic substrate that makes AI attacks reconstructable, though it does not
+      block them.
+
+  OBS-M2:
+    securityIntent: Prevent observability pipelines from becoming a secondary store of sensitive data.
+    threats:
+      - Secret Leakage
+      - Sensitive Information Disclosure
+      - Data Exfiltration
+    protects:
+      - Logs
+      - Secrets
+      - Data
+      - Audit Trail
+    mitre:
+      atlas:
+        - AML.T0055
+        - AML.T0037
+      attack:
+        - T1552
+        - T1552.001
+    mappingRationale: >-
+      AI traces routinely capture full prompts, retrieved documents, and tool
+      arguments including credentials, then replicate them into log stores with far
+      broader access than the secrets manager. Redaction at ingest prevents
+      observability from becoming the softest credential target in the system.
+
+  OBS-R1:
+    securityIntent: Enable safe reproduction of failed AI interactions without exposing production data.
+    threats:
+      - Sensitive Information Disclosure
+      - Prompt Injection
+    protects:
+      - Logs
+      - Data
+      - Runtime
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Debugging AI failures requires replaying real inputs, which is otherwise done
+      by copying sensitive payloads into developer environments. A controlled
+      replay environment supports investigation while containing that exposure.
+
+  OBS-R2:
+    securityIntent: Turn observed production failures into evaluation cases.
+    threats:
+      - Misinformation
+      - Hallucinated Actions
+    protects:
+      - Logs
+      - Models
+      - Users
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Annotated traces close the loop between behaviour observed in production and
+      behaviour that is tested before release. This is a quality control with no
+      adversary technique mapping.
+
+  OBS-R3:
+    securityIntent: Present AI latency, error, and quality burn against SLOs in one place.
+    threats:
+      - Denial of Service
+      - Misinformation
+    protects:
+      - Availability
+      - Users
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Consolidated SLO dashboards let responders distinguish an AI quality problem
+      from an infrastructure one during an incident. This is an operational
+      visibility control with no adversary technique mapping.
+
+  OBS-R4:
+    securityIntent: Attribute AI consumption precisely enough to detect abuse and runaway usage.
+    threats:
+      - Denial of Wallet
+      - Excessive Agency
+    protects:
+      - Cost
+      - Logs
+    mitre:
+      atlas:
+        - AML.T0034
+        - AML.T0034.000
+      attack: []
+    mappingRationale: >-
+      Per-request, per-feature, and per-tenant attribution is what makes a
+      cost-harvesting pattern distinguishable from normal growth. It is the
+      detection layer beneath the hard limits in COST-M1.
+
+  # --------------------------------------------- organizational-governance --
+  ORG-M1:
+    securityIntent: Establish the organization's binding boundary for acceptable and prohibited AI use.
+    threats:
+      - Insider Misuse
+      - Harmful Content Generation
+      - Shadow Agents
+    protects:
+      - Users
+      - Audit Trail
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Without a stated policy there is no basis for declaring a use unacceptable or
+      for acting when someone crosses the line. This is foundational governance
+      with no adversary technique mapping.
+
+  ORG-R1:
+    securityIntent: Keep AI risk posture visible to the leadership that can fund and mandate remediation.
+    threats:
+      - Shadow Agents
+    protects:
+      - Audit Trail
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Periodic leadership review is what allocates the funding and authority needed
+      to close control gaps. This is organizational governance with no adversary
+      technique mapping.
+
+  ORG-R2:
+    securityIntent: Assign named owners to the APRF domains that matter for each production AI system.
+    threats:
+      - Shadow Agents
+      - Repudiation
+    protects:
+      - Audit Trail
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Controls without named owners decay because no one is accountable for their
+      upkeep. Ownership is an accountability control with no adversary technique
+      mapping.
+
+  ORG-R3:
+    securityIntent: Feed incidents and evaluation failures into a tracked improvement backlog.
+    threats:
+      - Repudiation
+    protects:
+      - Audit Trail
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      A backlog fed by real failures is what converts lessons into control changes
+      rather than documents. This is a continual improvement control with no
+      adversary technique mapping.
+
+  ORG-R4:
+    securityIntent: Record accepted control gaps with an owner and an expiry rather than leaving them implicit.
+    threats:
+      - Repudiation
+      - Insider Misuse
+    protects:
+      - Audit Trail
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Time-bounded, owned risk acceptance prevents indefinite silent gaps and forces
+      each exception back onto the agenda. This is governance accountability with no
+      adversary technique mapping.
+
+  ORG-R5:
+    securityIntent: Independently sample APRF evidence to confirm that claimed controls are real.
+    threats:
+      - Repudiation
+      - Insider Misuse
+    protects:
+      - Audit Trail
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Evidence that is never sampled tends to drift from what the system actually
+      does. Independent sampling keeps assessment results trustworthy; no adversary
+      technique maps.
+
+  # --------------------------------------------------------- performance-slo --
+  PERF-M1:
+    securityIntent: Define the availability and latency commitment for critical AI user journeys.
+    threats:
+      - Denial of Service
+    protects:
+      - Availability
+      - Users
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      SLOs define the baseline against which degradation, abuse impact, and
+      incident severity are measured. This is a reliability control with no
+      adversary technique mapping.
+
+  PERF-M2:
+    securityIntent: Expose latency, error, and AI quality metrics so degradation is measurable.
+    threats:
+      - Denial of Service
+      - Misinformation
+    protects:
+      - Availability
+      - Users
+      - Logs
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Metrics that are not emitted cannot be alerted on or investigated later.
+      Instrumentation is the prerequisite for PERF-M3; no adversary technique maps
+      directly.
+
+  PERF-M3:
+    securityIntent: Alert when SLO burn indicates the system is degrading beyond agreed limits.
+    threats:
+      - Denial of Service
+      - Denial of Wallet
+    protects:
+      - Availability
+      - Cost
+    mitre:
+      atlas:
+        - AML.T0029
+      attack: []
+    mappingRationale: >-
+      Sustained SLO burn is often the first visible symptom of resource-exhaustion
+      abuse against an AI endpoint. Alerting turns that into an actionable signal;
+      it is detective and does not itself restore capacity.
+
+  PERF-R1:
+    securityIntent: Use error budgets to slow release velocity when AI reliability is degrading.
+    threats:
+      - Denial of Service
+    protects:
+      - Availability
+      - Users
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Error budgets make the trade-off between shipping speed and reliability
+      explicit instead of implicit. This is a delivery governance control with no
+      adversary technique mapping.
+
+  PERF-R2:
+    securityIntent: Validate that the system withstands deliberately expensive prompts and agent loops.
+    threats:
+      - Denial of Service
+      - Denial of Wallet
+      - Excessive Agency
+    protects:
+      - Availability
+      - Cost
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0029
+        - AML.T0034.001
+        - AML.T0034.002
+        - AML.T0046
+      attack:
+        - T1499
+    mappingRationale: >-
+      Long-context and recursive agent workloads consume far more capacity per
+      request than typical traffic, which makes them efficient denial-of-service
+      and cost-harvesting vectors. Capacity testing against these shapes is what
+      establishes the limits that COST-M1 and AGN-M2 then enforce.
+
+  PERF-R3:
+    securityIntent: Measure streaming-specific latency so perceived responsiveness is not invisible to SLOs.
+    threats:
+      - Denial of Service
+    protects:
+      - Availability
+      - Users
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Aggregate request latency hides time-to-first-token and inter-token stalls
+      that dominate the streaming user experience. This is a reliability
+      measurement control with no adversary technique mapping.
+
+  PERF-R4:
+    securityIntent: Present AI operational metrics in near real time so degradation is seen as it happens.
+    threats:
+      - Denial of Service
+    protects:
+      - Availability
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Delayed dashboards extend time to detection during a live degradation. Near
+      real-time presentation shortens that gap; no adversary technique maps.
+
+  # ---------------------------------------------------- platform-engineering --
+  DX-M1:
+    securityIntent: Make the controlled route to production the easiest route, so teams do not build around it.
+    threats:
+      - Configuration Drift
+      - Shadow Agents
+      - Insider Misuse
+    protects:
+      - Runtime
+      - Infrastructure
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      When the compliant path is slower than the improvised one, teams route around
+      controls and create unmanaged deployments. A documented golden path is how
+      control coverage is achieved in practice; no adversary technique maps.
+
+  DX-M2:
+    securityIntent: Let builders detect control failures before merge rather than at release.
+    threats:
+      - Secret Leakage
+      - Identity Spoofing
+      - Configuration Drift
+    protects:
+      - Secrets
+      - Identity
+      - Runtime
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Shifting mandatory-control checks into local and CI workflows catches auth,
+      secret, and evaluation failures at the cheapest point to fix them. The
+      contribution is coverage and consistency; the specific techniques are mapped
+      on the underlying controls such as SEC2-R1.
+
+  DX-R1:
+    securityIntent: Make safe configuration the starting point for new agent, RAG, and MCP services.
+    threats:
+      - Configuration Drift
+      - Prompt Injection
+      - Secret Leakage
+    protects:
+      - Runtime
+      - Prompts
+      - Secrets
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Templates encode safe defaults so each new service does not re-derive them,
+      usually incorrectly and under time pressure. The security benefit is that
+      correct configuration is the default rather than an afterthought.
+
+  DX-R2:
+    securityIntent: Let builders run evaluations before opening a pull request.
+    threats:
+      - Misinformation
+      - Hallucinated Actions
+    protects:
+      - Models
+      - Prompts
+      - Users
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Fast inner-loop evaluation means quality problems are found by the author
+      rather than by the release gate or a customer. This is a developer experience
+      control with no adversary technique mapping.
+
+  DX-R3:
+    securityIntent: Measure whether the paved road is actually being used.
+    threats:
+      - Configuration Drift
+      - Shadow Agents
+    protects:
+      - Runtime
+      - Audit Trail
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Bypass rate is a direct measure of control coverage erosion, and a rising
+      rate means posture is degrading even while individual checks still pass. This
+      is a governance metric with no adversary technique mapping.
+
+  DX-R4:
+    securityIntent: Give the AI platform a named owner and a support channel so problems have somewhere to go.
+    threats:
+      - Shadow Agents
+    protects:
+      - Runtime
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      An unsupported platform is abandoned in favour of unmanaged alternatives.
+      Ownership and support keep teams on the controlled path; no adversary
+      technique maps.
+
+  # ------------------------------------------------------ prompt-engineering --
+  PRM-M1:
+    securityIntent: Make the exact prompt serving production identifiable, attributable, and immutable.
+    threats:
+      - Configuration Drift
+      - Repudiation
+      - Prompt Injection
+    protects:
+      - Prompts
+      - Audit Trail
+      - Runtime
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Unversioned prompts make it impossible to establish what instructions were in
+      force during an incident or to prove a change was reviewed. Versioning is the
+      precondition for rollback, evaluation attachment, and forensic
+      reconstruction.
+
+  PRM-M2:
+    securityIntent: Ensure prompt changes are reviewed and backed by evaluation evidence before release.
+    threats:
+      - Harmful Content Generation
+      - Prompt Injection
+      - Misinformation
+      - Insider Misuse
+    protects:
+      - Prompts
+      - Users
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Prompts carry security-relevant instructions, so an unreviewed edit can
+      silently delete a safety constraint with no code change and no deployment
+      signal. Review plus attached evaluation makes that change visible and
+      measurable before it reaches users.
+
+  PRM-M3:
+    securityIntent: Allow rollback to a prior prompt version without redeploying unrelated services.
+    threats:
+      - Harmful Content Generation
+      - Denial of Service
+      - Configuration Drift
+    protects:
+      - Prompts
+      - Users
+      - Availability
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Prompt rollback coupled to a full service deploy is too slow to be usable
+      during a live safety incident. Independent rollback keeps time to containment
+      within minutes; no adversary technique maps.
+
+  PRM-R1:
+    securityIntent: Keep secrets and personal data out of prompt source and templates.
+    threats:
+      - Secret Leakage
+      - System Prompt Leakage
+      - Sensitive Information Disclosure
+      - Prompt Injection
+    protects:
+      - Secrets
+      - Prompts
+      - Data
+    mitre:
+      atlas:
+        - AML.T0055
+        - AML.T0056
+        - AML.T0069.002
+      attack:
+        - T1552
+        - T1552.001
+    mappingRationale: >-
+      Anything hardcoded in a prompt is recoverable through system prompt
+      extraction and is usually committed to source control as well. Parameterizing
+      templates means a successful extraction yields a template rather than live
+      credentials or personal data.
+
+  PRM-R2:
+    securityIntent: Catch injection-prone and unsafe prompt constructs before they reach production.
+    threats:
+      - Prompt Injection
+      - Secret Leakage
+      - System Prompt Leakage
+    protects:
+      - Prompts
+      - Context
+      - Secrets
+    mitre:
+      atlas:
+        - AML.T0051
+        - AML.T0055
+      attack: []
+    mappingRationale: >-
+      Static analysis catches recurring anti-patterns such as unescaped
+      interpolation of untrusted content and embedded credentials. It is a cheap
+      preventive check that shrinks the injection surface introduced during prompt
+      authoring.
+
+  PRM-R3:
+    securityIntent: Measure the real impact of high-traffic prompt changes before full rollout.
+    threats:
+      - Harmful Content Generation
+      - Misinformation
+    protects:
+      - Prompts
+      - Users
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      A prompt change that improves curated evaluations can still degrade live
+      traffic that the suite does not represent. A/B and shadow evaluation catch
+      that before full exposure; no adversary technique maps.
+
+  # -------------------------------------------------- reliability-continuity --
+  REL-M1:
+    securityIntent: Prevent a slow or failing dependency from exhausting capacity or amplifying cost.
+    threats:
+      - Denial of Service
+      - Denial of Wallet
+      - Excessive Agency
+    protects:
+      - Availability
+      - Cost
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0029
+        - AML.T0034.001
+      attack: []
+    mappingRationale: >-
+      Without timeouts, a slow provider consumes connections and workers until the
+      whole service fails; without retry bounds, one failure multiplies into many
+      billable calls. Both limits cap the amplification available to an attacker who
+      can induce failures, as well as to ordinary defects.
+
+  REL-M2:
+    securityIntent: Keep critical user journeys functional when the AI path is unavailable.
+    threats:
+      - Denial of Service
+    protects:
+      - Availability
+      - Users
+    mitre:
+      atlas:
+        - AML.T0029
+      attack: []
+    mappingRationale: >-
+      A defined degraded mode keeps the journey working when the model path is
+      down, whether from a provider outage or a denial-of-service attempt. It
+      reduces the impact of the disruption rather than preventing it.
+
+  REL-M3:
+    securityIntent: Prevent tool-using workflows from reporting success when steps have silently failed.
+    threats:
+      - Hallucinated Actions
+      - Misinformation
+      - Excessive Agency
+    protects:
+      - External Systems
+      - Data
+      - Users
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Agents routinely narrate success for tool calls that actually errored,
+      leaving downstream state inconsistent and users misinformed. Verifying real
+      tool outcomes closes that false-success path; the failure mode is correctness
+      rather than an adversary technique.
+
+  REL-M4:
+    securityIntent: Ensure the artifacts required to restore AI service survive a destructive event.
+    threats:
+      - Denial of Service
+      - Data and Model Poisoning
+      - Supply Chain Compromise
+    protects:
+      - Availability
+      - Models
+      - Prompts
+      - Data
+    mitre:
+      atlas:
+        - AML.T0076
+      attack:
+        - T1485
+        - T1486
+    mappingRationale: >-
+      Prompts, model pins, tool catalogs, and indexes commonly fall outside
+      conventional backup scope, which leaves the AI service unrecoverable even
+      when the database is restored. Backing them up provides the recovery path
+      after model corruption, data destruction, or ransomware.
+
+  REL-M5:
+    securityIntent: Set explicit recovery time and recovery point objectives for business-critical AI services.
+    threats:
+      - Denial of Service
+    protects:
+      - Availability
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      RTO and RPO targets are what make backup and failover design decisions
+      testable rather than aspirational. This is continuity planning with no
+      adversary technique mapping.
+
+  REL-R1:
+    securityIntent: Stop a failing AI provider from cascading into total service failure.
+    threats:
+      - Denial of Service
+    protects:
+      - Availability
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0029
+      attack: []
+    mappingRationale: >-
+      Circuit breakers cut off a failing dependency before it consumes the caller's
+      resources, and bulkheads stop one workload from exhausting shared client
+      capacity. Together they limit the reach of both outages and
+      resource-exhaustion abuse.
+
+  REL-R2:
+    securityIntent: Remove single-provider dependency for critical AI journeys without lowering the quality bar.
+    threats:
+      - Denial of Service
+    protects:
+      - Availability
+      - Users
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Provider-level failover eliminates a single point of failure, but only counts
+      if the fallback path is evaluated to the same standard as the primary.
+      Fallback routing must also respect residency constraints or it becomes a
+      compliance exposure in its own right.
+
+  REL-R3:
+    securityIntent: Document how critical AI-dependent business processes continue when AI is unavailable.
+    threats:
+      - Denial of Service
+    protects:
+      - Availability
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Processes that quietly became AI-dependent have no manual fallback until
+      someone writes one down. Documented continuity options address that; no
+      adversary technique maps.
+
+  REL-R4:
+    securityIntent: Rehearse continuity, including full provider loss, before it is tested by a real outage.
+    threats:
+      - Denial of Service
+    protects:
+      - Availability
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Failover paths that are never exercised routinely fail on first real use.
+      Drills validate them; this is readiness assurance with no adversary technique
+      mapping.
+
+  REL-R5:
+    securityIntent: Deliberately exercise AI dependency failure modes in production-like conditions.
+    threats:
+      - Denial of Service
+    protects:
+      - Availability
+      - Runtime
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Chaos experiments reveal timeout, retry, and fallback defects that only
+      appear under real failure. This is resilience assurance with no adversary
+      technique mapping.
+
+  REL-R6:
+    securityIntent: Keep standby inference capacity ready where self-hosted models are business-critical.
+    threats:
+      - Denial of Service
+    protects:
+      - Availability
+      - Infrastructure
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Self-hosted accelerator capacity cannot be provisioned quickly during an
+      incident, so cold recovery can take hours. Warm standby shortens that; no
+      adversary technique maps.
+
+  REL-R7:
+    securityIntent: Back multi-provider continuity with contractual commitments, not just technical routing.
+    threats:
+      - Denial of Service
+      - Supply Chain Compromise
+    protects:
+      - Availability
+      - Models
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Technical failover does not help when the alternate provider will not supply
+      capacity, or when a vendor withdraws a model line entirely. Contractual
+      options address provider withdrawal and capacity denial; no adversary
+      technique maps.
+
+  # ---------------------------------------------------- safety-responsible-ai --
+  SAF-M1:
+    securityIntent: Define what constitutes unsafe output and behaviour for this specific product domain.
+    threats:
+      - Harmful Content Generation
+      - Misinformation
+      - Bias and Discrimination
+    protects:
+      - Users
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Generic safety filters miss domain-specific harms such as unlicensed medical,
+      legal, or financial guidance. A domain policy defines the harm boundary that
+      the automated gates in SAF-M2 then enforce; the policy itself maps to no
+      adversary technique.
+
+  SAF-M2:
+    securityIntent: Block releases that fail the organization's stated safety bar.
+    threats:
+      - Harmful Content Generation
+      - Jailbreak
+      - Misinformation
+      - Bias and Discrimination
+    protects:
+      - Users
+      - Models
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0054
+        - AML.T0048
+        - AML.T0048.003
+      attack: []
+    mappingRationale: >-
+      Safety gates stop a release that has lost jailbreak resistance or begun
+      producing harmful content from reaching users at all. They reduce the
+      likelihood of external and user harm originating from the deployed system.
+
+  SAF-M3:
+    securityIntent: Ensure users know when they are interacting with an AI system.
+    threats:
+      - Misinformation
+      - Identity Spoofing
+    protects:
+      - Users
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Users who believe they are speaking with a human calibrate trust differently
+      and may disclose more than they intend. Disclosure is a transparency
+      obligation, so the driver is regulatory rather than adversarial.
+
+  SAF-M4:
+    securityIntent: Measure disparate outcomes on high-stakes automated decision paths.
+    threats:
+      - Bias and Discrimination
+      - Harmful Content Generation
+    protects:
+      - Users
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      High-stakes automated decisions can produce systematically disparate outcomes
+      that aggregate accuracy metrics conceal entirely. Disparity evaluation makes
+      that visible; it is a responsible-AI obligation with no adversary technique
+      mapping.
+
+  SAF-R1:
+    securityIntent: Apply human judgement to safety edge cases that automated evaluation classifies poorly.
+    threats:
+      - Harmful Content Generation
+      - Bias and Discrimination
+      - Misinformation
+    protects:
+      - Users
+      - Safety
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Edge cases are exactly where automated safety classifiers are least reliable.
+      Sampled human review covers that gap; no adversary technique maps.
+
+  SAF-R2:
+    securityIntent: Test whether safety controls hold end to end, from jailbreak attempt through to real-world harm.
+    threats:
+      - Jailbreak
+      - Harmful Content Generation
+      - Prompt Injection
+    protects:
+      - Users
+      - Models
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0054
+        - AML.T0051
+        - AML.T0048.003
+      attack: []
+    mappingRationale: >-
+      Safety red teaming asks whether a bypassed guardrail actually produces harm,
+      which component-level filter tests never answer. It exercises the
+      jailbreak-to-user-harm chain that automated suites systematically
+      under-represent.
+
+  # ---------------------------------------------------------------- secrets --
+  SEC2-M1:
+    securityIntent: Keep production secrets out of prompts, source control, and notebooks.
+    threats:
+      - Secret Leakage
+      - Privilege Escalation
+      - Identity Spoofing
+      - Data Exfiltration
+    protects:
+      - Secrets
+      - Identity
+      - APIs
+      - Infrastructure
+    mitre:
+      atlas:
+        - AML.T0055
+        - AML.T0083
+        - AML.T0037
+      attack:
+        - T1552
+        - T1552.001
+        - T1078
+    mappingRationale: >-
+      Credentials embedded in prompts and agent configuration are recoverable
+      through prompt extraction and repository search, and they are almost never
+      rotated. Centralizing them in a secrets manager removes the unsecured-credential
+      path that these techniques depend on.
+
+  SEC2-M2:
+    securityIntent: Prevent secrets from being persisted into logs and traces.
+    threats:
+      - Secret Leakage
+      - Sensitive Information Disclosure
+      - Privilege Escalation
+    protects:
+      - Secrets
+      - Logs
+      - Audit Trail
+    mitre:
+      atlas:
+        - AML.T0055
+        - AML.T0037
+      attack:
+        - T1552
+        - T1552.001
+    mappingRationale: >-
+      AI traces capture tool arguments and headers where credentials commonly
+      appear, then copy them into log stores with much broader access. Redaction at
+      ingest prevents observability from becoming the easiest credential target in
+      the environment.
+
+  SEC2-M3:
+    securityIntent: Ensure AI credentials are narrowly scoped, rotatable, and never shipped to clients.
+    threats:
+      - Secret Leakage
+      - Denial of Wallet
+      - Privilege Escalation
+      - Identity Spoofing
+    protects:
+      - Secrets
+      - Identity
+      - APIs
+      - Cost
+    mitre:
+      atlas:
+        - AML.T0055
+        - AML.T0040
+        - AML.T0034
+      attack:
+        - T1552
+        - T1078
+    mappingRationale: >-
+      Provider keys embedded in mobile or browser clients are trivially extracted
+      and then used for free inference billed to the owner. Scoping and rotation
+      limit both the reach and the lifetime of any key that does escape.
+
+  SEC2-R1:
+    securityIntent: Detect committed secrets before they reach a shared repository.
+    threats:
+      - Secret Leakage
+      - Supply Chain Compromise
+    protects:
+      - Secrets
+      - Identity
+    mitre:
+      atlas:
+        - AML.T0055
+      attack:
+        - T1552
+        - T1552.001
+    mappingRationale: >-
+      Prompt templates, evaluation fixtures, and notebooks are common secret-leak
+      locations that default scanner configurations often exclude. Extending
+      scanning to those paths closes the gap before a credential becomes permanent
+      repository history.
+
+  SEC2-R2:
+    securityIntent: Constrain where a leaked runtime credential can actually be used from.
+    threats:
+      - Secret Leakage
+      - Data Exfiltration
+      - Privilege Escalation
+    protects:
+      - Secrets
+      - Network
+      - Data
+    mitre:
+      atlas:
+        - AML.T0025
+        - AML.T0055
+      attack:
+        - T1041
+        - T1567
+    mappingRationale: >-
+      Network and identity conditions on credential use mean a stolen token is not
+      usable from attacker-controlled infrastructure. This devalues any credential
+      that escapes the other secrets controls.
+
+  SEC2-R3:
+    securityIntent: Prevent secrets and sensitive data from being baked into models or published corpora.
+    threats:
+      - Secret Leakage
+      - Sensitive Information Disclosure
+      - Data and Model Poisoning
+    protects:
+      - Secrets
+      - Data
+      - Models
+    mitre:
+      atlas:
+        - AML.T0055
+        - AML.T0057
+        - AML.T0020
+      attack: []
+    mappingRationale: >-
+      Secrets present in fine-tuning data can be memorized and later emitted by the
+      model, at which point rotation is the only remedy and the model must be
+      retrained. Scanning before training or publication is the last point at which
+      that outcome can still be prevented.
+
+  # ----------------------------------------------------------- supply-chain --
+  SCI-M1:
+    securityIntent: Ensure production AI artifacts come from a verified source and have not been tampered with.
+    threats:
+      - Supply Chain Compromise
+      - Data and Model Poisoning
+      - Unsafe Code Execution
+    protects:
+      - Models
+      - Infrastructure
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0010
+        - AML.T0058
+        - AML.T0018.002
+        - AML.T0076
+        - AML.T0109
+      attack:
+        - T1195
+        - T1195.002
+    mappingRationale: >-
+      Model weights are executable artifacts that can carry embedded malware or
+      behavioural backdoors which evaluation will not surface. Verified provenance
+      and integrity is the only reliable control against substituted, poisoned, or
+      rug-pulled artifacts.
+
+  SCI-M2:
+    securityIntent: Ensure every external tool, MCP server, and plugin in production is known, pinned, and reviewed.
+    threats:
+      - Supply Chain Compromise
+      - Tool Abuse
+      - Unauthorized Tool Use
+      - Prompt Injection
+    protects:
+      - Tools
+      - External Systems
+      - Runtime
+      - Data
+    mitre:
+      atlas:
+        - AML.T0010.005
+        - AML.T0104
+        - AML.T0110
+        - AML.T0011.002
+        - AML.T0099
+        - AML.T0109
+      attack:
+        - T1195
+    mappingRationale: >-
+      MCP servers and agent plugins execute with the agent's privileges and can
+      silently redefine their own tool descriptions after installation. Inventory,
+      version pinning, and pre-production review counter poisoned and rug-pulled
+      tools, which are the primary agentic supply-chain techniques.
+
+  SCI-M3:
+    securityIntent: Block deployment of AI artifacts carrying known exploitable vulnerabilities.
+    threats:
+      - Supply Chain Compromise
+      - Unsafe Code Execution
+      - Privilege Escalation
+    protects:
+      - Infrastructure
+      - Runtime
+      - Models
+    mitre:
+      atlas:
+        - AML.T0010
+        - AML.T0049
+      attack:
+        - T1195
+        - T1190
+        - T1068
+    mappingRationale: >-
+      AI runtimes pull large, fast-moving dependency trees that include
+      deserialization-prone model loaders and inference servers. Scanning gates
+      keep known-vulnerable components out of production and shrink the exploitable
+      surface.
+
+  SCI-M4:
+    securityIntent: Enforce at the deployment boundary that only approved, signed AI artifacts can run.
+    threats:
+      - Supply Chain Compromise
+      - Data and Model Poisoning
+      - Insider Misuse
+    protects:
+      - Models
+      - Infrastructure
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0010
+        - AML.T0058
+        - AML.T0076
+      attack:
+        - T1195
+        - T1195.002
+    mappingRationale: >-
+      Provenance checks and scanning only reduce risk if the deploy path actually
+      refuses artifacts that fail them. Admission enforcement is what makes the
+      preceding supply-chain controls non-optional rather than advisory.
+
+  SCI-R1:
+    securityIntent: Verify artifact signatures against build provenance at deploy time.
+    threats:
+      - Supply Chain Compromise
+      - Data and Model Poisoning
+    protects:
+      - Models
+      - Infrastructure
+    mitre:
+      atlas:
+        - AML.T0010
+        - AML.T0058
+      attack:
+        - T1195.002
+    mappingRationale: >-
+      Signature verification tied to build provenance detects artifacts substituted
+      after the build step, including in the registry itself. It raises the
+      assurance from "came from our registry" to "was produced by our pipeline".
+
+  SCI-R2:
+    securityIntent: Record the composition of each production model pin so affected deployments can be found quickly.
+    threats:
+      - Supply Chain Compromise
+      - Data and Model Poisoning
+    protects:
+      - Models
+      - Audit Trail
+    mitre:
+      atlas:
+        - AML.T0010
+      attack:
+        - T1195
+    mappingRationale: >-
+      An MBOM records base model, adapters, and datasets, so a newly disclosed
+      poisoned component can be traced to every affected deployment. Its value is
+      response speed during a supply-chain incident rather than prevention.
+
+  # ------------------------------------------------------------- tool-safety --
+  TOL-M1:
+    securityIntent: Ensure tool execution authority comes from server-side policy, never from model output.
+    threats:
+      - Prompt Injection
+      - Unauthorized Tool Use
+      - Privilege Escalation
+      - Excessive Agency
+      - Tool Abuse
+    protects:
+      - Tools
+      - External Systems
+      - Data
+      - Identity
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0053
+        - AML.T0051
+        - AML.T0051.001
+        - AML.T0086
+        - AML.T0101
+      attack:
+        - T1078
+    mappingRationale: >-
+      Prompt injection becomes real-world impact at the exact moment a tool call is
+      executed on the model's say-so. Independent server-side authorization at that
+      boundary is the single most effective break in the injection-to-impact chain.
+
+  TOL-M2:
+    securityIntent: Restrict each agent to a fixed, approved set of tools it cannot expand at runtime.
+    threats:
+      - Unauthorized Tool Use
+      - Tool Abuse
+      - Excessive Agency
+      - Supply Chain Compromise
+    protects:
+      - Tools
+      - External Systems
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0053
+        - AML.T0010.005
+        - AML.T0110
+      attack: []
+    mappingRationale: >-
+      An agent that can discover or synthesize new tools at runtime has an
+      unbounded capability surface that no review has seen. A per-workload
+      allowlist keeps capability fixed and reviewable, and stops a poisoned or
+      newly advertised tool from being adopted mid-run.
+
+  TOL-M3:
+    securityIntent: Require an additional gate before high-impact tools are permitted to execute.
+    threats:
+      - Excessive Agency
+      - Tool Abuse
+      - Hallucinated Actions
+      - Prompt Injection
+    protects:
+      - Tools
+      - External Systems
+      - Data
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0101
+        - AML.T0053
+        - AML.T0086
+        - AML.T0048
+      attack:
+        - T1485
+    mappingRationale: >-
+      Destructive and irreversible tools warrant a stronger control than the
+      routine authorization applied to every call. Approval, dual control, or a
+      policy engine ensures a single manipulated invocation cannot cause
+      unrecoverable damage or bulk exfiltration.
+
+  TOL-M4:
+    securityIntent: Prevent unvalidated model-generated arguments from reaching an executor.
+    threats:
+      - Unsafe Code Execution
+      - Prompt Injection
+      - Tool Abuse
+      - Privilege Escalation
+    protects:
+      - Tools
+      - External Systems
+      - Runtime
+      - Infrastructure
+    mitre:
+      atlas:
+        - AML.T0102
+        - AML.T0050
+        - AML.T0051
+        - AML.T0072
+      attack:
+        - T1059
+    mappingRationale: >-
+      Model-generated arguments are untrusted input, and passing them unchecked to
+      shells, queries, or APIs reproduces classic injection flaws with a new source.
+      Schema validation and sanitization stop generated malicious commands from
+      reaching an interpreter.
+
+  TOL-M5:
+    securityIntent: Ensure tool catalog definitions are authentic and unchanged since they were reviewed.
+    threats:
+      - Supply Chain Compromise
+      - Prompt Injection
+      - Tool Abuse
+      - Unauthorized Tool Use
+    protects:
+      - Tools
+      - External Systems
+      - Runtime
+    mitre:
+      atlas:
+        - AML.T0110
+        - AML.T0104
+        - AML.T0010.005
+        - AML.T0011.002
+        - AML.T0109
+      attack:
+        - T1195
+    mappingRationale: >-
+      Tool descriptions are read directly into the model's context, which makes a
+      modified catalog both a supply-chain compromise and a prompt-injection
+      vector. Signing and reviewing catalogs detects silent redefinition of a tool
+      after it was approved.
+
+  TOL-R1:
+    securityIntent: Let destructive tool behaviour be validated without producing irreversible effects.
+    threats:
+      - Excessive Agency
+      - Hallucinated Actions
+      - Tool Abuse
+    protects:
+      - External Systems
+      - Data
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0101
+      attack: []
+    mappingRationale: >-
+      Dry-run and simulation modes let an agent's destructive paths be exercised
+      where mistakes are recoverable. This reduces the chance that a defect or
+      manipulated invocation first manifests against production data.
+
+  TOL-R2:
+    securityIntent: Bound how much damage a single agent or tool can do within a given window.
+    threats:
+      - Tool Abuse
+      - Excessive Agency
+      - Data Exfiltration
+      - Denial of Wallet
+      - Denial of Service
+    protects:
+      - Tools
+      - External Systems
+      - Data
+      - Cost
+      - Availability
+    mitre:
+      atlas:
+        - AML.T0034.002
+        - AML.T0086
+        - AML.T0101
+      attack: []
+    mappingRationale: >-
+      Rate and blast-radius budgets cap the volume of actions available to a
+      hijacked agent before a human can intervene. They limit bulk exfiltration and
+      mass destructive operations even when each individual authorization check
+      legitimately passes.

@@ -285,6 +285,68 @@
             "type": "array",
             "items": { "type": "string" }
           },
+          "threatIntel": {
+            "type": "object",
+            "description": "Informative threat context from spec/aprf-threat-map.yaml — explains why the control exists; never affects status, score, or gating",
+            "additionalProperties": true,
+            "required": ["securityIntent", "threats", "protects", "mitre"],
+            "properties": {
+              "securityIntent": { "type": "string" },
+              "threats": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string" }
+              },
+              "protects": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string" }
+              },
+              "mitre": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": ["atlas", "attack"],
+                "properties": {
+                  "atlas": {
+                    "type": "array",
+                    "description": "MITRE ATLAS technique IDs; empty when no defensible mapping exists",
+                    "items": { "type": "string", "pattern": "^AML\\.T[0-9]{4}(\\.[0-9]{3})?$" }
+                  },
+                  "attack": {
+                    "type": "array",
+                    "description": "MITRE ATT&CK technique IDs; empty when no defensible mapping exists",
+                    "items": { "type": "string", "pattern": "^T[0-9]{4}(\\.[0-9]{3})?$" }
+                  }
+                }
+              },
+              "mappingRationale": { "type": "string" }
+            }
+          },
+          "crosswalks": {
+            "type": "array",
+            "description": "Informative peer-framework alignment from spec crosswalks — never evidence of certification or compliance",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "required": ["framework", "controlRef", "relation"],
+              "properties": {
+                "framework": { "type": "string" },
+                "frameworkId": { "type": "string" },
+                "controlRef": { "type": "string" },
+                "controlTitle": { "type": "string" },
+                "relation": {
+                  "type": "string",
+                  "enum": [
+                    "supports",
+                    "aligns-with",
+                    "partial",
+                    "evidence-for"
+                  ]
+                },
+                "url": { "type": "string" }
+              }
+            }
+          },
           "reasoning": { "type": "string" },
           "recommendedAction": { "type": "string" },
           "priority": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] },

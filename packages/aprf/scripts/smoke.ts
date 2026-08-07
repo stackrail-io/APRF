@@ -197,6 +197,19 @@ const a = JSON.parse(readFileSync(assessmentPath, "utf8")) as {
     severity?: string;
     evidenceFound: unknown[];
     requiredEvidenceMissing?: string[];
+    crosswalks?: Array<{
+      framework: string;
+      controlRef: string;
+      relation: string;
+      url?: string;
+    }>;
+    threatIntel?: {
+      securityIntent: string;
+      threats: string[];
+      protects: string[];
+      mitre: { atlas: string[]; attack: string[] };
+      mappingRationale: string;
+    };
     gate: string;
   }>;
 };
@@ -233,6 +246,77 @@ assert(
 assert(
   !byId.has("AUTHN-R2"),
   "AUTHN-R2 is not a core mandatory — must require --full",
+);
+
+// Crosswalks are informative peer-framework alignment from spec/aprf-spec.json.
+const agnCrosswalks = byId.get("AGN-M2")?.crosswalks ?? [];
+assert(
+  agnCrosswalks.some(
+    (x) => /NIST/i.test(x.framework) && x.controlRef === "MANAGE",
+  ),
+  `AGN-M2 must carry spec crosswalks; got ${JSON.stringify(agnCrosswalks)}`,
+);
+assert(
+  agnCrosswalks.every((x) =>
+    ["supports", "aligns-with", "partial", "evidence-for"].includes(x.relation),
+  ),
+  `crosswalk relations must come from the spec vocabulary; got ${JSON.stringify(agnCrosswalks)}`,
+);
+// AUTHN-M3 is not listed by Check ID, but authentication is a pillar-only
+// mapping — expand through category so pillar rows are not silently dropped.
+assert(
+  (byId.get("AUTHN-M3")?.crosswalks ?? []).some((x) =>
+    /NIST/i.test(x.framework),
+  ),
+  `AUTHN-M3 must inherit pillar-only NIST crosswalks; got ${JSON.stringify(byId.get("AUTHN-M3")?.crosswalks)}`,
+);
+
+// Threat intel is informative context from spec/aprf-threat-map.yaml.
+const withoutIntel = [...byId.entries()].filter(
+  ([, c]) =>
+    !c.threatIntel?.securityIntent ||
+    !c.threatIntel?.mappingRationale?.trim() ||
+    !c.threatIntel.threats?.length ||
+    !c.threatIntel.protects?.length ||
+    !Array.isArray(c.threatIntel.mitre?.atlas) ||
+    !Array.isArray(c.threatIntel.mitre?.attack),
+);
+assert(
+  withoutIntel.length === 0,
+  `every control needs threat intel with a rationale, threats, protects, and mitre arrays; missing on ${withoutIntel
+    .map(([id]) => id)
+    .join(", ")}`,
+);
+
+const agnIntel = byId.get("AGN-M2")?.threatIntel;
+assert(
+  agnIntel?.threats.includes("Excessive Agency") &&
+    agnIntel.mitre.atlas.includes("AML.T0034.002"),
+  `AGN-M2 must map agentic resource consumption; got ${JSON.stringify(agnIntel)}`,
+);
+
+const badTechniqueIds = [...byId.values()].flatMap((c) => [
+  ...(c.threatIntel?.mitre.atlas ?? []).filter(
+    (t) => !/^AML\.T\d{4}(\.\d{3})?$/.test(t),
+  ),
+  ...(c.threatIntel?.mitre.attack ?? []).filter(
+    (t) => !/^T\d{4}(\.\d{3})?$/.test(t),
+  ),
+]);
+assert(
+  badTechniqueIds.length === 0,
+  `MITRE technique IDs must be well-formed; got ${JSON.stringify(badTechniqueIds)}`,
+);
+
+// Governance and assurance Checks stay unmapped rather than being forced onto a
+// technique, so an all-mapped report would mean the conservative bar slipped.
+assert(
+  [...byId.values()].some(
+    (c) =>
+      c.threatIntel?.mitre.atlas.length === 0 &&
+      c.threatIntel.mitre.attack.length === 0,
+  ),
+  "some Checks must stay intentionally unmapped to MITRE",
 );
 
 const sec2 = byId.get("SEC2-M1");
@@ -394,6 +478,49 @@ assert(
 assert(
   !html.includes("APRF_AUTH_PROBE_MAX_ROUTES"),
   "REPORT.html must not show APRF_AUTH_PROBE_MAX_ROUTES in evidence gaps",
+);
+assert(
+  html.includes("Framework crosswalk") &&
+    html.includes("informative alignment only"),
+  "REPORT.html must show framework crosswalks with the informative-only caveat",
+);
+assert(
+  html.includes("NIST AI Risk Management Framework MANAGE"),
+  "REPORT.html must name the mapped peer-framework control",
+);
+assert(
+  html.includes("Why this control exists") &&
+    html.includes("informative threat context"),
+  "REPORT.html must show threat context with the informative-only caveat",
+);
+assert(
+  html.includes("Threats mitigated") && html.includes("Protects"),
+  "REPORT.html must list threats and protected assets",
+);
+assert(
+  html.includes("https://atlas.mitre.org/techniques/AML.T"),
+  "REPORT.html must deep-link mapped MITRE ATLAS techniques",
+);
+// ATLAS addresses sub-techniques by full dotted ID; truncating to the parent
+// would silently point at the wrong technique.
+assert(
+  html.includes("https://atlas.mitre.org/techniques/AML.T0034.002"),
+  "REPORT.html must link ATLAS sub-techniques by their full ID",
+);
+assert(
+  html.includes("no technique mapped"),
+  "REPORT.html must say so explicitly where a Check is intentionally unmapped",
+);
+assert(
+  html.includes("Top threat exposure") &&
+    html.includes("gate-blocking") &&
+    html.includes("Unmet controls"),
+  "REPORT.html executive summary must roll up top threats across unmet controls",
+);
+// The rollup must not imply an incident occurred, only unmitigated exposure.
+assert(
+  html.includes("not that an attack has occurred"),
+  "top threat rollup must caveat that unmet means unmitigated or unproven",
 );
 
 console.log(`aprf assess engine smoke OK → ${htmlPath}`);

@@ -22,6 +22,8 @@ import {
 } from "node:fs";
 import { join, resolve } from "node:path";
 import {
+  getCrosswalksForCheck,
+  getThreatIntelForCheck,
   getGeneratedCatalog,
   SEVERITY_WEIGHT,
   type AprfRule,
@@ -138,6 +140,23 @@ type ControlOut = {
   manualVerification: string;
   falsePositiveGuidance: string;
   references: AprfRule["references"];
+  /** Informative peer-framework alignment — not proof of certification. */
+  crosswalks: Array<{
+    framework: string;
+    frameworkId: string;
+    controlRef: string;
+    controlTitle: string;
+    relation: string;
+    url?: string;
+  }>;
+  /** Why this control exists and what it defends against — informative context. */
+  threatIntel?: {
+    securityIntent: string;
+    threats: string[];
+    protects: string[];
+    mitre: { atlas: string[]; attack: string[] };
+    mappingRationale: string;
+  };
   gate: "mandatory" | "recommended";
   severity: AprfRule["severity"];
   status: ControlStatus;
@@ -822,6 +841,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     );
 
     const fix = rule.recommendedFixes?.[0] ?? "";
+    const threatIntel = getThreatIntelForCheck(checkId);
     controls.push({
       checkId,
       title: rule.title,
@@ -835,6 +855,15 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       manualVerification: rule.manualVerification,
       falsePositiveGuidance: rule.falsePositiveGuidance,
       references: rule.references,
+      crosswalks: getCrosswalksForCheck(checkId).map((c) => ({
+        framework: c.framework,
+        frameworkId: c.frameworkId,
+        controlRef: c.controlRef,
+        controlTitle: c.controlTitle,
+        relation: c.relation,
+        ...(c.url ? { url: c.url } : {}),
+      })),
+      ...(threatIntel ? { threatIntel } : {}),
       gate,
       severity,
       status,
