@@ -2230,18 +2230,24 @@ checks:
       NOT_APPLICABLE when no agent signals.
   AGN-M2:
     requiredEvidence:
-      - "Runtime/platform config for max-steps, wall-clock timeout, and spawn depth"
-      - "Enforcement tests / imported abort-on-exceed suite (imports/agent-loop-limits/)"
+      - "Runtime/platform Execution Bounds: iteration + duration (+ recursion/delegation when spawn/sub-agents supported)"
+      - "Enforcement tests / imported abort-on-exceed suite with no continue-after-abort (imports/agent-loop-limits/)"
+      - "Prefer runtime logs showing limit-triggered termination (measuredAt ≤90d)"
     searchExtra:
       - "**/*agent*"
       - "**/*orchestr*"
       - "**/*timeout*"
       - "**/*spawn*"
+      - "**/*iteration*"
+      - "**/*delegation*"
     plugins: [agent-loop-limits, repo-filesystem]
-    naWhen: "No agent / multi-step autonomy in system"
+    naWhen: "No production agent runtime (chat-only / single-inference / embeddings / classifiers / rerankers)"
     evaluation: |
-      PASS if agent-loop-limits report statusHint=pass (all three limits + measured abort + measuredAt ≤90d).
+      PASS if agent-loop-limits report statusHint=pass (required bounds present + measured abort +
+      continuesAfterAbort≠true + measuredAt ≤90d). Recursion/delegation depth required only when
+      spawn/sub-agent capability signals are present; otherwise that bound is N/A.
       PARTIAL if configs or tests found without measured abort suite.
+      FAIL if continue-after-abort or prompt-only limits.
       NOT_APPLICABLE when report statusHint=not_applicable (no agent signals).
   AGN-M3:
     requiredEvidence:

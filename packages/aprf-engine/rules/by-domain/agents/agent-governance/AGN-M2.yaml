@@ -1,73 +1,134 @@
 id: "AGN-M2"
 category: "agent-governance"
-title: "Production agents must have hard limits on steps, time, and spawn depth"
+title: "Production agent runtimes must enforce bounded execution"
 description: >
-  Every production agent runtime shall enforce finite hard limits on plan/tool
-  steps, wall-clock execution time, and recursive agent spawning (child/sub-agent
-  depth). Limits must be enforced by the platform or runtime—not by prompt
-  wording alone—and exceeding a limit must abort or fail closed the run.
+  Every production agent runtime shall enforce finite execution bounds including
+  reasoning/tool iterations, execution duration, and recursive delegation depth
+  where supported. Bounds shall be enforced by runtime or platform controls
+  rather than prompts or model instructions. Exceeding any bound shall terminate
+  or safely abort execution so the agent cannot continue planning or dispatch
+  further side effects after abort. Applies to agent frameworks, orchestration
+  frameworks, workflow engines with agent loops, MCP clients, MCP servers acting
+  autonomously, A2A runtimes, and multi-agent systems. Not applicable to simple
+  chat-completion APIs, single-inference endpoints, embeddings, classifiers, or
+  rerankers without multi-step / tool / delegation autonomy.
 whyItMatters: >
-  Unbounded agent loops are a reliable abuse and failure mode: attackers and
-  buggy planners can recurse into spawn trees, burn tokens and tool quota, and
-  amplify side effects far beyond the original request. Soft or prompt-only
-  “budgets” are bypassable; without runtime max-steps, wall-clock timeout, and
-  spawn-depth caps, a single session becomes a self-propagating load and
-  privilege amplifier. Hard limits convert runaway agency into a contained,
+  Critical because absence of execution bounds permits uncontrolled autonomous
+  execution that can amplify cost, side effects, privilege use, and service
+  degradation. Unbounded agent loops enable recursive planner explosion,
+  self-reflection loops, planner oscillation, recursive MCP delegation, and
+  cyclic graph execution—turning a single session into runaway token spend,
+  denial of wallet, denial of service, and privilege amplification. Soft or
+  prompt-only “budgets” are bypassable; runtime iteration, duration, and (when
+  applicable) recursion/delegation caps convert runaway agency into a contained,
   observable abort.
 severity: "critical"
 weight: 4
 gate: "mandatory"
 passCondition: >
-  100% of production agents have finite max-steps, wall-clock timeout, and
-  spawn-depth ≤ configured bound; enforcement tests show the run aborts (or
-  otherwise fails closed) when any limit is exceeded; 0 production agents rely
-  solely on prompt text for these limits.
+  Every production agent runtime enforces finite execution bounds appropriate to
+  its execution model. These include bounded reasoning/tool iterations,
+  bounded execution duration, and bounded recursive delegation where supported.
+  Enforcement is implemented by the runtime or platform and verified through
+  tests (and preferably runtime logs) that demonstrate safe termination when
+  each configured bound is exceeded, with no continued planning or background
+  side-effect dispatch after abort. No production agent relies solely on prompts
+  or model instructions to enforce execution limits. Recursion/delegation depth
+  is required when the runtime supports recursive delegation, agent spawning, or
+  sub-agent execution; otherwise that bound is NOT_APPLICABLE for that runtime.
 evidenceRequired:
-  - "Runtime/platform configuration declaring max steps, wall-clock timeout, and spawn depth for each production agent (or shared policy bound)"
-  - "Enforcement test results showing abort/fail-closed when each limit is exceeded (steps, time, spawn depth)"
+  - "Runtime/platform configuration declaring finite iteration and duration bounds for each production agent runtime (plus recursion/delegation depth when that capability is supported)"
+  - "Enforcement test results showing abort/fail-closed when each applicable bound is exceeded, including proof the agent cannot continue execution after abort"
+  - "Runtime logs (or equivalent telemetry) showing execution terminated due to a configured bound (preferred; measuredAt ≤90 days when used for PASS)"
 detection:
-  capability: "automated"
+  capability: "hybrid"
   detectors:
     - id: "repo-agent-loop-limits"
       params:
         require:
-          - "max-steps"
-          - "wall-clock-timeout"
-          - "spawn-depth"
+          - "iteration-bound"
+          - "duration-bound"
+        requireWhenSupported:
+          - "recursion-delegation-bound"
+        conceptSignals:
+          iterationBound:
+            - "max_steps"
+            - "max_iterations"
+            - "max_tool_calls"
+            - "max_turns"
+            - "step_limit"
+            - "iteration_limit"
+          durationBound:
+            - "wall_clock"
+            - "execution_timeout"
+            - "run_timeout"
+            - "agent_timeout"
+            - "timeout_seconds"
+            - "timeout:"
+            - "deadline"
+            - "max_runtime"
+            - "max_duration"
+          recursionDelegationBound:
+            - "spawn_depth"
+            - "spawn_limit"
+            - "delegation_depth"
+            - "max_recursion"
+            - "max_children"
+            - "max_spawn"
+            - "graph_depth"
+            - "child_agent_limit"
         requireEnforcementTests: true
         failClosedOnExceed: true
+        requireNoContinueAfterAbort: true
+        preferRuntimeTerminationLogs: true
     - id: "manual-attest"
       params:
         hint: >
           If automation cannot see runtime enforcement, attest finite
-          max-steps/wall-clock/spawn-depth config plus abort-on-exceed tests
-          for every production agent.
+          iteration and duration bounds (plus recursion/delegation depth when
+          spawning or sub-agents are supported), abort-on-exceed tests that
+          prove no continue-after-abort, and preferably runtime logs of
+          limit-triggered termination for every production agent runtime.
 manualVerification: >
   1) Inventory production agent runtimes (same scope as the charter inventory).
-  2) For each, locate the runtime or platform setting for max steps (or equivalent
-  tool-call/plan iterations), wall-clock timeout, and maximum spawn/delegation
-  depth. Confirm each value is finite and documented; treat missing, null,
-  zero-as-unlimited, or “disabled” as fail.
-  3) Review or run enforcement tests: force step overrun, timeout overrun, and
-  spawn-depth overrun; require abort/fail-closed with an observable signal
-  (error, kill, or quarantine). Prompt-only refusals without runtime stop do
-  not pass.
-  4) PASS only if every production agent meets config + enforcement evidence.
+  Score NOT_APPLICABLE if the system has only simple chat-completion / single
+  inference / embedding / classifier / reranker paths with no multi-step tool
+  or delegation autonomy.
+  2) For each runtime, map its native controls to Execution Bounds: (a) iteration
+  bound (reasoning/tool iterations, max steps, max tool calls, etc.), (b) duration
+  bound (timeout, deadline, wall-clock, execution_timeout, etc.), (c)
+  recursion/delegation bound when the runtime supports recursive delegation,
+  agent spawning, or sub-agent execution—otherwise mark (c) N/A for that runtime.
+  Confirm each required value is finite and documented; treat missing, null,
+  zero-as-unlimited, Infinity, or “disabled” as fail.
+  3) Review or run enforcement tests: force each applicable bound to be exceeded;
+  require abort/fail-closed with an observable signal (error, kill, or quarantine).
+  Also verify the agent cannot continue execution after abort (no further planner
+  steps and no leftover background tool/task dispatch). Prompt-only refusals
+  without runtime stop do not pass.
+  4) Prefer runtime logs showing “terminated due to limit” (or equivalent) for
+  each bound class exercised. PASS only if every production agent runtime meets
+  config + enforcement evidence for all applicable bounds.
 falsePositiveGuidance: >
   Do not pass on charter text or system-prompt budgets without runtime
   enforcement. Do not pass because a framework “supports” limits if production
-  configs leave them unset or infinite. Client-side or SDK defaults that operators
-  can override to unlimited fail unless production policy prevents that override.
-  A test that only asserts config keys exist (without exceeding limits) is
-  insufficient. Token or cost budgets alone do not satisfy step, wall-clock, and
-  spawn-depth requirements unless mapped 1:1 to those three controls with
-  abort-on-exceed. Kill-switch or pause capability does not substitute for
-  proactive hard limits. Named exceptions need owner and expiry ≤90 days.
+  configs leave them unset or infinite (e.g. maxSteps = Infinity). Client-side
+  or SDK defaults that operators can override to unlimited fail unless production
+  platform policy prevents that override. A test that only asserts config keys
+  exist (without exceeding limits) is insufficient. Do not treat model context
+  window or token limits as execution limits—they do not stop unbounded tool
+  calls or recursive planning. Token or cost budgets alone do not satisfy
+  iteration and duration bounds unless mapped 1:1 with abort-on-exceed. Kill-switch
+  or pause capability (AGN-M3) does not substitute for proactive hard limits.
+  Do not fail for missing spawn/delegation depth when the runtime has no recursive
+  delegation, agent spawning, or sub-agent execution capability. Named exceptions
+  need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Set finite platform defaults for max-steps, wall-clock timeout, and spawn depth; fail closed if unset at deploy time"
-  - "Add contract/integration tests that exceed each limit and assert abort (include recursive spawn fixtures)"
-  - "Block production promotion when agent configs omit any of the three limits or set unlimited sentinels"
-  - "Alert on limit-hit rates so operators can tune bounds without disabling enforcement"
+  - "Set finite platform defaults for iteration and duration bounds (and recursion/delegation depth when supported); fail closed if unset at deploy time"
+  - "Enforce platform defaults that cannot be disabled by application developers unless an explicit governance exception is approved (owner + expiry ≤90 days)"
+  - "Add contract/integration tests that exceed each applicable bound and assert abort with no continue-after-abort (include recursive delegation fixtures when spawning is supported)"
+  - "Retain and review runtime logs that record limit-triggered termination; alert on limit-hit rates so operators can tune bounds without disabling enforcement"
+  - "Block production promotion when agent configs omit required bounds or set unlimited sentinels"
 references:
   - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
@@ -83,9 +144,9 @@ relatedRules:
 tags:
   - "agent-governance"
   - "mandatory"
-  - "automated"
+  - "hybrid"
+  - "execution-bounds"
   - "loop-limits"
-  - "spawn-depth"
 applicability:
   technologies: []
   minCriticality: 2

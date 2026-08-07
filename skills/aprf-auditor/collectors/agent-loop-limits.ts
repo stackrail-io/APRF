@@ -1,9 +1,9 @@
 /**
  * agent-loop-limits — AGN-M2 / repo-agent-loop-limits detector executor.
  *
- * Finds runtime config for max-steps, wall-clock timeout, and spawn depth,
- * plus enforcement-test signals. Import measured abort results under
- * imports/agent-loop-limits/ to unlock PASS.
+ * Finds runtime Execution Bounds: iteration + duration (always), and
+ * recursion/delegation depth when spawning/sub-agents are supported.
+ * Import measured abort results under imports/agent-loop-limits/ to unlock PASS.
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
@@ -29,19 +29,34 @@ const RELATED = ["AGN-M2"] as const;
 const DETECTOR_ID = "repo-agent-loop-limits";
 
 const AGENT_PATH_RE =
-  /(agent|orchestr|autonom|langgraph|crewai|autogen|swarm|planner|a2a)/i;
+  /(agent|orchestr|autonom|langgraph|crewai|autogen|swarm|planner|a2a|mcp)/i;
 
+/** Iteration bound concepts (reasoning/tool iterations). */
 const MAX_STEPS_RE =
-  /\b(max[_-]?(steps|iterations|tool[_-]?calls|turns)|step[_-]?limit|iteration[_-]?limit|maxIterations|max_tool_calls)\b/i;
+  /\b(max[_-]?(steps|iterations|tool[_-]?calls|turns)|step[_-]?limit|iteration[_-]?limit|maxIterations|max_iterations|max_tool_calls|maxTurns|max_turns)\b/i;
 
+/** Duration bound concepts (bare `timeout:` only via TIMEOUT_ASSIGN_RE + agentish). */
 const WALL_CLOCK_RE =
-  /\b(wall[_-]?clock(?:[_-]?\w+)?|run[_-]?timeout|agent[_-]?timeout|execution[_-]?timeout|timeout[_-]?(seconds|ms|secs)|max[_-]?(runtime|duration)|deadline)\b/i;
+  /\b(wall[_-]?clock(?:[_-]?\w+)?|run[_-]?timeout|agent[_-]?timeout|execution[_-]?timeout|timeout[_-]?(seconds|ms|secs)|max[_-]?(runtime|duration)|deadline|execution[_-]?deadline)\b/i;
 
+/** Agent-scoped bare timeout assignment — avoids matching generic HTTP `timeout` in paths. */
+const TIMEOUT_ASSIGN_RE = /\btimeout\s*[:=]/i;
+
+/** Recursion/delegation depth bound concepts (no bare max_depth — too many FPs). */
 const SPAWN_DEPTH_RE =
-  /\b(spawn[_-]?(depth|limit)|max[_-]?(spawn|children|sub[_-]?agents|delegation)|recursion[_-]?limit|max[_-]?depth|child[_-]?agent[_-]?limit)\b/i;
+  /\b(spawn[_-]?(depth|limit)|max[_-]?(spawn|children|sub[_-]?agents|delegation|recursion)|delegation[_-]?depth|recursion[_-]?limit|child[_-]?agent[_-]?limit|graph[_-]?depth)\b/i;
+
+/**
+ * Capability signals that make recursion/delegation bounds applicable.
+ * Prefer concrete spawn/sub-agent controls over vague “multi-agent” / “delegate” docs.
+ */
+const SPAWN_CAPABILITY_RE =
+  /(^|[^A-Za-z0-9])(spawn(?:ing)?|allow[_-]?sub[_-]?agent|sub[_-]?agents?|child[_-]?agents?|max[_-]?(?:spawn|children|sub[_-]?agents)|delegation[_-]?depth|recursive[_-]?(?:agent|delegat)\w*|a2a[_-]?handoff|create[_-]?(?:sub[_-]?)?agent|supervisor[_-]?agent)/i;
+
+const DOC_ONLY_EXT_RE = /\.(md|rst|txt)$/i;
 
 const ENFORCE_TEST_RE =
-  /\b(abort|fail[_-]?closed|timeout|exceed|spawn|max[_-]?steps|enforcement|kill[_-]?run|cancel[_-]?run)\b/i;
+  /\b(abort|fail[_-]?closed|timeout|exceed|spawn|max[_-]?steps|enforcement|kill[_-]?run|cancel[_-]?run|no[_-]?continue|terminated?\s+due\s+to)\b/i;
 
 const TEST_PATH_RE =
   /(test|spec|e2e|fixture|__tests__|enforcement)/i;
@@ -66,17 +81,23 @@ export interface AgentLoopLimitsReport {
     wallClock: { found: boolean; refs: string[] };
     spawnDepth: { found: boolean; refs: string[] };
     enforcementTests: { found: boolean; refs: string[] };
+    spawnCapability: { found: boolean; refs: string[] };
   };
   importedResults: {
     found: boolean;
     agentsCovered: number | null;
     limitsEnforcedAbort: boolean | null;
     promptOnlyLimits: number | null;
+    continuesAfterAbort: boolean | null;
+    terminationLogsPresent: boolean | null;
     measuredAt: string | null;
     sources: string[];
   };
   summary: {
+    /** True when iteration + duration (+ recursion/delegation if applicable) are present. */
     allThreeLimitsPresent: boolean;
+    requiredBoundsPresent: boolean;
+    spawnDepthApplicable: boolean;
     enforcementPresent: boolean;
     agentSignalsPresent: boolean;
     agnM2Satisfied: boolean | null;
@@ -95,8 +116,9 @@ function collectLimitRefs(
   targetPath: string,
   maxFiles: number,
   pattern: RegExp,
-  limit = 16,
+  opts?: { alsoMatchTimeoutAssign?: boolean; limit?: number },
 ): string[] {
+  const limit = opts?.limit ?? 16;
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
     maxFiles: Math.max(maxFiles, 5000),
@@ -118,12 +140,51 @@ function collectLimitRefs(
     if (isSkippedScanRelPath(r)) continue;
     const text = readText(f, 80_000) || "";
     const agentish = AGENT_PATH_RE.test(r) || AGENT_PATH_RE.test(text);
-    if (pattern.test(r) || (pattern.test(text) && agentish)) {
+    const textHit =
+      pattern.test(text) ||
+      (opts?.alsoMatchTimeoutAssign === true && TIMEOUT_ASSIGN_RE.test(text));
+    if (pattern.test(r) || (textHit && agentish)) {
       refs.push(r);
     }
     if (refs.length >= limit) break;
   }
   return [...new Set(refs)];
+}
+
+function collectSpawnCapability(
+  targetPath: string,
+  maxFiles: number,
+): { found: boolean; refs: string[] } {
+  const refs: string[] = [];
+  const files = walkFiles(targetPath, {
+    maxFiles: Math.max(maxFiles, 5000),
+    extensions: [
+      ".py",
+      ".ts",
+      ".js",
+      ".tsx",
+      ".jsx",
+      ".yml",
+      ".yaml",
+      ".json",
+    ],
+  });
+  for (const f of files) {
+    const r = rel(targetPath, f);
+    if (isSkippedScanRelPath(r)) continue;
+    // Docs/marketing alone must not force recursion/delegation bounds.
+    if (DOC_ONLY_EXT_RE.test(r)) continue;
+    const text = readText(f, 80_000) || "";
+    const agentish = AGENT_PATH_RE.test(r) || AGENT_PATH_RE.test(text);
+    if (
+      SPAWN_CAPABILITY_RE.test(r) ||
+      (SPAWN_CAPABILITY_RE.test(text) && agentish)
+    ) {
+      refs.push(r);
+    }
+    if (refs.length >= 12) break;
+  }
+  return { found: refs.length > 0, refs: [...new Set(refs)] };
 }
 
 function detectEnforcementTests(targetPath: string, maxFiles: number) {
@@ -163,7 +224,7 @@ function detectAgentSignals(targetPath: string, maxFiles: number): boolean {
     if (AGENT_PATH_RE.test(r)) return true;
     const text = readText(f, 20_000) || "";
     if (
-      /\b(AgentExecutor|create_react_agent|langgraph|CrewAI|AutoGen|multi-?agent)\b/i.test(
+      /\b(AgentExecutor|create_react_agent|langgraph|CrewAI|AutoGen|multi-?agent|OpenAIAgents|BrowserUse)\b/i.test(
         text,
       )
     ) {
@@ -173,11 +234,18 @@ function detectAgentSignals(targetPath: string, maxFiles: number): boolean {
   return false;
 }
 
+function asBool(v: unknown): boolean | null {
+  if (typeof v === "boolean") return v;
+  return null;
+}
+
 function loadImported(ctx: CollectorContext): AgentLoopLimitsReport["importedResults"] {
   const sources: string[] = [];
   let agentsCovered: number | null = null;
   let limitsEnforcedAbort: boolean | null = null;
   let promptOnlyLimits: number | null = null;
+  let continuesAfterAbort: boolean | null = null;
+  let terminationLogsPresent: boolean | null = null;
   let measuredAt: string | null = null;
 
   for (const f of listImportFiles(ctx.outputDir, PLUGIN_ID)) {
@@ -197,6 +265,20 @@ function loadImported(ctx: CollectorContext): AgentLoopLimitsReport["importedRes
       if (typeof data.promptOnlyLimits === "number") {
         promptOnlyLimits = data.promptOnlyLimits;
       }
+      const cont = asBool(data.continuesAfterAbort);
+      if (cont !== null) {
+        continuesAfterAbort =
+          continuesAfterAbort === null ? cont : continuesAfterAbort || cont;
+      }
+      const logs = asBool(
+        data.terminationLogsPresent ?? data.runtimeTerminationLogsPresent,
+      );
+      if (logs !== null) {
+        terminationLogsPresent =
+          terminationLogsPresent === null
+            ? logs
+            : terminationLogsPresent || logs;
+      }
       const results = Array.isArray(data.results)
         ? (data.results as Array<Record<string, unknown>>)
         : [];
@@ -211,11 +293,26 @@ function loadImported(ctx: CollectorContext): AgentLoopLimitsReport["importedRes
         const promptOnly = results.filter(
           (r) => r.promptOnly === true || r.runtimeEnforced === false,
         ).length;
+        const continued = results.filter(
+          (r) =>
+            r.continuesAfterAbort === true ||
+            r.backgroundTasksContinued === true,
+        ).length;
+        const withLogs = results.filter(
+          (r) =>
+            r.terminationLogPresent === true ||
+            r.runtimeTerminationLog === true,
+        ).length;
         limitsEnforcedAbort =
           limitsEnforcedAbort === null
             ? aborted === results.length
             : limitsEnforcedAbort && aborted === results.length;
         promptOnlyLimits = (promptOnlyLimits ?? 0) + promptOnly;
+        if (continued > 0) continuesAfterAbort = true;
+        else if (continuesAfterAbort === null) continuesAfterAbort = false;
+        if (withLogs > 0) {
+          terminationLogsPresent = true;
+        }
       }
     } catch {
       /* skip */
@@ -227,6 +324,8 @@ function loadImported(ctx: CollectorContext): AgentLoopLimitsReport["importedRes
     agentsCovered,
     limitsEnforcedAbort,
     promptOnlyLimits,
+    continuesAfterAbort,
+    terminationLogsPresent,
     measuredAt,
     sources,
   };
@@ -237,40 +336,58 @@ export function buildAgentLoopLimitsReport(opts: {
   maxSteps: { found: boolean; refs: string[] };
   wallClock: { found: boolean; refs: string[] };
   spawnDepth: { found: boolean; refs: string[] };
+  spawnCapability: { found: boolean; refs: string[] };
   enforcementTests: { found: boolean; refs: string[] };
   agentSignals: boolean;
   imported: AgentLoopLimitsReport["importedResults"];
 }): AgentLoopLimitsReport {
   const notes: string[] = [];
-  const allThree =
-    opts.maxSteps.found && opts.wallClock.found && opts.spawnDepth.found;
+  const spawnDepthApplicable = opts.spawnCapability.found;
+  const requiredBoundsPresent =
+    opts.maxSteps.found &&
+    opts.wallClock.found &&
+    (!spawnDepthApplicable || opts.spawnDepth.found);
+  // Legacy alias: "all three" means all *required* bounds for this runtime model.
+  const allThree = requiredBoundsPresent;
   const enforcementPresent =
     opts.enforcementTests.found || opts.imported.found;
 
-  if (!opts.agentSignals && !allThree && !enforcementPresent) {
+  if (!opts.agentSignals && !requiredBoundsPresent && !enforcementPresent) {
     notes.push(
-      "No agent/autonomy signals found — AGN-M2 may be NOT_APPLICABLE if the system has no production agents.",
+      "No agent/autonomy signals found — AGN-M2 may be NOT_APPLICABLE if the system has no production agent runtimes (chat-only / single-inference / embeddings / classifiers / rerankers).",
     );
   }
 
   if (opts.maxSteps.found) {
-    notes.push(`max-steps signals: ${opts.maxSteps.refs.slice(0, 3).join(", ")}`);
+    notes.push(
+      `iteration-bound signals: ${opts.maxSteps.refs.slice(0, 3).join(", ")}`,
+    );
   } else {
-    notes.push("No max-steps / iteration limit config found for agent runtimes.");
+    notes.push(
+      "No iteration bound (max_steps / max_iterations / max_tool_calls / …) found for agent runtimes.",
+    );
   }
   if (opts.wallClock.found) {
     notes.push(
-      `wall-clock timeout signals: ${opts.wallClock.refs.slice(0, 3).join(", ")}`,
+      `duration-bound signals: ${opts.wallClock.refs.slice(0, 3).join(", ")}`,
     );
   } else {
-    notes.push("No wall-clock / run timeout config found for agent runtimes.");
-  }
-  if (opts.spawnDepth.found) {
     notes.push(
-      `spawn-depth signals: ${opts.spawnDepth.refs.slice(0, 3).join(", ")}`,
+      "No duration bound (timeout / deadline / wall_clock / execution_timeout / …) found for agent runtimes.",
+    );
+  }
+  if (!spawnDepthApplicable) {
+    notes.push(
+      "No recursive delegation / spawn / sub-agent capability signals — recursion/delegation depth bound is NOT_APPLICABLE for this target.",
+    );
+  } else if (opts.spawnDepth.found) {
+    notes.push(
+      `recursion/delegation-bound signals: ${opts.spawnDepth.refs.slice(0, 3).join(", ")}`,
     );
   } else {
-    notes.push("No spawn-depth / child-agent limit config found.");
+    notes.push(
+      "Spawn/delegation capability present but no recursion/delegation depth bound config found.",
+    );
   }
   if (opts.enforcementTests.found) {
     notes.push(
@@ -283,7 +400,7 @@ export function buildAgentLoopLimitsReport(opts: {
   }
   if (opts.imported.found) {
     notes.push(
-      `Imported: ${opts.imported.sources.join(", ")} (agentsCovered=${opts.imported.agentsCovered}, abort=${opts.imported.limitsEnforcedAbort}, promptOnly=${opts.imported.promptOnlyLimits})`,
+      `Imported: ${opts.imported.sources.join(", ")} (agentsCovered=${opts.imported.agentsCovered}, abort=${opts.imported.limitsEnforcedAbort}, promptOnly=${opts.imported.promptOnlyLimits}, continuesAfterAbort=${opts.imported.continuesAfterAbort}, terminationLogs=${opts.imported.terminationLogsPresent})`,
     );
   }
 
@@ -293,30 +410,48 @@ export function buildAgentLoopLimitsReport(opts: {
   const measuredFail =
     (opts.imported.promptOnlyLimits !== null &&
       opts.imported.promptOnlyLimits > 0) ||
-    (opts.imported.limitsEnforcedAbort === false && opts.imported.found);
+    (opts.imported.limitsEnforcedAbort === false && opts.imported.found) ||
+    opts.imported.continuesAfterAbort === true;
 
   if (measuredFail) {
     statusHint = "fail";
     agnM2Satisfied = false;
-    notes.push(
-      "Imported results show prompt-only limits or failed abort-on-exceed — AGN-M2 fail.",
-    );
+    if (opts.imported.continuesAfterAbort === true) {
+      notes.push(
+        "Imported results show continue-after-abort (planner or background tasks kept running) — AGN-M2 fail.",
+      );
+    } else {
+      notes.push(
+        "Imported results show prompt-only limits or failed abort-on-exceed — AGN-M2 fail.",
+      );
+    }
   } else if (
-    allThree &&
+    requiredBoundsPresent &&
     enforcementPresent &&
     opts.imported.limitsEnforcedAbort === true &&
     (opts.imported.promptOnlyLimits === null ||
       opts.imported.promptOnlyLimits === 0) &&
+    opts.imported.continuesAfterAbort !== true &&
     measuredAtFresh(opts.imported.measuredAt)
   ) {
     statusHint = "pass";
     agnM2Satisfied = true;
-  } else if (allThree || enforcementPresent || opts.maxSteps.found || opts.imported.found) {
+    if (opts.imported.terminationLogsPresent !== true) {
+      notes.push(
+        "PASS without imported runtime termination logs — prefer logs showing limit-triggered termination for stronger evidence.",
+      );
+    }
+  } else if (
+    requiredBoundsPresent ||
+    enforcementPresent ||
+    opts.maxSteps.found ||
+    opts.imported.found
+  ) {
     statusHint = "partial";
     agnM2Satisfied = false;
-    if (allThree && opts.imported.limitsEnforcedAbort === null) {
+    if (requiredBoundsPresent && opts.imported.limitsEnforcedAbort === null) {
       notes.push(
-        "All three limit configs present but no measured abort-on-exceed import — drop JSON under imports/agent-loop-limits/ to PASS.",
+        "Required execution bounds present but no measured abort-on-exceed import — drop JSON under imports/agent-loop-limits/ to PASS.",
       );
     }
     if (opts.imported.found && !measuredAtFresh(opts.imported.measuredAt)) {
@@ -336,22 +471,22 @@ export function buildAgentLoopLimitsReport(opts: {
   if (statusHint !== "pass" && statusHint !== "not_applicable") {
     if (!opts.maxSteps.found) {
       gapNotes.push(
-        "Max-steps / iteration limit config for agent runtimes (repo or import)",
+        "Iteration bound config (max_steps / max_iterations / max_tool_calls / …) for agent runtimes",
       );
     }
     if (!opts.wallClock.found) {
       gapNotes.push(
-        "Wall-clock / run timeout config for agent runtimes (repo or import)",
+        "Duration bound config (timeout / deadline / wall_clock / execution_timeout / …) for agent runtimes",
       );
     }
-    if (!opts.spawnDepth.found) {
+    if (spawnDepthApplicable && !opts.spawnDepth.found) {
       gapNotes.push(
-        "Spawn-depth / child-agent limit config (repo or import)",
+        "Recursion/delegation depth bound (spawn_depth / delegation_depth / max_recursion / graph_depth / …) — required because spawn/sub-agent capability was detected",
       );
     }
     if (!opts.imported.found || opts.imported.limitsEnforcedAbort !== true) {
       gapNotes.push(
-        "Measured abort-on-exceed results under imports/agent-loop-limits/ (limitsEnforcedAbort=true, measuredAt ≤90d) — config/tests alone cannot PASS",
+        "Measured abort-on-exceed results under imports/agent-loop-limits/ (limitsEnforcedAbort=true, continuesAfterAbort=false, measuredAt ≤90d) — config/tests alone cannot PASS",
       );
     }
   }
@@ -371,10 +506,13 @@ export function buildAgentLoopLimitsReport(opts: {
       wallClock: opts.wallClock,
       spawnDepth: opts.spawnDepth,
       enforcementTests: opts.enforcementTests,
+      spawnCapability: opts.spawnCapability,
     },
     importedResults: opts.imported,
     summary: {
       allThreeLimitsPresent: allThree,
+      requiredBoundsPresent,
+      spawnDepthApplicable,
       enforcementPresent,
       agentSignalsPresent: opts.agentSignals,
       agnM2Satisfied,
@@ -396,7 +534,9 @@ export const agentLoopLimitsCollector: Collector = {
     maxSteps.found = maxSteps.refs.length > 0;
     const wallClock = {
       found: false,
-      refs: collectLimitRefs(ctx.targetPath, maxFiles, WALL_CLOCK_RE),
+      refs: collectLimitRefs(ctx.targetPath, maxFiles, WALL_CLOCK_RE, {
+        alsoMatchTimeoutAssign: true,
+      }),
     };
     wallClock.found = wallClock.refs.length > 0;
     const spawnDepth = {
@@ -404,6 +544,7 @@ export const agentLoopLimitsCollector: Collector = {
       refs: collectLimitRefs(ctx.targetPath, maxFiles, SPAWN_DEPTH_RE),
     };
     spawnDepth.found = spawnDepth.refs.length > 0;
+    const spawnCapability = collectSpawnCapability(ctx.targetPath, maxFiles);
     const enforcementTests = detectEnforcementTests(ctx.targetPath, maxFiles);
     const agentSignals = detectAgentSignals(ctx.targetPath, maxFiles);
     const imported = loadImported(ctx);
@@ -413,6 +554,7 @@ export const agentLoopLimitsCollector: Collector = {
       maxSteps,
       wallClock,
       spawnDepth,
+      spawnCapability,
       enforcementTests,
       agentSignals,
       imported,
@@ -426,9 +568,9 @@ export const agentLoopLimitsCollector: Collector = {
     );
 
     const foundRefs = [
-      ...report.signals.maxSteps.refs.map((r) => `maxSteps: ${r}`),
-      ...report.signals.wallClock.refs.map((r) => `wallClock: ${r}`),
-      ...report.signals.spawnDepth.refs.map((r) => `spawnDepth: ${r}`),
+      ...report.signals.maxSteps.refs.map((r) => `iterationBound: ${r}`),
+      ...report.signals.wallClock.refs.map((r) => `durationBound: ${r}`),
+      ...report.signals.spawnDepth.refs.map((r) => `recursionBound: ${r}`),
       ...report.signals.enforcementTests.refs.map(
         (r) => `enforcementTests: ${r}`,
       ),
@@ -450,9 +592,12 @@ export const agentLoopLimitsCollector: Collector = {
           "agent-loop-limits",
           "agn-m2",
           DETECTOR_ID,
-          ...(report.summary.allThreeLimitsPresent
-            ? ["max-steps", "wall-clock", "spawn-depth"]
+          ...(report.summary.requiredBoundsPresent
+            ? ["iteration-bound", "duration-bound"]
             : []),
+          ...(report.summary.spawnDepthApplicable
+            ? ["recursion-delegation-bound-applicable"]
+            : ["recursion-delegation-bound-na"]),
           ...(report.summary.agnM2Satisfied
             ? ["agn-m2-satisfied"]
             : ["agn-m2-incomplete"]),
@@ -464,7 +609,7 @@ export const agentLoopLimitsCollector: Collector = {
     return {
       pluginId: PLUGIN_ID,
       status: "ran",
-      detail: `AGN-M2 status=${report.summary.statusHint} limits3=${report.summary.allThreeLimitsPresent} enforce=${report.summary.enforcementPresent} satisfied=${report.summary.agnM2Satisfied}; report=imports/${PLUGIN_ID}/agent-loop-limits-report.json`,
+      detail: `AGN-M2 status=${report.summary.statusHint} requiredBounds=${report.summary.requiredBoundsPresent} spawnApplicable=${report.summary.spawnDepthApplicable} enforce=${report.summary.enforcementPresent} satisfied=${report.summary.agnM2Satisfied}; report=imports/${PLUGIN_ID}/agent-loop-limits-report.json`,
       nodes,
     };
   },
