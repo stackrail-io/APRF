@@ -2230,6 +2230,8 @@ checks:
       Default finding severity is high; severityHint=critical when inventory
       completeness or accountable ownership cannot be demonstrated.
       PARTIAL if inventory/charter artifacts found without complete attested import.
+      FAIL if the imported inventory reports complete=false or agents missing
+      required governance metadata (missingFieldCount>0).
       NOT_APPLICABLE when summary.inScope=false (framework/SDK/library-only or
       productionAgentsPresent=false); summary.naReason is copied to assessment.naReason.
   AGN-M2:

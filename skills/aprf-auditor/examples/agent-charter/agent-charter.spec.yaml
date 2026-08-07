@@ -75,10 +75,10 @@ lastUpdated: "" # ISO timestamp of last charter edit (required for AGN-M1)
 
 expiryDate: "" # ISO date after which the charter must be re-approved
 
-# Named exceptions (optional). Each row needs justification, approver, expiry ≤90d,
-# and compensating controls.
+# Named exceptions (optional). Each row needs justification, approver, an expiry
+# within 90 days of the inventory measuredAt, and compensating controls.
 exceptions: []
 # - justification: ""
 #   approver: ""
-#   expiry: "" # ISO date ≤90 days from grant
+#   expiry: "" # ISO date ≤90 days after the inventory measuredAt
 #   compensatingControls: ""

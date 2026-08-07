@@ -63,8 +63,9 @@ function agnM1ScopeLists(): {
   };
 }
 
+/** Agent-ish paths — bare "charter"/"inventory" left to INVENTORY_PATH_RE. */
 const AGENT_PATH_RE =
-  /(agent|orchestr|autonom|langgraph|crewai|autogen|charter|inventory)/i;
+  /(agent|orchestr|autonom|langgraph|crewai|autogen|agent[_-]?charter|agent[_-]?inventory)/i;
 
 const INVENTORY_PATH_RE =
   /(agent.?inventory|agents\.(ya?ml|json|toml|md)|charters?[/\\]|AGENT\.md|agents[/\\]registry)/i;
@@ -73,9 +74,9 @@ const INVENTORY_PATH_RE =
 const FRAMEWORK_ONLY_RE =
   /\b(langgraph|crewai|autogen|openai[_-]?agents([_-]?sdk)?|agents?[_-]?sdk|langchain)\b/i;
 
-/** Agent-specific production runtime cues (not bare k8s/helm/terraform). */
+/** Agent-specific production runtime cues (not bare cmdb/catalog/k8s). */
 const PRODUCTION_RUNTIME_RE =
-  /\b(production[_-]?agent|deployed[_-]?agent|agent[_-]?runtime|agent[_-]?fleet|cmdb|service[_-]?catalog|deployment[_-]?manifest)\b/i;
+  /\b(production[_-]?agent|deployed[_-]?agent|agent[_-]?runtime|agent[_-]?fleet|agent[_-]?cmdb|agent[_-]?(service[_-]?)?catalog)\b/i;
 
 const PURPOSE_RE =
   /\b(purpose|goal|mission|charter|description|objectives?)\b/i;
@@ -294,6 +295,14 @@ function agentExceptionsValid(
 }
 
 function normalizeCompletenessEvidence(raw: unknown): string | null {
+  // "at least one of" — accept the first recognized entry from an array.
+  if (Array.isArray(raw)) {
+    for (const item of raw) {
+      const hit = normalizeCompletenessEvidence(item);
+      if (hit) return hit;
+    }
+    return null;
+  }
   if (typeof raw !== "string") return null;
   // runtimeRegistry / runtime_registry / runtime-registry → runtime-registry
   const key = raw
@@ -613,14 +622,20 @@ export function buildAgentCharterInventoryReport(opts: {
   if (opts.charters.found) {
     pushInfo(`Charter-like refs: ${opts.charters.refs.slice(0, 4).join(", ")}`);
   }
+  const missingFieldNames: string[] = [];
   for (const [k, present] of Object.entries(opts.fields)) {
     if (present) {
       pushInfo(
         `Field ${k}: ${opts.fieldRefs[k]?.slice(0, 2).join(", ") || "present"}`,
       );
     } else if (inScope) {
-      pushGap(`Required charter field missing in repo scan: ${k}`);
+      missingFieldNames.push(k);
     }
+  }
+  if (missingFieldNames.length > 0) {
+    pushGap(
+      `Required charter fields missing in repo scan: ${missingFieldNames.join(", ")}`,
+    );
   }
   if (opts.imported.found) {
     pushInfo(

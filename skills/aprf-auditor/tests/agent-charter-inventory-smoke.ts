@@ -8,6 +8,7 @@ import {
   mkdtempSync,
   mkdirSync,
   readFileSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -22,8 +23,22 @@ function assert(cond: unknown, msg: string): asserts cond {
   if (!cond) throw new Error(msg);
 }
 
+const tmpRoots: string[] = [];
+
 function tmp(prefix: string): string {
-  return mkdtempSync(join(tmpdir(), prefix));
+  const dir = mkdtempSync(join(tmpdir(), prefix));
+  tmpRoots.push(dir);
+  return dir;
+}
+
+function cleanupTmp(): void {
+  for (const dir of tmpRoots) {
+    try {
+      rmSync(dir, { recursive: true, force: true });
+    } catch {
+      /* best-effort */
+    }
+  }
 }
 
 function daysAgo(days: number): string {
@@ -532,8 +547,28 @@ async function main() {
     });
     const r = await collect(baseCtx, targetDir, out);
     assert(
-      r.summary.statusHint !== "pass",
-      "empty agents[] must not unlock PASS",
+      r.summary.statusHint === "partial",
+      `empty agents[]: expected partial, got ${r.summary.statusHint}`,
+    );
+    assert(
+      r.gapNotes?.some((n) => /0 agents/i.test(n)),
+      `empty agents[]: expected 0-agents gap, got ${JSON.stringify(r.gapNotes)}`,
+    );
+  }
+
+  // --- PASS: completenessEvidence as array (first recognized) ---
+  {
+    const out = tmp("aprf-agn1-ev-arr-");
+    writeImport(out, {
+      measuredAt: new Date().toISOString(),
+      completenessEvidence: ["unknown-source", "runtime-registry"],
+      agents: [fullAgent({ id: "array-evidence-agent" })],
+    });
+    const r = await collect(baseCtx, targetDir, out);
+    assert(
+      r.summary.statusHint === "pass" &&
+        r.importedResults.completenessEvidence === "runtime-registry",
+      `array evidence: got ${JSON.stringify(r.summary)} / ${r.importedResults.completenessEvidence}`,
     );
   }
 
@@ -617,7 +652,11 @@ async function main() {
   console.log("agent-charter-inventory smoke OK");
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exitCode = 1;
+  })
+  .finally(() => {
+    cleanupTmp();
+  });
