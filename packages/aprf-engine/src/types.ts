@@ -73,8 +73,12 @@ export interface RuleDetection {
 }
 
 export interface RuleApplicability {
-  /** Empty = technology-agnostic. */
+  /** Empty = technology-agnostic (not cloud/vendor-gated). */
   technologies?: Technology[];
+  /** Human-readable in-scope system classes (does not filter evaluate()). */
+  appliesTo?: string[];
+  /** Human-readable out-of-scope system classes (does not filter evaluate()). */
+  notApplicableTo?: string[];
   minCriticality: CriticalityTier;
   requiredFromLevel: CapabilityLevel;
   profiles?: string[];

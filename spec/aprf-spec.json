@@ -3802,7 +3802,7 @@
       "engineeringPhilosophy": "Autonomy is a dial, not a virtue. Production agents have explicit charters: allowed goals, max steps, escalation paths, and kill switches. Multi-agent and A2A systems require governance of the mesh, not only of each node.",
       "whyItMatters": "Unconstrained agents loop, spend unbounded budget, escalate privileges across A2A links, or pursue goals that conflict with business and safety policy. Governance failures look like 'the agent went rogue' but are usually missing product controls.",
       "commonFailures": [
-        "No maximum step, wall-clock, or spawn-depth budget for agent loops",
+        "No finite execution bounds (iteration, duration, recursion/delegation when supported) for agent runtimes",
         "Agents that can redefine or pursue conflicting goals without a pre-tool policy gate",
         "A2A trust assumed by network presence alone (no peer auth or scoped capabilities)",
         "No operator kill switch, cancellation of in-flight/queued work, or drill evidence",
@@ -3821,10 +3821,10 @@
         },
         {
           "id": "AGN-M2",
-          "requirement": "Every production agent runtime shall enforce finite hard limits on plan/tool steps, wall-clock execution time, and recursive agent spawning (child/sub-agent depth). Limits must be enforced by the platform or runtime—not by prompt wording alone—and exceeding a limit must abort or fail closed the run.",
-          "artifact": "Runtime/platform configuration declaring max steps, wall-clock timeout, and spawn depth for each production agent (or shared policy bound) + Enforcement test results showing abort/fail-closed when each limit is exceeded (steps, time, spawn depth)",
-          "passCondition": "100% of production agents have finite max-steps, wall-clock timeout, and spawn-depth ≤ configured bound; enforcement tests show the run aborts (or otherwise fails closed) when any limit is exceeded; 0 production agents rely solely on prompt text for these limits.",
-          "method": "automated",
+          "requirement": "Every production agent runtime shall enforce finite execution bounds including reasoning/tool iterations, execution duration, and recursive delegation depth where supported. Bounds shall be enforced by runtime or platform controls rather than prompts or model instructions. Exceeding any bound shall terminate or safely abort execution so the agent cannot continue planning or dispatch further side effects after abort. Applies to agent frameworks, orchestration frameworks, workflow engines with agent loops, MCP clients, MCP servers acting autonomously, A2A runtimes, and multi-agent systems. Not applicable to simple chat-completion APIs, single-inference endpoints, embeddings, classifiers, or rerankers without multi-step / tool / delegation autonomy.",
+          "artifact": "Runtime/platform configuration declaring finite iteration and duration bounds for each production agent runtime (plus recursion/delegation depth when that capability is supported) + Enforcement test results showing abort/fail-closed when each applicable bound is exceeded, including proof the agent cannot continue execution after abort + Runtime logs (or equivalent telemetry) showing execution terminated due to a configured bound (preferred; measuredAt ≤90 days when used for PASS)",
+          "passCondition": "Every production agent runtime enforces finite execution bounds appropriate to its execution model. These include bounded reasoning/tool iterations, bounded execution duration, and bounded recursive delegation where supported. Enforcement is implemented by the runtime or platform and verified through tests (and preferably runtime logs) that demonstrate safe termination when each configured bound is exceeded, with no continued planning or background side-effect dispatch after abort. No production agent relies solely on prompts or model instructions to enforce execution limits. Recursion/delegation depth is required when the runtime supports recursive delegation, agent spawning, or sub-agent execution; otherwise that bound is NOT_APPLICABLE for that runtime.",
+          "method": "hybrid",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -3878,7 +3878,7 @@
       ],
       "evidenceRequired": [
         "Versioned agent inventory with charters and owners (AGN-M1)",
-        "Runtime max-steps / wall-clock / spawn-depth config + abort-on-exceed evidence (AGN-M2)",
+        "Runtime execution bounds (iteration + duration; recursion/delegation when supported) + abort-on-exceed evidence (AGN-M2)",
         "Kill-switch/pause runbook, cancellation suite, and ≤90-day drill record (AGN-M3)",
         "A2A/multi-agent handoff inventory with peer auth, scoped capabilities, and deny tests (AGN-M4)",
         "Goal-conflict / disallowed-goal plan policy with named owner and synthetic deny traces (AGN-R1)",
@@ -3894,7 +3894,7 @@
         "Keep a versioned RACI with Responsible and Accountable for every production agent ID"
       ],
       "automaticValidations": [
-        "Runtime enforcement of step, wall-clock, and spawn-depth limits with abort-on-exceed",
+        "Runtime enforcement of execution bounds (iteration, duration, recursion/delegation when supported) with abort-on-exceed and no continue-after-abort",
         "Denial of unauthenticated, forged-peer, and over-scoped A2A handoffs",
         "Kill-switch cancellation suite (queued, running, and child-agent paths)",
         "Goal-conflict / disallowed-goal policy gate before side-effecting tools",

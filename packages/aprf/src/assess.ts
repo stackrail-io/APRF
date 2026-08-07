@@ -121,6 +121,8 @@ type HintHit = {
   gapNotes?: string[];
   /** Optional finding severity override (e.g. AGN-M1 high→critical escalation). */
   severityHint?: AprfRule["severity"];
+  /** Collector-provided NOT_APPLICABLE reason (e.g. scope / appliesTo). */
+  naReason?: string;
 };
 
 type ControlOut = {
@@ -227,6 +229,7 @@ function setHint(
       : prevSev > hitSev
         ? prev.severityHint
         : (hit.severityHint ?? prev.severityHint);
+  const naReason = hit.naReason ?? prev.naReason;
   byCheck.set(checkId, {
     hint: hit.hint,
     pluginId,
@@ -237,6 +240,7 @@ function setHint(
         : hit.reportRef,
     ...(gapNotes.length ? { gapNotes } : {}),
     ...(severityHint ? { severityHint } : {}),
+    ...(naReason ? { naReason } : {}),
   });
 }
 
@@ -259,7 +263,11 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
     for (const file of files) {
       if (!file.includes("report")) continue;
       let doc: {
-        summary?: { statusHint?: unknown; severityHint?: unknown };
+        summary?: {
+          statusHint?: unknown;
+          severityHint?: unknown;
+          naReason?: unknown;
+        };
         gapNotes?: unknown;
         notes?: unknown;
       };
@@ -308,6 +316,11 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
         sevRaw === "low"
           ? (sevRaw as AprfRule["severity"])
           : undefined;
+      const naReason =
+        typeof doc.summary?.naReason === "string" &&
+        doc.summary.naReason.trim().length > 0
+          ? doc.summary.naReason.trim()
+          : undefined;
       for (const checkId of checkIds) {
         setHint(byCheck, checkId, {
           hint,
@@ -315,6 +328,7 @@ function loadHintsFromImports(outDir: string): Map<string, HintHit> {
           reportRef,
           ...(gapNotes?.length ? { gapNotes } : {}),
           ...(severityHint ? { severityHint } : {}),
+          ...(naReason ? { naReason } : {}),
         });
       }
     }
@@ -423,6 +437,22 @@ function isFoundRefsGroup(
   return typeof o.found === "boolean" && Array.isArray(o.refs);
 }
 
+/** Customer-facing labels for collector signal keys in Evidence found. */
+const SIGNAL_DISPLAY_NAMES: Record<string, string> = Object.assign(
+  Object.create(null) as Record<string, string>,
+  {
+    maxSteps: "iterationBound",
+    wallClock: "durationBound",
+    spawnDepth: "recursionBound",
+  },
+);
+
+function signalDisplayName(name: string): string {
+  return Object.prototype.hasOwnProperty.call(SIGNAL_DISPLAY_NAMES, name)
+    ? SIGNAL_DISPLAY_NAMES[name]!
+    : name;
+}
+
 /**
  * Prefer Evidence found from collector report `signals.<name>.found === true`
  * refs. If `signals` is absent, fall back to top-level `{ found, refs }` groups
@@ -462,6 +492,7 @@ function evidenceFromFoundSignals(
     const seen = new Set<string>();
     for (const [name, raw] of Object.entries(signalMap)) {
       if (!isFoundRefsGroup(raw) || raw.found !== true) continue;
+      const label = signalDisplayName(name);
       const refs = raw.refs.filter(
         (r): r is string => typeof r === "string" && r.trim().length > 0,
       );
@@ -469,7 +500,7 @@ function evidenceFromFoundSignals(
         const key = `${reportRef}#${name}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        out.push({ ref: reportRef, excerpt: `${name}: found=true` });
+        out.push({ ref: reportRef, excerpt: `${label}: found=true` });
         if (out.length >= 12) return out;
         continue;
       }
@@ -482,8 +513,8 @@ function evidenceFromFoundSignals(
         out.push({
           ref: r,
           excerpt: looksLikeFinding
-            ? `${name}: found=true — unauthenticated caller not rejected`
-            : `${name}: found=true`,
+            ? `${label}: found=true — unauthenticated caller not rejected`
+            : `${label}: found=true`,
         });
         if (out.length >= 12) return out;
       }
@@ -827,7 +858,11 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
         estimatedEffort: "",
       },
       ...(notApplicable
-        ? { naReason: "Collector reported not_applicable (surface absent)." }
+        ? {
+            naReason:
+              mapped?.naReason ??
+              "Collector reported not_applicable (surface absent).",
+          }
         : {}),
     });
   }

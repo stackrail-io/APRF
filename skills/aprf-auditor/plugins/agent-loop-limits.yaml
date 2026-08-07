@@ -1,5 +1,5 @@
 id: agent-loop-limits
-title: Agent loop limits — max steps, wall-clock, spawn depth (AGN-M2)
+title: Agent execution bounds — iteration, duration, recursion/delegation (AGN-M2)
 version: "0.2.0"
 executor: collectors/agent-loop-limits.ts
 evidenceClass: runtime-config
@@ -9,10 +9,10 @@ inputs:
   - "Target repo (agent runtimes, orchestrators, configs, tests)"
   - "Optional measured suite: aprf-assessment/imports/agent-loop-limits/*.{json}"
 collect:
-  - "Detect max-steps / iteration limits in agent-related config or code"
-  - "Detect wall-clock / run timeout settings"
-  - "Detect spawn-depth / child-agent limits"
-  - "Detect enforcement tests that abort on exceedance"
+  - "Detect iteration bounds (max_steps / max_iterations / max_tool_calls / …)"
+  - "Detect duration bounds (timeout / deadline / wall_clock / execution_timeout / …)"
+  - "Detect recursion/delegation bounds when spawn/sub-agent capability is present"
+  - "Detect enforcement tests that abort on exceedance with no continue-after-abort"
   - "Ingest imported abort-on-exceed results; write agent-loop-limits-report.json"
 emits:
   nodeClass: runtime-config
@@ -21,14 +21,19 @@ emits:
     - agent-loop-limits
     - agn-m2
     - repo-agent-loop-limits
-    - max-steps
-    - wall-clock
-    - spawn-depth
+    - iteration-bound
+    - duration-bound
+    - recursion-delegation-bound-applicable
 mapsToChecks: [AGN-M2]
 whenUnavailable: >
   Config discovery alone is PARTIAL. AGN-M2 PASS needs imported measured results
-  showing abort/fail-closed when steps, wall-clock, or spawn depth are exceeded
-  (0 prompt-only limits) plus measuredAt ≤90 days. No agent signals → NOT_APPLICABLE.
+  showing abort/fail-closed when each applicable bound is exceeded
+  (continuesAfterAbort=false, 0 prompt-only limits) plus measuredAt ≤90 days.
+  Recursion/delegation depth is required only when spawn/sub-agent capability
+  is present; otherwise that bound is N/A. No in-scope agent-runtime signals
+  (or import productionAgentRuntimesPresent=false) → NOT_APPLICABLE with
+  summary.naReason citing appliesTo / notApplicableTo; assess excludes N/A
+  from the mandatory gate.
 live:
   required: false
   note: Offline repo heuristics + optional imported enforcement suite JSON.
