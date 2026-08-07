@@ -431,7 +431,7 @@ export function buildAgentLoopLimitsReport(opts: {
     opts.imported.limitsEnforcedAbort === true &&
     (opts.imported.promptOnlyLimits === null ||
       opts.imported.promptOnlyLimits === 0) &&
-    opts.imported.continuesAfterAbort !== true &&
+    opts.imported.continuesAfterAbort === false &&
     measuredAtFresh(opts.imported.measuredAt)
   ) {
     statusHint = "pass";
@@ -484,7 +484,11 @@ export function buildAgentLoopLimitsReport(opts: {
         "Recursion/delegation depth bound (spawn_depth / delegation_depth / max_recursion / graph_depth / …) — required because spawn/sub-agent capability was detected",
       );
     }
-    if (!opts.imported.found || opts.imported.limitsEnforcedAbort !== true) {
+    if (
+      !opts.imported.found ||
+      opts.imported.limitsEnforcedAbort !== true ||
+      opts.imported.continuesAfterAbort !== false
+    ) {
       gapNotes.push(
         "Measured abort-on-exceed results under imports/agent-loop-limits/ (limitsEnforcedAbort=true, continuesAfterAbort=false, measuredAt ≤90d) — config/tests alone cannot PASS",
       );
