@@ -7,6 +7,7 @@
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
+import { getGeneratedCatalog } from "@stackrail-io/aprf-engine";
 import type {
   Collector,
   CollectorContext,
@@ -28,24 +29,16 @@ const PLUGIN_ID = "agent-loop-limits";
 const RELATED = ["AGN-M2"] as const;
 const DETECTOR_ID = "repo-agent-loop-limits";
 
-/** Mirrors AGN-M2 applicability.appliesTo / notApplicableTo (catalog metadata). */
-const APPLIES_TO = [
-  "agent frameworks",
-  "orchestration frameworks",
-  "workflow engines",
-  "MCP clients",
-  "MCP servers acting autonomously",
-  "A2A runtimes",
-  "multi-agent systems",
-] as const;
-
-const NOT_APPLICABLE_TO = [
-  "simple chat completion APIs",
-  "single inference endpoints",
-  "embeddings",
-  "classifiers",
-  "rerankers",
-] as const;
+/** AGN-M2 applicability from catalog YAML (packages/aprf-engine/rules/.../AGN-M2.yaml). */
+function agnM2ScopeLists(): {
+  appliesTo: string[];
+  notApplicableTo: string[];
+} {
+  const rule = getGeneratedCatalog().rules.find((r) => r.id === "AGN-M2");
+  const appliesTo = rule?.applicability.appliesTo ?? [];
+  const notApplicableTo = rule?.applicability.notApplicableTo ?? [];
+  return { appliesTo, notApplicableTo };
+}
 
 /** Path segments that imply an agent/orchestration tree (scope + config association). */
 const AGENT_PATH_RE =
@@ -393,15 +386,22 @@ function loadImported(ctx: CollectorContext): AgentLoopLimitsReport["importedRes
 function buildNaReason(opts: {
   outOfScopeRefs: string[];
   importSaysAbsent: boolean;
+  appliesTo: string[];
+  notApplicableTo: string[];
 }): string {
-  const classes = NOT_APPLICABLE_TO.join(", ");
+  const applies =
+    opts.appliesTo.length > 0 ? opts.appliesTo.join(", ") : "agent runtimes";
+  const classes =
+    opts.notApplicableTo.length > 0
+      ? opts.notApplicableTo.join(", ")
+      : "chat-only / single-inference / embeddings / classifiers / rerankers";
   if (opts.importSaysAbsent) {
-    return `NOT_APPLICABLE: import attested productionAgentRuntimesPresent=false. AGN-M2 applies to ${APPLIES_TO.join(", ")}; not to ${classes}.`;
+    return `NOT_APPLICABLE: import attested productionAgentRuntimesPresent=false. AGN-M2 applies to ${applies}; not to ${classes}.`;
   }
   if (opts.outOfScopeRefs.length > 0) {
-    return `NOT_APPLICABLE: no production agent-runtime signals; out-of-scope surfaces found (${opts.outOfScopeRefs.slice(0, 3).join(", ")}). Applies to ${APPLIES_TO.join(", ")}; not to ${classes}.`;
+    return `NOT_APPLICABLE: no production agent-runtime signals; out-of-scope surfaces found (${opts.outOfScopeRefs.slice(0, 3).join(", ")}). Applies to ${applies}; not to ${classes}.`;
   }
-  return `NOT_APPLICABLE: no production agent-runtime signals. Applies to ${APPLIES_TO.join(", ")}; not to ${classes}.`;
+  return `NOT_APPLICABLE: no production agent-runtime signals. Applies to ${applies}; not to ${classes}.`;
 }
 
 export function buildAgentLoopLimitsReport(opts: {
@@ -415,6 +415,7 @@ export function buildAgentLoopLimitsReport(opts: {
   outOfScopeRefs: string[];
   imported: AgentLoopLimitsReport["importedResults"];
 }): AgentLoopLimitsReport {
+  const { appliesTo, notApplicableTo } = agnM2ScopeLists();
   const notes: string[] = [];
   const spawnDepthApplicable = opts.spawnCapability.found;
   const requiredBoundsPresent =
@@ -437,7 +438,14 @@ export function buildAgentLoopLimitsReport(opts: {
       importSaysPresent);
 
   if (!inScope) {
-    notes.push(buildNaReason({ outOfScopeRefs: opts.outOfScopeRefs, importSaysAbsent }));
+    notes.push(
+      buildNaReason({
+        outOfScopeRefs: opts.outOfScopeRefs,
+        importSaysAbsent,
+        appliesTo,
+        notApplicableTo,
+      }),
+    );
   } else if (opts.agentSignals) {
     notes.push("In scope: production agent-runtime / orchestration signals present.");
   }
@@ -505,6 +513,8 @@ export function buildAgentLoopLimitsReport(opts: {
     naReason = buildNaReason({
       outOfScopeRefs: opts.outOfScopeRefs,
       importSaysAbsent,
+      appliesTo,
+      notApplicableTo,
     });
   } else if (measuredFail) {
     statusHint = "fail";
@@ -611,8 +621,8 @@ export function buildAgentLoopLimitsReport(opts: {
       agentSignalsPresent: opts.agentSignals,
       inScope,
       naReason,
-      appliesTo: [...APPLIES_TO],
-      notApplicableTo: [...NOT_APPLICABLE_TO],
+      appliesTo,
+      notApplicableTo,
       agnM2Satisfied,
       statusHint,
     },
