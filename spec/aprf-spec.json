@@ -297,6 +297,78 @@
       "slug": "0003-observability-obs-m2-to-recommended",
       "href": "/aprf/rfc/0003-observability-obs-m2-to-recommended/",
       "markdownPath": "/aprf/rfc/0003-observability-obs-m2-to-recommended.md"
+    },
+    {
+      "id": "APRF-RFC-0004",
+      "number": 4,
+      "title": "Split PERF-M2 dashboards — metrics stay mandatory; dashboards → PERF-R4",
+      "status": "accepted",
+      "created": "2026-08-01",
+      "semverImpact": "MINOR",
+      "summary": "Rewrites PERF-M2 as mandatory ops metrics; adds PERF-R4 for near-real-time dashboards as recommended maturity.",
+      "slug": "0004-performance-slo-perf-m2-dashboards-to-recommended",
+      "href": "/aprf/rfc/0004-performance-slo-perf-m2-dashboards-to-recommended/",
+      "markdownPath": "/aprf/rfc/0004-performance-slo-perf-m2-dashboards-to-recommended.md"
+    },
+    {
+      "id": "APRF-RFC-0005",
+      "number": 5,
+      "title": "Demote reliability-continuity REL-M4 to recommended (REL-R3)",
+      "status": "accepted",
+      "created": "2026-08-01",
+      "semverImpact": "MINOR",
+      "summary": "Demotes REL-M4→REL-R3 (process continuity options with owners); pre-release ID-removal exception.",
+      "slug": "0005-reliability-continuity-rel-m4-to-recommended",
+      "href": "/aprf/rfc/0005-reliability-continuity-rel-m4-to-recommended/",
+      "markdownPath": "/aprf/rfc/0005-reliability-continuity-rel-m4-to-recommended.md"
+    },
+    {
+      "id": "APRF-RFC-0006",
+      "number": 6,
+      "title": "Demote reliability-continuity REL-M7 to recommended (REL-R5)",
+      "status": "accepted",
+      "created": "2026-08-01",
+      "semverImpact": "MINOR",
+      "summary": "Demotes REL-M7→REL-R5 (AI-dependency chaos); removes from Regulated mandatories; pre-release ID-removal exception.",
+      "slug": "0006-reliability-continuity-rel-m7-to-recommended",
+      "href": "/aprf/rfc/0006-reliability-continuity-rel-m7-to-recommended/",
+      "markdownPath": "/aprf/rfc/0006-reliability-continuity-rel-m7-to-recommended.md"
+    },
+    {
+      "id": "APRF-RFC-0007",
+      "number": 7,
+      "title": "Demote reliability-continuity REL-M8 to recommended (REL-R7)",
+      "status": "accepted",
+      "created": "2026-08-01",
+      "semverImpact": "MINOR",
+      "summary": "Demotes REL-M8→REL-R7 (multi-provider Level-5 continuity); removes from Regulated mandatories; pre-release ID-removal exception.",
+      "slug": "0007-reliability-continuity-rel-m8-to-recommended",
+      "href": "/aprf/rfc/0007-reliability-continuity-rel-m8-to-recommended/",
+      "markdownPath": "/aprf/rfc/0007-reliability-continuity-rel-m8-to-recommended.md"
+    },
+    {
+      "id": "APRF-RFC-0008",
+      "number": 8,
+      "title": "Demote explainability EXP-M4 to recommended (EXP-R3)",
+      "status": "accepted",
+      "created": "2026-08-01",
+      "semverImpact": "MINOR",
+      "summary": "Demotes EXP-M4→EXP-R3 (change/counterfactual summaries); removes from Regulated mandatories; pre-release ID-removal exception.",
+      "slug": "0008-explainability-exp-m4-to-recommended",
+      "href": "/aprf/rfc/0008-explainability-exp-m4-to-recommended/",
+      "markdownPath": "/aprf/rfc/0008-explainability-exp-m4-to-recommended.md"
+    },
+    {
+      "id": "APRF-RFC-0009",
+      "number": 9,
+      "title": "Demote adversarial-security SEC-M5 to recommended (SEC-R3)",
+      "status": "accepted",
+      "created": "2026-08-01",
+      "semverImpact": "MINOR",
+      "summary": "Demotes SEC-M5→SEC-R3 (exfiltration detection; canaries optional among equivalents); removes from Regulated mandatories; pre-release ID-removal exception.",
+      "slug": "0009-adversarial-security-sec-m5-to-recommended",
+      "href": "/aprf/rfc/0009-adversarial-security-sec-m5-to-recommended/",
+      "markdownPath": "/aprf/rfc/0009-adversarial-security-sec-m5-to-recommended.md"
     }
   ],
   "scope": {
@@ -5254,17 +5326,17 @@
   "stats": {
     "domainCount": 8,
     "pillarCount": 27,
-    "mandatoryCheckCount": 108,
-    "recommendedCheckCount": 69,
+    "mandatoryCheckCount": 92,
+    "recommendedCheckCount": 85,
     "ruleEngine": {
       "package": "@stackrail-io/aprf-engine",
       "note": "Normative rule bodies live in packages/aprf-engine/rules/; pillars hydrate checks at load time."
     },
     "profileCount": 2,
-    "coreProfileCheckCount": 40,
+    "coreProfileCheckCount": 39,
     "crosswalkCount": 6,
     "crosswalkMappingCount": 51,
     "lensCount": 4,
-    "lensCheckCount": 63
+    "lensCheckCount": 50
   }
 }

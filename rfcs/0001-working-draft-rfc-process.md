@@ -6,6 +6,7 @@
 | Author(s) | StackRail (working-draft publisher) |
 | Created | 2026-07-24 |
 | SemVer impact | MINOR |
+| Index summary | Editorial RFC that ratifies the stewardship RFC stages on the site, publishes this index, and records the first open review window—no taxonomy changes. |
 
 ## Problem
 

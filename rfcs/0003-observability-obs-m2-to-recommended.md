@@ -6,6 +6,7 @@
 | Author(s) | StackRail (working-draft publisher) |
 | Created | 2026-08-01 |
 | SemVer impact | MINOR |
+| Index summary | Demotes OBS-M2→OBS-R4 (token/cost attribution); removes from Core/Regulated mandatories; pre-release ID-removal exception. |
 | Related | [APRF-RFC-0002](0002-incident-readiness-mandatory-to-recommended.md) (pre-release ID-removal exception) |
 
 ## Problem

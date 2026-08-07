@@ -6,6 +6,7 @@
 | Author(s) | |
 | Created | YYYY-MM-DD |
 | SemVer impact | PATCH \| MINOR \| MAJOR |
+| Index summary | One-sentence index blurb for aprf-spec.json `rfcs` |
 
 ## Problem
 

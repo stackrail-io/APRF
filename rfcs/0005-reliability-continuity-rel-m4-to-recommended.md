@@ -6,6 +6,7 @@
 | Author(s) | StackRail (working-draft publisher) |
 | Created | 2026-08-01 |
 | SemVer impact | MINOR |
+| Index summary | Demotes REL-M4→REL-R3 (process continuity options with owners); pre-release ID-removal exception. |
 | Related | [APRF-RFC-0002](0002-incident-readiness-mandatory-to-recommended.md), [APRF-RFC-0003](0003-observability-obs-m2-to-recommended.md) (pre-release M→R pattern) |
 
 ## Problem

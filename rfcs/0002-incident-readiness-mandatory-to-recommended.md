@@ -6,6 +6,7 @@
 | Author(s) | StackRail (working-draft publisher) |
 | Created | 2026-08-01 |
 | SemVer impact | MINOR |
+| Index summary | Demotes INC-M3→INC-R2 and INC-M4→INC-R4; documents pre-release exception for removing IDs without deprecated stubs before the first tagged version. |
 | Implements | PR [#14](https://github.com/stackrail-io/APRF/pull/14) (`feat/incident-readiness-hybrid`) |
 
 ## Problem
