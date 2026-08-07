@@ -437,6 +437,19 @@ function isFoundRefsGroup(
   return typeof o.found === "boolean" && Array.isArray(o.refs);
 }
 
+/** Customer-facing labels for collector signal keys in Evidence found. */
+const SIGNAL_DISPLAY_NAMES: Record<string, string> = {
+  maxSteps: "iterationBound",
+  wallClock: "durationBound",
+  spawnDepth: "recursionBound",
+  enforcementTests: "enforcementTests",
+  spawnCapability: "spawnCapability",
+};
+
+function signalDisplayName(name: string): string {
+  return SIGNAL_DISPLAY_NAMES[name] ?? name;
+}
+
 /**
  * Prefer Evidence found from collector report `signals.<name>.found === true`
  * refs. If `signals` is absent, fall back to top-level `{ found, refs }` groups
@@ -476,6 +489,7 @@ function evidenceFromFoundSignals(
     const seen = new Set<string>();
     for (const [name, raw] of Object.entries(signalMap)) {
       if (!isFoundRefsGroup(raw) || raw.found !== true) continue;
+      const label = signalDisplayName(name);
       const refs = raw.refs.filter(
         (r): r is string => typeof r === "string" && r.trim().length > 0,
       );
@@ -483,7 +497,7 @@ function evidenceFromFoundSignals(
         const key = `${reportRef}#${name}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        out.push({ ref: reportRef, excerpt: `${name}: found=true` });
+        out.push({ ref: reportRef, excerpt: `${label}: found=true` });
         if (out.length >= 12) return out;
         continue;
       }
@@ -496,8 +510,8 @@ function evidenceFromFoundSignals(
         out.push({
           ref: r,
           excerpt: looksLikeFinding
-            ? `${name}: found=true — unauthenticated caller not rejected`
-            : `${name}: found=true`,
+            ? `${label}: found=true — unauthenticated caller not rejected`
+            : `${label}: found=true`,
         });
         if (out.length >= 12) return out;
       }
