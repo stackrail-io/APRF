@@ -438,16 +438,19 @@ function isFoundRefsGroup(
 }
 
 /** Customer-facing labels for collector signal keys in Evidence found. */
-const SIGNAL_DISPLAY_NAMES: Record<string, string> = {
-  maxSteps: "iterationBound",
-  wallClock: "durationBound",
-  spawnDepth: "recursionBound",
-  enforcementTests: "enforcementTests",
-  spawnCapability: "spawnCapability",
-};
+const SIGNAL_DISPLAY_NAMES: Record<string, string> = Object.assign(
+  Object.create(null) as Record<string, string>,
+  {
+    maxSteps: "iterationBound",
+    wallClock: "durationBound",
+    spawnDepth: "recursionBound",
+  },
+);
 
 function signalDisplayName(name: string): string {
-  return SIGNAL_DISPLAY_NAMES[name] ?? name;
+  return Object.prototype.hasOwnProperty.call(SIGNAL_DISPLAY_NAMES, name)
+    ? SIGNAL_DISPLAY_NAMES[name]!
+    : name;
 }
 
 /**
