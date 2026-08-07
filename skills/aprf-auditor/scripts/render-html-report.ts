@@ -20,7 +20,12 @@ import {
 import { dirname, resolve, join, extname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parse as parseYaml } from "yaml";
-import { getGeneratedCatalog } from "@stackrail-io/aprf-engine";
+import {
+  getCrosswalksForCheck,
+  getThreatIntelForCheck,
+  SEVERITY_WEIGHT,
+  getGeneratedCatalog,
+} from "@stackrail-io/aprf-engine";
 import { allPassSamples, getPassSamples } from "./pass-samples.ts";
 import {
   customerFacingGap,
@@ -196,6 +201,23 @@ type Control = {
   references?: Array<{ title?: string; url?: string } | string>;
   evidenceFound?: Array<{ ref: string; excerpt?: string }>;
   requiredEvidenceMissing?: string[];
+  /** Why the control exists; falls back to the catalog threat map. */
+  threatIntel?: {
+    securityIntent?: string;
+    threats?: string[];
+    protects?: string[];
+    mitre?: { atlas?: string[]; attack?: string[] };
+    mappingRationale?: string;
+  };
+  /** Informative peer-framework alignment; falls back to the catalog crosswalks. */
+  crosswalks?: Array<{
+    framework: string;
+    frameworkId?: string;
+    controlRef: string;
+    controlTitle?: string;
+    relation: string;
+    url?: string;
+  }>;
   remediation?: {
     fix: string;
     example?: string;
@@ -946,6 +968,164 @@ function nextStepsForControl(c: Control): string[] {
   return [...new Set(steps)];
 }
 
+/**
+ * Peer-framework crosswalks for a Check. Prefers what the assessment recorded
+ * (so a report stays faithful to the catalog version it was written against),
+ * and falls back to the shipped catalog for assessments that predate the field.
+ */
+function crosswalksForControl(c: Control): NonNullable<Control["crosswalks"]> {
+  if (c.crosswalks?.length) return c.crosswalks;
+  return getCrosswalksForCheck(c.checkId).map((x) => ({
+    framework: x.framework,
+    frameworkId: x.frameworkId,
+    controlRef: x.controlRef,
+    controlTitle: x.controlTitle,
+    relation: x.relation,
+    url: x.url,
+  }));
+}
+
+/** Threat context for a Check, preferring the assessment then the shipped catalog. */
+function threatIntelForControl(c: Control): Control["threatIntel"] | null {
+  if (c.threatIntel?.securityIntent) return c.threatIntel;
+  return getThreatIntelForCheck(c.checkId);
+}
+
+/**
+ * Deep-link a MITRE technique. ATLAS addresses sub-techniques by their full
+ * dotted ID; ATT&CK nests them as a path segment under the parent technique.
+ */
+function mitreUrl(id: string, framework: "atlas" | "attack"): string {
+  if (framework === "atlas") {
+    return `https://atlas.mitre.org/techniques/${id}`;
+  }
+  const [parent, sub] = id.split(".");
+  return sub
+    ? `https://attack.mitre.org/techniques/${parent}/${sub}/`
+    : `https://attack.mitre.org/techniques/${parent}/`;
+}
+
+function threatIntelBlock(c: Control): string {
+  const ti = threatIntelForControl(c);
+  if (!ti?.securityIntent) return "";
+
+  const chips = (items: string[] | undefined, cls: string): string =>
+    items?.length
+      ? `<div class="meta-chips">${items
+          .map((t) => `<span class="chip ${cls}">${esc(t)}</span>`)
+          .join("")}</div>`
+      : "";
+
+  const atlas = ti.mitre?.atlas ?? [];
+  const attack = ti.mitre?.attack ?? [];
+  const techLinks = [
+    ...atlas.map((id) => ({ id, url: mitreUrl(id, "atlas"), label: "ATLAS" })),
+    ...attack.map((id) => ({ id, url: mitreUrl(id, "attack"), label: "ATT&CK" })),
+  ];
+  const mitreLine = techLinks.length
+    ? `<p class="meta">MITRE: ${techLinks
+        .map(
+          (t) =>
+            `<a href="${esc(t.url)}" rel="noopener">${esc(t.label)} ${esc(t.id)}</a>`,
+        )
+        .join(" · ")}</p>`
+    : `<p class="meta">MITRE: no technique mapped — this control addresses governance or assurance rather than a specific adversary technique.</p>`;
+
+  return `<div class="threat-intel">
+  <p><strong>Why this control exists</strong> <span class="meta">— informative threat context; mappings reduce exposure and do not guarantee mitigation</span></p>
+  <p>${esc(ti.securityIntent)}</p>
+  ${ti.threats?.length ? `<p class="meta">Threats mitigated</p>${chips(ti.threats, "risk")}` : ""}
+  ${ti.protects?.length ? `<p class="meta">Protects</p>${chips(ti.protects, "asset")}` : ""}
+  ${mitreLine}
+  ${ti.mappingRationale ? `<p>${esc(ti.mappingRationale)}</p>` : ""}
+</div>`;
+}
+
+type ThreatExposure = {
+  threat: string;
+  checkIds: string[];
+  blockers: number;
+  weight: number;
+};
+
+/**
+ * Rank threats by the exposure left open by unmet controls, so the summary can
+ * answer "what is this system most exposed to right now" without opening every
+ * Check. "Unmet" matches the domain-score and gate definition (FAIL, PARTIAL,
+ * NOT_DEMONSTRATED) — it therefore includes controls that are merely unproven.
+ */
+function topThreatExposure(controls: Control[], limit = 6): ThreatExposure[] {
+  const unmet = new Set(["FAIL", "PARTIAL", "NOT_DEMONSTRATED"]);
+  const byThreat = new Map<string, ThreatExposure>();
+
+  for (const c of controls) {
+    const status = (c.status || "").toUpperCase().replace(/-/g, "_");
+    if (!unmet.has(status)) continue;
+    const threats = threatIntelForControl(c)?.threats ?? [];
+    if (threats.length === 0) continue;
+
+    const mandatory = (c.gate ?? "").toLowerCase() === "mandatory";
+    const severity = (c.severity ?? "").toLowerCase() as keyof typeof SEVERITY_WEIGHT;
+    // Gate-blocking controls count double: they hold production readiness open.
+    const weight = (SEVERITY_WEIGHT[severity] ?? 1) * (mandatory ? 2 : 1);
+
+    for (const threat of threats) {
+      const entry = byThreat.get(threat) ?? {
+        threat,
+        checkIds: [],
+        blockers: 0,
+        weight: 0,
+      };
+      entry.checkIds.push(c.checkId);
+      if (mandatory) entry.blockers += 1;
+      entry.weight += weight;
+      byThreat.set(threat, entry);
+    }
+  }
+
+  return [...byThreat.values()]
+    .sort(
+      (a, b) =>
+        b.weight - a.weight ||
+        b.checkIds.length - a.checkIds.length ||
+        a.threat.localeCompare(b.threat),
+    )
+    .slice(0, limit);
+}
+
+function topThreatsBlock(controls: Control[]): string {
+  const top = topThreatExposure(controls);
+  if (top.length === 0) return "";
+
+  const rows = top
+    .map((t) => {
+      const shown = t.checkIds.slice(0, 4).map(esc).join(", ");
+      const extra = t.checkIds.length - 4;
+      const blockerNote =
+        t.blockers > 0
+          ? `<span class="pill bad">${t.blockers} gate-blocking</span>`
+          : `<span class="pill muted">non-gate</span>`;
+      return `<tr>
+        <td><span class="chip risk">${esc(t.threat)}</span></td>
+        <td>${t.checkIds.length}</td>
+        <td>${blockerNote}</td>
+        <td class="meta">${shown}${extra > 0 ? ` +${extra} more` : ""}</td>
+      </tr>`;
+    })
+    .join("");
+
+  return `<section class="threat-rollup">
+  <h3>Top threat exposure</h3>
+  <p class="meta" style="max-width:72ch">Threats carried by controls that are not yet met (failed, partial, or not demonstrated). Ranked by the severity of those controls, counting gate-blocking ones double. Threat context is informative — an unmet control means the exposure is unmitigated or unproven, not that an attack has occurred.</p>
+  <div class="panel">
+  <table>
+    <thead><tr><th>Threat</th><th>Unmet controls</th><th>Gate impact</th><th>Checks</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  </div>
+  </section>`;
+}
+
 function controlDetailBody(c: Control): string {
   const statusKey = (c.status || "").toUpperCase().replace(/-/g, "_");
   const evidence =
@@ -999,6 +1179,20 @@ function controlDetailBody(c: Control): string {
         })
         .join("")}</ul>`
     : "";
+  const crosswalks = crosswalksForControl(c);
+  const crosswalkBlock =
+    crosswalks.length > 0
+      ? `<p><strong>Framework crosswalk</strong> <span class="meta">— informative alignment only; not certification or proof of compliance</span></p>
+      <ul>${crosswalks
+        .map((x) => {
+          const label = `${x.framework} ${x.controlRef}${x.controlTitle ? ` — ${x.controlTitle}` : ""}`;
+          const linked = x.url
+            ? `<a href="${esc(x.url)}" rel="noopener">${esc(label)}</a>`
+            : esc(label);
+          return `<li>${linked} <span class="meta">(${esc(x.relation)})</span></li>`;
+        })
+        .join("")}</ul>`
+      : "";
   const catalogMissing =
     !c.description &&
     !c.whyItMatters &&
@@ -1011,7 +1205,9 @@ function controlDetailBody(c: Control): string {
   <p class="meta">Category: <code>${esc(c.category)}</code> (${esc(controlCategory(c))}) · Domain: ${esc(controlDomain(c))}</p>
   ${c.description ? `<p><strong>Description:</strong> ${esc(c.description)}</p>` : ""}
   ${c.whyItMatters ? `<p><strong>Why it matters:</strong> ${esc(c.whyItMatters)}</p>` : ""}
+  ${threatIntelBlock(c)}
   ${refs}
+  ${crosswalkBlock}
   ${c.passCondition ? `<p><strong>Pass condition:</strong> ${esc(c.passCondition)}</p>` : ""}
   ${evidenceRequired}
   ${c.manualVerification ? formatManualVerification(c.manualVerification) : ""}
@@ -1326,6 +1522,13 @@ function render(a: Assessment): string {
       border: 1px solid #c9dde5; border-radius: 999px;
       padding: 0.22rem 0.65rem; font-size: 0.75rem; font-weight: 600;
     }
+    .chip.risk { background: var(--bad-bg); color: var(--bad); border-color: #e6c9c9; }
+    .chip.asset { background: var(--na-bg); color: var(--na); border-color: #d5d5d5; }
+    .threat-intel {
+      border-left: 3px solid var(--accent); padding: 0.1rem 0 0.1rem 0.9rem;
+      margin: 0.9rem 0;
+    }
+    .threat-intel .meta-chips { margin: 0.3rem 0 0.6rem; }
     .lede {
       font-family: var(--serif); font-size: 1.05rem; color: var(--muted);
       margin: 0.65rem 0 0; max-width: 62ch;
@@ -1338,6 +1541,9 @@ function render(a: Assessment): string {
     }
     h2 .hint { font-size: 0.78rem; font-weight: 500; color: var(--muted); border: 0; letter-spacing: 0; }
     h3 { font-size: 0.95rem; font-weight: 650; margin: 0 0 0.75rem; }
+    .threat-rollup { margin-top: 2rem; }
+    .threat-rollup h3 { margin-bottom: 0.35rem; }
+    .threat-rollup .panel { margin-top: 0.75rem; }
     .meta, .empty, footer { color: var(--muted); font-size: 0.9rem; }
     .banner {
       background: var(--warn-bg); border: 1px solid #efd9a0; border-left: 4px solid var(--warn);
@@ -1676,6 +1882,7 @@ function render(a: Assessment): string {
         ? `<p class="verify-callout" style="max-width:72ch"><strong>${needsVerificationCount} check${needsVerificationCount === 1 ? "" : "s"} ${needsVerificationCount === 1 ? "is" : "are"} implemented but unverified.</strong> The control was found in this repository, but the Check requires measured proof (a test, drill, or probe result) before it can pass. These are the shortest path to closing the gate — filter the table by <em>Needs verification</em> to see them.</p>`
         : ""
     }
+    ${topThreatsBlock(a.controls)}
 
     <h2>Visual overview</h2>
     <div class="viz-grid">

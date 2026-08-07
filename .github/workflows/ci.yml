@@ -47,6 +47,9 @@ jobs:
       - name: YAML catalog ↔ published spec ↔ profile integrity
         run: npm run aprf:integrity
 
+      - name: Threat map coverage, vocabularies, and MITRE IDs
+        run: npm run aprf:threat-map
+
       - name: Collectors unused locals / useless assignments
         run: npm run aprf:collectors:unused
 

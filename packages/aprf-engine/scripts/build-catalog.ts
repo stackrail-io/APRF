@@ -9,6 +9,8 @@ import { createHash } from "crypto";
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { parse as parseYaml } from "yaml";
+import type { CrosswalkDef, ThreatIntelDef } from "../src/catalog-types";
 import { loadRulesFromDisk, rulesRootDir } from "../src/loader";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -19,11 +21,53 @@ function contentStamp(
   pillars: unknown,
   categories: unknown,
   rules: unknown,
+  crosswalks: unknown,
+  threatIntel: unknown,
 ): string {
   const digest = createHash("sha256")
-    .update(JSON.stringify({ domains, pillars, categories, rules }))
+    .update(
+      JSON.stringify({
+        domains,
+        pillars,
+        categories,
+        rules,
+        crosswalks,
+        threatIntel,
+      }),
+    )
     .digest("hex");
   return `sha256:${digest}`;
+}
+
+function findRepoRoot(from: string): string {
+  let dir = from;
+  for (let i = 0; i < 8; i++) {
+    if (existsSync(join(dir, "spec", "aprf-spec.json"))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return from;
+}
+
+/** Crosswalks are published in spec/aprf-spec.json; embed them so the catalog ships offline. */
+function loadCrosswalks(rulesRoot: string): CrosswalkDef[] {
+  const specPath = join(findRepoRoot(rulesRoot), "spec", "aprf-spec.json");
+  if (!existsSync(specPath)) return [];
+  const spec = JSON.parse(readFileSync(specPath, "utf8")) as {
+    crosswalks?: CrosswalkDef[];
+  };
+  return spec.crosswalks ?? [];
+}
+
+/** Threat context lives in spec/aprf-threat-map.yaml; embed it so the catalog ships offline. */
+function loadThreatIntel(rulesRoot: string): Record<string, ThreatIntelDef> {
+  const mapPath = join(findRepoRoot(rulesRoot), "spec", "aprf-threat-map.yaml");
+  if (!existsSync(mapPath)) return {};
+  const doc = parseYaml(readFileSync(mapPath, "utf8")) as {
+    rules?: Record<string, ThreatIntelDef>;
+  };
+  return doc.rules ?? {};
 }
 
 function main() {
@@ -36,13 +80,67 @@ function main() {
     process.exit(1);
   }
 
+  const crosswalks = loadCrosswalks(root);
+  const ruleIds = new Set(rules.map((r) => r.id));
+  for (const cw of crosswalks) {
+    const peerControlIds = new Set((cw.controls ?? []).map((c) => c.id));
+    for (const m of cw.mappings ?? []) {
+      // buildCrosswalkIndex skips mappings whose peer control is unknown, so an
+      // unvalidated typo would silently drop crosswalks from reports.
+      if (!peerControlIds.has(m.peerControlId)) {
+        console.error(
+          `aprf-engine build-catalog refused — crosswalk ${cw.id} maps unknown peer control ${m.peerControlId}`,
+        );
+        process.exit(1);
+      }
+      for (const id of m.aprfCheckIds ?? []) {
+        if (!ruleIds.has(id)) {
+          console.error(
+            `aprf-engine build-catalog refused — crosswalk ${cw.id} maps unknown Check ${id}`,
+          );
+          process.exit(1);
+        }
+      }
+    }
+  }
+
+  const threatIntel = loadThreatIntel(root);
+  for (const id of Object.keys(threatIntel)) {
+    if (!ruleIds.has(id)) {
+      console.error(
+        `aprf-engine build-catalog refused — threat map describes unknown Check ${id}`,
+      );
+      process.exit(1);
+    }
+  }
+  // Once the map exists it must stay complete, so a new Check cannot ship without
+  // threat context. An absent map is tolerated for bootstrap builds.
+  if (Object.keys(threatIntel).length > 0) {
+    const missing = rules.map((r) => r.id).filter((id) => !threatIntel[id]);
+    if (missing.length > 0) {
+      console.error(
+        `aprf-engine build-catalog refused — threat map missing ${missing.length} Check(s): ${missing.join(", ")}`,
+      );
+      process.exit(1);
+    }
+  }
+
   const catalog = {
-    generatedAt: contentStamp(domains, pillars, categories, rules),
+    generatedAt: contentStamp(
+      domains,
+      pillars,
+      categories,
+      rules,
+      crosswalks,
+      threatIntel,
+    ),
     ruleCount: rules.length,
     domains,
     pillars,
     categories,
     rules,
+    crosswalks,
+    threatIntel,
   };
 
   const body = `/* eslint-disable */

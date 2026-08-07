@@ -27,8 +27,21 @@ export {
   getRuleById,
 } from "./index-builder.js";
 
-export type { GeneratedCatalog } from "./catalog-types.js";
-export { getGeneratedCatalog, getGeneratedRuleIndex } from "./catalog.js";
+export type {
+  GeneratedCatalog,
+  CrosswalkDef,
+  CrosswalkControlDef,
+  CrosswalkMappingDef,
+  CrosswalkRelation,
+  ThreatIntelDef,
+} from "./catalog-types.js";
+export type { CheckCrosswalk } from "./catalog.js";
+export {
+  getGeneratedCatalog,
+  getGeneratedRuleIndex,
+  getCrosswalksForCheck,
+  getThreatIntelForCheck,
+} from "./catalog.js";
 
 export {
   createDetectorRegistry,
