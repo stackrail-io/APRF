@@ -32,7 +32,7 @@ export const RULE_ENGINE_NOTE =
 
 type SpecSlice = {
   crosswalks?: Array<{ mappings?: unknown[] }>;
-  profiles?: unknown[];
+  profiles?: Array<{ id: string; mandatoryCheckIds?: string[] }>;
   lenses?: Array<{ additionalMandatoryCheckIds?: string[] }>;
   stats?: Partial<SpecStats>;
 };
@@ -66,6 +66,14 @@ export function computeSpecStats(
     }
   }
 
+  // Count Core from the supplied spec (fallback package profiles) so sync/integrity
+  // reflect the document being checked, not a stale import if the two diverge.
+  const profiles = spec.profiles ?? APRF_PROFILES;
+  const coreProfile = profiles.find((p) => p.id === PROFILE_CORE.id);
+  if (!coreProfile) {
+    throw new Error(`missing profile ${PROFILE_CORE.id}`);
+  }
+
   return {
     domainCount,
     pillarCount,
@@ -75,8 +83,8 @@ export function computeSpecStats(
       package: "@stackrail-io/aprf-engine",
       note: RULE_ENGINE_NOTE,
     },
-    profileCount: (spec.profiles ?? APRF_PROFILES).length,
-    coreProfileCheckCount: PROFILE_CORE.mandatoryCheckIds.length,
+    profileCount: profiles.length,
+    coreProfileCheckCount: coreProfile.mandatoryCheckIds?.length ?? 0,
     crosswalkCount: crosswalks.length,
     crosswalkMappingCount,
     lensCount: lenses.length,
