@@ -11,7 +11,7 @@ The public standard must remain citable for a decade. Implementations (collector
 
 ## Hard invariants
 
-1. **Normative vs operational split.** This repository owns Pillars, Checks (and optional Requirement *labels*), profiles/lenses, schemas, RFCs. Detections, Evidence stores, and engines are **products/plugins**.
+1. **Normative vs operational split.** Normative artifacts stay in this repository: Pillars, Checks (and optional Requirement *labels*), profiles/lenses, schemas, RFCs, plus informative crosswalks/threat context. **Operational** execution is separate from the standard: this repo ships a **reference** path that **does** collect Evidence from target repos (and optional imports/live probes) via `skills/aprf-auditor` collectors, then assess/report with `@stackrail-io/aprf`. Products may replace or extend that path (other collectors, Evidence stores, UIs) but must not redefine Check IDs or gate semantics.
 2. **Gates are binary.** Mandatory Checks are `pass` | `fail` | `na`. No org-wide “readiness %.”
 3. **Stable Check IDs.** Preserve the published namespace (`AUTHN-M1`, `SEC-M1`, …). Deprecate; never reuse; do not renumber to `SEC-001`.
 4. **Platform names stay out of Checks.** Principles in Checks; platforms only in Detections.

@@ -13,9 +13,9 @@ Three planes (hardened after adversarial review):
 
 | Plane | Contents | In this repo? |
 | --- | --- | --- |
-| **Normative** | Pillars → Checks (Requirement labels optional); profiles/lenses | Yes |
+| **Normative** | Pillars → Checks (Requirement labels optional); profiles/lenses; informative crosswalks/threat map | Yes |
 | **Binding** | Criticality, maturity floor, profile scope, N/A | Assessment-time |
-| **Operational** | Evidence (tiered), Detections, engine roles | **No** — plugins / products |
+| **Operational** | Evidence collection, Detections, engine roles | **Yes (reference):** repo collectors + CLI assess/report; products may ship their own stores/detectors/UIs |
 
 Gates stay binary (no org-wide readiness %). Platform names belong in Detections, not Checks. See **[ARCHITECTURE.md](ARCHITECTURE.md)** and the critique trail **[ARCHITECTURE-REVIEW.md](ARCHITECTURE-REVIEW.md)**.
 
