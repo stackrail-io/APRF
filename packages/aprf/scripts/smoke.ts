@@ -525,8 +525,21 @@ assert(
 assert(
   html.includes("Evidence coverage") &&
     html.includes("Repo collectors alone cannot produce PASS") &&
-    html.includes("You will not see PASS from a code scan alone"),
+    html.includes("You will not see PASS from a code scan alone") &&
+    html.includes("This assessment has 0 PASS"),
   "REPORT.html must explain hybrid evidence coverage and that repo-only collect cannot PASS",
+);
+// Executive summary order: verification callout → Evidence coverage → Top threat exposure.
+const verifyCalloutAt = html.indexOf("implemented but unverified");
+const evidenceCoverageAt = html.indexOf("Evidence coverage");
+const topThreatAt = html.indexOf("Top threat exposure");
+assert(
+  verifyCalloutAt >= 0 &&
+    evidenceCoverageAt >= 0 &&
+    topThreatAt >= 0 &&
+    verifyCalloutAt < evidenceCoverageAt &&
+    evidenceCoverageAt < topThreatAt,
+  "REPORT.html must order verification callout, then Evidence coverage, then Top threat exposure",
 );
 
 console.log(`aprf assess engine smoke OK → ${htmlPath}`);
