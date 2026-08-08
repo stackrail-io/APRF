@@ -47,6 +47,9 @@ jobs:
       - name: YAML catalog ↔ published spec ↔ profile integrity
         run: npm run aprf:integrity
 
+      - name: Sync RFCs and stats; fail if aprf-spec.json drifted
+        run: npm run aprf:check-spec-sync
+
       - name: Threat map coverage, vocabularies, and MITRE IDs
         run: npm run aprf:threat-map
 

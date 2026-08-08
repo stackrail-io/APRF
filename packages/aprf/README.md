@@ -37,22 +37,23 @@ aprf audit --target . --out ./aprf-assessment --profile core
 
 Same flags on `collect` and `audit`. Providing `--base-url` or admin/limited creds auto-enables live mode (no separate `--live` required). Passwords/tokens are never written to reports.
 
+Prefer **environment variables** set outside chat (secret manager or non-echoing prompt). Do **not** pass passwords/tokens on argv — process lists and CI logs can capture them:
+
 ```bash
+# Prerequisites already set in the local shell:
+#   APRF_ADMIN_EMAIL + APRF_ADMIN_PASSWORD  — or — APRF_ADMIN_TOKEN
+# Optional AUTHZ-M1: APRF_AUTHZ_LIMITED_EMAIL + APRF_AUTHZ_LIMITED_PASSWORD
+#   — or — APRF_AUTHZ_LIMITED_TOKEN
 npx @stackrail-io/aprf audit --target . --out ./aprf-assessment --profile core \
-  --base-url http://127.0.0.1:8080 \
-  --admin-email "$APRF_ADMIN_EMAIL" \
-  --admin-password "$APRF_ADMIN_PASSWORD"
+  --base-url http://127.0.0.1:8080
 ```
 
-| Flag | Env | Used by |
-| --- | --- | --- |
-| `--base-url` | `APRF_AUTH_PROBE_BASE_URL` | AUTHN-M1, AUTHZ-M1, AUTHN-M2 |
-| `--admin-token` | `APRF_ADMIN_TOKEN` | AUTHN-M2, AUTHZ-M1 (temp user) |
-| `--admin-email` | `APRF_ADMIN_EMAIL` | sign-in → JWT |
-| `--admin-password` | `APRF_ADMIN_PASSWORD` | sign-in → JWT |
-| `--limited-email` | `APRF_AUTHZ_LIMITED_EMAIL` | AUTHZ-M1 denial probe |
-| `--limited-password` | `APRF_AUTHZ_LIMITED_PASSWORD` | AUTHZ-M1 denial probe |
-| `--limited-token` | `APRF_AUTHZ_LIMITED_TOKEN` | AUTHZ-M1 denial probe |
+| Flag / Env | Used by |
+| --- | --- |
+| `--base-url` / `APRF_AUTH_PROBE_BASE_URL` | AUTHN-M1, AUTHZ-M1, AUTHN-M2 |
+| `APRF_ADMIN_TOKEN` (or discouraged `--admin-token`) | AUTHN-M2, AUTHZ-M1 (temp user) |
+| `APRF_ADMIN_EMAIL` + `APRF_ADMIN_PASSWORD` | sign-in → JWT |
+| `APRF_AUTHZ_LIMITED_*` | AUTHZ-M1 denial probe |
 
 Other collector evidence: drop measured JSON under `./aprf-assessment/imports/<pluginId>/`, or set collector-specific env (e.g. `GITHUB_TOKEN` with live mode for github-actions).
 
@@ -69,6 +70,8 @@ Aligned with auditor `scoring.yaml` / `confidence.yaml` / `evidence-precedence.y
 - `recommendedScore` = severity-weighted recommended Checks only (`null` / n/a under default profile assess; use `--full` to score recommended)
 - `audit` without `--plugins` / `--full` collects only plugins that map to the profile gate
 - Optional `--lens rag,agents,voice,coding`
+- Each control may include informative `crosswalks` and `threatIntel` from the pinned catalog (never gate inputs)
+- `REPORT.html` executive summary includes **Top threat exposure** across unmet controls
 
 Agent YES/NO/DON'T KNOW attestation fills remain in [`skills/aprf-auditor`](../../skills/aprf-auditor/).
 
