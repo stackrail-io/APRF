@@ -8,7 +8,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Changed
-- Docs sync: README / ARCHITECTURE / CONTRIBUTING and package READMEs now describe the shipped CLI assessment path, threat-map + crosswalks (informative), corrected Regulated profile count (51), and full `validate` / CI gates (`aprf:threat-map`, sync-rfcs/stats).
+- Docs sync: README / ARCHITECTURE / CONTRIBUTING and package READMEs now describe the shipped CLI assessment path, threat-map + crosswalks (informative), and corrected Regulated profile count (51).
+- CI / `npm run validate` run `aprf:check-spec-sync` (`aprf:sync-rfcs` + `aprf:sync-stats`, fail on `spec/aprf-spec.json` drift) alongside `aprf:threat-map`.
 
 ## [Catalog 0.11.3] / [@stackrail-io/aprf@0.1.4] — 2026-08-07
 

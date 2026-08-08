@@ -67,7 +67,7 @@ npx @stackrail-io/aprf audit --target . --profile core
 | `@stackrail-io/aprf-framework-definition` | Core / Regulated profiles, lenses (RAG/Agents/Voice/Coding), Policy overlays, Check applicability |
 | `@stackrail-io/aprf` | CLI: `collect` / `assess` / `report` / `audit` — pinned catalog, no repo clone |
 
-Today the catalog holds **178 Checks** across **27 pillars** (**92** mandatory / **85** recommended active). New Checks are data files — no engine code changes required — but each Check needs a row in [`spec/aprf-threat-map.yaml`](spec/aprf-threat-map.yaml).
+Today the catalog holds **178 Checks** across **27 pillars** (**92** mandatory / **85** recommended active, plus **1** deprecated recommended stub `INF-R1`). New Checks are data files — no engine code changes required — but each Check needs a row in [`spec/aprf-threat-map.yaml`](spec/aprf-threat-map.yaml).
 
 ## Quick start
 
@@ -83,10 +83,11 @@ npm run validate
 1. **`aprf:validate`** — load every YAML Check, validate against [`rule.schema.json`](packages/aprf-engine/rules/_schema/rule.schema.json), check referential integrity (`relatedRules`, unique IDs, detector allowlist)
 2. **`aprf:catalog`** — regenerate [`packages/aprf-engine/src/generated/catalog.ts`](packages/aprf-engine/src/generated/catalog.ts) (content-hash stamped; embeds crosswalks + threat intel)
 3. **`aprf:integrity`** — YAML ↔ `spec/aprf-spec.json` Check IDs; Core/Regulated + lenses match framework-definition; `stats` match recomputed values; stewardship contact hygiene
-4. **`aprf:threat-map`** — every Check has threat context; closed vocabularies; pinned MITRE IDs
-5. **`aprf:collectors:unused`** — TypeScript unused locals/parameters in auditor collectors
-6. **`test:unit`** — aprf-engine + framework-definition + CLI smoke
-7. **`test:auditor-skill`** — auditor skill / collector / HTML report smokes
+4. **`aprf:check-spec-sync`** — run `aprf:sync-rfcs` + `aprf:sync-stats`; **fail if** `spec/aprf-spec.json` drifts
+5. **`aprf:threat-map`** — every Check has threat context; closed vocabularies; pinned MITRE IDs
+6. **`aprf:collectors:unused`** — TypeScript unused locals/parameters in auditor collectors
+7. **`test:unit`** — aprf-engine + framework-definition + CLI smoke
+8. **`test:auditor-skill`** — auditor skill / collector / HTML report smokes
 
 Useful individual scripts:
 
@@ -94,9 +95,10 @@ Useful individual scripts:
 npm run aprf:validate          # YAML schema + referential integrity
 npm run aprf:catalog           # rebuild generated catalog (commit if changed)
 npm run aprf:integrity         # YAML ↔ spec ↔ profile ↔ stats gate
-npm run aprf:threat-map        # threat-map coverage + MITRE IDs
 npm run aprf:sync-rfcs         # rfcs/*.md → spec/aprf-spec.json `rfcs`
 npm run aprf:sync-stats        # recompute spec/aprf-spec.json `stats`
+npm run aprf:check-spec-sync   # sync rfcs+stats; fail on drift (CI + validate)
+npm run aprf:threat-map        # threat-map coverage + MITRE IDs
 npm run test:unit              # engine / framework / CLI unit + smoke
 npm run build                  # emit publishable dist/ for all packages
 ```
@@ -153,7 +155,7 @@ Deprecate with `status: deprecated`, `replacedBy`, and `deprecationNote` — nev
 
 | Job | What it checks |
 | --- | --- |
-| **Validate catalog and packages** | `npm ci` → rule schema → catalog rebuild → **fail if generated catalog drifted** → YAML↔spec↔profile↔stats integrity → threat-map → collectors unused → unit tests → auditor-skill tests → TypeScript `dist/` build |
+| **Validate catalog and packages** | `npm ci` → rule schema → catalog rebuild → **fail if generated catalog drifted** → YAML↔spec↔profile↔stats integrity → **sync-rfcs + sync-stats; fail if `aprf-spec.json` drifted** → threat-map → collectors unused → unit tests → auditor-skill tests → TypeScript `dist/` build |
 | **Spec JSON structure** | `spec/aprf-spec.json` SemVer + pillar presence; schema `$id`s parse; stewardship `emailHint` present; no retired personal emails / product API paths |
 
 PRs that edit YAML Checks but forget to regenerate the catalog will fail CI with a clear drift error. Fix with:

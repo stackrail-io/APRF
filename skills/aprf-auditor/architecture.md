@@ -50,5 +50,5 @@ Still useful for exploratory chat, but weak on rescans, precedence, and runtime 
 1. Collectors emit sorted node IDs.
 2. Precedence selects a **primary** evidence node per Check claim; others are supporting.
 3. Freshness decay adjusts confidence (never invents PASS).
-4. Same graph + same APRF version + same profile → same assessment (modulo user attestation nodes).
+4. Same graph + same APRF version + same profile → same assessment outcomes for the same evidence payloads (modulo user attestation nodes). Freshness windows that read `measuredAt` / import timestamps can change a Check from PASS to PARTIAL/FAIL when wall-clock time moves — treat those as inputs, not as non-determinism in the scorer.
 5. Crosswalks and threat intel are **informative only** — they decorate reports and never flip a gate.
