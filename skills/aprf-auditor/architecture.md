@@ -1,28 +1,27 @@
-# APRF Auditor — Target Architecture
+# APRF Auditor — Architecture
 
-Working-draft evolution of the portable skill. Agents MAY implement the simple path today; hosts SHOULD migrate toward the evidence-graph path.
+Shipped path for local assessment. Prefer the open CLI (`@stackrail-io/aprf`) so collect → assess → report stay deterministic; the skill orchestrates that CLI and asks for missing evidence.
 
-## Current (v0.1 path)
+## Shipped path
+
+```text
+Project
+  → Evidence Collectors (collectors/*.ts via `aprf collect` / `npm run aprf:collect`)
+  → Normalized Evidence Graph (evidence-graph.json) + per-plugin statusHints
+  → Assess engine (`aprf assess` — profile/lens gate from statusHints + imports)
+  → Assessment JSON (statuses, crosswalks, threatIntel)
+  → REPORT.html (`aprf report` — discovery, domain scores, per-control detail, top threat exposure)
+```
+
+Every Check is decided from collector `statusHint`s and graph evidence (plus optional imports / live probes), not ad-hoc re-globbing in the model.
+
+### Legacy ad-hoc path (avoid for gate claims)
 
 ```text
 Project → Workflow search → Checks → Report
 ```
 
-Works for local LLM agents. Weaknesses: rescans, unclear precedence, weak runtime coverage.
-
-## Target (v0.2+ path)
-
-```text
-Project
-  → Evidence Collectors (collectors/*.ts via npm run aprf:collect)
-  → Normalized Evidence Graph (evidence-graph.json)
-  → Rule Engine (APRF Check YAML + scoring.yaml)
-  → Assessment (statuses)
-  → Remediation pack
-  → Report artifacts
-```
-
-Every Check **queries the graph** (and optional live plugin refresh) instead of ad-hoc re-globbing.
+Still useful for exploratory chat, but weak on rescans, precedence, and runtime coverage. Do not invent PASS from chat-only answers.
 
 ### Collector tiers (no StackRail)
 
@@ -30,20 +29,21 @@ Every Check **queries the graph** (and optional live plugin refresh) instead of 
 | --- | --- | --- |
 | **Local** | Repo walk, CI YAML, IaC regex, OTel/promptfoo config | Default |
 | **Import** | Files under `aprf-assessment/imports/<plugin>/` | Drop exports (LangSmith, Phoenix, …) |
-| **Live** | Opt-in APIs (e.g. GitHub Actions runs) | `APRF_AUDITOR_LIVE=1` + credentials |
+| **Live** | Opt-in APIs (auth probes, GitHub Actions, …) | Base URL + credential **env vars** (never paste secrets into chat) |
 
 ## Planes
 
-| Plane | Responsibility | Skill files |
+| Plane | Responsibility | Skill / package files |
 | --- | --- | --- |
 | Capability | What environments/evidence the skill knows | `capabilities.yaml` |
-| Collection | Gather artifacts into graph nodes | `plugins/*`, Phase 1–2 |
+| Collection | Gather artifacts into graph nodes | `collectors/*`, `plugins/*` |
 | Precedence | Which node wins when multiple support a claim | `evidence-precedence.yaml` |
 | Confidence | Objective score from evidence class + freshness | `confidence.yaml` |
-| Normative | APRF Checks / profiles / lenses | APRF repo packages |
-| Assessment | Status + gate + scores | `workflow.md`, `scoring.yaml` |
+| Normative | APRF Checks / profiles / lenses / threat map / crosswalks | `@stackrail-io/aprf-engine`, framework-definition, `spec/` |
+| Assessment | Status + gate + scores | CLI assess engine, `scoring.yaml` |
 | Remediation | Fix / example / owner / effort | control `remediation` in schema |
-| History / Diff | Trend and PR compare | `compare` mode, `history/` |
+| Reporting | HTML + discovery + threat exposure rollup | `scripts/render-html-report.ts` |
+| History / Diff | Trend and PR compare | `compare` mode, `history/` (when used) |
 
 ## Determinism rules
 
@@ -51,3 +51,4 @@ Every Check **queries the graph** (and optional live plugin refresh) instead of 
 2. Precedence selects a **primary** evidence node per Check claim; others are supporting.
 3. Freshness decay adjusts confidence (never invents PASS).
 4. Same graph + same APRF version + same profile → same assessment (modulo user attestation nodes).
+5. Crosswalks and threat intel are **informative only** — they decorate reports and never flip a gate.
