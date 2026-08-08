@@ -48,7 +48,8 @@ function main() {
   writeFileSync(specPath, specText.slice(0, afterKey) + statsJson + specText.slice(end));
   console.log(
     `OK: synced stats — domains=${stats.domainCount} pillars=${stats.pillarCount} ` +
-      `mandatory=${stats.mandatoryCheckCount} recommended=${stats.recommendedCheckCount} ` +
+      `checks=${stats.checkCount} (mandatory=${stats.mandatoryCheckCount} ` +
+      `recommended=${stats.recommendedCheckCount} deprecated=${stats.deprecatedCheckCount}) ` +
       `core=${stats.coreProfileCheckCount} lenses=${stats.lensCount} lensChecks=${stats.lensCheckCount} ` +
       `crosswalks=${stats.crosswalkCount}/${stats.crosswalkMappingCount}`,
   );

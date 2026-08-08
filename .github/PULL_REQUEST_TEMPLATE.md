@@ -35,8 +35,13 @@ Select all that apply:
 
 - [ ] Regenerated and committed `packages/aprf-engine/src/generated/catalog.ts` (`npm run aprf:catalog`)
 - [ ] Spec synced where catalog is SoT (`spec/aprf-spec.json` method / requirement / passCondition as needed)
+- [ ] Threat map updated for new/changed Check IDs (`spec/aprf-threat-map.yaml`; `npm run aprf:threat-map`)
 - [ ] No reused Check IDs; deprecations use `replacedBy`
 - [ ] Titles keep obligation language (`must` / `should` / `must have` / `should have`); no `...` / `…` truncation
+
+**If RFCs or profile/catalog counts changed**
+
+- [ ] `npm run aprf:sync-rfcs` and/or `npm run aprf:sync-stats` committed when applicable
 
 **Scope**
 

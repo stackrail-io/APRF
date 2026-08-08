@@ -1,6 +1,8 @@
 /**
  * Canonical computation for spec/aprf-spec.json `stats`.
- * domainCount excludes the cross-cutting domain; check counts skip deprecated;
+ * domainCount excludes the cross-cutting domain.
+ * mandatory/recommended counts are active Checks only; deprecatedCheckCount
+ * is separate so checkCount = mandatory + recommended + deprecated.
  * lensCheckCount is the unique set of lens additionalMandatoryCheckIds.
  */
 import type { GeneratedCatalog } from "../../packages/aprf-engine/src/catalog-types.ts";
@@ -13,8 +15,14 @@ import {
 export type SpecStats = {
   domainCount: number;
   pillarCount: number;
+  /** Active mandatory Checks (status ≠ deprecated). */
   mandatoryCheckCount: number;
+  /** Active recommended Checks (status ≠ deprecated). */
   recommendedCheckCount: number;
+  /** Deprecated stubs still shipped in the catalog (e.g. INF-R1 → SCI-R1). */
+  deprecatedCheckCount: number;
+  /** Total Checks in the catalog (= mandatory + recommended + deprecated). */
+  checkCount: number;
   ruleEngine: {
     package: string;
     note: string;
@@ -42,10 +50,14 @@ export function computeSpecStats(
   spec: SpecSlice,
 ): SpecStats {
   const active = catalog.rules.filter((r) => r.status !== "deprecated");
+  const deprecatedCheckCount = catalog.rules.filter(
+    (r) => r.status === "deprecated",
+  ).length;
   const mandatoryCheckCount = active.filter((r) => r.gate === "mandatory").length;
   const recommendedCheckCount = active.filter(
     (r) => r.gate === "recommended",
   ).length;
+  const checkCount = catalog.rules.length;
 
   const domainCount = (catalog.domains ?? []).filter(
     (d) => !d.crossCutting,
@@ -74,11 +86,23 @@ export function computeSpecStats(
     throw new Error(`missing profile ${PROFILE_CORE.id}`);
   }
 
+  if (
+    checkCount !==
+    mandatoryCheckCount + recommendedCheckCount + deprecatedCheckCount
+  ) {
+    throw new Error(
+      `checkCount arithmetic broken: total=${checkCount} ≠ ` +
+        `${mandatoryCheckCount}+${recommendedCheckCount}+${deprecatedCheckCount}`,
+    );
+  }
+
   return {
     domainCount,
     pillarCount,
     mandatoryCheckCount,
     recommendedCheckCount,
+    deprecatedCheckCount,
+    checkCount,
     ruleEngine: {
       package: "@stackrail-io/aprf-engine",
       note: RULE_ENGINE_NOTE,
