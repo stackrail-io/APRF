@@ -522,6 +522,12 @@ assert(
   html.includes("not that an attack has occurred"),
   "top threat rollup must caveat that unmet means unmitigated or unproven",
 );
+assert(
+  html.includes("Evidence coverage") &&
+    html.includes("Repo collectors alone cannot produce PASS") &&
+    html.includes("You will not see PASS from a code scan alone"),
+  "REPORT.html must explain hybrid evidence coverage and that repo-only collect cannot PASS",
+);
 
 console.log(`aprf assess engine smoke OK → ${htmlPath}`);
 rmSync(root, { recursive: true, force: true });
