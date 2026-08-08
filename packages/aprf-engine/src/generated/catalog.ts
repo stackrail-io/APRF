@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:32a1e7b7980b7ae419f142c03ec7d3a72e26bd547acfa9728bcac8e7cd78f46c",
+  "generatedAt": "sha256:bd5c43d2ef005bbdab6aad32c03925c944cec1fc62769680cefd3d3c4a59bbfe",
   "ruleCount": 178,
   "domains": [
     {
@@ -7517,12 +7517,18 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Critical findings closed or waived with owner and expiry"
       ],
       "detection": {
-        "capability": "manual",
+        "capability": "hybrid",
         "detectors": [
+          {
+            "id": "repo-ai-iac-cis-policy",
+            "params": {
+              "hint": "Discover production-AI IaC modules, CIS-aligned (or equivalent) policy-scan config, and apply/PR wiring; ingest coverage under imports/ai-iac-cis-policy/; require IaC covering production AI (in-repo or present=true + iacCoversProductionAiInfrastructure), cisAlignedPolicyChecksOnEveryApplyOrPr, policyScanReportPresent, openCriticalFindingsUnwaived=0 (or criticalFindingsClosedOrWaivedWithOwnerAndExpiry), measuredAt ≤90 days; N/A when productionAiInfrastructurePresent=false.\n"
+            }
+          },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "Attest IaC for production AI infra plus CIS-aligned (or equivalent) policy checks on apply/PR with 0 open unwaived critical findings (measuredAt ≤90 days)—or attest no production AI infrastructure.\n"
+              "hint": "If automation cannot prove coverage, attest IaC for production AI infra plus CIS-aligned (or equivalent) policy checks on apply/PR with 0 open unwaived critical findings (measuredAt ≤90 days)—or attest productionAiInfrastructurePresent=false when the organization manages no production AI infrastructure.\n"
             }
           }
         ]
@@ -7531,7 +7537,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "falsePositiveGuidance": "Do not pass sample Terraform without production AI coverage. Do not pass policy configs that never run on apply/PR. Do not pass empty inventories without an explicit N/A attest. Do not score INF-M1 or SCI-R1 as substitutes. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Declare production AI infrastructure in IaC and wire CIS-aligned (or equivalent) policy checks to apply/PR",
-        "Close or time-box critical findings; retain the latest report (measuredAt ≤90 days)",
+        "Close or time-box critical findings; retain the latest report under imports/ai-iac-cis-policy/ (measuredAt ≤90 days)",
+        "If out of scope, attest productionAiInfrastructurePresent=false with rationale",
         "Time-box gaps with owner and expiry ≤90 days"
       ],
       "references": [
@@ -7563,7 +7570,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "infrastructure",
         "recommended",
-        "manual",
+        "hybrid",
         "iac",
         "policy-as-code"
       ],

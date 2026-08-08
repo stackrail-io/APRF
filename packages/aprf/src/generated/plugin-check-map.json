@@ -137,6 +137,9 @@
   "ai-harm-policy": [
     "SAF-M1"
   ],
+  "ai-iac-cis-policy": [
+    "INF-R3"
+  ],
   "ai-improvement-backlog": [
     "ORG-R3"
   ],

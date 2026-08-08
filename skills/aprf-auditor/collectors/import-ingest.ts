@@ -46,6 +46,7 @@ const RUNTIME_PLUGINS = new Set([
   "ai-runtime-patching",
   "agent-tool-connectivity",
   "shared-accelerator-isolation",
+  "ai-iac-cis-policy",
   "secrets-hygiene",
   "secret-redaction",
   "key-rotation-scope",
