@@ -5328,6 +5328,8 @@
     "pillarCount": 27,
     "mandatoryCheckCount": 92,
     "recommendedCheckCount": 85,
+    "deprecatedCheckCount": 1,
+    "checkCount": 178,
     "ruleEngine": {
       "package": "@stackrail-io/aprf-engine",
       "note": "Normative rule bodies live in packages/aprf-engine/rules/; pillars hydrate checks at load time."
