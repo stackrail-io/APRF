@@ -1127,6 +1127,89 @@ function topThreatsBlock(controls: Control[]): string {
   </section>`;
 }
 
+type EvidenceCoverage = {
+  applicable: number;
+  pass: number;
+  partial: number;
+  notDemonstrated: number;
+  fail: number;
+  needsVerification: number;
+  requiredItems: number;
+  missingItems: number;
+};
+
+/**
+ * Status rollup for in-scope Checks assessed from the repo (and any
+ * measured imports present) — derived from control statuses and evidence lists.
+ */
+function evidenceCoverage(controls: Control[]): EvidenceCoverage {
+  const applicable = controls.filter((c) => {
+    const s = (c.status || "").toUpperCase().replace(/-/g, "_");
+    return s !== "NOT_APPLICABLE";
+  });
+
+  let pass = 0;
+  let partial = 0;
+  let notDemonstrated = 0;
+  let fail = 0;
+  let needsVerificationCount = 0;
+  let requiredItems = 0;
+  let missingItems = 0;
+
+  for (const c of applicable) {
+    const s = (c.status || "").toUpperCase().replace(/-/g, "_");
+    if (s === "PASS") pass++;
+    else if (s === "PARTIAL") partial++;
+    else if (s === "NOT_DEMONSTRATED") notDemonstrated++;
+    else if (s === "FAIL") fail++;
+
+    if (needsVerification(c)) needsVerificationCount++;
+
+    requiredItems += (c.evidenceRequired ?? []).length;
+    missingItems += (c.requiredEvidenceMissing ?? []).length;
+  }
+
+  return {
+    applicable: applicable.length,
+    pass,
+    partial,
+    notDemonstrated,
+    fail,
+    needsVerification: needsVerificationCount,
+    requiredItems,
+    missingItems,
+  };
+}
+
+function evidenceCoverageBlock(controls: Control[]): string {
+  const cov = evidenceCoverage(controls);
+  if (cov.applicable === 0) return "";
+
+  const passPct = Math.round((cov.pass / cov.applicable) * 100);
+  const zeroPass = cov.pass === 0;
+
+  return `<section class="evidence-coverage">
+  <h3>Evidence coverage</h3>
+  <p class="pass-callout" style="max-width:72ch"><strong>Repo collectors alone cannot produce PASS.</strong>
+  Almost every APRF Check is <em>hybrid</em>: scanning the codebase finds signals (often shown as PARTIAL), but a PASS requires measured proof — drop results under <code>aprf-assessment/imports/&lt;plugin&gt;/</code> with a recent <code>measuredAt</code>, or run live probes where the collector supports them.
+  <strong>You will not see PASS from a code scan alone</strong> — expect PARTIAL / NOT_DEMONSTRATED until measured imports exist.
+  ${
+    zeroPass
+      ? `<strong>This assessment has 0 PASS</strong> among ${cov.applicable} in-scope Checks from the repo (expected for repo-only collect).`
+      : `<strong>This assessment has ${cov.pass} PASS</strong> among ${cov.applicable} in-scope Checks from the repo (measured evidence was available for those).`
+  }</p>
+  <div class="grid" style="margin-top:0.85rem">
+    <div class="stat"><div class="label">In-scope Checks from repo</div><div class="value">${cov.applicable}</div></div>
+    <div class="stat"><div class="label">PASS</div><div class="value ${cov.pass ? "ok" : "muted"}">${cov.pass} <span class="meta">(${passPct}%)</span></div></div>
+    <div class="stat"><div class="label">PARTIAL</div><div class="value">${cov.partial}</div></div>
+    <div class="stat"><div class="label">Not demonstrated</div><div class="value">${cov.notDemonstrated}</div></div>
+    <div class="stat"><div class="label">FAIL</div><div class="value">${cov.fail}</div></div>
+  </div>
+  <p class="meta" style="max-width:72ch;margin-top:0.75rem">${cov.needsVerification} Check${cov.needsVerification === 1 ? "" : "s"} show in-repo signals but still need measured proof (filter <em>Needs verification</em>).
+  Catalog lists ${cov.requiredItems} evidence item${cov.requiredItems === 1 ? "" : "s"} across in-scope Checks; this run still asks for ${cov.missingItems} gap note${cov.missingItems === 1 ? "" : "s"} (imports, probes, or scope attestation).</p>
+  </section>`;
+}
+
 function controlDetailBody(c: Control): string {
   const statusKey = (c.status || "").toUpperCase().replace(/-/g, "_");
   const evidence =
@@ -1545,6 +1628,18 @@ function render(a: Assessment): string {
     .threat-rollup { margin-top: 2rem; }
     .threat-rollup h3 { margin-bottom: 0.35rem; }
     .threat-rollup .panel { margin-top: 0.75rem; }
+    .evidence-coverage { margin-top: 2rem; }
+    .evidence-coverage h3 { margin-bottom: 0.35rem; }
+    .pass-callout {
+      margin: 0.5rem 0 0; padding: 0.7rem 0.85rem;
+      background: var(--warn-bg); border-left: 4px solid var(--warn);
+      border-radius: 0 6px 6px 0; font-family: var(--sans); font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .pass-callout code {
+      font-size: 0.84em; background: rgba(0,0,0,0.05); padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
     .meta, .empty, footer { color: var(--muted); font-size: 0.9rem; }
     .banner {
       background: var(--warn-bg); border: 1px solid #efd9a0; border-left: 4px solid var(--warn);
@@ -1883,6 +1978,7 @@ function render(a: Assessment): string {
         ? `<p class="verify-callout" style="max-width:72ch"><strong>${needsVerificationCount} check${needsVerificationCount === 1 ? "" : "s"} ${needsVerificationCount === 1 ? "is" : "are"} implemented but unverified.</strong> The control was found in this repository, but the Check requires measured proof (a test, drill, or probe result) before it can pass. These are the shortest path to closing the gate — filter the table by <em>Needs verification</em> to see them.</p>`
         : ""
     }
+    ${evidenceCoverageBlock(a.controls)}
     ${topThreatsBlock(a.controls)}
 
     <h2>Visual overview</h2>
