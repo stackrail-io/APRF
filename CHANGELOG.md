@@ -10,6 +10,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ### Changed
 - Docs sync: README / ARCHITECTURE / CONTRIBUTING and package READMEs now describe the shipped CLI assessment path, threat-map + crosswalks (informative), and corrected Regulated profile count (51).
 - CI / `npm run validate` run `aprf:check-spec-sync` (`aprf:sync-rfcs` + `aprf:sync-stats`, fail on `spec/aprf-spec.json` drift) alongside `aprf:threat-map`.
+- Promoted **INF-R3** from manual to **hybrid** with collector `ai-iac-cis-policy` (production-AI IaC + CIS-aligned policy checks on apply/PR; inventory-gated PASS; measuredAt ≤90d; N/A via `productionAiInfrastructurePresent=false`); synced `aprf-spec.json`.
 
 ## [Catalog 0.11.3] / [@stackrail-io/aprf@0.1.4] — 2026-08-07
 

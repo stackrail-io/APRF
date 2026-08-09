@@ -214,6 +214,7 @@ export const CATALOG_DETECTOR_IDS = [
   "repo-ai-runtime-patching",
   "repo-agent-tool-connectivity",
   "repo-shared-accelerator-isolation",
+  "repo-ai-iac-cis-policy",
   "repo-ai-exfil-detection",
   "repo-multi-turn-indirect-injection-redteam",
   "repo-multimodal-input-scan",

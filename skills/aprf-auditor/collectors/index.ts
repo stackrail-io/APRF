@@ -56,6 +56,7 @@ import { aiPublicExposureScanCollector } from "./ai-public-exposure-scan.ts";
 import { aiRuntimePatchingCollector } from "./ai-runtime-patching.ts";
 import { agentToolConnectivityCollector } from "./agent-tool-connectivity.ts";
 import { sharedAcceleratorIsolationCollector } from "./shared-accelerator-isolation.ts";
+import { aiIacCisPolicyCollector } from "./ai-iac-cis-policy.ts";
 import { secretsHygieneCollector } from "./secrets-hygiene.ts";
 import { artifactProvenanceIntegrityCollector } from "./artifact-provenance-integrity.ts";
 import { aiExternalToolInventoryCollector } from "./ai-external-tool-inventory.ts";
@@ -247,6 +248,7 @@ export const COLLECTORS: Collector[] = [
   aiRuntimePatchingCollector,
   agentToolConnectivityCollector,
   sharedAcceleratorIsolationCollector,
+  aiIacCisPolicyCollector,
   secretsHygieneCollector,
   artifactProvenanceIntegrityCollector,
   aiExternalToolInventoryCollector,

@@ -2815,7 +2815,7 @@
           "requirement": "Production AI infrastructure shall be declared in infrastructure-as-code with CIS-aligned (or equivalent) policy checks on every apply/PR—proven by IaC modules, policy-scan config, and a fresh production-stack report—not by console-built stacks alone.",
           "artifact": "IaC modules covering production AI infrastructure; CIS-aligned (or equivalent) policy-scan config wired to apply/PR; Latest policy-scan report for production stacks (measuredAt ≤90 days); Critical findings closed or waived with owner and expiry",
           "passCondition": "Production AI infrastructure is declared in IaC; CIS-aligned (or equivalent) policy checks run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions with owner and expiry (measuredAt ≤90 days). If no production AI infrastructure is managed by the organization, score NOT_APPLICABLE.",
-          "method": "manual",
+          "method": "hybrid",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }

@@ -28,14 +28,26 @@ evidenceRequired:
   - "Latest policy-scan report for production stacks (measuredAt ≤90 days)"
   - "Critical findings closed or waived with owner and expiry"
 detection:
-  capability: "manual"
+  capability: "hybrid"
   detectors:
+    - id: "repo-ai-iac-cis-policy"
+      params:
+        hint: >
+          Discover production-AI IaC modules, CIS-aligned (or equivalent)
+          policy-scan config, and apply/PR wiring; ingest coverage under
+          imports/ai-iac-cis-policy/; require IaC covering production AI
+          (in-repo or present=true + iacCoversProductionAiInfrastructure),
+          cisAlignedPolicyChecksOnEveryApplyOrPr, policyScanReportPresent,
+          openCriticalFindingsUnwaived=0 (or criticalFindingsClosedOrWaivedWithOwnerAndExpiry),
+          measuredAt ≤90 days; N/A when productionAiInfrastructurePresent=false.
     - id: "manual-attest"
       params:
         hint: >
-          Attest IaC for production AI infra plus CIS-aligned (or equivalent)
-          policy checks on apply/PR with 0 open unwaived critical findings
-          (measuredAt ≤90 days)—or attest no production AI infrastructure.
+          If automation cannot prove coverage, attest IaC for production AI
+          infra plus CIS-aligned (or equivalent) policy checks on apply/PR
+          with 0 open unwaived critical findings (measuredAt ≤90 days)—or
+          attest productionAiInfrastructurePresent=false when the organization
+          manages no production AI infrastructure.
 manualVerification: >
   1) Confirm the organization manages production AI infrastructure. If none,
   score NOT_APPLICABLE. 2) Confirm those stacks are declared in IaC. 3)
@@ -52,7 +64,8 @@ falsePositiveGuidance: >
   substitutes. Named exceptions need owner and expiry ≤90 days.
 recommendedFixes:
   - "Declare production AI infrastructure in IaC and wire CIS-aligned (or equivalent) policy checks to apply/PR"
-  - "Close or time-box critical findings; retain the latest report (measuredAt ≤90 days)"
+  - "Close or time-box critical findings; retain the latest report under imports/ai-iac-cis-policy/ (measuredAt ≤90 days)"
+  - "If out of scope, attest productionAiInfrastructurePresent=false with rationale"
   - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "CIS Benchmarks"
@@ -73,7 +86,7 @@ relatedRules:
 tags:
   - "infrastructure"
   - "recommended"
-  - "manual"
+  - "hybrid"
   - "iac"
   - "policy-as-code"
 applicability:

@@ -846,6 +846,35 @@ checks:
       PARTIAL if isolation/test signals without inventory, or incomplete import.
       FAIL if isolation design or capacity/isolation test attested false.
       Managed-API-only stacks should N/A, not FAIL. INF-M1/M2/M3 do not substitute.
+  INF-R3:
+    requiredEvidence:
+      - "IaC modules covering production AI infrastructure"
+      - "CIS-aligned (or equivalent) policy-scan config wired to apply/PR"
+      - "production-AI IaC (in-repo or present=true + iacCovers) + cisAlignedPolicyChecksOnEveryApplyOrPr + policyScanReportPresent + openCriticalFindingsUnwaived=0 (or waived with owner/expiry) + measuredAt≤90d under imports/ai-iac-cis-policy/"
+    plugins: [ai-iac-cis-policy, repo-filesystem, github-actions]
+    searchExtra:
+      - "**/*.tf"
+      - "**/*terraform*"
+      - "**/*pulumi*"
+      - "**/*checkov*"
+      - "**/*tfsec*"
+      - "**/*terrascan*"
+      - "**/*cis*"
+      - "**/*conftest*"
+      - "**/.github/workflows/*"
+    naWhen: "No production AI infrastructure managed by the organization"
+    evaluation: |
+      Prefer collectors/ai-iac-cis-policy or imports/ai-iac-cis-policy/*.json with measuredAt ≤90d.
+      PASS if statusHint=pass / infR3Satisfied === true
+      (production-AI IaC in-repo or productionAiInfrastructurePresent=true +
+      iacCoversProductionAiInfrastructure + cisAlignedPolicyChecksOnEveryApplyOrPr +
+      policyScanReportPresent + openCriticalFindingsUnwaived=0 or
+      criticalFindingsClosedOrWaivedWithOwnerAndExpiry + measuredAt ≤90d).
+      NOT_APPLICABLE if productionAiInfrastructurePresent=false and no in-repo production-AI IaC
+      (sample Terraform / policy-scan docs alone do not block N/A).
+      PARTIAL if IaC/policy signals without production-AI inventory, or incomplete import.
+      FAIL if IaC coverage, CIS-on-apply/PR, report, or open unwaived criticals attested false/nonzero.
+      INF-M1 CSPM public-exposure scans and SCI-R1 verify-on-deploy do not substitute.
   SCI-M1:
     requiredEvidence:
       - "Signature / attestation / provenance / checksum verification config (cosign, Notation, SLSA, OCI, or equivalent)"

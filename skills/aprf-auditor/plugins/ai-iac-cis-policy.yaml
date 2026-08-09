@@ -1,0 +1,28 @@
+id: ai-iac-cis-policy
+title: Production AI IaC + CIS-aligned policy checks (INF-R3)
+version: "0.2.0"
+executor: collectors/ai-iac-cis-policy.ts
+evidenceClass: iac
+alsoEmits: [ci]
+detectorIds: [repo-ai-iac-cis-policy]
+inputs:
+  - "Target repo (production AI IaC, CIS/tfsec/checkov/conftest policy scans, apply/PR wiring)"
+  - "Optional coverage: aprf-assessment/imports/ai-iac-cis-policy/*.{json}"
+collect:
+  - "Detect production-AI IaC, CIS-aligned policy-scan config, and apply/PR wiring"
+  - "Ingest coverage; write ai-iac-cis-policy-report.json"
+emits:
+  nodeClass: iac
+  refPattern: "aprf-assessment/imports/ai-iac-cis-policy/*"
+  signals: [ai-iac-cis-policy, inf-r3, repo-ai-iac-cis-policy]
+mapsToChecks: [INF-R3]
+whenUnavailable: >
+  Signals alone are PARTIAL. INF-R3 PASS needs production-AI IaC (in-repo or
+  productionAiInfrastructurePresent=true + iacCoversProductionAiInfrastructure=true),
+  cisAlignedPolicyChecksOnEveryApplyOrPr=true, policyScanReportPresent=true,
+  openCriticalFindingsUnwaived=0 (or criticalFindingsClosedOrWaivedWithOwnerAndExpiry=true),
+  measuredAt ≤90 days. Set productionAiInfrastructurePresent=false for
+  NOT_APPLICABLE when the organization manages no production AI infrastructure.
+live:
+  required: false
+  note: Offline IaC + CIS policy-scan heuristics + optional imported JSON.
