@@ -46,7 +46,6 @@ const RUNTIME_PLUGINS = new Set([
   "ai-runtime-patching",
   "agent-tool-connectivity",
   "shared-accelerator-isolation",
-  "ai-iac-cis-policy",
   "secrets-hygiene",
   "secret-redaction",
   "key-rotation-scope",
@@ -72,7 +71,12 @@ const RUNTIME_PLUGINS = new Set([
 function evidenceClass(pluginId: string): EvidenceClass {
   if (pluginId === "custom") return "user";
   if (pluginId === "promptfoo") return "ci";
-  if (pluginId === "aws" || pluginId === "azure" || pluginId === "gcp") {
+  if (
+    pluginId === "aws" ||
+    pluginId === "azure" ||
+    pluginId === "gcp" ||
+    pluginId === "ai-iac-cis-policy"
+  ) {
     return "iac";
   }
   if (RUNTIME_PLUGINS.has(pluginId)) return "runtime";
