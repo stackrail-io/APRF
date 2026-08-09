@@ -3,6 +3,7 @@ id: otel
 title: OpenTelemetry collector / config
 version: "0.2.0"
 evidenceClass: runtime
+detectorIds: [repo-otel-config]
 inputs:
   - "OTel collector config, SDK init, or exported traces"
   - "aprf-assessment/imports/otel/"

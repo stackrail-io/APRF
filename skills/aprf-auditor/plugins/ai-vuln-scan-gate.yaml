@@ -6,6 +6,8 @@ evidenceClass: ci
 alsoEmits: []
 detectorIds:
   - repo-ai-vuln-scan-gate
+  - repo-vuln-scan-config
+  - repo-dependency-update-config
 inputs:
   - "Target repo (trivy/grype/snyk, Dependabot, model-serving, promote gates)"
   - "Optional coverage: aprf-assessment/imports/ai-vuln-scan-gate/*.json"

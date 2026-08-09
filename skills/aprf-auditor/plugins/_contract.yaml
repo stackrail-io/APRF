@@ -3,8 +3,11 @@ id: _contract
 version: "0.2.0"
 kind: contract
 requiredFields: [id, title, evidenceClass, inputs, collect, emits, whenUnavailable]
+recommendedFields: [detectorIds, mapsToChecks, executor]
 evidenceClassEnum: [runtime, ci, iac, runtime-config, policy, code, docs, user]
 emitsMustInclude: [nodeClass, refPattern, signals]
+# detectorIds: Check YAML detection.detectors[].id values this plugin covers
+# (bridge for join/validate; plugin id may differ). mapsToChecks: score join.
 security:
   - Never exfiltrate secrets to third parties.
   - Prefer user-provided exports under aprf-assessment/imports/<pluginId>/ when live APIs are unavailable.

@@ -11,11 +11,14 @@ Every plugin directory/file must declare:
 | `id` | Stable plugin id |
 | `executor` | Path to TypeScript collector under `collectors/` (optional but preferred) |
 | `evidenceClass` | Primary class emitted (`runtime`, `ci`, …) |
+| `detectorIds` | Check YAML `detection.detectors[].id` values this plugin covers (may differ from `id`) |
 | `inputs` | What the user/host must provide |
 | `collect` | Steps to gather artifacts |
 | `emits` | Node shapes / signals |
-| `mapsToChecks` | Hint Check ID prefixes or IDs |
+| `mapsToChecks` | Check IDs this plugin can satisfy (score join key) |
 | `whenUnavailable` | After search, ask YES / NO / DON'T KNOW (Phase 2b); map DON'T KNOW → NOT_DEMONSTRATED |
+
+`detectorIds` and plugin `id` are separate namespaces. Scoring joins via `mapsToChecks`; `detectorIds` is the explicit bridge for “which plugin owns this Check detector?” (`npm run aprf:detector-bridge`, generated `packages/aprf/src/generated/detector-plugin-map.json`).
 
 See `_contract.yaml`. Run executors:
 

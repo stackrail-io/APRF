@@ -118,6 +118,8 @@ Reporting: each control may show crosswalks + threat chips/MITRE links; the exec
 - Stochastic detections **cannot alone** satisfy a mandatory Check (`assurance` must be `signal-only` unless paired with deterministic corroboration or human attestation).
 - Many Detections → one Check; one Detection → many Checks (graph). Sufficiency is the Check’s `satisfactionPolicy` (target model) or attestation + product mapping today.
 
+**Reference auditor join (this repo):** Check YAML `detection.detectors[].id` and plugin/collector `id` are **separate namespaces**. Assessment scores via `plugin.id` → `mapsToChecks`. The explicit detector→plugin bridge is `plugin.detectorIds` (generated `packages/aprf/src/generated/detector-plugin-map.json`; gated by `npm run aprf:detector-bridge`). Do not assume detector ID equals plugin name.
+
 ### Evidence (operational)
 
 | Tier | Retention | Immutable? |

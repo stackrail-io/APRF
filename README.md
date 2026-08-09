@@ -83,11 +83,12 @@ npm run validate
 1. **`aprf:validate`** — load every YAML Check, validate against [`rule.schema.json`](packages/aprf-engine/rules/_schema/rule.schema.json), check referential integrity (`relatedRules`, unique IDs, detector allowlist)
 2. **`aprf:catalog`** — regenerate [`packages/aprf-engine/src/generated/catalog.ts`](packages/aprf-engine/src/generated/catalog.ts) (content-hash stamped; embeds crosswalks + threat intel)
 3. **`aprf:integrity`** — YAML ↔ `spec/aprf-spec.json` Check IDs; Core/Regulated + lenses match framework-definition; `stats` match recomputed values; stewardship contact hygiene
-4. **`aprf:check-spec-sync`** — run `aprf:sync-rfcs` + `aprf:sync-stats`; **fail if** `spec/aprf-spec.json` drifts
-5. **`aprf:threat-map`** — every Check has threat context; closed vocabularies; pinned MITRE IDs
-6. **`aprf:collectors:unused`** — TypeScript unused locals/parameters in auditor collectors
-7. **`test:unit`** — aprf-engine + framework-definition + CLI smoke
-8. **`test:auditor-skill`** — auditor skill / collector / HTML report smokes
+4. **`aprf:detector-bridge`** — every Check detector (except `manual-attest`) claimed in `plugin.detectorIds`; generated join maps in sync
+5. **`aprf:check-spec-sync`** — run `aprf:sync-rfcs` + `aprf:sync-stats`; **fail if** `spec/aprf-spec.json` drifts
+6. **`aprf:threat-map`** — every Check has threat context; closed vocabularies; pinned MITRE IDs
+7. **`aprf:collectors:unused`** — TypeScript unused locals/parameters in auditor collectors
+8. **`test:unit`** — aprf-engine + framework-definition + CLI smoke
+9. **`test:auditor-skill`** — auditor skill / collector / HTML report smokes
 
 Useful individual scripts:
 
@@ -95,6 +96,7 @@ Useful individual scripts:
 npm run aprf:validate          # YAML schema + referential integrity
 npm run aprf:catalog           # rebuild generated catalog (commit if changed)
 npm run aprf:integrity         # YAML ↔ spec ↔ profile ↔ stats gate
+npm run aprf:detector-bridge   # Check detectors ↔ plugin.detectorIds + join maps
 npm run aprf:sync-rfcs         # rfcs/*.md → spec/aprf-spec.json `rfcs`
 npm run aprf:sync-stats        # recompute spec/aprf-spec.json `stats`
 npm run aprf:check-spec-sync   # sync rfcs+stats; fail on drift (CI + validate)

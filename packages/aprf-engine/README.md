@@ -43,8 +43,9 @@ From the APRF repo root:
 npm install
 npm run aprf:validate    # schema + referential + YAML lint vs aprf-spec.json
 npm run aprf:catalog     # regenerate src/generated/catalog.ts — commit if changed
-npm run aprf:integrity   # YAML ↔ published spec ↔ profiles ↔ stats
-npm run aprf:threat-map  # threat-map coverage, vocabularies, pinned MITRE IDs
+npm run aprf:integrity         # YAML ↔ published spec ↔ profiles ↔ stats
+npm run aprf:detector-bridge   # Check detectors ↔ plugin.detectorIds + join maps
+npm run aprf:threat-map        # threat-map coverage, vocabularies, pinned MITRE IDs
 npm run test:unit        # aprf-engine + framework-definition + CLI smokes
 npm run test:yaml -w @stackrail-io/aprf-engine  # YAML lint fixtures only
 npm run validate         # full local CI-equivalent chain
