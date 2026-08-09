@@ -7,6 +7,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ## [Unreleased]
 
+### Added
+- Detector↔plugin bridge: complete `plugin.detectorIds` for orphan Check detectors; generate `detector-plugin-map.json`; `aprf:detector-bridge` in local `validate` and `.github/workflows/ci.yml` (every Check detector except `manual-attest` must be claimed; join maps must match plugin YAML).
+
 ### Changed
 - Docs sync: README / ARCHITECTURE / CONTRIBUTING and package READMEs now describe the shipped CLI assessment path, threat-map + crosswalks (informative), and corrected Regulated profile count (51).
 - CI / `npm run validate` run `aprf:check-spec-sync` (`aprf:sync-rfcs` + `aprf:sync-stats`, fail on `spec/aprf-spec.json` drift) alongside `aprf:threat-map`.

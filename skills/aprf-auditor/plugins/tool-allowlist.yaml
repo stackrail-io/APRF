@@ -6,6 +6,9 @@ evidenceClass: ci
 alsoEmits: []
 detectorIds:
   - repo-tool-allowlist
+  - mcp-tool-allowlist
+  - mcp-no-unrestricted-shell
+  - mcp-no-unrestricted-network
 inputs:
   - "Target repo (tool allowlists, MCP allowlist configs, deny tests)"
   - "Optional coverage: aprf-assessment/imports/tool-allowlist/*.json"

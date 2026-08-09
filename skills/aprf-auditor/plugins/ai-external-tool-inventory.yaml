@@ -6,6 +6,7 @@ evidenceClass: ci
 alsoEmits: []
 detectorIds:
   - repo-ai-external-tool-inventory
+  - mcp-package-pinned
 inputs:
   - "Target repo (MCP configs, agent plugins, tool registries, integration pins)"
   - "Optional coverage: aprf-assessment/imports/ai-external-tool-inventory/*.json"

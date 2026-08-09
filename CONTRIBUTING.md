@@ -28,7 +28,7 @@ This repository is the **normative public home** for APRF, plus the **reference 
 2. Keep `spec/aprf-spec.json` pillar Check lists / pass conditions in sync when those fields are the published SoT for the site.
 3. Add or update the matching row in [`spec/aprf-threat-map.yaml`](spec/aprf-threat-map.yaml) (MITRE mapping optional — do not force-fit).
 4. Run `npm run aprf:catalog` and commit `packages/aprf-engine/src/generated/catalog.ts` if it changed.
-5. Run `npm run validate` (includes `aprf:threat-map` and `aprf:integrity`).
+5. Run `npm run validate` (includes `aprf:threat-map`, `aprf:integrity`, and `aprf:detector-bridge`).
 
 ### When you add or accept an RFC
 

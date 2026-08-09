@@ -47,6 +47,9 @@ jobs:
       - name: YAML catalog ↔ published spec ↔ profile integrity
         run: npm run aprf:integrity
 
+      - name: Check detector ↔ plugin.detectorIds bridge
+        run: npm run aprf:detector-bridge
+
       - name: Sync RFCs and stats; fail if aprf-spec.json drifted
         run: npm run aprf:check-spec-sync
 

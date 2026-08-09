@@ -1,0 +1,594 @@
+{
+  "agent-role-matrix": [
+    "agent-role-matrix"
+  ],
+  "artifact-signature-verification": [
+    "artifact-provenance-integrity"
+  ],
+  "authz-entry-tests": [
+    "authz-entry-tests"
+  ],
+  "child-agent-termination-test": [
+    "agent-kill-switch"
+  ],
+  "cosign-verification": [
+    "ai-verify-on-deploy",
+    "artifact-provenance-integrity"
+  ],
+  "cross-tenant-tests": [
+    "cross-tenant-tests"
+  ],
+  "docker-image-digest-pinned": [
+    "artifact-provenance-integrity"
+  ],
+  "drill-log-review": [
+    "agent-kill-switch"
+  ],
+  "high-priv-agent-review": [
+    "high-priv-agent-review"
+  ],
+  "http-auth-probe": [
+    "http-auth-probe"
+  ],
+  "kill-api-exists": [
+    "agent-kill-switch"
+  ],
+  "mcp-no-unrestricted-network": [
+    "tool-allowlist"
+  ],
+  "mcp-no-unrestricted-shell": [
+    "tool-allowlist"
+  ],
+  "mcp-package-pinned": [
+    "ai-external-tool-inventory"
+  ],
+  "mcp-s2s-inventory": [
+    "mcp-s2s-inventory"
+  ],
+  "mcp-tool-allowlist": [
+    "tool-allowlist"
+  ],
+  "model-checksum-validation": [
+    "artifact-provenance-integrity"
+  ],
+  "notation-verification": [
+    "artifact-provenance-integrity"
+  ],
+  "oci-provenance": [
+    "artifact-provenance-integrity"
+  ],
+  "prompt-has-owner": [
+    "prompt-version-registry"
+  ],
+  "prompt-versioned": [
+    "prompt-version-registry"
+  ],
+  "queue-cancellation-test": [
+    "agent-kill-switch"
+  ],
+  "repo-a2a-config": [
+    "a2a-peer-auth"
+  ],
+  "repo-abuse-injection-release-gate": [
+    "abuse-injection-release-gate"
+  ],
+  "repo-agent-behavior-feature-flags": [
+    "agent-behavior-feature-flags"
+  ],
+  "repo-agent-charter-inventory": [
+    "agent-charter-inventory"
+  ],
+  "repo-agent-goal-policy": [
+    "agent-goal-policy"
+  ],
+  "repo-agent-loop-limits": [
+    "agent-loop-limits"
+  ],
+  "repo-agent-raci": [
+    "agent-raci-ownership"
+  ],
+  "repo-agent-sandbox-sim": [
+    "agent-sandbox-sim"
+  ],
+  "repo-agent-tool-connectivity": [
+    "agent-tool-connectivity"
+  ],
+  "repo-ai-acceptable-use-policy": [
+    "ai-acceptable-use-policy"
+  ],
+  "repo-ai-admin-mfa": [
+    "ai-admin-mfa"
+  ],
+  "repo-ai-adversarial-capacity-tests": [
+    "ai-adversarial-capacity-tests"
+  ],
+  "repo-ai-artifact-change-records": [
+    "ai-artifact-change-records"
+  ],
+  "repo-ai-artifact-promotion-path": [
+    "ai-artifact-promotion-path"
+  ],
+  "repo-ai-canary-progressive-delivery": [
+    "ai-canary-progressive-delivery"
+  ],
+  "repo-ai-change-summary": [
+    "ai-change-summary"
+  ],
+  "repo-ai-circuit-bulkhead": [
+    "ai-circuit-bulkhead"
+  ],
+  "repo-ai-config-as-code": [
+    "ai-config-as-code"
+  ],
+  "repo-ai-containment-drill": [
+    "ai-containment-drill"
+  ],
+  "repo-ai-continuity-drill": [
+    "ai-continuity-drill"
+  ],
+  "repo-ai-continuity-options": [
+    "ai-continuity-options"
+  ],
+  "repo-ai-control-evidence-matrix": [
+    "ai-control-evidence-matrix"
+  ],
+  "repo-ai-control-plane-audit-logs": [
+    "ai-control-plane-audit-logs"
+  ],
+  "repo-ai-control-plane-backup": [
+    "ai-control-plane-backup"
+  ],
+  "repo-ai-control-testing": [
+    "ai-control-testing"
+  ],
+  "repo-ai-customer-notification-criteria": [
+    "ai-customer-notification-criteria"
+  ],
+  "repo-ai-decision-path-recon": [
+    "ai-decision-path-recon"
+  ],
+  "repo-ai-degraded-mode": [
+    "ai-degraded-mode"
+  ],
+  "repo-ai-deletion-export": [
+    "ai-deletion-export"
+  ],
+  "repo-ai-deploy-policy-enforcement": [
+    "ai-deploy-policy-enforcement"
+  ],
+  "repo-ai-distributed-trace-linkage": [
+    "ai-distributed-trace-linkage"
+  ],
+  "repo-ai-domain-ownership": [
+    "ai-domain-ownership"
+  ],
+  "repo-ai-dpia": [
+    "ai-dpia"
+  ],
+  "repo-ai-error-budget-release-gate": [
+    "ai-error-budget-release-gate"
+  ],
+  "repo-ai-exfil-detection": [
+    "ai-exfil-detection"
+  ],
+  "repo-ai-explainability-matrix": [
+    "ai-explainability-matrix"
+  ],
+  "repo-ai-explanation-hygiene": [
+    "ai-explanation-hygiene"
+  ],
+  "repo-ai-external-tool-inventory": [
+    "ai-external-tool-inventory"
+  ],
+  "repo-ai-fairness-eval": [
+    "ai-fairness-eval"
+  ],
+  "repo-ai-fallback-eval": [
+    "ai-fallback-eval"
+  ],
+  "repo-ai-harm-policy": [
+    "ai-harm-policy"
+  ],
+  "repo-ai-iac-cis-policy": [
+    "ai-iac-cis-policy"
+  ],
+  "repo-ai-improvement-backlog": [
+    "ai-improvement-backlog"
+  ],
+  "repo-ai-incident-tabletop": [
+    "ai-incident-tabletop"
+  ],
+  "repo-ai-independent-assessment": [
+    "ai-independent-assessment"
+  ],
+  "repo-ai-interaction-disclosure": [
+    "ai-interaction-disclosure"
+  ],
+  "repo-ai-jailbreak-harm-redteam": [
+    "ai-jailbreak-harm-redteam"
+  ],
+  "repo-ai-journey-slo-catalog": [
+    "ai-journey-slo-catalog"
+  ],
+  "repo-ai-leadership-review": [
+    "ai-leadership-review"
+  ],
+  "repo-ai-model-mbom": [
+    "ai-model-mbom"
+  ],
+  "repo-ai-multi-provider-continuity": [
+    "ai-multi-provider-continuity"
+  ],
+  "repo-ai-obligations-register": [
+    "ai-obligations-register"
+  ],
+  "repo-ai-ops-dashboards": [
+    "ai-ops-dashboards"
+  ],
+  "repo-ai-ops-metrics": [
+    "ai-ops-metrics"
+  ],
+  "repo-ai-org-aprf-sampling": [
+    "ai-org-aprf-sampling"
+  ],
+  "repo-ai-partial-tool-failure": [
+    "ai-partial-tool-failure"
+  ],
+  "repo-ai-pipeline-gates": [
+    "platform-ai-pipeline-gates"
+  ],
+  "repo-ai-public-exposure-scan": [
+    "ai-public-exposure-scan"
+  ],
+  "repo-ai-rag-provenance": [
+    "ai-rag-provenance"
+  ],
+  "repo-ai-residency-routing": [
+    "ai-residency-routing"
+  ],
+  "repo-ai-risk-acceptance": [
+    "ai-risk-acceptance"
+  ],
+  "repo-ai-rto-rpo-catalog": [
+    "ai-rto-rpo-catalog"
+  ],
+  "repo-ai-runtime-patching": [
+    "ai-runtime-patching"
+  ],
+  "repo-ai-safety-edge-sampling": [
+    "ai-safety-edge-sampling"
+  ],
+  "repo-ai-safety-eval-gates": [
+    "ai-safety-eval-gates"
+  ],
+  "repo-ai-safety-quality-alerts": [
+    "ai-safety-quality-alerts"
+  ],
+  "repo-ai-slo-burn-alerts": [
+    "ai-slo-burn-alerts"
+  ],
+  "repo-ai-slo-dashboards": [
+    "ai-slo-dashboards"
+  ],
+  "repo-ai-streaming-slis": [
+    "ai-streaming-slis"
+  ],
+  "repo-ai-timeouts-retries": [
+    "ai-timeouts-retries"
+  ],
+  "repo-ai-token-cost-attribution": [
+    "ai-token-cost-attribution"
+  ],
+  "repo-ai-trace-quality-annotations": [
+    "ai-trace-quality-annotations"
+  ],
+  "repo-ai-trace-replay": [
+    "ai-trace-replay"
+  ],
+  "repo-ai-trace-sensitive-redaction": [
+    "ai-trace-sensitive-redaction"
+  ],
+  "repo-ai-trust-documentation": [
+    "ai-trust-documentation"
+  ],
+  "repo-ai-user-rationale": [
+    "ai-user-rationale"
+  ],
+  "repo-ai-verify-on-deploy": [
+    "ai-verify-on-deploy"
+  ],
+  "repo-ai-vuln-scan-gate": [
+    "ai-vuln-scan-gate"
+  ],
+  "repo-ai-warm-standby": [
+    "ai-warm-standby"
+  ],
+  "repo-approval-audit-log": [
+    "human-approval-audit"
+  ],
+  "repo-approval-bypass-tests": [
+    "human-approval-bypass"
+  ],
+  "repo-approval-queue-sla": [
+    "human-approval-sla"
+  ],
+  "repo-approval-ui-context": [
+    "human-approval-ui"
+  ],
+  "repo-artifact-provenance-integrity": [
+    "artifact-provenance-integrity"
+  ],
+  "repo-chaos-tests": [
+    "ai-chaos-dependency"
+  ],
+  "repo-context-budget": [
+    "context-budget"
+  ],
+  "repo-context-budget-monitoring": [
+    "context-budget-monitoring"
+  ],
+  "repo-context-compaction-evals": [
+    "context-compaction-evals"
+  ],
+  "repo-context-sensitive-inclusion": [
+    "context-sensitive-inclusion"
+  ],
+  "repo-context-source-acl": [
+    "context-source-acl"
+  ],
+  "repo-context-structured-blocks": [
+    "context-structured-blocks"
+  ],
+  "repo-corpus-freshness": [
+    "corpus-freshness-metrics"
+  ],
+  "repo-cost-alert-config": [
+    "ai-cost-alerts"
+  ],
+  "repo-credential-egress-controls": [
+    "credential-egress-controls"
+  ],
+  "repo-dataset-cards": [
+    "dataset-cards-registry"
+  ],
+  "repo-dataset-provenance": [
+    "dataset-provenance-governance"
+  ],
+  "repo-dataset-secret-scan-gate": [
+    "dataset-secret-scan-gate"
+  ],
+  "repo-dependency-update-config": [
+    "ai-vuln-scan-gate"
+  ],
+  "repo-destructive-tool-dry-run": [
+    "destructive-tool-dry-run"
+  ],
+  "repo-dual-control-config": [
+    "human-dual-control"
+  ],
+  "repo-dx-metrics": [
+    "platform-dx-metrics"
+  ],
+  "repo-embedding-index-migration": [
+    "embedding-index-migration"
+  ],
+  "repo-env-parity-model-tool-catalog": [
+    "env-parity-model-tool-catalog"
+  ],
+  "repo-eval-human-review": [
+    "eval-human-review"
+  ],
+  "repo-eval-online-signals": [
+    "eval-online-signals"
+  ],
+  "repo-eval-release-gates": [
+    "eval-release-gates"
+  ],
+  "repo-eval-shadow-cutover": [
+    "eval-shadow-cutover"
+  ],
+  "repo-eval-suite-present": [
+    "eval-suite-ci"
+  ],
+  "repo-eval-track-catalog": [
+    "eval-track-catalog"
+  ],
+  "repo-feedback-promotion": [
+    "feedback-promotion-governance"
+  ],
+  "repo-finops-unit-economics": [
+    "ai-finops-unit-economics"
+  ],
+  "repo-golden-path-docs": [
+    "platform-golden-path"
+  ],
+  "repo-high-impact-tool-gates": [
+    "high-impact-tool-gates"
+  ],
+  "repo-high-risk-output-gate": [
+    "high-risk-output-gate"
+  ],
+  "repo-human-approval-config": [
+    "human-approval-gates"
+  ],
+  "repo-identity-propagation": [
+    "identity-propagation"
+  ],
+  "repo-incident-playbooks": [
+    "incident-playbooks"
+  ],
+  "repo-injection-policy-gate": [
+    "injection-policy-gate"
+  ],
+  "repo-inner-loop-evals": [
+    "platform-inner-loop-evals"
+  ],
+  "repo-key-rotation-scope": [
+    "key-rotation-scope"
+  ],
+  "repo-memory-integrity": [
+    "memory-integrity"
+  ],
+  "repo-memory-isolation": [
+    "memory-isolation"
+  ],
+  "repo-memory-poisoning-evals": [
+    "memory-poisoning-evals"
+  ],
+  "repo-memory-promotion-architecture": [
+    "memory-promotion-architecture"
+  ],
+  "repo-memory-retention": [
+    "memory-retention"
+  ],
+  "repo-memory-write-policy": [
+    "memory-write-policy"
+  ],
+  "repo-model-capability-allowlist": [
+    "model-capability-allowlist"
+  ],
+  "repo-model-deprecation-sunset": [
+    "model-deprecation-sunset"
+  ],
+  "repo-model-inventory": [
+    "model-inventory"
+  ],
+  "repo-model-license-provenance": [
+    "model-license-provenance"
+  ],
+  "repo-model-path-egress-boundary": [
+    "model-path-egress-boundary"
+  ],
+  "repo-model-payload-classification": [
+    "model-payload-classification"
+  ],
+  "repo-model-payload-redaction": [
+    "model-payload-redaction"
+  ],
+  "repo-model-pin-config": [
+    "model-pin-config"
+  ],
+  "repo-model-promotion-eval": [
+    "model-promotion-eval"
+  ],
+  "repo-model-routing-config": [
+    "ai-model-routing"
+  ],
+  "repo-multi-turn-indirect-injection-redteam": [
+    "multi-turn-indirect-injection-redteam"
+  ],
+  "repo-multimodal-input-scan": [
+    "multimodal-input-scan"
+  ],
+  "repo-one-click-ai-rollback": [
+    "one-click-ai-rollback"
+  ],
+  "repo-otel-config": [
+    "otel"
+  ],
+  "repo-platform-ownership": [
+    "platform-ownership-support"
+  ],
+  "repo-policy-as-code": [
+    "policy-as-code"
+  ],
+  "repo-post-incident-aprf-actions": [
+    "post-incident-aprf-actions"
+  ],
+  "repo-precommit-ci-secret-scan": [
+    "precommit-ci-secret-scan"
+  ],
+  "repo-prompt-ab-shadow-eval": [
+    "prompt-ab-shadow-eval"
+  ],
+  "repo-prompt-cache-config": [
+    "ai-prompt-cache"
+  ],
+  "repo-prompt-change-review-eval": [
+    "prompt-change-review-eval"
+  ],
+  "repo-prompt-lint-ci": [
+    "prompt-lint-ci"
+  ],
+  "repo-prompt-model-version-retention": [
+    "prompt-model-version-retention"
+  ],
+  "repo-prompt-rollback": [
+    "prompt-rollback"
+  ],
+  "repo-prompt-template-hygiene": [
+    "prompt-template-hygiene"
+  ],
+  "repo-quality-slo-auto-rollback": [
+    "quality-slo-auto-rollback"
+  ],
+  "repo-rag-corpus-config": [
+    "rag-corpus-governance"
+  ],
+  "repo-rate-limit-config": [
+    "ai-spend-limits"
+  ],
+  "repo-retry-amplification-config": [
+    "ai-retry-amplification"
+  ],
+  "repo-rollback-drill": [
+    "rollback-drill"
+  ],
+  "repo-rollback-runbook": [
+    "rollback-runbook"
+  ],
+  "repo-sbom-config": [
+    "ai-model-mbom"
+  ],
+  "repo-scaffolding-templates": [
+    "platform-scaffolding-templates"
+  ],
+  "repo-secret-redaction": [
+    "secret-redaction"
+  ],
+  "repo-secrets-hygiene": [
+    "secrets-hygiene"
+  ],
+  "repo-shared-accelerator-isolation": [
+    "shared-accelerator-isolation"
+  ],
+  "repo-short-lived-agent-tokens": [
+    "short-lived-agent-tokens"
+  ],
+  "repo-signed-tool-catalog": [
+    "signed-tool-catalog"
+  ],
+  "repo-tool-allowlist": [
+    "tool-allowlist"
+  ],
+  "repo-tool-argument-schema": [
+    "tool-argument-schema"
+  ],
+  "repo-tool-gateway-authz": [
+    "tool-gateway-authz"
+  ],
+  "repo-tool-rate-limits": [
+    "tool-rate-limits"
+  ],
+  "repo-train-serve-skew": [
+    "train-serve-skew-monitor"
+  ],
+  "repo-vendor-model-terms": [
+    "vendor-model-terms"
+  ],
+  "repo-vuln-scan-config": [
+    "ai-vuln-scan-gate"
+  ],
+  "repo-workload-identity-runtimes": [
+    "workload-identity-runtimes"
+  ],
+  "running-task-cancellation-test": [
+    "agent-kill-switch"
+  ],
+  "sensitive-doc-abac": [
+    "sensitive-doc-abac"
+  ],
+  "slsa-attestation": [
+    "artifact-provenance-integrity"
+  ]
+}
