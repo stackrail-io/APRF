@@ -9,28 +9,40 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   aiIacCisPolicyCollector,
   type AiIacCisPolicyReport,
 } from "../collectors/ai-iac-cis-policy.ts";
+import { importIngestCollector } from "../collectors/import-ingest.ts";
 import type { CollectorContext } from "../collectors/types.ts";
 
-async function run(
-  target: string,
-  outDir: string,
-): Promise<AiIacCisPolicyReport> {
-  await aiIacCisPolicyCollector.collect({
+const PLUGIN_ID = "ai-iac-cis-policy";
+const pluginYaml = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../plugins/ai-iac-cis-policy.yaml",
+);
+
+function ctx(target: string, outDir: string): CollectorContext {
+  return {
     targetPath: target,
     outputDir: outDir,
     assessedAt: new Date(),
     gitCommit: undefined,
     live: false,
     maxFiles: 2000,
-  } as CollectorContext);
+  } as CollectorContext;
+}
+
+async function run(
+  target: string,
+  outDir: string,
+): Promise<AiIacCisPolicyReport> {
+  await aiIacCisPolicyCollector.collect(ctx(target, outDir));
   return JSON.parse(
     readFileSync(
-      join(outDir, "imports", "ai-iac-cis-policy", "ai-iac-cis-policy-report.json"),
+      join(outDir, "imports", PLUGIN_ID, "ai-iac-cis-policy-report.json"),
       "utf8",
     ),
   );
@@ -175,6 +187,38 @@ async function main() {
     if (rSample.summary.statusHint !== "partial") {
       throw new Error(
         `sample IaC without prod-AI inventory expected partial: ${JSON.stringify(rSample.summary)}`,
+      );
+    }
+
+    // Imported + native evidence must share class "iac" (precedence/confidence).
+    const meta = readFileSync(pluginYaml, "utf8");
+    if (!/^evidenceClass:\s*iac\s*$/m.test(meta) || !/^\s*nodeClass:\s*iac\s*$/m.test(meta)) {
+      throw new Error(
+        "plugin ai-iac-cis-policy.yaml must declare evidenceClass/nodeClass iac",
+      );
+    }
+    const native = await aiIacCisPolicyCollector.collect(ctx(t2, out2));
+    if (native.status !== "ran" || native.nodes.length < 1) {
+      throw new Error(`native collect unexpected: ${JSON.stringify(native)}`);
+    }
+    const badNative = native.nodes.filter((n) => n.class !== "iac");
+    if (badNative.length > 0) {
+      throw new Error(
+        `native collector nodes must be class iac; got ${badNative.map((n) => n.class).join(",")}`,
+      );
+    }
+    const imported = await importIngestCollector(PLUGIN_ID).collect(
+      ctx(t2, out2),
+    );
+    if (imported.status !== "ran" || imported.nodes.length < 1) {
+      throw new Error(
+        `import-ingest unexpected: ${JSON.stringify(imported)}`,
+      );
+    }
+    const badImport = imported.nodes.filter((n) => n.class !== "iac");
+    if (badImport.length > 0) {
+      throw new Error(
+        `import-ingest nodes for ${PLUGIN_ID} must be class iac; got ${badImport.map((n) => n.class).join(",")}`,
       );
     }
 
