@@ -29,7 +29,7 @@ npm run aprf:collect -- --target <project> --out ./aprf-assessment
 ## Adding a plugin
 
 1. Copy `_contract.yaml` → `my-plugin.yaml`
-2. Add `collectors/my-plugin.ts` implementing `Collector` (or reuse `import-ingest`)
+2. Add `collectors/my-plugin.ts` implementing `Collector` (or `repoImportCollector` / `import-ingest` for hybrid/import-only)
 3. Register in `collectors/index.ts` and `capabilities.yaml`
 4. Prefer exporting files into `aprf-assessment/imports/<pluginId>/` for reproducible offline runs
 

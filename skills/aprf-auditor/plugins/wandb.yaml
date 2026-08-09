@@ -1,14 +1,18 @@
+executor: collectors/runtime-vendor.ts
 id: wandb
 title: Weights & Biases experiment / eval export
-version: "0.2.0"
+version: "0.3.0"
 evidenceClass: runtime
-inputs: ["aprf-assessment/imports/wandb/"]
+alsoEmits: [runtime-config]
+inputs:
+  - "wandb init/config in repo"
+  - "Optional: aprf-assessment/imports/wandb/"
 collect:
-  - "Detect wandb init in code"
-  - "Ingest user-exported run summaries for model/eval evidence"
+  - "Detect wandb init / WANDB_ env in code and lockfiles"
+  - "Ingest user-exported run summaries under imports/wandb/ for model/eval evidence"
 emits:
   nodeClass: runtime
-  refPattern: "imports/wandb/*"
+  refPattern: "**/*wandb*|imports/wandb/*"
   signals: [experiment, eval, model-version]
 mapsToChecks: [MOD-M1, MOD-R4, EVL-M1]
 whenUnavailable: "Ask for export"

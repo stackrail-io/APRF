@@ -48,6 +48,7 @@ agentFrameworks:
 evidenceClasses:
   - id: runtime
     description: Live or exported telemetry / traces / eval runs
+    # Local scanners find SDK/config for vendor obs plugins; measured PASS still needs imports/ or live probes.
     collectorSupport: partial
   - id: ci
     description: Pipeline definitions and run artifacts in-repo or attached

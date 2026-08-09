@@ -40,6 +40,15 @@ import { aiFairnessEvalCollector } from "./ai-fairness-eval.ts";
 import { aiJailbreakHarmRedteamCollector } from "./ai-jailbreak-harm-redteam.ts";
 import { aiSafetyEdgeSamplingCollector } from "./ai-safety-edge-sampling.ts";
 import { promptfooCollector } from "./promptfoo.ts";
+import {
+  langsmithCollector,
+  phoenixCollector,
+  wandbCollector,
+  heliconeCollector,
+  prometheusCollector,
+  grafanaCollector,
+  cloudwatchCollector,
+} from "./runtime-vendor.ts";
 import { httpAuthProbeCollector } from "./http-auth-probe.ts";
 import { mcpS2sInventoryCollector } from "./mcp-s2s-inventory.ts";
 import { aiAdminMfaCollector } from "./ai-admin-mfa.ts";
@@ -187,7 +196,7 @@ import {
   azureCollector,
   gcpCollector,
 } from "./iac-cloud.ts";
-import { importIngestCollector, customImportCollector } from "./import-ingest.ts";
+import { customImportCollector } from "./import-ingest.ts";
 
 /** Collectors with real TypeScript executors (local and/or import ingest). */
 export const COLLECTORS: Collector[] = [
@@ -375,14 +384,14 @@ export const COLLECTORS: Collector[] = [
   awsCollector,
   azureCollector,
   gcpCollector,
-  // Export-only runtime plugins (drop files under imports/<id>/)
-  importIngestCollector("langsmith"),
-  importIngestCollector("phoenix"),
-  importIngestCollector("helicone"),
-  importIngestCollector("wandb"),
-  importIngestCollector("prometheus"),
-  importIngestCollector("grafana"),
-  importIngestCollector("cloudwatch"),
+  // Vendor obs / eval: local config scan + imports/<id>/
+  langsmithCollector,
+  phoenixCollector,
+  heliconeCollector,
+  wandbCollector,
+  prometheusCollector,
+  grafanaCollector,
+  cloudwatchCollector,
   // Out-of-plugin customer evidence
   customImportCollector,
 ];

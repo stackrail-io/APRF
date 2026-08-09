@@ -1,15 +1,17 @@
+executor: collectors/promptfoo.ts
 id: promptfoo
 title: Promptfoo / eval harness collector
-version: "0.2.0"
+version: "0.3.0"
 evidenceClass: ci
 alsoEmits: [runtime-config]
-inputs: ["promptfoo.yaml", "**/redteam/**", "CI eval job"]
+inputs: ["promptfoo.yaml", "**/redteam/**", "CI eval job", "imports/promptfoo/"]
 collect:
   - "Find promptfoo/eval configs and recent JSON results"
+  - "Ingest optional results under imports/promptfoo/"
   - "Link to EVL and SEC injection/red-team Checks"
 emits:
   nodeClass: ci
-  refPattern: "**/promptfoo*"
+  refPattern: "**/promptfoo*|imports/promptfoo/*"
   signals: [eval-suite, redteam, gate]
 mapsToChecks: [EVL-M1, EVL-M2, SEC-M1, SEC-M2, SEC-M3]
 whenUnavailable: "Ask for eval results path"

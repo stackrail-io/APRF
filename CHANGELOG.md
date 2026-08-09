@@ -9,6 +9,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ### Added
 - Detector↔plugin bridge: complete `plugin.detectorIds` for orphan Check detectors; generate `detector-plugin-map.json`; `aprf:detector-bridge` in local `validate` and `.github/workflows/ci.yml` (every Check detector except `manual-attest` must be claimed; join maps must match plugin YAML).
+- Real hybrid collectors for former import-only stubs: `langsmith`, `phoenix`, `wandb`, `helicone`, `prometheus`, `grafana`, `cloudwatch` (repo config/IaC scan + `imports/<id>/`); shared factory `collectors/lib/repo-import-collector.ts`.
 
 ### Changed
 - Docs sync: README / ARCHITECTURE / CONTRIBUTING and package READMEs now describe the shipped CLI assessment path, threat-map + crosswalks (informative), and corrected Regulated profile count (51).

@@ -1,14 +1,18 @@
+executor: collectors/runtime-vendor.ts
 id: helicone
 title: Helicone gateway / logging export
-version: "0.2.0"
+version: "0.3.0"
 evidenceClass: runtime
-inputs: ["aprf-assessment/imports/helicone/", "proxy config in-repo"]
+alsoEmits: [runtime-config]
+inputs:
+  - "Helicone base URL / headers / proxy config in-repo"
+  - "Optional: aprf-assessment/imports/helicone/"
 collect:
-  - "Detect Helicone base URL / headers in config"
-  - "Prefer user export for request logs"
+  - "Detect Helicone gateway/auth headers in config"
+  - "Prefer user export under imports/helicone/ for request logs"
 emits:
   nodeClass: runtime
-  refPattern: "imports/helicone/*"
+  refPattern: "**/*helicone*|imports/helicone/*"
   signals: [request-log, cost, cache]
 mapsToChecks: [OBS-M1, COST-M1, COST-M2]
 whenUnavailable: "Ask user for export"

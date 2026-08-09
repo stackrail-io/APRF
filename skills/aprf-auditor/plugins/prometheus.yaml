@@ -1,14 +1,18 @@
+executor: collectors/runtime-vendor.ts
 id: prometheus
 title: Prometheus rules / metrics config
-version: "0.2.0"
+version: "0.3.0"
 evidenceClass: runtime
 alsoEmits: [runtime-config]
-inputs: ["prometheus*.yml", "**/recording*.yaml", "optional metrics snapshot"]
+inputs:
+  - "prometheus*.yml, recording/alert rules, ServiceMonitor"
+  - "Optional metrics snapshot under aprf-assessment/imports/prometheus/"
 collect:
-  - "Find scrape configs and alert rules relevant to LLM latency/error/cost"
+  - "Find scrape configs and alert/recording rules relevant to LLM latency/error/cost"
+  - "Ingest optional metrics snapshots from imports/prometheus/"
 emits:
   nodeClass: runtime
-  refPattern: "**/prometheus*"
+  refPattern: "**/prometheus*|**/recording*|imports/prometheus/*"
   signals: [metric, alert-rule]
 mapsToChecks: [OBS-M1, PERF-M1, COST-M2]
 whenUnavailable: "Ask for rules or Grafana-linked export"
