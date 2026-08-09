@@ -12,7 +12,7 @@ collect:
   - "Ingest user-exported run summaries under imports/wandb/ for model/eval evidence"
 emits:
   nodeClass: runtime
-  refPattern: "**/*wandb*|imports/wandb/*"
+  refPattern: "**/*wandb*|**/*.{ts,tsx,js,jsx,mjs,cjs,py,env}|**/package.json|**/pyproject.toml|**/requirements*.txt|imports/wandb/*"
   signals: [experiment, eval, model-version]
 mapsToChecks: [MOD-M1, MOD-R4, EVL-M1]
 whenUnavailable: "Ask for export"

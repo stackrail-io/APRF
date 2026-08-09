@@ -12,6 +12,8 @@ import { join } from "node:path";
 import {
   langsmithCollector,
   phoenixCollector,
+  wandbCollector,
+  heliconeCollector,
   prometheusCollector,
   grafanaCollector,
   cloudwatchCollector,
@@ -53,10 +55,11 @@ async function main() {
 
     const t = join(root, "app");
     mkdirSync(join(t, "src"), { recursive: true });
-    mkdirSync(join(t, "ops", "prometheus"), { recursive: true });
     mkdirSync(join(t, "ops"), { recursive: true });
+    mkdirSync(join(t, "ops", "prometheus"), { recursive: true });
     mkdirSync(join(t, "ops", "grafana"), { recursive: true });
     mkdirSync(join(t, "infra"), { recursive: true });
+    mkdirSync(join(t, "lib"), { recursive: true });
     mkdirSync(join(t, "dashboards"), { recursive: true });
     writeFileSync(
       join(t, "src", "tracing.ts"),
@@ -67,12 +70,37 @@ async function main() {
       "from phoenix.otel import register\nregister()\n",
     );
     writeFileSync(
+      join(t, "src", "train.py"),
+      "import wandb\nwandb.init(project='aprf')\n",
+    );
+    writeFileSync(
+      join(t, "src", "proxy.ts"),
+      'const base = "https://gateway.helicone.ai";\nprocess.env.HELICONE_API_KEY;\n',
+    );
+    writeFileSync(
       join(t, "src", "cw_sdk.ts"),
       'import { CloudWatch } from "aws-sdk";\nnew CloudWatch().putMetricAlarm({ AlarmName: "x" });\n',
     );
     writeFileSync(
+      join(t, "lib", "monitoring-stack.ts"),
+      'import { CfnAlarm } from "aws-cdk-lib/aws-cloudwatch";\nnew CfnAlarm(this, "A", {} as never);\n',
+    );
+    writeFileSync(
       join(t, "ops", "prometheus", "rules.yml"),
       "groups:\n  - name: llm\n    rules:\n      - record: llm:latency:p99\n        expr: histogram_quantile(0.99, token_latency_bucket)\n",
+    );
+    // Path lacks prometheus hints — contentScanExtensions must still find it.
+    writeFileSync(
+      join(t, "ops", "alerts.yaml"),
+      "apiVersion: monitoring.coreos.com/v1\nkind: PrometheusRule\nmetadata:\n  name: llm\n",
+    );
+    writeFileSync(
+      join(t, "ops", "cfn-logs.json"),
+      JSON.stringify({
+        Resources: {
+          AiLogs: { Type: "AWS::Logs::LogGroup", Properties: { LogGroupName: "/ai" } },
+        },
+      }),
     );
     // dashboard in filename, not under grafana/ — must still match Grafana JSON shape.
     writeFileSync(
@@ -139,11 +167,27 @@ async function main() {
       throw new Error("phoenix path-only false positive");
     }
 
+    const wb = await wandbCollector.collect(ctx(t, join(root, "o-wb")));
+    if (wb.status !== "ran" || !wb.nodes.some((n) => n.ref.includes("train.py"))) {
+      throw new Error(`wandb miss: ${JSON.stringify(wb)}`);
+    }
+    if (wb.nodes.some((n) => n.class !== "runtime-config")) {
+      throw new Error("wandb repo nodes must be runtime-config");
+    }
+
+    const hc = await heliconeCollector.collect(ctx(t, join(root, "o-hc")));
+    if (hc.status !== "ran" || !hc.nodes.some((n) => n.ref.includes("proxy.ts"))) {
+      throw new Error(`helicone miss: ${JSON.stringify(hc)}`);
+    }
+
     const prom = await prometheusCollector.collect(
       ctx(t, join(root, "o-prom")),
     );
-    if (prom.status !== "ran" || prom.nodes.length < 1) {
-      throw new Error(`prometheus unexpected: ${JSON.stringify(prom)}`);
+    if (
+      prom.status !== "ran" ||
+      !prom.nodes.some((n) => n.ref.includes("alerts.yaml"))
+    ) {
+      throw new Error(`prometheus content-scan miss: ${JSON.stringify(prom)}`);
     }
 
     const graf = await grafanaCollector.collect(ctx(t, join(root, "o-graf")));
@@ -166,6 +210,13 @@ async function main() {
     }
     if (cw.nodes.some((n) => n.ref.includes("cw_sdk.ts"))) {
       throw new Error("cloudwatch should not emit bare SDK putMetricAlarm hits");
+    }
+    const cdkNode = cw.nodes.find((n) => n.ref.includes("monitoring-stack.ts"));
+    if (!cdkNode || cdkNode.class !== "iac") {
+      throw new Error(`cloudwatch CDK CfnAlarm should be iac: ${JSON.stringify(cdkNode)}`);
+    }
+    if (!cw.nodes.some((n) => n.ref.includes("cfn-logs.json") && n.class === "iac")) {
+      throw new Error("cloudwatch AWS::Logs::LogGroup miss");
     }
 
     console.log("aprf-auditor runtime-vendor smoke OK");

@@ -12,7 +12,7 @@ collect:
   - "Ingest span/eval exports if present under imports/phoenix/"
 emits:
   nodeClass: runtime
-  refPattern: "**/*phoenix*|**/*arize*|imports/phoenix/*"
+  refPattern: "**/*phoenix*|**/*arize*|**/*.{ts,tsx,js,jsx,mjs,cjs,py,env}|**/package.json|**/pyproject.toml|**/requirements*.txt|imports/phoenix/*"
   signals: [eval-run, trace]
 mapsToChecks: [EVL-M1, OBS-M1, SEC-M1]
 whenUnavailable: "Ask for export or mark runtime evidence missing"

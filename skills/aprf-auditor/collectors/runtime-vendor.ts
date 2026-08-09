@@ -113,6 +113,7 @@ export const prometheusCollector: Collector = repoImportCollector({
   ],
   contentPattern:
     /\b(?:scrape_configs|alerting_rules|recording_rules|PrometheusRule|ServiceMonitor|histogram_quantile)\b|(?:^|[^A-Za-z0-9_])(?:llm_|token_|prompt_)[A-Za-z0-9_]+/i,
+  contentScanExtensions: [".yml", ".yaml", ".json", ".toml", ".tf"],
   signals: ["metric", "alert-rule"],
   relatedCheckIds: ["OBS-M1", "PERF-M1", "COST-M2"],
   evidenceClass: "runtime-config",
@@ -140,15 +141,19 @@ export const cloudwatchCollector: Collector = repoImportCollector({
   id: "cloudwatch",
   pathHints: ["cloudwatch", "cw_", "monitoring", "alarms", "cdk", "serverless"],
   // Prefer IaC resource types; avoid bare SDK method names that match app code.
+  // Log groups are AWS::Logs::LogGroup (not AWS::CloudWatch::LogGroup).
   contentPattern:
-    /(?:\baws_cloudwatch(?:_metric_alarm|_log_group)?\b|\bcloudwatch_(?:metric_alarm|log_group)\b|AWS::CloudWatch::(?:Alarm|LogGroup)|\baws_cloudwatch_log_group\b|\bCfnAlarm\b|\bCfnLogGroup\b|\blogs\.CreateLogGroup\b)/i,
+    /(?:\baws_cloudwatch(?:_metric_alarm|_log_group)?\b|\bcloudwatch_(?:metric_alarm|log_group)\b|AWS::CloudWatch::Alarm|AWS::Logs::LogGroup|\baws_cloudwatch_log_group\b|\bCfnAlarm\b|\bCfnLogGroup\b|\blogs\.CreateLogGroup\b)/i,
   contentScanExtensions: [".tf", ".json", ".yml", ".yaml", ".ts", ".py", ".bicep"],
   signals: ["alarm", "log-group"],
   relatedCheckIds: ["OBS-M1", "INC-M1", "COST-M2"],
-  evidenceClass: (relPath) =>
+  evidenceClass: (relPath, text) =>
     /\.(?:tf|bicep)$/i.test(relPath) ||
     /(?:^|\/)(?:infra|terraform|cdk|cloudformation|pulumi|bicep|templates)\//i.test(
       relPath,
+    ) ||
+    /\b(?:CfnAlarm|CfnLogGroup|AWS::CloudWatch::Alarm|AWS::Logs::LogGroup)\b/.test(
+      text,
     )
       ? "iac"
       : "runtime-config",

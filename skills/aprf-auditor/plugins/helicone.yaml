@@ -12,7 +12,7 @@ collect:
   - "Prefer user export under imports/helicone/ for request logs"
 emits:
   nodeClass: runtime
-  refPattern: "**/*helicone*|imports/helicone/*"
+  refPattern: "**/*helicone*|**/*.{ts,tsx,js,jsx,mjs,cjs,py,env}|**/package.json|**/pyproject.toml|**/requirements*.txt|imports/helicone/*"
   signals: [request-log, cost, cache]
 mapsToChecks: [OBS-M1, COST-M1, COST-M2]
 whenUnavailable: "Ask user for export"

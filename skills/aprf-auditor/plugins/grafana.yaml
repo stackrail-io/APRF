@@ -3,7 +3,7 @@ id: grafana
 title: Grafana dashboard-as-code
 version: "0.3.0"
 evidenceClass: runtime
-alsoEmits: [runtime-config, docs]
+alsoEmits: [runtime-config]
 inputs:
   - "**/grafana/**, **/*dashboard*.json"
   - "Optional: aprf-assessment/imports/grafana/"
