@@ -123,8 +123,14 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **destructive-tool-dry-run** | `destructive-tool-dry-run.ts` | destructive dry-run non-prod (TOL-R1) | `imports/destructive-tool-dry-run/` | — |
 | **tool-rate-limits** | `tool-rate-limits.ts` | rate + blast budgets (TOL-R2) | `imports/tool-rate-limits/` | — |
 | promptfoo | `promptfoo.ts` | eval configs | `imports/promptfoo/` | — |
+| langsmith | `runtime-vendor.ts` | SDK/env/config scan | `imports/langsmith/` | — |
+| phoenix | `runtime-vendor.ts` | Phoenix/Arize config | `imports/phoenix/` | — |
+| wandb | `runtime-vendor.ts` | wandb init/config | `imports/wandb/` | — |
+| helicone | `runtime-vendor.ts` | gateway/headers | `imports/helicone/` | — |
+| prometheus | `runtime-vendor.ts` | scrape/alert rules | `imports/prometheus/` | — |
+| grafana | `runtime-vendor.ts` | dashboard-as-code | `imports/grafana/` | — |
+| cloudwatch | `runtime-vendor.ts` | CW alarm/log IaC | `imports/cloudwatch/` | — |
 | aws / azure / gcp | `iac-cloud.ts` | Terraform/Bicep signals | `imports/<cloud>/` | — |
-| langsmith, phoenix, … | `import-ingest.ts` | — | `imports/<id>/` | — |
 | **custom** | `import-ingest.ts` | — | **`imports/custom/`** | — |
 | **agent-charter-inventory** | `agent-charter-inventory.ts` | inventory/charters | `imports/agent-charter-inventory/` | — |
 | **agent-loop-limits** | `agent-loop-limits.ts` | agent limit config/tests | `imports/agent-loop-limits/` | — |

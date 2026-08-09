@@ -27,8 +27,8 @@ Still useful for exploratory chat, but weak on rescans, precedence, and runtime 
 
 | Tier | What runs | When |
 | --- | --- | --- |
-| **Local** | Repo walk, CI YAML, IaC regex, OTel/promptfoo config | Default |
-| **Import** | Files under `aprf-assessment/imports/<plugin>/` | Drop exports (LangSmith, Phoenix, …) |
+| **Local** | Repo walk, CI YAML, IaC regex, OTel/promptfoo + vendor obs config (LangSmith, Phoenix, Prometheus, Grafana, …) | Default |
+| **Import** | Files under `aprf-assessment/imports/<plugin>/` | Measured runtime exports (traces, eval runs, metrics snapshots) |
 | **Live** | Opt-in APIs (auth probes, GitHub Actions, …) | Base URL + credential **env vars** (never paste secrets into chat) |
 
 ## Planes

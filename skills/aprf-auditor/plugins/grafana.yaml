@@ -1,14 +1,18 @@
+executor: collectors/runtime-vendor.ts
 id: grafana
 title: Grafana dashboard-as-code
-version: "0.2.0"
+version: "0.3.0"
 evidenceClass: runtime
-alsoEmits: [docs]
-inputs: ["**/grafana/**", "**/*dashboard*.json"]
+alsoEmits: [runtime-config]
+inputs:
+  - "**/grafana/**, **/*dashboard*.json"
+  - "Optional: aprf-assessment/imports/grafana/"
 collect:
-  - "Inventory dashboards covering LLM/tool/cost SLOs"
+  - "Inventory dashboard-as-code covering LLM/tool/cost SLOs"
+  - "Ingest optional exports under imports/grafana/"
 emits:
   nodeClass: runtime
-  refPattern: "**/grafana/**"
+  refPattern: "**/grafana/**|**/*dashboard*|imports/grafana/*"
   signals: [dashboard, slo]
 mapsToChecks: [OBS-M1, PERF-M1, COST-M1]
 whenUnavailable: "Dashboards alone without data source proof → low freshness/confidence"
