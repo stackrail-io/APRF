@@ -63,7 +63,7 @@ references:
     url: "https://sre.google/workbook/observability/"
   - title: "OpenTelemetry"
     url: "https://opentelemetry.io/"
-  - title: "OWASP LLM — Sensitive Information Disclosure"
+  - title: "OWASP LLM — LLM02 Sensitive Information Disclosure"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
   - "OBS-M1"

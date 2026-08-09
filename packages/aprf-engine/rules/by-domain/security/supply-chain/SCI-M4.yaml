@@ -87,7 +87,7 @@ references:
     url: "https://docs.sigstore.dev/policy-controller/overview/"
   - title: "CNCF Software Supply Chain Best Practices"
     url: "https://www.cncf.io/"
-  - title: "OWASP LLM — Supply Chain Vulnerabilities"
+  - title: "OWASP LLM — LLM03 Supply Chain"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
   - title: "NIST AI RMF — Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"

@@ -70,7 +70,7 @@ recommendedFixes:
 references:
   - title: "Model Context Protocol — security considerations"
     url: "https://modelcontextprotocol.io/"
-  - title: "OWASP LLM — Excessive Agency"
+  - title: "OWASP LLM — LLM06 Excessive Agency"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
   - "TOL-M3"

@@ -67,7 +67,7 @@ recommendedFixes:
   - "Run validation ≤90 days; retain expected-alert / 0-silent-miss evidence under imports/ai-exfil-detection/"
   - "Time-box gaps with owner and expiry ≤90 days"
 references:
-  - title: "OWASP Top 10 for Large Language Model Applications — LLM06 Sensitive Information Disclosure"
+  - title: "OWASP Top 10 for Large Language Model Applications — LLM02 Sensitive Information Disclosure"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
   - title: "NIST AI Risk Management Framework"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"

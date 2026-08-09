@@ -61,7 +61,7 @@ recommendedFixes:
   - "Add contract tests that reject non-conforming fixtures on 100% of inventoried paths"
   - "Retain evidence under imports/high-risk-output-gate/; time-box gaps ≤90 days"
 references:
-  - title: "OWASP Top 10 for Large Language Model Applications — LLM02 Insecure Output Handling"
+  - title: "OWASP Top 10 for Large Language Model Applications — LLM05 Improper Output Handling"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
   - title: "NIST AI Risk Management Framework"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"

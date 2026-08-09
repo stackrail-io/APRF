@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:bd5c43d2ef005bbdab6aad32c03925c944cec1fc62769680cefd3d3c4a59bbfe",
+  "generatedAt": "sha256:f63fbe380359c8673cc2f20bc75b985baba7c9e7ade8387ef1f577e95d36a127",
   "ruleCount": 178,
   "domains": [
     {
@@ -1475,7 +1475,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications — LLM01 / agent risks",
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -1564,7 +1564,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
         },
         {
-          "title": "OWASP Top 10 for Large Language Model Applications — LLM06 Sensitive Information Disclosure",
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM02 Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -3550,7 +3550,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -3626,7 +3626,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -3703,7 +3703,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -3857,7 +3857,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -3933,7 +3933,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM01 — Prompt Injection",
+          "title": "OWASP LLM — LLM01 Prompt Injection",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -5825,7 +5825,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM Top 10 — LLM09 Overreliance",
+          "title": "OWASP LLM Top 10 — LLM09 Misinformation",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -5973,7 +5973,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM Top 10 — LLM02 Insecure Output Handling",
+          "title": "OWASP LLM Top 10 — LLM02 Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -7627,7 +7627,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses",
+          "title": "OWASP LLM — LLM04 Data and Model Poisoning / LLM08 Vector and Embedding Weaknesses",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -7704,7 +7704,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses",
+          "title": "OWASP LLM — LLM04 Data and Model Poisoning / LLM08 Vector and Embedding Weaknesses",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -7781,7 +7781,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses",
+          "title": "OWASP LLM — LLM04 Data and Model Poisoning / LLM08 Vector and Embedding Weaknesses",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -7858,7 +7858,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses",
+          "title": "OWASP LLM — LLM04 Data and Model Poisoning / LLM08 Vector and Embedding Weaknesses",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -7934,7 +7934,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses",
+          "title": "OWASP LLM — LLM04 Data and Model Poisoning / LLM08 Vector and Embedding Weaknesses",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -8011,7 +8011,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses",
+          "title": "OWASP LLM — LLM04 Data and Model Poisoning / LLM08 Vector and Embedding Weaknesses",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -8608,7 +8608,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://opentelemetry.io/"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -9933,7 +9933,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -10011,7 +10011,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -10091,7 +10091,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -10169,7 +10169,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -10247,7 +10247,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -10324,7 +10324,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -10407,7 +10407,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://sre.google/workbook/"
         },
         {
-          "title": "OWASP LLM Prompt Injection guidance",
+          "title": "OWASP LLM — LLM01 Prompt Injection",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -10480,7 +10480,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://sre.google/workbook/"
         },
         {
-          "title": "OWASP LLM Prompt Injection guidance",
+          "title": "OWASP LLM — LLM01 Prompt Injection",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -10555,7 +10555,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://sre.google/workbook/"
         },
         {
-          "title": "OWASP LLM Prompt Injection guidance",
+          "title": "OWASP LLM — LLM01 Prompt Injection",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -10629,7 +10629,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://sre.google/workbook/"
         },
         {
-          "title": "OWASP LLM Prompt Injection guidance",
+          "title": "OWASP LLM — LLM01 Prompt Injection",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -10704,7 +10704,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://sre.google/workbook/"
         },
         {
-          "title": "OWASP LLM Prompt Injection guidance",
+          "title": "OWASP LLM — LLM01 Prompt Injection",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -10777,7 +10777,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://sre.google/workbook/"
         },
         {
-          "title": "OWASP LLM Prompt Injection guidance",
+          "title": "OWASP LLM — LLM01 Prompt Injection",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -12307,7 +12307,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cncf.io/"
         },
         {
-          "title": "OWASP LLM — Supply Chain Vulnerabilities",
+          "title": "OWASP LLM — LLM03 Supply Chain",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -12398,7 +12398,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cncf.io/"
         },
         {
-          "title": "OWASP LLM — Supply Chain Vulnerabilities",
+          "title": "OWASP LLM — LLM03 Supply Chain",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -12497,7 +12497,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cncf.io/"
         },
         {
-          "title": "OWASP LLM — Supply Chain Vulnerabilities",
+          "title": "OWASP LLM — LLM03 Supply Chain",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -12589,7 +12589,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cncf.io/"
         },
         {
-          "title": "OWASP LLM — Supply Chain Vulnerabilities",
+          "title": "OWASP LLM — LLM03 Supply Chain",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -12682,7 +12682,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cncf.io/"
         },
         {
-          "title": "OWASP LLM — Supply Chain Vulnerabilities",
+          "title": "OWASP LLM — LLM03 Supply Chain",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -12780,7 +12780,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cncf.io/"
         },
         {
-          "title": "OWASP LLM — Supply Chain Vulnerabilities",
+          "title": "OWASP LLM — LLM03 Supply Chain",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -12936,7 +12936,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications — LLM02 Insecure Output Handling",
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM05 Improper Output Handling",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -13095,7 +13095,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications — LLM08 Excessive Agency",
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -13255,7 +13255,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications — LLM02 Insecure Output Handling / multimodal risks",
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM01 Prompt Injection (multimodal / indirect)",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -13334,7 +13334,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications — LLM06 Sensitive Information Disclosure",
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM02 Sensitive Information Disclosure",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -13905,7 +13905,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP LLM — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -14007,7 +14007,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP LLM — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -14087,7 +14087,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP LLM — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -14168,7 +14168,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM — Insecure Output Handling / Excessive Agency",
+          "title": "OWASP LLM — LLM05 Improper Output Handling / LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         },
         {
@@ -14250,7 +14250,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://slsa.dev/"
         },
         {
-          "title": "OWASP LLM — Supply Chain Vulnerabilities",
+          "title": "OWASP LLM — LLM03 Supply Chain",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -14324,7 +14324,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP LLM — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],
@@ -14403,7 +14403,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
+          "title": "OWASP LLM — LLM06 Excessive Agency",
           "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
         }
       ],

@@ -58,7 +58,7 @@ recommendedFixes:
 references:
   - title: "NIST AI RMF — privacy considerations"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
-  - title: "OWASP LLM — Sensitive Information Disclosure"
+  - title: "OWASP LLM — LLM02 Sensitive Information Disclosure"
     url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
 relatedRules:
   - "PRI-M1"
