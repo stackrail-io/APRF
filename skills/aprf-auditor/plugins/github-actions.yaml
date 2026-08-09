@@ -17,6 +17,6 @@ emits:
   nodeClass: ci
   refPattern: ".github/workflows/<file>"
   signals: [workflow-job, secret-scan, eval-gate, deploy]
-mapsToChecks: [SEC2-M1, SEC2-M2, SEC2-R1, EVL-M1, CHG-M1, CHG-M2, DEP-M1, SUP-M1]
+mapsToChecks: [SEC2-M1, SEC2-M2, SEC2-R1, EVL-M1, CHG-M1, CHG-M2, DEP-M1, SCI-M1]
 whenUnavailable: "No workflows → skip plugin; do not invent CI"
 builtin: true

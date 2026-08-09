@@ -70,7 +70,7 @@ references:
   - title: "ISO/IEC 42001 — AI management systems"
     url: "https://www.iso.org/standard/81230.html"
   - title: "OWASP LLM Top 10 — LLM01 Prompt Injection (related, not substitute)"
-    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+    url: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
 relatedRules:
   - "SAF-M1"
   - "SAF-M2"

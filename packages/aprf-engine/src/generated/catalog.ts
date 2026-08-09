@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:bd5c43d2ef005bbdab6aad32c03925c944cec1fc62769680cefd3d3c4a59bbfe",
+  "generatedAt": "sha256:3fc0b36fa9895e9c86276fd2c9df69bda59304c73617f031f0841234dc216c55",
   "ruleCount": 178,
   "domains": [
     {
@@ -620,7 +620,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "references": [
         {
           "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         },
         {
           "title": "NIST AI Risk Management Framework — Govern",
@@ -760,7 +760,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "references": [
         {
           "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         },
         {
           "title": "NIST AI Risk Management Framework — Govern / Manage",
@@ -873,7 +873,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "references": [
         {
           "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         },
         {
           "title": "NIST AI Risk Management Framework — Govern / Manage",
@@ -944,7 +944,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "references": [
         {
           "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         },
         {
           "title": "NIST AI Risk Management Framework — Govern / Manage",
@@ -1020,7 +1020,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "references": [
         {
           "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         },
         {
           "title": "NIST AI Risk Management Framework — Govern / Manage",
@@ -1095,7 +1095,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "references": [
         {
           "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         },
         {
           "title": "NIST AI Risk Management Framework — Govern / Manage",
@@ -1169,7 +1169,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "references": [
         {
           "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         },
         {
           "title": "NIST AI Risk Management Framework — Govern",
@@ -1475,8 +1475,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications — LLM01 / agent risks",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM06 Excessive Agency",
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         },
         {
           "title": "RFC 8693 — OAuth 2.0 Token Exchange",
@@ -1564,8 +1564,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
         },
         {
-          "title": "OWASP Top 10 for Large Language Model Applications — LLM06 Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM02 Sensitive Information Disclosure",
+          "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
         },
         {
           "title": "CIS Benchmarks — Identity controls",
@@ -3550,8 +3550,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
+          "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
         }
       ],
       "relatedRules": [
@@ -3626,8 +3626,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
+          "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
         }
       ],
       "relatedRules": [
@@ -3703,8 +3703,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
+          "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
         }
       ],
       "relatedRules": [
@@ -3857,8 +3857,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
+          "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
         }
       ],
       "relatedRules": [
@@ -3933,8 +3933,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM01 — Prompt Injection",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM01 Prompt Injection",
+          "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         }
       ],
       "relatedRules": [
@@ -5825,8 +5825,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM Top 10 — LLM09 Overreliance",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM Top 10 — LLM09 Misinformation",
+          "url": "https://genai.owasp.org/llmrisk/llm092025-misinformation/"
         }
       ],
       "relatedRules": [
@@ -5973,8 +5973,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM Top 10 — LLM02 Insecure Output Handling",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM Top 10 — LLM02 Sensitive Information Disclosure",
+          "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
         }
       ],
       "relatedRules": [
@@ -6270,7 +6270,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         },
         {
           "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         }
       ],
       "relatedRules": [
@@ -6344,7 +6344,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         },
         {
           "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         }
       ],
       "relatedRules": [
@@ -6413,7 +6413,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         },
         {
           "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         }
       ],
       "relatedRules": [
@@ -6484,7 +6484,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         },
         {
           "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         }
       ],
       "relatedRules": [
@@ -6555,7 +6555,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         },
         {
           "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         }
       ],
       "relatedRules": [
@@ -6625,7 +6625,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         },
         {
           "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         }
       ],
       "relatedRules": [
@@ -7627,8 +7627,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM04 Data and Model Poisoning / LLM08 Vector and Embedding Weaknesses",
+          "url": "https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/"
         }
       ],
       "relatedRules": [
@@ -7704,8 +7704,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM04 Data and Model Poisoning / LLM08 Vector and Embedding Weaknesses",
+          "url": "https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/"
         }
       ],
       "relatedRules": [
@@ -7781,8 +7781,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM04 Data and Model Poisoning / LLM08 Vector and Embedding Weaknesses",
+          "url": "https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/"
         }
       ],
       "relatedRules": [
@@ -7858,8 +7858,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM04 Data and Model Poisoning / LLM08 Vector and Embedding Weaknesses",
+          "url": "https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/"
         }
       ],
       "relatedRules": [
@@ -7934,8 +7934,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM04 Data and Model Poisoning / LLM08 Vector and Embedding Weaknesses",
+          "url": "https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/"
         }
       ],
       "relatedRules": [
@@ -8011,8 +8011,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Training Data Poisoning / Vector and Embedding Weaknesses",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM04 Data and Model Poisoning / LLM08 Vector and Embedding Weaknesses",
+          "url": "https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/"
         }
       ],
       "relatedRules": [
@@ -8608,8 +8608,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://opentelemetry.io/"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
+          "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
         }
       ],
       "relatedRules": [
@@ -9933,8 +9933,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
+          "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
         }
       ],
       "relatedRules": [
@@ -10011,8 +10011,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
+          "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
         }
       ],
       "relatedRules": [
@@ -10091,8 +10091,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
+          "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
         }
       ],
       "relatedRules": [
@@ -10169,8 +10169,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
+          "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
         }
       ],
       "relatedRules": [
@@ -10247,8 +10247,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
+          "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
         }
       ],
       "relatedRules": [
@@ -10324,8 +10324,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.nist.gov/itl/ai-risk-management-framework"
         },
         {
-          "title": "OWASP LLM — Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM02 Sensitive Information Disclosure",
+          "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
         }
       ],
       "relatedRules": [
@@ -10407,8 +10407,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://sre.google/workbook/"
         },
         {
-          "title": "OWASP LLM Prompt Injection guidance",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM01 Prompt Injection",
+          "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         }
       ],
       "relatedRules": [
@@ -10480,8 +10480,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://sre.google/workbook/"
         },
         {
-          "title": "OWASP LLM Prompt Injection guidance",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM01 Prompt Injection",
+          "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         }
       ],
       "relatedRules": [
@@ -10555,8 +10555,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://sre.google/workbook/"
         },
         {
-          "title": "OWASP LLM Prompt Injection guidance",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM01 Prompt Injection",
+          "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         }
       ],
       "relatedRules": [
@@ -10629,8 +10629,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://sre.google/workbook/"
         },
         {
-          "title": "OWASP LLM Prompt Injection guidance",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM01 Prompt Injection",
+          "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         }
       ],
       "relatedRules": [
@@ -10704,8 +10704,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://sre.google/workbook/"
         },
         {
-          "title": "OWASP LLM Prompt Injection guidance",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM01 Prompt Injection",
+          "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         }
       ],
       "relatedRules": [
@@ -10777,8 +10777,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://sre.google/workbook/"
         },
         {
-          "title": "OWASP LLM Prompt Injection guidance",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM01 Prompt Injection",
+          "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         }
       ],
       "relatedRules": [
@@ -12180,7 +12180,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         },
         {
           "title": "OWASP LLM Top 10 — LLM01 Prompt Injection (related, not substitute)",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         }
       ],
       "relatedRules": [
@@ -12307,8 +12307,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cncf.io/"
         },
         {
-          "title": "OWASP LLM — Supply Chain Vulnerabilities",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM03 Supply Chain",
+          "url": "https://genai.owasp.org/llmrisk/llm032025-supply-chain/"
         }
       ],
       "relatedRules": [
@@ -12398,8 +12398,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cncf.io/"
         },
         {
-          "title": "OWASP LLM — Supply Chain Vulnerabilities",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM03 Supply Chain",
+          "url": "https://genai.owasp.org/llmrisk/llm032025-supply-chain/"
         },
         {
           "title": "NIST AI RMF — Manage",
@@ -12497,8 +12497,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cncf.io/"
         },
         {
-          "title": "OWASP LLM — Supply Chain Vulnerabilities",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM03 Supply Chain",
+          "url": "https://genai.owasp.org/llmrisk/llm032025-supply-chain/"
         },
         {
           "title": "CISA Known Exploited Vulnerabilities Catalog",
@@ -12589,8 +12589,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cncf.io/"
         },
         {
-          "title": "OWASP LLM — Supply Chain Vulnerabilities",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM03 Supply Chain",
+          "url": "https://genai.owasp.org/llmrisk/llm032025-supply-chain/"
         },
         {
           "title": "NIST AI RMF — Manage",
@@ -12682,8 +12682,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cncf.io/"
         },
         {
-          "title": "OWASP LLM — Supply Chain Vulnerabilities",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM03 Supply Chain",
+          "url": "https://genai.owasp.org/llmrisk/llm032025-supply-chain/"
         },
         {
           "title": "NIST AI RMF — Manage",
@@ -12780,8 +12780,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://www.cncf.io/"
         },
         {
-          "title": "OWASP LLM — Supply Chain Vulnerabilities",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM03 Supply Chain",
+          "url": "https://genai.owasp.org/llmrisk/llm032025-supply-chain/"
         },
         {
           "title": "NIST AI RMF — Manage",
@@ -12857,7 +12857,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "references": [
         {
           "title": "OWASP Top 10 for Large Language Model Applications — LLM01 Prompt Injection",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         },
         {
           "title": "NIST AI Risk Management Framework",
@@ -12936,8 +12936,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications — LLM02 Insecure Output Handling",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM05 Improper Output Handling",
+          "url": "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/"
         },
         {
           "title": "NIST AI Risk Management Framework",
@@ -13016,7 +13016,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "references": [
         {
           "title": "OWASP Top 10 for Large Language Model Applications — LLM01 Prompt Injection",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         },
         {
           "title": "NIST AI Risk Management Framework",
@@ -13095,8 +13095,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications — LLM08 Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM06 Excessive Agency",
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         },
         {
           "title": "NIST AI Risk Management Framework",
@@ -13175,7 +13175,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "references": [
         {
           "title": "OWASP Top 10 for Large Language Model Applications — LLM01 Prompt Injection",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         },
         {
           "title": "NIST AI Risk Management Framework",
@@ -13255,8 +13255,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications — LLM02 Insecure Output Handling / multimodal risks",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM01 Prompt Injection (multimodal / indirect)",
+          "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
         },
         {
           "title": "NIST AI Risk Management Framework",
@@ -13334,8 +13334,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "references": [
         {
-          "title": "OWASP Top 10 for Large Language Model Applications — LLM06 Sensitive Information Disclosure",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP Top 10 for Large Language Model Applications — LLM02 Sensitive Information Disclosure",
+          "url": "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
         },
         {
           "title": "NIST AI Risk Management Framework",
@@ -13905,8 +13905,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM06 Excessive Agency",
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         },
         {
           "title": "OWASP Access Control Cheat Sheet",
@@ -14007,8 +14007,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM06 Excessive Agency",
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         },
         {
           "title": "NIST AI RMF — Manage",
@@ -14087,8 +14087,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM06 Excessive Agency",
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         },
         {
           "title": "NIST AI RMF — Govern / Manage",
@@ -14168,8 +14168,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM — Insecure Output Handling / Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM05 Improper Output Handling / LLM06 Excessive Agency",
+          "url": "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/"
         },
         {
           "title": "JSON Schema",
@@ -14250,8 +14250,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://slsa.dev/"
         },
         {
-          "title": "OWASP LLM — Supply Chain Vulnerabilities",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM03 Supply Chain",
+          "url": "https://genai.owasp.org/llmrisk/llm032025-supply-chain/"
         }
       ],
       "relatedRules": [
@@ -14324,8 +14324,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM06 Excessive Agency",
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         }
       ],
       "relatedRules": [
@@ -14403,8 +14403,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "url": "https://modelcontextprotocol.io/"
         },
         {
-          "title": "OWASP LLM — Excessive Agency",
-          "url": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+          "title": "OWASP LLM — LLM06 Excessive Agency",
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
         }
       ],
       "relatedRules": [

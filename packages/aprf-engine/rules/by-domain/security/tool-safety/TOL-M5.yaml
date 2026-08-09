@@ -77,8 +77,8 @@ references:
     url: "https://modelcontextprotocol.io/"
   - title: "SLSA — Supply-chain Levels for Software Artifacts"
     url: "https://slsa.dev/"
-  - title: "OWASP LLM — Supply Chain Vulnerabilities"
-    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "OWASP LLM — LLM03 Supply Chain"
+    url: "https://genai.owasp.org/llmrisk/llm032025-supply-chain/"
 relatedRules:
   - "TOL-M2"
   - "SCI-M1"

@@ -71,8 +71,8 @@ recommendedFixes:
   - "Retain design + sample traces under imports/identity-propagation/ (measuredAt ≤90 days)"
   - "Time-box gaps with owner and expiry ≤90 days"
 references:
-  - title: "OWASP Top 10 for Large Language Model Applications — LLM01 / agent risks"
-    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "OWASP Top 10 for Large Language Model Applications — LLM06 Excessive Agency"
+    url: "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
   - title: "RFC 8693 — OAuth 2.0 Token Exchange"
     url: "https://datatracker.ietf.org/doc/html/rfc8693"
   - title: "Model Context Protocol — Authorization"

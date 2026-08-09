@@ -55,8 +55,8 @@ recommendedFixes:
 references:
   - title: "Google SRE Workbook — Managing Risk (change management parallels)"
     url: "https://sre.google/workbook/"
-  - title: "OWASP LLM Prompt Injection guidance"
-    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  - title: "OWASP LLM — LLM01 Prompt Injection"
+    url: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
 relatedRules:
   - "PRM-M1"
   - "PRM-M2"
