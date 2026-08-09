@@ -59,7 +59,7 @@ references:
   - title: "NIST AI RMF — Govern and Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
   - title: "OWASP LLM — LLM04 Data and Model Poisoning / LLM08 Vector and Embedding Weaknesses"
-    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+    url: "https://genai.owasp.org/llmrisk/llm042025-data-and-model-poisoning/"
 relatedRules:
   - "MEM-M1"
   - "MEM-M2"

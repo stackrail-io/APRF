@@ -83,7 +83,7 @@ references:
   - title: "CNCF Software Supply Chain Best Practices"
     url: "https://www.cncf.io/"
   - title: "OWASP LLM — LLM03 Supply Chain"
-    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+    url: "https://genai.owasp.org/llmrisk/llm032025-supply-chain/"
   - title: "NIST AI RMF — Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:

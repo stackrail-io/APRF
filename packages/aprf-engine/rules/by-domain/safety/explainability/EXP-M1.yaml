@@ -58,7 +58,7 @@ references:
   - title: "NIST AI RMF — Explainability and Interpretability"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
   - title: "OWASP LLM Top 10 — LLM09 Misinformation"
-    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+    url: "https://genai.owasp.org/llmrisk/llm092025-misinformation/"
 relatedRules:
   - "EXP-M2"
   - "EXP-M3"

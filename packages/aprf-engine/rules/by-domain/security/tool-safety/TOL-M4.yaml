@@ -71,7 +71,7 @@ references:
   - title: "Model Context Protocol — security considerations"
     url: "https://modelcontextprotocol.io/"
   - title: "OWASP LLM — LLM05 Improper Output Handling / LLM06 Excessive Agency"
-    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+    url: "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/"
   - title: "JSON Schema"
     url: "https://json-schema.org/"
 relatedRules:

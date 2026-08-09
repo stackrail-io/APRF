@@ -127,7 +127,7 @@ recommendedFixes:
     demonstrated"
 references:
   - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
-    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+    url: "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
   - title: "NIST AI Risk Management Framework — Govern"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
   - title: "NIST SP 800-218 — Secure Software Development Framework (SSDF)"

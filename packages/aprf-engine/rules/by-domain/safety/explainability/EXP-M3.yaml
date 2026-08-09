@@ -61,7 +61,7 @@ references:
   - title: "NIST AI RMF — Explainability and Interpretability"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
   - title: "OWASP LLM Top 10 — LLM02 Sensitive Information Disclosure"
-    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+    url: "https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/"
 relatedRules:
   - "EXP-M1"
   - "EXP-M2"

@@ -62,7 +62,7 @@ recommendedFixes:
   - "Retain evidence under imports/high-risk-output-gate/; time-box gaps ≤90 days"
 references:
   - title: "OWASP Top 10 for Large Language Model Applications — LLM05 Improper Output Handling"
-    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+    url: "https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/"
   - title: "NIST AI Risk Management Framework"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
   - title: "CIS Controls (select mappings for AI workloads)"

@@ -63,7 +63,7 @@ recommendedFixes:
   - "Time-box gaps with owner and expiry ≤90 days"
 references:
   - title: "OWASP Top 10 for Large Language Model Applications — LLM01 Prompt Injection (multimodal / indirect)"
-    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+    url: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
   - title: "NIST AI Risk Management Framework"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
   - title: "CIS Controls (select mappings for AI workloads)"

@@ -61,7 +61,7 @@ recommendedFixes:
   - "Schedule a ≤90-day review of deny rates and rule coverage with the policy owner"
 references:
   - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
-    url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+    url: "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
   - title: "NIST AI Risk Management Framework — Govern / Manage"
     url: "https://www.nist.gov/itl/ai-risk-management-framework"
 relatedRules:
