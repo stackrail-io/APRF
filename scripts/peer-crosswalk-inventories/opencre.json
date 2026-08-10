@@ -1,0 +1,83 @@
+{
+  "frameworkId": "opencre",
+  "controls": [
+    {
+      "id": "opencre:CWE-16",
+      "ref": "CWE-16",
+      "title": "Configuration",
+      "summary": "Security misconfiguration occurs when applications, frameworks, or infrastructure use insecure defaults, unnecessary features, or improperly configured security controls. OpenCRE: 180-488, 462-245, 623-347"
+    },
+    {
+      "id": "opencre:CWE-200",
+      "ref": "CWE-200",
+      "title": "Exposure of Sensitive Information",
+      "summary": "Sensitive information exposure occurs when applications inadvertently reveal data that can be used by attackers — through error messages, logs, API responses, or verbose configurations. OpenCRE: 713-683, 743-110, 227-045"
+    },
+    {
+      "id": "opencre:CWE-22",
+      "ref": "CWE-22",
+      "title": "Path Traversal",
+      "summary": "Path traversal occurs when user-controlled input is used to construct file paths without canonicalization, allowing access to files outside intended directories. OpenCRE: 675-168"
+    },
+    {
+      "id": "opencre:CWE-287",
+      "ref": "CWE-287",
+      "title": "Improper Authentication",
+      "summary": "Improper authentication allows attackers to bypass identity verification, impersonate users, or access protected resources without valid credentials. OpenCRE: 813-610, 605-735, 816-631"
+    },
+    {
+      "id": "opencre:CWE-327",
+      "ref": "CWE-327",
+      "title": "Use of a Broken or Risky Cryptographic Algorithm",
+      "summary": "Use of broken or risky cryptographic algorithms undermines data confidentiality and integrity, allowing attackers to decrypt, forge, or tamper with protected data. OpenCRE: 742-431, 002-801, 504-340"
+    },
+    {
+      "id": "opencre:CWE-352",
+      "ref": "CWE-352",
+      "title": "Cross-Site Request Forgery (CSRF)",
+      "summary": "CSRF forces authenticated users to submit unintended requests, enabling attackers to perform state-changing actions on behalf of victims. OpenCRE: 464-084, 060-472"
+    },
+    {
+      "id": "opencre:CWE-384",
+      "ref": "CWE-384",
+      "title": "Session Fixation",
+      "summary": "Session fixation allows attackers to set a victim's session identifier before authentication, then hijack the authenticated session. OpenCRE: 002-630"
+    },
+    {
+      "id": "opencre:CWE-502",
+      "ref": "CWE-502",
+      "title": "Deserialization of Untrusted Data",
+      "summary": "Deserialization of untrusted data can lead to remote code execution, object injection, or denial of service when applications reconstruct objects from attacker-controlled serialized input. OpenCRE: 831-563, 736-554, 762-616"
+    },
+    {
+      "id": "opencre:CWE-778",
+      "ref": "CWE-778",
+      "title": "Insufficient Logging",
+      "summary": "Insufficient logging prevents detection of security breaches, hinders forensic analysis, and delays incident response when critical security events go unrecorded. OpenCRE: 184-284, 841-710, 555-048"
+    },
+    {
+      "id": "opencre:CWE-78",
+      "ref": "CWE-78",
+      "title": "OS Command Injection",
+      "summary": "OS command injection occurs when untrusted data is passed to system shell commands without proper sanitization, allowing attackers to run arbitrary commands. OpenCRE: 857-718, 683-722"
+    },
+    {
+      "id": "opencre:CWE-79",
+      "ref": "CWE-79",
+      "title": "Cross-site Scripting (XSS)",
+      "summary": "Cross-site scripting occurs when untrusted data is included in web output without proper encoding, allowing attackers to run scripts in victim browsers. OpenCRE: 366-835"
+    },
+    {
+      "id": "opencre:CWE-798",
+      "ref": "CWE-798",
+      "title": "Use of Hard-coded Credentials",
+      "summary": "Hard-coded credentials in source code, configuration files, or system prompts can be extracted by attackers to gain unauthorized access to systems and services. OpenCRE: 551-054, 774-888, 340-375"
+    },
+    {
+      "id": "opencre:CWE-89",
+      "ref": "CWE-89",
+      "title": "SQL Injection",
+      "summary": "SQL injection occurs when untrusted data is sent to a database interpreter as part of a query, allowing attackers to read, modify, or delete data. OpenCRE: 064-808, 732-873"
+    }
+  ]
+}

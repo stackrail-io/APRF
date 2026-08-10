@@ -15,7 +15,7 @@ export interface CrosswalkControlDef {
   summary?: string;
   /**
    * Optional bridges to controls in other published crosswalks
-   * (e.g. OWASP LLM01 → aisvs:C2.1). Informative only.
+   * (e.g. OWASP LLM01 → aisvs:v1.0-C2.1). Informative only.
    */
   relatedPeerControlIds?: string[];
 }
