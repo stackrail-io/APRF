@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:3fc0b36fa9895e9c86276fd2c9df69bda59304c73617f031f0841234dc216c55",
+  "generatedAt": "sha256:1e88cdc2f5fa295b04a054d303faa8741fe049fee4f155fc277d2521ae7b3d66",
   "ruleCount": 178,
   "domains": [
     {
@@ -14830,52 +14830,131 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "owasp-llm:01",
           "ref": "LLM01",
-          "title": "Prompt Injection"
+          "title": "Prompt Injection",
+          "relatedPeerControlIds": [
+            "aisvs:C2.1",
+            "aisvs:C2.2",
+            "aisvs:C2.7",
+            "aisvs:C2.8",
+            "aisvs:C10.1"
+          ]
         },
         {
           "id": "owasp-llm:02",
           "ref": "LLM02",
-          "title": "Sensitive Information Disclosure"
+          "title": "Sensitive Information Disclosure",
+          "relatedPeerControlIds": [
+            "aisvs:C7.3",
+            "aisvs:C5.4",
+            "aisvs:C11.1",
+            "aisvs:C11.2",
+            "aisvs:C11.3",
+            "aisvs:C10.3",
+            "aisvs:C10.4"
+          ]
         },
         {
           "id": "owasp-llm:03",
           "ref": "LLM03",
-          "title": "Supply Chain"
+          "title": "Supply Chain",
+          "relatedPeerControlIds": [
+            "aisvs:C6.1",
+            "aisvs:C6.2",
+            "aisvs:C6.3",
+            "aisvs:C6.4",
+            "aisvs:C6.7",
+            "aisvs:C3.1",
+            "aisvs:C6.6"
+          ]
         },
         {
           "id": "owasp-llm:04",
           "ref": "LLM04",
-          "title": "Data and Model Poisoning"
+          "title": "Data and Model Poisoning",
+          "relatedPeerControlIds": [
+            "aisvs:C1.1",
+            "aisvs:C1.2",
+            "aisvs:C1.4",
+            "aisvs:C1.5",
+            "aisvs:C10.6",
+            "aisvs:C3.4"
+          ]
         },
         {
           "id": "owasp-llm:05",
           "ref": "LLM05",
-          "title": "Improper Output Handling"
+          "title": "Improper Output Handling",
+          "relatedPeerControlIds": [
+            "aisvs:C7.1",
+            "aisvs:C7.3",
+            "aisvs:C7.4",
+            "aisvs:C9.3",
+            "aisvs:C2.4"
+          ]
         },
         {
           "id": "owasp-llm:06",
           "ref": "LLM06",
-          "title": "Excessive Agency"
+          "title": "Excessive Agency",
+          "relatedPeerControlIds": [
+            "aisvs:C9.2",
+            "aisvs:C9.3",
+            "aisvs:C9.6",
+            "aisvs:C9.7",
+            "aisvs:C9.1",
+            "aisvs:C5.6",
+            "aisvs:C7.4",
+            "aisvs:C13.2"
+          ]
         },
         {
           "id": "owasp-llm:07",
           "ref": "LLM07",
-          "title": "System Prompt Leakage"
+          "title": "System Prompt Leakage",
+          "relatedPeerControlIds": [
+            "aisvs:C2.1",
+            "aisvs:C5.4",
+            "aisvs:C4.4",
+            "aisvs:C7.5",
+            "aisvs:C5.2"
+          ]
         },
         {
           "id": "owasp-llm:08",
           "ref": "LLM08",
-          "title": "Vector and Embedding Weaknesses"
+          "title": "Vector and Embedding Weaknesses",
+          "relatedPeerControlIds": [
+            "aisvs:C8.1",
+            "aisvs:C8.2",
+            "aisvs:C8.3",
+            "aisvs:C8.4",
+            "aisvs:C8.5",
+            "aisvs:C5.5"
+          ]
         },
         {
           "id": "owasp-llm:09",
           "ref": "LLM09",
-          "title": "Misinformation"
+          "title": "Misinformation",
+          "relatedPeerControlIds": [
+            "aisvs:C7.2",
+            "aisvs:C7.5",
+            "aisvs:C10.1",
+            "aisvs:C13.4",
+            "aisvs:C13.6"
+          ]
         },
         {
           "id": "owasp-llm:10",
           "ref": "LLM10",
-          "title": "Unbounded Consumption"
+          "title": "Unbounded Consumption",
+          "relatedPeerControlIds": [
+            "aisvs:C2.6",
+            "aisvs:C4.6",
+            "aisvs:C9.1",
+            "aisvs:C10.5",
+            "aisvs:C13.1"
+          ]
         }
       ],
       "mappings": [
@@ -15030,6 +15109,4341 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           ],
           "relation": "supports",
           "note": "Denial-of-wallet and resource exhaustion — spend ceilings + timeouts."
+        }
+      ]
+    },
+    {
+      "id": "aisvs",
+      "name": "OWASP AI Application Security Verification Standard (AISVS)",
+      "peerVersion": "section-level (playbook inventory)",
+      "url": "https://owasp.org/www-project-ai-application-security-verification-standard/",
+      "disclaimer": "Informative alignment only. Does not constitute certification, accreditation, or official endorsement.",
+      "controls": [
+        {
+          "id": "aisvs:C1.1",
+          "ref": "C1.1",
+          "title": "Training Data Provenance",
+          "summary": "Requirements for maintaining a verifiable inventory of training data, trusted sources, and logged changes for auditability."
+        },
+        {
+          "id": "aisvs:C1.2",
+          "ref": "C1.2",
+          "title": "Training Data Security & Integrity",
+          "summary": "Requirements for restricting access, encrypting data, and validating integrity to prevent tampering, theft, or data poisoning."
+        },
+        {
+          "id": "aisvs:C1.3",
+          "ref": "C1.3",
+          "title": "Data Labeling and Annotation Security",
+          "summary": "Requirements for access-controlled, auditable labeling processes and protection of sensitive information in labels."
+        },
+        {
+          "id": "aisvs:C1.4",
+          "ref": "C1.4",
+          "title": "Training Data Quality and Security Assurance",
+          "summary": "Requirements for automated validation, manual spot-checks, poisoning detection, and logged remediation to guarantee dataset reliability."
+        },
+        {
+          "id": "aisvs:C1.5",
+          "ref": "C1.5",
+          "title": "Data Lineage and Traceability",
+          "summary": "Requirements for tracking dataset lineage from source to model input for auditability and incident response."
+        },
+        {
+          "id": "aisvs:C10.1",
+          "ref": "C10.1",
+          "title": "Model Alignment & Safety",
+          "summary": "Alignment test-suite, refusal and safe-completion guard-rails, harmful-content metrics, counter-jailbreak training."
+        },
+        {
+          "id": "aisvs:C10.2",
+          "ref": "C10.2",
+          "title": "C10.2"
+        },
+        {
+          "id": "aisvs:C10.3",
+          "ref": "C10.3",
+          "title": "Membership-Inference Mitigation",
+          "summary": "Per-query entropy regularization or temperature-scaling; ε-bounded differentially-private optimization; attack simulations (shadow-model or black-box)."
+        },
+        {
+          "id": "aisvs:C10.4",
+          "ref": "C10.4",
+          "title": "Model-Inversion Resistance",
+          "summary": "Sensitive attributes never directly output; query-rate limits; training with privacy-preserving noise."
+        },
+        {
+          "id": "aisvs:C10.5",
+          "ref": "C10.5",
+          "title": "Model-Extraction Defense",
+          "summary": "Rate limits tuned to memorization threshold; query-entropy and input-plurality extraction detector; watermarks; extraction-alert incident response."
+        },
+        {
+          "id": "aisvs:C10.6",
+          "ref": "C10.6",
+          "title": "Inference-Time Poisoned-Data Detection",
+          "summary": "Anomaly detector (e.g., STRIP, consistency-scoring) before inference; threshold tuning; soft-blocking; stress-testing."
+        },
+        {
+          "id": "aisvs:C10.7",
+          "ref": "C10.7",
+          "title": "C10.7"
+        },
+        {
+          "id": "aisvs:C10.8",
+          "ref": "C10.8",
+          "title": "C10.8"
+        },
+        {
+          "id": "aisvs:C10.9",
+          "ref": "C10.9",
+          "title": "C10.9"
+        },
+        {
+          "id": "aisvs:C11.1",
+          "ref": "C11.1",
+          "title": "Anonymization & Data Minimization",
+          "summary": "Remove or hash direct and quasi-identifiers; automated k-anonymity/l-diversity audits and alerts."
+        },
+        {
+          "id": "aisvs:C11.2",
+          "ref": "C11.2",
+          "title": "Right-to-be-Forgotten & Deletion Enforcement",
+          "summary": "Deletion requests propagate to raw datasets, checkpoints, embeddings, logs, backups; machine-unlearning routines; immutable deletion audit log."
+        },
+        {
+          "id": "aisvs:C11.3",
+          "ref": "C11.3",
+          "title": "Differential-Privacy Safeguards",
+          "summary": "Privacy-loss accounting dashboards; black-box privacy audits; formal proofs for post-training fine-tunes and embeddings."
+        },
+        {
+          "id": "aisvs:C11.4",
+          "ref": "C11.4",
+          "title": "C11.4"
+        },
+        {
+          "id": "aisvs:C11.5",
+          "ref": "C11.5",
+          "title": "C11.5"
+        },
+        {
+          "id": "aisvs:C11.6",
+          "ref": "C11.6",
+          "title": "C11.6"
+        },
+        {
+          "id": "aisvs:C12.1",
+          "ref": "C12.1",
+          "title": "C12.1"
+        },
+        {
+          "id": "aisvs:C12.2",
+          "ref": "C12.2",
+          "title": "C12.2"
+        },
+        {
+          "id": "aisvs:C12.3",
+          "ref": "C12.3",
+          "title": "C12.3"
+        },
+        {
+          "id": "aisvs:C12.4",
+          "ref": "C12.4",
+          "title": "C12.4"
+        },
+        {
+          "id": "aisvs:C12.5",
+          "ref": "C12.5",
+          "title": "C12.5"
+        },
+        {
+          "id": "aisvs:C12.6",
+          "ref": "C12.6",
+          "title": "C12.6"
+        },
+        {
+          "id": "aisvs:C12.7",
+          "ref": "C12.7",
+          "title": "C12.7"
+        },
+        {
+          "id": "aisvs:C12.8",
+          "ref": "C12.8",
+          "title": "C12.8"
+        },
+        {
+          "id": "aisvs:C13.1",
+          "ref": "C13.1",
+          "title": "Kill-Switch & Override Mechanisms",
+          "summary": "Manual kill-switch to halt inference; override controls for authorized personnel; rollback to previous model or safe-mode."
+        },
+        {
+          "id": "aisvs:C13.2",
+          "ref": "C13.2",
+          "title": "Human-in-the-Loop Decision Checkpoints",
+          "summary": "High-risk decisions require human approval; risk thresholds with auto-triggers; escalation procedures."
+        },
+        {
+          "id": "aisvs:C13.3",
+          "ref": "C13.3",
+          "title": "C13.3"
+        },
+        {
+          "id": "aisvs:C13.4",
+          "ref": "C13.4",
+          "title": "Explainable-AI Techniques",
+          "summary": "Human-readable explanations; explanation quality validation; feature importance scores."
+        },
+        {
+          "id": "aisvs:C13.5",
+          "ref": "C13.5",
+          "title": "C13.5"
+        },
+        {
+          "id": "aisvs:C13.6",
+          "ref": "C13.6",
+          "title": "Uncertainty Quantification",
+          "summary": "Confidence scores with outputs; uncertainty triggers human review; calibrated methods."
+        },
+        {
+          "id": "aisvs:C13.7",
+          "ref": "C13.7",
+          "title": "C13.7"
+        },
+        {
+          "id": "aisvs:C2.1",
+          "ref": "C2.1",
+          "title": "Prompt Injection Defense",
+          "summary": "Defenses against prompt injection and system prompt leakage using instruction hierarchy, sanitization, and detection."
+        },
+        {
+          "id": "aisvs:C2.2",
+          "ref": "C2.2",
+          "title": "Adversarial-Example Resistance",
+          "summary": "Input normalization, quarantine of suspected adversarial inputs, and adversarial-hardened model variants for high-risk endpoints."
+        },
+        {
+          "id": "aisvs:C2.3",
+          "ref": "C2.3",
+          "title": "C2.3"
+        },
+        {
+          "id": "aisvs:C2.4",
+          "ref": "C2.4",
+          "title": "Schema, Type & Length Validation",
+          "summary": "Explicit input schemas, rejection of oversized inputs, and server-side type checks including for tool or MCP arguments."
+        },
+        {
+          "id": "aisvs:C2.5",
+          "ref": "C2.5",
+          "title": "C2.5"
+        },
+        {
+          "id": "aisvs:C2.6",
+          "ref": "C2.6",
+          "title": "Input Rate Limiting & Abuse Prevention",
+          "summary": "Per-user, per-IP, per-API-key rate limits and anomalous usage pattern detection to prevent DoS and abuse."
+        },
+        {
+          "id": "aisvs:C2.7",
+          "ref": "C2.7",
+          "title": "Multi-Modal Input Validation",
+          "summary": "Validation of non-text inputs (images, audio, files) for type, size, format, malware, and adversarial patterns."
+        },
+        {
+          "id": "aisvs:C2.8",
+          "ref": "C2.8",
+          "title": "Real-Time Adaptive Threat Detection",
+          "summary": "Pattern matching on inputs and outputs, adaptive detection models, and risk-adaptive responses (disable tools, HITL)."
+        },
+        {
+          "id": "aisvs:C3.1",
+          "ref": "C3.1",
+          "title": "Model Authorization & Integrity",
+          "summary": "Model registry with MBOM/AIBOM, cryptographic signing of artifacts, and deployment admission verification."
+        },
+        {
+          "id": "aisvs:C3.2",
+          "ref": "C3.2",
+          "title": "C3.2"
+        },
+        {
+          "id": "aisvs:C3.3",
+          "ref": "C3.3",
+          "title": "C3.3"
+        },
+        {
+          "id": "aisvs:C3.4",
+          "ref": "C3.4",
+          "title": "Secure Development Practices",
+          "summary": "Separated dev/test/prod environments, version-controlled artifacts with peer review, isolated training data with chain of custody."
+        },
+        {
+          "id": "aisvs:C3.5",
+          "ref": "C3.5",
+          "title": "C3.5"
+        },
+        {
+          "id": "aisvs:C4.1",
+          "ref": "C4.1",
+          "title": "C4.1"
+        },
+        {
+          "id": "aisvs:C4.2",
+          "ref": "C4.2",
+          "title": "C4.2"
+        },
+        {
+          "id": "aisvs:C4.3",
+          "ref": "C4.3",
+          "title": "C4.3"
+        },
+        {
+          "id": "aisvs:C4.4",
+          "ref": "C4.4",
+          "title": "Secrets & Cryptographic Key Management",
+          "summary": "Secrets in dedicated management system, encryption at rest, strong authentication for production access; never embed in code, configs, or prompts."
+        },
+        {
+          "id": "aisvs:C4.5",
+          "ref": "C4.5",
+          "title": "C4.5"
+        },
+        {
+          "id": "aisvs:C4.6",
+          "ref": "C4.6",
+          "title": "AI Infrastructure Resource Management, Backup and Recovery",
+          "summary": "Workload resource quotas and limits; automated protections on threshold breach (rate limiting, workload isolation)."
+        },
+        {
+          "id": "aisvs:C4.7",
+          "ref": "C4.7",
+          "title": "C4.7"
+        },
+        {
+          "id": "aisvs:C4.8",
+          "ref": "C4.8",
+          "title": "C4.8"
+        },
+        {
+          "id": "aisvs:C5.1",
+          "ref": "C5.1",
+          "title": "C5.1"
+        },
+        {
+          "id": "aisvs:C5.2",
+          "ref": "C5.2",
+          "title": "Authorization & Policy",
+          "summary": "RBAC/ABAC with allow-lists and default-deny; access control change logging; real-time alerts for unauthorized access."
+        },
+        {
+          "id": "aisvs:C5.3",
+          "ref": "C5.3",
+          "title": "C5.3"
+        },
+        {
+          "id": "aisvs:C5.4",
+          "ref": "C5.4",
+          "title": "Output Filtering & Data Loss Prevention",
+          "summary": "Post-inference filtering, citation validation against entitlements, output format restrictions by permission level."
+        },
+        {
+          "id": "aisvs:C5.5",
+          "ref": "C5.5",
+          "title": "Multi-Tenant Isolation",
+          "summary": "Default-deny cross-tenant policies, authenticated tenant IDs, namespace segregation, per-tenant encryption."
+        },
+        {
+          "id": "aisvs:C5.6",
+          "ref": "C5.6",
+          "title": "Autonomous Agent Authorization",
+          "summary": "Scoped capability tokens, high-risk capabilities disabled by default, session-bound tokens, continuous authorization."
+        },
+        {
+          "id": "aisvs:C6.1",
+          "ref": "C6.1",
+          "title": "Pretrained Model Vetting & Origin Integrity",
+          "summary": "Assess and authenticate third-party model origins, licenses, and hidden behaviors before fine-tuning or deployment."
+        },
+        {
+          "id": "aisvs:C6.2",
+          "ref": "C6.2",
+          "title": "Framework & Library Scanning",
+          "summary": "Continuously scan AI frameworks and libraries for vulnerabilities and malicious code."
+        },
+        {
+          "id": "aisvs:C6.3",
+          "ref": "C6.3",
+          "title": "Dependency Pinning & Verification",
+          "summary": "Pin every dependency to immutable digests and verify builds for tamper-free artifacts."
+        },
+        {
+          "id": "aisvs:C6.4",
+          "ref": "C6.4",
+          "title": "Trusted Source Enforcement",
+          "summary": "Allow artifact downloads only from cryptographically verified, organization-approved sources."
+        },
+        {
+          "id": "aisvs:C6.5",
+          "ref": "C6.5",
+          "title": "C6.5"
+        },
+        {
+          "id": "aisvs:C6.6",
+          "ref": "C6.6",
+          "title": "Supply Chain Attack Monitoring",
+          "summary": "Detect supply-chain threats through vulnerability feeds, audit-log analytics, and incident response playbooks."
+        },
+        {
+          "id": "aisvs:C6.7",
+          "ref": "C6.7",
+          "title": "AI BOM for Model Artifacts",
+          "summary": "Generate and sign AI BOMs so downstream consumers can verify component integrity at deploy time."
+        },
+        {
+          "id": "aisvs:C7.1",
+          "ref": "C7.1",
+          "title": "Output Format Enforcement",
+          "summary": "Validate outputs against strict schema, use stop sequences and token limits; treat model output as untrusted."
+        },
+        {
+          "id": "aisvs:C7.2",
+          "ref": "C7.2",
+          "title": "Hallucination Detection & Mitigation",
+          "summary": "Detect when the model is unsure or lying; block low-confidence responses and log hallucination events."
+        },
+        {
+          "id": "aisvs:C7.3",
+          "ref": "C7.3",
+          "title": "Output Safety & Privacy Filtering",
+          "summary": "Scan and redact PII, block harmful or confidential content before delivery to requestors."
+        },
+        {
+          "id": "aisvs:C7.4",
+          "ref": "C7.4",
+          "title": "Output & Action Limiting",
+          "summary": "Hard limits on requests and tokens per user; explicit user confirmation for high-impact actions; max recursion and delegation limits."
+        },
+        {
+          "id": "aisvs:C7.5",
+          "ref": "C7.5",
+          "title": "Explainability & Transparency",
+          "summary": "Display confidence scores and reasoning summaries; sanitize explanations to remove system prompts and backend data."
+        },
+        {
+          "id": "aisvs:C7.6",
+          "ref": "C7.6",
+          "title": "C7.6"
+        },
+        {
+          "id": "aisvs:C8.1",
+          "ref": "C8.1",
+          "title": "Access Controls on Memory & RAG Indices",
+          "summary": "Namespace/collection scope controls with default-deny; scoped API claims; cross-scope access detection and rejection."
+        },
+        {
+          "id": "aisvs:C8.2",
+          "ref": "C8.2",
+          "title": "Embedding Sanitization & Validation",
+          "summary": "Pre-screen content before vectorization; detect sensitive data before embedding; reject malformed or poisoning inputs."
+        },
+        {
+          "id": "aisvs:C8.3",
+          "ref": "C8.3",
+          "title": "Memory Expiry, Revocation & Deletion",
+          "summary": "Retention times on stored vectors; purge within defined timeframes; ensure unrecoverability on deletion."
+        },
+        {
+          "id": "aisvs:C8.4",
+          "ref": "C8.4",
+          "title": "Prevent Embedding Inversion & Leakage",
+          "summary": "Protect sensitive collections via encryption; privacy/utility regression tests for inversion and inference."
+        },
+        {
+          "id": "aisvs:C8.5",
+          "ref": "C8.5",
+          "title": "Scope Enforcement for User-Specific Memory",
+          "summary": "Scope constraints in vector engine; prevent cross-scope collisions; adversarial multi-tenant tests."
+        },
+        {
+          "id": "aisvs:C9.1",
+          "ref": "C9.1",
+          "title": "Execution Budgets, Loop Control, and Circuit Breakers",
+          "summary": "Per-execution budgets, cumulative resource counters, circuit breakers on violations; bound recursion and concurrency."
+        },
+        {
+          "id": "aisvs:C9.2",
+          "ref": "C9.2",
+          "title": "High-Impact Action Approval and Irreversibility Controls",
+          "summary": "Require human approval for privileged or irreversible actions; bind approvals to parameters; test rollback."
+        },
+        {
+          "id": "aisvs:C9.3",
+          "ref": "C9.3",
+          "title": "Tool and Plugin Isolation and Safe Integration",
+          "summary": "Sandboxed execution, per-tool quotas, declared privileges; validate tool outputs against strict schemas before downstream use."
+        },
+        {
+          "id": "aisvs:C9.4",
+          "ref": "C9.4",
+          "title": "C9.4"
+        },
+        {
+          "id": "aisvs:C9.5",
+          "ref": "C9.5",
+          "title": "C9.5"
+        },
+        {
+          "id": "aisvs:C9.6",
+          "ref": "C9.6",
+          "title": "Authorization, Delegation, and Continuous Enforcement",
+          "summary": "Fine-grained tool/parameter policies, integrity-protected delegation, time-bound scopes; authorize every action at execution time."
+        },
+        {
+          "id": "aisvs:C9.7",
+          "ref": "C9.7",
+          "title": "Intent Verification and Constraint Gates",
+          "summary": "Pre-execution constraint gates, explicit user intent confirmation, post-condition checks; bind execution to user intent."
+        },
+        {
+          "id": "aisvs:C9.8",
+          "ref": "C9.8",
+          "title": "C9.8"
+        },
+        {
+          "id": "aisvs:C9.9",
+          "ref": "C9.9",
+          "title": "C9.9"
+        }
+      ],
+      "mappings": [
+        {
+          "peerControlId": "aisvs:C1.1",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "data-governance",
+            "evaluation",
+            "memory-management",
+            "model-governance"
+          ],
+          "aprfCheckIds": [
+            "DG-M2",
+            "EVL-M1",
+            "MEM-M2",
+            "MOD-R4"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C1.2",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "data-governance",
+            "evaluation",
+            "memory-management",
+            "model-governance"
+          ],
+          "aprfCheckIds": [
+            "DG-M2",
+            "EVL-M1",
+            "MEM-M2",
+            "MOD-R4"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C1.3",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "data-governance",
+            "evaluation"
+          ],
+          "aprfCheckIds": [
+            "DG-M2",
+            "EVL-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C1.4",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "data-governance",
+            "evaluation",
+            "memory-management",
+            "model-governance"
+          ],
+          "aprfCheckIds": [
+            "DG-M2",
+            "EVL-M1",
+            "MEM-M2",
+            "MOD-R4"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C1.5",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "data-governance",
+            "evaluation",
+            "memory-management",
+            "model-governance"
+          ],
+          "aprfCheckIds": [
+            "DG-M2",
+            "EVL-M1",
+            "MEM-M2",
+            "MOD-R4"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C10.1",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "model-governance",
+            "ai-security",
+            "prompt-engineering",
+            "tool-safety",
+            "evaluation",
+            "explainability"
+          ],
+          "aprfCheckIds": [
+            "SAF-M2",
+            "MOD-M1",
+            "SEC-M4",
+            "SEC-M1",
+            "SEC-M3",
+            "PRM-M1",
+            "TOL-M1",
+            "EVL-M2",
+            "EXP-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C10.2",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "model-governance",
+            "ai-security"
+          ],
+          "aprfCheckIds": [
+            "SAF-M2",
+            "MOD-M1",
+            "SEC-M4"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C10.3",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "model-governance",
+            "ai-security",
+            "data-privacy",
+            "context-engineering",
+            "secrets",
+            "memory-management"
+          ],
+          "aprfCheckIds": [
+            "SAF-M2",
+            "MOD-M1",
+            "SEC-M4",
+            "PRI-M1",
+            "PRI-M2",
+            "SEC2-M1",
+            "MEM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C10.4",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "model-governance",
+            "ai-security",
+            "data-privacy",
+            "context-engineering",
+            "secrets",
+            "memory-management"
+          ],
+          "aprfCheckIds": [
+            "SAF-M2",
+            "MOD-M1",
+            "SEC-M4",
+            "PRI-M1",
+            "PRI-M2",
+            "SEC2-M1",
+            "MEM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C10.5",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "model-governance",
+            "ai-security"
+          ],
+          "aprfCheckIds": [
+            "SAF-M2",
+            "MOD-M1",
+            "SEC-M4"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C10.6",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "model-governance",
+            "ai-security",
+            "data-governance",
+            "memory-management",
+            "evaluation"
+          ],
+          "aprfCheckIds": [
+            "SAF-M2",
+            "MOD-M1",
+            "SEC-M4",
+            "DG-M2",
+            "MEM-M2",
+            "MOD-R4",
+            "EVL-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C10.7",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "model-governance",
+            "ai-security"
+          ],
+          "aprfCheckIds": [
+            "SAF-M2",
+            "MOD-M1",
+            "SEC-M4"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C10.8",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "model-governance",
+            "ai-security"
+          ],
+          "aprfCheckIds": [
+            "SAF-M2",
+            "MOD-M1",
+            "SEC-M4"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C10.9",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "model-governance",
+            "ai-security"
+          ],
+          "aprfCheckIds": [
+            "SAF-M2",
+            "MOD-M1",
+            "SEC-M4"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C11.1",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "data-privacy",
+            "data-governance",
+            "context-engineering",
+            "secrets",
+            "memory-management"
+          ],
+          "aprfCheckIds": [
+            "PRI-M1",
+            "DG-M1",
+            "PRI-M2",
+            "SEC2-M1",
+            "MEM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C11.2",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "data-privacy",
+            "data-governance",
+            "context-engineering",
+            "secrets",
+            "memory-management"
+          ],
+          "aprfCheckIds": [
+            "PRI-M1",
+            "DG-M1",
+            "PRI-M2",
+            "SEC2-M1",
+            "MEM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C11.3",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "data-privacy",
+            "data-governance",
+            "context-engineering",
+            "secrets",
+            "memory-management"
+          ],
+          "aprfCheckIds": [
+            "PRI-M1",
+            "DG-M1",
+            "PRI-M2",
+            "SEC2-M1",
+            "MEM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C11.4",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "data-privacy",
+            "data-governance"
+          ],
+          "aprfCheckIds": [
+            "PRI-M1",
+            "DG-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C11.5",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "data-privacy",
+            "data-governance"
+          ],
+          "aprfCheckIds": [
+            "PRI-M1",
+            "DG-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C11.6",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "data-privacy",
+            "data-governance"
+          ],
+          "aprfCheckIds": [
+            "PRI-M1",
+            "DG-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C12.1",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "observability",
+            "incident-readiness"
+          ],
+          "aprfCheckIds": [
+            "OBS-M1",
+            "INC-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C12.2",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "observability",
+            "incident-readiness"
+          ],
+          "aprfCheckIds": [
+            "OBS-M1",
+            "INC-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C12.3",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "observability",
+            "incident-readiness"
+          ],
+          "aprfCheckIds": [
+            "OBS-M1",
+            "INC-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C12.4",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "observability",
+            "incident-readiness"
+          ],
+          "aprfCheckIds": [
+            "OBS-M1",
+            "INC-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C12.5",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "observability",
+            "incident-readiness"
+          ],
+          "aprfCheckIds": [
+            "OBS-M1",
+            "INC-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C12.6",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "observability",
+            "incident-readiness"
+          ],
+          "aprfCheckIds": [
+            "OBS-M1",
+            "INC-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C12.7",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "observability",
+            "incident-readiness"
+          ],
+          "aprfCheckIds": [
+            "OBS-M1",
+            "INC-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C12.8",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "observability",
+            "incident-readiness"
+          ],
+          "aprfCheckIds": [
+            "OBS-M1",
+            "INC-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C13.1",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "reliability-continuity",
+            "incident-readiness",
+            "human-approval"
+          ],
+          "aprfCheckIds": [
+            "REL-M1",
+            "INC-M1",
+            "HUM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C13.2",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "reliability-continuity",
+            "incident-readiness",
+            "human-approval",
+            "tool-safety",
+            "agent-governance",
+            "authorization"
+          ],
+          "aprfCheckIds": [
+            "REL-M1",
+            "INC-M1",
+            "HUM-M1",
+            "TOL-M1",
+            "TOL-M2",
+            "TOL-M3",
+            "AGN-M2",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C13.3",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "reliability-continuity",
+            "incident-readiness",
+            "human-approval"
+          ],
+          "aprfCheckIds": [
+            "REL-M1",
+            "INC-M1",
+            "HUM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C13.4",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "reliability-continuity",
+            "incident-readiness",
+            "human-approval",
+            "safety-responsible-ai",
+            "evaluation",
+            "explainability"
+          ],
+          "aprfCheckIds": [
+            "REL-M1",
+            "INC-M1",
+            "HUM-M1",
+            "SAF-M2",
+            "EVL-M2",
+            "EXP-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C13.5",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "reliability-continuity",
+            "incident-readiness",
+            "human-approval"
+          ],
+          "aprfCheckIds": [
+            "REL-M1",
+            "INC-M1",
+            "HUM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C13.6",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "reliability-continuity",
+            "incident-readiness",
+            "human-approval",
+            "safety-responsible-ai",
+            "evaluation",
+            "explainability"
+          ],
+          "aprfCheckIds": [
+            "REL-M1",
+            "INC-M1",
+            "HUM-M1",
+            "SAF-M2",
+            "EVL-M2",
+            "EXP-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C13.7",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "reliability-continuity",
+            "incident-readiness",
+            "human-approval"
+          ],
+          "aprfCheckIds": [
+            "REL-M1",
+            "INC-M1",
+            "HUM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C2.1",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "ai-security",
+            "prompt-engineering",
+            "tool-safety",
+            "secrets"
+          ],
+          "aprfCheckIds": [
+            "SEC-M1",
+            "PRM-M1",
+            "SEC-M3",
+            "TOL-M1",
+            "PRM-M2",
+            "SEC2-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C2.2",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "ai-security",
+            "prompt-engineering",
+            "tool-safety"
+          ],
+          "aprfCheckIds": [
+            "SEC-M1",
+            "PRM-M1",
+            "SEC-M3",
+            "TOL-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C2.3",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "ai-security",
+            "prompt-engineering"
+          ],
+          "aprfCheckIds": [
+            "SEC-M1",
+            "PRM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C2.4",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "ai-security",
+            "prompt-engineering",
+            "tool-safety",
+            "safety-responsible-ai"
+          ],
+          "aprfCheckIds": [
+            "SEC-M1",
+            "PRM-M1",
+            "SEC-M3",
+            "TOL-M2",
+            "SAF-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C2.5",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "ai-security",
+            "prompt-engineering"
+          ],
+          "aprfCheckIds": [
+            "SEC-M1",
+            "PRM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C2.6",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "ai-security",
+            "prompt-engineering",
+            "cost-optimization",
+            "reliability-continuity",
+            "performance-slo"
+          ],
+          "aprfCheckIds": [
+            "SEC-M1",
+            "PRM-M1",
+            "COST-M1",
+            "COST-M3",
+            "REL-M1",
+            "PERF-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C2.7",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "ai-security",
+            "prompt-engineering",
+            "tool-safety"
+          ],
+          "aprfCheckIds": [
+            "SEC-M1",
+            "PRM-M1",
+            "SEC-M3",
+            "TOL-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C2.8",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "ai-security",
+            "prompt-engineering",
+            "tool-safety"
+          ],
+          "aprfCheckIds": [
+            "SEC-M1",
+            "PRM-M1",
+            "SEC-M3",
+            "TOL-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C3.1",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "model-governance",
+            "evaluation",
+            "supply-chain",
+            "infrastructure"
+          ],
+          "aprfCheckIds": [
+            "MOD-M1",
+            "EVL-M1",
+            "SCI-M1",
+            "SCI-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C3.2",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "model-governance",
+            "evaluation"
+          ],
+          "aprfCheckIds": [
+            "MOD-M1",
+            "EVL-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C3.3",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "model-governance",
+            "evaluation"
+          ],
+          "aprfCheckIds": [
+            "MOD-M1",
+            "EVL-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C3.4",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "model-governance",
+            "evaluation",
+            "data-governance",
+            "memory-management"
+          ],
+          "aprfCheckIds": [
+            "MOD-M1",
+            "EVL-M1",
+            "DG-M2",
+            "MEM-M2",
+            "MOD-R4"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C3.5",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "model-governance",
+            "evaluation"
+          ],
+          "aprfCheckIds": [
+            "MOD-M1",
+            "EVL-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C4.1",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "infrastructure",
+            "platform-engineering"
+          ],
+          "aprfCheckIds": [
+            "INF-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C4.2",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "infrastructure",
+            "platform-engineering"
+          ],
+          "aprfCheckIds": [
+            "INF-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C4.3",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "infrastructure",
+            "platform-engineering"
+          ],
+          "aprfCheckIds": [
+            "INF-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C4.4",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "infrastructure",
+            "platform-engineering",
+            "prompt-engineering",
+            "ai-security",
+            "secrets"
+          ],
+          "aprfCheckIds": [
+            "INF-M1",
+            "INF-M2",
+            "PRM-M2",
+            "SEC-M1",
+            "SEC2-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C4.5",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "infrastructure",
+            "platform-engineering"
+          ],
+          "aprfCheckIds": [
+            "INF-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C4.6",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "infrastructure",
+            "platform-engineering",
+            "cost-optimization",
+            "reliability-continuity",
+            "performance-slo"
+          ],
+          "aprfCheckIds": [
+            "INF-M1",
+            "INF-M2",
+            "COST-M1",
+            "COST-M3",
+            "REL-M1",
+            "PERF-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C4.7",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "infrastructure",
+            "platform-engineering"
+          ],
+          "aprfCheckIds": [
+            "INF-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C4.8",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "infrastructure",
+            "platform-engineering"
+          ],
+          "aprfCheckIds": [
+            "INF-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C5.1",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "authentication",
+            "authorization",
+            "secrets"
+          ],
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1",
+            "SEC2-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C5.2",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "authentication",
+            "authorization",
+            "secrets",
+            "prompt-engineering",
+            "ai-security"
+          ],
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1",
+            "SEC2-M1",
+            "PRM-M2",
+            "SEC-M1",
+            "SEC2-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C5.3",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "authentication",
+            "authorization",
+            "secrets"
+          ],
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1",
+            "SEC2-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C5.4",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "authentication",
+            "authorization",
+            "secrets",
+            "data-privacy",
+            "context-engineering",
+            "memory-management",
+            "prompt-engineering",
+            "ai-security"
+          ],
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1",
+            "SEC2-M1",
+            "PRI-M1",
+            "PRI-M2",
+            "MEM-M1",
+            "PRM-M2",
+            "SEC-M1",
+            "SEC2-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C5.5",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "authentication",
+            "authorization",
+            "secrets",
+            "memory-management",
+            "context-engineering",
+            "data-governance"
+          ],
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1",
+            "SEC2-M1",
+            "MEM-M1",
+            "MEM-M3",
+            "CTX-M2",
+            "DG-M3"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C5.6",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "authentication",
+            "authorization",
+            "secrets",
+            "tool-safety",
+            "agent-governance",
+            "human-approval"
+          ],
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1",
+            "SEC2-M1",
+            "TOL-M1",
+            "TOL-M2",
+            "TOL-M3",
+            "AGN-M2",
+            "HUM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C6.1",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "supply-chain",
+            "model-governance",
+            "infrastructure"
+          ],
+          "aprfCheckIds": [
+            "SCI-M1",
+            "MOD-M1",
+            "SCI-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C6.2",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "supply-chain",
+            "model-governance",
+            "infrastructure"
+          ],
+          "aprfCheckIds": [
+            "SCI-M1",
+            "MOD-M1",
+            "SCI-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C6.3",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "supply-chain",
+            "model-governance",
+            "infrastructure"
+          ],
+          "aprfCheckIds": [
+            "SCI-M1",
+            "MOD-M1",
+            "SCI-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C6.4",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "supply-chain",
+            "model-governance",
+            "infrastructure"
+          ],
+          "aprfCheckIds": [
+            "SCI-M1",
+            "MOD-M1",
+            "SCI-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C6.5",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "supply-chain",
+            "model-governance"
+          ],
+          "aprfCheckIds": [
+            "SCI-M1",
+            "MOD-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C6.6",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "supply-chain",
+            "model-governance",
+            "infrastructure"
+          ],
+          "aprfCheckIds": [
+            "SCI-M1",
+            "MOD-M1",
+            "SCI-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C6.7",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "supply-chain",
+            "model-governance",
+            "infrastructure"
+          ],
+          "aprfCheckIds": [
+            "SCI-M1",
+            "MOD-M1",
+            "SCI-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C7.1",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "ai-security",
+            "tool-safety"
+          ],
+          "aprfCheckIds": [
+            "SAF-M1",
+            "SEC-M3",
+            "TOL-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C7.2",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "ai-security",
+            "evaluation",
+            "explainability"
+          ],
+          "aprfCheckIds": [
+            "SAF-M1",
+            "SEC-M3",
+            "SAF-M2",
+            "EVL-M2",
+            "EXP-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C7.3",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "ai-security",
+            "data-privacy",
+            "context-engineering",
+            "secrets",
+            "memory-management",
+            "tool-safety"
+          ],
+          "aprfCheckIds": [
+            "SAF-M1",
+            "SEC-M3",
+            "PRI-M1",
+            "PRI-M2",
+            "SEC2-M1",
+            "MEM-M1",
+            "TOL-M2"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C7.4",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "ai-security",
+            "tool-safety",
+            "agent-governance",
+            "human-approval",
+            "authorization"
+          ],
+          "aprfCheckIds": [
+            "SAF-M1",
+            "SEC-M3",
+            "TOL-M2",
+            "TOL-M1",
+            "TOL-M3",
+            "AGN-M2",
+            "HUM-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C7.5",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "ai-security",
+            "prompt-engineering",
+            "secrets",
+            "evaluation",
+            "explainability"
+          ],
+          "aprfCheckIds": [
+            "SAF-M1",
+            "SEC-M3",
+            "PRM-M2",
+            "SEC-M1",
+            "SEC2-M2",
+            "SAF-M2",
+            "EVL-M2",
+            "EXP-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C7.6",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "safety-responsible-ai",
+            "ai-security"
+          ],
+          "aprfCheckIds": [
+            "SAF-M1",
+            "SEC-M3"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C8.1",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "memory-management",
+            "context-engineering",
+            "data-governance"
+          ],
+          "aprfCheckIds": [
+            "MEM-M1",
+            "CTX-M2",
+            "MEM-M3",
+            "DG-M3"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C8.2",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "memory-management",
+            "context-engineering",
+            "data-governance"
+          ],
+          "aprfCheckIds": [
+            "MEM-M1",
+            "CTX-M2",
+            "MEM-M3",
+            "DG-M3"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C8.3",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "memory-management",
+            "context-engineering",
+            "data-governance"
+          ],
+          "aprfCheckIds": [
+            "MEM-M1",
+            "CTX-M2",
+            "MEM-M3",
+            "DG-M3"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C8.4",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "memory-management",
+            "context-engineering",
+            "data-governance"
+          ],
+          "aprfCheckIds": [
+            "MEM-M1",
+            "CTX-M2",
+            "MEM-M3",
+            "DG-M3"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C8.5",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "memory-management",
+            "context-engineering",
+            "data-governance"
+          ],
+          "aprfCheckIds": [
+            "MEM-M1",
+            "CTX-M2",
+            "MEM-M3",
+            "DG-M3"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C9.1",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "tool-safety",
+            "human-approval",
+            "authorization"
+          ],
+          "aprfCheckIds": [
+            "AGN-M2",
+            "TOL-M1",
+            "HUM-M1",
+            "TOL-M2",
+            "TOL-M3",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C9.2",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "tool-safety",
+            "human-approval",
+            "authorization"
+          ],
+          "aprfCheckIds": [
+            "AGN-M2",
+            "TOL-M1",
+            "HUM-M1",
+            "TOL-M2",
+            "TOL-M3",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C9.3",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "tool-safety",
+            "human-approval",
+            "ai-security",
+            "safety-responsible-ai",
+            "authorization"
+          ],
+          "aprfCheckIds": [
+            "AGN-M2",
+            "TOL-M1",
+            "HUM-M1",
+            "SEC-M3",
+            "TOL-M2",
+            "SAF-M1",
+            "TOL-M3",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C9.4",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "tool-safety",
+            "human-approval"
+          ],
+          "aprfCheckIds": [
+            "AGN-M2",
+            "TOL-M1",
+            "HUM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C9.5",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "tool-safety",
+            "human-approval"
+          ],
+          "aprfCheckIds": [
+            "AGN-M2",
+            "TOL-M1",
+            "HUM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C9.6",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "tool-safety",
+            "human-approval",
+            "authorization"
+          ],
+          "aprfCheckIds": [
+            "AGN-M2",
+            "TOL-M1",
+            "HUM-M1",
+            "TOL-M2",
+            "TOL-M3",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C9.7",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "tool-safety",
+            "human-approval",
+            "authorization"
+          ],
+          "aprfCheckIds": [
+            "AGN-M2",
+            "TOL-M1",
+            "HUM-M1",
+            "TOL-M2",
+            "TOL-M3",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C9.8",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "tool-safety",
+            "human-approval"
+          ],
+          "aprfCheckIds": [
+            "AGN-M2",
+            "TOL-M1",
+            "HUM-M1"
+          ]
+        },
+        {
+          "peerControlId": "aisvs:C9.9",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "tool-safety",
+            "human-approval"
+          ],
+          "aprfCheckIds": [
+            "AGN-M2",
+            "TOL-M1",
+            "HUM-M1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "asvs",
+      "name": "OWASP Application Security Verification Standard",
+      "peerVersion": "5.0",
+      "url": "https://owasp.org/www-project-application-security-verification-standard/",
+      "disclaimer": "Informative alignment only. Does not constitute certification, accreditation, or official endorsement.",
+      "controls": [
+        {
+          "id": "asvs:V1.1",
+          "ref": "V1.1",
+          "title": "Encoding and Sanitization Architecture",
+          "summary": "Architectural requirements for the order and placement of encoding, escaping, and decoding operations."
+        },
+        {
+          "id": "asvs:V1.2",
+          "ref": "V1.2",
+          "title": "Injection Prevention",
+          "summary": "Output encoding and escaping requirements to prevent injection into interpreters (SQL, HTML, JS, OS, LDAP, etc.)."
+        },
+        {
+          "id": "asvs:V1.3",
+          "ref": "V1.3",
+          "title": "Sanitization",
+          "summary": "Requirements for sanitizing untrusted HTML and dynamic content when encoding is not applicable."
+        },
+        {
+          "id": "asvs:V1.4",
+          "ref": "V1.4",
+          "title": "Memory, String, and Unmanaged Code",
+          "summary": "Requirements for safe memory handling and string operations in unmanaged or low-level code."
+        },
+        {
+          "id": "asvs:V1.5",
+          "ref": "V1.5",
+          "title": "Safe Deserialization",
+          "summary": "Requirements for safely deserializing data from untrusted or external sources."
+        },
+        {
+          "id": "asvs:V10.1",
+          "ref": "V10.1",
+          "title": "Generic OAuth and OIDC Security",
+          "summary": "General security requirements applicable to all OAuth and OIDC implementations."
+        },
+        {
+          "id": "asvs:V10.2",
+          "ref": "V10.2",
+          "title": "OAuth Client",
+          "summary": "Security requirements for applications acting as an OAuth client."
+        },
+        {
+          "id": "asvs:V10.3",
+          "ref": "V10.3",
+          "title": "OAuth Resource Server",
+          "summary": "Security requirements for APIs acting as an OAuth resource server."
+        },
+        {
+          "id": "asvs:V10.4",
+          "ref": "V10.4",
+          "title": "OAuth Authorization Server",
+          "summary": "Security requirements for OAuth authorization servers that issue tokens."
+        },
+        {
+          "id": "asvs:V10.5",
+          "ref": "V10.5",
+          "title": "OIDC Client",
+          "summary": "Security requirements for applications acting as an OIDC relying party (client)."
+        },
+        {
+          "id": "asvs:V10.6",
+          "ref": "V10.6",
+          "title": "OpenID Provider",
+          "summary": "Security requirements for OpenID Providers that authenticate users and issue ID tokens."
+        },
+        {
+          "id": "asvs:V10.7",
+          "ref": "V10.7",
+          "title": "Consent Management",
+          "summary": "Requirements for managing and recording user consent in OAuth and OIDC flows."
+        },
+        {
+          "id": "asvs:V11.1",
+          "ref": "V11.1",
+          "title": "Cryptographic Inventory and Documentation",
+          "summary": "Requirements for documenting and inventorying cryptographic implementations."
+        },
+        {
+          "id": "asvs:V11.2",
+          "ref": "V11.2",
+          "title": "Secure Cryptography Implementation",
+          "summary": "Requirements for correctly implementing cryptographic operations using vetted libraries."
+        },
+        {
+          "id": "asvs:V11.3",
+          "ref": "V11.3",
+          "title": "Encryption Algorithms",
+          "summary": "Requirements for selecting and configuring approved encryption algorithms."
+        },
+        {
+          "id": "asvs:V11.4",
+          "ref": "V11.4",
+          "title": "Hashing and Hash-based Functions",
+          "summary": "Requirements for selecting approved hash functions and HMAC constructions."
+        },
+        {
+          "id": "asvs:V11.5",
+          "ref": "V11.5",
+          "title": "Random Values",
+          "summary": "Requirements for generating cryptographically secure random values."
+        },
+        {
+          "id": "asvs:V11.6",
+          "ref": "V11.6",
+          "title": "Public Key Cryptography",
+          "summary": "Requirements for using public key cryptography for signing and asymmetric encryption."
+        },
+        {
+          "id": "asvs:V11.7",
+          "ref": "V11.7",
+          "title": "In-Use Data Cryptography",
+          "summary": "Requirements for cryptographic protections applied to data while it is actively being used."
+        },
+        {
+          "id": "asvs:V12.1",
+          "ref": "V12.1",
+          "title": "General TLS Security Guidance",
+          "summary": "General requirements for TLS configuration including protocol versions, cipher suites, and certificate management."
+        },
+        {
+          "id": "asvs:V12.2",
+          "ref": "V12.2",
+          "title": "HTTPS Communication with External Facing Services",
+          "summary": "Requirements for HTTPS on externally accessible services, including publicly trusted certificates."
+        },
+        {
+          "id": "asvs:V12.3",
+          "ref": "V12.3",
+          "title": "General Service to Service Communication Security",
+          "summary": "Requirements for encrypted and authenticated communication between internal services and backends."
+        },
+        {
+          "id": "asvs:V13.1",
+          "ref": "V13.1",
+          "title": "Configuration Documentation",
+          "summary": "Requirements for documenting security-relevant configuration decisions."
+        },
+        {
+          "id": "asvs:V13.2",
+          "ref": "V13.2",
+          "title": "Backend Communication Configuration",
+          "summary": "Requirements for securely configuring the application's outbound backend connections."
+        },
+        {
+          "id": "asvs:V13.3",
+          "ref": "V13.3",
+          "title": "Secret Management",
+          "summary": "Requirements for securely storing, accessing, and rotating application secrets and credentials."
+        },
+        {
+          "id": "asvs:V13.4",
+          "ref": "V13.4",
+          "title": "Unintended Information Leakage",
+          "summary": "Requirements for preventing the application from leaking sensitive information through errors, headers, or responses."
+        },
+        {
+          "id": "asvs:V14.1",
+          "ref": "V14.1",
+          "title": "Data Protection Documentation",
+          "summary": "Requirements for identifying, classifying, and documenting protection requirements for sensitive data."
+        },
+        {
+          "id": "asvs:V14.2",
+          "ref": "V14.2",
+          "title": "General Data Protection",
+          "summary": "Requirements for protecting sensitive data from unauthorized access, leakage, and excessive exposure."
+        },
+        {
+          "id": "asvs:V14.3",
+          "ref": "V14.3",
+          "title": "Client-side Data Protection",
+          "summary": "Requirements for protecting sensitive data stored or processed on client devices and browsers."
+        },
+        {
+          "id": "asvs:V15.1",
+          "ref": "V15.1",
+          "title": "Secure Coding and Architecture Documentation",
+          "summary": "Requirements for documenting dependency risk, dangerous functionality, and remediation policies."
+        },
+        {
+          "id": "asvs:V15.2",
+          "ref": "V15.2",
+          "title": "Security Architecture and Dependencies",
+          "summary": "Requirements for dependency management, supply chain security, and architectural isolation of risky components."
+        },
+        {
+          "id": "asvs:V15.3",
+          "ref": "V15.3",
+          "title": "Defensive Coding",
+          "summary": "Requirements for defensive coding practices in security-sensitive code paths."
+        },
+        {
+          "id": "asvs:V15.4",
+          "ref": "V15.4",
+          "title": "Safe Concurrency",
+          "summary": "Requirements for safe concurrency to prevent race conditions and data corruption in multi-threaded code."
+        },
+        {
+          "id": "asvs:V16.1",
+          "ref": "V16.1",
+          "title": "Security Logging Documentation",
+          "summary": "Requirements for documenting logging decisions and defining which events must be recorded."
+        },
+        {
+          "id": "asvs:V16.2",
+          "ref": "V16.2",
+          "title": "General Logging",
+          "summary": "General requirements for what application logs should record and how."
+        },
+        {
+          "id": "asvs:V16.3",
+          "ref": "V16.3",
+          "title": "Security Events",
+          "summary": "Requirements for logging security-relevant events such as authentication, authorization failures, and sensitive actions."
+        },
+        {
+          "id": "asvs:V16.4",
+          "ref": "V16.4",
+          "title": "Log Protection",
+          "summary": "Requirements for protecting log data from tampering, injection, and unauthorized access."
+        },
+        {
+          "id": "asvs:V16.5",
+          "ref": "V16.5",
+          "title": "Error Handling",
+          "summary": "Requirements for handling errors safely without leaking sensitive information to users."
+        },
+        {
+          "id": "asvs:V17.1",
+          "ref": "V17.1",
+          "title": "TURN Server",
+          "summary": "Security requirements for TURN server deployments used in WebRTC applications."
+        },
+        {
+          "id": "asvs:V17.2",
+          "ref": "V17.2",
+          "title": "Media",
+          "summary": "Security requirements for WebRTC media servers handling real-time audio and video streams."
+        },
+        {
+          "id": "asvs:V17.3",
+          "ref": "V17.3",
+          "title": "Signaling",
+          "summary": "Security requirements for WebRTC signaling servers that coordinate peer connections."
+        },
+        {
+          "id": "asvs:V2.1",
+          "ref": "V2.1",
+          "title": "Validation and Business Logic Documentation",
+          "summary": "Requirements for documenting expected inputs and business logic rules."
+        },
+        {
+          "id": "asvs:V2.2",
+          "ref": "V2.2",
+          "title": "Input Validation",
+          "summary": "Requirements for validating input data at application boundaries."
+        },
+        {
+          "id": "asvs:V2.3",
+          "ref": "V2.3",
+          "title": "Business Logic Security",
+          "summary": "Requirements for securing business workflows against manipulation, skipping steps, or race conditions."
+        },
+        {
+          "id": "asvs:V2.4",
+          "ref": "V2.4",
+          "title": "Anti-automation",
+          "summary": "Requirements for protecting against automated abuse, scraping, and excessive requests."
+        },
+        {
+          "id": "asvs:V3.1",
+          "ref": "V3.1",
+          "title": "Web Frontend Security Documentation",
+          "summary": "Requirements for documenting frontend security decisions and browser security configurations."
+        },
+        {
+          "id": "asvs:V3.2",
+          "ref": "V3.2",
+          "title": "Unintended Content Interpretation",
+          "summary": "Requirements to prevent browsers from misinterpreting response content types."
+        },
+        {
+          "id": "asvs:V3.3",
+          "ref": "V3.3",
+          "title": "Cookie Setup",
+          "summary": "Requirements for securely configuring cookie attributes."
+        },
+        {
+          "id": "asvs:V3.4",
+          "ref": "V3.4",
+          "title": "Browser Security Mechanism Headers",
+          "summary": "Requirements for HTTP security headers that instruct browsers to enforce security policies."
+        },
+        {
+          "id": "asvs:V3.5",
+          "ref": "V3.5",
+          "title": "Browser Origin Separation",
+          "summary": "Requirements for enforcing origin boundaries and preventing cross-origin attacks in browsers."
+        },
+        {
+          "id": "asvs:V3.6",
+          "ref": "V3.6",
+          "title": "External Resource Integrity",
+          "summary": "Requirements for verifying the integrity of externally loaded resources."
+        },
+        {
+          "id": "asvs:V3.7",
+          "ref": "V3.7",
+          "title": "Other Browser Security Considerations",
+          "summary": "Miscellaneous browser security requirements not covered by other V3 sections."
+        },
+        {
+          "id": "asvs:V4.1",
+          "ref": "V4.1",
+          "title": "Generic Web Service Security",
+          "summary": "General security requirements applicable to all HTTP-based web services."
+        },
+        {
+          "id": "asvs:V4.2",
+          "ref": "V4.2",
+          "title": "HTTP Message Structure Validation",
+          "summary": "Requirements for validating the structure and fields of HTTP messages."
+        },
+        {
+          "id": "asvs:V4.3",
+          "ref": "V4.3",
+          "title": "GraphQL",
+          "summary": "Security requirements specific to GraphQL APIs."
+        },
+        {
+          "id": "asvs:V4.4",
+          "ref": "V4.4",
+          "title": "WebSocket",
+          "summary": "Security requirements for WebSocket connections and message handling."
+        },
+        {
+          "id": "asvs:V5.1",
+          "ref": "V5.1",
+          "title": "File Handling Documentation",
+          "summary": "Requirements for documenting file handling expectations and security decisions."
+        },
+        {
+          "id": "asvs:V5.2",
+          "ref": "V5.2",
+          "title": "File Upload and Content",
+          "summary": "Requirements for securely accepting and validating user-uploaded files."
+        },
+        {
+          "id": "asvs:V5.3",
+          "ref": "V5.3",
+          "title": "File Storage",
+          "summary": "Requirements for securely storing files and preventing path traversal or server-side execution."
+        },
+        {
+          "id": "asvs:V5.4",
+          "ref": "V5.4",
+          "title": "File Download",
+          "summary": "Requirements for securely serving files to users for download."
+        },
+        {
+          "id": "asvs:V6.1",
+          "ref": "V6.1",
+          "title": "Authentication Documentation",
+          "summary": "Requirements for documenting authentication decisions and mechanisms."
+        },
+        {
+          "id": "asvs:V6.2",
+          "ref": "V6.2",
+          "title": "Password Security",
+          "summary": "Requirements for securely handling user passwords, including storage, policies, and breach detection."
+        },
+        {
+          "id": "asvs:V6.3",
+          "ref": "V6.3",
+          "title": "General Authentication Security",
+          "summary": "General security requirements for all authentication mechanisms."
+        },
+        {
+          "id": "asvs:V6.4",
+          "ref": "V6.4",
+          "title": "Authentication Factor Lifecycle and Recovery",
+          "summary": "Requirements for managing authentication factor enrollment, recovery, and revocation."
+        },
+        {
+          "id": "asvs:V6.5",
+          "ref": "V6.5",
+          "title": "General Multi-factor Authentication Requirements",
+          "summary": "General requirements for implementing multi-factor authentication."
+        },
+        {
+          "id": "asvs:V6.6",
+          "ref": "V6.6",
+          "title": "Out-of-Band Authentication Mechanisms",
+          "summary": "Requirements for authentication mechanisms that use a separate out-of-band channel."
+        },
+        {
+          "id": "asvs:V6.7",
+          "ref": "V6.7",
+          "title": "Cryptographic Authentication Mechanism",
+          "summary": "Requirements for cryptographic authentication mechanisms such as WebAuthn, passkeys, and client certificates."
+        },
+        {
+          "id": "asvs:V6.8",
+          "ref": "V6.8",
+          "title": "Authentication with an Identity Provider",
+          "summary": "Requirements for authenticating users via an external identity provider using federated protocols."
+        },
+        {
+          "id": "asvs:V7.1",
+          "ref": "V7.1",
+          "title": "Session Management Documentation",
+          "summary": "Requirements for documenting session management decisions."
+        },
+        {
+          "id": "asvs:V7.2",
+          "ref": "V7.2",
+          "title": "Fundamental Session Management Security",
+          "summary": "Foundational requirements for creating and issuing secure session tokens."
+        },
+        {
+          "id": "asvs:V7.3",
+          "ref": "V7.3",
+          "title": "Session Timeout",
+          "summary": "Requirements for limiting session duration and implementing idle or absolute timeouts."
+        },
+        {
+          "id": "asvs:V7.4",
+          "ref": "V7.4",
+          "title": "Session Termination",
+          "summary": "Requirements for securely terminating sessions on logout or credential change."
+        },
+        {
+          "id": "asvs:V7.5",
+          "ref": "V7.5",
+          "title": "Defenses Against Session Abuse",
+          "summary": "Requirements for detecting and preventing session theft, fixation, and hijacking."
+        },
+        {
+          "id": "asvs:V7.6",
+          "ref": "V7.6",
+          "title": "Federated Re-authentication",
+          "summary": "Requirements for session management in federated identity and SSO scenarios."
+        },
+        {
+          "id": "asvs:V8.1",
+          "ref": "V8.1",
+          "title": "Authorization Documentation",
+          "summary": "Requirements for documenting authorization rules and decision factors."
+        },
+        {
+          "id": "asvs:V8.2",
+          "ref": "V8.2",
+          "title": "General Authorization Design",
+          "summary": "Requirements for function-level, data-level, and field-level access control enforcement."
+        },
+        {
+          "id": "asvs:V8.3",
+          "ref": "V8.3",
+          "title": "Operation Level Authorization",
+          "summary": "Requirements for enforcing authorization at the correct service tier and handling permission changes promptly."
+        },
+        {
+          "id": "asvs:V8.4",
+          "ref": "V8.4",
+          "title": "Other Authorization Considerations",
+          "summary": "Additional authorization requirements for multi-tenant systems and administrative interfaces."
+        },
+        {
+          "id": "asvs:V9.1",
+          "ref": "V9.1",
+          "title": "Token Source and Integrity",
+          "summary": "Requirements for verifying the source, signature, and integrity of self-contained tokens."
+        },
+        {
+          "id": "asvs:V9.2",
+          "ref": "V9.2",
+          "title": "Token Content",
+          "summary": "Requirements for the content, claims, and lifetime of self-contained tokens."
+        }
+      ],
+      "mappings": [
+        {
+          "peerControlId": "asvs:V1.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "PRM-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V1.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "PRM-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V1.3",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "PRM-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V1.4",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "PRM-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V1.5",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "PRM-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V10.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V10.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V10.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V10.4",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V10.5",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V10.6",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V10.7",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V11.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC2-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V11.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC2-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V11.3",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC2-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V11.4",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC2-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V11.5",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC2-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V11.6",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC2-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V11.7",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC2-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V12.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "INF-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V12.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "INF-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V12.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "INF-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V13.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INF-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V13.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INF-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V13.3",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INF-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V13.4",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INF-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V14.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "PRI-M1",
+            "DG-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V14.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "PRI-M1",
+            "DG-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V14.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "PRI-M1",
+            "DG-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V15.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V15.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V15.3",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V15.4",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V16.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "OBS-M1",
+            "INC-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V16.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "OBS-M1",
+            "INC-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V16.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "OBS-M1",
+            "INC-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V16.4",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "OBS-M1",
+            "INC-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V16.5",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "OBS-M1",
+            "INC-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V17.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INF-M1",
+            "REL-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V17.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INF-M1",
+            "REL-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V17.3",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INF-M1",
+            "REL-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V2.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "TOL-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V2.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "TOL-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V2.3",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "TOL-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V2.4",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "TOL-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V3.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M3",
+            "TOL-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V3.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M3",
+            "TOL-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V3.3",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M3",
+            "TOL-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V3.4",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M3",
+            "TOL-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V3.5",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M3",
+            "TOL-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V3.6",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M3",
+            "TOL-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V3.7",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M3",
+            "TOL-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V4.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHZ-M1",
+            "SEC-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V4.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHZ-M1",
+            "SEC-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V4.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHZ-M1",
+            "SEC-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V4.4",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHZ-M1",
+            "SEC-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V5.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INF-M1",
+            "DG-M3"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V5.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INF-M1",
+            "DG-M3"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V5.3",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INF-M1",
+            "DG-M3"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V5.4",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INF-M1",
+            "DG-M3"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V6.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHN-M3",
+            "SEC2-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V6.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHN-M3",
+            "SEC2-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V6.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHN-M3",
+            "SEC2-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V6.4",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHN-M3",
+            "SEC2-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V6.5",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHN-M3",
+            "SEC2-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V6.6",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHN-M3",
+            "SEC2-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V6.7",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHN-M3",
+            "SEC2-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V6.8",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHN-M3",
+            "SEC2-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V7.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V7.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V7.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V7.4",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V7.5",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V7.6",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V8.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHZ-M1",
+            "AUTHZ-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V8.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHZ-M1",
+            "AUTHZ-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V8.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHZ-M1",
+            "AUTHZ-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V8.4",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHZ-M1",
+            "AUTHZ-M2"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V9.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M2",
+            "SEC2-M1"
+          ]
+        },
+        {
+          "peerControlId": "asvs:V9.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "AUTHN-M2",
+            "SEC2-M1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "opencre",
+      "name": "OpenCRE (Open Common Requirements Enumeration)",
+      "peerVersion": "CWE bridge set (playbook inventory)",
+      "url": "https://www.opencre.org/",
+      "disclaimer": "Informative alignment only. Does not constitute certification, accreditation, or official endorsement.",
+      "controls": [
+        {
+          "id": "opencre:CWE-16",
+          "ref": "CWE-16",
+          "title": "Configuration",
+          "summary": "Security misconfiguration occurs when applications, frameworks, or infrastructure use insecure defaults, unnecessary features, or improperly configured security controls. OpenCRE: 180-488, 462-245, 623-347"
+        },
+        {
+          "id": "opencre:CWE-200",
+          "ref": "CWE-200",
+          "title": "Exposure of Sensitive Information",
+          "summary": "Sensitive information exposure occurs when applications inadvertently reveal data that can be used by attackers — through error messages, logs, API responses, or verbose configurations. OpenCRE: 713-683, 743-110, 227-045"
+        },
+        {
+          "id": "opencre:CWE-22",
+          "ref": "CWE-22",
+          "title": "Path Traversal",
+          "summary": "Path traversal occurs when user-controlled input is used to construct file paths without canonicalization, allowing access to files outside intended directories. OpenCRE: 675-168"
+        },
+        {
+          "id": "opencre:CWE-287",
+          "ref": "CWE-287",
+          "title": "Improper Authentication",
+          "summary": "Improper authentication allows attackers to bypass identity verification, impersonate users, or access protected resources without valid credentials. OpenCRE: 813-610, 605-735, 816-631"
+        },
+        {
+          "id": "opencre:CWE-327",
+          "ref": "CWE-327",
+          "title": "Use of a Broken or Risky Cryptographic Algorithm",
+          "summary": "Use of broken or risky cryptographic algorithms undermines data confidentiality and integrity, allowing attackers to decrypt, forge, or tamper with protected data. OpenCRE: 742-431, 002-801, 504-340"
+        },
+        {
+          "id": "opencre:CWE-352",
+          "ref": "CWE-352",
+          "title": "Cross-Site Request Forgery (CSRF)",
+          "summary": "CSRF forces authenticated users to submit unintended requests, enabling attackers to perform state-changing actions on behalf of victims. OpenCRE: 464-084, 060-472"
+        },
+        {
+          "id": "opencre:CWE-384",
+          "ref": "CWE-384",
+          "title": "Session Fixation",
+          "summary": "Session fixation allows attackers to set a victim's session identifier before authentication, then hijack the authenticated session. OpenCRE: 002-630"
+        },
+        {
+          "id": "opencre:CWE-502",
+          "ref": "CWE-502",
+          "title": "Deserialization of Untrusted Data",
+          "summary": "Deserialization of untrusted data can lead to remote code execution, object injection, or denial of service when applications reconstruct objects from attacker-controlled serialized input. OpenCRE: 831-563, 736-554, 762-616"
+        },
+        {
+          "id": "opencre:CWE-778",
+          "ref": "CWE-778",
+          "title": "Insufficient Logging",
+          "summary": "Insufficient logging prevents detection of security breaches, hinders forensic analysis, and delays incident response when critical security events go unrecorded. OpenCRE: 184-284, 841-710, 555-048"
+        },
+        {
+          "id": "opencre:CWE-78",
+          "ref": "CWE-78",
+          "title": "OS Command Injection",
+          "summary": "OS command injection occurs when untrusted data is passed to system shell commands without proper sanitization, allowing attackers to run arbitrary commands. OpenCRE: 857-718, 683-722"
+        },
+        {
+          "id": "opencre:CWE-79",
+          "ref": "CWE-79",
+          "title": "Cross-site Scripting (XSS)",
+          "summary": "Cross-site scripting occurs when untrusted data is included in web output without proper encoding, allowing attackers to run scripts in victim browsers. OpenCRE: 366-835"
+        },
+        {
+          "id": "opencre:CWE-798",
+          "ref": "CWE-798",
+          "title": "Use of Hard-coded Credentials",
+          "summary": "Hard-coded credentials in source code, configuration files, or system prompts can be extracted by attackers to gain unauthorized access to systems and services. OpenCRE: 551-054, 774-888, 340-375"
+        },
+        {
+          "id": "opencre:CWE-89",
+          "ref": "CWE-89",
+          "title": "SQL Injection",
+          "summary": "SQL injection occurs when untrusted data is sent to a database interpreter as part of a query, allowing attackers to read, modify, or delete data. OpenCRE: 064-808, 732-873"
+        }
+      ],
+      "mappings": [
+        {
+          "peerControlId": "opencre:CWE-16",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "infrastructure",
+            "change-management"
+          ],
+          "aprfCheckIds": [
+            "INF-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "opencre:CWE-200",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "data-privacy",
+            "secrets"
+          ],
+          "aprfCheckIds": [
+            "PRI-M1",
+            "SEC2-M1",
+            "SEC2-M2"
+          ]
+        },
+        {
+          "peerControlId": "opencre:CWE-22",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "ai-security",
+            "tool-safety"
+          ],
+          "aprfCheckIds": [
+            "SEC-M1",
+            "TOL-M1"
+          ]
+        },
+        {
+          "peerControlId": "opencre:CWE-287",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "authentication"
+          ],
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHN-M2",
+            "AUTHN-M3"
+          ]
+        },
+        {
+          "peerControlId": "opencre:CWE-327",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "secrets",
+            "infrastructure"
+          ],
+          "aprfCheckIds": [
+            "SEC2-M1",
+            "INF-M2"
+          ]
+        },
+        {
+          "peerControlId": "opencre:CWE-352",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "authentication",
+            "authorization"
+          ],
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "opencre:CWE-384",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "authentication",
+            "authorization"
+          ],
+          "aprfCheckIds": [
+            "AUTHN-M1",
+            "AUTHZ-M2"
+          ]
+        },
+        {
+          "peerControlId": "opencre:CWE-502",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "tool-safety",
+            "ai-security"
+          ],
+          "aprfCheckIds": [
+            "TOL-M2",
+            "SEC-M1"
+          ]
+        },
+        {
+          "peerControlId": "opencre:CWE-778",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "observability",
+            "incident-readiness"
+          ],
+          "aprfCheckIds": [
+            "OBS-M1",
+            "INC-M1"
+          ]
+        },
+        {
+          "peerControlId": "opencre:CWE-78",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "tool-safety",
+            "ai-security"
+          ],
+          "aprfCheckIds": [
+            "TOL-M1",
+            "TOL-M2",
+            "SEC-M1"
+          ]
+        },
+        {
+          "peerControlId": "opencre:CWE-79",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "ai-security",
+            "tool-safety"
+          ],
+          "aprfCheckIds": [
+            "SEC-M3",
+            "TOL-M2"
+          ]
+        },
+        {
+          "peerControlId": "opencre:CWE-798",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "secrets"
+          ],
+          "aprfCheckIds": [
+            "SEC2-M1",
+            "SEC2-M2"
+          ]
+        },
+        {
+          "peerControlId": "opencre:CWE-89",
+          "relation": "partial",
+          "aprfPillarSlugs": [
+            "tool-safety",
+            "data-governance"
+          ],
+          "aprfCheckIds": [
+            "TOL-M1",
+            "DG-M3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maestro",
+      "name": "CSA MAESTRO (Multi-Agentic Threat Model)",
+      "peerVersion": "7-layer architecture + extended multi-agent threats",
+      "url": "https://cloudsecurityalliance.org/",
+      "disclaimer": "Informative alignment only. Does not constitute certification, accreditation, or official endorsement.",
+      "controls": [
+        {
+          "id": "maestro:L1",
+          "ref": "L1",
+          "title": "Foundation Models",
+          "summary": "Core LLMs, model APIs, inference engines."
+        },
+        {
+          "id": "maestro:L2",
+          "ref": "L2",
+          "title": "Data Operations",
+          "summary": "Memory stores, vector databases, RAG pipelines, context management."
+        },
+        {
+          "id": "maestro:L3",
+          "ref": "L3",
+          "title": "Agent Frameworks",
+          "summary": "Orchestration logic, agent-tool bindings, routing decisions."
+        },
+        {
+          "id": "maestro:L4",
+          "ref": "L4",
+          "title": "Deployment & Infrastructure",
+          "summary": "Containers, orchestration, cloud/on-premise resources."
+        },
+        {
+          "id": "maestro:L5",
+          "ref": "L5",
+          "title": "Evaluation & Observability",
+          "summary": "Monitoring, metrics, anomaly detection, performance tracking."
+        },
+        {
+          "id": "maestro:L6",
+          "ref": "L6",
+          "title": "Security & Compliance",
+          "summary": "Cross-cutting security controls and compliance frameworks."
+        },
+        {
+          "id": "maestro:L7",
+          "ref": "L7",
+          "title": "Agent Ecosystem",
+          "summary": "User-facing applications, agent marketplace, business integrations."
+        },
+        {
+          "id": "maestro:reasoning-collapse",
+          "ref": "reasoning-collapse",
+          "title": "Reasoning Collapse",
+          "summary": "Chain-of-thought breakdowns across agent delegation."
+        },
+        {
+          "id": "maestro:emergent-covert-coordination",
+          "ref": "emergent-covert-coordination",
+          "title": "Emergent Covert Coordination",
+          "summary": "Autonomous symbolic protocol development between agents."
+        },
+        {
+          "id": "maestro:heterogeneous-multi-agent-exploits",
+          "ref": "heterogeneous-multi-agent-exploits",
+          "title": "Heterogeneous Multi-Agent Exploits",
+          "summary": "Coordinated attacks using diverse agent capabilities."
+        },
+        {
+          "id": "maestro:goal-drift",
+          "ref": "goal-drift",
+          "title": "Goal Drift in Delegated Chains",
+          "summary": "Intent mutation through agent handoffs."
+        },
+        {
+          "id": "maestro:trust-misuse",
+          "ref": "trust-misuse",
+          "title": "Trust Misuse Between Legitimate Agents",
+          "summary": "Strategic misreporting within valid roles."
+        }
+      ],
+      "mappings": [
+        {
+          "peerControlId": "maestro:L1",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "model-governance",
+            "ai-security",
+            "supply-chain"
+          ],
+          "aprfCheckIds": [
+            "MOD-M1",
+            "SCI-M1",
+            "SEC-M3"
+          ]
+        },
+        {
+          "peerControlId": "maestro:L2",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "memory-management",
+            "context-engineering",
+            "data-governance"
+          ],
+          "aprfCheckIds": [
+            "MEM-M1",
+            "MEM-M3",
+            "CTX-M2",
+            "DG-M3"
+          ]
+        },
+        {
+          "peerControlId": "maestro:L3",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "tool-safety"
+          ],
+          "aprfCheckIds": [
+            "AGN-M1",
+            "AGN-M2",
+            "TOL-M1",
+            "TOL-M3"
+          ]
+        },
+        {
+          "peerControlId": "maestro:L4",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "infrastructure",
+            "platform-engineering",
+            "supply-chain"
+          ],
+          "aprfCheckIds": [
+            "INF-M1",
+            "INF-M2",
+            "SCI-M2"
+          ]
+        },
+        {
+          "peerControlId": "maestro:L5",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "observability",
+            "evaluation",
+            "performance-slo"
+          ],
+          "aprfCheckIds": [
+            "OBS-M1",
+            "EVL-M1",
+            "PERF-M1"
+          ]
+        },
+        {
+          "peerControlId": "maestro:L6",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "ai-security",
+            "compliance",
+            "organizational-governance"
+          ],
+          "aprfCheckIds": [
+            "SEC-M1",
+            "SEC-M4",
+            "CMP-M1"
+          ]
+        },
+        {
+          "peerControlId": "maestro:L7",
+          "relation": "supports",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "human-approval",
+            "authorization"
+          ],
+          "aprfCheckIds": [
+            "AGN-M1",
+            "HUM-M1",
+            "AUTHZ-M1"
+          ]
+        },
+        {
+          "peerControlId": "maestro:reasoning-collapse",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "evaluation",
+            "explainability"
+          ],
+          "aprfCheckIds": [
+            "AGN-M2",
+            "EVL-M2",
+            "EXP-M1"
+          ]
+        },
+        {
+          "peerControlId": "maestro:emergent-covert-coordination",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "ai-security",
+            "observability"
+          ],
+          "aprfCheckIds": [
+            "AGN-M1",
+            "SEC-M4",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "maestro:heterogeneous-multi-agent-exploits",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "tool-safety",
+            "ai-security"
+          ],
+          "aprfCheckIds": [
+            "AGN-M1",
+            "TOL-M1",
+            "SEC-M1",
+            "SEC-M3"
+          ]
+        },
+        {
+          "peerControlId": "maestro:goal-drift",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "human-approval",
+            "evaluation"
+          ],
+          "aprfCheckIds": [
+            "AGN-M2",
+            "HUM-M1",
+            "EVL-M1"
+          ]
+        },
+        {
+          "peerControlId": "maestro:trust-misuse",
+          "relation": "aligns-with",
+          "aprfPillarSlugs": [
+            "agent-governance",
+            "authorization",
+            "observability"
+          ],
+          "aprfCheckIds": [
+            "AGN-M1",
+            "AUTHZ-M1",
+            "OBS-M1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fiasse",
+      "name": "OWASP FIASSE / SSEM",
+      "peerVersion": "1.0.4",
+      "url": "https://owasp.org/www-project-fiasse/",
+      "disclaimer": "Informative alignment only. Does not constitute certification, accreditation, or official endorsement.",
+      "controls": [
+        {
+          "id": "fiasse:S1.1",
+          "ref": "S1.1",
+          "title": "S1.1"
+        },
+        {
+          "id": "fiasse:S1.2",
+          "ref": "S1.2",
+          "title": "S1.2"
+        },
+        {
+          "id": "fiasse:S2.1",
+          "ref": "S2.1",
+          "title": "S2.1"
+        },
+        {
+          "id": "fiasse:S2.2",
+          "ref": "S2.2",
+          "title": "S2.2"
+        },
+        {
+          "id": "fiasse:S2.3",
+          "ref": "S2.3",
+          "title": "S2.3"
+        },
+        {
+          "id": "fiasse:S2.4",
+          "ref": "S2.4",
+          "title": "S2.4"
+        },
+        {
+          "id": "fiasse:S2.5",
+          "ref": "S2.5",
+          "title": "S2.5"
+        },
+        {
+          "id": "fiasse:S2.6",
+          "ref": "S2.6",
+          "title": "S2.6"
+        },
+        {
+          "id": "fiasse:S3.1",
+          "ref": "S3.1",
+          "title": "S3.1"
+        },
+        {
+          "id": "fiasse:S3.2.1.1",
+          "ref": "S3.2.1.1",
+          "title": "S3.2.1.1"
+        },
+        {
+          "id": "fiasse:S3.2.1.2",
+          "ref": "S3.2.1.2",
+          "title": "S3.2.1.2"
+        },
+        {
+          "id": "fiasse:S3.2.1.3",
+          "ref": "S3.2.1.3",
+          "title": "S3.2.1.3"
+        },
+        {
+          "id": "fiasse:S3.2.1.4",
+          "ref": "S3.2.1.4",
+          "title": "S3.2.1.4"
+        },
+        {
+          "id": "fiasse:S3.2.1",
+          "ref": "S3.2.1",
+          "title": "S3.2.1"
+        },
+        {
+          "id": "fiasse:S3.2.2.1",
+          "ref": "S3.2.2.1",
+          "title": "S3.2.2.1"
+        },
+        {
+          "id": "fiasse:S3.2.2.2",
+          "ref": "S3.2.2.2",
+          "title": "S3.2.2.2"
+        },
+        {
+          "id": "fiasse:S3.2.2.3",
+          "ref": "S3.2.2.3",
+          "title": "S3.2.2.3"
+        },
+        {
+          "id": "fiasse:S3.2.2",
+          "ref": "S3.2.2",
+          "title": "S3.2.2"
+        },
+        {
+          "id": "fiasse:S3.2.3.1",
+          "ref": "S3.2.3.1",
+          "title": "S3.2.3.1"
+        },
+        {
+          "id": "fiasse:S3.2.3.2",
+          "ref": "S3.2.3.2",
+          "title": "S3.2.3.2"
+        },
+        {
+          "id": "fiasse:S3.2.3.3",
+          "ref": "S3.2.3.3",
+          "title": "S3.2.3.3"
+        },
+        {
+          "id": "fiasse:S3.2.3",
+          "ref": "S3.2.3",
+          "title": "S3.2.3"
+        },
+        {
+          "id": "fiasse:S3.2",
+          "ref": "S3.2",
+          "title": "S3.2"
+        },
+        {
+          "id": "fiasse:S4.1.1",
+          "ref": "S4.1.1",
+          "title": "S4.1.1"
+        },
+        {
+          "id": "fiasse:S4.1.2",
+          "ref": "S4.1.2",
+          "title": "S4.1.2"
+        },
+        {
+          "id": "fiasse:S4.1",
+          "ref": "S4.1",
+          "title": "S4.1"
+        },
+        {
+          "id": "fiasse:S4.2.1",
+          "ref": "S4.2.1",
+          "title": "S4.2.1"
+        },
+        {
+          "id": "fiasse:S4.2.2",
+          "ref": "S4.2.2",
+          "title": "S4.2.2"
+        },
+        {
+          "id": "fiasse:S4.2",
+          "ref": "S4.2",
+          "title": "S4.2"
+        },
+        {
+          "id": "fiasse:S4.3",
+          "ref": "S4.3",
+          "title": "S4.3"
+        },
+        {
+          "id": "fiasse:S4.4.1.1",
+          "ref": "S4.4.1.1",
+          "title": "S4.4.1.1"
+        },
+        {
+          "id": "fiasse:S4.4.1.2",
+          "ref": "S4.4.1.2",
+          "title": "S4.4.1.2"
+        },
+        {
+          "id": "fiasse:S4.4.1",
+          "ref": "S4.4.1",
+          "title": "S4.4.1"
+        },
+        {
+          "id": "fiasse:S4.4",
+          "ref": "S4.4",
+          "title": "S4.4"
+        },
+        {
+          "id": "fiasse:S4.5",
+          "ref": "S4.5",
+          "title": "S4.5"
+        },
+        {
+          "id": "fiasse:S4.6",
+          "ref": "S4.6",
+          "title": "S4.6"
+        },
+        {
+          "id": "fiasse:S5.1",
+          "ref": "S5.1",
+          "title": "S5.1"
+        },
+        {
+          "id": "fiasse:S5.2",
+          "ref": "S5.2",
+          "title": "S5.2"
+        },
+        {
+          "id": "fiasse:S5.3",
+          "ref": "S5.3",
+          "title": "S5.3"
+        },
+        {
+          "id": "fiasse:S6.1.1",
+          "ref": "S6.1.1",
+          "title": "S6.1.1"
+        },
+        {
+          "id": "fiasse:S6.1.2",
+          "ref": "S6.1.2",
+          "title": "S6.1.2"
+        },
+        {
+          "id": "fiasse:S6.1",
+          "ref": "S6.1",
+          "title": "S6.1"
+        },
+        {
+          "id": "fiasse:S6.2",
+          "ref": "S6.2",
+          "title": "S6.2"
+        },
+        {
+          "id": "fiasse:S7.1",
+          "ref": "S7.1",
+          "title": "S7.1"
+        },
+        {
+          "id": "fiasse:S7.2",
+          "ref": "S7.2",
+          "title": "S7.2"
+        },
+        {
+          "id": "fiasse:S7.3",
+          "ref": "S7.3",
+          "title": "S7.3"
+        },
+        {
+          "id": "fiasse:S7.4",
+          "ref": "S7.4",
+          "title": "S7.4"
+        },
+        {
+          "id": "fiasse:S8",
+          "ref": "S8",
+          "title": "S8"
+        },
+        {
+          "id": "fiasse:SA.1.1",
+          "ref": "SA.1.1",
+          "title": "SA.1.1"
+        },
+        {
+          "id": "fiasse:SA.1.2",
+          "ref": "SA.1.2",
+          "title": "SA.1.2"
+        },
+        {
+          "id": "fiasse:SA.1.3",
+          "ref": "SA.1.3",
+          "title": "SA.1.3"
+        },
+        {
+          "id": "fiasse:SA.1.4",
+          "ref": "SA.1.4",
+          "title": "SA.1.4"
+        },
+        {
+          "id": "fiasse:SA.1",
+          "ref": "SA.1",
+          "title": "SA.1"
+        },
+        {
+          "id": "fiasse:SA.2.1",
+          "ref": "SA.2.1",
+          "title": "SA.2.1"
+        },
+        {
+          "id": "fiasse:SA.2.2",
+          "ref": "SA.2.2",
+          "title": "SA.2.2"
+        },
+        {
+          "id": "fiasse:SA.2.3",
+          "ref": "SA.2.3",
+          "title": "SA.2.3"
+        },
+        {
+          "id": "fiasse:SA.2",
+          "ref": "SA.2",
+          "title": "SA.2"
+        },
+        {
+          "id": "fiasse:SA.3.1",
+          "ref": "SA.3.1",
+          "title": "SA.3.1"
+        },
+        {
+          "id": "fiasse:SA.3.2",
+          "ref": "SA.3.2",
+          "title": "SA.3.2"
+        },
+        {
+          "id": "fiasse:SA.3.3",
+          "ref": "SA.3.3",
+          "title": "SA.3.3"
+        },
+        {
+          "id": "fiasse:SA.3",
+          "ref": "SA.3",
+          "title": "SA.3"
+        }
+      ],
+      "mappings": [
+        {
+          "peerControlId": "fiasse:S1.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "ORG-M1",
+            "CMP-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S1.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "ORG-M1",
+            "CMP-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S2.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "ORG-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S2.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "ORG-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S2.3",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "ORG-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S2.4",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "ORG-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S2.5",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "ORG-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S2.6",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "ORG-M1",
+            "CHG-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.2.1.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.2.1.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.2.1.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.2.1.4",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.2.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.2.2.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.2.2.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.2.2.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.2.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.2.3.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.2.3.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.2.3.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.2.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S3.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "CHG-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S4.1.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "SCI-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S4.1.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "SCI-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S4.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "SCI-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S4.2.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "SCI-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S4.2.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "SCI-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S4.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "SCI-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S4.3",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "SCI-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S4.4.1.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "SCI-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S4.4.1.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "SCI-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S4.4.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "SCI-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S4.4",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "SCI-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S4.5",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "SCI-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S4.6",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "SEC-M1",
+            "SCI-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S5.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S5.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S5.3",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S6.1.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INC-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S6.1.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INC-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S6.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INC-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S6.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "INC-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S7.1",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "ORG-M1",
+            "CMP-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S7.2",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "ORG-M1",
+            "CMP-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S7.3",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "ORG-M1",
+            "CMP-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S7.4",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "ORG-M1",
+            "CMP-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:S8",
+          "relation": "partial",
+          "aprfCheckIds": [
+            "REL-M1",
+            "INF-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:SA.1.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:SA.1.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:SA.1.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:SA.1.4",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:SA.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:SA.2.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:SA.2.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:SA.2.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:SA.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:SA.3.1",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:SA.3.2",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:SA.3.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
+        },
+        {
+          "peerControlId": "fiasse:SA.3",
+          "relation": "aligns-with",
+          "aprfCheckIds": [
+            "EVL-M1",
+            "OBS-M1"
+          ]
         }
       ]
     },

@@ -99,7 +99,7 @@ These enrich assessments; they **never** change pass/fail, severity, weight, or 
 
 | Artifact | Role |
 | --- | --- |
-| `spec/aprf-spec.json` → `crosswalks[]` | Peer frameworks (NIST AI RMF, ISO 42001, …) mapped to APRF Checks and/or pillar slugs. Pillar-only rows expand via Check `category`. |
+| `spec/aprf-spec.json` → `crosswalks[]` | Peer frameworks (NIST AI RMF, ISO 42001, OWASP LLM Top 10 + AISVS bridges, AISVS, ASVS, OpenCRE, MAESTRO, FIASSE, SOC 2, AWS WA, SLSA, …) mapped to APRF Checks and/or pillar slugs. Pillar-only rows expand via Check `category`. Optional `relatedPeerControlIds` bridge peer controls across frameworks. |
 | `spec/aprf-threat-map.yaml` | Per-Check `securityIntent`, `threats`, `protects`, optional MITRE ATLAS/ATT&CK IDs, `mappingRationale`. Full Check coverage required once the map exists. |
 | `spec/mitre-technique-index.json` | Pinned offline technique IDs; `npm run aprf:threat-map` validates against it. |
 | Generated catalog | `build-catalog` embeds both; `getCrosswalksForCheck` / `getThreatIntelForCheck` expose them. |

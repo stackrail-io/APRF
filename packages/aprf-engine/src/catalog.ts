@@ -26,6 +26,10 @@ export interface CheckCrosswalk {
   controlRef: string;
   controlTitle: string;
   relation: CrosswalkRelation;
+  /** Peer control IDs in other frameworks this control bridges to (e.g. aisvs:C2.1). */
+  relatedPeerControlIds?: string[];
+  /** Human-readable related peer refs (e.g. "AISVS C2.1") for reports. */
+  relatedPeerRefs?: string[];
 }
 
 let crosswalkIndex: Map<string, CheckCrosswalk[]> | null = null;
@@ -38,6 +42,23 @@ function buildCrosswalkIndex(): Map<string, CheckCrosswalk[]> {
     const list = rulesByPillar.get(rule.category) ?? [];
     list.push(rule.id);
     rulesByPillar.set(rule.category, list);
+  }
+
+  // Resolve relatedPeerControlIds → "AISVS C2.1" labels across all frameworks.
+  const PEER_SHORT_NAMES: Record<string, string> = {
+    aisvs: "AISVS",
+    asvs: "ASVS",
+    "owasp-llm-top-10": "OWASP LLM",
+    opencre: "OpenCRE",
+    maestro: "MAESTRO",
+    fiasse: "FIASSE",
+  };
+  const peerLabelById = new Map<string, string>();
+  for (const framework of catalog.crosswalks ?? []) {
+    const shortName = PEER_SHORT_NAMES[framework.id] ?? framework.name;
+    for (const c of framework.controls ?? []) {
+      peerLabelById.set(c.id, `${shortName} ${c.ref}`);
+    }
   }
 
   const index = new Map<string, CheckCrosswalk[]>();
@@ -54,6 +75,13 @@ function buildCrosswalkIndex(): Map<string, CheckCrosswalk[]> {
         for (const id of rulesByPillar.get(slug) ?? []) checkIds.add(id);
       }
 
+      const relatedPeerControlIds = control.relatedPeerControlIds?.filter(
+        (id) => peerLabelById.has(id),
+      );
+      const relatedPeerRefs = relatedPeerControlIds?.map(
+        (id) => peerLabelById.get(id)!,
+      );
+
       const entry: CheckCrosswalk = {
         frameworkId: framework.id,
         framework: framework.name,
@@ -63,6 +91,9 @@ function buildCrosswalkIndex(): Map<string, CheckCrosswalk[]> {
         controlRef: control.ref,
         controlTitle: control.title,
         relation: mapping.relation,
+        ...(relatedPeerControlIds?.length
+          ? { relatedPeerControlIds, relatedPeerRefs }
+          : {}),
       };
       for (const checkId of checkIds) {
         const list = index.get(checkId);

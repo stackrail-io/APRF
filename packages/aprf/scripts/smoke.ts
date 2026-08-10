@@ -199,9 +199,12 @@ const a = JSON.parse(readFileSync(assessmentPath, "utf8")) as {
     requiredEvidenceMissing?: string[];
     crosswalks?: Array<{
       framework: string;
+      frameworkId?: string;
       controlRef: string;
       relation: string;
       url?: string;
+      relatedPeerControlIds?: string[];
+      relatedPeerRefs?: string[];
     }>;
     threatIntel?: {
       securityIntent: string;
@@ -269,6 +272,35 @@ assert(
     /NIST/i.test(x.framework),
   ),
   `AUTHN-M3 must inherit pillar-only NIST crosswalks; got ${JSON.stringify(byId.get("AUTHN-M3")?.crosswalks)}`,
+);
+
+// Fine-grained peer frameworks (AISVS / MAESTRO) on core agent Check AGN-M2.
+assert(
+  agnCrosswalks.some(
+    (x) =>
+      (x.frameworkId === "aisvs" || /AISVS/i.test(x.framework)) &&
+      /^C9\./.test(x.controlRef),
+  ),
+  `AGN-M2 must carry AISVS C9.* crosswalks; got ${JSON.stringify(agnCrosswalks.filter((x) => /AISVS/i.test(x.framework) || x.frameworkId === "aisvs"))}`,
+);
+assert(
+  agnCrosswalks.some(
+    (x) => x.frameworkId === "maestro" || /MAESTRO/i.test(x.framework),
+  ),
+  `AGN-M2 must carry MAESTRO crosswalks; got ${JSON.stringify(agnCrosswalks.filter((x) => /MAESTRO/i.test(x.framework) || x.frameworkId === "maestro"))}`,
+);
+
+// OWASP LLM Top 10 → AISVS related-peer bridges surface on mapped Checks.
+const secM1Crosswalks = byId.get("SEC-M1")?.crosswalks ?? [];
+const llm01 = secM1Crosswalks.find(
+  (x) =>
+    (x.frameworkId === "owasp-llm-top-10" || /LLM Top 10/i.test(x.framework)) &&
+    x.controlRef === "LLM01",
+);
+assert(
+  llm01?.relatedPeerRefs?.some((r) => /AISVS C2\.1/.test(r)) ||
+    llm01?.relatedPeerControlIds?.includes("aisvs:C2.1"),
+  `SEC-M1 LLM01 must bridge to AISVS C2.1; got ${JSON.stringify(llm01)}`,
 );
 
 // Threat intel is informative context from spec/aprf-threat-map.yaml.
@@ -485,8 +517,16 @@ assert(
   "REPORT.html must show framework crosswalks with the informative-only caveat",
 );
 assert(
-  html.includes("NIST AI Risk Management Framework MANAGE"),
-  "REPORT.html must name the mapped peer-framework control",
+  /NIST AI Risk Management Framework[\s\S]{0,400}MANAGE/.test(html),
+  "REPORT.html must show NIST MANAGE under its grouped framework crosswalk",
+);
+const secM1Panel = html.match(
+  /id="detail-SEC-M1"[\s\S]*?(?=<div class="flyout-panel"|$)/,
+)?.[0];
+assert(
+  !!secM1Panel &&
+    /LLM01[\s\S]{0,400}related: AISVS C2\.1/.test(secM1Panel),
+  "REPORT.html SEC-M1 flyout must show LLM01 related: AISVS C2.1",
 );
 assert(
   html.includes("Why this control exists") &&

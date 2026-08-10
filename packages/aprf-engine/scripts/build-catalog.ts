@@ -82,26 +82,59 @@ function main() {
 
   const crosswalks = loadCrosswalks(root);
   const ruleIds = new Set(rules.map((r) => r.id));
+  const allPeerControlIds = new Set<string>();
+  for (const cw of crosswalks) {
+    for (const c of cw.controls ?? []) allPeerControlIds.add(c.id);
+  }
+  const danglingRelated: string[] = [];
+  const crosswalkErrors: string[] = [];
   for (const cw of crosswalks) {
     const peerControlIds = new Set((cw.controls ?? []).map((c) => c.id));
+    const mappedPeerIds = new Set<string>();
+    for (const c of cw.controls ?? []) {
+      for (const relatedId of c.relatedPeerControlIds ?? []) {
+        if (!allPeerControlIds.has(relatedId)) {
+          danglingRelated.push(`${cw.id} / ${c.id} → ${relatedId}`);
+        }
+      }
+    }
     for (const m of cw.mappings ?? []) {
       // buildCrosswalkIndex skips mappings whose peer control is unknown, so an
       // unvalidated typo would silently drop crosswalks from reports.
       if (!peerControlIds.has(m.peerControlId)) {
-        console.error(
-          `aprf-engine build-catalog refused — crosswalk ${cw.id} maps unknown peer control ${m.peerControlId}`,
+        crosswalkErrors.push(
+          `${cw.id} maps unknown peer control ${m.peerControlId}`,
         );
-        process.exit(1);
       }
+      mappedPeerIds.add(m.peerControlId);
       for (const id of m.aprfCheckIds ?? []) {
         if (!ruleIds.has(id)) {
-          console.error(
-            `aprf-engine build-catalog refused — crosswalk ${cw.id} maps unknown Check ${id}`,
-          );
-          process.exit(1);
+          crosswalkErrors.push(`${cw.id} maps unknown Check ${id}`);
         }
       }
     }
+    // Every published peer control must have a mapping row or it never appears
+    // on Checks / REPORT.html despite shipping in the catalog.
+    const unmapped = [...peerControlIds].filter((id) => !mappedPeerIds.has(id));
+    if (unmapped.length > 0) {
+      crosswalkErrors.push(
+        `${cw.id} has ${unmapped.length} control(s) with no mappings: ${unmapped.join(", ")}`,
+      );
+    }
+  }
+  if (danglingRelated.length > 0) {
+    console.error(
+      `aprf-engine build-catalog refused — ${danglingRelated.length} relatedPeerControlIds reference unknown peer controls:`,
+    );
+    for (const d of danglingRelated) console.error(`  - ${d}`);
+    process.exit(1);
+  }
+  if (crosswalkErrors.length > 0) {
+    console.error(
+      `aprf-engine build-catalog refused — ${crosswalkErrors.length} crosswalk error(s):`,
+    );
+    for (const e of crosswalkErrors) console.error(`  - ${e}`);
+    process.exit(1);
   }
 
   const threatIntel = loadThreatIntel(root);
