@@ -153,6 +153,9 @@ function parseFrontmatterLoose(raw) {
 }
 
 function parseFrontmatter(text) {
+  // Playbook corpora often ship CRLF; normalize so loose/YAML parsers see LF-only lines.
+  // (JS `.` does not match `\r`, so `key: "value"\r` fails `^(key):\s*(.*)$`.)
+  text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   if (!text.startsWith("---")) return { meta: {}, body: text };
   const end = text.indexOf("\n---", 3);
   if (end < 0) return { meta: {}, body: text };
@@ -165,6 +168,18 @@ function parseFrontmatter(text) {
     meta = parseFrontmatterLoose(raw);
   }
   return { meta, body: text.slice(end + 4) };
+}
+
+/** Prefer frontmatter title; else first ATX heading in body (AISVS section files). */
+function resolvePeerTitle(meta, body, ref, stripPrefix) {
+  let title = (meta.title || "").trim();
+  if (!title || title === ref) {
+    const heading = body.match(/^#{1,3}\s+(.+)$/m);
+    if (heading) title = heading[1].trim();
+  }
+  if (!title) title = ref;
+  if (stripPrefix) title = title.replace(stripPrefix, "").trim() || title;
+  return title;
 }
 
 function listMd(dir, { required = false } = {}) {
@@ -610,9 +625,15 @@ function buildFromPlaybook(playbookRoot) {
   for (const path of listMd(join(playbookRoot, "data/aisvs"), {
     required: true,
   })) {
-    const { meta } = parseFrontmatter(readFileSync(path, "utf8"));
+    const { meta, body } = parseFrontmatter(readFileSync(path, "utf8"));
     const ref = meta.aisvs_chapter || path.replace(/.*\//, "").replace(/\.md$/, "");
-    const title = (meta.title || ref).replace(/^C[\d.]+\s+/, "");
+    // Body headings are often "10.2 Adversarial-…" (no C prefix) — strip either form.
+    const title = resolvePeerTitle(
+      meta,
+      body,
+      ref,
+      /^(?:C)?[\d.]+\s+/,
+    );
     const id = `aisvs:${ref}`;
     aisvsControls.push({
       id,
@@ -643,9 +664,9 @@ function buildFromPlaybook(playbookRoot) {
     join(playbookRoot, "plugins/code-security-skills/data/asvs"),
     { required: true },
   )) {
-    const { meta } = parseFrontmatter(readFileSync(path, "utf8"));
+    const { meta, body } = parseFrontmatter(readFileSync(path, "utf8"));
     const ref = meta.asvs_chapter || path.replace(/.*\//, "").replace(/\.md$/, "");
-    const title = (meta.title || ref).replace(/^V[\d.]+\s+/, "");
+    const title = resolvePeerTitle(meta, body, ref, /^V[\d.]+\s+/);
     const id = `asvs:${ref}`;
     asvsControls.push({
       id,
@@ -665,10 +686,10 @@ function buildFromPlaybook(playbookRoot) {
     join(playbookRoot, "plugins/code-security-skills/data/fiasse"),
     { required: true },
   )) {
-    const { meta } = parseFrontmatter(readFileSync(path, "utf8"));
+    const { meta, body } = parseFrontmatter(readFileSync(path, "utf8"));
     const ref =
       meta.fiasse_section || path.replace(/.*\//, "").replace(/\.md$/, "");
-    const title = (meta.title || ref).replace(/^(S|SA)[\d.]+\s+/, "");
+    const title = resolvePeerTitle(meta, body, ref, /^(S|SA)[\d.]+\s+/);
     const id = `fiasse:${ref}`;
     const control = {
       id,
@@ -824,9 +845,7 @@ function applyToSpec(payload) {
   }
   spec.crosswalks = out;
 
-  spec.metadata = spec.metadata ?? {};
-  spec.metadata.compatibility = {
-    ...(spec.metadata.compatibility ?? {}),
+  const compatibility = {
     crosswalks: [
       "NIST AI RMF",
       "ISO/IEC 42001",
@@ -841,6 +860,17 @@ function applyToSpec(payload) {
       "SLSA / supply-chain",
     ],
     note: "Machine-readable maps for NIST AI RMF, ISO/IEC 42001, OWASP LLM Top 10 (incl. AISVS relatedPeerControlIds), AISVS, ASVS, OpenCRE, MAESTRO, FIASSE, SOC 2, AWS Well-Architected, and SLSA ship in the APRF spec under crosswalks[]. Informative alignment only — not certification.",
+  };
+  // Keep metadata + governance lists in lockstep (chips/docs vs machine maps).
+  spec.metadata = spec.metadata ?? {};
+  spec.metadata.compatibility = {
+    ...(spec.metadata.compatibility ?? {}),
+    ...compatibility,
+  };
+  spec.governance = spec.governance ?? {};
+  spec.governance.compatibility = {
+    ...(spec.governance.compatibility ?? {}),
+    ...compatibility,
   };
 
   writeFileSync(specPath, `${JSON.stringify(spec, null, 2)}\n`);

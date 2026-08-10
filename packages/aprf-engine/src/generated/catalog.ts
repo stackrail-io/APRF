@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:1e88cdc2f5fa295b04a054d303faa8741fe049fee4f155fc277d2521ae7b3d66",
+  "generatedAt": "sha256:5c88f981036ad7d136021b19fb63f714666ee442b2d76a4a335df8bde2f4b5c0",
   "ruleCount": 178,
   "domains": [
     {
@@ -15158,7 +15158,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C10.2",
           "ref": "C10.2",
-          "title": "C10.2"
+          "title": "Adversarial-Example Hardening"
         },
         {
           "id": "aisvs:C10.3",
@@ -15187,17 +15187,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C10.7",
           "ref": "C10.7",
-          "title": "C10.7"
+          "title": "Dynamic Security Policy Adaptation"
         },
         {
           "id": "aisvs:C10.8",
           "ref": "C10.8",
-          "title": "C10.8"
+          "title": "Reflection-Based Security Analysis"
         },
         {
           "id": "aisvs:C10.9",
           "ref": "C10.9",
-          "title": "C10.9"
+          "title": "Evolution & Self-Improvement Security"
         },
         {
           "id": "aisvs:C11.1",
@@ -15220,57 +15220,57 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C11.4",
           "ref": "C11.4",
-          "title": "C11.4"
+          "title": "Purpose-Limitation & Scope-Creep Protection"
         },
         {
           "id": "aisvs:C11.5",
           "ref": "C11.5",
-          "title": "C11.5"
+          "title": "Consent Management & Lawful-Basis Tracking"
         },
         {
           "id": "aisvs:C11.6",
           "ref": "C11.6",
-          "title": "C11.6"
+          "title": "Federated Learning with Privacy Controls"
         },
         {
           "id": "aisvs:C12.1",
           "ref": "C12.1",
-          "title": "C12.1"
+          "title": "Request & Response Logging"
         },
         {
           "id": "aisvs:C12.2",
           "ref": "C12.2",
-          "title": "C12.2"
+          "title": "Abuse Detection and Alerting"
         },
         {
           "id": "aisvs:C12.3",
           "ref": "C12.3",
-          "title": "C12.3"
+          "title": "Model Drift Detection"
         },
         {
           "id": "aisvs:C12.4",
           "ref": "C12.4",
-          "title": "C12.4"
+          "title": "Performance & Behavior Telemetry"
         },
         {
           "id": "aisvs:C12.5",
           "ref": "C12.5",
-          "title": "C12.5"
+          "title": "AI Incident Response Planning & Execution"
         },
         {
           "id": "aisvs:C12.6",
           "ref": "C12.6",
-          "title": "C12.6"
+          "title": "AI Performance Degradation Detection"
         },
         {
           "id": "aisvs:C12.7",
           "ref": "C12.7",
-          "title": "C12.7"
+          "title": "DAG Visualization & Workflow Security"
         },
         {
           "id": "aisvs:C12.8",
           "ref": "C12.8",
-          "title": "C12.8"
+          "title": "Proactive Security Behavior Monitoring"
         },
         {
           "id": "aisvs:C13.1",
@@ -15287,7 +15287,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C13.3",
           "ref": "C13.3",
-          "title": "C13.3"
+          "title": "Chain of Responsibility & Auditability"
         },
         {
           "id": "aisvs:C13.4",
@@ -15298,7 +15298,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C13.5",
           "ref": "C13.5",
-          "title": "C13.5"
+          "title": "Model Cards & Usage Disclosures"
         },
         {
           "id": "aisvs:C13.6",
@@ -15309,7 +15309,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C13.7",
           "ref": "C13.7",
-          "title": "C13.7"
+          "title": "User-Facing Transparency Reports"
         },
         {
           "id": "aisvs:C2.1",
@@ -15326,7 +15326,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C2.3",
           "ref": "C2.3",
-          "title": "C2.3"
+          "title": "Prompt Character Set"
         },
         {
           "id": "aisvs:C2.4",
@@ -15337,7 +15337,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C2.5",
           "ref": "C2.5",
-          "title": "C2.5"
+          "title": "Content & Policy Screening"
         },
         {
           "id": "aisvs:C2.6",
@@ -15366,12 +15366,12 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C3.2",
           "ref": "C3.2",
-          "title": "C3.2"
+          "title": "Model Validation & Testing"
         },
         {
           "id": "aisvs:C3.3",
           "ref": "C3.3",
-          "title": "C3.3"
+          "title": "Controlled Deployment & Rollback"
         },
         {
           "id": "aisvs:C3.4",
@@ -15382,22 +15382,22 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C3.5",
           "ref": "C3.5",
-          "title": "C3.5"
+          "title": "Model Retirement & Decommissioning"
         },
         {
           "id": "aisvs:C4.1",
           "ref": "C4.1",
-          "title": "C4.1"
+          "title": "Runtime Environment Isolation"
         },
         {
           "id": "aisvs:C4.2",
           "ref": "C4.2",
-          "title": "C4.2"
+          "title": "Secure Build & Deployment Pipelines"
         },
         {
           "id": "aisvs:C4.3",
           "ref": "C4.3",
-          "title": "C4.3"
+          "title": "Network Security & Access Control"
         },
         {
           "id": "aisvs:C4.4",
@@ -15408,7 +15408,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C4.5",
           "ref": "C4.5",
-          "title": "C4.5"
+          "title": "AI Workload Sandboxing & Validation"
         },
         {
           "id": "aisvs:C4.6",
@@ -15419,17 +15419,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C4.7",
           "ref": "C4.7",
-          "title": "C4.7"
+          "title": "AI Hardware Security"
         },
         {
           "id": "aisvs:C4.8",
           "ref": "C4.8",
-          "title": "C4.8"
+          "title": "Edge & Distributed AI Security"
         },
         {
           "id": "aisvs:C5.1",
           "ref": "C5.1",
-          "title": "C5.1"
+          "title": "Identity Management & Authentication"
         },
         {
           "id": "aisvs:C5.2",
@@ -15440,7 +15440,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C5.3",
           "ref": "C5.3",
-          "title": "C5.3"
+          "title": "Query-Time Security Enforcement"
         },
         {
           "id": "aisvs:C5.4",
@@ -15487,7 +15487,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C6.5",
           "ref": "C6.5",
-          "title": "C6.5"
+          "title": "Third‑Party Dataset Risk Assessment"
         },
         {
           "id": "aisvs:C6.6",
@@ -15534,7 +15534,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C7.6",
           "ref": "C7.6",
-          "title": "C7.6"
+          "title": "Monitoring Integration"
         },
         {
           "id": "aisvs:C8.1",
@@ -15587,12 +15587,12 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C9.4",
           "ref": "C9.4",
-          "title": "C9.4"
+          "title": "Agent and Orchestrator Identity, Signing, and Tamper-Evident Audit"
         },
         {
           "id": "aisvs:C9.5",
           "ref": "C9.5",
-          "title": "C9.5"
+          "title": "Secure Messaging and Protocol Hardening"
         },
         {
           "id": "aisvs:C9.6",
@@ -15609,12 +15609,12 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "aisvs:C9.8",
           "ref": "C9.8",
-          "title": "C9.8"
+          "title": "Multi-Agent Domain Isolation and Swarm Risk Controls"
         },
         {
           "id": "aisvs:C9.9",
           "ref": "C9.9",
-          "title": "C9.9"
+          "title": "Model Context Protocol (MCP) Security"
         }
       ],
       "mappings": [
@@ -18653,307 +18653,368 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         {
           "id": "fiasse:S1.1",
           "ref": "S1.1",
-          "title": "S1.1"
+          "title": "The Application Security Challenge",
+          "summary": "The core challenge: organizations invest significantly in AppSec yet often see limited outcomes. Shift-left has underdelivered, AI code generation amplifies risk, and developers lack deep security expertise."
         },
         {
           "id": "fiasse:S1.2",
           "ref": "S1.2",
-          "title": "S1.2"
+          "title": "Document Purpose and Scope",
+          "summary": "Defines FIASSE as the overarching strategic framework and SSEM as the design language model within it. Introduces the deliberate term 'securable' over 'secure'."
         },
         {
           "id": "fiasse:S2.1",
           "ref": "S2.1",
-          "title": "S2.1"
+          "title": "The Securable Paradigm: No Static Secure State",
+          "summary": "There is no static state of secure. Software must be built with inherent qualities that enable it to adapt to evolving threats."
         },
         {
           "id": "fiasse:S2.2",
           "ref": "S2.2",
-          "title": "S2.2"
+          "title": "Resiliently Add Computing Value",
+          "summary": "The primary directive: resiliently add computing value -- code that is robust enough to withstand change, stress, and attack."
         },
         {
           "id": "fiasse:S2.3",
           "ref": "S2.3",
-          "title": "S2.3"
+          "title": "Security Mission: Reducing Material Impact",
+          "summary": "The core mission is to reduce the probability of material impact of a cyber event. Security strategies must align with business objectives."
         },
         {
           "id": "fiasse:S2.4",
           "ref": "S2.4",
-          "title": "S2.4"
+          "title": "Aligning Security with Development",
+          "summary": "Security and development are complementary disciplines. True alignment uses established software engineering terms and engages AppSec early (Participation over Assessment)."
         },
         {
           "id": "fiasse:S2.5",
           "ref": "S2.5",
-          "title": "S2.5"
+          "title": "The Transparency Principle",
+          "summary": "Transparency is a foundational engineering strategy: designing systems so internal state and behavior are observable and understandable to authorized parties."
         },
         {
           "id": "fiasse:S2.6",
           "ref": "S2.6",
-          "title": "S2.6"
+          "title": "The Principle of Least Astonishment",
+          "summary": "Systems should behave in ways that are intuitive and predictable. POLA supports Analyzability, Modifiability, and clearer security boundaries; it works in concert with the Transparency Principle."
         },
         {
           "id": "fiasse:S3.1",
           "ref": "S3.1",
-          "title": "S3.1"
+          "title": "Model Overview and Design Language",
+          "summary": "SSEM provides a design language using established software engineering terms. Ten attributes grouped into three pillars (Maintainability, Trustworthiness, Reliability)."
         },
         {
           "id": "fiasse:S3.2.1.1",
           "ref": "S3.2.1.1",
-          "title": "S3.2.1.1"
+          "title": "Analyzability",
+          "summary": "The ability to locate the cause of a behavior within the code. Drives the speed and accuracy of vulnerability remediation."
         },
         {
           "id": "fiasse:S3.2.1.2",
           "ref": "S3.2.1.2",
-          "title": "S3.2.1.2"
+          "title": "Modifiability",
+          "summary": "The ability to change code without breaking existing functionality or introducing new vulnerabilities. Enables rapid response to evolving threats."
         },
         {
           "id": "fiasse:S3.2.1.3",
           "ref": "S3.2.1.3",
-          "title": "S3.2.1.3"
+          "title": "Testability",
+          "summary": "The ability to write a test for a piece of code without modifying the code under test. Enables continuous verification of security controls."
         },
         {
           "id": "fiasse:S3.2.1.4",
           "ref": "S3.2.1.4",
-          "title": "S3.2.1.4"
+          "title": "Observability",
+          "summary": "The degree to which the internal state of a system can be inferred from its external outputs. Achieved through code-level instrumentation: structured logging, monitoring, instrumentation, and UI feedback."
         },
         {
           "id": "fiasse:S3.2.1",
           "ref": "S3.2.1",
-          "title": "S3.2.1"
+          "title": "Maintainability",
+          "summary": "Maintainability encompasses Analyzability, Modifiability, Testability, and Observability -- the ability to evolve, correct, adapt, and observe software in operation."
         },
         {
           "id": "fiasse:S3.2.2.1",
           "ref": "S3.2.2.1",
-          "title": "S3.2.2.1"
+          "title": "Confidentiality",
+          "summary": "Property that information is not disclosed to unauthorized individuals, entities, or processes. Achieved through inherent protective qualities, not overlaid controls alone."
         },
         {
           "id": "fiasse:S3.2.2.2",
           "ref": "S3.2.2.2",
-          "title": "S3.2.2.2"
+          "title": "Accountability",
+          "summary": "Every action within a system is attributable to a specific, identified entity. Enables auditing and incident response."
         },
         {
           "id": "fiasse:S3.2.2.3",
           "ref": "S3.2.2.3",
-          "title": "S3.2.2.3"
+          "title": "Authenticity",
+          "summary": "The property that an entity is what it claims to be. Includes Defendable Authentication, digital signatures, and supporting non-repudiation."
         },
         {
           "id": "fiasse:S3.2.2",
           "ref": "S3.2.2",
-          "title": "S3.2.2"
+          "title": "Trustworthiness",
+          "summary": "Trustworthiness encompasses Confidentiality, Accountability, and Authenticity -- the ability to meet stakeholder expectations in a verifiable way."
         },
         {
           "id": "fiasse:S3.2.3.1",
           "ref": "S3.2.3.1",
-          "title": "S3.2.3.1"
+          "title": "Availability",
+          "summary": "Property of being accessible and usable on demand by authorized entities, including during adverse circumstances."
         },
         {
           "id": "fiasse:S3.2.3.2",
           "ref": "S3.2.3.2",
-          "title": "S3.2.3.2"
+          "title": "Integrity",
+          "summary": "Property of accuracy and completeness. Applies at both system and data levels; supported by the Derived Integrity Principle (Section 4.4.1.2)."
         },
         {
           "id": "fiasse:S3.2.3.3",
           "ref": "S3.2.3.3",
-          "title": "S3.2.3.3"
+          "title": "Resilience",
+          "summary": "The ability of a system to continue operating during and after failure, and to recover. Includes fault tolerance, defensive coding, and strong trust boundaries."
         },
         {
           "id": "fiasse:S3.2.3",
           "ref": "S3.2.3",
-          "title": "S3.2.3"
+          "title": "Reliability",
+          "summary": "Reliability encompasses Availability, Integrity, and Resilience -- consistent and predictable operation under adverse conditions."
         },
         {
           "id": "fiasse:S3.2",
           "ref": "S3.2",
-          "title": "S3.2"
+          "title": "Core Securable Attributes",
+          "summary": "The building blocks of securable software: tangible characteristics that contribute directly to a system's security and resilience."
         },
         {
           "id": "fiasse:S4.1.1",
           "ref": "S4.1.1",
-          "title": "S4.1.1"
+          "title": "Proactive Communication",
+          "summary": "Inform development teams about new initiatives, demonstrate tools, and maintain regular synchronization to sustain partnership."
         },
         {
           "id": "fiasse:S4.1.2",
           "ref": "S4.1.2",
-          "title": "S4.1.2"
+          "title": "Integrating Security into Requirements",
+          "summary": "Active AppSec participation in requirements gathering. Key deliverables: Security Features, Threat Scenarios, and Security Acceptance Criteria."
         },
         {
           "id": "fiasse:S4.1",
           "ref": "S4.1",
-          "title": "S4.1"
+          "title": "Establishing Clear Expectations",
+          "summary": "Clear expectations through proactive communication and integrating security into requirements (features, threat scenarios, acceptance criteria)."
         },
         {
           "id": "fiasse:S4.2.1",
           "ref": "S4.2.1",
-          "title": "S4.2.1"
+          "title": "Code-Level Threat Awareness",
+          "summary": "Lightweight, continuous practice of asking 'What can go wrong?' at the code level. Findings that reveal design-level concerns must escalate into the formal threat model."
         },
         {
           "id": "fiasse:S4.2.2",
           "ref": "S4.2.2",
-          "title": "S4.2.2"
+          "title": "Threat Modeling Solution Framework",
+          "summary": "Use SSEM (especially Trustworthiness and Reliability) to find inherent architectural solutions; gaps that cannot be addressed inherently become explicit security requirements."
         },
         {
           "id": "fiasse:S4.2",
           "ref": "S4.2",
-          "title": "S4.2"
+          "title": "Threat Modeling",
+          "summary": "Two distinct activities: formal Threat Modeling at the system/feature level, and continuous lightweight Threat Awareness at the code level."
         },
         {
           "id": "fiasse:S4.3",
           "ref": "S4.3",
-          "title": "S4.3"
+          "title": "The Boundary Control Principle",
+          "summary": "Flexibility within the interior is an engineering asset; control at every trust boundary is a security requirement. Harden the shell, keep the interior flexible. (Formerly called 'The Flexibility Principle'.)"
         },
         {
           "id": "fiasse:S4.4.1.1",
           "ref": "S4.4.1.1",
-          "title": "S4.4.1.1"
+          "title": "The Request Surface Minimization Principle",
+          "summary": "Process only the specific named values expected. Log or reject deviations; in sensitive contexts, log-and-reject is the more defensible posture."
         },
         {
           "id": "fiasse:S4.4.1.2",
           "ref": "S4.4.1.2",
-          "title": "S4.4.1.2"
+          "title": "The Derived Integrity Principle",
+          "summary": "Any value critical to system or business-logic integrity must be derived in a trusted context, never accepted from a client. The client expresses intent; the server enforces integrity."
         },
         {
           "id": "fiasse:S4.4.1",
           "ref": "S4.4.1",
-          "title": "S4.4.1"
+          "title": "Canonical Input Handling",
+          "summary": "Apply minimum acceptable range at the point of input through canonicalization/normalization, validation, and sanitization."
         },
         {
           "id": "fiasse:S4.4",
           "ref": "S4.4",
-          "title": "S4.4"
+          "title": "Resilient Coding",
+          "summary": "Defensive coding practices that produce predictable, recoverable behavior: strong typing, input validation, output encoding, safe resource management, graceful and secure failure, and least privilege at the code level."
         },
         {
           "id": "fiasse:S4.5",
           "ref": "S4.5",
-          "title": "S4.5"
+          "title": "Dependency Management",
+          "summary": "Evaluate dependencies against SSEM attributes before introduction. Minimize dependencies, update regularly, go beyond CVE scanning."
         },
         {
           "id": "fiasse:S4.6",
           "ref": "S4.6",
-          "title": "S4.6"
+          "title": "Dependency Stewardship",
+          "summary": "The ongoing application of SSEM attributes to dependency selection, integration, monitoring, and lifecycle management. Stewardship asks: would this dependency be responsible, maintainable, and trustworthy now and over time?"
         },
         {
           "id": "fiasse:S5.1",
           "ref": "S5.1",
-          "title": "S5.1"
+          "title": "Natively Extending Development Processes",
+          "summary": "Integrate security into existing workflows rather than imposing separate gates. Security as partner in design, not external assessor."
         },
         {
           "id": "fiasse:S5.2",
           "ref": "S5.2",
-          "title": "S5.2"
+          "title": "The Role of Merge Reviews",
+          "summary": "Merge reviews are an effective scaling point for securable review and knowledge transfer. SSEM attributes provide a shared review basis."
         },
         {
           "id": "fiasse:S5.3",
           "ref": "S5.3",
-          "title": "S5.3"
+          "title": "Early Integration: Planning and Requirements",
+          "summary": "Set security expectations at planning and requirements. Active AppSec participation in requirements (Section 4.1.2) is the primary mechanism."
         },
         {
           "id": "fiasse:S6.1.1",
           "ref": "S6.1.1",
-          "title": "S6.1.1"
+          "title": "Ineffective Vulnerability Reporting",
+          "summary": "Avoid routing raw scanner output to development. Validate true positives, identify root causes, prioritize impact, and verify fixes."
         },
         {
           "id": "fiasse:S6.1.2",
           "ref": "S6.1.2",
-          "title": "S6.1.2"
+          "title": "Pitfalls of Exploit-First Training",
+          "summary": "Training centered on exploitation does not equip developers with the engineering principles needed to build inherently securable systems."
         },
         {
           "id": "fiasse:S6.1",
           "ref": "S6.1",
-          "title": "S6.1"
+          "title": "The Shoveling Left Phenomenon",
+          "summary": "Shoveling Left: supplying impractical information to developers. The corrective discipline is the Actionable Security Intelligence Principle."
         },
         {
           "id": "fiasse:S6.2",
           "ref": "S6.2",
-          "title": "S6.2"
+          "title": "Strategic Use of Security Output",
+          "summary": "Scanning and testing output must be converted into engineering-grounded direction tied to requirements and acceptance criteria, not handed to developers as finished intelligence."
         },
         {
           "id": "fiasse:S7.1",
           "ref": "S7.1",
-          "title": "S7.1"
+          "title": "The Role of the Security Team",
+          "summary": "Security metrics measure partnership effectiveness, not developer adherence. The security team's effectiveness is limited by software quality."
         },
         {
           "id": "fiasse:S7.2",
           "ref": "S7.2",
-          "title": "S7.2"
+          "title": "Senior Software Engineers",
+          "summary": "Senior engineers drive security requirements, lead SSEM-based merge reviews, maintain prompt engineering standards for AI-assisted generation, and mentor peers."
         },
         {
           "id": "fiasse:S7.3",
           "ref": "S7.3",
-          "title": "S7.3"
+          "title": "Developing Software Engineers",
+          "summary": "Developing engineers benefit from SSEM mental models. Focus on engineering fundamentals, defensive coding, trust boundaries, and scrutinizing AI-generated code."
         },
         {
           "id": "fiasse:S7.4",
           "ref": "S7.4",
-          "title": "S7.4"
+          "title": "Product Owners and Managers",
+          "summary": "FIASSE-literate Product Owners assess backlog items for securability implications, validate security acceptance criteria, and recognize when scope cuts erode securable attributes."
         },
         {
           "id": "fiasse:S8",
           "ref": "S8",
-          "title": "S8"
+          "title": "Organizational Adoption of FIASSE",
+          "summary": "Six-step adoption path: assess practices, integrate SSEM terminology, identify influencers, educate teams, foster collaboration, and monitor continuously."
         },
         {
           "id": "fiasse:SA.1.1",
           "ref": "SA.1.1",
-          "title": "SA.1.1"
+          "title": "Measuring Analyzability",
+          "summary": "Quantitative and qualitative measures for Analyzability."
         },
         {
           "id": "fiasse:SA.1.2",
           "ref": "SA.1.2",
-          "title": "SA.1.2"
+          "title": "Measuring Modifiability",
+          "summary": "Quantitative and qualitative measures for Modifiability."
         },
         {
           "id": "fiasse:SA.1.3",
           "ref": "SA.1.3",
-          "title": "SA.1.3"
+          "title": "Measuring Testability",
+          "summary": "Quantitative and qualitative measures for Testability."
         },
         {
           "id": "fiasse:SA.1.4",
           "ref": "SA.1.4",
-          "title": "SA.1.4"
+          "title": "Measuring Observability",
+          "summary": "Quantitative and qualitative measures for Observability, including structured logging review, instrumentation audits, and failure-path observability."
         },
         {
           "id": "fiasse:SA.1",
           "ref": "SA.1",
-          "title": "SA.1"
+          "title": "Measuring Maintainability",
+          "summary": "Quantitative and qualitative measurement approaches for Analyzability, Modifiability, Testability, and Observability."
         },
         {
           "id": "fiasse:SA.2.1",
           "ref": "SA.2.1",
-          "title": "SA.2.1"
+          "title": "Measuring Confidentiality",
+          "summary": "Quantitative and qualitative measures for Confidentiality."
         },
         {
           "id": "fiasse:SA.2.2",
           "ref": "SA.2.2",
-          "title": "SA.2.2"
+          "title": "Measuring Accountability",
+          "summary": "Quantitative and qualitative measures for Accountability."
         },
         {
           "id": "fiasse:SA.2.3",
           "ref": "SA.2.3",
-          "title": "SA.2.3"
+          "title": "Measuring Authenticity",
+          "summary": "Quantitative and qualitative measures for Authenticity."
         },
         {
           "id": "fiasse:SA.2",
           "ref": "SA.2",
-          "title": "SA.2"
+          "title": "Measuring Trustworthiness",
+          "summary": "Quantitative and qualitative measurement approaches for Confidentiality, Accountability, and Authenticity."
         },
         {
           "id": "fiasse:SA.3.1",
           "ref": "SA.3.1",
-          "title": "SA.3.1"
+          "title": "Measuring Availability",
+          "summary": "Quantitative and qualitative measures for Availability."
         },
         {
           "id": "fiasse:SA.3.2",
           "ref": "SA.3.2",
-          "title": "SA.3.2"
+          "title": "Measuring Integrity",
+          "summary": "Quantitative and qualitative measures for Integrity."
         },
         {
           "id": "fiasse:SA.3.3",
           "ref": "SA.3.3",
-          "title": "SA.3.3"
+          "title": "Measuring Resilience",
+          "summary": "Quantitative and qualitative measures for Resilience."
         },
         {
           "id": "fiasse:SA.3",
           "ref": "SA.3",
-          "title": "SA.3"
+          "title": "Measuring Reliability",
+          "summary": "Quantitative and qualitative measurement approaches for Availability, Integrity, and Resilience."
         }
       ],
       "mappings": [
