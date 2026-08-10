@@ -45,22 +45,17 @@ function buildCrosswalkIndex(): Map<string, CheckCrosswalk[]> {
   }
 
   // Resolve relatedPeerControlIds → "AISVS C2.1" labels across all frameworks.
+  const PEER_SHORT_NAMES: Record<string, string> = {
+    aisvs: "AISVS",
+    asvs: "ASVS",
+    "owasp-llm-top-10": "OWASP LLM",
+    opencre: "OpenCRE",
+    maestro: "MAESTRO",
+    fiasse: "FIASSE",
+  };
   const peerLabelById = new Map<string, string>();
   for (const framework of catalog.crosswalks ?? []) {
-    const shortName =
-      framework.id === "aisvs"
-        ? "AISVS"
-        : framework.id === "asvs"
-          ? "ASVS"
-          : framework.id === "owasp-llm-top-10"
-            ? "OWASP LLM"
-            : framework.id === "opencre"
-              ? "OpenCRE"
-              : framework.id === "maestro"
-                ? "MAESTRO"
-                : framework.id === "fiasse"
-                  ? "FIASSE"
-                  : framework.name;
+    const shortName = PEER_SHORT_NAMES[framework.id] ?? framework.name;
     for (const c of framework.controls ?? []) {
       peerLabelById.set(c.id, `${shortName} ${c.ref}`);
     }

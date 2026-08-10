@@ -520,9 +520,13 @@ assert(
   /NIST AI Risk Management Framework[\s\S]{0,400}MANAGE/.test(html),
   "REPORT.html must show NIST MANAGE under its grouped framework crosswalk",
 );
+const secM1Panel = html.match(
+  /id="detail-SEC-M1"[\s\S]*?(?=<div class="flyout-panel"|$)/,
+)?.[0];
 assert(
-  html.includes("related: AISVS C2.1") || html.includes("related: AISVS"),
-  "REPORT.html must surface LLM→AISVS related-peer bridges",
+  !!secM1Panel &&
+    /LLM01[\s\S]{0,400}related: AISVS C2\.1/.test(secM1Panel),
+  "REPORT.html SEC-M1 flyout must show LLM01 related: AISVS C2.1",
 );
 assert(
   html.includes("Why this control exists") &&

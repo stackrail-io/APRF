@@ -1290,9 +1290,12 @@ function controlDetailBody(c: Control): string {
             const linked = x.url
               ? `<a href="${esc(x.url)}" rel="noopener">${esc(label)}</a>`
               : esc(label);
+            const relatedValues = x.relatedPeerRefs?.length
+              ? x.relatedPeerRefs
+              : (x.relatedPeerControlIds ?? []);
             const related =
-              x.relatedPeerRefs && x.relatedPeerRefs.length > 0
-                ? ` <span class="meta">related: ${esc(x.relatedPeerRefs.join(", "))}</span>`
+              relatedValues.length > 0
+                ? ` <span class="meta">related: ${esc(relatedValues.join(", "))}</span>`
                 : "";
             return `<li>${linked} <span class="meta">(${esc(x.relation)})</span>${related}</li>`;
           })

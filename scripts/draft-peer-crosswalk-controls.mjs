@@ -20,11 +20,23 @@ import {
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parse as parseYaml } from "yaml";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(here, "..");
 const DISCLAIMER =
   "Informative alignment only. Does not constitute certification, accreditation, or official endorsement.";
+
+function loadAprfPillars() {
+  const path = join(repoRoot, "packages/aprf-engine/rules/_index/pillars.yaml");
+  const doc = parseYaml(readFileSync(path, "utf8"));
+  const slugs = (doc?.pillars ?? []).map((p) => p.slug).filter(Boolean);
+  if (!slugs.length) throw new Error(`No pillar slugs found in ${path}`);
+  return new Set(slugs);
+}
+
+/** Valid APRF pillar slugs from the engine index (fail closed on unknown). */
+const APRF_PILLARS = loadAprfPillars();
 
 function parseArgs(argv) {
   const out = {
@@ -54,23 +66,28 @@ function parseArgs(argv) {
   return out;
 }
 
-function parseFrontmatter(text) {
-  if (!text.startsWith("---")) return { meta: {}, body: text };
-  const end = text.indexOf("\n---", 3);
-  if (end < 0) return { meta: {}, body: text };
-  const raw = text.slice(4, end);
+/** Line-based subset parser for playbook frontmatter that is not strict YAML. */
+function parseFrontmatterLoose(raw) {
   const meta = {};
   let listKey = null;
   let objListKey = null;
   let currentObj = null;
   for (const line of raw.split("\n")) {
     if (/^\s*-\s+section:\s*/.test(line) && objListKey) {
-      currentObj = { section: line.replace(/^\s*-\s+section:\s*/, "").replace(/^["']|["']$/g, "").trim() };
+      currentObj = {
+        section: line
+          .replace(/^\s*-\s+section:\s*/, "")
+          .replace(/^["']|["']$/g, "")
+          .trim(),
+      };
       meta[objListKey].push(currentObj);
       continue;
     }
     if (currentObj && /^\s+title:\s*/.test(line)) {
-      currentObj.title = line.replace(/^\s+title:\s*/, "").replace(/^["']|["']$/g, "").trim();
+      currentObj.title = line
+        .replace(/^\s+title:\s*/, "")
+        .replace(/^["']|["']$/g, "")
+        .trim();
       continue;
     }
     if (currentObj && /^\s+requirements:/.test(line)) {
@@ -78,16 +95,30 @@ function parseFrontmatter(text) {
       continue;
     }
     if (currentObj?.requirements && /^\s+-\s+/.test(line)) {
-      currentObj.requirements.push(line.replace(/^\s+-\s+/, "").replace(/^["']|["']$/g, "").trim());
+      currentObj.requirements.push(
+        line.replace(/^\s+-\s+/, "").replace(/^["']|["']$/g, "").trim(),
+      );
       continue;
     }
     if (/^\s*-\s+cre_id:\s*/.test(line) && objListKey === "opencre_mappings") {
-      currentObj = { cre_id: line.replace(/^\s*-\s+cre_id:\s*/, "").replace(/^["']|["']$/g, "").trim() };
+      currentObj = {
+        cre_id: line
+          .replace(/^\s*-\s+cre_id:\s*/, "")
+          .replace(/^["']|["']$/g, "")
+          .trim(),
+      };
       meta.opencre_mappings.push(currentObj);
       continue;
     }
-    if (currentObj && objListKey === "opencre_mappings" && /^\s+cre_name:\s*/.test(line)) {
-      currentObj.cre_name = line.replace(/^\s+cre_name:\s*/, "").replace(/^["']|["']$/g, "").trim();
+    if (
+      currentObj &&
+      objListKey === "opencre_mappings" &&
+      /^\s+cre_name:\s*/.test(line)
+    ) {
+      currentObj.cre_name = line
+        .replace(/^\s+cre_name:\s*/, "")
+        .replace(/^["']|["']$/g, "")
+        .trim();
       continue;
     }
     const keyMatch = line.match(/^([a-zA-Z0-9_]+):\s*(.*)$/);
@@ -113,18 +144,42 @@ function parseFrontmatter(text) {
       continue;
     }
     if (listKey && /^\s*-\s+/.test(line)) {
-      meta[listKey].push(line.replace(/^\s*-\s+/, "").replace(/^["']|["']$/g, "").trim());
+      meta[listKey].push(
+        line.replace(/^\s*-\s+/, "").replace(/^["']|["']$/g, "").trim(),
+      );
     }
+  }
+  return meta;
+}
+
+function parseFrontmatter(text) {
+  if (!text.startsWith("---")) return { meta: {}, body: text };
+  const end = text.indexOf("\n---", 3);
+  if (end < 0) return { meta: {}, body: text };
+  const raw = text.slice(4, end);
+  let meta;
+  try {
+    meta = parseYaml(raw) ?? {};
+  } catch {
+    // Playbook frontmatter is often not strict YAML (unquoted apostrophes, etc.).
+    meta = parseFrontmatterLoose(raw);
   }
   return { meta, body: text.slice(end + 4) };
 }
 
-function listMd(dir) {
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir)
+function listMd(dir, { required = false } = {}) {
+  if (!existsSync(dir)) {
+    if (required) throw new Error(`Playbook source directory not found: ${dir}`);
+    return [];
+  }
+  const files = readdirSync(dir)
     .filter((f) => f.endsWith(".md") && f.toLowerCase() !== "readme.md")
     .sort()
     .map((f) => join(dir, f));
+  if (required && files.length === 0) {
+    throw new Error(`Playbook source directory has no Markdown files: ${dir}`);
+  }
+  return files;
 }
 
 function mapRow(peerControlId, pillars, checks, relation = "partial") {
@@ -257,206 +312,70 @@ const AISVS_CHAPTER_DEFAULTS = {
 };
 
 /**
- * ASVS 5.0 chapter map (not ASVS 4). Prefer explicit Check IDs; keep at most one
- * pillar slug to limit report flood from pillar expansion.
+ * ASVS 5.0 chapter map (not ASVS 4). Check IDs only — no pillar expansion.
  */
 const ASVS_CHAPTER_DEFAULTS = {
-  V1: {
-    pillars: ["ai-security"],
-    checks: ["SEC-M1", "PRM-M1"],
-    relation: "partial",
-  },
-  V2: {
-    pillars: ["ai-security"],
-    checks: ["SEC-M1", "TOL-M2"],
-    relation: "partial",
-  },
-  V3: {
-    pillars: ["ai-security"],
-    checks: ["SEC-M3", "TOL-M2"],
-    relation: "partial",
-  },
-  V4: {
-    pillars: ["authorization"],
-    checks: ["AUTHZ-M1", "SEC-M1"],
-    relation: "aligns-with",
-  },
-  V5: {
-    pillars: ["infrastructure"],
-    checks: ["INF-M1", "DG-M3"],
-    relation: "partial",
-  },
-  V6: {
-    pillars: ["authentication"],
-    checks: ["AUTHN-M1", "AUTHN-M3", "SEC2-M1"],
-    relation: "aligns-with",
-  },
-  V7: {
-    pillars: ["authentication"],
-    checks: ["AUTHN-M1", "AUTHZ-M1"],
-    relation: "aligns-with",
-  },
-  V8: {
-    pillars: ["authorization"],
-    checks: ["AUTHZ-M1", "AUTHZ-M2"],
-    relation: "aligns-with",
-  },
-  V9: {
-    pillars: ["authentication"],
-    checks: ["AUTHN-M2", "SEC2-M1"],
-    relation: "aligns-with",
-  },
-  V10: {
-    pillars: ["authentication"],
-    checks: ["AUTHN-M1", "AUTHZ-M1"],
-    relation: "aligns-with",
-  },
-  V11: {
-    pillars: ["secrets"],
-    checks: ["SEC2-M1", "INF-M2"],
-    relation: "partial",
-  },
-  V12: {
-    pillars: ["infrastructure"],
-    checks: ["INF-M1", "INF-M2"],
-    relation: "aligns-with",
-  },
-  V13: {
-    pillars: ["infrastructure"],
-    checks: ["INF-M1", "CHG-M1"],
-    relation: "partial",
-  },
-  V14: {
-    pillars: ["data-privacy"],
-    checks: ["PRI-M1", "DG-M1"],
-    relation: "aligns-with",
-  },
-  V15: {
-    pillars: ["ai-security"],
-    checks: ["SEC-M1", "CHG-M1"],
-    relation: "partial",
-  },
-  V16: {
-    pillars: ["observability"],
-    checks: ["OBS-M1", "INC-M1"],
-    relation: "aligns-with",
-  },
-  V17: {
-    pillars: ["infrastructure"],
-    checks: ["INF-M1", "REL-M1"],
-    relation: "partial",
-  },
+  V1: { checks: ["SEC-M1", "PRM-M1"], relation: "partial" },
+  V2: { checks: ["SEC-M1", "TOL-M2"], relation: "partial" },
+  V3: { checks: ["SEC-M3", "TOL-M2"], relation: "partial" },
+  V4: { checks: ["AUTHZ-M1", "SEC-M1"], relation: "aligns-with" },
+  V5: { checks: ["INF-M1", "DG-M3"], relation: "partial" },
+  V6: { checks: ["AUTHN-M1", "AUTHN-M3", "SEC2-M1"], relation: "aligns-with" },
+  V7: { checks: ["AUTHN-M1", "AUTHZ-M1"], relation: "aligns-with" },
+  V8: { checks: ["AUTHZ-M1", "AUTHZ-M2"], relation: "aligns-with" },
+  V9: { checks: ["AUTHN-M2", "SEC2-M1"], relation: "aligns-with" },
+  V10: { checks: ["AUTHN-M1", "AUTHZ-M1"], relation: "aligns-with" },
+  V11: { checks: ["SEC2-M1", "INF-M2"], relation: "partial" },
+  V12: { checks: ["INF-M1", "INF-M2"], relation: "aligns-with" },
+  V13: { checks: ["INF-M1", "CHG-M1"], relation: "partial" },
+  V14: { checks: ["PRI-M1", "DG-M1"], relation: "aligns-with" },
+  V15: { checks: ["SEC-M1", "CHG-M1"], relation: "partial" },
+  V16: { checks: ["OBS-M1", "INC-M1"], relation: "aligns-with" },
+  V17: { checks: ["INF-M1", "REL-M1"], relation: "partial" },
 };
 
 /** LLM10 (unbounded consumption) only seeds these AISVS sections; others keep chapter affinity. */
 const LLM10_CONSUMPTION_SECTIONS = new Set(["C2.6", "C4.6"]);
 
-// Only use known APRF pillar slugs — drop placeholders that aren't in APRF.
-const APRF_PILLARS = new Set([
-  "ai-security",
-  "authentication",
-  "authorization",
-  "secrets",
-  "tool-safety",
-  "supply-chain",
-  "infrastructure",
-  "safety-responsible-ai",
-  "explainability",
-  "data-privacy",
-  "data-governance",
-  "memory-management",
-  "model-governance",
-  "prompt-engineering",
-  "context-engineering",
-  "evaluation",
-  "agent-governance",
-  "human-approval",
-  "observability",
-  "performance-slo",
-  "reliability-continuity",
-  "change-management",
-  "incident-readiness",
-  "cost-optimization",
-  "organizational-governance",
-  "compliance",
-  "platform-engineering",
-]);
-
 function filterPillars(slugs) {
-  return (slugs ?? []).filter((s) => APRF_PILLARS.has(s));
+  const out = [];
+  const unknown = [];
+  for (const s of slugs ?? []) {
+    if (APRF_PILLARS.has(s)) out.push(s);
+    else unknown.push(s);
+  }
+  if (unknown.length > 0) {
+    throw new Error(`Unknown APRF pillar slug(s): ${unknown.join(", ")}`);
+  }
+  return out;
 }
 
 function asvsDefaults(ref) {
   const chapter = ref.match(/^(V\d+)/)?.[1] ?? "V1";
   const d = ASVS_CHAPTER_DEFAULTS[chapter] ?? {
-    pillars: ["ai-security"],
     checks: ["SEC-M1"],
     relation: "partial",
   };
-  return {
-    pillars: filterPillars(d.pillars),
-    checks: d.checks ?? [],
-    relation: d.relation,
-  };
+  return { checks: d.checks ?? [], relation: d.relation };
 }
 
-/** Prefer Check IDs; one pillar max to limit report flood. */
+/** Prefer Check IDs; no pillar expansion for FIASSE. */
 const FIASSE_DEFAULTS = {
-  S1: {
-    pillars: ["organizational-governance"],
-    checks: ["ORG-M1", "CMP-M1"],
-    relation: "partial",
-  },
-  S2: {
-    pillars: ["change-management"],
-    checks: ["ORG-M1", "CHG-M1"],
-    relation: "partial",
-  },
-  S3: {
-    pillars: ["platform-engineering"],
-    checks: ["CHG-M1", "INF-M1"],
-    relation: "aligns-with",
-  },
-  S4: {
-    pillars: ["ai-security"],
-    checks: ["SEC-M1", "SCI-M1"],
-    relation: "partial",
-  },
-  S5: {
-    pillars: ["evaluation"],
-    checks: ["EVL-M1", "OBS-M1"],
-    relation: "partial",
-  },
-  S6: {
-    pillars: ["incident-readiness"],
-    checks: ["INC-M1", "OBS-M1"],
-    relation: "partial",
-  },
-  S7: {
-    pillars: ["compliance"],
-    checks: ["ORG-M1", "CMP-M1"],
-    relation: "partial",
-  },
-  S8: {
-    pillars: ["reliability-continuity"],
-    checks: ["REL-M1", "INF-M1"],
-    relation: "partial",
-  },
-  SA: {
-    pillars: ["evaluation"],
-    checks: ["EVL-M1", "OBS-M1"],
-    relation: "aligns-with",
-  },
+  S1: { checks: ["ORG-M1", "CMP-M1"], relation: "partial" },
+  S2: { checks: ["ORG-M1", "CHG-M1"], relation: "partial" },
+  S3: { checks: ["CHG-M1", "INF-M1"], relation: "aligns-with" },
+  S4: { checks: ["SEC-M1", "SCI-M1"], relation: "partial" },
+  S5: { checks: ["EVL-M1", "OBS-M1"], relation: "partial" },
+  S6: { checks: ["INC-M1", "OBS-M1"], relation: "partial" },
+  S7: { checks: ["ORG-M1", "CMP-M1"], relation: "partial" },
+  S8: { checks: ["REL-M1", "INF-M1"], relation: "partial" },
+  SA: { checks: ["EVL-M1", "OBS-M1"], relation: "aligns-with" },
 };
 
 function fiasseDefaults(ref) {
   const key = ref.startsWith("SA") ? "SA" : ref.match(/^(S\d+)/)?.[1] ?? "S1";
   const d = FIASSE_DEFAULTS[key] ?? FIASSE_DEFAULTS.S1;
-  return {
-    pillars: filterPillars(d.pillars),
-    checks: d.checks ?? [],
-    relation: d.relation,
-  };
+  return { checks: d.checks ?? [], relation: d.relation };
 }
 
 function aisvsChapterDefaults(ref) {
@@ -655,10 +574,14 @@ function buildFromPlaybook(playbookRoot) {
 
   // --- LLM → AISVS bridges ---
   const llmBridgeByNum = {};
-  for (const path of listMd(join(playbookRoot, "data/llm-top10"))) {
+  for (const path of listMd(join(playbookRoot, "data/llm-top10"), {
+    required: true,
+  })) {
     const { meta } = parseFrontmatter(readFileSync(path, "utf8"));
     const id = String(meta.owasp_llm_id || "").replace("LLM", "");
-    const sections = (meta.aisvs_mappings || []).map((m) => m.section).filter(Boolean);
+    const sections = (meta.aisvs_mappings || [])
+      .map((m) => m.section)
+      .filter(Boolean);
     if (id) llmBridgeByNum[id.padStart(2, "0")] = sections;
   }
 
@@ -684,7 +607,9 @@ function buildFromPlaybook(playbookRoot) {
   // --- AISVS ---
   const aisvsControls = [];
   const aisvsMappings = [];
-  for (const path of listMd(join(playbookRoot, "data/aisvs"))) {
+  for (const path of listMd(join(playbookRoot, "data/aisvs"), {
+    required: true,
+  })) {
     const { meta } = parseFrontmatter(readFileSync(path, "utf8"));
     const ref = meta.aisvs_chapter || path.replace(/.*\//, "").replace(/\.md$/, "");
     const title = (meta.title || ref).replace(/^C[\d.]+\s+/, "");
@@ -716,6 +641,7 @@ function buildFromPlaybook(playbookRoot) {
   const asvsMappings = [];
   for (const path of listMd(
     join(playbookRoot, "plugins/code-security-skills/data/asvs"),
+    { required: true },
   )) {
     const { meta } = parseFrontmatter(readFileSync(path, "utf8"));
     const ref = meta.asvs_chapter || path.replace(/.*\//, "").replace(/\.md$/, "");
@@ -737,6 +663,7 @@ function buildFromPlaybook(playbookRoot) {
   const fiasseMappings = [];
   for (const path of listMd(
     join(playbookRoot, "plugins/code-security-skills/data/fiasse"),
+    { required: true },
   )) {
     const { meta } = parseFrontmatter(readFileSync(path, "utf8"));
     const ref =
@@ -758,7 +685,9 @@ function buildFromPlaybook(playbookRoot) {
   // --- OpenCRE ---
   const opencreControls = [];
   const opencreMappings = [];
-  for (const path of listMd(join(playbookRoot, "data/opencre"))) {
+  for (const path of listMd(join(playbookRoot, "data/opencre"), {
+    required: true,
+  })) {
     const { meta } = parseFrontmatter(readFileSync(path, "utf8"));
     const ref = meta.cwe_id || path.replace(/.*\//, "").replace(/\.md$/, "");
     const title = (meta.title || ref).replace(/^CWE-\d+\s+/, "");
@@ -766,16 +695,17 @@ function buildFromPlaybook(playbookRoot) {
       .map((m) => m.cre_id)
       .filter(Boolean);
     const id = `opencre:${ref}`;
+    const summary = [
+      meta.summary,
+      creIds.length ? `OpenCRE: ${creIds.join(", ")}` : null,
+    ]
+      .filter(Boolean)
+      .join(" ");
     opencreControls.push({
       id,
       ref,
       title,
-      summary: [
-        meta.summary,
-        creIds.length ? `OpenCRE: ${creIds.join(", ")}` : null,
-      ]
-        .filter(Boolean)
-        .join(" "),
+      ...(summary ? { summary } : {}),
     });
     const d = OPENCRE_MAP[ref] ?? {
       pillars: ["ai-security"],
@@ -796,9 +726,22 @@ function buildFromPlaybook(playbookRoot) {
   );
 
   // --- LLM relatedPeerControlIds payload ---
+  const aisvsControlIds = new Set(aisvsControls.map((c) => c.id));
   const llmRelated = {};
+  const unknownBridges = [];
   for (const [num, sections] of Object.entries(llmBridgeByNum)) {
-    llmRelated[`owasp-llm:${num}`] = sections.map((s) => `aisvs:${s}`);
+    const ids = sections.map((s) => `aisvs:${s}`);
+    for (const id of ids) {
+      if (!aisvsControlIds.has(id)) {
+        unknownBridges.push(`owasp-llm:${num} → ${id}`);
+      }
+    }
+    llmRelated[`owasp-llm:${num}`] = ids.filter((id) => aisvsControlIds.has(id));
+  }
+  if (unknownBridges.length > 0) {
+    throw new Error(
+      `LLM→AISVS bridges reference unknown AISVS controls:\n  ${unknownBridges.join("\n  ")}`,
+    );
   }
 
   const frameworks = [
@@ -855,15 +798,11 @@ function buildFromPlaybook(playbookRoot) {
 function applyToSpec(payload) {
   const specPath = join(repoRoot, "spec/aprf-spec.json");
   const spec = JSON.parse(readFileSync(specPath, "utf8"));
-  const keepIds = new Set([
-    "nist-ai-rmf",
-    "iso-42001",
-    "owasp-llm-top-10",
-    "soc2-tsc",
-    "aws-well-architected",
-    "slsa",
-  ]);
-  const existing = (spec.crosswalks ?? []).filter((c) => keepIds.has(c.id));
+  // Drop only frameworks this run regenerates; preserve every other entry.
+  const regeneratedIds = new Set(payload.frameworks.map((f) => f.id));
+  const existing = (spec.crosswalks ?? []).filter(
+    (c) => !regeneratedIds.has(c.id),
+  );
   const llm = existing.find((c) => c.id === "owasp-llm-top-10");
   if (llm) {
     for (const control of llm.controls ?? []) {
@@ -871,7 +810,7 @@ function applyToSpec(payload) {
       if (related?.length) control.relatedPeerControlIds = related;
     }
   }
-  // Insert new frameworks after owasp-llm-top-10 for readability
+  // Insert regenerated frameworks after owasp-llm-top-10 for readability
   const out = [];
   for (const cw of existing) {
     out.push(cw);
@@ -887,6 +826,7 @@ function applyToSpec(payload) {
 
   spec.metadata = spec.metadata ?? {};
   spec.metadata.compatibility = {
+    ...(spec.metadata.compatibility ?? {}),
     crosswalks: [
       "NIST AI RMF",
       "ISO/IEC 42001",
