@@ -82,8 +82,23 @@ function main() {
 
   const crosswalks = loadCrosswalks(root);
   const ruleIds = new Set(rules.map((r) => r.id));
+  const allPeerControlIds = new Set<string>();
+  for (const cw of crosswalks) {
+    for (const c of cw.controls ?? []) allPeerControlIds.add(c.id);
+  }
   for (const cw of crosswalks) {
     const peerControlIds = new Set((cw.controls ?? []).map((c) => c.id));
+    const mappedPeerIds = new Set<string>();
+    for (const c of cw.controls ?? []) {
+      for (const relatedId of c.relatedPeerControlIds ?? []) {
+        if (!allPeerControlIds.has(relatedId)) {
+          console.error(
+            `aprf-engine build-catalog refused — crosswalk ${cw.id} control ${c.id} relatedPeerControlIds references unknown peer control ${relatedId}`,
+          );
+          process.exit(1);
+        }
+      }
+    }
     for (const m of cw.mappings ?? []) {
       // buildCrosswalkIndex skips mappings whose peer control is unknown, so an
       // unvalidated typo would silently drop crosswalks from reports.
@@ -93,6 +108,7 @@ function main() {
         );
         process.exit(1);
       }
+      mappedPeerIds.add(m.peerControlId);
       for (const id of m.aprfCheckIds ?? []) {
         if (!ruleIds.has(id)) {
           console.error(
@@ -101,6 +117,15 @@ function main() {
           process.exit(1);
         }
       }
+    }
+    // Every published peer control must have a mapping row or it never appears
+    // on Checks / REPORT.html despite shipping in the catalog.
+    const unmapped = [...peerControlIds].filter((id) => !mappedPeerIds.has(id));
+    if (unmapped.length > 0) {
+      console.error(
+        `aprf-engine build-catalog refused — crosswalk ${cw.id} has ${unmapped.length} control(s) with no mappings: ${unmapped.join(", ")}`,
+      );
+      process.exit(1);
     }
   }
 

@@ -13,6 +13,11 @@ export interface CrosswalkControlDef {
   ref: string;
   title: string;
   summary?: string;
+  /**
+   * Optional bridges to controls in other published crosswalks
+   * (e.g. OWASP LLM01 → aisvs:C2.1). Informative only.
+   */
+  relatedPeerControlIds?: string[];
 }
 
 /** Peer control ↔ APRF Checks / pillars, as published in spec/aprf-spec.json. */

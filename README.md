@@ -174,7 +174,7 @@ git add packages/aprf-engine/src/generated/catalog.ts
 | **Core** (`aprf-profile-core`) | 39 | Tier 2 / capability level 3 |
 | **Regulated** (`aprf-profile-regulated`) | 51 (Core + 12 Tier-3-only) | Tier 3 / capability level 5 |
 
-Lenses (RAG, Agents, Voice, Coding) add additional mandatory Check IDs. Gating is binary: all in-scope mandatories must **pass** or be formally **N/A** with rationale. Assessments also carry **informative** peer-framework crosswalks and threat context (including a “Top threat exposure” rollup in `REPORT.html`) — these never change the gate.
+Lenses (RAG, Agents, Voice, Coding) add additional mandatory Check IDs. Gating is binary: all in-scope mandatories must **pass** or be formally **N/A** with rationale. Assessments also carry **informative** peer-framework crosswalks (NIST AI RMF, ISO/IEC 42001, OWASP LLM Top 10 with AISVS bridges, AISVS, ASVS, OpenCRE, CSA MAESTRO, FIASSE/SSEM, SOC 2, AWS Well-Architected, SLSA) and threat context (including a “Top threat exposure” rollup in `REPORT.html`) — these never change the gate.
 
 ### Local agent assessment (APRF Auditor skill)
 

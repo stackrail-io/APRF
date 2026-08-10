@@ -148,6 +148,8 @@ type ControlOut = {
     controlTitle: string;
     relation: string;
     url?: string;
+    relatedPeerControlIds?: string[];
+    relatedPeerRefs?: string[];
   }>;
   /** Why this control exists and what it defends against — informative context. */
   threatIntel?: {
@@ -862,6 +864,12 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
         controlTitle: c.controlTitle,
         relation: c.relation,
         ...(c.url ? { url: c.url } : {}),
+        ...(c.relatedPeerControlIds?.length
+          ? { relatedPeerControlIds: c.relatedPeerControlIds }
+          : {}),
+        ...(c.relatedPeerRefs?.length
+          ? { relatedPeerRefs: c.relatedPeerRefs }
+          : {}),
       })),
       ...(threatIntel ? { threatIntel } : {}),
       gate,

@@ -30,7 +30,7 @@ The on-disk YAML loader (`src/loader.ts`) is **repo tooling only** (validate / b
 `getGeneratedCatalog()` includes:
 
 - `rules` — normative Checks  
-- `crosswalks` — peer-framework alignments from `spec/aprf-spec.json` (informative)  
+- `crosswalks` — peer-framework alignments from `spec/aprf-spec.json` (informative; includes AISVS/ASVS/OpenCRE/MAESTRO/FIASSE and optional `relatedPeerControlIds` bridges)  
 - `threatIntel` — per-Check threat context from `spec/aprf-threat-map.yaml` (informative)
 
 Helpers: `getCrosswalksForCheck(id)`, `getThreatIntelForCheck(id)`. Neither field affects evaluate/gate math.

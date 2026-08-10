@@ -217,6 +217,8 @@ type Control = {
     controlTitle?: string;
     relation: string;
     url?: string;
+    relatedPeerControlIds?: string[];
+    relatedPeerRefs?: string[];
   }>;
   remediation?: {
     fix: string;
@@ -983,6 +985,12 @@ function crosswalksForControl(c: Control): NonNullable<Control["crosswalks"]> {
     controlTitle: x.controlTitle,
     relation: x.relation,
     url: x.url,
+    ...(x.relatedPeerControlIds?.length
+      ? { relatedPeerControlIds: x.relatedPeerControlIds }
+      : {}),
+    ...(x.relatedPeerRefs?.length
+      ? { relatedPeerRefs: x.relatedPeerRefs }
+      : {}),
   }));
 }
 
@@ -1264,19 +1272,37 @@ function controlDetailBody(c: Control): string {
         .join("")}</ul>`
     : "";
   const crosswalks = crosswalksForControl(c);
-  const crosswalkBlock =
-    crosswalks.length > 0
-      ? `<p><strong>Framework crosswalk</strong> <span class="meta">— informative alignment only; not certification or proof of compliance</span></p>
-      <ul>${crosswalks
-        .map((x) => {
-          const label = `${x.framework} ${x.controlRef}${x.controlTitle ? ` — ${x.controlTitle}` : ""}`;
-          const linked = x.url
-            ? `<a href="${esc(x.url)}" rel="noopener">${esc(label)}</a>`
-            : esc(label);
-          return `<li>${linked} <span class="meta">(${esc(x.relation)})</span></li>`;
-        })
-        .join("")}</ul>`
-      : "";
+  const crosswalkBlock = (() => {
+    if (crosswalks.length === 0) return "";
+    const byFramework = new Map<string, NonNullable<Control["crosswalks"]>>();
+    for (const x of crosswalks) {
+      const key = x.frameworkId || x.framework;
+      const list = byFramework.get(key) ?? [];
+      list.push(x);
+      byFramework.set(key, list);
+    }
+    const groups = [...byFramework.entries()]
+      .map(([, items]) => {
+        const name = items[0]?.framework ?? "Peer framework";
+        const bullets = items
+          .map((x) => {
+            const label = `${x.controlRef}${x.controlTitle ? ` — ${x.controlTitle}` : ""}`;
+            const linked = x.url
+              ? `<a href="${esc(x.url)}" rel="noopener">${esc(label)}</a>`
+              : esc(label);
+            const related =
+              x.relatedPeerRefs && x.relatedPeerRefs.length > 0
+                ? ` <span class="meta">related: ${esc(x.relatedPeerRefs.join(", "))}</span>`
+                : "";
+            return `<li>${linked} <span class="meta">(${esc(x.relation)})</span>${related}</li>`;
+          })
+          .join("");
+        return `<li><strong>${esc(name)}</strong><ul>${bullets}</ul></li>`;
+      })
+      .join("");
+    return `<p><strong>Framework crosswalk</strong> <span class="meta">— informative alignment only; not certification or proof of compliance</span></p>
+      <ul>${groups}</ul>`;
+  })();
   const catalogMissing =
     !c.description &&
     !c.whyItMatters &&
