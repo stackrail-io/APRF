@@ -26,7 +26,7 @@ export interface CheckCrosswalk {
   controlRef: string;
   controlTitle: string;
   relation: CrosswalkRelation;
-  /** Peer control IDs in other frameworks this control bridges to (e.g. aisvs:C2.1). */
+  /** Peer control IDs in other frameworks this control bridges to (e.g. aisvs:v1.0-C2.1). */
   relatedPeerControlIds?: string[];
   /** Human-readable related peer refs (e.g. "AISVS C2.1") for reports. */
   relatedPeerRefs?: string[];

@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 /**
- * Draft (and optionally apply) fine-grained peer crosswalk controls from
- * OWASP secure-agent-playbook frontmatter. Does not vendor playbook corpora.
+ * Draft (and optionally apply) fine-grained peer crosswalk controls.
+ *
+ * AISVS sections are parsed from a local OWASP AISVS checkout (locked `1.0/en/`).
+ * ASVS / OpenCRE / FIASSE use ID/title/summary inventories under
+ * scripts/peer-crosswalk-inventories/ (not full peer markdown corpora).
  *
  * Usage:
- *   node scripts/draft-peer-crosswalk-controls.mjs [--playbook-root PATH] [--out FILE]
+ *   node scripts/draft-peer-crosswalk-controls.mjs [--aisvs-root PATH] [--out FILE]
  *   node scripts/draft-peer-crosswalk-controls.mjs --apply
  *
  * --apply merges new frameworks into spec/aprf-spec.json, enriches
@@ -38,9 +41,39 @@ function loadAprfPillars() {
 /** Valid APRF pillar slugs from the engine index (fail closed on unknown). */
 const APRF_PILLARS = loadAprfPillars();
 
+function aisvsEnDir(root) {
+  return join(root, "1.0", "en");
+}
+
+/** Prefer an OWASP/AISVS checkout that contains locked `1.0/en/`. */
+function resolveAisvsRoot(explicit) {
+  // Explicit --aisvs-root / AISVS_ROOT must be valid; never silently fall through.
+  if (explicit) {
+    if (existsSync(aisvsEnDir(explicit))) return explicit;
+    throw new Error(
+      `OWASP AISVS 1.0 not found at --aisvs-root / AISVS_ROOT: ${explicit} (expected ${aisvsEnDir(explicit)}).`,
+    );
+  }
+  const candidates = [
+    resolve(repoRoot, "../AISVS"),
+    resolve(repoRoot, "../../AISVS"),
+    "/tmp/AISVS",
+  ];
+  for (const root of candidates) {
+    if (existsSync(aisvsEnDir(root))) return root;
+  }
+  throw new Error(
+    [
+      "OWASP AISVS 1.0 not found (expected <root>/1.0/en).",
+      "Clone https://github.com/OWASP/AISVS and pass --aisvs-root PATH (or set AISVS_ROOT).",
+      `Tried: ${candidates.join(", ")}`,
+    ].join(" "),
+  );
+}
+
 function parseArgs(argv) {
   const out = {
-    playbookRoot: process.env.PLAYBOOK_ROOT || "",
+    aisvsRoot: process.env.AISVS_ROOT || "",
     out: "",
     apply: false,
     selfTest: false,
@@ -49,221 +82,84 @@ function parseArgs(argv) {
     const a = argv[i];
     if (a === "--apply") out.apply = true;
     else if (a === "--self-test") out.selfTest = true;
-    else if (a === "--playbook-root") out.playbookRoot = argv[++i] ?? "";
+    else if (a === "--aisvs-root") out.aisvsRoot = argv[++i] ?? "";
     else if (a === "--out") out.out = argv[++i] ?? "";
     else if (a === "--help" || a === "-h") {
       console.log(
-        `Usage: draft-peer-crosswalk-controls.mjs [--playbook-root PATH] [--out FILE] [--apply] [--self-test]`,
+        `Usage: draft-peer-crosswalk-controls.mjs [--aisvs-root PATH] [--out FILE] [--apply] [--self-test]`,
       );
       process.exit(0);
     }
   }
-  if (!out.playbookRoot) {
-    const sibling = resolve(repoRoot, "../stackrail/secure-agent-playbook");
-    const alt = resolve(repoRoot, "../../stackrail/secure-agent-playbook");
-    out.playbookRoot = existsSync(sibling)
-      ? sibling
-      : existsSync(alt)
-        ? alt
-        : sibling;
-  }
   return out;
 }
 
-/** Line-based subset parser for playbook frontmatter that is not strict YAML. */
-function parseFrontmatterLoose(raw) {
-  const meta = {};
-  let listKey = null;
-  let objListKey = null;
-  let currentObj = null;
-  for (const line of raw.split("\n")) {
-    if (/^\s*-\s+section:\s*/.test(line) && objListKey) {
-      currentObj = {
-        section: line
-          .replace(/^\s*-\s+section:\s*/, "")
-          .replace(/^["']|["']$/g, "")
-          .trim(),
-      };
-      meta[objListKey].push(currentObj);
-      continue;
-    }
-    if (currentObj && /^\s+title:\s*/.test(line)) {
-      currentObj.title = line
-        .replace(/^\s+title:\s*/, "")
-        .replace(/^["']|["']$/g, "")
-        .trim();
-      continue;
-    }
-    if (currentObj && /^\s+requirements:/.test(line)) {
-      currentObj.requirements = [];
-      continue;
-    }
-    if (currentObj?.requirements && /^\s+-\s+/.test(line)) {
-      currentObj.requirements.push(
-        line.replace(/^\s+-\s+/, "").replace(/^["']|["']$/g, "").trim(),
-      );
-      continue;
-    }
-    if (/^\s*-\s+cre_id:\s*/.test(line) && objListKey === "opencre_mappings") {
-      currentObj = {
-        cre_id: line
-          .replace(/^\s*-\s+cre_id:\s*/, "")
-          .replace(/^["']|["']$/g, "")
-          .trim(),
-      };
-      meta.opencre_mappings.push(currentObj);
-      continue;
-    }
-    if (
-      currentObj &&
-      objListKey === "opencre_mappings" &&
-      /^\s+cre_name:\s*/.test(line)
-    ) {
-      currentObj.cre_name = line
-        .replace(/^\s+cre_name:\s*/, "")
-        .replace(/^["']|["']$/g, "")
-        .trim();
-      continue;
-    }
-    const keyMatch = line.match(/^([a-zA-Z0-9_]+):\s*(.*)$/);
-    if (keyMatch) {
-      currentObj = null;
-      const key = keyMatch[1];
-      const val = keyMatch[2].trim();
-      if (val === "" || val === "|" || val === ">") {
-        if (key === "aisvs_mappings" || key === "opencre_mappings") {
-          objListKey = key;
-          listKey = null;
-          meta[key] = [];
-        } else {
-          listKey = key;
-          objListKey = null;
-          meta[key] = [];
-        }
-      } else {
-        listKey = null;
-        objListKey = null;
-        meta[key] = val.replace(/^["']|["']$/g, "");
-      }
-      continue;
-    }
-    if (listKey && /^\s*-\s+/.test(line)) {
-      meta[listKey].push(
-        line.replace(/^\s*-\s+/, "").replace(/^["']|["']$/g, "").trim(),
-      );
-    }
+function loadPeerInventory(frameworkId) {
+  const path = join(here, "peer-crosswalk-inventories", `${frameworkId}.json`);
+  if (!existsSync(path)) {
+    throw new Error(`Peer inventory not found: ${path}`);
   }
-  return meta;
-}
-
-function parseFrontmatter(text) {
-  // Playbook corpora often ship CRLF; normalize so loose/YAML parsers see LF-only lines.
-  // (JS `.` does not match `\r`, so `key: "value"\r` fails `^(key):\s*(.*)$`.)
-  text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-  if (!text.startsWith("---")) return { meta: {}, body: text };
-  const end = text.indexOf("\n---", 3);
-  if (end < 0) return { meta: {}, body: text };
-  const raw = text.slice(4, end);
-  let meta;
-  try {
-    meta = parseYaml(raw) ?? {};
-  } catch {
-    // Playbook frontmatter is often not strict YAML (unquoted apostrophes, etc.).
-    meta = parseFrontmatterLoose(raw);
+  const doc = JSON.parse(readFileSync(path, "utf8"));
+  const controls = doc?.controls;
+  if (!Array.isArray(controls) || controls.length === 0) {
+    throw new Error(`Peer inventory has no controls: ${path}`);
   }
-  return { meta, body: text.slice(end + 4) };
-}
-
-/** Prefer frontmatter title; else first ATX heading in body (AISVS section files). */
-function resolvePeerTitle(meta, body, ref, stripPrefix) {
-  let title = (meta.title || "").trim();
-  if (!title || title === ref) {
-    // Match all ATX levels (H1–H6); playbook sections sometimes use deeper headings.
-    const heading = body.match(/^#{1,6}\s+(.+)$/m);
-    if (heading) title = heading[1].trim();
-  }
-  if (!title) title = ref;
-  if (stripPrefix) {
-    const stripped = title.replace(stripPrefix, "").trim();
-    if (stripped) {
-      title = stripped;
-    } else if (title === ref) {
-      // Bare section id with no trailing label (C10.2 / V1.1 / SA.1.1): drop prefix letters.
-      const bare = title.replace(/^(?:SA\.?|S|C|V)(?=[\d.])/i, "").trim();
-      if (bare) title = bare;
-    }
-  }
-  return title;
-}
-
-/** Regression checks for title resolution (run via --self-test). */
-function selfTestResolvePeerTitle() {
-  const cases = [
-    {
-      name: "frontmatter title preferred",
-      meta: { title: "C10.2 Adversarial-Example Hardening" },
-      body: "# ignored\n",
-      ref: "C10.2",
-      strip: /^(?:C)?[\d.]+\s*/,
-      want: "Adversarial-Example Hardening",
-    },
-    {
-      name: "H4 body heading fallback",
-      meta: {},
-      body: "#### 10.2 Adversarial-Example Hardening\n\ntext\n",
-      ref: "C10.2",
-      strip: /^(?:C)?[\d.]+\s*/,
-      want: "Adversarial-Example Hardening",
-    },
-    {
-      name: "bare AISVS ref strips C prefix",
-      meta: {},
-      body: "",
-      ref: "C10.2",
-      strip: /^(?:C)?[\d.]+\s*/,
-      want: "10.2",
-    },
-    {
-      name: "bare ASVS ref strips V prefix",
-      meta: {},
-      body: "",
-      ref: "V1.1",
-      strip: /^V[\d.]+\s*/,
-      want: "1.1",
-    },
-    {
-      name: "bare FIASSE SA ref strips SA prefix",
-      meta: {},
-      body: "",
-      ref: "SA.1.1",
-      strip: /^(S|SA)[\d.]+\s*/,
-      want: "1.1",
-    },
-  ];
-  for (const c of cases) {
-    const got = resolvePeerTitle(c.meta, c.body, c.ref, c.strip);
-    if (got !== c.want) {
+  const expectedPrefix = `${frameworkId}:`;
+  const seen = new Set();
+  return controls.map((c, i) => {
+    const id = typeof c?.id === "string" ? c.id.trim() : "";
+    const ref = typeof c?.ref === "string" ? c.ref.trim() : "";
+    const title = typeof c?.title === "string" ? c.title.trim() : "";
+    const summary =
+      typeof c?.summary === "string" && c.summary.trim()
+        ? c.summary.trim()
+        : undefined;
+    if (!id || !ref || !title) {
       throw new Error(
-        `resolvePeerTitle self-test failed (${c.name}): got ${JSON.stringify(got)}, want ${JSON.stringify(c.want)}`,
+        `${path} controls[${i}] missing required id/ref/title`,
       );
     }
-  }
-  console.error(`resolvePeerTitle self-test OK (${cases.length} cases)`);
+    if (!id.startsWith(expectedPrefix) || id !== `${frameworkId}:${ref}`) {
+      throw new Error(
+        `${path} controls[${i}] id/ref mismatch: id=${JSON.stringify(id)} ref=${JSON.stringify(ref)} (expected ${frameworkId}:${ref})`,
+      );
+    }
+    if (seen.has(id)) {
+      throw new Error(`${path} duplicate control id: ${id}`);
+    }
+    seen.add(id);
+    return summary ? { id, ref, title, summary } : { id, ref, title };
+  });
 }
 
-function listMd(dir, { required = false } = {}) {
-  if (!existsSync(dir)) {
-    if (required) throw new Error(`Playbook source directory not found: ${dir}`);
-    return [];
+/** Regression checks for inventory + AISVS helpers (run via --self-test). */
+function selfTest() {
+  for (const id of ["asvs", "fiasse", "opencre"]) {
+    const controls = loadPeerInventory(id);
+    if (controls.length === 0) {
+      throw new Error(`self-test: empty inventory ${id}`);
+    }
   }
-  const files = readdirSync(dir)
-    .filter((f) => f.endsWith(".md") && f.toLowerCase() !== "readme.md")
-    .sort()
-    .map((f) => join(dir, f));
-  if (required && files.length === 0) {
-    throw new Error(`Playbook source directory has no Markdown files: ${dir}`);
+  if (aisvsPeerId("C2.1") !== "aisvs:v1.0-C2.1") {
+    throw new Error(`self-test: aisvsPeerId failed: ${aisvsPeerId("C2.1")}`);
   }
-  return files;
+  if (aisvsChapterDefaults("C10.2") !== AISVS_CHAPTER_DEFAULTS.C10) {
+    throw new Error("self-test: C10 chapter defaults mis-resolved");
+  }
+  if (aisvsChapterDefaults("C1.1") !== AISVS_CHAPTER_DEFAULTS.C1) {
+    throw new Error("self-test: C1 chapter defaults mis-resolved");
+  }
+  // Explicit bad root must fail closed (not fall through).
+  let failed = false;
+  try {
+    resolveAisvsRoot("/nonexistent-aisvs-root-for-self-test");
+  } catch {
+    failed = true;
+  }
+  if (!failed) {
+    throw new Error("self-test: resolveAisvsRoot should reject invalid explicit root");
+  }
+  console.error("draft-peer-crosswalk self-test OK");
 }
 
 function mapRow(peerControlId, pillars, checks, relation = "partial") {
@@ -373,24 +269,21 @@ const AISVS_CHAPTER_DEFAULTS = {
     checks: ["AGN-M2", "TOL-M1", "HUM-M1"],
     relation: "partial",
   },
+  // Official AISVS 1.0: C10 = MCP Security.
   C10: {
-    pillars: ["safety-responsible-ai", "model-governance", "ai-security"],
-    checks: ["SAF-M2", "MOD-M1", "SEC-M4"],
+    pillars: ["tool-safety", "authentication", "authorization", "ai-security"],
+    checks: ["TOL-M1", "TOL-M2", "AUTHN-M1", "AUTHZ-M1", "SEC-M1"],
     relation: "partial",
   },
+  // Official AISVS 1.0: C11 = Adversarial Robustness.
   C11: {
-    pillars: ["data-privacy", "data-governance"],
-    checks: ["PRI-M1", "DG-M1"],
+    pillars: ["ai-security", "safety-responsible-ai", "model-governance", "evaluation"],
+    checks: ["SEC-M3", "SEC-M4", "SAF-M1", "SAF-M2", "EVL-M1", "MOD-M1"],
     relation: "partial",
   },
   C12: {
     pillars: ["observability", "incident-readiness"],
     checks: ["OBS-M1", "INC-M1"],
-    relation: "partial",
-  },
-  C13: {
-    pillars: ["reliability-continuity", "incident-readiness", "human-approval"],
-    checks: ["REL-M1", "INC-M1", "HUM-M1"],
     relation: "partial",
   },
 };
@@ -418,8 +311,32 @@ const ASVS_CHAPTER_DEFAULTS = {
   V17: { checks: ["INF-M1", "REL-M1"], relation: "partial" },
 };
 
+/** OWASP LLM Top 10 → official AISVS 1.0 section keys (C*.*). */
+const LLM_TO_AISVS_V1 = {
+  "01": ["C2.1", "C7.3", "C9.3", "C11.1", "C11.4"],
+  "02": ["C5.2", "C7.3", "C8.1", "C12.1"],
+  "03": ["C6.1", "C6.2", "C3.1"],
+  "04": ["C1.1", "C1.3", "C3.2", "C11.1"],
+  "05": ["C7.1", "C7.2", "C7.3"],
+  "06": ["C9.1", "C9.2", "C9.3", "C9.5", "C9.6"],
+  "07": ["C2.1", "C5.1", "C7.3"],
+  "08": ["C8.1", "C8.2", "C8.3"],
+  "09": ["C7.2", "C7.4", "C11.1"],
+  "10": ["C9.1", "C12.3", "C4.1"],
+};
+
 /** LLM10 (unbounded consumption) only seeds these AISVS sections; others keep chapter affinity. */
-const LLM10_CONSUMPTION_SECTIONS = new Set(["C2.6", "C4.6"]);
+const LLM10_CONSUMPTION_SECTIONS = new Set(["C9.1"]);
+
+const AISVS_RELEASE = "v1.0";
+
+function aisvsPeerId(section) {
+  return `aisvs:${AISVS_RELEASE}-${section}`;
+}
+
+function aisvsPeerRef(section) {
+  return `${AISVS_RELEASE}-${section}`;
+}
 
 function filterPillars(slugs) {
   const out = [];
@@ -462,9 +379,48 @@ function fiasseDefaults(ref) {
   return { checks: d.checks ?? [], relation: d.relation };
 }
 
-function aisvsChapterDefaults(ref) {
-  const chapter = ref.match(/^(C\d+)/)?.[1] ?? "C2";
+function aisvsSectionKey(refOrSection) {
+  return String(refOrSection).match(/(C\d+\.\d+)/)?.[1] ?? String(refOrSection);
+}
+
+function aisvsChapterDefaults(refOrSection) {
+  const section = aisvsSectionKey(refOrSection);
+  const chapter = section.match(/^(C\d+)/)?.[1] ?? "C2";
   return AISVS_CHAPTER_DEFAULTS[chapter] ?? AISVS_CHAPTER_DEFAULTS.C2;
+}
+
+/** Parse section headings from OWASP AISVS `1.0/en/0x10-C*.md`. */
+function loadOfficialAisvsSections(aisvsRoot) {
+  const enDir = join(aisvsRoot, "1.0", "en");
+  if (!existsSync(enDir)) {
+    throw new Error(`AISVS 1.0 English tree not found: ${enDir}`);
+  }
+  const files = readdirSync(enDir)
+    .filter((f) => /^0x10-C\d+/i.test(f) && f.endsWith(".md"))
+    .sort()
+    .map((f) => join(enDir, f));
+  if (files.length === 0) {
+    throw new Error(`No AISVS chapter files (0x10-C*.md) under ${enDir}`);
+  }
+  const sections = [];
+  const seen = new Set();
+  for (const path of files) {
+    const text = readFileSync(path, "utf8");
+    const re = /^##\s+(C\d+\.\d+)\s+(.+)$/gm;
+    let m;
+    while ((m = re.exec(text))) {
+      const section = m[1];
+      if (seen.has(section)) {
+        throw new Error(`Duplicate AISVS section ${section} in ${path}`);
+      }
+      seen.add(section);
+      sections.push({ section, title: m[2].trim() });
+    }
+  }
+  if (sections.length === 0) {
+    throw new Error(`No ## C*.* section headings found under ${enDir}`);
+  }
+  return sections;
 }
 
 function mergeRelation(a, b) {
@@ -651,27 +607,12 @@ const MAESTRO_CONTROLS = [
   },
 ];
 
-function buildFromPlaybook(playbookRoot) {
-  if (!existsSync(playbookRoot)) {
-    throw new Error(`Playbook root not found: ${playbookRoot}`);
-  }
+function buildFromSources(aisvsRoot) {
+  const resolvedAisvsRoot = resolveAisvsRoot(aisvsRoot);
 
-  // --- LLM → AISVS bridges ---
-  const llmBridgeByNum = {};
-  for (const path of listMd(join(playbookRoot, "data/llm-top10"), {
-    required: true,
-  })) {
-    const { meta } = parseFrontmatter(readFileSync(path, "utf8"));
-    const id = String(meta.owasp_llm_id || "").replace("LLM", "");
-    const sections = (meta.aisvs_mappings || [])
-      .map((m) => m.section)
-      .filter(Boolean);
-    if (id) llmBridgeByNum[id.padStart(2, "0")] = sections;
-  }
-
-  // Invert LLM→AISVS for seeding (LLM10 only onto consumption-core sections).
-  const aisvsSeed = new Map(); // section -> { pillars, checks, relation }
-  for (const [num, sections] of Object.entries(llmBridgeByNum)) {
+  // Invert official LLM→AISVS for seeding (LLM10 only onto consumption-core sections).
+  const aisvsSeed = new Map(); // section (C*.*) -> { pillars, checks, relation }
+  for (const [num, sections] of Object.entries(LLM_TO_AISVS_V1)) {
     const src = LLM_TO_APRF[num];
     if (!src) continue;
     for (const section of sections) {
@@ -688,34 +629,19 @@ function buildFromPlaybook(playbookRoot) {
     }
   }
 
-  // --- AISVS ---
+  // --- AISVS (official OWASP AISVS 1.0) ---
   const aisvsControls = [];
   const aisvsMappings = [];
-  for (const path of listMd(join(playbookRoot, "data/aisvs"), {
-    required: true,
-  })) {
-    const { meta, body } = parseFrontmatter(readFileSync(path, "utf8"));
-    const ref = meta.aisvs_chapter || path.replace(/.*\//, "").replace(/\.md$/, "");
-    // Body headings are often "10.2 Adversarial-…" (no C prefix) — strip either form.
-    const title = resolvePeerTitle(
-      meta,
-      body,
-      ref,
-      /^(?:C)?[\d.]+\s*/,
-    );
-    const id = `aisvs:${ref}`;
-    aisvsControls.push({
-      id,
-      ref,
-      title,
-      ...(meta.summary ? { summary: meta.summary } : {}),
-    });
+  for (const { section, title } of loadOfficialAisvsSections(resolvedAisvsRoot)) {
+    const ref = aisvsPeerRef(section);
+    const id = aisvsPeerId(section);
+    aisvsControls.push({ id, ref, title });
     // Always keep chapter affinity; merge LLM seed on top when present.
-    const chapter = aisvsChapterDefaults(ref);
+    const chapter = aisvsChapterDefaults(section);
     const pillars = new Set(filterPillars(chapter.pillars));
     const checks = new Set(chapter.checks ?? []);
     let relation = chapter.relation;
-    const seed = aisvsSeed.get(ref);
+    const seed = aisvsSeed.get(section);
     if (seed) {
       for (const p of seed.pillars) pillars.add(p);
       for (const c of seed.checks) checks.add(c);
@@ -726,86 +652,32 @@ function buildFromPlaybook(playbookRoot) {
     );
   }
 
-  // --- ASVS ---
-  const asvsControls = [];
-  const asvsMappings = [];
-  for (const path of listMd(
-    join(playbookRoot, "plugins/code-security-skills/data/asvs"),
-    { required: true },
-  )) {
-    const { meta, body } = parseFrontmatter(readFileSync(path, "utf8"));
-    const ref = meta.asvs_chapter || path.replace(/.*\//, "").replace(/\.md$/, "");
-    const title = resolvePeerTitle(meta, body, ref, /^V[\d.]+\s*/);
-    const id = `asvs:${ref}`;
-    asvsControls.push({
-      id,
-      ref,
-      title,
-      ...(meta.summary ? { summary: meta.summary } : {}),
-    });
-    const d = asvsDefaults(ref);
+  // --- ASVS (inventory under scripts/peer-crosswalk-inventories/) ---
+  const asvsControls = loadPeerInventory("asvs");
+  const asvsMappings = asvsControls.map((c) => {
+    const d = asvsDefaults(c.ref);
     // Check IDs only — avoid pillar expansion flooding every auth/infra Check.
-    asvsMappings.push(mapRow(id, undefined, d.checks, d.relation));
-  }
+    return mapRow(c.id, undefined, d.checks, d.relation);
+  });
 
   // --- FIASSE ---
-  const fiasseControls = [];
-  const fiasseMappings = [];
-  for (const path of listMd(
-    join(playbookRoot, "plugins/code-security-skills/data/fiasse"),
-    { required: true },
-  )) {
-    const { meta, body } = parseFrontmatter(readFileSync(path, "utf8"));
-    const ref =
-      meta.fiasse_section || path.replace(/.*\//, "").replace(/\.md$/, "");
-    const title = resolvePeerTitle(meta, body, ref, /^(S|SA)[\d.]+\s*/);
-    const id = `fiasse:${ref}`;
-    const control = {
-      id,
-      ref,
-      title,
-      ...(meta.summary ? { summary: meta.summary } : {}),
-    };
-    fiasseControls.push(control);
-    const d = fiasseDefaults(ref);
+  const fiasseControls = loadPeerInventory("fiasse");
+  const fiasseMappings = fiasseControls.map((c) => {
+    const d = fiasseDefaults(c.ref);
     // Check IDs only — FIASSE sections are broad; pillar expansion over-attaches.
-    fiasseMappings.push(mapRow(id, undefined, d.checks, d.relation));
-  }
+    return mapRow(c.id, undefined, d.checks, d.relation);
+  });
 
   // --- OpenCRE ---
-  const opencreControls = [];
-  const opencreMappings = [];
-  for (const path of listMd(join(playbookRoot, "data/opencre"), {
-    required: true,
-  })) {
-    const { meta } = parseFrontmatter(readFileSync(path, "utf8"));
-    const ref = meta.cwe_id || path.replace(/.*\//, "").replace(/\.md$/, "");
-    const title = (meta.title || ref).replace(/^CWE-\d+\s+/, "");
-    const creIds = (meta.opencre_mappings || [])
-      .map((m) => m.cre_id)
-      .filter(Boolean);
-    const id = `opencre:${ref}`;
-    const summary = [
-      meta.summary,
-      creIds.length ? `OpenCRE: ${creIds.join(", ")}` : null,
-    ]
-      .filter(Boolean)
-      .join(" ");
-    opencreControls.push({
-      id,
-      ref,
-      title,
-      ...(summary ? { summary } : {}),
-    });
-    const d = OPENCRE_MAP[ref] ?? {
+  const opencreControls = loadPeerInventory("opencre");
+  const opencreMappings = opencreControls.map((c) => {
+    const d = OPENCRE_MAP[c.ref] ?? {
       pillars: ["ai-security"],
       checks: ["SEC-M1"],
       relation: "partial",
     };
-    opencreMappings.push(
-      mapRow(id, filterPillars(d.pillars), d.checks, d.relation),
-    );
-  }
+    return mapRow(c.id, filterPillars(d.pillars), d.checks, d.relation);
+  });
 
   // --- MAESTRO ---
   const maestroControls = MAESTRO_CONTROLS.map(
@@ -815,12 +687,12 @@ function buildFromPlaybook(playbookRoot) {
     mapRow(c.id, filterPillars(c.pillars), c.checks, c.relation),
   );
 
-  // --- LLM relatedPeerControlIds payload ---
+  // --- LLM relatedPeerControlIds payload (official AISVS 1.0) ---
   const aisvsControlIds = new Set(aisvsControls.map((c) => c.id));
   const llmRelated = {};
   const unknownBridges = [];
-  for (const [num, sections] of Object.entries(llmBridgeByNum)) {
-    const ids = sections.map((s) => `aisvs:${s}`);
+  for (const [num, sections] of Object.entries(LLM_TO_AISVS_V1)) {
+    const ids = sections.map((s) => aisvsPeerId(s));
     for (const id of ids) {
       if (!aisvsControlIds.has(id)) {
         unknownBridges.push(`owasp-llm:${num} → ${id}`);
@@ -838,10 +710,9 @@ function buildFromPlaybook(playbookRoot) {
     {
       id: "aisvs",
       name: "OWASP AI Application Security Verification Standard (AISVS)",
-      peerVersion:
-        "playbook section inventory (aisvs:C*.* keys; not OWASP AISVS 1.0 v1.0-C* requirement tags)",
-      url: "https://owasp.org/www-project-ai-application-security-verification-standard/",
-      disclaimer: `${DISCLAIMER} Peer control IDs are stable keys from the secure-agent-playbook AISVS section corpus; chapter numbering may differ from a specific OWASP AISVS release.`,
+      peerVersion: "1.0",
+      url: "https://github.com/OWASP/AISVS/tree/main/1.0/en",
+      disclaimer: `${DISCLAIMER} Peer control IDs cite OWASP AISVS 1.0 section tags (aisvs:v1.0-C*.*) from the locked 1.0/en tree.`,
       controls: aisvsControls,
       mappings: aisvsMappings,
     },
@@ -857,7 +728,7 @@ function buildFromPlaybook(playbookRoot) {
     {
       id: "opencre",
       name: "OpenCRE (Open Common Requirements Enumeration)",
-      peerVersion: "CWE bridge set (playbook inventory)",
+      peerVersion: "CWE bridge set",
       url: "https://www.opencre.org/",
       disclaimer: DISCLAIMER,
       controls: opencreControls,
@@ -898,7 +769,9 @@ function applyToSpec(payload) {
   if (llm) {
     for (const control of llm.controls ?? []) {
       const related = payload.llmRelated[control.id];
-      if (related?.length) control.relatedPeerControlIds = related;
+      if (related === undefined) continue;
+      if (related.length) control.relatedPeerControlIds = related;
+      else delete control.relatedPeerControlIds;
     }
   }
   // Insert regenerated frameworks after owasp-llm-top-10 for readability
@@ -957,10 +830,10 @@ function applyToSpec(payload) {
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.selfTest) {
-    selfTestResolvePeerTitle();
+    selfTest();
     return;
   }
-  const payload = buildFromPlaybook(args.playbookRoot);
+  const payload = buildFromSources(args.aisvsRoot);
   if (args.apply) {
     applyToSpec(payload);
     return;

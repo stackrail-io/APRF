@@ -279,7 +279,7 @@ assert(
   agnCrosswalks.some(
     (x) =>
       (x.frameworkId === "aisvs" || /AISVS/i.test(x.framework)) &&
-      /^C9\./.test(x.controlRef),
+      /(?:^|-)C9\./.test(x.controlRef),
   ),
   `AGN-M2 must carry AISVS C9.* crosswalks; got ${JSON.stringify(agnCrosswalks.filter((x) => /AISVS/i.test(x.framework) || x.frameworkId === "aisvs"))}`,
 );
@@ -298,9 +298,9 @@ const llm01 = secM1Crosswalks.find(
     x.controlRef === "LLM01",
 );
 assert(
-  llm01?.relatedPeerRefs?.some((r) => /AISVS C2\.1/.test(r)) ||
-    llm01?.relatedPeerControlIds?.includes("aisvs:C2.1"),
-  `SEC-M1 LLM01 must bridge to AISVS C2.1; got ${JSON.stringify(llm01)}`,
+  llm01?.relatedPeerRefs?.some((r) => /AISVS v1\.0-C2\.1/.test(r)) ||
+    llm01?.relatedPeerControlIds?.includes("aisvs:v1.0-C2.1"),
+  `SEC-M1 LLM01 must bridge to AISVS v1.0-C2.1; got ${JSON.stringify(llm01)}`,
 );
 
 // Threat intel is informative context from spec/aprf-threat-map.yaml.
@@ -525,8 +525,8 @@ const secM1Panel = html.match(
 )?.[0];
 assert(
   !!secM1Panel &&
-    /LLM01[\s\S]{0,400}related: AISVS C2\.1/.test(secM1Panel),
-  "REPORT.html SEC-M1 flyout must show LLM01 related: AISVS C2.1",
+    /LLM01[\s\S]{0,400}related: AISVS v1\.0-C2\.1/.test(secM1Panel),
+  "REPORT.html SEC-M1 flyout must show LLM01 related: AISVS v1.0-C2.1",
 );
 assert(
   html.includes("Why this control exists") &&

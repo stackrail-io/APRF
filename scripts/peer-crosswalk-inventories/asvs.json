@@ -1,0 +1,485 @@
+{
+  "frameworkId": "asvs",
+  "controls": [
+    {
+      "id": "asvs:V1.1",
+      "ref": "V1.1",
+      "title": "Encoding and Sanitization Architecture",
+      "summary": "Architectural requirements for the order and placement of encoding, escaping, and decoding operations."
+    },
+    {
+      "id": "asvs:V1.2",
+      "ref": "V1.2",
+      "title": "Injection Prevention",
+      "summary": "Output encoding and escaping requirements to prevent injection into interpreters (SQL, HTML, JS, OS, LDAP, etc.)."
+    },
+    {
+      "id": "asvs:V1.3",
+      "ref": "V1.3",
+      "title": "Sanitization",
+      "summary": "Requirements for sanitizing untrusted HTML and dynamic content when encoding is not applicable."
+    },
+    {
+      "id": "asvs:V1.4",
+      "ref": "V1.4",
+      "title": "Memory, String, and Unmanaged Code",
+      "summary": "Requirements for safe memory handling and string operations in unmanaged or low-level code."
+    },
+    {
+      "id": "asvs:V1.5",
+      "ref": "V1.5",
+      "title": "Safe Deserialization",
+      "summary": "Requirements for safely deserializing data from untrusted or external sources."
+    },
+    {
+      "id": "asvs:V10.1",
+      "ref": "V10.1",
+      "title": "Generic OAuth and OIDC Security",
+      "summary": "General security requirements applicable to all OAuth and OIDC implementations."
+    },
+    {
+      "id": "asvs:V10.2",
+      "ref": "V10.2",
+      "title": "OAuth Client",
+      "summary": "Security requirements for applications acting as an OAuth client."
+    },
+    {
+      "id": "asvs:V10.3",
+      "ref": "V10.3",
+      "title": "OAuth Resource Server",
+      "summary": "Security requirements for APIs acting as an OAuth resource server."
+    },
+    {
+      "id": "asvs:V10.4",
+      "ref": "V10.4",
+      "title": "OAuth Authorization Server",
+      "summary": "Security requirements for OAuth authorization servers that issue tokens."
+    },
+    {
+      "id": "asvs:V10.5",
+      "ref": "V10.5",
+      "title": "OIDC Client",
+      "summary": "Security requirements for applications acting as an OIDC relying party (client)."
+    },
+    {
+      "id": "asvs:V10.6",
+      "ref": "V10.6",
+      "title": "OpenID Provider",
+      "summary": "Security requirements for OpenID Providers that authenticate users and issue ID tokens."
+    },
+    {
+      "id": "asvs:V10.7",
+      "ref": "V10.7",
+      "title": "Consent Management",
+      "summary": "Requirements for managing and recording user consent in OAuth and OIDC flows."
+    },
+    {
+      "id": "asvs:V11.1",
+      "ref": "V11.1",
+      "title": "Cryptographic Inventory and Documentation",
+      "summary": "Requirements for documenting and inventorying cryptographic implementations."
+    },
+    {
+      "id": "asvs:V11.2",
+      "ref": "V11.2",
+      "title": "Secure Cryptography Implementation",
+      "summary": "Requirements for correctly implementing cryptographic operations using vetted libraries."
+    },
+    {
+      "id": "asvs:V11.3",
+      "ref": "V11.3",
+      "title": "Encryption Algorithms",
+      "summary": "Requirements for selecting and configuring approved encryption algorithms."
+    },
+    {
+      "id": "asvs:V11.4",
+      "ref": "V11.4",
+      "title": "Hashing and Hash-based Functions",
+      "summary": "Requirements for selecting approved hash functions and HMAC constructions."
+    },
+    {
+      "id": "asvs:V11.5",
+      "ref": "V11.5",
+      "title": "Random Values",
+      "summary": "Requirements for generating cryptographically secure random values."
+    },
+    {
+      "id": "asvs:V11.6",
+      "ref": "V11.6",
+      "title": "Public Key Cryptography",
+      "summary": "Requirements for using public key cryptography for signing and asymmetric encryption."
+    },
+    {
+      "id": "asvs:V11.7",
+      "ref": "V11.7",
+      "title": "In-Use Data Cryptography",
+      "summary": "Requirements for cryptographic protections applied to data while it is actively being used."
+    },
+    {
+      "id": "asvs:V12.1",
+      "ref": "V12.1",
+      "title": "General TLS Security Guidance",
+      "summary": "General requirements for TLS configuration including protocol versions, cipher suites, and certificate management."
+    },
+    {
+      "id": "asvs:V12.2",
+      "ref": "V12.2",
+      "title": "HTTPS Communication with External Facing Services",
+      "summary": "Requirements for HTTPS on externally accessible services, including publicly trusted certificates."
+    },
+    {
+      "id": "asvs:V12.3",
+      "ref": "V12.3",
+      "title": "General Service to Service Communication Security",
+      "summary": "Requirements for encrypted and authenticated communication between internal services and backends."
+    },
+    {
+      "id": "asvs:V13.1",
+      "ref": "V13.1",
+      "title": "Configuration Documentation",
+      "summary": "Requirements for documenting security-relevant configuration decisions."
+    },
+    {
+      "id": "asvs:V13.2",
+      "ref": "V13.2",
+      "title": "Backend Communication Configuration",
+      "summary": "Requirements for securely configuring the application's outbound backend connections."
+    },
+    {
+      "id": "asvs:V13.3",
+      "ref": "V13.3",
+      "title": "Secret Management",
+      "summary": "Requirements for securely storing, accessing, and rotating application secrets and credentials."
+    },
+    {
+      "id": "asvs:V13.4",
+      "ref": "V13.4",
+      "title": "Unintended Information Leakage",
+      "summary": "Requirements for preventing the application from leaking sensitive information through errors, headers, or responses."
+    },
+    {
+      "id": "asvs:V14.1",
+      "ref": "V14.1",
+      "title": "Data Protection Documentation",
+      "summary": "Requirements for identifying, classifying, and documenting protection requirements for sensitive data."
+    },
+    {
+      "id": "asvs:V14.2",
+      "ref": "V14.2",
+      "title": "General Data Protection",
+      "summary": "Requirements for protecting sensitive data from unauthorized access, leakage, and excessive exposure."
+    },
+    {
+      "id": "asvs:V14.3",
+      "ref": "V14.3",
+      "title": "Client-side Data Protection",
+      "summary": "Requirements for protecting sensitive data stored or processed on client devices and browsers."
+    },
+    {
+      "id": "asvs:V15.1",
+      "ref": "V15.1",
+      "title": "Secure Coding and Architecture Documentation",
+      "summary": "Requirements for documenting dependency risk, dangerous functionality, and remediation policies."
+    },
+    {
+      "id": "asvs:V15.2",
+      "ref": "V15.2",
+      "title": "Security Architecture and Dependencies",
+      "summary": "Requirements for dependency management, supply chain security, and architectural isolation of risky components."
+    },
+    {
+      "id": "asvs:V15.3",
+      "ref": "V15.3",
+      "title": "Defensive Coding",
+      "summary": "Requirements for defensive coding practices in security-sensitive code paths."
+    },
+    {
+      "id": "asvs:V15.4",
+      "ref": "V15.4",
+      "title": "Safe Concurrency",
+      "summary": "Requirements for safe concurrency to prevent race conditions and data corruption in multi-threaded code."
+    },
+    {
+      "id": "asvs:V16.1",
+      "ref": "V16.1",
+      "title": "Security Logging Documentation",
+      "summary": "Requirements for documenting logging decisions and defining which events must be recorded."
+    },
+    {
+      "id": "asvs:V16.2",
+      "ref": "V16.2",
+      "title": "General Logging",
+      "summary": "General requirements for what application logs should record and how."
+    },
+    {
+      "id": "asvs:V16.3",
+      "ref": "V16.3",
+      "title": "Security Events",
+      "summary": "Requirements for logging security-relevant events such as authentication, authorization failures, and sensitive actions."
+    },
+    {
+      "id": "asvs:V16.4",
+      "ref": "V16.4",
+      "title": "Log Protection",
+      "summary": "Requirements for protecting log data from tampering, injection, and unauthorized access."
+    },
+    {
+      "id": "asvs:V16.5",
+      "ref": "V16.5",
+      "title": "Error Handling",
+      "summary": "Requirements for handling errors safely without leaking sensitive information to users."
+    },
+    {
+      "id": "asvs:V17.1",
+      "ref": "V17.1",
+      "title": "TURN Server",
+      "summary": "Security requirements for TURN server deployments used in WebRTC applications."
+    },
+    {
+      "id": "asvs:V17.2",
+      "ref": "V17.2",
+      "title": "Media",
+      "summary": "Security requirements for WebRTC media servers handling real-time audio and video streams."
+    },
+    {
+      "id": "asvs:V17.3",
+      "ref": "V17.3",
+      "title": "Signaling",
+      "summary": "Security requirements for WebRTC signaling servers that coordinate peer connections."
+    },
+    {
+      "id": "asvs:V2.1",
+      "ref": "V2.1",
+      "title": "Validation and Business Logic Documentation",
+      "summary": "Requirements for documenting expected inputs and business logic rules."
+    },
+    {
+      "id": "asvs:V2.2",
+      "ref": "V2.2",
+      "title": "Input Validation",
+      "summary": "Requirements for validating input data at application boundaries."
+    },
+    {
+      "id": "asvs:V2.3",
+      "ref": "V2.3",
+      "title": "Business Logic Security",
+      "summary": "Requirements for securing business workflows against manipulation, skipping steps, or race conditions."
+    },
+    {
+      "id": "asvs:V2.4",
+      "ref": "V2.4",
+      "title": "Anti-automation",
+      "summary": "Requirements for protecting against automated abuse, scraping, and excessive requests."
+    },
+    {
+      "id": "asvs:V3.1",
+      "ref": "V3.1",
+      "title": "Web Frontend Security Documentation",
+      "summary": "Requirements for documenting frontend security decisions and browser security configurations."
+    },
+    {
+      "id": "asvs:V3.2",
+      "ref": "V3.2",
+      "title": "Unintended Content Interpretation",
+      "summary": "Requirements to prevent browsers from misinterpreting response content types."
+    },
+    {
+      "id": "asvs:V3.3",
+      "ref": "V3.3",
+      "title": "Cookie Setup",
+      "summary": "Requirements for securely configuring cookie attributes."
+    },
+    {
+      "id": "asvs:V3.4",
+      "ref": "V3.4",
+      "title": "Browser Security Mechanism Headers",
+      "summary": "Requirements for HTTP security headers that instruct browsers to enforce security policies."
+    },
+    {
+      "id": "asvs:V3.5",
+      "ref": "V3.5",
+      "title": "Browser Origin Separation",
+      "summary": "Requirements for enforcing origin boundaries and preventing cross-origin attacks in browsers."
+    },
+    {
+      "id": "asvs:V3.6",
+      "ref": "V3.6",
+      "title": "External Resource Integrity",
+      "summary": "Requirements for verifying the integrity of externally loaded resources."
+    },
+    {
+      "id": "asvs:V3.7",
+      "ref": "V3.7",
+      "title": "Other Browser Security Considerations",
+      "summary": "Miscellaneous browser security requirements not covered by other V3 sections."
+    },
+    {
+      "id": "asvs:V4.1",
+      "ref": "V4.1",
+      "title": "Generic Web Service Security",
+      "summary": "General security requirements applicable to all HTTP-based web services."
+    },
+    {
+      "id": "asvs:V4.2",
+      "ref": "V4.2",
+      "title": "HTTP Message Structure Validation",
+      "summary": "Requirements for validating the structure and fields of HTTP messages."
+    },
+    {
+      "id": "asvs:V4.3",
+      "ref": "V4.3",
+      "title": "GraphQL",
+      "summary": "Security requirements specific to GraphQL APIs."
+    },
+    {
+      "id": "asvs:V4.4",
+      "ref": "V4.4",
+      "title": "WebSocket",
+      "summary": "Security requirements for WebSocket connections and message handling."
+    },
+    {
+      "id": "asvs:V5.1",
+      "ref": "V5.1",
+      "title": "File Handling Documentation",
+      "summary": "Requirements for documenting file handling expectations and security decisions."
+    },
+    {
+      "id": "asvs:V5.2",
+      "ref": "V5.2",
+      "title": "File Upload and Content",
+      "summary": "Requirements for securely accepting and validating user-uploaded files."
+    },
+    {
+      "id": "asvs:V5.3",
+      "ref": "V5.3",
+      "title": "File Storage",
+      "summary": "Requirements for securely storing files and preventing path traversal or server-side execution."
+    },
+    {
+      "id": "asvs:V5.4",
+      "ref": "V5.4",
+      "title": "File Download",
+      "summary": "Requirements for securely serving files to users for download."
+    },
+    {
+      "id": "asvs:V6.1",
+      "ref": "V6.1",
+      "title": "Authentication Documentation",
+      "summary": "Requirements for documenting authentication decisions and mechanisms."
+    },
+    {
+      "id": "asvs:V6.2",
+      "ref": "V6.2",
+      "title": "Password Security",
+      "summary": "Requirements for securely handling user passwords, including storage, policies, and breach detection."
+    },
+    {
+      "id": "asvs:V6.3",
+      "ref": "V6.3",
+      "title": "General Authentication Security",
+      "summary": "General security requirements for all authentication mechanisms."
+    },
+    {
+      "id": "asvs:V6.4",
+      "ref": "V6.4",
+      "title": "Authentication Factor Lifecycle and Recovery",
+      "summary": "Requirements for managing authentication factor enrollment, recovery, and revocation."
+    },
+    {
+      "id": "asvs:V6.5",
+      "ref": "V6.5",
+      "title": "General Multi-factor Authentication Requirements",
+      "summary": "General requirements for implementing multi-factor authentication."
+    },
+    {
+      "id": "asvs:V6.6",
+      "ref": "V6.6",
+      "title": "Out-of-Band Authentication Mechanisms",
+      "summary": "Requirements for authentication mechanisms that use a separate out-of-band channel."
+    },
+    {
+      "id": "asvs:V6.7",
+      "ref": "V6.7",
+      "title": "Cryptographic Authentication Mechanism",
+      "summary": "Requirements for cryptographic authentication mechanisms such as WebAuthn, passkeys, and client certificates."
+    },
+    {
+      "id": "asvs:V6.8",
+      "ref": "V6.8",
+      "title": "Authentication with an Identity Provider",
+      "summary": "Requirements for authenticating users via an external identity provider using federated protocols."
+    },
+    {
+      "id": "asvs:V7.1",
+      "ref": "V7.1",
+      "title": "Session Management Documentation",
+      "summary": "Requirements for documenting session management decisions."
+    },
+    {
+      "id": "asvs:V7.2",
+      "ref": "V7.2",
+      "title": "Fundamental Session Management Security",
+      "summary": "Foundational requirements for creating and issuing secure session tokens."
+    },
+    {
+      "id": "asvs:V7.3",
+      "ref": "V7.3",
+      "title": "Session Timeout",
+      "summary": "Requirements for limiting session duration and implementing idle or absolute timeouts."
+    },
+    {
+      "id": "asvs:V7.4",
+      "ref": "V7.4",
+      "title": "Session Termination",
+      "summary": "Requirements for securely terminating sessions on logout or credential change."
+    },
+    {
+      "id": "asvs:V7.5",
+      "ref": "V7.5",
+      "title": "Defenses Against Session Abuse",
+      "summary": "Requirements for detecting and preventing session theft, fixation, and hijacking."
+    },
+    {
+      "id": "asvs:V7.6",
+      "ref": "V7.6",
+      "title": "Federated Re-authentication",
+      "summary": "Requirements for session management in federated identity and SSO scenarios."
+    },
+    {
+      "id": "asvs:V8.1",
+      "ref": "V8.1",
+      "title": "Authorization Documentation",
+      "summary": "Requirements for documenting authorization rules and decision factors."
+    },
+    {
+      "id": "asvs:V8.2",
+      "ref": "V8.2",
+      "title": "General Authorization Design",
+      "summary": "Requirements for function-level, data-level, and field-level access control enforcement."
+    },
+    {
+      "id": "asvs:V8.3",
+      "ref": "V8.3",
+      "title": "Operation Level Authorization",
+      "summary": "Requirements for enforcing authorization at the correct service tier and handling permission changes promptly."
+    },
+    {
+      "id": "asvs:V8.4",
+      "ref": "V8.4",
+      "title": "Other Authorization Considerations",
+      "summary": "Additional authorization requirements for multi-tenant systems and administrative interfaces."
+    },
+    {
+      "id": "asvs:V9.1",
+      "ref": "V9.1",
+      "title": "Token Source and Integrity",
+      "summary": "Requirements for verifying the source, signature, and integrity of self-contained tokens."
+    },
+    {
+      "id": "asvs:V9.2",
+      "ref": "V9.2",
+      "title": "Token Content",
+      "summary": "Requirements for the content, claims, and lifetime of self-contained tokens."
+    }
+  ]
+}

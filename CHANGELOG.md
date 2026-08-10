@@ -8,14 +8,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Added
-- Fine-grained informative peer crosswalks in `spec/aprf-spec.json`: **AISVS** (89), **ASVS 5.0** (80), **OpenCRE** (13 CWE bridges), **CSA MAESTRO** (7 layers + 5 extended threats), **FIASSE/SSEM** (61); OWASP LLM Top 10 controls gain `relatedPeerControlIds` AISVS bridges ([APRF-RFC-0010](rfcs/0010-peer-crosswalks-aisvs-asvs-opencre-maestro-fiasse.md)).
-- `scripts/draft-peer-crosswalk-controls.mjs` — draft/apply peer `controls[]` + LLM→AISVS bridges from a local secure-agent-playbook checkout (does not vendor corpora).
+- Fine-grained informative peer crosswalks in `spec/aprf-spec.json`: **OWASP AISVS 1.0** (`aisvs:v1.0-C*.*`), **ASVS 5.0** (80), **OpenCRE** (13 CWE bridges), **CSA MAESTRO** (7 layers + 5 extended threats), **FIASSE/SSEM** (61); OWASP LLM Top 10 controls gain `relatedPeerControlIds` AISVS bridges ([APRF-RFC-0010](rfcs/0010-peer-crosswalks-aisvs-asvs-opencre-maestro-fiasse.md)).
+- `scripts/draft-peer-crosswalk-controls.mjs` — draft/apply peer `controls[]` + LLM→AISVS bridges from a local OWASP AISVS 1.0 checkout (`--aisvs-root`) and compact ASVS/OpenCRE/FIASSE inventories under `scripts/peer-crosswalk-inventories/`.
 - Detector↔plugin bridge: complete `plugin.detectorIds` for orphan Check detectors; generate `detector-plugin-map.json`; `aprf:detector-bridge` in local `validate` and `.github/workflows/ci.yml` (every Check detector except `manual-attest` must be claimed; join maps must match plugin YAML).
 - Real hybrid collectors for former import-only stubs: `langsmith`, `phoenix`, `wandb`, `helicone`, `prometheus`, `grafana`, `cloudwatch` (repo config/IaC scan + `imports/<id>/`); shared factory `collectors/lib/repo-import-collector.ts`.
 
 ### Changed
 - Catalog build validates `relatedPeerControlIds` and refuses peer controls with no `mappings[]` row; assessment/HTML surface related-peer refs; `REPORT.html` groups Framework crosswalk lists by framework.
-- Peer-map quality: ASVS 5.0 chapter affinities (not ASVS 4), AISVS LLM seeds merge with chapter defaults (LLM10 consumption seed limited to C2.6/C4.6), ASVS/FIASSE prefer Check IDs over pillar expansion.
+- Peer-map quality: ASVS 5.0 chapter affinities (not ASVS 4), AISVS sourced from official OWASP AISVS 1.0 (C10=MCP / C11=Adversarial Robustness), LLM→AISVS bridges remapped to v1.0 sections (LLM10 consumption seed limited to C9.1), ASVS/FIASSE prefer Check IDs over pillar expansion.
 - Docs sync: README / ARCHITECTURE / CONTRIBUTING and package READMEs now describe the shipped CLI assessment path, threat-map + crosswalks (informative), and corrected Regulated profile count (51).
 - CI / `npm run validate` run `aprf:check-spec-sync` (`aprf:sync-rfcs` + `aprf:sync-stats`, fail on `spec/aprf-spec.json` drift) alongside `aprf:threat-map`.
 - Promoted **INF-R3** from manual to **hybrid** with collector `ai-iac-cis-policy` (production-AI IaC + CIS-aligned policy checks on apply/PR; inventory-gated PASS; measuredAt ≤90d; N/A via `productionAiInfrastructurePresent=false`); synced `aprf-spec.json`.
