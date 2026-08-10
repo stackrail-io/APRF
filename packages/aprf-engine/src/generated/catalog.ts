@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:5c88f981036ad7d136021b19fb63f714666ee442b2d76a4a335df8bde2f4b5c0",
+  "generatedAt": "sha256:b2972192f65fe99d2a2991a9a7782db8bdd3b9a6743577018f295b33f4005c9f",
   "ruleCount": 178,
   "domains": [
     {
@@ -15115,9 +15115,9 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "aisvs",
       "name": "OWASP AI Application Security Verification Standard (AISVS)",
-      "peerVersion": "section-level (playbook inventory)",
+      "peerVersion": "playbook section inventory (aisvs:C*.* keys; not OWASP AISVS 1.0 v1.0-C* requirement tags)",
       "url": "https://owasp.org/www-project-ai-application-security-verification-standard/",
-      "disclaimer": "Informative alignment only. Does not constitute certification, accreditation, or official endorsement.",
+      "disclaimer": "Informative alignment only. Does not constitute certification, accreditation, or official endorsement. Peer control IDs are stable keys from the secure-agent-playbook AISVS section corpus; chapter numbering may differ from a specific OWASP AISVS release.",
       "controls": [
         {
           "id": "aisvs:C1.1",

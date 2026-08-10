@@ -1571,9 +1571,9 @@
     {
       "id": "aisvs",
       "name": "OWASP AI Application Security Verification Standard (AISVS)",
-      "peerVersion": "section-level (playbook inventory)",
+      "peerVersion": "playbook section inventory (aisvs:C*.* keys; not OWASP AISVS 1.0 v1.0-C* requirement tags)",
       "url": "https://owasp.org/www-project-ai-application-security-verification-standard/",
-      "disclaimer": "Informative alignment only. Does not constitute certification, accreditation, or official endorsement.",
+      "disclaimer": "Informative alignment only. Does not constitute certification, accreditation, or official endorsement. Peer control IDs are stable keys from the secure-agent-playbook AISVS section corpus; chapter numbering may differ from a specific OWASP AISVS release.",
       "controls": [
         {
           "id": "aisvs:C1.1",

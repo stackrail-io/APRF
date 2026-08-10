@@ -43,14 +43,18 @@ function parseArgs(argv) {
     playbookRoot: process.env.PLAYBOOK_ROOT || "",
     out: "",
     apply: false,
+    selfTest: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--apply") out.apply = true;
+    else if (a === "--self-test") out.selfTest = true;
     else if (a === "--playbook-root") out.playbookRoot = argv[++i] ?? "";
     else if (a === "--out") out.out = argv[++i] ?? "";
     else if (a === "--help" || a === "-h") {
-      console.log(`Usage: draft-peer-crosswalk-controls.mjs [--playbook-root PATH] [--out FILE] [--apply]`);
+      console.log(
+        `Usage: draft-peer-crosswalk-controls.mjs [--playbook-root PATH] [--out FILE] [--apply] [--self-test]`,
+      );
       process.exit(0);
     }
   }
@@ -174,12 +178,77 @@ function parseFrontmatter(text) {
 function resolvePeerTitle(meta, body, ref, stripPrefix) {
   let title = (meta.title || "").trim();
   if (!title || title === ref) {
-    const heading = body.match(/^#{1,3}\s+(.+)$/m);
+    // Match all ATX levels (H1–H6); playbook sections sometimes use deeper headings.
+    const heading = body.match(/^#{1,6}\s+(.+)$/m);
     if (heading) title = heading[1].trim();
   }
   if (!title) title = ref;
-  if (stripPrefix) title = title.replace(stripPrefix, "").trim() || title;
+  if (stripPrefix) {
+    const stripped = title.replace(stripPrefix, "").trim();
+    if (stripped) {
+      title = stripped;
+    } else if (title === ref) {
+      // Bare section id with no trailing label (C10.2 / V1.1 / SA.1.1): drop prefix letters.
+      const bare = title.replace(/^(?:SA\.?|S|C|V)(?=[\d.])/i, "").trim();
+      if (bare) title = bare;
+    }
+  }
   return title;
+}
+
+/** Regression checks for title resolution (run via --self-test). */
+function selfTestResolvePeerTitle() {
+  const cases = [
+    {
+      name: "frontmatter title preferred",
+      meta: { title: "C10.2 Adversarial-Example Hardening" },
+      body: "# ignored\n",
+      ref: "C10.2",
+      strip: /^(?:C)?[\d.]+\s*/,
+      want: "Adversarial-Example Hardening",
+    },
+    {
+      name: "H4 body heading fallback",
+      meta: {},
+      body: "#### 10.2 Adversarial-Example Hardening\n\ntext\n",
+      ref: "C10.2",
+      strip: /^(?:C)?[\d.]+\s*/,
+      want: "Adversarial-Example Hardening",
+    },
+    {
+      name: "bare AISVS ref strips C prefix",
+      meta: {},
+      body: "",
+      ref: "C10.2",
+      strip: /^(?:C)?[\d.]+\s*/,
+      want: "10.2",
+    },
+    {
+      name: "bare ASVS ref strips V prefix",
+      meta: {},
+      body: "",
+      ref: "V1.1",
+      strip: /^V[\d.]+\s*/,
+      want: "1.1",
+    },
+    {
+      name: "bare FIASSE SA ref strips SA prefix",
+      meta: {},
+      body: "",
+      ref: "SA.1.1",
+      strip: /^(S|SA)[\d.]+\s*/,
+      want: "1.1",
+    },
+  ];
+  for (const c of cases) {
+    const got = resolvePeerTitle(c.meta, c.body, c.ref, c.strip);
+    if (got !== c.want) {
+      throw new Error(
+        `resolvePeerTitle self-test failed (${c.name}): got ${JSON.stringify(got)}, want ${JSON.stringify(c.want)}`,
+      );
+    }
+  }
+  console.error(`resolvePeerTitle self-test OK (${cases.length} cases)`);
 }
 
 function listMd(dir, { required = false } = {}) {
@@ -632,7 +701,7 @@ function buildFromPlaybook(playbookRoot) {
       meta,
       body,
       ref,
-      /^(?:C)?[\d.]+\s+/,
+      /^(?:C)?[\d.]+\s*/,
     );
     const id = `aisvs:${ref}`;
     aisvsControls.push({
@@ -666,7 +735,7 @@ function buildFromPlaybook(playbookRoot) {
   )) {
     const { meta, body } = parseFrontmatter(readFileSync(path, "utf8"));
     const ref = meta.asvs_chapter || path.replace(/.*\//, "").replace(/\.md$/, "");
-    const title = resolvePeerTitle(meta, body, ref, /^V[\d.]+\s+/);
+    const title = resolvePeerTitle(meta, body, ref, /^V[\d.]+\s*/);
     const id = `asvs:${ref}`;
     asvsControls.push({
       id,
@@ -689,7 +758,7 @@ function buildFromPlaybook(playbookRoot) {
     const { meta, body } = parseFrontmatter(readFileSync(path, "utf8"));
     const ref =
       meta.fiasse_section || path.replace(/.*\//, "").replace(/\.md$/, "");
-    const title = resolvePeerTitle(meta, body, ref, /^(S|SA)[\d.]+\s+/);
+    const title = resolvePeerTitle(meta, body, ref, /^(S|SA)[\d.]+\s*/);
     const id = `fiasse:${ref}`;
     const control = {
       id,
@@ -769,9 +838,10 @@ function buildFromPlaybook(playbookRoot) {
     {
       id: "aisvs",
       name: "OWASP AI Application Security Verification Standard (AISVS)",
-      peerVersion: "section-level (playbook inventory)",
+      peerVersion:
+        "playbook section inventory (aisvs:C*.* keys; not OWASP AISVS 1.0 v1.0-C* requirement tags)",
       url: "https://owasp.org/www-project-ai-application-security-verification-standard/",
-      disclaimer: DISCLAIMER,
+      disclaimer: `${DISCLAIMER} Peer control IDs are stable keys from the secure-agent-playbook AISVS section corpus; chapter numbering may differ from a specific OWASP AISVS release.`,
       controls: aisvsControls,
       mappings: aisvsMappings,
     },
@@ -886,6 +956,10 @@ function applyToSpec(payload) {
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (args.selfTest) {
+    selfTestResolvePeerTitle();
+    return;
+  }
   const payload = buildFromPlaybook(args.playbookRoot);
   if (args.apply) {
     applyToSpec(payload);
