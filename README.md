@@ -1,9 +1,6 @@
 <p align="center">
   <a href="https://github.com/stackrail-io/APRF">
-    <picture>
-      <source srcset="docs/banner.svg" type="image/svg+xml"/>
-      <img src="docs/banner.png" alt="APRF — AI Production Readiness Framework" width="900"/>
-    </picture>
+    <img src="docs/banner.png" alt="APRF — AI Production Readiness Framework" width="900"/>
   </a>
 </p>
 
