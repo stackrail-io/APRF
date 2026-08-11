@@ -1,11 +1,29 @@
-# AI Production Readiness Framework (APRF)
+<p align="center">
+  <a href="https://github.com/stackrail-io/APRF">
+    <picture>
+      <source srcset="docs/banner.svg" type="image/svg+xml"/>
+      <img src="docs/banner.png" alt="APRF — AI Production Readiness Framework" width="900"/>
+    </picture>
+  </a>
+</p>
 
-**Status:** working-draft **v0.11.0**  
-**Publisher:** [StackRail](https://stackrail.io) (working-draft publisher)  
-**Site:** [https://stackrail.io/aprf/](https://stackrail.io/aprf/)  
-**Question:** Can this AI application safely operate in production?
+<h1 align="center">AI Production Readiness Framework (APRF)</h1>
+
+<p align="center">
+  <strong>Can this AI application safely operate in production?</strong>
+</p>
+
+<p align="center">
+  <a href="https://github.com/stackrail-io/APRF/actions/workflows/ci.yml"><img src="https://github.com/stackrail-io/APRF/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"/></a>
+  <a href="https://www.npmjs.com/package/@stackrail-io/aprf"><img src="https://img.shields.io/npm/v/@stackrail-io/aprf?label=aprf&color=0ea5e9" alt="npm"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-22c55e" alt="License"/></a>
+  <a href="https://stackrail.io/aprf/"><img src="https://img.shields.io/badge/status-working%20draft%20v0.11.0-64748b" alt="Working draft v0.11.0"/></a>
+  <a href="https://stackrail.io"><img src="https://img.shields.io/badge/publisher-StackRail-14b8a6" alt="Publisher StackRail"/></a>
+</p>
 
 APRF is a vendor-neutral working draft for engineering readiness of AI systems. It uses **gated pass/fail** mandatory checks — not a vanity readiness percentage. Self-assessment is **not** third-party certification.
+
+**Site:** [https://stackrail.io/aprf/](https://stackrail.io/aprf/)
 
 ## Architecture
 
