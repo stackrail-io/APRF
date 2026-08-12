@@ -582,8 +582,21 @@ function measuredAtFresh(
   const t = Date.parse(measuredAt.trim());
   if (Number.isNaN(t)) return false;
   const ageMs = now.getTime() - t;
-  if (ageMs < 0) return true;
+  // Tolerate clock skew, but never accept an arbitrarily future-dated report.
+  const MAX_SKEW_MS = 24 * 60 * 60 * 1000;
+  if (ageMs < 0) return -ageMs <= MAX_SKEW_MS;
   return ageMs <= maxAgeDays * 24 * 60 * 60 * 1000;
+}
+
+function reportMeasuredAt(
+  doc: Record<string, unknown>,
+  summary: Record<string, unknown> | null,
+  imported: Record<string, unknown> | null,
+): string | null {
+  if (typeof imported?.measuredAt === "string") return imported.measuredAt;
+  if (typeof summary?.measuredAt === "string") return summary.measuredAt;
+  if (typeof doc.measuredAt === "string") return doc.measuredAt;
+  return null;
 }
 
 /**
@@ -606,26 +619,26 @@ function reportHasMeasuredImport(
       doc.summary && typeof doc.summary === "object" && !Array.isArray(doc.summary)
         ? (doc.summary as Record<string, unknown>)
         : null;
-    const summaryTier = parseEvidenceTier(summary?.achievedTier);
-    if (summaryTier && (summaryTier === "E4" || summaryTier === "E5")) {
-      return true;
-    }
-    if (summary?.measuredEvidence === true) return true;
-
     const imported =
       doc.importedResults &&
       typeof doc.importedResults === "object" &&
       !Array.isArray(doc.importedResults)
         ? (doc.importedResults as Record<string, unknown>)
         : null;
-    if (imported?.found === true) {
-      const at =
-        typeof imported.measuredAt === "string"
-          ? imported.measuredAt
-          : typeof doc.measuredAt === "string"
-            ? doc.measuredAt
-            : null;
-      if (measuredAtFresh(at)) return true;
+    const declaredAt = reportMeasuredAt(doc, summary, imported);
+    const summaryTier = parseEvidenceTier(summary?.achievedTier);
+    if (
+      (summaryTier === "E4" || summaryTier === "E5") &&
+      measuredAtFresh(declaredAt)
+    ) {
+      return true;
+    }
+    if (summary?.measuredEvidence === true && measuredAtFresh(declaredAt)) {
+      return true;
+    }
+
+    if (imported?.found === true && measuredAtFresh(declaredAt)) {
+      return true;
     }
     // Coverage JSON style: top-level measuredAt with PASS-unlock fields present.
     if (
@@ -639,6 +652,49 @@ function reportHasMeasuredImport(
   } catch {
     return false;
   }
+}
+
+/** Provenance-backed evidence type IDs from import JSON + graph signals. */
+function observedEvidenceTypesFor(
+  outDir: string,
+  reportRef: string | undefined,
+  related: EvidenceNode[],
+): string[] {
+  const ids = new Set<string>();
+  for (const n of related) {
+    for (const s of n.signals ?? []) {
+      if (typeof s === "string" && /^[a-z][a-z0-9_]*$/.test(s)) ids.add(s);
+    }
+  }
+  if (!reportRef?.startsWith("imports/")) return [...ids];
+  const path = join(outDir, reportRef);
+  if (!existsSync(path)) return [...ids];
+  try {
+    const doc = JSON.parse(readFileSync(path, "utf8")) as Record<
+      string,
+      unknown
+    >;
+    const buckets: unknown[] = [
+      doc.evidenceTypes,
+      doc.matchedEvidence,
+      doc.summary &&
+      typeof doc.summary === "object" &&
+      !Array.isArray(doc.summary)
+        ? (doc.summary as Record<string, unknown>).evidenceTypes
+        : null,
+    ];
+    for (const bucket of buckets) {
+      if (!Array.isArray(bucket)) continue;
+      for (const raw of bucket) {
+        if (typeof raw === "string" && /^[a-z][a-z0-9_]*$/.test(raw)) {
+          ids.add(raw);
+        }
+      }
+    }
+  } catch {
+    /* ignore unreadable reports */
+  }
+  return [...ids];
 }
 
 function pluginEmitsTierFor(pluginId: string | undefined): EvidenceTier | null {
@@ -864,12 +920,16 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       outDir,
       mapped?.reportRef,
     );
-    const repoSignalsPresent =
+    const rawRepoSignals =
       related.some((n) => n.ref && n.ref !== "not-demonstrated") ||
       hint === "partial" ||
       hint === "fail" ||
       hint === "pass" ||
       Boolean(mapped?.reportRef?.startsWith("imports/"));
+    const repoSignalsPresent =
+      hint !== "not_demonstrated" &&
+      hint !== "not_applicable" &&
+      rawRepoSignals;
     const achievedTier = classifyAchievedTier({
       evidenceClasses: related.map((n) => n.class),
       measuredImportPresent,
@@ -878,10 +938,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
         hint !== "not_demonstrated" &&
         related.length > 0 &&
         related.every((n) => n.class === "user"),
-      repoSignalsPresent:
-        hint !== "not_demonstrated" &&
-        hint !== "not_applicable" &&
-        repoSignalsPresent,
+      repoSignalsPresent,
       pluginEmitsTier: pluginEmitsTierFor(mapped?.pluginId),
     });
     // Below-floor evidence cannot PASS (APRF-RFC-0011).
@@ -895,12 +952,13 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     const matchedTypes = matchedEvidenceTypes({
       evidenceClasses: related.map((n) => n.class),
       acceptable,
-      measuredImportPresent,
+      observedEvidenceTypes: observedEvidenceTypesFor(
+        outDir,
+        mapped?.reportRef,
+        related,
+      ),
       independentVerification,
-      repoSignalsPresent:
-        hint !== "not_demonstrated" &&
-        hint !== "not_applicable" &&
-        repoSignalsPresent,
+      repoSignalsPresent,
     });
     const evidenceTier: ControlEvidenceTier = {
       minimum: minimumTier,

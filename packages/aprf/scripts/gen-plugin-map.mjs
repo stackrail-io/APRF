@@ -65,6 +65,12 @@ for (const name of readdirSync(pluginsDir).sort()) {
     typeof doc.emitsEvidenceTier === "string"
       ? doc.emitsEvidenceTier.trim().toUpperCase()
       : "";
+  if (rawTier && !TIERS.has(rawTier)) {
+    console.error(
+      `FAIL: ${pluginId} declares invalid emitsEvidenceTier="${doc.emitsEvidenceTier}" (expected one of ${[...TIERS].join(", ")})`,
+    );
+    process.exit(1);
+  }
   if (TIERS.has(rawTier)) {
     pluginTierMap[pluginId] = rawTier;
   } else if (

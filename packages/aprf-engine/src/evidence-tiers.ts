@@ -68,14 +68,9 @@ export const CLASS_TO_EVIDENCE_TYPES: Record<string, readonly string[]> = {
   policy: ["cis_policy_scan", "network_policy"],
   "runtime-config": ["runtime_network_config"],
   ci: ["cis_policy_scan", "repo_signal"],
-  runtime: [
-    "reachability_probe",
-    "cspm_scan",
-    "policy_scan_report",
-    "patching_sla_report",
-    "connectivity_deny_probe",
-    "accelerator_isolation_test",
-  ],
+  // Broad "runtime" class alone does not identify a specific evidence type —
+  // pass observedEvidenceTypes from the import/plugin instead.
+  runtime: [],
 };
 
 /** Default minimumTier when Check omits evidencePolicy.minimumTier. */
@@ -207,12 +202,14 @@ export function verificationFor(opts: {
 
 /**
  * Observed evidence type IDs, optionally intersected with acceptableEvidence.
- * Never invents IDs that were not implied by classes / measured / independent flags.
+ * Never invents IDs that were not implied by classes / observed types / flags.
+ * A bare measuredImportPresent flag does not claim every runtime type ID.
  */
 export function matchedEvidenceTypes(opts: {
   evidenceClasses: EvidenceClassLike[];
   acceptable: string[];
-  measuredImportPresent?: boolean;
+  /** Explicit type IDs from import/plugin/signals (provenance required). */
+  observedEvidenceTypes?: string[];
   independentVerification?: boolean;
   repoSignalsPresent?: boolean;
 }): string[] {
@@ -220,16 +217,14 @@ export function matchedEvidenceTypes(opts: {
   if (opts.independentVerification) {
     candidates.add("independent_assessment");
   }
-  if (opts.measuredImportPresent) {
-    for (const t of CLASS_TO_EVIDENCE_TYPES.runtime ?? []) {
-      candidates.add(t);
-    }
+  for (const id of opts.observedEvidenceTypes ?? []) {
+    if (typeof id === "string" && id.trim()) candidates.add(id.trim());
   }
   for (const cls of opts.evidenceClasses) {
     const types = CLASS_TO_EVIDENCE_TYPES[cls];
-    if (types) {
+    if (types?.length) {
       for (const t of types) candidates.add(t);
-    } else if (cls) {
+    } else if (cls && cls !== "runtime") {
       candidates.add("repo_signal");
     }
   }

@@ -124,7 +124,7 @@ Reporting: each control may show crosswalks + threat chips/MITRE links; the exec
 
 Two orthogonal axes:
 
-**1. Evidence Assurance Tiers (normative — APRF-RFC-0011)** — how strongly evidence proves the control. Checks declare `evidencePolicy.minimumTier`; assessment records `achieved` vs `minimum` and `verification` (`NONE` \| `UNVERIFIED` \| `VERIFIED` \| `NOT_APPLICABLE`). **PASS requires `achievedTier >= minimumTier`** and existing passCondition/collector metrics. Below-floor evidence stays `PARTIAL` with `verification: UNVERIFIED` (not a sixth control status). Defaults when omitted: manual→E1, hybrid→E3, automated→E4.
+**1. Evidence Assurance Tiers (normative — APRF-RFC-0011)** — how strongly evidence proves the control. Checks declare `evidencePolicy.minimumTier`; assessment records `achieved` vs `minimum` and `verification` (`NONE` \| `UNVERIFIED` \| `VERIFIED` \| `NOT_APPLICABLE`). **PASS requires `achievedTier >= minimumTier`** and existing passCondition/collector metrics. Below-floor evidence stays `PARTIAL` with `verification: UNVERIFIED` (not a sixth control status). Defaults when omitted: manual→E1, none→E1, hybrid→E3, automated→E4.
 
 | Tier | Meaning |
 | --- | --- |

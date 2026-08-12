@@ -153,7 +153,7 @@ function enrichControlsFromCatalog(
       rule.detection?.capability as DetectionCapability | undefined,
     );
     const acceptable = rule.evidencePolicy?.acceptableEvidence ?? [];
-    const evidenceTier: NonNullable<Control["evidenceTier"]> = c.evidenceTier
+    const evidenceTier: Control["evidenceTier"] = c.evidenceTier
       ? {
           ...c.evidenceTier,
           minimum: c.evidenceTier.minimum ?? minimum,
@@ -162,13 +162,7 @@ function enrichControlsFromCatalog(
               c.evidenceTier.acceptable
             : [...acceptable],
         }
-      : {
-          minimum,
-          achieved: "E0",
-          acceptable: [...acceptable],
-          matched: [],
-          verification: "NONE",
-        };
+      : undefined;
     return {
       ...c,
       title: rule.title || c.title,
@@ -179,7 +173,7 @@ function enrichControlsFromCatalog(
       whyItMatters: rule.whyItMatters ?? c.whyItMatters,
       passCondition: rule.passCondition ?? c.passCondition,
       evidenceRequired: rule.evidenceRequired ?? c.evidenceRequired,
-      evidenceTier,
+      ...(evidenceTier ? { evidenceTier } : {}),
       recommendedFixes,
       manualVerification: rule.manualVerification ?? c.manualVerification,
       falsePositiveGuidance:

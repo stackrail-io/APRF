@@ -59,11 +59,12 @@ Raises honesty of production-readiness claims by preventing repo-only evidence f
 
 ## Open questions
 
-- When should CI fail on unknown `acceptableEvidence` IDs vs warn during registry growth?
+_(none)_
 
 ## Resolved
 
 - `aprf-spec.json` check rows **do** project `minimumTier` (resolved from YAML `evidencePolicy` or capability defaults) via `npm run aprf:sync-evidence-tiers`; integrity fails on drift.
+- CI **fails** on unknown `acceptableEvidence` IDs (`lintEvidencePolicy` + YAML validation); add new IDs to `spec/evidence-types.yaml` then regenerate catalog.
 
 ## Checklist
 

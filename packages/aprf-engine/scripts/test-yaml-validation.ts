@@ -395,6 +395,14 @@ assertIncludes(
 assertIncludes(
   lintEvidencePolicy({
     ...baseRule,
+    evidencePolicy: { minimumTtier: "E5" },
+  }),
+  "evidencePolicy.minimumTtier is not supported",
+  "typo evidencePolicy keys rejected",
+);
+assertIncludes(
+  lintEvidencePolicy({
+    ...baseRule,
     evidencePolicy: { acceptableEvidence: ["not_a_real_type"] },
   }),
   'unknown id "not_a_real_type"',

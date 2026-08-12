@@ -641,8 +641,7 @@ assert(
 );
 assert(
   html.includes("UNVERIFIED (below floor)") &&
-    html.includes("Evidence:") &&
-    html.includes("Required:"),
+    html.includes("Evidence: E2 · Required: E3 · UNVERIFIED"),
   "REPORT.html must surface Evidence Assurance Tiers (achieved / required / UNVERIFIED)",
 );
 // Executive summary order: verification callout → Evidence coverage → Top threat exposure.

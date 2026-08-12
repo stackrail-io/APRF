@@ -136,12 +136,31 @@ assert.deepEqual(
   [],
   "must not invent iac_module or repo_signal when class only implies IaC types outside acceptable",
 );
-assert.ok(
+assert.deepEqual(
+  matchedEvidenceTypes({
+    evidenceClasses: ["runtime"],
+    acceptable: ["reachability_probe", "network_policy"],
+  }),
+  [],
+  "bare runtime class must not claim every runtime evidence type",
+);
+assert.deepEqual(
   matchedEvidenceTypes({
     evidenceClasses: [],
     acceptable: ["reachability_probe", "network_policy"],
-    measuredImportPresent: true,
-  }).includes("reachability_probe"),
+    observedEvidenceTypes: ["reachability_probe"],
+  }),
+  ["reachability_probe"],
+  "imported type with provenance matches acceptable",
+);
+assert.deepEqual(
+  matchedEvidenceTypes({
+    evidenceClasses: [],
+    acceptable: ["reachability_probe", "network_policy"],
+    observedEvidenceTypes: ["patching_sla_report"],
+  }),
+  [],
+  "unrelated imported type must not match acceptable",
 );
 
 console.log("aprf-engine evidence-tiers tests OK");

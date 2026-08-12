@@ -273,6 +273,12 @@ export function lintEvidencePolicy(raw: unknown): string[] {
     return errors;
   }
   const pol = raw.evidencePolicy;
+  const allowed = new Set(["minimumTier", "acceptableEvidence"]);
+  for (const key of Object.keys(pol)) {
+    if (!allowed.has(key)) {
+      errors.push(`evidencePolicy.${key} is not supported`);
+    }
+  }
   if (pol.minimumTier != null) {
     if (
       typeof pol.minimumTier !== "string" ||

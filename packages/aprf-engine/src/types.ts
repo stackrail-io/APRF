@@ -198,8 +198,8 @@ export interface AprfCheckProjection {
   artifact: string;
   passCondition: string;
   method: "automated" | "manual" | "hybrid";
-  /** Evidence Assurance floor (APRF-RFC-0011). */
-  minimumTier: EvidenceTier;
+  /** Evidence Assurance floor (APRF-RFC-0011); omit for capability default. */
+  minimumTier?: EvidenceTier;
   requiredFromLevel: CapabilityLevel;
   minCriticality: CriticalityTier;
   deprecated?: boolean;
