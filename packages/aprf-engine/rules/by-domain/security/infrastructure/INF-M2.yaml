@@ -29,6 +29,13 @@ evidenceRequired:
   - "Inventory of production AI runtime environments (containers, VMs, serverless, managed AI platforms, or equivalent)"
   - "Vulnerability scan and/or image/runtime age report covering that inventory (measuredAt ≤90 days)"
   - "CVE/patch backlog disposition + waiver register for any SLA exceptions (owner and expiry)"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - patching_sla_report
+    - infrastructure_logs
+    - cloud_audit_logs
+    - repo_signal
 detection:
   capability: "hybrid"
   detectors:

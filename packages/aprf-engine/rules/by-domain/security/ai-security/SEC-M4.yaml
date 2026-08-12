@@ -26,6 +26,16 @@ evidenceRequired:
   - "Architecture diagram of model/tool trust boundaries"
   - "Network policy or egress allowlist export for the model/tool runtime identity"
   - "Automated or reviewed probe results (allowlisted-only reachability; unrestricted internal admin/data-store routes = 0)"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - network_policy
+    - cloud_egress_policy
+    - cloud_configuration
+    - runtime_network_config
+    - reachability_probe
+    - network_flow_logs
+    - cloud_audit_logs
 detection:
   capability: "hybrid"
   detectors:

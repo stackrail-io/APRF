@@ -3,6 +3,7 @@ title: Model-path egress / trust boundary (SEC-M4)
 version: "0.2.0"
 executor: collectors/model-path-egress-boundary.ts
 evidenceClass: iac
+emitsEvidenceTier: E3
 alsoEmits: []
 detectorIds: [repo-model-path-egress-boundary]
 inputs:

@@ -5,7 +5,11 @@
 import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { parse as parseYaml } from "yaml";
 import { getGeneratedCatalog } from "../packages/aprf-engine/src/catalog.ts";
+import { resolveMinimumTier } from "../packages/aprf-engine/src/evidence-tiers.ts";
+import { KNOWN_EVIDENCE_TYPE_IDS } from "../packages/aprf-engine/src/generated/evidence-type-ids.ts";
+import type { EvidenceTier } from "../packages/aprf-engine/src/types.ts";
 import {
   PROFILE_CORE,
   PROFILE_REGULATED,
@@ -30,16 +34,30 @@ function assert(cond: unknown, msg: string): asserts cond {
 
 const catalog = getGeneratedCatalog();
 const catalogIds = new Set(catalog.rules.map((r) => r.id));
+const catalogById = new Map(catalog.rules.map((r) => [r.id, r]));
 assert(catalog.ruleCount === catalog.rules.length, "ruleCount mismatch");
 assert(catalogIds.size === catalog.rules.length, "duplicate catalog IDs");
+
+const evidenceTypesDoc = parseYaml(
+  readFileSync(join(root, "spec", "evidence-types.yaml"), "utf8"),
+) as { types?: Array<{ id?: string }> };
+const yamlEvidenceTypeIds = (evidenceTypesDoc.types ?? [])
+  .map((t) => t.id)
+  .filter((id): id is string => typeof id === "string" && id.length > 0)
+  .sort();
+assert(
+  JSON.stringify([...KNOWN_EVIDENCE_TYPE_IDS].sort()) ===
+    JSON.stringify(yamlEvidenceTypeIds),
+  `generated evidence-type-ids drifted from spec/evidence-types.yaml — run npm run aprf:catalog\n  generated=${[...KNOWN_EVIDENCE_TYPE_IDS].join(", ")}\n  yaml=${yamlEvidenceTypeIds.join(", ")}`,
+);
 
 const spec = JSON.parse(
   readFileSync(join(root, "spec", "aprf-spec.json"), "utf8"),
 ) as {
   governance?: { version?: string };
   pillars?: Array<{
-    mandatoryChecks?: Array<{ id: string }>;
-    recommendedChecks?: Array<{ id: string }>;
+    mandatoryChecks?: Array<{ id: string; minimumTier?: EvidenceTier }>;
+    recommendedChecks?: Array<{ id: string; minimumTier?: EvidenceTier }>;
   }>;
   profiles?: Array<{ id: string; mandatoryCheckIds?: string[] }>;
   lenses?: Array<{ id: string; additionalMandatoryCheckIds?: string[] }>;
@@ -142,6 +160,29 @@ assert(spec.stats, "spec.stats missing — run npm run aprf:sync-stats");
 assert(
   JSON.stringify(spec.stats) === JSON.stringify(expectedStats),
   `spec.stats drift — run npm run aprf:sync-stats\n  recorded=${JSON.stringify(spec.stats)}\n  expected=${JSON.stringify(expectedStats)}`,
+);
+
+const tierDrift: string[] = [];
+for (const pillar of spec.pillars ?? []) {
+  for (const list of [pillar.mandatoryChecks, pillar.recommendedChecks]) {
+    for (const check of list ?? []) {
+      const rule = catalogById.get(check.id);
+      if (!rule) continue;
+      const expected = resolveMinimumTier(
+        rule.evidencePolicy,
+        rule.detection.capability,
+      );
+      if (check.minimumTier !== expected) {
+        tierDrift.push(
+          `${check.id}: spec=${check.minimumTier ?? "(missing)"} catalog=${expected}`,
+        );
+      }
+    }
+  }
+}
+assert(
+  tierDrift.length === 0,
+  `spec Check minimumTier drift — run npm run aprf:sync-evidence-tiers\n  ${tierDrift.slice(0, 20).join("\n  ")}${tierDrift.length > 20 ? `\n  …+${tierDrift.length - 20} more` : ""}`,
 );
 
 console.log(

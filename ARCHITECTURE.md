@@ -73,7 +73,7 @@ OWASP/WA-style standards win with a **shallow public surface**. Requirements rem
 
 Machine-evaluable or attest-able expectations.
 
-**Shipped today (v0.11 YAML / `rule.schema.json`):** `id`, `title`, `description`, `whyItMatters`, `severity`, `weight`, `gate` (`mandatory` | `recommended`), `passCondition`, `evidenceRequired[]`, `detection`, `manualVerification`, `falsePositiveGuidance`, `recommendedFixes`, `references[]`, `relatedRules[]`, `tags[]`, `applicability` (`minCriticality`, `requiredFromLevel`, optional technologies/profiles/lenses / `appliesTo` / `notApplicableTo`), `status`, optional deprecation fields.
+**Shipped today (v0.11 YAML / `rule.schema.json`):** `id`, `title`, `description`, `whyItMatters`, `severity`, `weight`, `gate` (`mandatory` | `recommended`), `passCondition`, `evidenceRequired[]`, optional `evidencePolicy` (`minimumTier` E0–E5, `acceptableEvidence[]` type IDs — [APRF-RFC-0011](rfcs/0011-evidence-assurance-tiers.md)), `detection`, `manualVerification`, `falsePositiveGuidance`, `recommendedFixes`, `references[]`, `relatedRules[]`, `tags[]`, `applicability` (`minCriticality`, `requiredFromLevel`, optional technologies/profiles/lenses / `appliesTo` / `notApplicableTo`), `status`, optional deprecation fields.
 
 **Additive catalog metadata (not Check YAML fields — do not affect gate/score):** peer-framework **crosswalks** (from `spec/aprf-spec.json`) and per-Check **threat intel** (from `spec/aprf-threat-map.yaml`) are embedded into the generated catalog and surfaced on assessment controls / `REPORT.html`.
 
@@ -83,7 +83,7 @@ Machine-evaluable or attest-able expectations.
 - `gateClass` (alias of today’s `gate`)
 - `maturityFloor` / `minCriticality` (already partially shipped as `applicability.*`)
 - `successCriteria` / `failureCriteria` (today: `passCondition`)
-- `requiredEvidenceTypes[]` (IDs from a future Evidence Type Registry)
+- `requiredEvidenceTypes[]` (full Evidence Type Registry schemas — starter IDs already via `evidencePolicy.acceptableEvidence` + `spec/evidence-types.yaml`)
 - `satisfactionPolicy`: `anyOf` (default) | `allOf` | `attestationOnly`
 - Optional `requirementId` (documentation label)
 
@@ -122,6 +122,21 @@ Reporting: each control may show crosswalks + threat chips/MITRE links; the exec
 
 ### Evidence (operational)
 
+Two orthogonal axes:
+
+**1. Evidence Assurance Tiers (normative — APRF-RFC-0011)** — how strongly evidence proves the control. Checks declare `evidencePolicy.minimumTier`; assessment records `achieved` vs `minimum` and `verification` (`NONE` \| `UNVERIFIED` \| `VERIFIED` \| `NOT_APPLICABLE`). **PASS requires `achievedTier >= minimumTier`** and existing passCondition/collector metrics. Below-floor evidence stays `PARTIAL` with `verification: UNVERIFIED` (not a sixth control status). Defaults when omitted: manual→E1, none→E1, hybrid→E3, automated→E4.
+
+| Tier | Meaning |
+| --- | --- |
+| E0 | No evidence |
+| E1 | Self-attestation |
+| E2 | Repository evidence |
+| E3 | Configuration evidence |
+| E4 | Runtime evidence |
+| E5 | Independent verification |
+
+**2. Retention tiers (operational packaging)** — how long raw evidence is kept:
+
 | Tier | Retention | Immutable? |
 | --- | --- | --- |
 | `ephemeral` | TTL (product-defined) | Content-addressed while held |
@@ -130,9 +145,11 @@ Reporting: each control may show crosswalks + threat chips/MITRE links; the exec
 
 PII/residency handled by products; the standard requires digests in the Conformance Pack, not raw clouds of traces.
 
-### Evidence Type Registry (planned)
+### Evidence Type Registry (starter + planned)
 
-**Not shipped in this repository yet.** Future normative home for versioned evidence *kind* IDs + JSON schemas (e.g. `git.repo_snapshot`, `k8s.manifest`, `otel.trace_summary`, `prompt.bundle`) — analogous to OpenTelemetry semantic conventions. Until that lands, Checks use free-form `evidenceRequired[]` strings. New platforms should prefer new evidence types (once registered) over new Checks when principles already exist.
+**Starter shipped:** [`spec/evidence-types.yaml`](spec/evidence-types.yaml) — vocabulary IDs for `evidencePolicy.acceptableEvidence` (e.g. `network_policy`, `cloud_configuration`, `cloud_audit_logs`, `reachability_probe`). Free-form `evidenceRequired[]` prose remains required on every Check.
+
+**Full registry (planned):** versioned evidence *kind* IDs + JSON schemas (e.g. `git.repo_snapshot`, `k8s.manifest`, `otel.trace_summary`, `prompt.bundle`) — analogous to OpenTelemetry semantic conventions. New platforms should prefer new evidence types (once registered) over new Checks when principles already exist.
 
 ---
 

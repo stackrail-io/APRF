@@ -386,6 +386,18 @@
       "slug": "0010-peer-crosswalks-aisvs-asvs-opencre-maestro-fiasse",
       "href": "/aprf/rfc/0010-peer-crosswalks-aisvs-asvs-opencre-maestro-fiasse/",
       "markdownPath": "/aprf/rfc/0010-peer-crosswalks-aisvs-asvs-opencre-maestro-fiasse.md"
+    },
+    {
+      "id": "APRF-RFC-0011",
+      "number": 11,
+      "title": "Evidence Assurance Tiers (E0–E5)",
+      "status": "in-review",
+      "created": "2026-08-11",
+      "semverImpact": "MINOR",
+      "summary": "Adds normative Evidence Assurance Tiers (E0–E5) and Check `evidencePolicy.minimumTier` so PASS requires evidence at or above a declared floor; UNVERIFIED is a verification outcome on PARTIAL, not a sixth control status.",
+      "slug": "0011-evidence-assurance-tiers",
+      "href": "/aprf/rfc/0011-evidence-assurance-tiers/",
+      "markdownPath": "/aprf/rfc/0011-evidence-assurance-tiers.md"
     }
   ],
   "scope": {
@@ -5601,6 +5613,7 @@
           "artifact": "Server-side policy mediating privileged tool/actions (not prompt-only) + Versioned injection/privilege-escalation corpus + CI gate report + Policy-engine deny sample logs or harness results (denyRatePct + modelTextPrivilegeGrants)",
           "passCondition": "≥95% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the suite (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -5610,6 +5623,7 @@
           "artifact": "Coverage inventory of high-risk side-effect paths (write/irreversible/financial) + Schema or policy filter definitions applied before those side effects + Contract test results showing non-conforming output rejected on 100% of inventoried paths",
           "passCondition": "100% of high-risk side-effect paths (impact tier write/irreversible/financial) reject non-conforming model output in contract tests; coverage inventory lists every such path (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -5619,6 +5633,7 @@
           "artifact": "Abuse/jailbreak/injection suite definition covering those case classes + CI/release gate configuration that blocks promote on suite fail + Last 30 days of release reports showing gate=pass, or owned waivers (expiry ≤30 days)",
           "passCondition": "100% of production releases in the last 30 days show an abuse/jailbreak/injection suite gate = pass (suite must include those case classes), or a time-boxed waiver with owner and expiry ≤30 days (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -5628,6 +5643,7 @@
           "artifact": "Architecture diagram of model/tool trust boundaries + Network policy or egress allowlist export for the model/tool runtime identity + Automated or reviewed probe results (allowlisted-only reachability; unrestricted internal admin/data-store routes = 0)",
           "passCondition": "Automated or reviewed probe shows the model/tool runtime can reach only allowlisted destinations; 0 unrestricted routes to internal admin APIs or data stores from the model identity (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -5639,6 +5655,7 @@
           "artifact": "Versioned red-team suite covering multi-turn and indirect RAG/MCP injection + Case counts (≥10 multi-turn, ≥10 indirect RAG/MCP) with documented pass thresholds + Latest scored run report ≤90 days with retention ≥90 days",
           "passCondition": "Suite includes ≥10 multi-turn and ≥10 indirect RAG/MCP injection cases; latest run ≤90 days meets documented pass thresholds; report retained ≥90 days (measuredAt ≤90 days). If the system has no multi-turn, RAG, or MCP surfaces, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -5648,6 +5665,7 @@
           "artifact": "Multimodal input content-safety and/or malware scanner config (pre-model-ingest) + Inventory of image/file types accepted in production + Latest CI or batch scan report ≤90 days showing type coverage and 0 unscanned production paths",
           "passCondition": "Where multimodal inputs are accepted, scanner runs before model ingest; last report ≤90 days shows coverage of image/file types in use and 0 unscanned production paths (measuredAt ≤90 days). If multimodal inputs are not accepted, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -5657,6 +5675,7 @@
           "artifact": "Documented exfiltration-detection mechanism for sensitive AI contexts (mechanism class named) + Coverage of production-sensitive AI paths (inventory or mapping) + Latest validation ≤90 days (detection test, alert-rule exercise, or equivalent) with expected alerts / 0 silent misses",
           "passCondition": "Sensitive AI contexts have a documented exfiltration-detection mechanism (canary/honeytoken, DLP, SIEM/UEBA, egress monitoring, or equivalent); latest validation ≤90 days shows expected detection/alerts for covered paths with 0 silent misses in the validation suite or review (measuredAt ≤90 days). If no sensitive AI contexts exist, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -5730,6 +5749,7 @@
           "artifact": "Production AI HTTP/RPC route catalog + unauthenticated auth-probe report (401/403) matching the catalog",
           "passCondition": "100% of declared production AI HTTP/RPC routes in the probe inventory return 401/403 without credentials; every declared AI route in the production route catalog was probed (measuredAt ≤90 days). If no customer-facing AI HTTP/RPC APIs exist, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -5739,6 +5759,7 @@
           "artifact": "Production MCP/AI S2S connection inventory + auth config (secrets redacted) + scored report",
           "passCondition": "0 production MCP or AI S2S connections accept anonymous access or shared long-lived static keys; each connection has a named machine identity (measuredAt ≤90 days). NOT_APPLICABLE if no production MCP or AI S2S connections.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -5748,6 +5769,7 @@
           "artifact": "IdP MFA policy export for AI control-plane admin roles + break-glass inventory with monitoring",
           "passCondition": "100% of AI control-plane admin roles enforce MFA; break-glass accounts ≤ documented maximum and have monitoring enabled (measuredAt ≤90 days). NOT_APPLICABLE if no AI control-plane admin access.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -5757,6 +5779,7 @@
           "artifact": "Identity-propagation design + sample traces showing end-user/service subject on privileged tool/agent/workflow calls",
           "passCondition": "100% of sampled privileged tool/agent/workflow calls in the latest review carry an end-user (or documented service) subject; 0 anonymous privileged hops (measuredAt ≤90 days). NOT_APPLICABLE if no tools, agents, workflows, or delegated actions.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -5768,6 +5791,7 @@
           "artifact": "Agent/tool credential inventory with TTL/exceptions + secret-scan of prompts/config (0 long-lived static API keys)",
           "passCondition": "100% of inventoried agent/tool credentials have TTL ≤1h (or a named exception with owner and expiry ≤30 days); secret scan of production prompts/config finds 0 long-lived static API keys (measuredAt ≤90 days). NOT_APPLICABLE if no agent/tool credentials in production prompts/config.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -5777,6 +5801,7 @@
           "artifact": "Self-hosted model runtime inventory + workload-identity bindings + sample authenticated call traces (0 static shared keys)",
           "passCondition": "Every self-hosted model runtime in production authenticates via workload identity (SPIFFE/IAM role/equivalent); 0 static shared keys in the runtime inventory; sample authenticated calls (or harness) present (measuredAt ≤90 days). NOT_APPLICABLE if no self-hosted model runtimes.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -5842,6 +5867,7 @@
           "artifact": "Inventory of privileged AI feature/tool/retrieval entry points + server-side authz policy + authz suite (authenticated-but-unauthorized denied)",
           "passCondition": "100% of privileged AI feature, tool, and retrieval entry points enforce authorization server-side; 0 successful requests from authenticated callers lacking required permission or scope in the authz suite (measuredAt ≤90 days). NOT_APPLICABLE if no privileged AI feature, tool, or retrieval entry points.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -5851,6 +5877,7 @@
           "artifact": "Inventory of multi-tenant AI data/memory paths + cross-tenant attack suite (≥10 cases) + scored report",
           "passCondition": "0 successful unauthorized cross-tenant reads/writes across ≥10 automated attack cases on AI data and memory paths (measuredAt ≤90 days). NOT_APPLICABLE if no multi-tenant AI data or memory paths.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -5860,6 +5887,7 @@
           "artifact": "Inventory of production agent/automation identities + role matrix/IAM export + ≤90-day access-review record",
           "passCondition": "100% of production agent/automation identities appear in the role matrix with non-admin default roles; quarterly (or ≤90-day) access review recorded with 0 unexplained privilege escalations (measuredAt ≤90 days). NOT_APPLICABLE if no production agent or automation identities.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -5869,6 +5897,7 @@
           "artifact": "Sensitive document-class inventory + ABAC/policy config + deny-test results matching production",
           "passCondition": "Sensitive document classes are enumerated; attribute-based policy (subject/resource attributes) denies unauthorized class access in tests; inventory matches production classes (measuredAt ≤90 days). NOT_APPLICABLE if no sensitive document classes are in scope for AI retrieval or grounding.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -5880,6 +5909,7 @@
           "artifact": "Policy-as-code for tool/model access + CI/admission policy-check + ≤90-day deny evidence",
           "passCondition": "Tool and model access rules are expressed as code and enforced in CI or admission; last failing-to-passing policy change ≤90 days shows a deny for unauthorized tool/model (measuredAt ≤90 days). NOT_APPLICABLE if no production tools or models subject to access control.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -5889,6 +5919,7 @@
           "artifact": "High-privilege agent inventory + ≤90-day access-review report with keep/revoke/modify + revoke or none-warranted evidence",
           "passCondition": "Every high-privilege agent identity was reviewed ≤90 days ago; ≥1 revoke or scope-reduction appears in the last two cycles (or attestation that none were warranted with reviewer sign-off) (measuredAt ≤90 days). NOT_APPLICABLE if no high-privilege agent identities.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -5954,6 +5985,7 @@
           "artifact": "Secrets-manager / sealed-secrets / cloud secret-ref wiring for production runtime; CI/repo secret-scan config covering prompts and fixtures; Latest secret-scan report with 0 privileged findings (measuredAt ≤90 days); Attest or inventory showing 100% of production runtime secrets resolve from the secrets manager",
           "passCondition": "Secrets-manager wiring covers production runtime secrets; 100% of those secrets resolve from the secrets manager; the latest secret scan covering repos, prompt registries, and client bundles finds 0 privileged production secrets (measuredAt ≤90 days). If no production runtime secrets exist, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 2,
           "minCriticality": 1
         },
@@ -5963,6 +5995,7 @@
           "artifact": "Redaction/masking config for logging and/or tracing pipelines; Synthetic secret-injection canary harness covering API key/bearer/AWS-key patterns; Canary results showing 100% detection/redaction in persisted logs/traces (measuredAt ≤90 days)",
           "passCondition": "Logging/tracing secret-redaction config is present; a canary harness injects synthetic API key/bearer/AWS-key patterns and shows 100% redaction in persisted logs/traces (measuredAt ≤90 days). If no production logging or tracing pipelines exist, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -5972,6 +6005,7 @@
           "artifact": "Inventory of production provider/cloud keys with least-privilege scope; Rotation dates or provider-managed short-lived credential evidence within policy; Client bundle/scan report showing 0 privileged provider/cloud keys (measuredAt ≤90 days)",
           "passCondition": "Inventory of production provider/cloud keys exists; 0 privileged provider/cloud keys are embedded in client apps; 100% of production keys have a documented least-privilege scope and are within rotation policy (≤90 days or provider-managed short-lived credentials) (measuredAt ≤90 days). If no production provider/cloud keys exist, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -5983,6 +6017,7 @@
           "artifact": "Pre-commit secret-scan hook/config covering prompts and fixtures; CI secret-scan workflow covering prompts and fixtures; Proof scanning blocks on high-confidence secrets; Latest green main-branch or PR-merge secret-scan evidence (measuredAt ≤7 days)",
           "passCondition": "Pre-commit and CI secret scanning are configured; both cover application code, prompts, and fixtures; scanning blocks on high-confidence secrets; the latest green main-branch scan (or last PR-merge scan evidence) is ≤7 days (measuredAt ≤7 days). If no application code, prompts, or fixtures exist, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -5992,6 +6027,7 @@
           "artifact": "Egress allowlist/policy config for runtimes that hold credentials; Documented allowed destinations for those credentials; Sample deny (and optionally allow) logs proving enforcement (measuredAt ≤90 days)",
           "passCondition": "Egress allowlist/policy is configured for production runtimes that hold credentials; destinations are documented; ≥1 deny event is observed in test or production logs proving enforcement (measuredAt ≤90 days). If no production runtimes hold credentials, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -6001,6 +6037,7 @@
           "artifact": "Dataset secret/PII scan gate config before fine-tune or eval corpus publish; Proof publish is blocked when critical findings are open; Linked scan reports covering 100% of fine-tune/eval corpora published in the last 90 days (measuredAt ≤90 days)",
           "passCondition": "A secret/PII scan gate is configured before fine-tune or eval corpus publish; publish is blocked when critical findings are open; 100% of fine-tune/eval corpora published in the last 90 days have a linked scan report (measuredAt ≤90 days). If no fine-tune or eval corpus publish exists, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -6066,6 +6103,7 @@
           "artifact": "Inventory or mapping of production tool-invocation paths (or attested gateway covering 100%); Tool gateway / tool-runtime authz enforcement config (server-side)",
           "passCondition": "100% of production tool-invocation paths are covered by server-side tool authz (gateway or runtime); automated tests show tool calls without a valid authz decision are denied at 100%; model-proposed tool name/args alone never bypass the gateway/runtime (measuredAt ≤90 days). If no production agents/workloads invoke tools, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6075,6 +6113,7 @@
           "artifact": "Inventory of production agents/workloads that can invoke tools; Per-agent/workload tool allowlist configuration covering 100% of those agents",
           "passCondition": "Inventory covers 100% of production agents/workloads that can invoke tools; each has an explicit tool allowlist; automated tests deny unknown-tool requests at 100%; unknown or model-invented tool names are rejected at runtime (measuredAt ≤90 days). If no production agents/workloads invoke tools, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6084,6 +6123,7 @@
           "artifact": "Impact-tiered tool inventory marking write/irreversible/financial tools in production; Gate configuration (approval, dual control, or policy engine) for 100% of those tools",
           "passCondition": "Impact-tiered inventory covers 100% of production write/irreversible/financial tools; 100% of those tools have a configured additional gate (approval, dual control, or policy engine); automated tests show ungated execution is impossible for those tools (measuredAt ≤90 days). If no write/irreversible/financial tools exist in production, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6093,6 +6133,7 @@
           "artifact": "Inventory of production tools that accept arguments; JSON Schema (or equivalent) per inventoried production tool",
           "passCondition": "Inventory covers 100% of production tools; each has a declared argument schema; invalid/malicious argument fixtures are rejected at 100% before side effects (measuredAt ≤90 days). If no production tools exist, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6102,6 +6143,7 @@
           "artifact": "Inventory of production MCP/agent tool catalogs; Signed (or integrity-verified) catalogs + verify-on-load / reject-unsigned for catalog consumers",
           "passCondition": "Inventory covers 100% of production MCP/agent tool catalogs; catalog loaders reject unsigned or unapproved catalogs; last supply-chain review is ≤90 days or since the last catalog change (measuredAt ≤90 days). If no production MCP/agent tool catalogs are loaded, score NOT_APPLICABLE. (Level-5 / regulated advanced scope.)",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -6113,6 +6155,7 @@
           "artifact": "Inventory/catalog of destructive tools marking dry-run/simulation support; Sample lower-env dry-run logs or promotion evidence links ≤90 days",
           "passCondition": "Inventory covers 100% of tools classified destructive; each exposes dry-run or simulation in non-prod; the last promotion of a destructive tool includes a dry-run evidence link ≤90 days old (measuredAt ≤90 days). If no destructive tools exist, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -6122,6 +6165,7 @@
           "artifact": "Inventory of high-impact tools requiring rate and blast-radius budgets; Per-tool rate-limit and blast-radius policy config for those tools",
           "passCondition": "Inventory covers 100% of high-impact tools; each has a documented QPS or daily cap and a max-affected-entities (or equivalent) blast-radius budget; ≥1 limit hit or synthetic test proves enforcement in the last 30 days (measuredAt ≤90 days). If no high-impact tools exist, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -6187,6 +6231,7 @@
           "artifact": "Signature / attestation / provenance / checksum verification config (cosign, Notation, SLSA, OCI, or equivalent); Digest or signature verification logs for production model/container pulls in the sample window; Proof unverified pulls are blocked (admission policy, registry policy, or deploy gate; measuredAt ≤90 days)",
           "passCondition": "Provenance/integrity verification is configured for production model and/or container artifacts (signature, attestation, OCI provenance, and/or checksum/digest); 100% of production model/container pulls in the sample window verify against expected digest or signature; unverified pulls are blocked (measuredAt ≤90 days). If no production model or container artifacts are pulled, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6196,6 +6241,7 @@
           "artifact": "Inventory of production external AI tools, MCP servers, agent plugins, and high-impact integrations with version pins, owners, review dates ≤180 days, and 0 unpinned latest/floating entries (measuredAt ≤90 days)",
           "passCondition": "100% of production external AI tools, MCP servers, agent plugins, and high-impact integrations have version pin + owner + review date ≤180 days; 0 unpinned “latest” (or floating) entries in production (inventory evidence measuredAt ≤90 days). If none of those surfaces exist in production, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6205,6 +6251,7 @@
           "artifact": "Vulnerability scanner config + promote-path critical block (org policy) + retained scan results with 100% coverage and 0 skipped scans for production AI artifacts (measuredAt ≤90 days); critical waivers with owner + expiry ≤14 days",
           "passCondition": "100% of production AI artifacts in the sample window (language dependencies, OCI/container images, serverless packages, and model-serving runtimes including inference servers and accelerator libraries in scope) were vulnerability-scanned with no skipped scans; findings that are critical per organizational policy block promotion unless waived with named owner and expiry ≤14 days; scan results are retained (evidence measuredAt ≤90 days). If no production AI artifacts are built or deployed, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6214,6 +6261,7 @@
           "artifact": "Deployment policy configuration (admission, pipeline, cloud deploy policy, registry, or AI-platform gate) + deny/verification logs for unsigned, unapproved, and revoked/untrusted signatures (measuredAt ≤90 days)",
           "passCondition": "Production deployment policy is enforced on AI artifact deploy/promote paths; unsigned artifacts are blocked; unapproved artifacts are blocked; revoked or untrusted signatures are rejected; deployment or admission deny/verification logs prove enforcement (measuredAt ≤90 days). If no production AI artifacts are deployed (models/containers/serverless AI packages), score NOT_APPLICABLE. Required from capability Level 5 (advanced mandatory)—not a Tier 2/Core baseline.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -6225,6 +6273,7 @@
           "artifact": "Verify-on-deploy / promote-path policy + last production deploy verification log (signature/attestation success) + recorded unsigned-reject test/canary/deny log (measuredAt ≤90 days)",
           "passCondition": "The last production model/container (or equivalent AI package) deploy verified a signature or attestation successfully; an unsigned artifact is rejected in a recorded test, canary, or deny log within 90 days (evidence measuredAt ≤90 days). If no production model/container AI artifacts are deployed, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -6234,6 +6283,7 @@
           "artifact": "Machine-readable MBOM (preferred) or SBOM + model-specific metadata per production model pin; registry links; retention ≥90 days; coverage export (measuredAt ≤90 days)",
           "passCondition": "100% of production model pins have a machine-readable MBOM (or SBOM plus model-specific metadata covering weights/adapters/tokenizers and serving stack as applicable) retained ≥90 days and linked from the model registry entry (coverage evidence measuredAt ≤90 days). If no production model pins exist, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -6303,6 +6353,7 @@
           "artifact": "Inventory of in-scope AI data stores and control-plane endpoints; CSPM/network scan covering those surfaces (measuredAt ≤90 days); Authenticated edge-control config, or private-only exposure proven by the scan; Open high/critical public-exposure findings closed or waived with owner and expiry",
           "passCondition": "Inventory of in-scope AI data stores and control-plane endpoints exists; 0 of those endpoints are publicly reachable without authentication in the latest CSPM/network scan; findings severity ≥ high are closed or waived with owner and expiry; authenticated edge controls are configured or private-only exposure is proven by the scan (measuredAt ≤90 days). If no AI data stores or control planes exist, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6312,6 +6363,7 @@
           "artifact": "Documented patching SLA for production AI runtime environments; Inventory of production AI runtime environments (containers, VMs, serverless, managed AI platforms, or equivalent); Vulnerability scan and/or image/runtime age report covering that inventory (measuredAt ≤90 days); CVE/patch backlog disposition + waiver register for any SLA exceptions (owner and expiry)",
           "passCondition": "Inventory of production AI runtime environments exists; a documented patching SLA covers those environments; 100% comply with that SLA or approved time-boxed waivers exist with owner and expiry; report shows 0 SLA breaches without such waivers and vulnerability/age evidence covers the inventory (measuredAt ≤90 days). If no production AI runtime environments exist, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6321,6 +6373,7 @@
           "artifact": "Inventory of agent/tool runtimes and their documented required dependencies; Least-privilege connectivity controls for those runtimes (network policy, security groups, service mesh, workload identity, egress gateway, private endpoints, or equivalent); Probe or reviewed test showing unauthorized internal-service access is blocked (measuredAt ≤90 days)",
           "passCondition": "Inventory of agent/tool runtimes and their documented required dependencies exists; those runtimes can communicate only with those dependencies; attempts to access unauthorized internal services are blocked by network and/or identity controls (measuredAt ≤90 days). If no agent or tool runtimes exist, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6330,6 +6383,7 @@
           "artifact": "Scope note: shared AI accelerator infrastructure present (or explicit N/A for managed-API/CPU-only/single-tenant/dedicated); Isolation design (GPU scheduling, MIG/vGPU, resource quotas, tenant QoS, or equivalent); Isolation and/or capacity test report meeting stated limits (measuredAt ≤90 days)",
           "passCondition": "Inventory or explicit scope confirms shared AI accelerator infrastructure; isolation and noisy-neighbor controls are documented; and the latest isolation/capacity test (measuredAt ≤90 days) meets stated limits. If the organization does not operate shared AI accelerator infrastructure (e.g. managed-API-only, CPU-only, single-tenant, or dedicated GPU per workload), score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -6341,6 +6395,7 @@
           "artifact": "Cluster/admission controller config requiring signed images + last failed-unsigned admission event or drill",
           "passCondition": "Unsigned model/container images cannot schedule in production namespaces; policy verified by a failed admission test within 90 days. Prefer scoring SCI-R1 instead.",
           "method": "manual",
+          "minimumTier": "E1",
           "requiredFromLevel": 4,
           "minCriticality": 2,
           "deprecated": true,
@@ -6353,6 +6408,7 @@
           "artifact": "IaC modules covering production AI infrastructure; CIS-aligned (or equivalent) policy-scan config wired to apply/PR; Latest policy-scan report for production stacks (measuredAt ≤90 days); Critical findings closed or waived with owner and expiry",
           "passCondition": "Production AI infrastructure is declared in IaC; CIS-aligned (or equivalent) policy checks run on every apply/PR; critical findings for production stacks are 0 or have dated exceptions with owner and expiry (measuredAt ≤90 days). If no production AI infrastructure is managed by the organization, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -6422,6 +6478,7 @@
           "artifact": "Approved domain-specific AI safety policy (versioned, owned) including harm categories and refusal/escalation + Evidence each domain-minimum harm category maps refuse vs escalate + Last review record ≤12 months with named owner",
           "passCondition": "Domain-specific AI safety policy has version, owner, and review date ≤12 months; maps ≥ domain-minimum harm categories with explicit refuse vs escalate actions for each (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6431,6 +6488,7 @@
           "artifact": "Safety suite definition with numeric thresholds + CI/gate reports covering in-scope releases in the last 30 days (100%) + Waiver register for gate failures (owner + expiry ≤14 days) when used",
           "passCondition": "Safety gate executed on 100% of in-scope releases in the last 30 days; fail blocks promote unless a time-boxed waiver (expiry ≤14 days) with owner is recorded (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6440,6 +6498,7 @@
           "artifact": "Disclosure UX inventory of in-scope user surfaces (policy checklist) + Latest screenshot/checklist audit showing coverage + critical-surface status",
           "passCondition": "AI-interaction disclosure present on 100% of in-scope user surfaces per policy checklist; 0 critical surfaces missing disclosure in the latest audit (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6449,6 +6508,7 @@
           "artifact": "Scope attestation: whether AI influences/automates high-stakes decisions + Inventory of in-scope high-stakes decision paths (when applicable) + Fairness/disparity eval methodology + latest run report with thresholds and owners (≤90 days)",
           "passCondition": "If the system influences or automates high-stakes decision paths, those paths are inventoried and the latest fairness/disparity eval (≤90 days) is retained with thresholds and named owners (measuredAt ≤90 days). If no high-stakes decision paths exist, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 3
         }
@@ -6460,6 +6520,7 @@
           "artifact": "Safety edge-case sampling plan (sample size + cadence) + Last review packet ≤90 days (labels, dispositions, reviewer names, backlog links when needed)",
           "passCondition": "Defined sample size and cadence (≥ monthly or per release); last packet ≤90 days includes disposition for each fail/edge case and links to backlog items when needed, with reviewer names (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -6469,6 +6530,7 @@
           "artifact": "Jailbreak-to-harm red-team suite definition (explicitly distinct from security injection suite) + Latest scored run report ≤90 days vs refusal/safety thresholds + Safety backlog items for findings with named owners",
           "passCondition": "A jailbreak-to-harm red-team suite (distinct from the security injection suite) covers documented harm categories; the latest run ≤90 days meets refusal/safety thresholds; findings feed the safety backlog with named owners (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -6534,6 +6596,7 @@
           "artifact": "Factual/high-stakes RAG eval suite measuring citation presence + Eval report showing ≥90% answers with ≥1 resolvable citation/source ID + Sample production traces with citations (supporting evidence)",
           "passCondition": "On the factual/high-stakes RAG eval set, ≥90% of answers include ≥1 valid source ID/citation that resolves to an authorized corpus document (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6543,6 +6606,7 @@
           "artifact": "Operator reconstruction procedure with documented time budget + Timed drill record covering ≥3 sampled production traces (≤90 days) + Evidence each sample reconstructed model→retrieval/tools→outcome within budget",
           "passCondition": "On-call or operator successfully reconstructs model→retrieval/tools→outcome for 3/3 sampled production traces within the documented time budget (e.g. ≤15 minutes each; measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6552,6 +6616,7 @@
           "artifact": "Explanation redaction/blocking policy covering explanation payloads + Automated test showing 100% redaction/block of synthetic secret/PII fixtures + Production explanation sample scan with 0 privileged secret pattern hits (≤90 days)",
           "passCondition": "Synthetic secret/PII fixtures in explanation paths are redacted or blocked at 100% in tests; latest production explanation sample scan shows 0 privileged secret pattern hits (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -6563,6 +6628,7 @@
           "artifact": "Material automated-decision catalog (decision types marked material) + ≥20-case sample showing user-facing rationale for each material type (100% coverage) + Gap list with named owners for any missing rationale",
           "passCondition": "100% of decision types marked material in the catalog return a rationale field or UI explanation in a ≥20-case sample; gaps are tracked with named owners (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -6572,6 +6638,7 @@
           "artifact": "Explainability requirements matrix (feature × regulation/obligation) + Last compliance review record ≤12 months with named owner",
           "passCondition": "Every regulated AI feature lists required explanation type and evidence; the matrix was reviewed ≤12 months ago with a named owner (attest measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -6581,6 +6648,7 @@
           "artifact": "Change/counterfactual summary tooling or template for model/prompt promotions + Retained summary for the last material model or prompt promotion (≤90 days)",
           "passCondition": "The last material model or prompt promotion includes a retained change or counterfactual summary (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -6640,6 +6708,7 @@
           "artifact": "Data classification scheme covering AI/model-bound payload classes + Handling rules for each sensitive class (allow / redact / block or equivalent) + Automated or sampled audit showing 100% of sampled production model requests tagged, with sensitive handling matching policy",
           "passCondition": "A classification scheme covers AI payload classes; ≥1 automated or sampled audit shows 100% of sampled production model requests tagged with a class; sensitive-class handling matches documented policy (audit/scheme measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6649,6 +6718,7 @@
           "artifact": "Deletion/export procedure or API covering AI memory and in-scope AI logs + Successful test execution record for a sample tenant/user with measured duration vs SLA",
           "passCondition": "Documented API/runbook covers AI memory and in-scope logs; a test shows deletion/export completes within SLA for a sample tenant/user with measured duration recorded (test evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6658,6 +6728,7 @@
           "artifact": "Routing policy config naming approved regions for regulated tenants/workloads + Sample routing decisions (or deny logs) showing 100% of sampled regulated requests stayed in approved regions",
           "passCondition": "Regulated workloads are labeled; 100% of sampled regulated requests stay in approved regions (routing sample/policy evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 3
         }
@@ -6669,6 +6740,7 @@
           "artifact": "Inventory or policy listing high-sensitivity fields subject to pre-model tokenization/redaction + Pre-model tokenization/redaction pipeline config with fail-closed on redaction errors + Sample of ≥50 production model requests showing 0 cleartext hits for those fields",
           "passCondition": "Documented high-sensitivity fields never appear in cleartext in ≥50 sampled production model requests; the pre-model tokenization/redaction pipeline fails closed on errors (sample/pipeline evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -6678,6 +6750,7 @@
           "artifact": "Inventory of production model providers + Vendor terms review records (DPA/training/retention) with date and owner per provider",
           "passCondition": "100% of production model providers have a review record ≤12 months covering training use and retention; 0 unreviewed providers in the inventory (inventory measuredAt ≤90 days; each review dated ≤365 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -6687,6 +6760,7 @@
           "artifact": "Inventory of major in-scope AI features in or entering production + Completed DPIA/PIA (or equivalent) with owner sign-off per feature, dated before production traffic",
           "passCondition": "100% of major in-scope AI features have a completed DPIA/PIA (or equivalent) with owner sign-off dated before production traffic (inventory/assessment evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -6752,6 +6826,7 @@
           "artifact": "Corpus/index inventory listing production indexes with owner, version ID, and refresh schedule + Evidence stale-beyond-cadence indexes are flagged or rebuilt",
           "passCondition": "100% of production indexes have owner + version ID + refresh cadence; 0 indexes missing any field; stale beyond cadence are flagged or rebuilt (inventory measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6761,6 +6836,7 @@
           "artifact": "Dataset cards or registry entries for eval/fine-tune sets covering provenance and quality criteria + CI or review-checklist evidence that promotion is blocked when cards are missing",
           "passCondition": "100% of datasets used in production gates or fine-tunes have provenance + quality criteria documented; promotion is blocked if missing (CI or review checklist evidence; inventory measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6770,6 +6846,7 @@
           "artifact": "Promotion policy listing feedback/memory→durable/training write paths + Write-path controls (policy engine or human approval) on those paths + Automated tests showing ungated promotion is denied",
           "passCondition": "100% of feedback→durable-memory/training promotion paths require a policy check or human approval; automated tests show ungated promotion is denied (deny evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -6781,6 +6858,7 @@
           "artifact": "Freshness SLO definitions for each critical corpus ID + Dashboard or job report showing ≥95% SLO compliance over the last 7 days + Alert config (or firing proof) covering freshness breaches",
           "passCondition": "Each critical corpus has a documented freshness SLO (e.g. max age hours); ≥95% of sampled docs meet the SLO in the last 7 days; an alert fires on freshness breach (sample/alert evidence measuredAt ≤7 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -6790,6 +6868,7 @@
           "artifact": "Skew monitor config covering each production embedding/feature pipeline + Last weekly (or ≤7-day) skew report comparing train vs serve distributions + Threshold definition plus ticket/page routing on breach",
           "passCondition": "A skew job ran within the last 7 days for every production embedding/feature pipeline; at least one documented threshold exists; breach creates a tracked ticket or page (job/alert evidence measuredAt ≤7 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -6799,6 +6878,7 @@
           "artifact": "Dataset cards (or registry metadata) for each major eval and fine-tune corpus + Fields covering purpose, source, PII handling, and last-updated date",
           "passCondition": "100% of major eval/fine-tune sets used in production promotion have a dataset card with purpose, source, PII handling, and last-updated date ≤12 months (inventory measuredAt ≤90 days; card last-updated ≤365 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -6863,6 +6943,7 @@
           "artifact": "Inventory or scope note of in-scope AI memory APIs (conversation, durable, vector/retrieval) + Cross-tenant (and cross-user where required) isolation attack suite results for those memory APIs",
           "passCondition": "0 successful cross-tenant (and cross-user where required) memory reads/writes across ≥10 automated attack cases covering in-scope memory APIs (suite evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6872,6 +6953,7 @@
           "artifact": "Retention policy naming periods per AI memory class (conversation, durable, vector/retrieval, or equivalent) + TTL or deletion job config covering those memory classes + Successful deletion/TTL test record showing older-than-retention samples absent after job run",
           "passCondition": "Policy documents retention periods per memory class; a TTL/deletion job succeeds in test and sample records older than retention are absent after the job run (policy/job/test evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6881,6 +6963,7 @@
           "artifact": "Write policy for durable/long-term memory naming allowed writers and content classes + Write-policy enforcement config (middleware, gateway, or store gate) + Automated deny tests showing 100% rejection of unauthorized writers",
           "passCondition": "Policy enumerates allowed writers and content classes for durable/long-term memory; unauthorized writers are denied at 100% in automated tests (policy/test evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6890,6 +6973,7 @@
           "artifact": "Inventory of critical AI memory classes requiring integrity protection + Integrity/signing design or config for those classes (MAC, signature, sealed object, or equivalent) + Latest verification sample showing successful integrity/signature checks for inventoried classes",
           "passCondition": "Critical memory classes are inventoried; cryptographic verification or signature checks succeed for 100% of those classes in the latest check (inventory/verification evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -6901,6 +6985,7 @@
           "artifact": "Memory-poisoning cases in the adversarial/eval suite covering the required scenario types + Latest suite run report with pass/fail per case and gate or risk-acceptance disposition for critical fails",
           "passCondition": "≥5 memory-poisoning scenarios are executed (including cross-tenant write, prompt-in-memory, and stale trusted fact); critical fails block promotion or have documented risk acceptance (suite evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -6910,6 +6995,7 @@
           "artifact": "Memory architecture doc or config showing distinct working vs durable stores + Promotion rules that gate working→durable writes + Sample promotion audit (≥10 recent promotions with rule ID and actor) and TTL config differing by memory class",
           "passCondition": "Working memory cannot silently become durable without a promotion rule; the last 10 promotions show rule ID and actor; TTL differs by memory class (architecture/audit evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -6975,6 +7061,7 @@
           "artifact": "Production model pin config (or registry) listing immutable model IDs on critical paths + Lint or CI rule that rejects “latest”/floating aliases on those paths",
           "passCondition": "0 “latest”/floating aliases on critical production paths; 100% of those paths reference immutable model IDs; lint or CI rejects floating aliases (pin evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -6984,6 +7071,7 @@
           "artifact": "Promotion policy or CI/registry rule requiring an eval pass artifact on model version bumps + Promotion log (or CI matrix) for the last 30 days showing linked eval pass artifacts; 0 promote-without-eval",
           "passCondition": "100% of production model promotions in the last 30 days have linked eval pass artifacts; promote-without-eval is blocked by gate (promotion evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -6995,6 +7083,7 @@
           "artifact": "Model/embedding deprecation and sunset policy (notice period + forced-sunset rules) + Registry export showing sunset dates for superseded pins; query of undocumented pins past sunset = 0",
           "passCondition": "Policy defines notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date in the registry; undocumented pins past sunset = 0 without exception (deprecation evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7004,6 +7093,7 @@
           "artifact": "Per-workload capability allowlist config (code execution, vision, browsing, etc.) + Deny log or test fixture showing a denied capability attempt within 90 days",
           "passCondition": "Each production workload has an explicit capability allowlist; ≥1 denied capability attempt is recorded in test or prod within 90 days (allowlist evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7013,6 +7103,7 @@
           "artifact": "License/provenance review checklist (or registry fields) for open-weight and fine-tuned models + Completed reviews ≤12 months old for each such production model; exceptions for blocked licenses with expiry",
           "passCondition": "100% of open-weight/fine-tuned production models have a license+provenance review ≤12 months old; blocked licenses have documented exceptions with expiry (review evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7022,6 +7113,7 @@
           "artifact": "Model inventory / registry export listing production models + Query or attestation showing 0 incomplete owner/residency/intended-use rows",
           "passCondition": "100% of production models have owner, residency, and intended-use fields; inventory query returns 0 incomplete rows (inventory evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -7087,6 +7179,7 @@
           "artifact": "Prompt registry (or versioned prompt store) listing production prompts with immutable version IDs + Owner field populated for each production prompt; query showing 0 unversioned / 0 missing-owner",
           "passCondition": "100% of production prompts have an immutable version ID and named owner; 0 unversioned production prompts (registry evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7096,6 +7189,7 @@
           "artifact": "Change records linking prompt versions to review IDs and eval pass artifacts + CI/registry gate (or equivalent) blocking promote without review + eval",
           "passCondition": "100% of production prompt releases in the last 30 days have a review ID and eval pass artifact; promote-without-both is blocked (release evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7105,6 +7199,7 @@
           "artifact": "Prompt rollback procedure documenting RTO and restore without full app redeploy + Timed restore test record showing prior prompt version restored within RTO (≤90 days)",
           "passCondition": "Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in the last 90 days (restore evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -7116,6 +7211,7 @@
           "artifact": "Prompt template inventory showing parameterized slots for variable inputs + Static analysis or review finding zero hardcoded secrets and zero hardcoded customer PII",
           "passCondition": "100% of production prompt templates are parameterized for variable inputs; scan of templates finds 0 secrets and 0 hardcoded customer PII fields (hygiene evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 2,
           "minCriticality": 1
         },
@@ -7125,6 +7221,7 @@
           "artifact": "Prompt-lint CI config covering length, secrets patterns, injection-prone constructs, unbounded user concatenation + Proof lint is required on prompt-change PRs + retained example of a failing lint",
           "passCondition": "Lint runs on every prompt change PR; blocking rules exist for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example retained (lint evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7134,6 +7231,7 @@
           "artifact": "A/B or shadow-eval config for high-traffic prompt changes + Last experiment report with quality/safety deltas + non-inferiority promotion gate",
           "passCondition": "Last high-traffic prompt change used A/B or shadow eval with pre-registered metrics; promotion required non-inferiority (or better) on safety and primary quality SLI (experiment evidence measuredAt ≤90 days). If no high-traffic prompt change is in scope, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -7199,6 +7297,7 @@
           "artifact": "Context-budget config (max tokens/bytes) for each production context builder + Unit/integration tests showing truncate/reject per priority rules with 0 silent overflows",
           "passCondition": "100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows (budget evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7208,6 +7307,7 @@
           "artifact": "Context assembly code enforcing source labels on retrieved and tool-sourced chunks + Automated tests showing ACL exclusion of unauthorized chunks at 100% and labels on included chunks",
           "passCondition": "Automated tests: unauthorized retrieval/tool chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts (label/ACL evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7217,6 +7317,7 @@
           "artifact": "Data-class inclusion policy enumerating sensitive classes with allow/deny rules + Enforcement tests or DLP hooks showing ≥95% strip/block on the sensitive-class fixture suite",
           "passCondition": "Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at ≥95% on the sensitive-class fixture suite (policy/suite evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -7228,6 +7329,7 @@
           "artifact": "Per-request context token/budget usage metrics (dashboard or telemetry export) + Alert rule for context saturation and/or hard-truncate rate with notify proof",
           "passCondition": "≥99% of production requests in a 24h sample emit context-budget usage; an alert fires when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold) (metrics/alert evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7237,6 +7339,7 @@
           "artifact": "Compaction/summarization eval set of critical facts with documented retention threshold + Latest information-loss / retention report ≤90 days with release-blocking gate evidence",
           "passCondition": "Critical-fact retention ≥ documented threshold after compaction on the eval set; last run ≤90 days; regressions block context-pipeline releases (eval evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7246,6 +7349,7 @@
           "artifact": "Context assembly schema/spec separating instruction vs data blocks + sample rendered request + Red-team or unit test showing untrusted data cannot overwrite the instruction section",
           "passCondition": "Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test (structure/test evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -7311,6 +7415,7 @@
           "artifact": "Eval suite registry mapping critical journeys to versioned offline suites + CI (or equivalent) runs on prompt/model/tool changes for the last 30 days, or waivers ≤14 days",
           "passCondition": "100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in the last 30 days triggered the suite (or documented waiver ≤14 days) (suite/CI evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7320,6 +7425,7 @@
           "artifact": "Gate config listing metric names and numeric thresholds per critical journey (quality + safety) + CI evidence that a failing gate blocks deploy (or equivalent required check)",
           "passCondition": "Each critical journey has ≥1 quality and ≥1 safety metric with numeric threshold; failing gate blocks deploy in CI (gate evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7329,6 +7435,7 @@
           "artifact": "Dashboard or metric exports for task success/failure rates on production AI workloads + Dashboard or metric exports for safety refusal rates + Alert rule or documented review cadence; proof dashboard freshness ≤24 hours",
           "passCondition": "Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness ≤24 hours on the dashboard (metrics evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7338,6 +7445,7 @@
           "artifact": "Shadow/canary eval config for high-risk AI cutovers (promotion criteria documented) + Comparison report for the last high-risk cutover showing criteria met before full traffic",
           "passCondition": "The last high-risk AI cutover retained a shadow/canary eval comparison that met promotion criteria before 100% traffic (cutover evidence measuredAt ≤90 days). If no high-risk AI cutover is in scope, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -7349,6 +7457,7 @@
           "artifact": "Eval catalog listing separate tracks for regression, adversarial, and distribution-shift with owners and corpora + Latest CI (or equivalent) matrix showing each track succeeded on the last production promotion",
           "passCondition": "All three tracks (regression, adversarial, distribution-shift) exist with distinct corpora and named owners; each track ran successfully on the last production model/prompt promotion (catalog/CI evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7358,6 +7467,7 @@
           "artifact": "Human preference / expert-review sampling protocol (cadence + sample size) + Last scored sample set with production-like prompts and inter-rater / adjudication notes",
           "passCondition": "Cadence and sample size are defined; last sample ≤90 days covers production-like prompts; disagreements have adjudication recorded (sampling evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -7425,6 +7535,7 @@
           "artifact": "Version-controlled agent inventory listing every production agent with owner, production identifier, lifecycle status, and charter URI/id + Per-agent charter documents (or equivalent structured records) covering purpose, owner, production identifier, lifecycle status, approved tool policy reference, data scope, autonomy boundaries, change justification or revision history, review date, last updated, charter version, and structured approval (approvedBy, approvalDate, approvalStatus) + Inventory completeness evidence: runtime registry, deployment manifest, CMDB, platform registry, or approved attestation with measuredAt ≤90 days",
           "passCondition": "Every production agent is represented in a version-controlled inventory. Each inventory entry references a current charter containing purpose, owner, production identifier (environment, system, application, or deployment id), lifecycle status (Active, Deprecated, Retired, or Experimental), approved tool policy, data scope, autonomy boundaries, change justification or revision history, review date, last updated, charter version, and structured approval (approvedBy, approvalDate, approvalStatus). Inventory completeness is demonstrated by at least one of: runtime registry, deployment manifest, CMDB, platform registry, or approved attestation (coversAllProductionAgents with measuredAt ≤90 days). Named exceptions include business justification, approver, expiry ≤90 days, and compensating controls. No production agent is missing required governance metadata. Runtime configuration is consistent with the approved charter.",
           "method": "automated",
+          "minimumTier": "E4",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7434,6 +7545,7 @@
           "artifact": "Runtime/platform configuration declaring finite iteration and duration bounds for each production agent runtime (plus recursion/delegation depth when that capability is supported) + Enforcement test results showing abort/fail-closed when each applicable bound is exceeded, including proof the agent cannot continue execution after abort + Runtime logs (or equivalent telemetry) showing execution terminated due to a configured bound (preferred; measuredAt ≤90 days when used for PASS)",
           "passCondition": "Every production agent runtime enforces finite execution bounds appropriate to its execution model. These include bounded reasoning/tool iterations, bounded execution duration, and bounded recursive delegation where supported. Enforcement is implemented by the runtime or platform and verified through tests (and preferably runtime logs) that demonstrate safe termination when each configured bound is exceeded, with no continued planning or background side-effect dispatch after abort. No production agent relies solely on prompts or model instructions to enforce execution limits. Recursion/delegation depth is required when the runtime supports recursive delegation, agent spawning, or sub-agent execution; otherwise that bound is NOT_APPLICABLE for that runtime.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7443,6 +7555,7 @@
           "artifact": "Kill-switch/pause runbook: who may invoke, scope (run / agent type / fleet), expected effect, and numeric time-to-effect SLO + Successful drill or production use record (≤90 days) with timestamps for invoke → effect, covering at least one production agent path + Cancellation suite or import proving queued work, running tasks, and child agents stop without new dispatch",
           "passCondition": "Documented pause/terminate control exists for production agents; control is restricted to authorized operators (not end-user-only and not model-invoked); ≥1 successful pause or terminate action in drill or production in the last 90 days shows recorded time-to-effect ≤ documented numeric SLO; evidence shows further tool/MCP/A2A side effects for that run (and its spawned children, if any) were stopped or drained without requiring the model to refuse.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7452,6 +7565,7 @@
           "artifact": "Inventory of production A2A/multi-agent handoff paths with authn/authz mechanism per path + Capability token/schema (or equivalent) examples showing scoped grants for handoffs + Negative test results: unauthenticated, forged identity, and over-scoped capability cases denied at 100%",
           "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers and scoped capabilities; negative tests show unauthenticated, forged-peer, and over-scoped handoffs denied at 100%; 0 production handoff paths that accept anonymous or network-presence-only trust (deny evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -7463,6 +7577,7 @@
           "artifact": "Versioned pre-execution policy rules (goal-conflict / disallowed-goal) with named owner + Sample deny/allow traces showing the planner gated side-effecting tools + ≥1 synthetic conflict deny record (test or prod) ≤90 days",
           "passCondition": "Agent planner runs policy checks for goal conflicts / disallowed goals before side-effecting tools; ≥1 synthetic conflict is denied in test or production logs within the last 90 days with retained deny/allow traces; the policy rule set has a named owner.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7472,6 +7587,7 @@
           "artifact": "Sandbox/simulation environment config (or equivalent) for agent behaviors + Last pre-prod simulation/sandbox report for a behavior change, linked to the production promotion + Recorded pass/fail criteria and outcome for that run (≤30 days before release)",
           "passCondition": "Last new agent behavior promoted to production has a linked sandbox or simulation run completed ≤30 days before release with pass/fail criteria recorded; the sandbox/simulation environment used for agent behaviors is documented or configured.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7481,6 +7597,7 @@
           "artifact": "Versioned RACI or ownership register covering production AI systems / agents + Required ownership fields defined (at minimum Responsible + Accountable) + Inventory export or query result showing 0 orphans for those fields",
           "passCondition": "Every production AI system ID (and production agent ID in scope) has non-empty Responsible and Accountable owner fields for the organization’s required domains/roles; inventory query returns 0 orphans (register/export measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -7560,6 +7677,7 @@
           "artifact": "Versioned high-impact action inventory (class, risk tier, gate id/owner) + Gate wiring evidence (policy/config) mapping each class to an approval control + Ungated execution test results showing 100% deny/fail-closed for inventoried classes",
           "passCondition": "100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests for those classes fail at 100% (inventory/deny evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7569,6 +7687,7 @@
           "artifact": "Approval audit log schema (actor, context, outcome, timestamp) as code or documented contract + Sample approval records from the last 30 days covering required fields + Schema validation test or import proving samples conform",
           "passCondition": "100% of sampled approvals in the last 30 days include actor ID, action context, and approve/deny outcome; schema validation for the approval audit log passes.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7578,6 +7697,7 @@
           "artifact": "Bypass-path threat model or test matrix across UI, API, and agent/job entry points + Test results showing 0 successful ungated high-impact executions",
           "passCondition": "Automated or reviewed bypass tests cover alternate UI, API, and agent/job entry points for inventoried high-impact actions; 0 successful ungated high-impact executions in those tests (bypass evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7587,6 +7707,7 @@
           "artifact": "Inventory of Level 5 irreversible action classes requiring dual control + Dual-control workflow configuration (two distinct approvers) + Sample approval records showing dual approval and 0 single-approver completes",
           "passCondition": "Level 5 irreversible action classes are inventoried; 100% of sampled executions of those classes show dual approval by two distinct actors; 0 single-approver completes in the sample (sample/config measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -7598,6 +7719,7 @@
           "artifact": "Approval UI/spec showing tool args, diff/preview, and confidence/risk fields + ≥10 sampled approval records (≤90 days) with those fields populated",
           "passCondition": "High-impact approvals display tool args, change diff (or equivalent), and confidence/risk; ≥10 sampled approvals in the last 90 days show those fields populated.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7607,6 +7729,7 @@
           "artifact": "Documented approval-queue SLA (metric, threshold, owner) + Queue age/metrics evidence for the last 30 days (dashboard export or report) + Open exception register with owners and expiry when SLA is breached",
           "passCondition": "A documented approval-queue SLA (e.g. p95 queue age) exists; measured p95 for the last 30 days is within SLA, or every open exception has a named owner and expiry ≤90 days.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -7682,6 +7805,7 @@
           "artifact": "Tracing config (or equivalent) instrumenting request → model → tool → outcome + Canary or 24h sampled traces showing ≥95% linked coverage (redacted)",
           "passCondition": "Canary or sampled traces show parent request ID linking model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours (trace evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7691,6 +7815,7 @@
           "artifact": "Scope attestation: whether traces can contain secrets or regulated/sensitive data + Trace redaction/masking/tokenization or ACL config for sensitive span fields + Synthetic sensitive-field test showing 100% redaction or unauthorized-access denial",
           "passCondition": "If traces contain (or are designed to contain) secrets or regulated/sensitive data, those fields are redacted, masked, tokenized, or access-controlled before reaching the tracing backend—proven by synthetic sensitive-field tests at 100% (evidence measuredAt ≤90 days). If traces demonstrably cannot carry secrets or regulated/sensitive data, score NOT_APPLICABLE.",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -7702,6 +7827,7 @@
           "artifact": "Secure/restricted replay tooling config for failed AI traces + Documented RTO for replay + Drill or real replay sample ≤90 days (redacted)",
           "passCondition": "On-call can replay a failed AI trace in a restricted environment within the documented RTO; last drill or real replay ≤90 days old (replay evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7711,6 +7837,7 @@
           "artifact": "Trace annotation schema and secure tooling for quality labels on spans + Last-90-day count ≥50 annotations feeding an eval or review loop",
           "passCondition": "Annotators can attach quality labels to production traces in a secure tool; ≥50 annotations in the last 90 days feed an eval or review loop (annotation evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7720,6 +7847,7 @@
           "artifact": "Named SLO targets for critical AI journeys covering latency, error, and quality burn + Burn-rate alert config + dashboard screenshot or URL with retention note",
           "passCondition": "Named SLOs with numeric targets cover latency, error, and quality burn for each critical AI journey; burn-rate alerts fire when burn exceeds the documented threshold (SLO evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7729,6 +7857,7 @@
           "artifact": "Cost/token metrics schema with request, feature, and tenant (or equivalent) labels + 24h sample showing ≥95% attributed billed model calls",
           "passCondition": "≥95% of billed model calls in a 24h sample carry request ID + feature + tenant (or equivalent) attribution labels (attribution evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -7794,6 +7923,7 @@
           "artifact": "SLO catalog listing critical AI journeys with numeric availability and latency targets + Coverage showing 100% of marked-critical journeys have both target types",
           "passCondition": "100% of journeys marked critical have availability % and latency percentile targets recorded in an SLO catalog (catalog evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7803,6 +7933,7 @@
           "artifact": "Metric definitions or exporters covering latency, error rate, and ≥1 AI quality/task-success signal + Proof metrics are queryable/available for operational monitoring",
           "passCondition": "Metrics for latency, error rate, and at least one AI-specific quality or task-success indicator are collected and available for operational monitoring (metrics evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7812,6 +7943,7 @@
           "artifact": "Burn-rate or SLO alert policies covering each critical AI journey SLO + Alert test or documented fire proving notification path",
           "passCondition": "Alert policies exist for each critical journey SLO; an alert test or documented fire demonstrates the notification path works (alert evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -7823,6 +7955,7 @@
           "artifact": "Error-budget policy linking AI SLOs to release freezes or risk acceptance + Last budget-burn gated release or drill ≤90 days",
           "passCondition": "When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days (gate evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7832,6 +7965,7 @@
           "artifact": "Load-test plan including long-prompt and agent-loop scenarios + Latest capacity test report ≤90 days showing p95/error within SLO at documented concurrency",
           "passCondition": "Last capacity test ≤90 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurrency (capacity evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7841,6 +7975,7 @@
           "artifact": "Streaming SLI definitions/dashboard for TTFT and inter-token latency + Alert config on documented thresholds + retention ≥30 days",
           "passCondition": "TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained ≥30 days (streaming evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7850,6 +7985,7 @@
           "artifact": "Dashboard URL/config covering latency, error rate, throughput, resource utilization, and AI quality + Near-real-time refresh evidence (e.g. panel freshness ≤15 minutes)",
           "passCondition": "Near-real-time operational dashboards visualize latency, error rate, throughput, resource utilization, and AI quality metrics for production services (dashboard evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -7918,6 +8054,7 @@
           "artifact": "Client config or code declaring finite timeout and max-retry for model/tool call sites + Static analysis report or integration test covering 100% of in-scope call sites",
           "passCondition": "100% of production model/tool client call sites have a finite timeout and a finite max-retry bound; verified by static check or integration test (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7927,6 +8064,7 @@
           "artifact": "Degraded-mode specification covering each critical AI-dependent journey + Feature-flag, circuit-breaker, or fallback test proving safe activation when AI fails",
           "passCondition": "100% of critical AI-dependent journeys document degraded behavior; a failover test shows non-AI or safe fallback activates when the AI dependency fails (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7936,6 +8074,7 @@
           "artifact": "Agent/tool error-handling policy or code that detects partial tool failure + Test evidence (integration, chaos, e2e, replay, contract, simulator, or equivalent) showing no false-success without compensation/rollback/retry/approval",
           "passCondition": "Test evidence demonstrates that when a tool partially succeeds and a later step fails, the workflow does not report overall success without explicit compensation, rollback, retry, or human approval (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7945,6 +8084,7 @@
           "artifact": "Backup job or inventory covering required AI control-plane artifacts (prompt registry, policies, indexes, as applicable) + Restore test report for a sample artifact set",
           "passCondition": "Backup inventory includes required AI control-plane artifacts; a restore test in the last 90 days succeeds for a sample artifact set (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7954,6 +8094,7 @@
           "artifact": "Business continuity, service-catalog, or disaster-recovery documentation with numeric RTO and RPO for business-critical AI services + Linkage from each in-scope service to a tested restore/failover procedure",
           "passCondition": "100% of business-critical AI services have numeric RTO and RPO documented and linked to a tested restore/failover procedure (continuity evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 3
         }
@@ -7965,6 +8106,7 @@
           "artifact": "Client library/config showing circuit breakers around model/provider calls + Bulkhead or concurrency limit per provider dependency + Breaker trip evidence: induced-failure test or production trip log",
           "passCondition": "Circuit breakers are configured around AI/provider clients and open under induced failure in test or an observed production trip within 90 days; bulkheads limit concurrent calls per provider dependency (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7974,6 +8116,7 @@
           "artifact": "Multi-provider or multi-region fallback configuration + Evidence the fallback path was exercised ≤90 days + Eval report comparing primary vs fallback quality/safety against minimum bars",
           "passCondition": "A multi-provider or multi-region fallback path is configured and was exercised ≤90 days; a retained eval comparing primary vs fallback meets documented minimum quality/safety bars (not connectivity-only; measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -7983,6 +8126,7 @@
           "artifact": "Continuity options documentation per critical AI-dependent process (failover, manual, alternate provider, or equivalent) + Named owner for each continuity option",
           "passCondition": "100% of processes marked critical-AI-dependent have ≥1 documented continuity option with a named owner (continuity evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -7992,6 +8136,7 @@
           "artifact": "Continuity drill calendar covering provider-loss (or equivalent) scenarios + Last provider-loss drill report with RTO/RPO results (≤90 days) + Named owner + expiry for any RTO/RPO miss",
           "passCondition": "A provider-loss (or equivalent) continuity drill completed ≤90 days with retained RTO/RPO results that met objectives or have named owners and expiry (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -8001,6 +8146,7 @@
           "artifact": "Chaos experiment plan covering AI provider/tool/gateway failure modes + Dated after-action report with retained actions",
           "passCondition": "At least one AI-dependency chaos exercise completed in the last 180 days with retained after-action actions (attest measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         },
@@ -8010,6 +8156,7 @@
           "artifact": "Warm-standby inference architecture for self-hosted critical workloads + Last failover test report with RTO result (≤90 days) + Standby capacity sizing covering declared peak",
           "passCondition": "For in-scope self-hosted inference, failover to warm standby completed within documented RTO in a test ≤90 days, and standby capacity covers declared peak for critical workloads (measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         },
@@ -8019,6 +8166,7 @@
           "artifact": "Provider contract summary or equivalent documenting alternate provider/path options + Technical failover design + successful failover test evidence",
           "passCondition": "Level-5 workloads have a documented alternate provider/path and a successful failover test ≤180 days (attest measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -8106,6 +8254,7 @@
           "artifact": "Version retention policy + registry listing of prior production prompt and model-pin versions + Restore dry-run record showing immediate prior version loaded in staging or prod-adjacent env",
           "passCondition": "≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env (retention evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -8115,6 +8264,7 @@
           "artifact": "Rollback runbook listing exact commands/UI steps and owners + On-call acknowledgment or drill checklist with recorded time-to-execute (≤90 days)",
           "passCondition": "Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute (operability evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -8124,6 +8274,7 @@
           "artifact": "Documented RTO for AI/prompt/model/deploy rollback + Drill or incident record with timestamps, outcome, and measured time-to-restore",
           "passCondition": "≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO (drill evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -8133,6 +8284,7 @@
           "artifact": "Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools + Last-30-day release coverage showing path adherence + 0 hot-edits without change records",
           "passCondition": "100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record (promotion evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -8142,6 +8294,7 @@
           "artifact": "Change log or ticket export for AI artifact releases + Last-30-day coverage showing who/what/when + review link on every change",
           "passCondition": "100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID) (change-record evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -8151,6 +8304,7 @@
           "artifact": "IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts + Drift check showing 0 unmanaged AI config resources + 100% live-pin match",
           "passCondition": "Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100% (drift evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -8162,6 +8316,7 @@
           "artifact": "One-command or one-click rollback script/action for AI release units + Last rollback exercise or real event log showing completion within documented RTO (≤90 days)",
           "passCondition": "AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO (exercise evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -8171,6 +8326,7 @@
           "artifact": "Feature-flag config covering new agent behaviors + Sample flag-change audit trail + kill/disable path test record (≤90 days)",
           "passCondition": "New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago (flag evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -8180,6 +8336,7 @@
           "artifact": "Rollback automation (or page+runbook) config tied to quality SLO burn signals + Sample trigger/test or drill evidence of that path within ≤90 days",
           "passCondition": "Quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred ≤90 days (automation evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         },
@@ -8189,6 +8346,7 @@
           "artifact": "Progressive delivery/canary config for high-traffic AI changes + Last canary promotion log with metrics link (≤90 days)",
           "passCondition": "High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release ≤90 days includes canary metrics link (canary evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -8198,6 +8356,7 @@
           "artifact": "Environment parity checklist for model pins and tool catalogs + Last parity scan across envs with 0 unexplained drifts (≤30 days)",
           "passCondition": "Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan ≤30 days with 0 unexplained drifts (parity evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -8207,6 +8366,7 @@
           "artifact": "Embedding/index migration runbook with validation gates + Last automated migration job log and validation (≤12 months) or no-upgrade attestation",
           "passCondition": "Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps (migration evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -8294,6 +8454,7 @@
           "artifact": "Playbook set covering abuse, leakage, bad actions, and provider outage with owners + Review dates ≤12 months for each of the four playbooks",
           "passCondition": "Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date ≤12 months (playbook evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -8303,6 +8464,7 @@
           "artifact": "Containment runbook covering pause agents, disable tools, and prompt/model rollback + Drill record ≤90 days showing all three actions within documented time budgets",
           "passCondition": "Drill in last 90 days successfully demonstrated pause agents, disable tools, and roll back prompt/model within documented time budgets (drill evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -8314,6 +8476,7 @@
           "artifact": "On-call alert policy export listing safety/quality pages + Last 90 days of triggered incidents or drill tickets for those pages",
           "passCondition": "At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and owner; policy reviewed ≤90 days ago (alert evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -8323,6 +8486,7 @@
           "artifact": "Post-incident review template requiring APRF pillar mapping + Last-90-day coverage: SEV-eligible AI reviews with tracked actions or no-action rationale",
           "passCondition": "100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale (review evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -8332,6 +8496,7 @@
           "artifact": "Customer notification criteria for AI-related events + Last drill or real notification sample ≤12 months with timestamps",
           "passCondition": "Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps (notification evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -8341,6 +8506,7 @@
           "artifact": "Tabletop plan for an AI-specific incident scenario + Dated after-action report ≤180 days with retained actions and owners",
           "passCondition": "An AI-focused tabletop completed ≤180 days with retained actions and owners (tabletop evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 3
         }
@@ -8418,6 +8584,7 @@
           "artifact": "Gateway/provider/application config declaring finite spend ceiling and/or rate limit (TPM/RPM/$, tokens) + Enforcement evidence: automated exceed test or ≤90-day production deny/throttle event log",
           "passCondition": "A finite hard spend ceiling and/or rate limit is configured for production AI workloads; enforcement demonstrably denies or throttles when the limit is exceeded (automated test or production event log measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 2,
           "minCriticality": 1
         },
@@ -8427,6 +8594,7 @@
           "artifact": "Cost/spend dashboard or telemetry views covering production AI workloads + Alert policies for budget burn and spend anomaly (IaC, provider, or gateway) + Notify proof: alert test or documented fire ≤90 days with page/notify outcome",
           "passCondition": "Alerts exist for both budget burn and spend anomaly covering production AI spend; a synthetic or historical burn/anomaly event would page/notify per runbook (alert test or documented fire measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -8436,6 +8604,7 @@
           "artifact": "Retry/backoff config (finite maxRetries + backoff) for production AI/model clients + Agent or client loop budget config where applicable (finite iterations/steps) + Amplification test results: forced failure/retry hits a bounded token or $ ceiling (≤90 days)",
           "passCondition": "Max retries and max agent/client loops are finite for 100% of production AI clients; amplification tests show cost cannot grow without bound under forced failure/retry (bounded token or $ ceiling; test measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -8447,6 +8616,7 @@
           "artifact": "Prompt/response cache config naming idempotent paths and safety exclusions + Hit-rate and savings report covering ≥30 days (import or dashboard export)",
           "passCondition": "Cache is enabled for documented idempotent/repeated prompt paths; sensitive/personalized prompts are excluded; hit-rate and savings are reported for a window of ≥30 days (report measuredAt within the last 90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -8456,6 +8626,7 @@
           "artifact": "Model-routing policy mapping low-risk task classes to cheap vs premium models + Eval coverage report for low-risk routed tasks vs premium baseline + Misroute-rate monitoring evidence covering ≤30 days",
           "passCondition": "Documented low-risk task classes route to cheaper models by default; eval shows quality within tolerance versus a premium baseline; misroute rate is monitored for a window of ≤30 days (report measuredAt within the last 90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -8465,6 +8636,7 @@
           "artifact": "Per-product AI unit-economics report (cost per successful task / journey) for the last quarter + FinOps review minutes ≤90 days with outlier owners and thresholds",
           "passCondition": "Each customer-facing AI product has unit-cost metrics for the last quarter; a FinOps review occurred within the last 90 days with named owners for outliers above documented thresholds (review measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }
@@ -8544,6 +8716,7 @@
           "artifact": "Approved AI acceptable-use / prohibited-applications policy with version, owner, and review date + Confirmation that both acceptable-use and prohibited-application sections are present",
           "passCondition": "Policy has version, owner, and review date ≤12 months; includes both acceptable-use and prohibited-application sections (policy evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -8555,6 +8728,7 @@
           "artifact": "Leadership AI risk / APRF maturity review minutes (or board pack excerpt) with review date + Action log showing owners and due dates for open items",
           "passCondition": "Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago; open actions have owners and due dates (review evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -8564,6 +8738,7 @@
           "artifact": "Production AI system inventory listing the org-declared required critical-domain owner fields + Query/report showing 0 systems missing required domain owners",
           "passCondition": "0 production AI systems missing any required critical-domain owner in the inventory; inventory covers all production AI system IDs; required domain set is declared (inventory evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -8573,6 +8748,7 @@
           "artifact": "Improvement backlog (tickets) linked from Sev-1/2 AI incidents and critical eval failures + Quarterly sample showing linkage rate ≥80% and closed-or-planned rate ≥50%",
           "passCondition": "≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; ≥50% of those items closed or have a dated plan (backlog evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -8582,6 +8758,7 @@
           "artifact": "Risk-acceptance / control-gap waiver register for in-scope AI systems + Confirmation that open waivers have owner+expiry and expired waivers have escalation (or are closed)",
           "passCondition": "100% of open control-gap waivers have owner + expiry; 0 expired waivers without an escalation record (register evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 3
         },
@@ -8591,6 +8768,7 @@
           "artifact": "Independent assessment or internal-audit sampling report against APRF evidence (org cadence) + Sampled Check IDs and findings from the last ≤12 month cycle",
           "passCondition": "Last org sampling report age ≤12 months; lists sampled Check IDs and findings (report evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -8654,6 +8832,7 @@
           "artifact": "Inventory of production AI system IDs in scope + Obligations register mapping each system to obligations (or none-in-scope) with owner and review date",
           "passCondition": "Every production AI system ID has ≥1 mapped obligation entry or an explicit “none in scope” attestation with owner and review date ≤12 months (register evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -8663,6 +8842,7 @@
           "artifact": "Control→evidence matrix linking in-scope obligations to APRF Checks or internal control/evidence IDs + Matrix review date (≤12 months) and confirmation of zero orphan obligation rows",
           "passCondition": "100% of in-scope obligations map to ≥1 evidence artifact ID; matrix review date ≤12 months; 0 orphan obligations without an evidence pointer (matrix evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 3
         },
@@ -8672,6 +8852,7 @@
           "artifact": "Audit log retention config for critical AI control-plane change events (policy minimum documented) + Synthetic control-plane change test showing ≤5 minute appearance and queryability after retention smoke check",
           "passCondition": "Retention is configured ≥ policy minimum (e.g. ≥365 days); a synthetic control-plane change appears in the audit log within ≤5 minutes and remains queryable after a retention smoke check (config/smoke evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -8683,6 +8864,7 @@
           "artifact": "Control-testing schedule + latest test results pack for in-scope AI/compliance controls + Exceptions register with owner, expiry, and compensating control for every open exception",
           "passCondition": "Documented controls due in the last cycle were tested on schedule (cycle age ≤90 days default); every open exception has owner, expiry, and compensating control (testing/exceptions evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -8692,6 +8874,7 @@
           "artifact": "Customer-facing trust/security doc with published URL and last-updated date + Explicit APRF pillar or Core Profile mapping table covering identity, safety/eval, data handling, and incident contact",
           "passCondition": "Public trust doc covers identity, safety/eval, data handling, and incident contact; pillar/Core mapping table is explicit; last-updated ≤12 months (trust-doc evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -8701,6 +8884,7 @@
           "artifact": "Independent assessment or internal-audit report sampling capability Level-5 AI systems against APRF gates + Coverage proof that every capability Level-5 system ID was in scope, with findings and remediation owners",
           "passCondition": "Last assessment age ≤12 months; covers every system that claims or attains capability Level 5; lists sampled Check IDs, findings, and remediation owners (assessment evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         }
@@ -8768,6 +8952,7 @@
           "artifact": "Golden-path documentation from scaffold to production with version and owner + Evidence the doc covers auth, secrets, evals, and promote steps + Review attestation or changelog showing review within 12 months",
           "passCondition": "A golden-path document exists with version and owner; it covers authentication, secrets, evals, and promote steps for AI features; last review is within 12 months (review measuredAt ≤365 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         },
@@ -8777,6 +8962,7 @@
           "artifact": "CI and/or local check config covering auth, secret-scan, and basic evals + Evidence those checks are required (blocking) on merge/promote for the AI golden-path template",
           "passCondition": "The default AI pipeline runs auth, secret-scan, and basic eval checks; failing any blocks merge or promote in the golden-path template (blocking evidence measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
         }
@@ -8788,6 +8974,7 @@
           "artifact": "Scaffolding template repo/catalog covering agents, RAG, and MCP + Evidence auth, secrets, and logging defaults are enabled in those templates + Adoption metrics (≥1 use in 90 days) or documented adoption target",
           "passCondition": "Templates exist for agents, RAG, and MCP with auth, secrets, and logging defaults on; ≥1 new service used a template in the last 90 days or an adoption target is documented (adoption proof measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -8797,6 +8984,7 @@
           "artifact": "Local/inner-loop eval runner docs and package or script entrypoint + Evidence the core eval subset runs in one command (or documented equivalent) + Sample AI PR (≤30 days) with pre-PR eval evidence or documented waiver",
           "passCondition": "A local or one-command inner-loop runner exists for the core AI eval subset; the last sampled AI PR (≤30 days) shows pre-PR eval evidence or a documented waiver (sample/waiver measuredAt ≤30 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         },
@@ -8806,6 +8994,7 @@
           "artifact": "Definitions/formulas for time-to-safe-production and policy-bypass rate + Dashboard or weekly report with ≥30 consecutive days of series + Bypass-rate alert or review threshold with named owner",
           "passCondition": "Both metrics are defined with formulas; published for ≥30 consecutive days; bypass rate has an alert or review threshold with a named owner (series / ownership proof measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
         },
@@ -8815,6 +9004,7 @@
           "artifact": "Platform ownership record naming the owner team for the AI paved road + Support channel (Slack, ticket queue, or equivalent) documented + Test-ping within published SLA (≤90 days) or listed on-call rotation",
           "passCondition": "Named owner team and support channel are documented for the AI platform / paved road; either a test ping met the published SLA within 90 days, or an on-call rotation is listed (support proof measuredAt ≤90 days).",
           "method": "hybrid",
+          "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 2
         }

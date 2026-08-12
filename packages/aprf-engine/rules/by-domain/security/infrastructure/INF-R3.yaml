@@ -27,6 +27,12 @@ evidenceRequired:
   - "CIS-aligned (or equivalent) policy-scan config wired to apply/PR"
   - "Latest policy-scan report for production stacks (measuredAt ≤90 days)"
   - "Critical findings closed or waived with owner and expiry"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - iac_module
+    - cis_policy_scan
+    - policy_scan_report
 detection:
   capability: "hybrid"
   detectors:

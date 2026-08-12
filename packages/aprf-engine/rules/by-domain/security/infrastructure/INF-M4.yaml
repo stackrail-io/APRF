@@ -31,6 +31,13 @@ evidenceRequired:
   - "Scope note: shared AI accelerator infrastructure present (or explicit N/A for managed-API/CPU-only/single-tenant/dedicated)"
   - "Isolation design (GPU scheduling, MIG/vGPU, resource quotas, tenant QoS, or equivalent)"
   - "Isolation and/or capacity test report meeting stated limits (measuredAt ≤90 days)"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - accelerator_isolation_test
+    - infrastructure_logs
+    - cloud_configuration
+    - repo_signal
 detection:
   capability: "hybrid"
   detectors:

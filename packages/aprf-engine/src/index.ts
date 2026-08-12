@@ -10,6 +10,8 @@ export type {
   DetectorRef,
   RuleDetection,
   RuleApplicability,
+  EvidenceTier,
+  RuleEvidencePolicy,
   AprfRule,
   CategoryDef,
   DomainDef,
@@ -18,7 +20,27 @@ export type {
   AprfCheckProjection,
 } from "./types.js";
 
-export { TECHNOLOGIES, SEVERITY_WEIGHT } from "./types.js";
+export { TECHNOLOGIES, SEVERITY_WEIGHT, EVIDENCE_TIERS } from "./types.js";
+
+export {
+  CLASS_TO_TIER,
+  CLASS_TO_EVIDENCE_TYPES,
+  defaultMinimumTier,
+  resolveMinimumTier,
+  parseEvidenceTier,
+  tierRank,
+  maxTier,
+  tierMeetsFloor,
+  tierFromEvidenceClass,
+  classifyAchievedTier,
+  verificationFor,
+  matchedEvidenceTypes,
+} from "./evidence-tiers.js";
+export type {
+  EvidenceVerification,
+  EvidenceClassLike,
+  ControlEvidenceTier,
+} from "./evidence-tiers.js";
 
 export {
   buildRuleIndex,

@@ -9,6 +9,7 @@ import type {
   Severity,
   Technology,
 } from "./types.js";
+import { resolveMinimumTier } from "./evidence-tiers.js";
 
 export function buildRuleIndex(
   rules: AprfRule[],
@@ -86,6 +87,10 @@ export function ruleToCheckProjection(rule: AprfRule): AprfCheckProjection {
     artifact: rule.evidenceRequired[0] ?? rule.title,
     passCondition: rule.passCondition,
     method,
+    minimumTier: resolveMinimumTier(
+      rule.evidencePolicy,
+      rule.detection.capability,
+    ),
     requiredFromLevel: rule.applicability.requiredFromLevel,
     minCriticality: rule.applicability.minCriticality,
     ...(rule.deprecated || rule.status === "deprecated"

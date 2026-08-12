@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:5439117563a4a2f47750944ca8b923d8aa3efe8e4e1226b96cd2749b1bb15463",
+  "generatedAt": "sha256:e6041a03a8f3ee2fde24fef1d55f44c2335f578db7bfa0cb642cd30c07f0bf5c",
   "ruleCount": 178,
   "domains": [
     {
@@ -7110,6 +7110,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Authenticated edge-control config, or private-only exposure proven by the scan",
         "Open high/critical public-exposure findings closed or waived with owner and expiry"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "cspm_scan",
+          "network_policy",
+          "cloud_egress_policy",
+          "cloud_configuration",
+          "network_flow_logs",
+          "cloud_audit_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -7195,6 +7206,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Vulnerability scan and/or image/runtime age report covering that inventory (measuredAt ≤90 days)",
         "CVE/patch backlog disposition + waiver register for any SLA exceptions (owner and expiry)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "patching_sla_report",
+          "infrastructure_logs",
+          "cloud_audit_logs",
+          "repo_signal"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -7278,6 +7298,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Least-privilege connectivity controls for those runtimes (network policy, security groups, service mesh, workload identity, egress gateway, private endpoints, or equivalent)",
         "Probe or reviewed test showing unauthorized internal-service access is blocked (measuredAt ≤90 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "network_policy",
+          "connectivity_deny_probe",
+          "runtime_network_config",
+          "cloud_configuration",
+          "network_flow_logs",
+          "application_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -7363,6 +7394,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Isolation design (GPU scheduling, MIG/vGPU, resource quotas, tenant QoS, or equivalent)",
         "Isolation and/or capacity test report meeting stated limits (measuredAt ≤90 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "accelerator_isolation_test",
+          "infrastructure_logs",
+          "cloud_configuration",
+          "repo_signal"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -7516,6 +7556,14 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Latest policy-scan report for production stacks (measuredAt ≤90 days)",
         "Critical findings closed or waived with owner and expiry"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "iac_module",
+          "cis_policy_scan",
+          "policy_scan_report"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -12829,6 +12877,14 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Versioned injection/privilege-escalation corpus + CI gate report",
         "Policy-engine deny sample logs or harness results (denyRatePct + modelTextPrivilegeGrants)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "repo_signal",
+          "policy_scan_report",
+          "application_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -13068,6 +13124,18 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Network policy or egress allowlist export for the model/tool runtime identity",
         "Automated or reviewed probe results (allowlisted-only reachability; unrestricted internal admin/data-store routes = 0)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "network_policy",
+          "cloud_egress_policy",
+          "cloud_configuration",
+          "runtime_network_config",
+          "reachability_probe",
+          "network_flow_logs",
+          "cloud_audit_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [

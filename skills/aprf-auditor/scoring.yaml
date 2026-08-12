@@ -11,6 +11,7 @@ principles:
   - "NOT_DEMONSTRATED on a mandatory Check is a blocker (same as DON'T KNOW / unanswered after ask)."
   - "Customer NO attestation → FAIL (demonstrated absence). Customer YES without artifacts → PARTIAL (low confidence)."
   - "NOT_APPLICABLE does not count as PASS; it removes the Check from the mandatory set when justified."
+  - "Evidence Assurance Tiers (APRF-RFC-0011): PASS requires achievedTier >= evidencePolicy.minimumTier (default from detection.capability). Below-floor evidence is PARTIAL with verification=UNVERIFIED — not a sixth status."
   - "No single vanity readiness percentage as a conformance claim."
 
 statuses:

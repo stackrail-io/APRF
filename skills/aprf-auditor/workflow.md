@@ -336,6 +336,8 @@ Batch in one message; allow replies like `all C`, `SEC2-M1:A`, or a full A/B/C m
 
 Same bar for `automated` / `hybrid`: chat YES alone never upgrades to PASS. SEC2-M1 is `hybrid` — it expects secrets-manager + scan/import evidence (detectors + `evidenceRequired`), not a verbal attestation.
 
+**Evidence Assurance Tiers (APRF-RFC-0011):** each Check has a `minimumTier` (explicit `evidencePolicy` or default from capability: manual→E1, none→E1, hybrid→E3, automated→E4). Assessment emits `evidenceTier` (`achieved`, `minimum`, `verification`). Repo signals are typically E2; configuration/IaC E3; measured imports / live probes E4. **PASS is impossible when `achieved < minimum`** — status stays `PARTIAL` with `verification: UNVERIFIED`. Do not invent PASS from Git finds alone.
+
 **Answer → status mapping** (record on the control as `userAttestation`):
 
 | Answer | Status | Notes |

@@ -25,6 +25,9 @@ import {
   getThreatIntelForCheck,
   SEVERITY_WEIGHT,
   getGeneratedCatalog,
+  resolveMinimumTier,
+  type DetectionCapability,
+  type EvidenceTier,
 } from "@stackrail-io/aprf-engine";
 import { allPassSamples, getPassSamples } from "./pass-samples.ts";
 import {
@@ -80,6 +83,11 @@ type CatalogRule = {
   whyItMatters?: string;
   passCondition?: string;
   evidenceRequired?: string[];
+  evidencePolicy?: {
+    minimumTier?: EvidenceTier | string;
+    acceptableEvidence?: string[];
+  };
+  detection?: { capability?: DetectionCapability | string };
   recommendedFixes?: string[];
   manualVerification?: string;
   falsePositiveGuidance?: string;
@@ -138,6 +146,23 @@ function enrichControlsFromCatalog(
       : c.recommendedAction;
     const remFix =
       recommendedFixes?.length ? recommendedFixes[0] : c.remediation?.fix;
+    const minimum = resolveMinimumTier(
+      rule.evidencePolicy as
+        | { minimumTier?: EvidenceTier; acceptableEvidence?: string[] }
+        | undefined,
+      rule.detection?.capability as DetectionCapability | undefined,
+    );
+    const acceptable = rule.evidencePolicy?.acceptableEvidence ?? [];
+    const evidenceTier: Control["evidenceTier"] = c.evidenceTier
+      ? {
+          ...c.evidenceTier,
+          minimum: c.evidenceTier.minimum ?? minimum,
+          acceptable:
+            c.evidenceTier.acceptable?.length ?
+              c.evidenceTier.acceptable
+            : [...acceptable],
+        }
+      : undefined;
     return {
       ...c,
       title: rule.title || c.title,
@@ -148,6 +173,7 @@ function enrichControlsFromCatalog(
       whyItMatters: rule.whyItMatters ?? c.whyItMatters,
       passCondition: rule.passCondition ?? c.passCondition,
       evidenceRequired: rule.evidenceRequired ?? c.evidenceRequired,
+      ...(evidenceTier ? { evidenceTier } : {}),
       recommendedFixes,
       manualVerification: rule.manualVerification ?? c.manualVerification,
       falsePositiveGuidance:
@@ -201,6 +227,14 @@ type Control = {
   references?: Array<{ title?: string; url?: string } | string>;
   evidenceFound?: Array<{ ref: string; excerpt?: string }>;
   requiredEvidenceMissing?: string[];
+  /** Evidence Assurance Tier rollup (APRF-RFC-0011). */
+  evidenceTier?: {
+    minimum?: string;
+    achieved?: string;
+    acceptable?: string[];
+    matched?: string[];
+    verification?: "NONE" | "UNVERIFIED" | "VERIFIED" | "NOT_APPLICABLE" | string;
+  };
   /** Why the control exists; falls back to the catalog threat map. */
   threatIntel?: {
     securityIntent?: string;
@@ -478,12 +512,22 @@ function renderRoadmapBucket(label: string, items: RoadmapRef[]): string {
 
 const NEEDS_VERIFICATION_LABEL = "Implemented — needs verification";
 
+function evidenceTierLine(c: Control): string {
+  const t = c.evidenceTier;
+  if (!t?.minimum && !t?.achieved) return "";
+  const achieved = t.achieved ?? "E0";
+  const minimum = t.minimum ?? "E0";
+  const ver = t.verification ?? "NONE";
+  return `Evidence: ${achieved} · Required: ${minimum} · ${ver}`;
+}
+
 /**
- * PARTIAL with real in-repo/import evidence means the control exists but the
- * measured proof the Check requires is missing. Display-only: status, gate
- * contribution, and scoring are unchanged.
+ * Prefer assessment evidenceTier.verification === UNVERIFIED (APRF-RFC-0011).
+ * Fallback: PARTIAL with real in-repo evidence (legacy assessments).
+ * Display-only overlay — status / gate contribution unchanged.
  */
 function needsVerification(c: Control): boolean {
+  if (c.evidenceTier?.verification === "UNVERIFIED") return true;
   if ((c.status || "").toUpperCase().replace(/-/g, "_") !== "PARTIAL") {
     return false;
   }
@@ -1142,6 +1186,8 @@ type EvidenceCoverage = {
   notDemonstrated: number;
   fail: number;
   needsVerification: number;
+  verified: number;
+  belowFloor: number;
   requiredItems: number;
   missingItems: number;
 };
@@ -1161,6 +1207,8 @@ function evidenceCoverage(controls: Control[]): EvidenceCoverage {
   let notDemonstrated = 0;
   let fail = 0;
   let needsVerificationCount = 0;
+  let verified = 0;
+  let belowFloor = 0;
   let requiredItems = 0;
   let missingItems = 0;
 
@@ -1172,6 +1220,8 @@ function evidenceCoverage(controls: Control[]): EvidenceCoverage {
     else if (s === "FAIL") fail++;
 
     if (needsVerification(c)) needsVerificationCount++;
+    if (c.evidenceTier?.verification === "VERIFIED") verified++;
+    if (c.evidenceTier?.verification === "UNVERIFIED") belowFloor++;
 
     requiredItems += (c.evidenceRequired ?? []).length;
     missingItems += (c.requiredEvidenceMissing ?? []).length;
@@ -1184,6 +1234,8 @@ function evidenceCoverage(controls: Control[]): EvidenceCoverage {
     notDemonstrated,
     fail,
     needsVerification: needsVerificationCount,
+    verified,
+    belowFloor,
     requiredItems,
     missingItems,
   };
@@ -1209,11 +1261,13 @@ function evidenceCoverageBlock(controls: Control[]): string {
   <div class="grid" style="margin-top:0.85rem">
     <div class="stat"><div class="label">In-scope Checks from repo</div><div class="value">${cov.applicable}</div></div>
     <div class="stat"><div class="label">PASS</div><div class="value ${cov.pass ? "ok" : "muted"}">${cov.pass} <span class="meta">(${passPct}%)</span></div></div>
+    <div class="stat"><div class="label">Verified (tier met)</div><div class="value ${cov.verified ? "ok" : "muted"}">${cov.verified}</div></div>
+    <div class="stat"><div class="label">UNVERIFIED (below floor)</div><div class="value">${cov.belowFloor}</div></div>
     <div class="stat"><div class="label">PARTIAL</div><div class="value">${cov.partial}</div></div>
     <div class="stat"><div class="label">Not demonstrated</div><div class="value">${cov.notDemonstrated}</div></div>
     <div class="stat"><div class="label">FAIL</div><div class="value">${cov.fail}</div></div>
   </div>
-  <p class="meta" style="max-width:72ch;margin-top:0.75rem">${cov.needsVerification} Check${cov.needsVerification === 1 ? "" : "s"} show in-repo signals but still need measured proof (filter <em>Needs verification</em>).
+  <p class="meta" style="max-width:72ch;margin-top:0.75rem">${cov.needsVerification} Check${cov.needsVerification === 1 ? "" : "s"} are <em>UNVERIFIED</em> — evidence tier below the Check floor or metrics incomplete (filter <em>Needs verification</em>).
   Catalog lists ${cov.requiredItems} evidence item${cov.requiredItems === 1 ? "" : "s"} across in-scope Checks; this run still asks for ${cov.missingItems} gap note${cov.missingItems === 1 ? "" : "s"} (imports, probes, or scope attestation).</p>
   </section>`;
 }
@@ -1351,8 +1405,13 @@ function controlDetailBody(c: Control): string {
     confidence ${esc(c.confidence)}${c.confidenceScore != null ? ` (${esc(c.confidenceScore)})` : ""} ·
     ${esc(c.priority)}</p>
   ${
+    evidenceTierLine(c)
+      ? `<p class="meta"><strong>${esc(evidenceTierLine(c))}</strong></p>`
+      : ""
+  }
+  ${
     needsVerification(c)
-      ? `<p class="verify-callout"><strong>${esc(NEEDS_VERIFICATION_LABEL)}</strong> — we found the control in this repository, but this Check requires measured proof that it holds. It stays ${esc(c.status)} until that evidence exists.</p>`
+      ? `<p class="verify-callout"><strong>${esc(NEEDS_VERIFICATION_LABEL)}</strong> — evidence is below the Check’s required assurance tier (or measured metrics are incomplete). Status stays ${esc(c.status)} until evidence meets ${esc(c.evidenceTier?.minimum ?? "the floor")}.</p>`
       : ""
   }
   <section class="assessment-findings">
@@ -1384,7 +1443,7 @@ function controlsTableAndFlyout(
   <td><code>${esc(c.checkId)}</code></td>
   <td>${esc(c.title)}</td>
   <td>${esc(controlCategory(c))}<span class="domain-sub">${esc(controlDomain(c))} domain</span></td>
-  <td><span class="pill ${statusClass(c.status)}">${esc(c.status)}</span>${verify ? `<span class="verify-sub">${esc(NEEDS_VERIFICATION_LABEL)}</span>` : ""}</td>
+  <td><span class="pill ${statusClass(c.status)}">${esc(c.status)}</span>${verify ? `<span class="verify-sub">${esc(NEEDS_VERIFICATION_LABEL)}</span>` : ""}${evidenceTierLine(c) ? `<span class="verify-sub">${esc(evidenceTierLine(c))}</span>` : ""}</td>
   <td>${esc(c.confidence)}${c.confidenceScore != null ? ` <span class="meta">(${esc(c.confidenceScore)})</span>` : ""}</td>
   <td>${tagPills(tags) || `<span class="empty">—</span>`}</td>
   <td>${esc(c.priority)}</td>

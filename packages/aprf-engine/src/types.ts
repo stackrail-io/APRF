@@ -72,6 +72,28 @@ export interface RuleDetection {
   detectors?: DetectorRef[];
 }
 
+/** Evidence Assurance Tier (APRF-RFC-0011) — how strongly evidence proves the control. */
+export type EvidenceTier = "E0" | "E1" | "E2" | "E3" | "E4" | "E5";
+
+export const EVIDENCE_TIERS: readonly EvidenceTier[] = [
+  "E0",
+  "E1",
+  "E2",
+  "E3",
+  "E4",
+  "E5",
+] as const;
+
+/**
+ * Optional Check floor for evidence assurance. Free-form evidenceRequired[]
+ * remains the human prose list; this is the machine-checkable floor.
+ */
+export interface RuleEvidencePolicy {
+  minimumTier?: EvidenceTier;
+  /** Evidence type IDs from spec/evidence-types.yaml. */
+  acceptableEvidence?: string[];
+}
+
 export interface RuleApplicability {
   /** Empty = technology-agnostic (not cloud/vendor-gated). */
   technologies?: Technology[];
@@ -99,6 +121,7 @@ export interface AprfRule {
   gate: RuleGate;
   passCondition: string;
   evidenceRequired: string[];
+  evidencePolicy?: RuleEvidencePolicy;
   detection: RuleDetection;
   manualVerification: string;
   falsePositiveGuidance: string;
@@ -175,6 +198,8 @@ export interface AprfCheckProjection {
   artifact: string;
   passCondition: string;
   method: "automated" | "manual" | "hybrid";
+  /** Evidence Assurance floor (APRF-RFC-0011); omit for capability default. */
+  minimumTier?: EvidenceTier;
   requiredFromLevel: CapabilityLevel;
   minCriticality: CriticalityTier;
   deprecated?: boolean;

@@ -129,7 +129,7 @@ Default: `anyOf` among Detections that declare `assurance: gate-eligible`.
 | --- | --- |
 | Still need principle docs without L2 hierarchy | **Requirement labels** + pillar narrative pages |
 | Stochastic evals still needed for AI quality | Allowed for recommended / with corroboration rules |
-| Who defines Evidence type registry? | **Planned** Evidence Type Registry (IDs + schemas), versioned like OTel semantic conventions — **not shipped in this repo yet** (see ARCHITECTURE.md “Evidence Type Registry (planned)”). Until then, Checks use free-form `evidenceRequired[]`. |
+| Who defines Evidence type registry? | **Starter shipped** (`spec/evidence-types.yaml` + Check `evidencePolicy.acceptableEvidence`, APRF-RFC-0011). Full per-type JSON Schemas remain planned (see ARCHITECTURE.md). Free-form `evidenceRequired[]` prose remains required. |
 
 | Air-gapped enterprises | Catalog + schemas are offline-friendly files; collectors optional |
 | Fork risk if StackRail dominates RFCs | Existing stewardship phases + interim advisory; architecture docs reaffirm transfer intent |
