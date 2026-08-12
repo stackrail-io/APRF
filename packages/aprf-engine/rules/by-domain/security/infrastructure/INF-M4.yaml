@@ -35,6 +35,8 @@ evidencePolicy:
   minimumTier: E3
   acceptableEvidence:
     - accelerator_isolation_test
+    - infrastructure_logs
+    - cloud_configuration
     - repo_signal
 detection:
   capability: "hybrid"

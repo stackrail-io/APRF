@@ -8,8 +8,8 @@ tiers:
   E0: { name: "No evidence", description: "No evidence collected for the Check." }
   E1: { name: "Self-attestation", description: "Human YES/NO attestation without measured artifacts." }
   E2: { name: "Repository evidence", description: "Code, docs, or repo collector signals." }
-  E3: { name: "Configuration evidence", description: "IaC, policy, runtime-config, or CI-wired configuration." }
-  E4: { name: "Runtime evidence", description: "Live probes, runtime telemetry, or measured imports with measuredAt." }
+  E3: { name: "Configuration evidence", description: "IaC, live/exported cloud configuration, policy, runtime-config, or CI-wired configuration." }
+  E4: { name: "Runtime evidence", description: "Live probes, operational logs, runtime telemetry, or measured imports with measuredAt." }
   E5: { name: "Independent verification", description: "Third-party or external assessor pack." }
 
 types:
@@ -19,6 +19,11 @@ types:
   - id: cloud_egress_policy
     defaultTier: E3
     description: Cloud egress / VPC endpoint / private-link policy for model or tool identities.
+  - id: cloud_configuration
+    defaultTier: E3
+    description: >
+      Live or exported cloud configuration (console, provider API, or config
+      snapshot) proving the control — without requiring IaC in the repo.
   - id: runtime_network_config
     defaultTier: E3
     description: Runtime network configuration (sidecar, service mesh, egress proxy) for AI workloads.
@@ -46,6 +51,18 @@ types:
   - id: accelerator_isolation_test
     defaultTier: E4
     description: Isolation / capacity test for shared AI accelerators.
+  - id: application_logs
+    defaultTier: E4
+    description: Application / service logs (gateway, inference, agent runtime) with measuredAt.
+  - id: infrastructure_logs
+    defaultTier: E4
+    description: Host, cluster, or platform infrastructure logs for AI runtimes with measuredAt.
+  - id: cloud_audit_logs
+    defaultTier: E4
+    description: Cloud control-plane audit logs (e.g. CloudTrail, Azure Activity, GCP Audit) with measuredAt.
+  - id: network_flow_logs
+    defaultTier: E4
+    description: Network flow / VPC / NSG / firewall logs proving allow/deny paths with measuredAt.
   - id: repo_signal
     defaultTier: E2
     description: Generic in-repo collector signal (docs, code paths, config mentions).

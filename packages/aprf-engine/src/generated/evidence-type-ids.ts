@@ -6,6 +6,7 @@
 export const KNOWN_EVIDENCE_TYPE_IDS = [
   "network_policy",
   "cloud_egress_policy",
+  "cloud_configuration",
   "runtime_network_config",
   "reachability_probe",
   "iac_module",
@@ -15,6 +16,10 @@ export const KNOWN_EVIDENCE_TYPE_IDS = [
   "patching_sla_report",
   "connectivity_deny_probe",
   "accelerator_isolation_test",
+  "application_logs",
+  "infrastructure_logs",
+  "cloud_audit_logs",
+  "network_flow_logs",
   "repo_signal",
   "self_attestation",
   "independent_assessment"

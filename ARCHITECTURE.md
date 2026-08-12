@@ -147,7 +147,7 @@ PII/residency handled by products; the standard requires digests in the Conforma
 
 ### Evidence Type Registry (starter + planned)
 
-**Starter shipped:** [`spec/evidence-types.yaml`](spec/evidence-types.yaml) — vocabulary IDs for `evidencePolicy.acceptableEvidence` (e.g. `network_policy`, `reachability_probe`). Free-form `evidenceRequired[]` prose remains required on every Check.
+**Starter shipped:** [`spec/evidence-types.yaml`](spec/evidence-types.yaml) — vocabulary IDs for `evidencePolicy.acceptableEvidence` (e.g. `network_policy`, `cloud_configuration`, `cloud_audit_logs`, `reachability_probe`). Free-form `evidenceRequired[]` prose remains required on every Check.
 
 **Full registry (planned):** versioned evidence *kind* IDs + JSON schemas (e.g. `git.repo_snapshot`, `k8s.manifest`, `otel.trace_summary`, `prompt.bundle`) — analogous to OpenTelemetry semantic conventions. New platforms should prefer new evidence types (once registered) over new Checks when principles already exist.
 

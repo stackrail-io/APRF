@@ -33,6 +33,8 @@ evidencePolicy:
   minimumTier: E3
   acceptableEvidence:
     - patching_sla_report
+    - infrastructure_logs
+    - cloud_audit_logs
     - repo_signal
 detection:
   capability: "hybrid"

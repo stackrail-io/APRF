@@ -26,6 +26,7 @@ evidencePolicy:
   acceptableEvidence:
     - repo_signal
     - policy_scan_report
+    - application_logs
 detection:
   capability: "hybrid"
   detectors:

@@ -16,6 +16,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ### Changed
 - Wave-1 `evidencePolicy` on **SEC-M1**, **SEC-M4**, **INF-M1**–**INF-M4**, **INF-R3** (minimumTier E3 + acceptableEvidence type IDs).
+- Starter evidence registry adds `cloud_configuration` (E3, non-IaC live/exported cloud config) and operational log types `application_logs`, `infrastructure_logs`, `cloud_audit_logs`, `network_flow_logs` (E4); wired into wave-1 Check `acceptableEvidence` where applicable (INF-R3 stays IaC-gated).
 - Catalog build validates `relatedPeerControlIds` and refuses peer controls with no `mappings[]` row; assessment/HTML surface related-peer refs; `REPORT.html` groups Framework crosswalk lists by framework.
 - Peer-map quality: ASVS 5.0 chapter affinities (not ASVS 4), AISVS sourced from official OWASP AISVS 1.0 (C10=MCP / C11=Adversarial Robustness), LLM→AISVS bridges remapped to v1.0 sections (LLM10 consumption seed limited to C9.1), ASVS/FIASSE prefer Check IDs over pillar expansion.
 - Docs sync: README / ARCHITECTURE / CONTRIBUTING and package READMEs now describe the shipped CLI assessment path, threat-map + crosswalks (informative), and corrected Regulated profile count (51).

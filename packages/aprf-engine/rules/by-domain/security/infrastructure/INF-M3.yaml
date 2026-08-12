@@ -35,6 +35,9 @@ evidencePolicy:
     - network_policy
     - connectivity_deny_probe
     - runtime_network_config
+    - cloud_configuration
+    - network_flow_logs
+    - application_logs
 detection:
   capability: "hybrid"
   detectors:

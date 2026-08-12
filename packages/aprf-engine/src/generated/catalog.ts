@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:053aa308270779d0e747078ee1cfccc5997efc0a18101fe725277b8dfc0ab087",
+  "generatedAt": "sha256:e6041a03a8f3ee2fde24fef1d55f44c2335f578db7bfa0cb642cd30c07f0bf5c",
   "ruleCount": 178,
   "domains": [
     {
@@ -7115,7 +7115,10 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "acceptableEvidence": [
           "cspm_scan",
           "network_policy",
-          "cloud_egress_policy"
+          "cloud_egress_policy",
+          "cloud_configuration",
+          "network_flow_logs",
+          "cloud_audit_logs"
         ]
       },
       "detection": {
@@ -7207,6 +7210,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "minimumTier": "E3",
         "acceptableEvidence": [
           "patching_sla_report",
+          "infrastructure_logs",
+          "cloud_audit_logs",
           "repo_signal"
         ]
       },
@@ -7298,7 +7303,10 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "acceptableEvidence": [
           "network_policy",
           "connectivity_deny_probe",
-          "runtime_network_config"
+          "runtime_network_config",
+          "cloud_configuration",
+          "network_flow_logs",
+          "application_logs"
         ]
       },
       "detection": {
@@ -7390,6 +7398,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "minimumTier": "E3",
         "acceptableEvidence": [
           "accelerator_isolation_test",
+          "infrastructure_logs",
+          "cloud_configuration",
           "repo_signal"
         ]
       },
@@ -12871,7 +12881,8 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "minimumTier": "E3",
         "acceptableEvidence": [
           "repo_signal",
-          "policy_scan_report"
+          "policy_scan_report",
+          "application_logs"
         ]
       },
       "detection": {
@@ -13118,8 +13129,11 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "acceptableEvidence": [
           "network_policy",
           "cloud_egress_policy",
+          "cloud_configuration",
           "runtime_network_config",
-          "reachability_probe"
+          "reachability_probe",
+          "network_flow_logs",
+          "cloud_audit_logs"
         ]
       },
       "detection": {
