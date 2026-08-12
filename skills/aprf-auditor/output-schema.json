@@ -285,6 +285,40 @@
             "type": "array",
             "items": { "type": "string" }
           },
+          "evidenceTier": {
+            "type": "object",
+            "description": "Evidence Assurance Tier rollup (APRF-RFC-0011). PASS requires achieved >= minimum.",
+            "additionalProperties": false,
+            "required": [
+              "minimum",
+              "achieved",
+              "acceptable",
+              "matched",
+              "verification"
+            ],
+            "properties": {
+              "minimum": {
+                "type": "string",
+                "enum": ["E0", "E1", "E2", "E3", "E4", "E5"]
+              },
+              "achieved": {
+                "type": "string",
+                "enum": ["E0", "E1", "E2", "E3", "E4", "E5"]
+              },
+              "acceptable": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "matched": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "verification": {
+                "type": "string",
+                "enum": ["NONE", "UNVERIFIED", "VERIFIED", "NOT_APPLICABLE"]
+              }
+            }
+          },
           "threatIntel": {
             "type": "object",
             "description": "Informative threat context from spec/aprf-threat-map.yaml — explains why the control exists; never affects status, score, or gating",

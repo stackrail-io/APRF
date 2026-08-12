@@ -3,11 +3,14 @@ id: _contract
 version: "0.2.0"
 kind: contract
 requiredFields: [id, title, evidenceClass, inputs, collect, emits, whenUnavailable]
-recommendedFields: [detectorIds, mapsToChecks, executor]
+recommendedFields: [detectorIds, mapsToChecks, executor, emitsEvidenceTier]
 evidenceClassEnum: [runtime, ci, iac, runtime-config, policy, code, docs, user]
+evidenceTierEnum: [E0, E1, E2, E3, E4, E5]
 emitsMustInclude: [nodeClass, refPattern, signals]
 # detectorIds: Check YAML detection.detectors[].id values this plugin covers
 # (bridge for join/validate; plugin id may differ). mapsToChecks: score join.
+# emitsEvidenceTier: max assurance tier this plugin's repo scan claims (APRF-RFC-0011);
+# defaults from evidenceClass when omitted; generated into plugin-evidence-tier-map.json.
 security:
   - Never exfiltrate secrets to third parties.
   - Prefer user-provided exports under aprf-assessment/imports/<pluginId>/ when live APIs are unavailable.

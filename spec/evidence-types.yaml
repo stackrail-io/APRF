@@ -1,0 +1,57 @@
+# Starter Evidence Type Registry (APRF-RFC-0011).
+# Full per-type JSON Schemas remain future work — IDs are vocabulary for
+# Check evidencePolicy.acceptableEvidence and assessment matched[].
+version: "0.1.0"
+aprfVersion: "0.11.0"
+
+tiers:
+  E0: { name: "No evidence", description: "No evidence collected for the Check." }
+  E1: { name: "Self-attestation", description: "Human YES/NO attestation without measured artifacts." }
+  E2: { name: "Repository evidence", description: "Code, docs, or repo collector signals." }
+  E3: { name: "Configuration evidence", description: "IaC, policy, runtime-config, or CI-wired configuration." }
+  E4: { name: "Runtime evidence", description: "Live probes, runtime telemetry, or measured imports with measuredAt." }
+  E5: { name: "Independent verification", description: "Third-party or external assessor pack." }
+
+types:
+  - id: network_policy
+    defaultTier: E3
+    description: NetworkPolicy / security-group / firewall rules declaring allowlisted destinations.
+  - id: cloud_egress_policy
+    defaultTier: E3
+    description: Cloud egress / VPC endpoint / private-link policy for model or tool identities.
+  - id: runtime_network_config
+    defaultTier: E3
+    description: Runtime network configuration (sidecar, service mesh, egress proxy) for AI workloads.
+  - id: reachability_probe
+    defaultTier: E4
+    description: Automated or reviewed probe proving allowlisted-only reachability.
+  - id: iac_module
+    defaultTier: E3
+    description: Infrastructure-as-code modules covering the production surface.
+  - id: cis_policy_scan
+    defaultTier: E3
+    description: CIS-aligned (or equivalent) policy-scan config wired to apply/PR.
+  - id: policy_scan_report
+    defaultTier: E4
+    description: Fresh policy-scan report for production stacks (measuredAt).
+  - id: cspm_scan
+    defaultTier: E4
+    description: CSPM / network exposure scan results.
+  - id: patching_sla_report
+    defaultTier: E4
+    description: Runtime inventory / CVE / image-age report against a documented patching SLA.
+  - id: connectivity_deny_probe
+    defaultTier: E4
+    description: Unauthorized internal-service access deny probe for agent/tool runtimes.
+  - id: accelerator_isolation_test
+    defaultTier: E4
+    description: Isolation / capacity test for shared AI accelerators.
+  - id: repo_signal
+    defaultTier: E2
+    description: Generic in-repo collector signal (docs, code paths, config mentions).
+  - id: self_attestation
+    defaultTier: E1
+    description: Manual attestation without supporting measured artifacts.
+  - id: independent_assessment
+    defaultTier: E5
+    description: External or independent verification pack.

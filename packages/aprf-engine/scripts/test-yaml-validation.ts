@@ -7,6 +7,7 @@ import { parse as parseYaml } from "yaml";
 import {
   buildSpecCheckIndex,
   lintCategoryNotEchoedInProse,
+  lintEvidencePolicy,
   lintForbiddenProse,
   lintFixedEnums,
   lintIdGateConvention,
@@ -371,6 +372,53 @@ assertNone(lintYamlRule(baseRule, ctx), "valid fixture passes full lint");
   assert(map.get("SEC-M1")?.gate === "mandatory", "index mandatory");
   assert(map.get("SEC-R1")?.gate === "recommended", "index recommended");
 }
+
+// evidencePolicy (APRF-RFC-0011)
+assertNone(
+  lintEvidencePolicy({
+    ...baseRule,
+    evidencePolicy: {
+      minimumTier: "E3",
+      acceptableEvidence: ["network_policy", "repo_signal"],
+    },
+  }),
+  "known evidencePolicy ids + tier ok",
+);
+assertIncludes(
+  lintEvidencePolicy({
+    ...baseRule,
+    evidencePolicy: { minimumTier: "E9" },
+  }),
+  'evidencePolicy.minimumTier "E9"',
+  "unknown minimumTier rejected",
+);
+assertIncludes(
+  lintEvidencePolicy({
+    ...baseRule,
+    evidencePolicy: { acceptableEvidence: ["not_a_real_type"] },
+  }),
+  'unknown id "not_a_real_type"',
+  "unknown acceptableEvidence id rejected",
+);
+assertIncludes(
+  lintYamlRule(
+    {
+      ...baseRule,
+      evidencePolicy: { minimumTier: "E5" },
+    },
+    {
+      ...ctx,
+      specById: new Map([
+        [
+          "SEC-M1",
+          { ...specById.get("SEC-M1")!, minimumTier: "E1" },
+        ],
+      ]),
+    },
+  ),
+  "resolved minimumTier E5 does not map to spec.minimumTier E1",
+  "evidencePolicy vs projected spec.minimumTier mismatch rejected",
+);
 
 // Full catalog: every by-domain/*.yaml (same path as npm run validate)
 {

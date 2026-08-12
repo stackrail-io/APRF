@@ -8,12 +8,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Added
+- **Evidence Assurance Tiers (E0–E5)** — [APRF-RFC-0011](rfcs/0011-evidence-assurance-tiers.md): Check `evidencePolicy.minimumTier` / `acceptableEvidence`, starter [`spec/evidence-types.yaml`](spec/evidence-types.yaml), assess `controls[].evidenceTier` (`achieved` / `minimum` / `verification`), REPORT shows Evidence / Required / UNVERIFIED. PASS requires `achievedTier >= minimumTier`; below-floor stays PARTIAL (not a sixth status). Defaults: manual→E1, hybrid→E3, automated→E4. Achieved tier is derived from graph classes + fresh measured imports (not `statusHint=pass`); `UNVERIFIED` means below floor only; `matched[]` is observed∩acceptable; plugins may declare `emitsEvidenceTier` (generated `plugin-evidence-tier-map.json`).
 - Fine-grained informative peer crosswalks in `spec/aprf-spec.json`: **OWASP AISVS 1.0** (`aisvs:v1.0-C*.*`), **ASVS 5.0** (80), **OpenCRE** (13 CWE bridges), **CSA MAESTRO** (7 layers + 5 extended threats), **FIASSE/SSEM** (61); OWASP LLM Top 10 controls gain `relatedPeerControlIds` AISVS bridges ([APRF-RFC-0010](rfcs/0010-peer-crosswalks-aisvs-asvs-opencre-maestro-fiasse.md)).
 - `scripts/draft-peer-crosswalk-controls.mjs` — draft/apply peer `controls[]` + LLM→AISVS bridges from a local OWASP AISVS 1.0 checkout (`--aisvs-root`) and compact ASVS/OpenCRE/FIASSE inventories under `scripts/peer-crosswalk-inventories/`.
 - Detector↔plugin bridge: complete `plugin.detectorIds` for orphan Check detectors; generate `detector-plugin-map.json`; `aprf:detector-bridge` in local `validate` and `.github/workflows/ci.yml` (every Check detector except `manual-attest` must be claimed; join maps must match plugin YAML).
 - Real hybrid collectors for former import-only stubs: `langsmith`, `phoenix`, `wandb`, `helicone`, `prometheus`, `grafana`, `cloudwatch` (repo config/IaC scan + `imports/<id>/`); shared factory `collectors/lib/repo-import-collector.ts`.
 
 ### Changed
+- Wave-1 `evidencePolicy` on **SEC-M1**, **SEC-M4**, **INF-M1**–**INF-M4**, **INF-R3** (minimumTier E3 + acceptableEvidence type IDs).
 - Catalog build validates `relatedPeerControlIds` and refuses peer controls with no `mappings[]` row; assessment/HTML surface related-peer refs; `REPORT.html` groups Framework crosswalk lists by framework.
 - Peer-map quality: ASVS 5.0 chapter affinities (not ASVS 4), AISVS sourced from official OWASP AISVS 1.0 (C10=MCP / C11=Adversarial Robustness), LLM→AISVS bridges remapped to v1.0 sections (LLM10 consumption seed limited to C9.1), ASVS/FIASSE prefer Check IDs over pillar expansion.
 - Docs sync: README / ARCHITECTURE / CONTRIBUTING and package READMEs now describe the shipped CLI assessment path, threat-map + crosswalks (informative), and corrected Regulated profile count (51).

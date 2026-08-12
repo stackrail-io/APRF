@@ -28,6 +28,12 @@ evidenceRequired:
   - "CSPM/network scan covering those surfaces (measuredAt ≤90 days)"
   - "Authenticated edge-control config, or private-only exposure proven by the scan"
   - "Open high/critical public-exposure findings closed or waived with owner and expiry"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - cspm_scan
+    - network_policy
+    - cloud_egress_policy
 detection:
   capability: "hybrid"
   detectors:

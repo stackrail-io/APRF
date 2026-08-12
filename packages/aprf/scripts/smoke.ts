@@ -16,6 +16,9 @@ mkdirSync(join(root, "imports", "workload-identity-runtimes"), {
   recursive: true,
 });
 mkdirSync(join(root, "imports", "http-auth-probe"), { recursive: true });
+mkdirSync(join(root, "imports", "model-path-egress-boundary"), {
+  recursive: true,
+});
 
 mkdirSync(join(root, "imports", "aws"), { recursive: true });
 writeFileSync(
@@ -74,6 +77,26 @@ writeFileSync(
     gapNotes: [
       "We found self-hosted model runtime signals, but still need recent measured evidence (within 90 days) under imports/workload-identity-runtimes/ showing 100% workload identity coverage, zero static shared keys in the inventory, and sample authenticated calls.",
     ],
+  }),
+);
+
+// Collector wrongly claims PASS with only repo signals / no measuredAt import.
+// Assess must coerce to PARTIAL + UNVERIFIED (Evidence Assurance Tier floor).
+writeFileSync(
+  join(
+    root,
+    "imports",
+    "model-path-egress-boundary",
+    "model-path-egress-boundary-report.json",
+  ),
+  JSON.stringify({
+    pluginId: "model-path-egress-boundary",
+    summary: { statusHint: "pass", secM4Satisfied: true },
+    signals: {
+      trustBoundary: { found: true, refs: ["docs/trust-boundary.md"] },
+      egressAllowlist: { found: true, refs: ["infra/network-policy.yaml"] },
+    },
+    notes: ["Signals alone should not PASS — missing measured import."],
   }),
 );
 
@@ -160,6 +183,11 @@ writeFileSync(
         status: "ran",
         detail: "AUTHN-R2 status=partial signals=true satisfied=false",
       },
+      {
+        pluginId: "model-path-egress-boundary",
+        status: "ran",
+        detail: "SEC-M4 status=pass signals=true satisfied=true",
+      },
     ],
     nodes: [
       {
@@ -170,6 +198,15 @@ writeFileSync(
         relatedCheckIds: ["SEC2-M1"],
         signals: ["sec2-m1"],
         excerpt: "statusHint=fail",
+      },
+      {
+        id: "model-path-egress-boundary:ref:docs/trust-boundary.md",
+        class: "code",
+        ref: "docs/trust-boundary.md",
+        pluginId: "model-path-egress-boundary",
+        relatedCheckIds: ["SEC-M4"],
+        signals: ["model-path-egress-boundary-ref"],
+        excerpt: "trust boundary docs (repo signal only)",
       },
     ],
     edges: [],
@@ -197,6 +234,13 @@ const a = JSON.parse(readFileSync(assessmentPath, "utf8")) as {
     severity?: string;
     evidenceFound: unknown[];
     requiredEvidenceMissing?: string[];
+    evidenceTier?: {
+      minimum: string;
+      achieved: string;
+      acceptable: string[];
+      matched: string[];
+      verification: string;
+    };
     crosswalks?: Array<{
       framework: string;
       frameworkId?: string;
@@ -496,6 +540,32 @@ assert(
   ),
   "AUTHN-R2 Evidence found must not include found=false signals",
 );
+assert(
+  authnR2?.evidenceTier?.minimum === "E3" &&
+    authnR2?.evidenceTier?.verification === "UNVERIFIED" &&
+    typeof authnR2?.evidenceTier?.achieved === "string",
+  `AUTHN-R2 must emit evidenceTier with hybrid floor E3 and UNVERIFIED; got ${JSON.stringify(authnR2?.evidenceTier)}`,
+);
+assert(
+  authnR2?.requiredEvidenceMissing?.some((n) => /UNVERIFIED|below required/i.test(n)),
+  "AUTHN-R2 gaps must mention tier UNVERIFIED / below required floor",
+);
+
+// SEC-M4: collector said PASS with only code-class repo signals → coerce.
+const secM4 = fullById.get("SEC-M4");
+assert(
+  secM4?.status === "PARTIAL" &&
+    secM4?.evidenceTier?.verification === "UNVERIFIED" &&
+    secM4?.evidenceTier?.achieved === "E2" &&
+    secM4?.evidenceTier?.minimum === "E3" &&
+    secM4?.passed === false,
+  `SEC-M4 must coerce false PASS below E3 floor to PARTIAL+UNVERIFIED; got ${JSON.stringify({ status: secM4?.status, evidenceTier: secM4?.evidenceTier, passed: secM4?.passed })}`,
+);
+assert(
+  Array.isArray(secM4?.evidenceTier?.matched) &&
+    !secM4.evidenceTier.matched.includes("reachability_probe"),
+  "SEC-M4 matched[] must not invent reachability_probe without measured import",
+);
 
 const htmlPath = resolve(root, "REPORT.html");
 writeAssessmentHtmlReport(assessmentPath, htmlPath);
@@ -568,6 +638,12 @@ assert(
     html.includes("You will not see PASS from a code scan alone") &&
     html.includes("This assessment has 0 PASS"),
   "REPORT.html must explain hybrid evidence coverage and that repo-only collect cannot PASS",
+);
+assert(
+  html.includes("UNVERIFIED (below floor)") &&
+    html.includes("Evidence:") &&
+    html.includes("Required:"),
+  "REPORT.html must surface Evidence Assurance Tiers (achieved / required / UNVERIFIED)",
 );
 // Executive summary order: verification callout → Evidence coverage → Top threat exposure.
 const verifyCalloutAt = html.indexOf("implemented but unverified");

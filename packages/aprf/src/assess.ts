@@ -26,8 +26,16 @@ import {
   getThreatIntelForCheck,
   getGeneratedCatalog,
   SEVERITY_WEIGHT,
+  classifyAchievedTier,
+  matchedEvidenceTypes,
+  parseEvidenceTier,
+  resolveMinimumTier,
+  tierMeetsFloor,
+  verificationFor,
   type AprfRule,
+  type ControlEvidenceTier,
   type DomainDef,
+  type EvidenceTier,
 } from "@stackrail-io/aprf-engine";
 import {
   PROFILE_CORE,
@@ -52,6 +60,9 @@ import type {
   EvidenceClass,
 } from "../../../skills/aprf-auditor/collectors/types.ts";
 import pluginCheckMap from "./generated/plugin-check-map.json" with {
+  type: "json",
+};
+import pluginEvidenceTierMap from "./generated/plugin-evidence-tier-map.json" with {
   type: "json",
 };
 import { catalogVersion, cliVersion } from "./versions.ts";
@@ -168,6 +179,8 @@ type ControlOut = {
   confidenceScore: number;
   evidenceFound: Array<{ ref: string; excerpt?: string }>;
   requiredEvidenceMissing: string[];
+  /** Evidence Assurance Tier rollup (APRF-RFC-0011). */
+  evidenceTier: ControlEvidenceTier;
   reasoning: string;
   recommendedAction: string;
   priority: string;
@@ -559,6 +572,82 @@ function buildCategoryDomainMap(
   return map;
 }
 
+/** Fresh measuredAt within maxAgeDays (default 90). */
+function measuredAtFresh(
+  measuredAt: string | null | undefined,
+  now = new Date(),
+  maxAgeDays = 90,
+): boolean {
+  if (!measuredAt || typeof measuredAt !== "string") return false;
+  const t = Date.parse(measuredAt.trim());
+  if (Number.isNaN(t)) return false;
+  const ageMs = now.getTime() - t;
+  if (ageMs < 0) return true;
+  return ageMs <= maxAgeDays * 24 * 60 * 60 * 1000;
+}
+
+/**
+ * Detect measured import / runtime pack from a collector report — never from
+ * statusHint=pass alone (that would launder the Evidence Assurance Tier floor).
+ */
+function reportHasMeasuredImport(
+  outDir: string,
+  reportRef: string | undefined,
+): boolean {
+  if (!reportRef?.startsWith("imports/")) return false;
+  const path = join(outDir, reportRef);
+  if (!existsSync(path)) return false;
+  try {
+    const doc = JSON.parse(readFileSync(path, "utf8")) as Record<
+      string,
+      unknown
+    >;
+    const summary =
+      doc.summary && typeof doc.summary === "object" && !Array.isArray(doc.summary)
+        ? (doc.summary as Record<string, unknown>)
+        : null;
+    const summaryTier = parseEvidenceTier(summary?.achievedTier);
+    if (summaryTier && (summaryTier === "E4" || summaryTier === "E5")) {
+      return true;
+    }
+    if (summary?.measuredEvidence === true) return true;
+
+    const imported =
+      doc.importedResults &&
+      typeof doc.importedResults === "object" &&
+      !Array.isArray(doc.importedResults)
+        ? (doc.importedResults as Record<string, unknown>)
+        : null;
+    if (imported?.found === true) {
+      const at =
+        typeof imported.measuredAt === "string"
+          ? imported.measuredAt
+          : typeof doc.measuredAt === "string"
+            ? doc.measuredAt
+            : null;
+      if (measuredAtFresh(at)) return true;
+    }
+    // Coverage JSON style: top-level measuredAt with PASS-unlock fields present.
+    if (
+      typeof doc.measuredAt === "string" &&
+      measuredAtFresh(doc.measuredAt) &&
+      !reportRef.includes("-report.json")
+    ) {
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+function pluginEmitsTierFor(pluginId: string | undefined): EvidenceTier | null {
+  if (!pluginId) return null;
+  return parseEvidenceTier(
+    (pluginEvidenceTierMap as Record<string, string>)[pluginId],
+  );
+}
+
 function nodesForCheck(
   graph: EvidenceGraph | undefined,
   checkId: string,
@@ -754,16 +843,80 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
 
     const mapped = hints.get(checkId);
     const hint: HintStatus = mapped?.hint ?? "not_demonstrated";
-    const status = HINT_TO_STATUS[hint];
+    let status = HINT_TO_STATUS[hint];
     const gate: "mandatory" | "recommended" = mandatoryIds.has(checkId)
       ? "mandatory"
       : "recommended";
-    const notApplicable = status === "NOT_APPLICABLE";
-    // scoring.yaml: N/A is excluded, not a pass
-    const passed = status === "PASS";
 
     const related = nodesForCheck(graph, checkId);
     const conf = confidenceFromEvidence(related, Boolean(mapped));
+    const minimumTier = resolveMinimumTier(
+      rule.evidencePolicy,
+      rule.detection?.capability,
+    );
+    const independentVerification = related.some(
+      (n) =>
+        n.signals?.includes("independent-verification") ||
+        n.signals?.includes("independent_assessment"),
+    );
+    // Never treat statusHint=pass as measured — only fresh import packs.
+    const measuredImportPresent = reportHasMeasuredImport(
+      outDir,
+      mapped?.reportRef,
+    );
+    const repoSignalsPresent =
+      related.some((n) => n.ref && n.ref !== "not-demonstrated") ||
+      hint === "partial" ||
+      hint === "fail" ||
+      hint === "pass" ||
+      Boolean(mapped?.reportRef?.startsWith("imports/"));
+    const achievedTier = classifyAchievedTier({
+      evidenceClasses: related.map((n) => n.class),
+      measuredImportPresent,
+      independentVerification,
+      selfAttestationOnly:
+        hint !== "not_demonstrated" &&
+        related.length > 0 &&
+        related.every((n) => n.class === "user"),
+      repoSignalsPresent:
+        hint !== "not_demonstrated" &&
+        hint !== "not_applicable" &&
+        repoSignalsPresent,
+      pluginEmitsTier: pluginEmitsTierFor(mapped?.pluginId),
+    });
+    // Below-floor evidence cannot PASS (APRF-RFC-0011).
+    if (status === "PASS" && !tierMeetsFloor(achievedTier, minimumTier)) {
+      status = "PARTIAL";
+    }
+    const notApplicable = status === "NOT_APPLICABLE";
+    // scoring.yaml: N/A is excluded, not a pass
+    const passed = status === "PASS";
+    const acceptable = rule.evidencePolicy?.acceptableEvidence ?? [];
+    const matchedTypes = matchedEvidenceTypes({
+      evidenceClasses: related.map((n) => n.class),
+      acceptable,
+      measuredImportPresent,
+      independentVerification,
+      repoSignalsPresent:
+        hint !== "not_demonstrated" &&
+        hint !== "not_applicable" &&
+        repoSignalsPresent,
+    });
+    const evidenceTier: ControlEvidenceTier = {
+      minimum: minimumTier,
+      achieved: achievedTier,
+      acceptable: [...acceptable],
+      matched: matchedTypes,
+      verification: verificationFor({
+        status,
+        achieved: achievedTier,
+        minimum: minimumTier,
+      }),
+    };
+    const tierGapNote =
+      evidenceTier.verification === "UNVERIFIED"
+        ? `Evidence tier ${achievedTier} is below required ${minimumTier} — UNVERIFIED; PASS needs measured evidence at or above ${minimumTier}.`
+        : null;
 
     // Evidence found: prefer report signals where found=true (and their refs).
     // Fall back to graph node excerpts. Never invent statusHint=… (plugin=…) rows.
@@ -820,18 +973,23 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     const requiredEvidenceMissing =
       status === "PASS" || status === "NOT_APPLICABLE"
         ? []
-        : mapped?.gapNotes?.length
-          ? mapped.gapNotes.map(softenGapJargon)
-          : status === "NOT_DEMONSTRATED"
-            ? [
-                mapped
-                  ? `No measured evidence yet for this check. Add recent results under imports/${mapped.pluginId}/, or attest that this surface is out of scope.`
-                  : `No scored collector report for this check yet. Re-run collect, or add measured evidence under imports/<plugin>/.`,
-                ...(rule.evidenceRequired ?? []).slice(0, 2).map(softenGapJargon),
-              ]
-            : mapped
-              ? [customerFacingImportGap(mapped.pluginId)]
-              : [...(rule.evidenceRequired ?? [])].map(softenGapJargon);
+        : [
+            ...(tierGapNote ? [tierGapNote] : []),
+            ...(mapped?.gapNotes?.length
+              ? mapped.gapNotes.map(softenGapJargon)
+              : status === "NOT_DEMONSTRATED"
+                ? [
+                    mapped
+                      ? `No measured evidence yet for this check. Add recent results under imports/${mapped.pluginId}/, or attest that this surface is out of scope.`
+                      : `No scored collector report for this check yet. Re-run collect, or add measured evidence under imports/<plugin>/.`,
+                    ...(rule.evidenceRequired ?? [])
+                      .slice(0, 2)
+                      .map(softenGapJargon),
+                  ]
+                : mapped
+                  ? [customerFacingImportGap(mapped.pluginId)]
+                  : [...(rule.evidenceRequired ?? [])].map(softenGapJargon)),
+          ];
 
     // Collector may escalate (e.g. AGN-M1 high → critical when inventory unproven).
     const severity = mapped?.severityHint ?? rule.severity;
@@ -881,9 +1039,10 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       confidenceScore: Number(conf.score.toFixed(3)),
       evidenceFound,
       requiredEvidenceMissing,
+      evidenceTier,
       reasoning: mapped
-        ? `Primary evidence class=${related[0]?.class ?? "ci"} (${evidenceFound.length} refs). Deterministic assess (no LLM).`
-        : `No scored collector report — marked NOT_DEMONSTRATED. Add imports/ evidence or re-run collect. Manual: ${rule.manualVerification}`,
+        ? `Evidence ${evidenceTier.achieved} (required ${evidenceTier.minimum}, ${evidenceTier.verification}). Primary class=${related[0]?.class ?? "ci"} (${evidenceFound.length} refs). Deterministic assess (no LLM).`
+        : `No scored collector report — marked NOT_DEMONSTRATED (evidence ${evidenceTier.achieved}, required ${evidenceTier.minimum}). Add imports/ evidence or re-run collect. Manual: ${rule.manualVerification}`,
       recommendedAction: (rule.recommendedFixes ?? []).join("; "),
       priority,
       // No placeholder owner/effort — those belong to a tracked remediation system, not CLI assess.

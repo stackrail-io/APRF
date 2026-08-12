@@ -29,6 +29,12 @@ evidenceRequired:
   - "Inventory of agent/tool runtimes and their documented required dependencies"
   - "Least-privilege connectivity controls for those runtimes (network policy, security groups, service mesh, workload identity, egress gateway, private endpoints, or equivalent)"
   - "Probe or reviewed test showing unauthorized internal-service access is blocked (measuredAt ≤90 days)"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - network_policy
+    - connectivity_deny_probe
+    - runtime_network_config
 detection:
   capability: "hybrid"
   detectors:

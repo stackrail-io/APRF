@@ -2,7 +2,17 @@
  * Extra Check-YAML lint rules beyond Ajv schema.
  * Used by scripts/validate-catalog.ts (CLI + unit catalog sweep) and fixture unit tests.
  */
-import type { AprfRule } from "./types.js";
+import type {
+  AprfRule,
+  DetectionCapability,
+  EvidenceTier,
+  RuleEvidencePolicy,
+} from "./types.js";
+import { EVIDENCE_TIERS } from "./types.js";
+import { resolveMinimumTier } from "./evidence-tiers.js";
+import { KNOWN_EVIDENCE_TYPE_IDS } from "./generated/evidence-type-ids.js";
+
+export { KNOWN_EVIDENCE_TYPE_IDS };
 
 export const SEVERITIES = ["critical", "high", "medium", "low"] as const;
 export const GATES = ["mandatory", "recommended"] as const;
@@ -23,6 +33,8 @@ export interface SpecCheckRef {
   pillarSeverity?: string;
   domain: string | null;
   method: "automated" | "manual" | "hybrid";
+  /** Projected evidence floor (APRF-RFC-0011); optional until sync lands. */
+  minimumTier?: EvidenceTier;
   requiredFromLevel: number;
   minCriticality: number;
   passCondition: string;
@@ -252,6 +264,49 @@ export function lintFixedEnums(raw: unknown): string[] {
   return errors;
 }
 
+/** Lint optional evidencePolicy (APRF-RFC-0011). */
+export function lintEvidencePolicy(raw: unknown): string[] {
+  const errors: string[] = [];
+  if (!isRecord(raw) || raw.evidencePolicy == null) return errors;
+  if (!isRecord(raw.evidencePolicy)) {
+    errors.push("evidencePolicy must be an object");
+    return errors;
+  }
+  const pol = raw.evidencePolicy;
+  if (pol.minimumTier != null) {
+    if (
+      typeof pol.minimumTier !== "string" ||
+      !(EVIDENCE_TIERS as readonly string[]).includes(pol.minimumTier)
+    ) {
+      errors.push(
+        `evidencePolicy.minimumTier "${String(pol.minimumTier)}" not in [${EVIDENCE_TIERS.join(", ")}]`,
+      );
+    }
+  }
+  if (pol.acceptableEvidence != null) {
+    if (!Array.isArray(pol.acceptableEvidence)) {
+      errors.push("evidencePolicy.acceptableEvidence must be an array");
+    } else {
+      for (const [i, id] of pol.acceptableEvidence.entries()) {
+        if (typeof id !== "string" || !/^[a-z][a-z0-9_]*$/.test(id)) {
+          errors.push(
+            `evidencePolicy.acceptableEvidence[${i}] must be a snake_case id`,
+          );
+          continue;
+        }
+        if (
+          !(KNOWN_EVIDENCE_TYPE_IDS as readonly string[]).includes(id)
+        ) {
+          errors.push(
+            `evidencePolicy.acceptableEvidence[${i}] unknown id "${id}" — add to spec/evidence-types.yaml`,
+          );
+        }
+      }
+    }
+  }
+  return errors;
+}
+
 export function lintIdGateConvention(raw: unknown): string[] {
   const errors: string[] = [];
   if (!isRecord(raw)) return errors;
@@ -448,6 +503,7 @@ export function lintYamlRule(
   const errors: string[] = [
     ...missingMandatoryFields(raw),
     ...lintFixedEnums(raw),
+    ...lintEvidencePolicy(raw),
     ...lintForbiddenProse(raw),
     ...lintIdGateConvention(raw),
     ...lintTitleObligation(raw),
@@ -534,6 +590,26 @@ export function lintYamlRule(
           `passCondition does not map to published spec for ${id}`,
         );
       }
+
+      if (spec.minimumTier) {
+        const capability =
+          isRecord(raw.detection) &&
+          typeof raw.detection.capability === "string" &&
+          (DETECTION_CAPABILITIES as readonly string[]).includes(
+            raw.detection.capability,
+          )
+            ? (raw.detection.capability as DetectionCapability)
+            : undefined;
+        const policy = isRecord(raw.evidencePolicy)
+          ? (raw.evidencePolicy as RuleEvidencePolicy)
+          : undefined;
+        const resolved = resolveMinimumTier(policy, capability);
+        if (resolved !== spec.minimumTier) {
+          errors.push(
+            `resolved minimumTier ${resolved} does not map to spec.minimumTier ${spec.minimumTier}`,
+          );
+        }
+      }
     }
   }
 
@@ -558,6 +634,7 @@ export function buildSpecCheckIndex(spec: {
     mandatoryChecks?: Array<{
       id: string;
       method: "automated" | "manual" | "hybrid";
+      minimumTier?: EvidenceTier;
       requiredFromLevel: number;
       minCriticality: number;
       passCondition: string;
@@ -566,6 +643,7 @@ export function buildSpecCheckIndex(spec: {
     recommendedChecks?: Array<{
       id: string;
       method: "automated" | "manual" | "hybrid";
+      minimumTier?: EvidenceTier;
       requiredFromLevel: number;
       minCriticality: number;
       passCondition: string;
@@ -584,6 +662,7 @@ export function buildSpecCheckIndex(spec: {
         pillarSeverity: pillar.severity,
         domain: pillar.domain ?? null,
         method: c.method,
+        ...(c.minimumTier ? { minimumTier: c.minimumTier } : {}),
         requiredFromLevel: c.requiredFromLevel,
         minCriticality: c.minCriticality,
         passCondition: c.passCondition,
@@ -599,6 +678,7 @@ export function buildSpecCheckIndex(spec: {
         pillarSeverity: pillar.severity,
         domain: pillar.domain ?? null,
         method: c.method,
+        ...(c.minimumTier ? { minimumTier: c.minimumTier } : {}),
         requiredFromLevel: c.requiredFromLevel,
         minCriticality: c.minCriticality,
         passCondition: c.passCondition,
