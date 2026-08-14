@@ -3,6 +3,7 @@ title: AI runtime patching SLA (INF-M2)
 version: "0.2.0"
 executor: collectors/ai-runtime-patching.ts
 evidenceClass: iac
+emitsEvidenceTier: E3
 alsoEmits: []
 detectorIds: [repo-ai-runtime-patching]
 inputs:

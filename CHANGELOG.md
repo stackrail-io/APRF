@@ -16,12 +16,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ### Changed
 - Wave-1 `evidencePolicy` on **SEC-M1**, **SEC-M4**, **INF-M1**–**INF-M4**, **INF-R3** (minimumTier E3 + acceptableEvidence type IDs).
+- Wave-2 `evidencePolicy` on **AUTHN-***, **AUTHZ-***, **SEC2-***, **SCI-*** (minimumTier E3 + acceptableEvidence); primary plugins declare `emitsEvidenceTier`.
+- Wave-1 collectors emit report `evidenceTypes[]` (provenance for `matched[]`); `CLASS_TO_EVIDENCE_TYPES` narrowed so broad `iac`/`policy` classes no longer invent unrelated type IDs.
 - Starter evidence registry adds `cloud_configuration` (E3, non-IaC live/exported cloud config) and operational log types `application_logs`, `infrastructure_logs`, `cloud_audit_logs`, `network_flow_logs` (E4); wired into wave-1 Check `acceptableEvidence` where applicable (INF-R3 stays IaC-gated).
 - Catalog build validates `relatedPeerControlIds` and refuses peer controls with no `mappings[]` row; assessment/HTML surface related-peer refs; `REPORT.html` groups Framework crosswalk lists by framework.
 - Peer-map quality: ASVS 5.0 chapter affinities (not ASVS 4), AISVS sourced from official OWASP AISVS 1.0 (C10=MCP / C11=Adversarial Robustness), LLM→AISVS bridges remapped to v1.0 sections (LLM10 consumption seed limited to C9.1), ASVS/FIASSE prefer Check IDs over pillar expansion.
 - Docs sync: README / ARCHITECTURE / CONTRIBUTING and package READMEs now describe the shipped CLI assessment path, threat-map + crosswalks (informative), and corrected Regulated profile count (51).
 - CI / `npm run validate` run `aprf:check-spec-sync` (`aprf:sync-rfcs` + `aprf:sync-stats` + `aprf:sync-evidence-tiers`, fail on `spec/aprf-spec.json` drift) alongside `aprf:threat-map`.
-- REPORT separates **UNVERIFIED (below floor)** from **metrics-incomplete PARTIAL** (repo signals without measured proof); only `evidenceTier.verification === UNVERIFIED` is labeled UNVERIFIED.
+- REPORT separates **UNVERIFIED (below floor)** from **metrics-incomplete PARTIAL** (repo signals without measured proof); only `evidenceTier.verification === UNVERIFIED` is labeled UNVERIFIED; table filter drops redundant Partial chip (keep Needs verification).
 - Promoted **INF-R3** from manual to **hybrid** with collector `ai-iac-cis-policy` (production-AI IaC + CIS-aligned policy checks on apply/PR; inventory-gated PASS; measuredAt ≤90d; N/A via `productionAiInfrastructurePresent=false`); synced `aprf-spec.json`.
 
 ## [Catalog 0.11.3] / [@stackrail-io/aprf@0.1.4] — 2026-08-07

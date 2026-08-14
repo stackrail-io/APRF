@@ -130,11 +130,11 @@ assert.deepEqual(
 assert.deepEqual(
   matchedEvidenceTypes({
     evidenceClasses: ["iac"],
-    acceptable: ["patching_sla_report", "repo_signal"],
+    acceptable: ["patching_sla_report", "repo_signal", "iac_module"],
     repoSignalsPresent: true,
   }),
-  [],
-  "must not invent iac_module or repo_signal when class only implies IaC types outside acceptable",
+  ["iac_module"],
+  "iac class only implies iac_module without collector provenance",
 );
 assert.deepEqual(
   matchedEvidenceTypes({

@@ -29,6 +29,15 @@ evidenceRequired:
   - "Model registry (or equivalent) entries linking each pin to its MBOM/SBOM artifact"
   - "Retention location proving artifacts are kept ≥90 days"
   - "Coverage attest or inventory export showing 100% of production pins linked (measuredAt ≤90 days)"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - iac_module
+    - cis_policy_scan
+    - policy_scan_report
+    - repo_signal
+    - cloud_configuration
+    - cloud_audit_logs
 detection:
   capability: "hybrid"
   detectors:

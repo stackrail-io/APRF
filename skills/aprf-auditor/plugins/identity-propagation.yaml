@@ -3,6 +3,7 @@ title: End-user identity propagation through agent/tool chains (AUTHN-M4)
 version: "0.2.0"
 executor: collectors/identity-propagation.ts
 evidenceClass: runtime
+emitsEvidenceTier: E4
 alsoEmits: []
 detectorIds: [repo-identity-propagation]
 inputs:

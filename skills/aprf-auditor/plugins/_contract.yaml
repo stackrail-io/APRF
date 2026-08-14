@@ -11,6 +11,8 @@ emitsMustInclude: [nodeClass, refPattern, signals]
 # (bridge for join/validate; plugin id may differ). mapsToChecks: score join.
 # emitsEvidenceTier: max assurance tier this plugin's repo scan claims (APRF-RFC-0011);
 # defaults from evidenceClass when omitted; generated into plugin-evidence-tier-map.json.
+# Collector *-report.json should set top-level (and summary) evidenceTypes[] to starter
+# registry IDs from spec/evidence-types.yaml so assessment matched[] has provenance.
 security:
   - Never exfiltrate secrets to third parties.
   - Prefer user-provided exports under aprf-assessment/imports/<pluginId>/ when live APIs are unavailable.

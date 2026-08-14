@@ -25,6 +25,13 @@ evidenceRequired:
   - "Production MCP/AI S2S connection inventory (tool servers, MCP servers, or equivalent)"
   - "Auth config per connection (auth_type / identity binding; secrets redacted)"
   - "Scoring report showing 0 anonymous and 0 shared static-key connections"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - application_logs
+    - cloud_audit_logs
+    - repo_signal
+    - policy_scan_report
 detection:
   capability: "hybrid"
   detectors:

@@ -35,6 +35,15 @@ evidenceRequired:
   - "CI/CD or promote-path gate that blocks critical findings per org policy (CVSS, EPSS, CISA KEV, reachability, exploit maturity, or equivalent)"
   - "Retained scan results for the sample window showing 100% coverage and 0 skipped scans (measuredAt ≤90 days)"
   - "Waiver records for any critical exceptions (owner + expiry ≤14 days), or proof none were granted"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - iac_module
+    - cis_policy_scan
+    - policy_scan_report
+    - repo_signal
+    - cloud_configuration
+    - cloud_audit_logs
 detection:
   capability: "hybrid"
   detectors:

@@ -3,6 +3,7 @@ id: http-auth-probe
 title: Unauthenticated HTTP auth probe (AUTHN-M1)
 version: "0.2.0"
 evidenceClass: runtime
+emitsEvidenceTier: E4
 detectorIds: [http-auth-probe]
 inputs:
   - "Base URL of a running app (local/staging/prod) via --base-url or APRF_AUTH_PROBE_BASE_URL"

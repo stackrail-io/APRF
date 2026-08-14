@@ -3,6 +3,7 @@ id: mcp-s2s-inventory
 title: MCP / S2S connection inventory (AUTHN-M2)
 version: "0.2.0"
 evidenceClass: runtime
+emitsEvidenceTier: E4
 detectorIds: [mcp-s2s-inventory]
 inputs:
   - "Optional: connection inventory JSON under aprf-assessment/imports/mcp-s2s-inventory/"

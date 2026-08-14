@@ -3,6 +3,7 @@ id: authz-entry-tests
 title: Authz middleware / policy tests for AI entry points (AUTHZ-M1)
 version: "0.3.0"
 evidenceClass: code
+emitsEvidenceTier: E2
 detectorIds: [authz-entry-tests]
 inputs:
   - "Target repo with FastAPI (or similar) AI routes"

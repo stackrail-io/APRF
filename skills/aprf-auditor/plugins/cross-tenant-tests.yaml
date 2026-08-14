@@ -3,6 +3,7 @@ id: cross-tenant-tests
 title: Cross-tenant attack tests for AI data and memory (AUTHZ-M2)
 version: "0.2.0"
 evidenceClass: code
+emitsEvidenceTier: E2
 detectorIds: [cross-tenant-tests]
 inputs:
   - "Target repo with multi-tenant AI data/memory paths"

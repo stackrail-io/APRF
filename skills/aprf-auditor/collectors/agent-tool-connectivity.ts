@@ -24,6 +24,7 @@ import {
   walkFiles,
   SCAN_EXTENSIONS,
 } from "./lib/fs.ts";
+import { withReportEvidenceTypes } from "./lib/evidence-types.ts";
 import {
   asBool,
   measuredAtFresh,
@@ -418,14 +419,33 @@ export const agentToolConnectivityCollector: Collector = {
     );
 
     const imported = loadImported(ctx);
-    const report = buildAgentToolConnectivityReport({
-      assessedAt: ctx.assessedAt.toISOString(),
-      dependencyInventory: { found: depRefs.length > 0, refs: depRefs },
-      connectivityControls: { found: connRefs.length > 0, refs: connRefs },
-      unauthorizedAccessProbe: { found: probeRefs.length > 0, refs: probeRefs },
-      agentToolRuntimes: { found: runtimeRefs.length > 0, refs: runtimeRefs },
-      imported,
-    });
+    const report = withReportEvidenceTypes(
+      buildAgentToolConnectivityReport({
+        assessedAt: ctx.assessedAt.toISOString(),
+        dependencyInventory: { found: depRefs.length > 0, refs: depRefs },
+        connectivityControls: { found: connRefs.length > 0, refs: connRefs },
+        unauthorizedAccessProbe: { found: probeRefs.length > 0, refs: probeRefs },
+        agentToolRuntimes: { found: runtimeRefs.length > 0, refs: runtimeRefs },
+        imported,
+      }),
+      [
+        ...(depRefs.length ||
+        connRefs.length ||
+        runtimeRefs.length ||
+        imported.found
+          ? [
+              "network_policy",
+              "runtime_network_config",
+              "cloud_configuration",
+              "application_logs",
+              "repo_signal",
+            ]
+          : []),
+        ...(probeRefs.length || imported.found
+          ? ["connectivity_deny_probe", "network_flow_logs"]
+          : []),
+      ],
+    );
 
     ensureDir(importDir(ctx));
     writeFileSync(

@@ -3,6 +3,7 @@ title: Agent/automation role matrix + access review (AUTHZ-M3)
 version: "0.2.0"
 executor: collectors/agent-role-matrix.ts
 evidenceClass: code
+emitsEvidenceTier: E2
 alsoEmits: []
 detectorIds: [agent-role-matrix]
 inputs:

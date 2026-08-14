@@ -24,6 +24,7 @@ import {
   walkFiles,
   SCAN_EXTENSIONS,
 } from "./lib/fs.ts";
+import { withReportEvidenceTypes } from "./lib/evidence-types.ts";
 import {
   asBool,
   measuredAtFresh,
@@ -368,16 +369,34 @@ export const sharedAcceleratorIsolationCollector: Collector = {
     );
 
     const imported = loadImported(ctx);
-    const report = buildSharedAcceleratorIsolationReport({
-      assessedAt: ctx.assessedAt.toISOString(),
-      sharedAccelerators: { found: sharedRefs.length > 0, refs: sharedRefs },
-      isolationControls: {
-        found: isolationRefs.length > 0,
-        refs: isolationRefs,
-      },
-      capacityOrIsolationTest: { found: testRefs.length > 0, refs: testRefs },
-      imported,
-    });
+    const report = withReportEvidenceTypes(
+      buildSharedAcceleratorIsolationReport({
+        assessedAt: ctx.assessedAt.toISOString(),
+        sharedAccelerators: { found: sharedRefs.length > 0, refs: sharedRefs },
+        isolationControls: {
+          found: isolationRefs.length > 0,
+          refs: isolationRefs,
+        },
+        capacityOrIsolationTest: { found: testRefs.length > 0, refs: testRefs },
+        imported,
+      }),
+      [
+        ...(sharedRefs.length ||
+        isolationRefs.length ||
+        testRefs.length ||
+        imported.found
+          ? [
+              "accelerator_isolation_test",
+              "cloud_configuration",
+              "infrastructure_logs",
+              "repo_signal",
+            ]
+          : []),
+        ...(testRefs.length || imported.found
+          ? ["accelerator_isolation_test"]
+          : []),
+      ],
+    );
 
     ensureDir(importDir(ctx));
     writeFileSync(

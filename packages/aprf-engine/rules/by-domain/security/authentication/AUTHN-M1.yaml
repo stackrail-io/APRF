@@ -22,6 +22,13 @@ evidenceRequired:
   - "Production AI HTTP/RPC route catalog (OpenAPI, framework routers, or equivalent)"
   - "Unauthenticated auth-probe report covering those declared AI routes (401/403)"
   - "Confirmation the probe inventory matches the production route catalog"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - application_logs
+    - cloud_audit_logs
+    - repo_signal
+    - policy_scan_report
 detection:
   capability: "hybrid"
   detectors:

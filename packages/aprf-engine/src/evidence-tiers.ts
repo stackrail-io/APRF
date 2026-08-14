@@ -58,16 +58,10 @@ export const CLASS_TO_EVIDENCE_TYPES: Record<string, readonly string[]> = {
   user: ["self_attestation"],
   docs: ["repo_signal"],
   code: ["repo_signal"],
-  iac: [
-    "iac_module",
-    "network_policy",
-    "cloud_egress_policy",
-    "runtime_network_config",
-    "cis_policy_scan",
-  ],
-  policy: ["cis_policy_scan", "network_policy"],
+  iac: ["iac_module"],
+  policy: ["cis_policy_scan"],
   "runtime-config": ["runtime_network_config"],
-  ci: ["cis_policy_scan", "repo_signal"],
+  ci: ["repo_signal"],
   // Broad "runtime" class alone does not identify a specific evidence type —
   // pass observedEvidenceTypes from the import/plugin instead.
   runtime: [],

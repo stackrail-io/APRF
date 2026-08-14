@@ -3,6 +3,7 @@ title: AI public exposure / edge auth scan (INF-M1)
 version: "0.2.0"
 executor: collectors/ai-public-exposure-scan.ts
 evidenceClass: iac
+emitsEvidenceTier: E3
 alsoEmits: []
 detectorIds: [repo-ai-public-exposure-scan]
 inputs:

@@ -3,6 +3,7 @@ title: Production AI IaC + CIS-aligned policy checks (INF-R3)
 version: "0.2.0"
 executor: collectors/ai-iac-cis-policy.ts
 evidenceClass: iac
+emitsEvidenceTier: E3
 alsoEmits: [ci]
 detectorIds: [repo-ai-iac-cis-policy]
 inputs:

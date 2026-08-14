@@ -23,6 +23,7 @@ import {
   walkFiles,
   SCAN_EXTENSIONS,
 } from "./lib/fs.ts";
+import { withReportEvidenceTypes } from "./lib/evidence-types.ts";
 import {
   asBool,
   measuredAtFresh,
@@ -418,14 +419,27 @@ export const aiRuntimePatchingCollector: Collector = {
     );
 
     const imported = loadImported(ctx);
-    const report = buildAiRuntimePatchingReport({
-      assessedAt: ctx.assessedAt.toISOString(),
-      patchingSla: { found: slaRefs.length > 0, refs: slaRefs },
-      runtimeInventory: { found: invRefs.length > 0, refs: invRefs },
-      cveOrAgeScan: { found: cveRefs.length > 0, refs: cveRefs },
-      waivers: { found: waiverRefs.length > 0, refs: waiverRefs },
-      imported,
-    });
+    const report = withReportEvidenceTypes(
+      buildAiRuntimePatchingReport({
+        assessedAt: ctx.assessedAt.toISOString(),
+        patchingSla: { found: slaRefs.length > 0, refs: slaRefs },
+        runtimeInventory: { found: invRefs.length > 0, refs: invRefs },
+        cveOrAgeScan: { found: cveRefs.length > 0, refs: cveRefs },
+        waivers: { found: waiverRefs.length > 0, refs: waiverRefs },
+        imported,
+      }),
+      [
+        ...(slaRefs.length ||
+        invRefs.length ||
+        cveRefs.length ||
+        imported.found
+          ? ["patching_sla_report", "infrastructure_logs", "repo_signal"]
+          : []),
+        ...(imported.found
+          ? ["patching_sla_report", "cloud_audit_logs", "infrastructure_logs"]
+          : []),
+      ],
+    );
 
     ensureDir(importDir(ctx));
     writeFileSync(

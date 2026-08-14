@@ -23,6 +23,7 @@ import {
   walkFiles,
   SCAN_EXTENSIONS,
 } from "./lib/fs.ts";
+import { withReportEvidenceTypes } from "./lib/evidence-types.ts";
 import {
   asBool,
   measuredAtFresh,
@@ -428,17 +429,38 @@ export const aiPublicExposureScanCollector: Collector = {
     );
 
     const imported = loadImported(ctx);
-    const report = buildAiPublicExposureScanReport({
-      assessedAt: ctx.assessedAt.toISOString(),
-      dataStores: { found: dataStoreRefs.length > 0, refs: dataStoreRefs },
-      controlPlanes: {
-        found: controlPlaneRefs.length > 0,
-        refs: controlPlaneRefs,
-      },
-      edgeAuth: { found: edgeAuthRefs.length > 0, refs: edgeAuthRefs },
-      cspmScan: { found: cspmRefs.length > 0, refs: cspmRefs },
-      imported,
-    });
+    const report = withReportEvidenceTypes(
+      buildAiPublicExposureScanReport({
+        assessedAt: ctx.assessedAt.toISOString(),
+        dataStores: { found: dataStoreRefs.length > 0, refs: dataStoreRefs },
+        controlPlanes: {
+          found: controlPlaneRefs.length > 0,
+          refs: controlPlaneRefs,
+        },
+        edgeAuth: { found: edgeAuthRefs.length > 0, refs: edgeAuthRefs },
+        cspmScan: { found: cspmRefs.length > 0, refs: cspmRefs },
+        imported,
+      }),
+      [
+        ...(dataStoreRefs.length ||
+        controlPlaneRefs.length ||
+        edgeAuthRefs.length ||
+        cspmRefs.length ||
+        imported.found
+          ? [
+              "cspm_scan",
+              "network_policy",
+              "cloud_egress_policy",
+              "cloud_configuration",
+              "repo_signal",
+            ]
+          : []),
+        ...(imported.found
+          ? ["network_flow_logs", "cloud_audit_logs", "cspm_scan"]
+          : []),
+        ...(cspmRefs.length ? ["cspm_scan"] : []),
+      ],
+    );
 
     ensureDir(importDir(ctx));
     writeFileSync(

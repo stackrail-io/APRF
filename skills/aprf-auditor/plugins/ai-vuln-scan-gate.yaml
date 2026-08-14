@@ -3,6 +3,7 @@ title: AI vuln-scan promote gate (SCI-M3)
 version: "0.2.0"
 executor: collectors/ai-vuln-scan-gate.ts
 evidenceClass: ci
+emitsEvidenceTier: E3
 alsoEmits: []
 detectorIds:
   - repo-ai-vuln-scan-gate

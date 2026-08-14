@@ -26,6 +26,7 @@ import {
   walkFiles,
   SCAN_EXTENSIONS,
 } from "./lib/fs.ts";
+import { withReportEvidenceTypes } from "./lib/evidence-types.ts";
 import {
   asBool,
   measuredAtFresh,
@@ -338,6 +339,38 @@ export function buildModelPathEgressBoundaryReport(opts: {
   };
 }
 
+function evidenceTypesForModelPath(opts: {
+  trustBoundary: { found: boolean };
+  egress: { found: boolean };
+  probe: { found: boolean };
+  imported: {
+    found: boolean;
+    probeShowsOnlyAllowlistedDestinations: boolean | null;
+    modelToolRuntimeEgressAllowlistConfigured: boolean | null;
+  };
+}): string[] {
+  const types: string[] = [];
+  if (opts.trustBoundary.found || opts.egress.found) {
+    types.push(
+      "network_policy",
+      "cloud_egress_policy",
+      "cloud_configuration",
+      "runtime_network_config",
+      "repo_signal",
+    );
+  }
+  if (
+    opts.probe.found ||
+    opts.imported.probeShowsOnlyAllowlistedDestinations === true
+  ) {
+    types.push("reachability_probe");
+  }
+  if (opts.imported.found) {
+    types.push("cloud_configuration", "network_policy", "cloud_egress_policy");
+  }
+  return types;
+}
+
 export const modelPathEgressBoundaryCollector: Collector = {
   id: PLUGIN_ID,
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
@@ -369,14 +402,22 @@ export const modelPathEgressBoundaryCollector: Collector = {
     );
 
     const imported = loadImported(ctx);
-    const report = buildModelPathEgressBoundaryReport({
-      assessedAt: ctx.assessedAt.toISOString(),
-      trustBoundary: { found: trustRefs.length > 0, refs: trustRefs },
-      egress: { found: egressRefs.length > 0, refs: egressRefs },
-      probe: { found: probeRefs.length > 0, refs: probeRefs },
-      adminDataStore: { found: adminRefs.length > 0, refs: adminRefs },
-      imported,
-    });
+    const report = withReportEvidenceTypes(
+      buildModelPathEgressBoundaryReport({
+        assessedAt: ctx.assessedAt.toISOString(),
+        trustBoundary: { found: trustRefs.length > 0, refs: trustRefs },
+        egress: { found: egressRefs.length > 0, refs: egressRefs },
+        probe: { found: probeRefs.length > 0, refs: probeRefs },
+        adminDataStore: { found: adminRefs.length > 0, refs: adminRefs },
+        imported,
+      }),
+      evidenceTypesForModelPath({
+        trustBoundary: { found: trustRefs.length > 0 },
+        egress: { found: egressRefs.length > 0 },
+        probe: { found: probeRefs.length > 0 },
+        imported,
+      }),
+    );
 
     ensureDir(importDir(ctx));
     writeFileSync(

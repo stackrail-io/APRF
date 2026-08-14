@@ -3,6 +3,7 @@ title: AI external tool / MCP / plugin inventory (SCI-M2)
 version: "0.2.0"
 executor: collectors/ai-external-tool-inventory.ts
 evidenceClass: ci
+emitsEvidenceTier: E3
 alsoEmits: []
 detectorIds:
   - repo-ai-external-tool-inventory
