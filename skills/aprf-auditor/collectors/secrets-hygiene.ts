@@ -42,7 +42,9 @@ const IMPORT_MAX_AGE_DAYS = 90;
 
 const CLOUD_CFG_IMPORT_RE =
   /(cloud.?config|provider.?export|config.?snapshot|secrets.?manager.?export)/i;
-const LOG_IMPORT_RE = /(log|audit|cloudtrail|cloud.?watch)/i;
+const APP_LOG_IMPORT_RE = /(app(lication)?.?log|runtime.?log|access.?log)/i;
+const AUDIT_LOG_IMPORT_RE =
+  /(audit.?log|cloudtrail|cloud.?watch.?audit|cloud.?audit)/i;
 const POLICY_SCAN_IMPORT_RE =
   /(\.sarif$|secret.?scan|gitleaks|trufflehog|detect.?secret|policy.?scan)/i;
 
@@ -478,8 +480,10 @@ function loadImported(
       }
       const logMetricPresent =
         resolvedPct != null || privileged != null || structural.production > 0;
-      if (logMetricPresent && LOG_IMPORT_RE.test(base)) {
+      if (logMetricPresent && APP_LOG_IMPORT_RE.test(base)) {
         proven.add("application_logs");
+      }
+      if (logMetricPresent && AUDIT_LOG_IMPORT_RE.test(base)) {
         proven.add("cloud_audit_logs");
       }
     } catch {

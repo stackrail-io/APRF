@@ -36,7 +36,10 @@ import {
 
 const CLOUD_CFG_IMPORT_RE =
   /(cloud.?config|provider.?export|config.?snapshot|egress.?policy|network.?policy)/i;
-const LOG_IMPORT_RE = /(log|audit|cloudtrail|cloud.?watch|deny.?event)/i;
+const APP_LOG_IMPORT_RE =
+  /(app(lication)?.?log|runtime.?log|access.?log|deny.?event)/i;
+const AUDIT_LOG_IMPORT_RE =
+  /(audit.?log|cloudtrail|cloud.?watch.?audit|cloud.?audit)/i;
 const POLICY_SCAN_IMPORT_RE =
   /(policy.?scan|opa|conftest|checkov|\.sarif$)/i;
 
@@ -189,8 +192,10 @@ function loadImported(
         denyEventCountProvingEnforcementInLast90Days,
         denyMetric,
       );
-      if (denyMetric != null && LOG_IMPORT_RE.test(base)) {
+      if (denyMetric != null && APP_LOG_IMPORT_RE.test(base)) {
         proven.add("application_logs");
+      }
+      if (denyMetric != null && AUDIT_LOG_IMPORT_RE.test(base)) {
         proven.add("cloud_audit_logs");
       }
     } catch {
