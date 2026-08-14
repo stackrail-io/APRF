@@ -40,6 +40,16 @@ const RELATED = ["SEC2-M1"] as const;
 const DETECTOR_ID = "repo-secrets-hygiene";
 const IMPORT_MAX_AGE_DAYS = 90;
 
+function importSourcesMatch(sources: string[], pattern: RegExp): boolean {
+  return sources.some((s) => pattern.test(s));
+}
+
+const CLOUD_CFG_IMPORT_RE =
+  /(cloud.?config|provider.?export|config.?snapshot|secrets.?manager.?export)/i;
+const LOG_IMPORT_RE = /(log|audit|cloudtrail|cloud.?watch)/i;
+const POLICY_SCAN_IMPORT_RE =
+  /(\.sarif$|secret.?scan|gitleaks|trufflehog|detect.?secret|policy.?scan)/i;
+
 const MANAGER_FILE_RE =
   /(external-?secrets|sealed-?secrets|secretproviderclass|vault|doppler|1password|aws.?secrets.?manager|secretsmanager|azure.?key.?vault|gcp.?secret|google.?secret.?manager)/i;
 
@@ -731,18 +741,17 @@ export const secretsHygieneCollector: Collector = {
         ...(manager.found || scan.found || embedded.length > 0
           ? ["repo_signal"]
           : []),
-        ...(manager.found || imported.secretsManagerWiringPresent != null
+        ...(imported.secretsManagerWiringPresent != null &&
+        importSourcesMatch(imported.sources, CLOUD_CFG_IMPORT_RE)
           ? ["cloud_configuration"]
           : []),
-        ...(scan.found ||
-        imported.found ||
-        imported.secretScanCoversPromptsAndFixtures != null ||
-        imported.privilegedSecretsInReposPromptsOrClientBundles != null
+        ...(importSourcesMatch(imported.sources, POLICY_SCAN_IMPORT_RE)
           ? ["policy_scan_report"]
           : []),
-        ...(imported.productionRuntimeSecretsResolvedFromSecretsManagerPct !=
+        ...((imported.productionRuntimeSecretsResolvedFromSecretsManagerPct !=
           null ||
-        imported.privilegedSecretsInReposPromptsOrClientBundles != null
+          imported.privilegedSecretsInReposPromptsOrClientBundles != null) &&
+        importSourcesMatch(imported.sources, LOG_IMPORT_RE)
           ? ["application_logs", "cloud_audit_logs"]
           : []),
       ],

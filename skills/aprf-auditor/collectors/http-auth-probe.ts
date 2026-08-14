@@ -51,6 +51,17 @@ function authProbeEvidenceTypes(opts: {
   return types;
 }
 
+/** True when route catalog comes from declared code/import — not builtin seeds alone. */
+function authProbeRouteCatalogPresent(opts: {
+  declaredAiRouteCount: number;
+  catalogSources?: string[];
+}): boolean {
+  if (opts.declaredAiRouteCount > 0) return true;
+  return (opts.catalogSources ?? []).some(
+    (s) => s !== "builtin-ai-prefix-hints",
+  );
+}
+
 /** Status codes that satisfy AUTHN-M1 for a protected AI route. */
 const EXPECT_STATUS = new Set([401, 403]);
 
@@ -1462,9 +1473,10 @@ export const httpAuthProbeCollector: Collector = {
                 evaluated,
                 authProbeEvidenceTypes({
                   probed,
-                  routeCatalogPresent:
-                    routes.length > 0 ||
-                    (evaluated.routesDiscovered ?? 0) > 0,
+                  routeCatalogPresent: authProbeRouteCatalogPresent({
+                    declaredAiRouteCount: declaredAiRoutes.length,
+                    catalogSources: evaluated.catalogSource,
+                  }),
                 }),
               ),
               null,
@@ -1539,7 +1551,10 @@ export const httpAuthProbeCollector: Collector = {
           report,
           authProbeEvidenceTypes({
             probed: true,
-            routeCatalogPresent: routes.length > 0,
+            routeCatalogPresent: authProbeRouteCatalogPresent({
+              declaredAiRouteCount: declaredAiRoutes.length,
+              catalogSources: sources,
+            }),
           }),
         ),
         null,

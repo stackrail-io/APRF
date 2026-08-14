@@ -65,7 +65,8 @@ function cloudCollector(cloud: Cloud): Collector {
           new RegExp(s.replace(/-/g, "[-_]?"), "i").test(text),
         );
         // Underscore type IDs are observedEvidenceTypes for matched[] (APRF-RFC-0011).
-        const evidenceTypeSignals = ["repo_signal", "cloud_configuration"];
+        // Local IaC proves repo_signal only — cloud_configuration requires a live/export snapshot.
+        const evidenceTypeSignals = ["repo_signal"];
         nodes.push({
           id: `${cloud}:iac:${i++}:${r}`,
           class: "iac",

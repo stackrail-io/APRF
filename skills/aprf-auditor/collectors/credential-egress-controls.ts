@@ -34,6 +34,19 @@ import {
   parseMeasuredAt,
 } from "./lib/import-attest.ts";
 
+function importSourcesMatch(
+  sources: string[],
+  pattern: RegExp,
+): boolean {
+  return sources.some((s) => pattern.test(s));
+}
+
+const CLOUD_CFG_IMPORT_RE =
+  /(cloud.?config|provider.?export|config.?snapshot|egress.?policy|network.?policy)/i;
+const LOG_IMPORT_RE = /(log|audit|cloudtrail|cloud.?watch|deny.?event)/i;
+const POLICY_SCAN_IMPORT_RE =
+  /(policy.?scan|opa|conftest|checkov|\.sarif$)/i;
+
 const PLUGIN_ID = "credential-egress-controls";
 const RELATED = ["SEC2-R2"] as const;
 const DETECTOR_ID = "repo-credential-egress-controls";
@@ -425,16 +438,16 @@ export const credentialEgressControlsCollector: Collector = {
         denyRefs.length
           ? ["repo_signal"]
           : []),
-        ...(egressRefs.length ||
-        imported.egressAllowlistOrPolicyConfigured != null ||
-        imported.credentialEgressDestinationsDocumented != null
+        ...(imported.egressAllowlistOrPolicyConfigured != null &&
+        importSourcesMatch(imported.sources, CLOUD_CFG_IMPORT_RE)
           ? ["cloud_configuration"]
           : []),
-        ...(denyRefs.length ||
-        imported.denyEventCountProvingEnforcementInLast90Days != null
+        ...(imported.denyEventCountProvingEnforcementInLast90Days != null &&
+        importSourcesMatch(imported.sources, LOG_IMPORT_RE)
           ? ["application_logs", "cloud_audit_logs"]
           : []),
-        ...(imported.credentialEgressDestinationsDocumented != null
+        ...(imported.credentialEgressDestinationsDocumented != null &&
+        importSourcesMatch(imported.sources, POLICY_SCAN_IMPORT_RE)
           ? ["policy_scan_report"]
           : []),
       ],
