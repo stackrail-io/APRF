@@ -391,7 +391,7 @@
       "id": "APRF-RFC-0011",
       "number": 11,
       "title": "Evidence Assurance Tiers (E0–E5)",
-      "status": "in-review",
+      "status": "accepted",
       "created": "2026-08-11",
       "semverImpact": "MINOR",
       "summary": "Adds normative Evidence Assurance Tiers (E0–E5) and Check `evidencePolicy.minimumTier` so PASS requires evidence at or above a declared floor; UNVERIFIED is a verification outcome on PARTIAL, not a sixth control status.",

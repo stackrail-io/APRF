@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | in-review |
+| Status | accepted |
 | Author(s) | StackRail |
 | Created | 2026-08-11 |
 | SemVer impact | MINOR |

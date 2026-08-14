@@ -7,6 +7,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ## [Unreleased]
 
+## [Catalog 0.12.0] / [@stackrail-io/aprf@0.1.5] — 2026-08-14
+
+MINOR catalog release: Evidence Assurance Tiers (APRF-RFC-0011), peer crosswalks, detector↔plugin bridge, and REPORT honesty fixes.
+
+Published on npm as:
+- `@stackrail-io/aprf-engine@0.12.0`
+- `@stackrail-io/aprf@0.1.5` (pins engine `0.12.0`, framework-definition `0.11.0`)
+
+Framework package remains `@stackrail-io/aprf-framework-definition@0.11.0`. Spec `governance.version` stays **0.11.0**. [APRF-RFC-0011](rfcs/0011-evidence-assurance-tiers.md) status → **accepted**.
+
 ### Added
 - **Evidence Assurance Tiers (E0–E5)** — [APRF-RFC-0011](rfcs/0011-evidence-assurance-tiers.md): Check `evidencePolicy.minimumTier` / `acceptableEvidence`, starter [`spec/evidence-types.yaml`](spec/evidence-types.yaml), assess `controls[].evidenceTier` (`achieved` / `minimum` / `verification`), REPORT shows Evidence / Required / UNVERIFIED. PASS requires `achievedTier >= minimumTier`; below-floor stays PARTIAL (not a sixth status). Defaults: manual→E1, hybrid→E3, automated→E4. Achieved tier is derived from graph classes + fresh measured imports (not `statusHint=pass`); `UNVERIFIED` means below floor only; `matched[]` is observed∩acceptable; plugins may declare `emitsEvidenceTier` (generated `plugin-evidence-tier-map.json`).
 - Fine-grained informative peer crosswalks in `spec/aprf-spec.json`: **OWASP AISVS 1.0** (`aisvs:v1.0-C*.*`), **ASVS 5.0** (80), **OpenCRE** (13 CWE bridges), **CSA MAESTRO** (7 layers + 5 extended threats), **FIASSE/SSEM** (61); OWASP LLM Top 10 controls gain `relatedPeerControlIds` AISVS bridges ([APRF-RFC-0010](rfcs/0010-peer-crosswalks-aisvs-asvs-opencre-maestro-fiasse.md)).
