@@ -472,10 +472,7 @@ function loadImported(
       }
 
       const scanMetricPresent =
-        privileged != null ||
-        covers != null ||
-        structural.production > 0 ||
-        /\.sarif$/i.test(base);
+        privileged != null || covers != null || structural.production > 0;
       if (scanMetricPresent && POLICY_SCAN_IMPORT_RE.test(base)) {
         proven.add("policy_scan_report");
       }
