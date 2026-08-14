@@ -316,6 +316,11 @@
               "verification": {
                 "type": "string",
                 "enum": ["NONE", "UNVERIFIED", "VERIFIED", "NOT_APPLICABLE"]
+              },
+              "partialReason": {
+                "type": "string",
+                "description": "When PARTIAL meets the floor but measured metrics are incomplete (not below-floor UNVERIFIED).",
+                "enum": ["metrics_incomplete"]
               }
             }
           },

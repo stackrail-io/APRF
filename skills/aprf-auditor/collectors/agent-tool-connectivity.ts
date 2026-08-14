@@ -429,20 +429,16 @@ export const agentToolConnectivityCollector: Collector = {
         imported,
       }),
       [
-        ...(depRefs.length ||
-        connRefs.length ||
-        runtimeRefs.length ||
-        imported.found
-          ? [
-              "network_policy",
-              "runtime_network_config",
-              "cloud_configuration",
-              "application_logs",
-              "repo_signal",
-            ]
+        ...(depRefs.length || runtimeRefs.length ? ["repo_signal"] : []),
+        ...(connRefs.length
+          ? ["network_policy", "runtime_network_config", "repo_signal"]
           : []),
-        ...(probeRefs.length || imported.found
-          ? ["connectivity_deny_probe", "network_flow_logs"]
+        ...(probeRefs.length ||
+        imported.unauthorizedInternalServiceAccessBlockedInProbe != null
+          ? ["connectivity_deny_probe"]
+          : []),
+        ...(imported.leastPrivilegeConnectivityControlsConfigured != null
+          ? ["network_policy", "runtime_network_config"]
           : []),
       ],
     );

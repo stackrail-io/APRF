@@ -23,6 +23,7 @@ import {
   rel,
   walkFiles,
 } from "./lib/fs.ts";
+import { withReportEvidenceTypes } from "./lib/evidence-types.ts";
 import {
   asBool,
   measuredAtFresh,
@@ -718,13 +719,34 @@ export const secretsHygieneCollector: Collector = {
     );
     const imported = loadImported(ctx);
 
-    const report = buildSecretsReport({
-      assessedAt: ctx.assessedAt.toISOString(),
-      manager,
-      scan,
-      embedded,
-      imported,
-    });
+    const report = withReportEvidenceTypes(
+      buildSecretsReport({
+        assessedAt: ctx.assessedAt.toISOString(),
+        manager,
+        scan,
+        embedded,
+        imported,
+      }),
+      [
+        ...(manager.found || scan.found || embedded.length > 0
+          ? ["repo_signal"]
+          : []),
+        ...(manager.found || imported.secretsManagerWiringPresent != null
+          ? ["cloud_configuration"]
+          : []),
+        ...(scan.found ||
+        imported.found ||
+        imported.secretScanCoversPromptsAndFixtures != null ||
+        imported.privilegedSecretsInReposPromptsOrClientBundles != null
+          ? ["policy_scan_report"]
+          : []),
+        ...(imported.productionRuntimeSecretsResolvedFromSecretsManagerPct !=
+          null ||
+        imported.privilegedSecretsInReposPromptsOrClientBundles != null
+          ? ["application_logs", "cloud_audit_logs"]
+          : []),
+      ],
+    );
 
     ensureDir(importDir(ctx));
     writeFileSync(

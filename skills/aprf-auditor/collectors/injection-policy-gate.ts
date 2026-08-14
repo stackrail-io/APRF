@@ -445,10 +445,18 @@ export const injectionPolicyGateCollector: Collector = {
         ...(policy.found || corpus.found || ciGate.found
           ? ["repo_signal"]
           : []),
-        ...(imported.found
-          ? ["policy_scan_report", "application_logs", "repo_signal"]
+        ...(ciGate.found || imported.ciGateConfigured != null
+          ? ["policy_scan_report"]
           : []),
-        ...(ciGate.found ? ["policy_scan_report"] : []),
+        ...(imported.denyRatePct != null ||
+        imported.modelTextPrivilegeGrants != null ||
+        imported.caseCount != null
+          ? ["application_logs"]
+          : []),
+        ...(imported.versionedCorpusPresent != null ||
+        imported.ciGateConfigured != null
+          ? ["repo_signal"]
+          : []),
       ],
     );
 

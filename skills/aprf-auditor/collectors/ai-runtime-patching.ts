@@ -432,11 +432,20 @@ export const aiRuntimePatchingCollector: Collector = {
         ...(slaRefs.length ||
         invRefs.length ||
         cveRefs.length ||
-        imported.found
-          ? ["patching_sla_report", "infrastructure_logs", "repo_signal"]
+        waiverRefs.length
+          ? ["repo_signal"]
           : []),
-        ...(imported.found
-          ? ["patching_sla_report", "cloud_audit_logs", "infrastructure_logs"]
+        ...(slaRefs.length || imported.patchingSlaDocumented != null
+          ? ["patching_sla_report"]
+          : []),
+        ...(cveRefs.length ||
+        imported.vulnerabilityOrImageAgeReportPresent === true ||
+        imported.productionAiRuntimesWithinDocumentedPatchingSlaPct != null
+          ? ["infrastructure_logs"]
+          : []),
+        ...(imported.openSlaBreachesWithoutApprovedWaiver != null ||
+        imported.vulnerabilityOrImageAgeReportPresent === true
+          ? ["cloud_audit_logs"]
           : []),
       ],
     );

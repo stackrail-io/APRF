@@ -35,10 +35,21 @@ import {
   measuredAtFresh,
   mergeOrBool,
 } from "./lib/import-attest.ts";
+import { withReportEvidenceTypes } from "./lib/evidence-types.ts";
 
 const PLUGIN_ID = "http-auth-probe";
 const RELATED = ["AUTHN-M1"] as const;
 const IMPORT_MAX_AGE_DAYS = 90;
+
+function authProbeEvidenceTypes(opts: {
+  probed: boolean;
+  routeCatalogPresent: boolean;
+}): string[] {
+  const types: string[] = [];
+  if (opts.routeCatalogPresent) types.push("repo_signal");
+  if (opts.probed) types.push("http_auth_probe");
+  return types;
+}
 
 /** Status codes that satisfy AUTHN-M1 for a protected AI route. */
 const EXPECT_STATUS = new Set([401, 403]);
@@ -1383,7 +1394,21 @@ export const httpAuthProbeCollector: Collector = {
           results: [],
         };
         const reportPath = join(importDir(ctx), "auth-probe-report.json");
-        writeFileSync(reportPath, JSON.stringify(naReport, null, 2), "utf8");
+        writeFileSync(
+          reportPath,
+          JSON.stringify(
+            withReportEvidenceTypes(
+              naReport,
+              authProbeEvidenceTypes({
+                probed: false,
+                routeCatalogPresent: false,
+              }),
+            ),
+            null,
+            2,
+          ),
+          "utf8",
+        );
         nodes.push({
           id: `${PLUGIN_ID}:report`,
           class: "runtime",
@@ -1427,7 +1452,26 @@ export const httpAuthProbeCollector: Collector = {
         if (evaluated) {
           const reportPath = join(importDir(ctx), "auth-probe-report.json");
           ensureDir(importDir(ctx));
-          writeFileSync(reportPath, JSON.stringify(evaluated, null, 2), "utf8");
+          const probed =
+            (evaluated.routesProbed ?? 0) > 0 ||
+            (evaluated.results?.length ?? 0) > 0;
+          writeFileSync(
+            reportPath,
+            JSON.stringify(
+              withReportEvidenceTypes(
+                evaluated,
+                authProbeEvidenceTypes({
+                  probed,
+                  routeCatalogPresent:
+                    routes.length > 0 ||
+                    (evaluated.routesDiscovered ?? 0) > 0,
+                }),
+              ),
+              null,
+              2,
+            ),
+            "utf8",
+          );
           const satisfied = evaluated.summary.authnM1Satisfied;
           nodes.push({
             id: `${PLUGIN_ID}:report`,
@@ -1488,7 +1532,21 @@ export const httpAuthProbeCollector: Collector = {
     });
     ensureDir(importDir(ctx));
     const reportPath = join(importDir(ctx), "auth-probe-report.json");
-    writeFileSync(reportPath, JSON.stringify(report, null, 2), "utf8");
+    writeFileSync(
+      reportPath,
+      JSON.stringify(
+        withReportEvidenceTypes(
+          report,
+          authProbeEvidenceTypes({
+            probed: true,
+            routeCatalogPresent: routes.length > 0,
+          }),
+        ),
+        null,
+        2,
+      ),
+      "utf8",
+    );
 
     const satisfied = report.summary.authnM1Satisfied;
     nodes.push({

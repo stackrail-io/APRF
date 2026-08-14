@@ -455,13 +455,20 @@ export const aiIacCisPolicyCollector: Collector = {
         imported,
       }),
       [
-        ...(iacRefs.length || prodAiIacRefs.length || imported.found
+        ...(iacRefs.length ||
+        prodAiIacRefs.length ||
+        imported.iacCoversProductionAiInfrastructure != null
           ? ["iac_module"]
           : []),
-        ...(policyRefs.length || ciRefs.length || imported.found
+        ...(policyRefs.length ||
+        ciRefs.length ||
+        imported.cisAlignedPolicyChecksOnEveryApplyOrPr != null
           ? ["cis_policy_scan"]
           : []),
-        ...(imported.found ? ["policy_scan_report"] : []),
+        ...(imported.policyScanReportPresent === true ||
+        imported.openCriticalFindingsUnwaived != null
+          ? ["policy_scan_report"]
+          : []),
       ],
     );
 

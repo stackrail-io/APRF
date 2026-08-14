@@ -343,30 +343,40 @@ function evidenceTypesForModelPath(opts: {
   trustBoundary: { found: boolean };
   egress: { found: boolean };
   probe: { found: boolean };
+  adminDataStore: { found: boolean };
   imported: {
     found: boolean;
     probeShowsOnlyAllowlistedDestinations: boolean | null;
     modelToolRuntimeEgressAllowlistConfigured: boolean | null;
+    trustBoundaryArchitectureDocumented: boolean | null;
   };
 }): string[] {
   const types: string[] = [];
-  if (opts.trustBoundary.found || opts.egress.found) {
-    types.push(
-      "network_policy",
-      "cloud_egress_policy",
-      "cloud_configuration",
-      "runtime_network_config",
-      "repo_signal",
-    );
+  if (
+    opts.trustBoundary.found ||
+    opts.egress.found ||
+    opts.adminDataStore.found
+  ) {
+    types.push("repo_signal");
+  }
+  if (opts.egress.found) {
+    types.push("network_policy", "cloud_egress_policy");
+  }
+  if (opts.trustBoundary.found) {
+    types.push("runtime_network_config");
   }
   if (
     opts.probe.found ||
-    opts.imported.probeShowsOnlyAllowlistedDestinations === true
+    (opts.imported.found &&
+      typeof opts.imported.probeShowsOnlyAllowlistedDestinations === "boolean")
   ) {
     types.push("reachability_probe");
   }
-  if (opts.imported.found) {
-    types.push("cloud_configuration", "network_policy", "cloud_egress_policy");
+  if (opts.imported.modelToolRuntimeEgressAllowlistConfigured != null) {
+    types.push("network_policy", "cloud_egress_policy");
+  }
+  if (opts.imported.trustBoundaryArchitectureDocumented === true) {
+    types.push("runtime_network_config");
   }
   return types;
 }
@@ -415,6 +425,7 @@ export const modelPathEgressBoundaryCollector: Collector = {
         trustBoundary: { found: trustRefs.length > 0 },
         egress: { found: egressRefs.length > 0 },
         probe: { found: probeRefs.length > 0 },
+        adminDataStore: { found: adminRefs.length > 0 },
         imported,
       }),
     );

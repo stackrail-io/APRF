@@ -11,7 +11,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 MINOR catalog release: Evidence Assurance Tiers (APRF-RFC-0011), peer crosswalks, detector↔plugin bridge, and REPORT honesty fixes.
 
-Published on npm as:
+Release package versions:
 - `@stackrail-io/aprf-engine@0.12.0`
 - `@stackrail-io/aprf@0.1.5` (pins engine `0.12.0`, framework-definition `0.11.0`)
 

@@ -444,21 +444,20 @@ export const aiPublicExposureScanCollector: Collector = {
       [
         ...(dataStoreRefs.length ||
         controlPlaneRefs.length ||
-        edgeAuthRefs.length ||
-        cspmRefs.length ||
-        imported.found
-          ? [
-              "cspm_scan",
-              "network_policy",
-              "cloud_egress_policy",
-              "cloud_configuration",
-              "repo_signal",
-            ]
+        edgeAuthRefs.length
+          ? ["repo_signal"]
           : []),
-        ...(imported.found
-          ? ["network_flow_logs", "cloud_audit_logs", "cspm_scan"]
+        ...(edgeAuthRefs.length ||
+        imported.authenticatedEdgeControlsConfigured != null ||
+        imported.privateOnlyExposureProvenByScan != null
+          ? ["network_policy"]
           : []),
-        ...(cspmRefs.length ? ["cspm_scan"] : []),
+        ...(cspmRefs.length || imported.cspmOrNetworkScanPresent === true
+          ? ["cspm_scan"]
+          : []),
+        ...(imported.cspmOrNetworkScanPresent === true
+          ? ["cloud_configuration"]
+          : []),
       ],
     );
 

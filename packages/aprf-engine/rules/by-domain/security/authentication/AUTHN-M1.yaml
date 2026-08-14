@@ -25,6 +25,7 @@ evidenceRequired:
 evidencePolicy:
   minimumTier: E3
   acceptableEvidence:
+    - http_auth_probe
     - application_logs
     - cloud_audit_logs
     - repo_signal

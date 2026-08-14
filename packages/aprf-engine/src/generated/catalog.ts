@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:65402cf6ebe32de52cabc665ba1a153840f789854ec4b91b0e81f9a54506f9d1",
+  "generatedAt": "sha256:122dd91f42d3c3f4e11168f646da2f1d91a16472f6d0cbe6975f17babb80c5a1",
   "ruleCount": 178,
   "domains": [
     {
@@ -1217,6 +1217,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "evidencePolicy": {
         "minimumTier": "E3",
         "acceptableEvidence": [
+          "http_auth_probe",
           "application_logs",
           "cloud_audit_logs",
           "repo_signal",

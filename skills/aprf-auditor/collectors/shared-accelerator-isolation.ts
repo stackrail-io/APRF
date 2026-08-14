@@ -381,19 +381,20 @@ export const sharedAcceleratorIsolationCollector: Collector = {
         imported,
       }),
       [
-        ...(sharedRefs.length ||
-        isolationRefs.length ||
-        testRefs.length ||
-        imported.found
-          ? [
-              "accelerator_isolation_test",
-              "cloud_configuration",
-              "infrastructure_logs",
-              "repo_signal",
-            ]
+        ...(sharedRefs.length || isolationRefs.length || testRefs.length
+          ? ["repo_signal"]
           : []),
-        ...(testRefs.length || imported.found
+        ...(isolationRefs.length ||
+        imported.isolationControlsDocumented != null ||
+        imported.tenantQosOrSchedulingPolicyPresent != null
+          ? ["cloud_configuration"]
+          : []),
+        ...(testRefs.length ||
+        imported.isolationOrCapacityTestMeetsStatedLimits != null
           ? ["accelerator_isolation_test"]
+          : []),
+        ...(imported.isolationOrCapacityTestMeetsStatedLimits != null
+          ? ["infrastructure_logs"]
           : []),
       ],
     );

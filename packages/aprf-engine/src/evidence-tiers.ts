@@ -237,4 +237,9 @@ export interface ControlEvidenceTier {
   acceptable: string[];
   matched: string[];
   verification: EvidenceVerification;
+  /**
+   * When PARTIAL meets the floor but measured metrics/imports are incomplete.
+   * Distinct from verification=UNVERIFIED (below floor).
+   */
+  partialReason?: "metrics_incomplete";
 }

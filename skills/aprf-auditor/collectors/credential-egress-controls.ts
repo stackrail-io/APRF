@@ -23,6 +23,7 @@ import {
   walkFiles,
   SCAN_EXTENSIONS,
 } from "./lib/fs.ts";
+import { withReportEvidenceTypes } from "./lib/evidence-types.ts";
 import {
   asBool,
   measuredAtFresh,
@@ -408,14 +409,36 @@ export const credentialEgressControlsCollector: Collector = {
     );
 
     const imported = loadImported(ctx);
-    const report = buildCredentialEgressControlsReport({
-      assessedAt: ctx.assessedAt.toISOString(),
-      egressPolicy: { found: egressRefs.length > 0, refs: egressRefs },
-      credentialRuntime: { found: credRefs.length > 0, refs: credRefs },
-      documentedDestinations: { found: destRefs.length > 0, refs: destRefs },
-      denyLogs: { found: denyRefs.length > 0, refs: denyRefs },
-      imported,
-    });
+    const report = withReportEvidenceTypes(
+      buildCredentialEgressControlsReport({
+        assessedAt: ctx.assessedAt.toISOString(),
+        egressPolicy: { found: egressRefs.length > 0, refs: egressRefs },
+        credentialRuntime: { found: credRefs.length > 0, refs: credRefs },
+        documentedDestinations: { found: destRefs.length > 0, refs: destRefs },
+        denyLogs: { found: denyRefs.length > 0, refs: denyRefs },
+        imported,
+      }),
+      [
+        ...(egressRefs.length ||
+        credRefs.length ||
+        destRefs.length ||
+        denyRefs.length
+          ? ["repo_signal"]
+          : []),
+        ...(egressRefs.length ||
+        imported.egressAllowlistOrPolicyConfigured != null ||
+        imported.credentialEgressDestinationsDocumented != null
+          ? ["cloud_configuration"]
+          : []),
+        ...(denyRefs.length ||
+        imported.denyEventCountProvingEnforcementInLast90Days != null
+          ? ["application_logs", "cloud_audit_logs"]
+          : []),
+        ...(imported.credentialEgressDestinationsDocumented != null
+          ? ["policy_scan_report"]
+          : []),
+      ],
+    );
 
     ensureDir(importDir(ctx));
     writeFileSync(
