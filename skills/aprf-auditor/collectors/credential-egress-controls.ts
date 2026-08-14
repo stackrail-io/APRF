@@ -34,13 +34,6 @@ import {
   parseMeasuredAt,
 } from "./lib/import-attest.ts";
 
-function importSourcesMatch(
-  sources: string[],
-  pattern: RegExp,
-): boolean {
-  return sources.some((s) => pattern.test(s));
-}
-
 const CLOUD_CFG_IMPORT_RE =
   /(cloud.?config|provider.?export|config.?snapshot|egress.?policy|network.?policy)/i;
 const LOG_IMPORT_RE = /(log|audit|cloudtrail|cloud.?watch|deny.?event)/i;
@@ -84,6 +77,11 @@ export interface CredentialEgressControlsReport {
     denyEventCountProvingEnforcementInLast90Days: number | null;
     measuredAt: string | null;
     sources: string[];
+    /**
+     * Stronger evidence types proven by the same import artifact that supplied
+     * the metric (filename pattern + field on that file).
+     */
+    provenEvidenceTypes: string[];
   };
   summary: {
     gateSignalsPresent: boolean;
@@ -132,6 +130,7 @@ function loadImported(
   ctx: CollectorContext,
 ): CredentialEgressControlsReport["importedResults"] {
   const sources: string[] = [];
+  const proven = new Set<string>();
   let runtimesHoldingCredentialsPresent: boolean | null = null;
   let egressAllowlistOrPolicyConfigured: boolean | null = null;
   let credentialEgressDestinationsDocumented: boolean | null = null;
@@ -144,7 +143,8 @@ function loadImported(
     if (!text) continue;
     try {
       const data = JSON.parse(text) as Record<string, unknown>;
-      sources.push(basename(f));
+      const base = basename(f);
+      sources.push(base);
       measuredAt = mergeOldestMeasuredAt(measuredAt, parseMeasuredAt(data));
       runtimesHoldingCredentialsPresent = mergeOrBool(
         runtimesHoldingCredentialsPresent,
@@ -152,18 +152,30 @@ function loadImported(
           asBool(data.runtimes_holding_credentials_present) ??
           asBool(data.credentialHoldingRuntimesPresent),
       );
+      const allowlist =
+        asBool(data.egressAllowlistOrPolicyConfigured) ??
+        asBool(data.egress_allowlist_or_policy_configured) ??
+        asBool(data.egressAllowlistConfigured);
       egressAllowlistOrPolicyConfigured = mergeAndBool(
         egressAllowlistOrPolicyConfigured,
-        asBool(data.egressAllowlistOrPolicyConfigured) ??
-          asBool(data.egress_allowlist_or_policy_configured) ??
-          asBool(data.egressAllowlistConfigured),
+        allowlist,
       );
+      if (allowlist != null && CLOUD_CFG_IMPORT_RE.test(base)) {
+        proven.add("cloud_configuration");
+      }
+
+      const destinations =
+        asBool(data.credentialEgressDestinationsDocumented) ??
+        asBool(data.credential_egress_destinations_documented) ??
+        asBool(data.destinationsDocumented);
       credentialEgressDestinationsDocumented = mergeAndBool(
         credentialEgressDestinationsDocumented,
-        asBool(data.credentialEgressDestinationsDocumented) ??
-          asBool(data.credential_egress_destinations_documented) ??
-          asBool(data.destinationsDocumented),
+        destinations,
       );
+      if (destinations != null && POLICY_SCAN_IMPORT_RE.test(base)) {
+        proven.add("policy_scan_report");
+      }
+
       const denyCount =
         asNum(data.denyEventCountProvingEnforcementInLast90Days) ??
         asNum(data.deny_event_count_proving_enforcement_in_last_90_days) ??
@@ -172,10 +184,15 @@ function loadImported(
         asBool(data.denyEventObservedInLast90Days) ??
         asBool(data.deny_event_observed_in_last_90_days);
       const fromBool = denyBool === true ? 1 : denyBool === false ? 0 : null;
+      const denyMetric = denyCount ?? fromBool;
       denyEventCountProvingEnforcementInLast90Days = mergeMaxNum(
         denyEventCountProvingEnforcementInLast90Days,
-        denyCount ?? fromBool,
+        denyMetric,
       );
+      if (denyMetric != null && LOG_IMPORT_RE.test(base)) {
+        proven.add("application_logs");
+        proven.add("cloud_audit_logs");
+      }
     } catch {
       /* skip */
     }
@@ -189,6 +206,7 @@ function loadImported(
     denyEventCountProvingEnforcementInLast90Days,
     measuredAt,
     sources,
+    provenEvidenceTypes: [...proven].sort(),
   };
 }
 
@@ -438,18 +456,7 @@ export const credentialEgressControlsCollector: Collector = {
         denyRefs.length
           ? ["repo_signal"]
           : []),
-        ...(imported.egressAllowlistOrPolicyConfigured != null &&
-        importSourcesMatch(imported.sources, CLOUD_CFG_IMPORT_RE)
-          ? ["cloud_configuration"]
-          : []),
-        ...(imported.denyEventCountProvingEnforcementInLast90Days != null &&
-        importSourcesMatch(imported.sources, LOG_IMPORT_RE)
-          ? ["application_logs", "cloud_audit_logs"]
-          : []),
-        ...(imported.credentialEgressDestinationsDocumented != null &&
-        importSourcesMatch(imported.sources, POLICY_SCAN_IMPORT_RE)
-          ? ["policy_scan_report"]
-          : []),
+        ...imported.provenEvidenceTypes,
       ],
     );
 

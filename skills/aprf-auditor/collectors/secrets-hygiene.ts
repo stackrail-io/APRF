@@ -40,10 +40,6 @@ const RELATED = ["SEC2-M1"] as const;
 const DETECTOR_ID = "repo-secrets-hygiene";
 const IMPORT_MAX_AGE_DAYS = 90;
 
-function importSourcesMatch(sources: string[], pattern: RegExp): boolean {
-  return sources.some((s) => pattern.test(s));
-}
-
 const CLOUD_CFG_IMPORT_RE =
   /(cloud.?config|provider.?export|config.?snapshot|secrets.?manager.?export)/i;
 const LOG_IMPORT_RE = /(log|audit|cloudtrail|cloud.?watch)/i;
@@ -123,6 +119,11 @@ export interface SecretsHygieneReport {
     secretScanCoversPromptsAndFixtures: boolean | null;
     measuredAt: string | null;
     sources: string[];
+    /**
+     * Stronger evidence types proven by the same import artifact that supplied
+     * the metric (filename pattern + field on that file).
+     */
+    provenEvidenceTypes: string[];
   };
   summary: {
     embeddedCount: number;
@@ -383,6 +384,7 @@ function loadImported(
   ctx: CollectorContext,
 ): SecretsHygieneReport["importedResults"] {
   const sources: string[] = [];
+  const proven = new Set<string>();
   let productionRuntimeSecretsPresent: boolean | null = null;
   let secretsManagerWiringPresent: boolean | null = null;
   let productionRuntimeSecretsResolvedFromSecretsManagerPct: number | null =
@@ -399,9 +401,14 @@ function loadImported(
     if (!text) continue;
     try {
       const data = JSON.parse(text) as Record<string, unknown>;
-      sources.push(basename(file));
+      const base = basename(file);
+      sources.push(base);
       measuredAt = mergeOldestMeasuredAt(measuredAt, parseMeasuredAt(data));
 
+      const wiring =
+        asBool(data.secretsManagerWiringPresent) ??
+        asBool(data.secrets_manager_wiring_present) ??
+        asBool(data.secretsManagerPresent);
       productionRuntimeSecretsPresent = mergeOrBool(
         productionRuntimeSecretsPresent,
         asBool(data.productionRuntimeSecretsPresent) ??
@@ -410,30 +417,40 @@ function loadImported(
       );
       secretsManagerWiringPresent = mergeAndBool(
         secretsManagerWiringPresent,
-        asBool(data.secretsManagerWiringPresent) ??
-          asBool(data.secrets_manager_wiring_present) ??
-          asBool(data.secretsManagerPresent),
+        wiring,
       );
+      if (wiring != null && CLOUD_CFG_IMPORT_RE.test(base)) {
+        proven.add("cloud_configuration");
+      }
+
+      const resolvedPct =
+        asNum(data.productionRuntimeSecretsResolvedFromSecretsManagerPct) ??
+        asNum(
+          data.production_runtime_secrets_resolved_from_secrets_manager_pct,
+        ) ??
+        asNum(data.resolvedFromSecretsManagerPct);
       productionRuntimeSecretsResolvedFromSecretsManagerPct = mergeMinNum(
         productionRuntimeSecretsResolvedFromSecretsManagerPct,
-        asNum(data.productionRuntimeSecretsResolvedFromSecretsManagerPct) ??
-          asNum(
-            data.production_runtime_secrets_resolved_from_secrets_manager_pct,
-          ) ??
-          asNum(data.resolvedFromSecretsManagerPct),
+        resolvedPct,
       );
+
       // Explicit gate field = production privileged findings (catalog contract).
+      const privileged =
+        asNum(data.privilegedSecretsInReposPromptsOrClientBundles) ??
+        asNum(data.privileged_secrets_in_repos_prompts_or_client_bundles) ??
+        asNum(data.privilegedSecretsFoundInScan);
       privilegedSecretsInReposPromptsOrClientBundles = mergeMaxNum(
         privilegedSecretsInReposPromptsOrClientBundles,
-        asNum(data.privilegedSecretsInReposPromptsOrClientBundles) ??
-          asNum(data.privileged_secrets_in_repos_prompts_or_client_bundles) ??
-          asNum(data.privilegedSecretsFoundInScan),
+        privileged,
       );
+
+      const covers =
+        asBool(data.secretScanCoversPromptsAndFixtures) ??
+        asBool(data.secret_scan_covers_prompts_and_fixtures) ??
+        asBool(data.scanCoversPromptsAndFixtures);
       secretScanCoversPromptsAndFixtures = mergeAndBool(
         secretScanCoversPromptsAndFixtures,
-        asBool(data.secretScanCoversPromptsAndFixtures) ??
-          asBool(data.secret_scan_covers_prompts_and_fixtures) ??
-          asBool(data.scanCoversPromptsAndFixtures),
+        covers,
       );
 
       // Structural scan payloads (SARIF / findings arrays): only production-path
@@ -453,6 +470,21 @@ function loadImported(
           structural.fixture,
         );
       }
+
+      const scanMetricPresent =
+        privileged != null ||
+        covers != null ||
+        structural.production > 0 ||
+        /\.sarif$/i.test(base);
+      if (scanMetricPresent && POLICY_SCAN_IMPORT_RE.test(base)) {
+        proven.add("policy_scan_report");
+      }
+      const logMetricPresent =
+        resolvedPct != null || privileged != null || structural.production > 0;
+      if (logMetricPresent && LOG_IMPORT_RE.test(base)) {
+        proven.add("application_logs");
+        proven.add("cloud_audit_logs");
+      }
     } catch {
       /* skip */
     }
@@ -468,6 +500,7 @@ function loadImported(
     secretScanCoversPromptsAndFixtures,
     measuredAt,
     sources,
+    provenEvidenceTypes: [...proven].sort(),
   };
 }
 
@@ -741,19 +774,7 @@ export const secretsHygieneCollector: Collector = {
         ...(manager.found || scan.found || embedded.length > 0
           ? ["repo_signal"]
           : []),
-        ...(imported.secretsManagerWiringPresent != null &&
-        importSourcesMatch(imported.sources, CLOUD_CFG_IMPORT_RE)
-          ? ["cloud_configuration"]
-          : []),
-        ...(importSourcesMatch(imported.sources, POLICY_SCAN_IMPORT_RE)
-          ? ["policy_scan_report"]
-          : []),
-        ...((imported.productionRuntimeSecretsResolvedFromSecretsManagerPct !=
-          null ||
-          imported.privilegedSecretsInReposPromptsOrClientBundles != null) &&
-        importSourcesMatch(imported.sources, LOG_IMPORT_RE)
-          ? ["application_logs", "cloud_audit_logs"]
-          : []),
+        ...imported.provenEvidenceTypes,
       ],
     );
 
