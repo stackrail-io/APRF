@@ -566,6 +566,20 @@ assert(
     !secM4.evidenceTier.matched.includes("reachability_probe"),
   "SEC-M4 matched[] must not invent reachability_probe without measured import",
 );
+assert(
+  secM4?.evidenceTier?.partialReason == null,
+  "below-floor PARTIAL must not set partialReason=metrics_incomplete",
+);
+assert(
+  [...fullById.values()].every(
+    (c) =>
+      c.evidenceTier?.partialReason !== "metrics_incomplete" ||
+      (c.status === "PARTIAL" &&
+        c.evidenceTier?.verification === "NONE" &&
+        c.evidenceTier?.achieved !== "E0"),
+  ),
+  "partialReason=metrics_incomplete only on floor-met PARTIAL with substance",
+);
 
 const htmlPath = resolve(root, "REPORT.html");
 writeAssessmentHtmlReport(assessmentPath, htmlPath);

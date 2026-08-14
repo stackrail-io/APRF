@@ -384,8 +384,7 @@ export const sharedAcceleratorIsolationCollector: Collector = {
         ...(sharedRefs.length || isolationRefs.length || testRefs.length
           ? ["repo_signal"]
           : []),
-        ...(isolationRefs.length ||
-        imported.isolationControlsDocumented != null ||
+        ...(imported.isolationControlsDocumented != null ||
         imported.tenantQosOrSchedulingPolicyPresent != null
           ? ["cloud_configuration"]
           : []),

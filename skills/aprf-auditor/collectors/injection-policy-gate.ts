@@ -453,10 +453,6 @@ export const injectionPolicyGateCollector: Collector = {
         imported.caseCount != null
           ? ["application_logs"]
           : []),
-        ...(imported.versionedCorpusPresent != null ||
-        imported.ciGateConfigured != null
-          ? ["repo_signal"]
-          : []),
       ],
     );
 

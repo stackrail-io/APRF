@@ -529,30 +529,13 @@ function isBelowFloor(c: Control): boolean {
 }
 
 /**
- * PARTIAL with floor met but incomplete measured metrics — prefer assess
- * evidenceTier.partialReason; legacy fallback is PARTIAL + evidenceFound when
- * not below floor. Must not be labeled UNVERIFIED.
+ * Floor-met PARTIAL with incomplete measured metrics — only when assess
+ * emitted evidenceTier.partialReason === metrics_incomplete. Do not infer
+ * from PARTIAL + evidenceFound (missing policy/corpus/gate is not this label).
  */
 function isMetricsIncomplete(c: Control): boolean {
   if (isBelowFloor(c)) return false;
-  if (c.evidenceTier?.partialReason === "metrics_incomplete") return true;
-  // Legacy assessments (pre-partialReason): do not treat every PARTIAL as
-  // metrics-incomplete — only when verification is NONE (floor met) with refs.
-  if ((c.status || "").toUpperCase().replace(/-/g, "_") !== "PARTIAL") {
-    return false;
-  }
-  if (
-    c.evidenceTier?.verification &&
-    c.evidenceTier.verification !== "NONE"
-  ) {
-    return false;
-  }
-  if (!c.evidenceTier?.achieved || c.evidenceTier.achieved === "E0") {
-    return false;
-  }
-  return (c.evidenceFound ?? []).some(
-    (e) => e?.ref && e.ref !== "not-demonstrated",
-  );
+  return c.evidenceTier?.partialReason === "metrics_incomplete";
 }
 
 /** Table filter: below-floor UNVERIFIED or metrics-incomplete PARTIAL. */
