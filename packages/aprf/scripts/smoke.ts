@@ -240,6 +240,7 @@ const a = JSON.parse(readFileSync(assessmentPath, "utf8")) as {
       acceptable: string[];
       matched: string[];
       verification: string;
+      partialReason?: "metrics_incomplete";
     };
     crosswalks?: Array<{
       framework: string;
@@ -566,6 +567,20 @@ assert(
     !secM4.evidenceTier.matched.includes("reachability_probe"),
   "SEC-M4 matched[] must not invent reachability_probe without measured import",
 );
+assert(
+  secM4?.evidenceTier?.partialReason == null,
+  "below-floor PARTIAL must not set partialReason=metrics_incomplete",
+);
+assert(
+  [...fullById.values()].every(
+    (c) =>
+      c.evidenceTier?.partialReason !== "metrics_incomplete" ||
+      (c.status === "PARTIAL" &&
+        c.evidenceTier?.verification === "NONE" &&
+        c.evidenceTier?.achieved !== "E0"),
+  ),
+  "partialReason=metrics_incomplete only on floor-met PARTIAL with substance",
+);
 
 const htmlPath = resolve(root, "REPORT.html");
 writeAssessmentHtmlReport(assessmentPath, htmlPath);
@@ -645,7 +660,7 @@ assert(
   "REPORT.html must surface Evidence Assurance Tiers (achieved / required / UNVERIFIED)",
 );
 // Executive summary order: verification callout → Evidence coverage → Top threat exposure.
-const verifyCalloutAt = html.indexOf("implemented but unverified");
+const verifyCalloutAt = html.indexOf("UNVERIFIED (below floor)");
 const evidenceCoverageAt = html.indexOf("Evidence coverage");
 const topThreatAt = html.indexOf("Top threat exposure");
 assert(

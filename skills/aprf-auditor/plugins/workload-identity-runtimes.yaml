@@ -3,6 +3,7 @@ title: Workload identity for self-hosted model runtimes (AUTHN-R2)
 version: "0.2.0"
 executor: collectors/workload-identity-runtimes.ts
 evidenceClass: runtime
+emitsEvidenceTier: E4
 alsoEmits: []
 detectorIds: [repo-workload-identity-runtimes]
 inputs:

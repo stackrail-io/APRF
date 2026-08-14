@@ -3,6 +3,7 @@ title: Short-lived agent/tool tokens; no static keys in prompts (AUTHN-R1)
 version: "0.2.0"
 executor: collectors/short-lived-agent-tokens.ts
 evidenceClass: runtime
+emitsEvidenceTier: E4
 alsoEmits: []
 detectorIds: [repo-short-lived-agent-tokens]
 inputs:

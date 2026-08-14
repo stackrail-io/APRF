@@ -33,7 +33,7 @@ export interface SpecCheckRef {
   pillarSeverity?: string;
   domain: string | null;
   method: "automated" | "manual" | "hybrid";
-  /** Projected evidence floor (APRF-RFC-0011); optional until sync lands. */
+  /** Projected evidence floor (APRF-RFC-0011); present after `aprf:sync-evidence-tiers`. */
   minimumTier?: EvidenceTier;
   requiredFromLevel: number;
   minCriticality: number;

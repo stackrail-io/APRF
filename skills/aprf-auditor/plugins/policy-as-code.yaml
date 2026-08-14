@@ -3,6 +3,7 @@ title: Tool/model access policy-as-code (AUTHZ-R1)
 version: "0.2.0"
 executor: collectors/policy-as-code.ts
 evidenceClass: code
+emitsEvidenceTier: E2
 alsoEmits: [ci]
 detectorIds: [repo-policy-as-code]
 inputs:

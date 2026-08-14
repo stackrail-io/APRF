@@ -24,6 +24,7 @@ import {
   walkFiles,
   SCAN_EXTENSIONS,
 } from "./lib/fs.ts";
+import { withReportEvidenceTypes } from "./lib/evidence-types.ts";
 import {
   asBool,
   measuredAtFresh,
@@ -441,17 +442,35 @@ export const aiIacCisPolicyCollector: Collector = {
     );
 
     const imported = loadImported(ctx);
-    const report = buildAiIacCisPolicyReport({
-      assessedAt: ctx.assessedAt.toISOString(),
-      iacModules: { found: iacRefs.length > 0, refs: iacRefs },
-      productionAiIac: {
-        found: prodAiIacRefs.length > 0,
-        refs: prodAiIacRefs,
-      },
-      cisPolicyScanConfig: { found: policyRefs.length > 0, refs: policyRefs },
-      ciApplyOrPrWiring: { found: ciRefs.length > 0, refs: ciRefs },
-      imported,
-    });
+    const report = withReportEvidenceTypes(
+      buildAiIacCisPolicyReport({
+        assessedAt: ctx.assessedAt.toISOString(),
+        iacModules: { found: iacRefs.length > 0, refs: iacRefs },
+        productionAiIac: {
+          found: prodAiIacRefs.length > 0,
+          refs: prodAiIacRefs,
+        },
+        cisPolicyScanConfig: { found: policyRefs.length > 0, refs: policyRefs },
+        ciApplyOrPrWiring: { found: ciRefs.length > 0, refs: ciRefs },
+        imported,
+      }),
+      [
+        ...(iacRefs.length ||
+        prodAiIacRefs.length ||
+        imported.iacCoversProductionAiInfrastructure != null
+          ? ["iac_module"]
+          : []),
+        ...(policyRefs.length ||
+        ciRefs.length ||
+        imported.cisAlignedPolicyChecksOnEveryApplyOrPr != null
+          ? ["cis_policy_scan"]
+          : []),
+        ...(imported.policyScanReportPresent === true ||
+        imported.openCriticalFindingsUnwaived != null
+          ? ["policy_scan_report"]
+          : []),
+      ],
+    );
 
     ensureDir(importDir(ctx));
     writeFileSync(

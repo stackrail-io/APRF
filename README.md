@@ -99,7 +99,7 @@ npm run validate
 2. **`aprf:catalog`** — regenerate [`packages/aprf-engine/src/generated/catalog.ts`](packages/aprf-engine/src/generated/catalog.ts) (content-hash stamped; embeds crosswalks + threat intel)
 3. **`aprf:integrity`** — YAML ↔ `spec/aprf-spec.json` Check IDs; Core/Regulated + lenses match framework-definition; `stats` match recomputed values; stewardship contact hygiene
 4. **`aprf:detector-bridge`** — every Check detector (except `manual-attest`) claimed in `plugin.detectorIds`; generated join maps in sync
-5. **`aprf:check-spec-sync`** — run `aprf:sync-rfcs` + `aprf:sync-stats`; **fail if** `spec/aprf-spec.json` drifts
+5. **`aprf:check-spec-sync`** — run `aprf:sync-rfcs` + `aprf:sync-stats` + `aprf:sync-evidence-tiers`; **fail if** `spec/aprf-spec.json` drifts
 6. **`aprf:threat-map`** — every Check has threat context; closed vocabularies; pinned MITRE IDs
 7. **`aprf:collectors:unused`** — TypeScript unused locals/parameters in auditor collectors
 8. **`test:unit`** — aprf-engine + framework-definition + CLI smoke
@@ -114,7 +114,8 @@ npm run aprf:integrity         # YAML ↔ spec ↔ profile ↔ stats gate
 npm run aprf:detector-bridge   # Check detectors ↔ plugin.detectorIds + join maps
 npm run aprf:sync-rfcs         # rfcs/*.md → spec/aprf-spec.json `rfcs`
 npm run aprf:sync-stats        # recompute spec/aprf-spec.json `stats`
-npm run aprf:check-spec-sync   # sync rfcs+stats; fail on drift (CI + validate)
+npm run aprf:sync-evidence-tiers  # project Check minimumTier onto spec check rows
+npm run aprf:check-spec-sync   # sync rfcs+stats+evidence-tiers; fail on drift (CI + validate)
 npm run aprf:threat-map        # threat-map coverage + MITRE IDs
 npm run test:unit              # engine / framework / CLI unit + smoke
 npm run build                  # emit publishable dist/ for all packages
@@ -172,7 +173,7 @@ Deprecate with `status: deprecated`, `replacedBy`, and `deprecationNote` — nev
 
 | Job | What it checks |
 | --- | --- |
-| **Validate catalog and packages** | `npm ci` → rule schema → catalog rebuild → **fail if generated catalog drifted** → YAML↔spec↔profile↔stats integrity → **sync-rfcs + sync-stats; fail if `aprf-spec.json` drifted** → threat-map → collectors unused → unit tests → auditor-skill tests → TypeScript `dist/` build |
+| **Validate catalog and packages** | `npm ci` → rule schema → catalog rebuild → **fail if generated catalog drifted** → YAML↔spec↔profile↔stats integrity → **sync-rfcs + sync-stats + sync-evidence-tiers; fail if `aprf-spec.json` drifted** → threat-map → collectors unused → unit tests → auditor-skill tests → TypeScript `dist/` build |
 | **Spec JSON structure** | `spec/aprf-spec.json` SemVer + pillar presence; schema `$id`s parse; stewardship `emailHint` present; no retired personal emails / product API paths |
 
 PRs that edit YAML Checks but forget to regenerate the catalog will fail CI with a clear drift error. Fix with:

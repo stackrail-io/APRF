@@ -23,6 +23,7 @@ import {
   rel,
   walkFiles,
 } from "./lib/fs.ts";
+import { withReportEvidenceTypes } from "./lib/evidence-types.ts";
 import {
   asBool,
   measuredAtFresh,
@@ -38,6 +39,14 @@ const PLUGIN_ID = "secrets-hygiene";
 const RELATED = ["SEC2-M1"] as const;
 const DETECTOR_ID = "repo-secrets-hygiene";
 const IMPORT_MAX_AGE_DAYS = 90;
+
+const CLOUD_CFG_IMPORT_RE =
+  /(cloud.?config|provider.?export|config.?snapshot|secrets.?manager.?export)/i;
+const APP_LOG_IMPORT_RE = /(app(lication)?.?log|runtime.?log|access.?log)/i;
+const AUDIT_LOG_IMPORT_RE =
+  /(audit.?log|cloudtrail|cloud.?watch.?audit|cloud.?audit)/i;
+const POLICY_SCAN_IMPORT_RE =
+  /(\.sarif$|secret.?scan|gitleaks|trufflehog|detect.?secret|policy.?scan)/i;
 
 const MANAGER_FILE_RE =
   /(external-?secrets|sealed-?secrets|secretproviderclass|vault|doppler|1password|aws.?secrets.?manager|secretsmanager|azure.?key.?vault|gcp.?secret|google.?secret.?manager)/i;
@@ -112,6 +121,11 @@ export interface SecretsHygieneReport {
     secretScanCoversPromptsAndFixtures: boolean | null;
     measuredAt: string | null;
     sources: string[];
+    /**
+     * Stronger evidence types proven by the same import artifact that supplied
+     * the metric (filename pattern + field on that file).
+     */
+    provenEvidenceTypes: string[];
   };
   summary: {
     embeddedCount: number;
@@ -372,6 +386,7 @@ function loadImported(
   ctx: CollectorContext,
 ): SecretsHygieneReport["importedResults"] {
   const sources: string[] = [];
+  const proven = new Set<string>();
   let productionRuntimeSecretsPresent: boolean | null = null;
   let secretsManagerWiringPresent: boolean | null = null;
   let productionRuntimeSecretsResolvedFromSecretsManagerPct: number | null =
@@ -388,9 +403,14 @@ function loadImported(
     if (!text) continue;
     try {
       const data = JSON.parse(text) as Record<string, unknown>;
-      sources.push(basename(file));
+      const base = basename(file);
+      sources.push(base);
       measuredAt = mergeOldestMeasuredAt(measuredAt, parseMeasuredAt(data));
 
+      const wiring =
+        asBool(data.secretsManagerWiringPresent) ??
+        asBool(data.secrets_manager_wiring_present) ??
+        asBool(data.secretsManagerPresent);
       productionRuntimeSecretsPresent = mergeOrBool(
         productionRuntimeSecretsPresent,
         asBool(data.productionRuntimeSecretsPresent) ??
@@ -399,30 +419,40 @@ function loadImported(
       );
       secretsManagerWiringPresent = mergeAndBool(
         secretsManagerWiringPresent,
-        asBool(data.secretsManagerWiringPresent) ??
-          asBool(data.secrets_manager_wiring_present) ??
-          asBool(data.secretsManagerPresent),
+        wiring,
       );
+      if (wiring != null && CLOUD_CFG_IMPORT_RE.test(base)) {
+        proven.add("cloud_configuration");
+      }
+
+      const resolvedPct =
+        asNum(data.productionRuntimeSecretsResolvedFromSecretsManagerPct) ??
+        asNum(
+          data.production_runtime_secrets_resolved_from_secrets_manager_pct,
+        ) ??
+        asNum(data.resolvedFromSecretsManagerPct);
       productionRuntimeSecretsResolvedFromSecretsManagerPct = mergeMinNum(
         productionRuntimeSecretsResolvedFromSecretsManagerPct,
-        asNum(data.productionRuntimeSecretsResolvedFromSecretsManagerPct) ??
-          asNum(
-            data.production_runtime_secrets_resolved_from_secrets_manager_pct,
-          ) ??
-          asNum(data.resolvedFromSecretsManagerPct),
+        resolvedPct,
       );
+
       // Explicit gate field = production privileged findings (catalog contract).
+      const privileged =
+        asNum(data.privilegedSecretsInReposPromptsOrClientBundles) ??
+        asNum(data.privileged_secrets_in_repos_prompts_or_client_bundles) ??
+        asNum(data.privilegedSecretsFoundInScan);
       privilegedSecretsInReposPromptsOrClientBundles = mergeMaxNum(
         privilegedSecretsInReposPromptsOrClientBundles,
-        asNum(data.privilegedSecretsInReposPromptsOrClientBundles) ??
-          asNum(data.privileged_secrets_in_repos_prompts_or_client_bundles) ??
-          asNum(data.privilegedSecretsFoundInScan),
+        privileged,
       );
+
+      const covers =
+        asBool(data.secretScanCoversPromptsAndFixtures) ??
+        asBool(data.secret_scan_covers_prompts_and_fixtures) ??
+        asBool(data.scanCoversPromptsAndFixtures);
       secretScanCoversPromptsAndFixtures = mergeAndBool(
         secretScanCoversPromptsAndFixtures,
-        asBool(data.secretScanCoversPromptsAndFixtures) ??
-          asBool(data.secret_scan_covers_prompts_and_fixtures) ??
-          asBool(data.scanCoversPromptsAndFixtures),
+        covers,
       );
 
       // Structural scan payloads (SARIF / findings arrays): only production-path
@@ -442,6 +472,20 @@ function loadImported(
           structural.fixture,
         );
       }
+
+      const scanMetricPresent =
+        privileged != null || covers != null || structural.production > 0;
+      if (scanMetricPresent && POLICY_SCAN_IMPORT_RE.test(base)) {
+        proven.add("policy_scan_report");
+      }
+      const logMetricPresent =
+        resolvedPct != null || privileged != null || structural.production > 0;
+      if (logMetricPresent && APP_LOG_IMPORT_RE.test(base)) {
+        proven.add("application_logs");
+      }
+      if (logMetricPresent && AUDIT_LOG_IMPORT_RE.test(base)) {
+        proven.add("cloud_audit_logs");
+      }
     } catch {
       /* skip */
     }
@@ -457,6 +501,7 @@ function loadImported(
     secretScanCoversPromptsAndFixtures,
     measuredAt,
     sources,
+    provenEvidenceTypes: [...proven].sort(),
   };
 }
 
@@ -718,13 +763,21 @@ export const secretsHygieneCollector: Collector = {
     );
     const imported = loadImported(ctx);
 
-    const report = buildSecretsReport({
-      assessedAt: ctx.assessedAt.toISOString(),
-      manager,
-      scan,
-      embedded,
-      imported,
-    });
+    const report = withReportEvidenceTypes(
+      buildSecretsReport({
+        assessedAt: ctx.assessedAt.toISOString(),
+        manager,
+        scan,
+        embedded,
+        imported,
+      }),
+      [
+        ...(manager.found || scan.found || embedded.length > 0
+          ? ["repo_signal"]
+          : []),
+        ...imported.provenEvidenceTypes,
+      ],
+    );
 
     ensureDir(importDir(ctx));
     writeFileSync(

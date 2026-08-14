@@ -30,6 +30,9 @@ types:
   - id: reachability_probe
     defaultTier: E4
     description: Automated or reviewed probe proving allowlisted-only reachability.
+  - id: http_auth_probe
+    defaultTier: E4
+    description: Unauthenticated HTTP/RPC auth probe of declared production AI routes (401/403).
   - id: iac_module
     defaultTier: E3
     description: Infrastructure-as-code modules covering the production surface.

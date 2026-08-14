@@ -3,6 +3,7 @@ title: High-privilege agent continuous access review (AUTHZ-R2)
 version: "0.2.0"
 executor: collectors/high-priv-agent-review.ts
 evidenceClass: code
+emitsEvidenceTier: E2
 alsoEmits: []
 detectorIds: [high-priv-agent-review]
 inputs:

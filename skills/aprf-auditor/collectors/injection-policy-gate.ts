@@ -22,6 +22,7 @@ import {
   walkFiles,
   SCAN_EXTENSIONS,
 } from "./lib/fs.ts";
+import { withReportEvidenceTypes } from "./lib/evidence-types.ts";
 
 import {
   asBool,
@@ -432,13 +433,28 @@ export const injectionPolicyGateCollector: Collector = {
     const ciGate = detectCiGate(ctx.targetPath, ctx.maxFiles ?? 4000);
     const imported = loadImported(ctx);
 
-    const report = buildInjectionPolicyReport({
-      assessedAt: ctx.assessedAt.toISOString(),
-      policy,
-      corpus,
-      ciGate,
-      imported,
-    });
+    const report = withReportEvidenceTypes(
+      buildInjectionPolicyReport({
+        assessedAt: ctx.assessedAt.toISOString(),
+        policy,
+        corpus,
+        ciGate,
+        imported,
+      }),
+      [
+        ...(policy.found || corpus.found || ciGate.found
+          ? ["repo_signal"]
+          : []),
+        ...(ciGate.found || imported.ciGateConfigured != null
+          ? ["policy_scan_report"]
+          : []),
+        ...(imported.denyRatePct != null ||
+        imported.modelTextPrivilegeGrants != null ||
+        imported.caseCount != null
+          ? ["application_logs"]
+          : []),
+      ],
+    );
 
     ensureDir(importDir(ctx));
     writeFileSync(

@@ -9,6 +9,7 @@ export const KNOWN_EVIDENCE_TYPE_IDS = [
   "cloud_configuration",
   "runtime_network_config",
   "reachability_probe",
+  "http_auth_probe",
   "iac_module",
   "cis_policy_scan",
   "policy_scan_report",

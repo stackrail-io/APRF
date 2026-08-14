@@ -3,6 +3,7 @@ title: Registry-linked model MBOM (SCI-R2)
 version: "0.2.0"
 executor: collectors/ai-model-mbom.ts
 evidenceClass: ci
+emitsEvidenceTier: E3
 alsoEmits: []
 detectorIds:
   - repo-ai-model-mbom

@@ -32,6 +32,15 @@ evidenceRequired:
   - "Version pins (commit SHA, package version, image digest, or equivalent—not latest/floating tags)"
   - "Named owner and review date ≤180 days per inventory entry"
   - "Attest or scan showing 0 unpinned latest/floating entries in production (measuredAt ≤90 days)"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - iac_module
+    - cis_policy_scan
+    - policy_scan_report
+    - repo_signal
+    - cloud_configuration
+    - cloud_audit_logs
 detection:
   capability: "hybrid"
   detectors:

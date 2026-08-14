@@ -26,6 +26,13 @@ evidenceRequired:
   - "Inventory of production agent/automation identities"
   - "Role matrix / IAM-policy export covering those identities with non-admin defaults"
   - "Access-review record ≤90 days with unexplainedPrivilegeEscalations=0"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - application_logs
+    - repo_signal
+    - policy_scan_report
+    - cloud_audit_logs
 detection:
   capability: "hybrid"
   detectors:

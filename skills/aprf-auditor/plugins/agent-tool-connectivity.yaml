@@ -3,6 +3,7 @@ title: Agent/tool least-privilege connectivity (INF-M3)
 version: "0.2.0"
 executor: collectors/agent-tool-connectivity.ts
 evidenceClass: iac
+emitsEvidenceTier: E3
 alsoEmits: []
 detectorIds: [repo-agent-tool-connectivity]
 inputs:

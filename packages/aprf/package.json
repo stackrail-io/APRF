@@ -1,6 +1,6 @@
 {
   "name": "@stackrail-io/aprf",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": false,
   "license": "Apache-2.0",
   "description": "APRF CLI — collect evidence, assess from collector statusHints, render REPORT.html (pinned Check catalog)",
@@ -42,7 +42,7 @@
     "test:unit": "npx tsx scripts/smoke.ts"
   },
   "dependencies": {
-    "@stackrail-io/aprf-engine": "0.11.3",
+    "@stackrail-io/aprf-engine": "0.12.0",
     "@stackrail-io/aprf-framework-definition": "0.11.0",
     "yaml": "^2.7.0"
   },

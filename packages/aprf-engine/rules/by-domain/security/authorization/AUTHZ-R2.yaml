@@ -26,6 +26,13 @@ evidenceRequired:
   - "Inventory of high-privilege agent identities"
   - "Last access-review report with keep/revoke/modify decisions (≤90 days)"
   - "Evidence of ≥1 revoke/scope-reduction in last two cycles, or signed none-warranted attestation"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - application_logs
+    - repo_signal
+    - policy_scan_report
+    - cloud_audit_logs
 detection:
   capability: "hybrid"
   detectors:

@@ -234,6 +234,7 @@ type Control = {
     acceptable?: string[];
     matched?: string[];
     verification?: "NONE" | "UNVERIFIED" | "VERIFIED" | "NOT_APPLICABLE" | string;
+    partialReason?: "metrics_incomplete" | string;
   };
   /** Why the control exists; falls back to the catalog threat map. */
   threatIntel?: {
@@ -510,7 +511,8 @@ function renderRoadmapBucket(label: string, items: RoadmapRef[]): string {
   return `<section class="block"><h3>${esc(label)}</h3><ul class="roadmap-list">${lis}</ul></section>`;
 }
 
-const NEEDS_VERIFICATION_LABEL = "Implemented — needs verification";
+const BELOW_FLOOR_LABEL = "UNVERIFIED — below floor";
+const METRICS_INCOMPLETE_LABEL = "Implemented — metrics incomplete";
 
 function evidenceTierLine(c: Control): string {
   const t = c.evidenceTier;
@@ -521,19 +523,30 @@ function evidenceTierLine(c: Control): string {
   return `Evidence: ${achieved} · Required: ${minimum} · ${ver}`;
 }
 
+/** APRF-RFC-0011: achieved tier below Check minimumTier. */
+function isBelowFloor(c: Control): boolean {
+  return c.evidenceTier?.verification === "UNVERIFIED";
+}
+
 /**
- * Prefer assessment evidenceTier.verification === UNVERIFIED (APRF-RFC-0011).
- * Fallback: PARTIAL with real in-repo evidence (legacy assessments).
- * Display-only overlay — status / gate contribution unchanged.
+ * Floor-met PARTIAL with incomplete measured metrics — only when assess
+ * emitted evidenceTier.partialReason === metrics_incomplete. Do not infer
+ * from PARTIAL + evidenceFound (missing policy/corpus/gate is not this label).
  */
+function isMetricsIncomplete(c: Control): boolean {
+  if (isBelowFloor(c)) return false;
+  return c.evidenceTier?.partialReason === "metrics_incomplete";
+}
+
+/** Table filter: below-floor UNVERIFIED or metrics-incomplete PARTIAL. */
 function needsVerification(c: Control): boolean {
-  if (c.evidenceTier?.verification === "UNVERIFIED") return true;
-  if ((c.status || "").toUpperCase().replace(/-/g, "_") !== "PARTIAL") {
-    return false;
-  }
-  return (c.evidenceFound ?? []).some(
-    (e) => e?.ref && e.ref !== "not-demonstrated",
-  );
+  return isBelowFloor(c) || isMetricsIncomplete(c);
+}
+
+function verificationSubLabel(c: Control): string {
+  if (isBelowFloor(c)) return BELOW_FLOOR_LABEL;
+  if (isMetricsIncomplete(c)) return METRICS_INCOMPLETE_LABEL;
+  return "";
 }
 
 function statusClass(status: string): string {
@@ -1186,6 +1199,7 @@ type EvidenceCoverage = {
   notDemonstrated: number;
   fail: number;
   needsVerification: number;
+  metricsIncomplete: number;
   verified: number;
   belowFloor: number;
   requiredItems: number;
@@ -1207,6 +1221,7 @@ function evidenceCoverage(controls: Control[]): EvidenceCoverage {
   let notDemonstrated = 0;
   let fail = 0;
   let needsVerificationCount = 0;
+  let metricsIncomplete = 0;
   let verified = 0;
   let belowFloor = 0;
   let requiredItems = 0;
@@ -1220,8 +1235,9 @@ function evidenceCoverage(controls: Control[]): EvidenceCoverage {
     else if (s === "FAIL") fail++;
 
     if (needsVerification(c)) needsVerificationCount++;
+    if (isMetricsIncomplete(c)) metricsIncomplete++;
     if (c.evidenceTier?.verification === "VERIFIED") verified++;
-    if (c.evidenceTier?.verification === "UNVERIFIED") belowFloor++;
+    if (isBelowFloor(c)) belowFloor++;
 
     requiredItems += (c.evidenceRequired ?? []).length;
     missingItems += (c.requiredEvidenceMissing ?? []).length;
@@ -1234,6 +1250,7 @@ function evidenceCoverage(controls: Control[]): EvidenceCoverage {
     notDemonstrated,
     fail,
     needsVerification: needsVerificationCount,
+    metricsIncomplete,
     verified,
     belowFloor,
     requiredItems,
@@ -1267,7 +1284,8 @@ function evidenceCoverageBlock(controls: Control[]): string {
     <div class="stat"><div class="label">Not demonstrated</div><div class="value">${cov.notDemonstrated}</div></div>
     <div class="stat"><div class="label">FAIL</div><div class="value">${cov.fail}</div></div>
   </div>
-  <p class="meta" style="max-width:72ch;margin-top:0.75rem">${cov.needsVerification} Check${cov.needsVerification === 1 ? "" : "s"} are <em>UNVERIFIED</em> — evidence tier below the Check floor or metrics incomplete (filter <em>Needs verification</em>).
+  <p class="meta" style="max-width:72ch;margin-top:0.75rem">${cov.belowFloor} Check${cov.belowFloor === 1 ? "" : "s"} are <em>UNVERIFIED</em> — evidence tier below the Check floor (filter <em>Needs verification</em>).
+  ${cov.metricsIncomplete} Check${cov.metricsIncomplete === 1 ? "" : "s"} have repo signals but incomplete measured metrics (same filter; not UNVERIFIED).
   Catalog lists ${cov.requiredItems} evidence item${cov.requiredItems === 1 ? "" : "s"} across in-scope Checks; this run still asks for ${cov.missingItems} gap note${cov.missingItems === 1 ? "" : "s"} (imports, probes, or scope attestation).</p>
   </section>`;
 }
@@ -1410,9 +1428,11 @@ function controlDetailBody(c: Control): string {
       : ""
   }
   ${
-    needsVerification(c)
-      ? `<p class="verify-callout"><strong>${esc(NEEDS_VERIFICATION_LABEL)}</strong> — evidence is below the Check’s required assurance tier (or measured metrics are incomplete). Status stays ${esc(c.status)} until evidence meets ${esc(c.evidenceTier?.minimum ?? "the floor")}.</p>`
-      : ""
+    isBelowFloor(c)
+      ? `<p class="verify-callout"><strong>${esc(BELOW_FLOOR_LABEL)}</strong> — evidence tier is below the Check’s required assurance floor (${esc(c.evidenceTier?.achieved ?? "E0")} &lt; ${esc(c.evidenceTier?.minimum ?? "the floor")}). Status stays ${esc(c.status)} until measured evidence meets the floor.</p>`
+      : isMetricsIncomplete(c)
+        ? `<p class="verify-callout"><strong>${esc(METRICS_INCOMPLETE_LABEL)}</strong> — in-repo signals were found, but measured metrics or imports are still incomplete. Status stays ${esc(c.status)} (not UNVERIFIED).</p>`
+        : ""
   }
   <section class="assessment-findings">
     <h4>This assessment</h4>
@@ -1439,11 +1459,12 @@ function controlsTableAndFlyout(
     .map((c) => {
       const tags = tagsById.get(c.checkId) ?? [];
       const verify = needsVerification(c);
-      return `<tr class="control-row" tabindex="0" role="button" data-control-id="${esc(c.checkId)}" data-status="${esc(c.status)}"${verify ? ` data-verify="1"` : ""} aria-label="Open details for ${esc(c.checkId)}">
+      const verifyLabel = verificationSubLabel(c);
+      return `<tr class="control-row" tabindex="0" role="button" data-control-id="${esc(c.checkId)}" data-status="${esc(c.status)}"${verify ? ` data-verify="1"` : ""}${isBelowFloor(c) ? ` data-below-floor="1"` : ""} aria-label="Open details for ${esc(c.checkId)}">
   <td><code>${esc(c.checkId)}</code></td>
   <td>${esc(c.title)}</td>
   <td>${esc(controlCategory(c))}<span class="domain-sub">${esc(controlDomain(c))} domain</span></td>
-  <td><span class="pill ${statusClass(c.status)}">${esc(c.status)}</span>${verify ? `<span class="verify-sub">${esc(NEEDS_VERIFICATION_LABEL)}</span>` : ""}${evidenceTierLine(c) ? `<span class="verify-sub">${esc(evidenceTierLine(c))}</span>` : ""}</td>
+  <td><span class="pill ${statusClass(c.status)}">${esc(c.status)}</span>${verifyLabel ? `<span class="verify-sub">${esc(verifyLabel)}</span>` : ""}${evidenceTierLine(c) ? `<span class="verify-sub">${esc(evidenceTierLine(c))}</span>` : ""}</td>
   <td>${esc(c.confidence)}${c.confidenceScore != null ? ` <span class="meta">(${esc(c.confidenceScore)})</span>` : ""}</td>
   <td>${tagPills(tags) || `<span class="empty">—</span>`}</td>
   <td>${esc(c.priority)}</td>
@@ -1455,7 +1476,6 @@ function controlsTableAndFlyout(
   <button type="button" class="filter-chip active" data-filter="all">All <strong>${ordered.length}</strong></button>
   <button type="button" class="filter-chip" data-filter="PASS">Passed <strong>${statusCounts.PASS ?? 0}</strong></button>
   <button type="button" class="filter-chip" data-filter="FAIL">Failed <strong>${statusCounts.FAIL ?? 0}</strong></button>
-  <button type="button" class="filter-chip" data-filter="PARTIAL">Partial <strong>${statusCounts.PARTIAL ?? 0}</strong></button>
   <button type="button" class="filter-chip" data-filter="NEEDS_VERIFICATION">Needs verification <strong>${ordered.filter(needsVerification).length}</strong></button>
   <button type="button" class="filter-chip" data-filter="NOT_DEMONSTRATED">Not demonstrated <strong>${statusCounts.NOT_DEMONSTRATED ?? 0}</strong></button>
   <button type="button" class="filter-chip" data-filter="NOT_APPLICABLE">N/A <strong>${statusCounts.NOT_APPLICABLE ?? 0}</strong></button>
@@ -1544,7 +1564,8 @@ function render(a: Assessment): string {
 
   const statusCounts = countByStatus(a.controls);
   const severityCounts = countBySeverity(a.controls);
-  const needsVerificationCount = a.controls.filter(needsVerification).length;
+  const belowFloorCount = a.controls.filter(isBelowFloor).length;
+  const metricsIncompleteCount = a.controls.filter(isMetricsIncomplete).length;
 
   // Prefer rollup from controls so category slugs never appear as "domains"
   const domainScores = domainScoresFromControls(a.controls);
@@ -2062,8 +2083,13 @@ function render(a: Assessment): string {
     </p>
     <p class="lede" style="max-width:72ch">${esc(a.executiveSummary.narrative)}</p>
     ${
-      needsVerificationCount > 0
-        ? `<p class="verify-callout" style="max-width:72ch"><strong>${needsVerificationCount} check${needsVerificationCount === 1 ? "" : "s"} ${needsVerificationCount === 1 ? "is" : "are"} implemented but unverified.</strong> The control was found in this repository, but the Check requires measured proof (a test, drill, or probe result) before it can pass. These are the shortest path to closing the gate — filter the table by <em>Needs verification</em> to see them.</p>`
+      belowFloorCount > 0
+        ? `<p class="verify-callout" style="max-width:72ch"><strong>${belowFloorCount} check${belowFloorCount === 1 ? "" : "s"} ${belowFloorCount === 1 ? "is" : "are"} UNVERIFIED (below floor).</strong> Repo signals exist, but the achieved evidence tier is below the Check’s required floor — add measured proof (import, probe, or drill with a fresh <code>measuredAt</code>). Filter the table by <em>Needs verification</em> to see them.</p>`
+        : ""
+    }
+    ${
+      metricsIncompleteCount > 0
+        ? `<p class="meta" style="max-width:72ch;margin-top:0.5rem">${metricsIncompleteCount} check${metricsIncompleteCount === 1 ? "" : "s"} ${metricsIncompleteCount === 1 ? "has" : "have"} repo signals with incomplete measured metrics (PARTIAL, not UNVERIFIED) — same filter.</p>`
         : ""
     }
     ${evidenceCoverageBlock(a.controls)}

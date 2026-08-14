@@ -3,6 +3,7 @@ title: Provider/cloud key rotation + scope + no client privileged keys (SEC2-M3)
 version: "0.2.0"
 executor: collectors/key-rotation-scope.ts
 evidenceClass: code
+emitsEvidenceTier: E2
 alsoEmits: []
 detectorIds: [repo-key-rotation-scope]
 inputs:

@@ -3,6 +3,7 @@ title: Artifact provenance/integrity verification (SCI-M1)
 version: "0.2.0"
 executor: collectors/artifact-provenance-integrity.ts
 evidenceClass: ci
+emitsEvidenceTier: E3
 alsoEmits: []
 detectorIds:
   - repo-artifact-provenance-integrity

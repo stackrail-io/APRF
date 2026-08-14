@@ -3,6 +3,7 @@ title: AI control-plane admin MFA + break-glass (AUTHN-M3)
 version: "0.2.0"
 executor: collectors/ai-admin-mfa.ts
 evidenceClass: runtime
+emitsEvidenceTier: E4
 alsoEmits: []
 detectorIds: [repo-ai-admin-mfa]
 inputs:

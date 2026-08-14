@@ -23,6 +23,7 @@ import {
   walkFiles,
   SCAN_EXTENSIONS,
 } from "./lib/fs.ts";
+import { withReportEvidenceTypes } from "./lib/evidence-types.ts";
 import {
   asBool,
   measuredAtFresh,
@@ -418,14 +419,36 @@ export const aiRuntimePatchingCollector: Collector = {
     );
 
     const imported = loadImported(ctx);
-    const report = buildAiRuntimePatchingReport({
-      assessedAt: ctx.assessedAt.toISOString(),
-      patchingSla: { found: slaRefs.length > 0, refs: slaRefs },
-      runtimeInventory: { found: invRefs.length > 0, refs: invRefs },
-      cveOrAgeScan: { found: cveRefs.length > 0, refs: cveRefs },
-      waivers: { found: waiverRefs.length > 0, refs: waiverRefs },
-      imported,
-    });
+    const report = withReportEvidenceTypes(
+      buildAiRuntimePatchingReport({
+        assessedAt: ctx.assessedAt.toISOString(),
+        patchingSla: { found: slaRefs.length > 0, refs: slaRefs },
+        runtimeInventory: { found: invRefs.length > 0, refs: invRefs },
+        cveOrAgeScan: { found: cveRefs.length > 0, refs: cveRefs },
+        waivers: { found: waiverRefs.length > 0, refs: waiverRefs },
+        imported,
+      }),
+      [
+        ...(slaRefs.length ||
+        invRefs.length ||
+        cveRefs.length ||
+        waiverRefs.length
+          ? ["repo_signal"]
+          : []),
+        ...(slaRefs.length || imported.patchingSlaDocumented != null
+          ? ["patching_sla_report"]
+          : []),
+        ...(cveRefs.length ||
+        imported.vulnerabilityOrImageAgeReportPresent === true ||
+        imported.productionAiRuntimesWithinDocumentedPatchingSlaPct != null
+          ? ["infrastructure_logs"]
+          : []),
+        ...(imported.openSlaBreachesWithoutApprovedWaiver != null ||
+        imported.vulnerabilityOrImageAgeReportPresent === true
+          ? ["cloud_audit_logs"]
+          : []),
+      ],
+    );
 
     ensureDir(importDir(ctx));
     writeFileSync(

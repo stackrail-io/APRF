@@ -3,6 +3,7 @@ title: Verify-on-deploy for AI artifacts (SCI-R1)
 version: "0.2.0"
 executor: collectors/ai-verify-on-deploy.ts
 evidenceClass: ci
+emitsEvidenceTier: E3
 alsoEmits: []
 detectorIds:
   - repo-ai-verify-on-deploy

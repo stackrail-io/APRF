@@ -28,6 +28,15 @@ evidenceRequired:
   - "Verify-on-deploy / promote-path policy or gate for signed model/container (or equivalent AI package) artifacts"
   - "Last production deploy verification log showing signature or attestation success"
   - "Recorded test, canary, or deny log showing an unsigned artifact was rejected (within 90 days; measuredAt ≤90 days)"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - iac_module
+    - cis_policy_scan
+    - policy_scan_report
+    - repo_signal
+    - cloud_configuration
+    - cloud_audit_logs
 detection:
   capability: "hybrid"
   detectors:

@@ -130,11 +130,65 @@ assert.deepEqual(
 assert.deepEqual(
   matchedEvidenceTypes({
     evidenceClasses: ["iac"],
-    acceptable: ["patching_sla_report", "repo_signal"],
+    acceptable: ["patching_sla_report", "repo_signal", "iac_module"],
     repoSignalsPresent: true,
   }),
-  [],
-  "must not invent iac_module or repo_signal when class only implies IaC types outside acceptable",
+  ["iac_module"],
+  "iac class only implies iac_module without collector provenance",
+);
+assert.deepEqual(
+  matchedEvidenceTypes({
+    evidenceClasses: ["policy"],
+    acceptable: [
+      "cis_policy_scan",
+      "policy_scan_report",
+      "repo_signal",
+      "iac_module",
+    ],
+    repoSignalsPresent: true,
+  }),
+  ["cis_policy_scan"],
+  "policy class only implies cis_policy_scan",
+);
+assert.deepEqual(
+  matchedEvidenceTypes({
+    evidenceClasses: ["runtime-config"],
+    acceptable: [
+      "runtime_network_config",
+      "network_policy",
+      "cloud_configuration",
+      "repo_signal",
+    ],
+    repoSignalsPresent: true,
+  }),
+  ["runtime_network_config"],
+  "runtime-config class only implies runtime_network_config",
+);
+assert.deepEqual(
+  matchedEvidenceTypes({
+    evidenceClasses: ["ci"],
+    acceptable: ["repo_signal", "policy_scan_report", "cis_policy_scan"],
+    repoSignalsPresent: true,
+  }),
+  ["repo_signal"],
+  "ci class only implies repo_signal (not policy_scan aliases)",
+);
+assert.deepEqual(
+  matchedEvidenceTypes({
+    evidenceClasses: ["iac"],
+    acceptable: [
+      "repo_signal",
+      "policy_scan_report",
+      "cloud_audit_logs",
+      "application_logs",
+      "cloud_configuration",
+      "iac_module",
+    ],
+    observedEvidenceTypes: ["repo_signal", "cloud_configuration"],
+    repoSignalsPresent: true,
+  }),
+  ["repo_signal", "cloud_configuration", "iac_module"],
+  "SEC2-style iac nodes need explicit type provenance for non-iac_module matches",
 );
 assert.deepEqual(
   matchedEvidenceTypes({

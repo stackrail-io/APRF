@@ -26,6 +26,13 @@ evidenceRequired:
   - "Inventory of privileged AI feature, tool, and retrieval entry points"
   - "Server-side authz middleware/policy on those entry points"
   - "Authz suite results showing authenticated-but-unauthorized callers denied (measuredAt ≤90 days)"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - application_logs
+    - repo_signal
+    - policy_scan_report
+    - cloud_audit_logs
 detection:
   capability: "hybrid"
   detectors:

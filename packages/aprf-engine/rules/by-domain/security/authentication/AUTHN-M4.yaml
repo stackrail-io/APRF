@@ -27,6 +27,13 @@ evidenceRequired:
   - "Identity-propagation design for agent/tool/workflow chains (subject carried or re-asserted)"
   - "Sample traces or harness results showing end-user or documented service subject on privileged calls"
   - "Review showing 0 anonymous privileged hops in the sample"
+evidencePolicy:
+  minimumTier: E3
+  acceptableEvidence:
+    - application_logs
+    - cloud_audit_logs
+    - repo_signal
+    - policy_scan_report
 detection:
   capability: "hybrid"
   detectors:

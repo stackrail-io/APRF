@@ -3,6 +3,7 @@ title: Sensitive document-class ABAC (AUTHZ-M4)
 version: "0.2.0"
 executor: collectors/sensitive-doc-abac.ts
 evidenceClass: code
+emitsEvidenceTier: E2
 alsoEmits: []
 detectorIds: [sensitive-doc-abac]
 inputs:

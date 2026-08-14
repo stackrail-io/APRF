@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:e6041a03a8f3ee2fde24fef1d55f44c2335f578db7bfa0cb642cd30c07f0bf5c",
+  "generatedAt": "sha256:122dd91f42d3c3f4e11168f646da2f1d91a16472f6d0cbe6975f17babb80c5a1",
   "ruleCount": 178,
   "domains": [
     {
@@ -1214,6 +1214,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Unauthenticated auth-probe report covering those declared AI routes (401/403)",
         "Confirmation the probe inventory matches the production route catalog"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "http_auth_probe",
+          "application_logs",
+          "cloud_audit_logs",
+          "repo_signal",
+          "policy_scan_report"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -1292,6 +1302,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Auth config per connection (auth_type / identity binding; secrets redacted)",
         "Scoring report showing 0 anonymous and 0 shared static-key connections"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "application_logs",
+          "cloud_audit_logs",
+          "repo_signal",
+          "policy_scan_report"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -1370,6 +1389,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Break-glass account inventory with documented maximum",
         "Evidence break-glass accounts have monitoring/alerting enabled"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "application_logs",
+          "cloud_audit_logs",
+          "repo_signal",
+          "policy_scan_report"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -1448,6 +1476,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Sample traces or harness results showing end-user or documented service subject on privileged calls",
         "Review showing 0 anonymous privileged hops in the sample"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "application_logs",
+          "cloud_audit_logs",
+          "repo_signal",
+          "policy_scan_report"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -1533,6 +1570,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "IdP/token TTL policy (or equivalent) covering those credentials",
         "Secret-scan report of prompts/config showing 0 long-lived static API keys"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "application_logs",
+          "cloud_audit_logs",
+          "repo_signal",
+          "policy_scan_report"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -1612,6 +1658,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Workload-identity binding config per runtime (SPIFFE, IAM role, or equivalent)",
         "Sample authenticated call traces (or harness) showing workload identity; 0 static shared keys"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "application_logs",
+          "cloud_audit_logs",
+          "repo_signal",
+          "policy_scan_report"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -1691,6 +1746,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Server-side authz middleware/policy on those entry points",
         "Authz suite results showing authenticated-but-unauthorized callers denied (measuredAt ≤90 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "application_logs",
+          "repo_signal",
+          "policy_scan_report",
+          "cloud_audit_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -1771,6 +1835,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Cross-tenant attack test suite results (≥10 cases) covering those paths",
         "Scoring report showing 0 successful unauthorized cross-tenant reads/writes (measuredAt ≤90 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "application_logs",
+          "repo_signal",
+          "policy_scan_report",
+          "cloud_audit_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -1850,6 +1923,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Role matrix / IAM-policy export covering those identities with non-admin defaults",
         "Access-review record ≤90 days with unexplainedPrivilegeEscalations=0"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "application_logs",
+          "repo_signal",
+          "policy_scan_report",
+          "cloud_audit_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -1929,6 +2011,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "ABAC/policy config binding subject/resource attributes to those classes",
         "Test results showing unauthorized class access denied; inventory matches production (measuredAt ≤90 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "application_logs",
+          "repo_signal",
+          "policy_scan_report",
+          "cloud_audit_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -2007,6 +2098,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "CI or admission policy-check wiring covering those rules",
         "Latest failing-to-passing policy change ≤90 days showing deny for unauthorized tool/model"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "application_logs",
+          "repo_signal",
+          "policy_scan_report",
+          "cloud_audit_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -2085,6 +2185,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Last access-review report with keep/revoke/modify decisions (≤90 days)",
         "Evidence of ≥1 revoke/scope-reduction in last two cycles, or signed none-warranted attestation"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "application_logs",
+          "repo_signal",
+          "policy_scan_report",
+          "cloud_audit_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -12270,6 +12379,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Digest or signature verification logs for production model/container pulls in the sample window",
         "Proof unverified pulls are blocked (admission policy, registry policy, or deploy gate; measuredAt ≤90 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "iac_module",
+          "cis_policy_scan",
+          "policy_scan_report",
+          "repo_signal",
+          "cloud_configuration",
+          "cloud_audit_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -12401,6 +12521,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Named owner and review date ≤180 days per inventory entry",
         "Attest or scan showing 0 unpinned latest/floating entries in production (measuredAt ≤90 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "iac_module",
+          "cis_policy_scan",
+          "policy_scan_report",
+          "repo_signal",
+          "cloud_configuration",
+          "cloud_audit_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -12498,6 +12629,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Retained scan results for the sample window showing 100% coverage and 0 skipped scans (measuredAt ≤90 days)",
         "Waiver records for any critical exceptions (owner + expiry ≤14 days), or proof none were granted"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "iac_module",
+          "cis_policy_scan",
+          "policy_scan_report",
+          "repo_signal",
+          "cloud_configuration",
+          "cloud_audit_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -12598,6 +12740,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Deny or verification logs showing unapproved artifacts blocked",
         "Evidence revoked/untrusted signatures are rejected (policy + logs or probe; measuredAt ≤90 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "iac_module",
+          "cis_policy_scan",
+          "policy_scan_report",
+          "repo_signal",
+          "cloud_configuration",
+          "cloud_audit_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -12685,6 +12838,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Last production deploy verification log showing signature or attestation success",
         "Recorded test, canary, or deny log showing an unsigned artifact was rejected (within 90 days; measuredAt ≤90 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "iac_module",
+          "cis_policy_scan",
+          "policy_scan_report",
+          "repo_signal",
+          "cloud_configuration",
+          "cloud_audit_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -12779,6 +12943,17 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Retention location proving artifacts are kept ≥90 days",
         "Coverage attest or inventory export showing 100% of production pins linked (measuredAt ≤90 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "iac_module",
+          "cis_policy_scan",
+          "policy_scan_report",
+          "repo_signal",
+          "cloud_configuration",
+          "cloud_audit_logs"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -13455,6 +13630,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Latest secret-scan report with 0 privileged findings (measuredAt ≤90 days)",
         "Attest or inventory showing 100% of production runtime secrets resolve from the secrets manager"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "repo_signal",
+          "policy_scan_report",
+          "cloud_audit_logs",
+          "application_logs",
+          "cloud_configuration"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -13532,6 +13717,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Synthetic secret-injection canary harness covering API key/bearer/AWS-key patterns",
         "Canary results showing 100% detection/redaction in persisted logs/traces (measuredAt ≤90 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "repo_signal",
+          "policy_scan_report",
+          "cloud_audit_logs",
+          "application_logs",
+          "cloud_configuration"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -13614,6 +13809,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Rotation dates or provider-managed short-lived credential evidence within policy",
         "Client bundle/scan report showing 0 privileged provider/cloud keys (measuredAt ≤90 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "repo_signal",
+          "policy_scan_report",
+          "cloud_audit_logs",
+          "application_logs",
+          "cloud_configuration"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -13697,6 +13902,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Proof scanning blocks on high-confidence secrets",
         "Latest green main-branch or PR-merge secret-scan evidence (measuredAt ≤7 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "repo_signal",
+          "policy_scan_report",
+          "cloud_audit_logs",
+          "application_logs",
+          "cloud_configuration"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -13780,6 +13995,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Documented allowed destinations for those credentials",
         "Sample deny (and optionally allow) logs proving enforcement (measuredAt ≤90 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "repo_signal",
+          "policy_scan_report",
+          "cloud_audit_logs",
+          "application_logs",
+          "cloud_configuration"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [
@@ -13862,6 +14087,16 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Proof publish is blocked when critical findings are open",
         "Linked scan reports covering 100% of fine-tune/eval corpora published in the last 90 days (measuredAt ≤90 days)"
       ],
+      "evidencePolicy": {
+        "minimumTier": "E3",
+        "acceptableEvidence": [
+          "repo_signal",
+          "policy_scan_report",
+          "cloud_audit_logs",
+          "application_logs",
+          "cloud_configuration"
+        ]
+      },
       "detection": {
         "capability": "hybrid",
         "detectors": [

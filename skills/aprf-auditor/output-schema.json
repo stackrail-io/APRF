@@ -316,6 +316,11 @@
               "verification": {
                 "type": "string",
                 "enum": ["NONE", "UNVERIFIED", "VERIFIED", "NOT_APPLICABLE"]
+              },
+              "partialReason": {
+                "type": "string",
+                "description": "When PARTIAL meets the floor but measured metrics are incomplete (not below-floor UNVERIFIED).",
+                "enum": ["metrics_incomplete"]
               }
             }
           },
@@ -395,6 +400,32 @@
             },
             "then": {
               "properties": { "passed": { "const": false } }
+            }
+          },
+          {
+            "if": {
+              "required": ["evidenceTier"],
+              "properties": {
+                "evidenceTier": {
+                  "type": "object",
+                  "required": ["partialReason"]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "status": { "const": "PARTIAL" },
+                "evidenceTier": {
+                  "type": "object",
+                  "properties": {
+                    "verification": { "const": "NONE" },
+                    "achieved": {
+                      "type": "string",
+                      "not": { "const": "E0" }
+                    }
+                  }
+                }
+              }
             }
           }
         ]

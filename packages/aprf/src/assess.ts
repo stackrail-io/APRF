@@ -971,6 +971,15 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
         minimum: minimumTier,
       }),
     };
+    // Floor-met PARTIAL with substance = metrics incomplete (not UNVERIFIED).
+    if (
+      status === "PARTIAL" &&
+      evidenceTier.verification === "NONE" &&
+      achievedTier !== "E0" &&
+      repoSignalsPresent
+    ) {
+      evidenceTier.partialReason = "metrics_incomplete";
+    }
     const tierGapNote =
       evidenceTier.verification === "UNVERIFIED"
         ? `Evidence tier ${achievedTier} is below required ${minimumTier} — UNVERIFIED; PASS needs measured evidence at or above ${minimumTier}.`

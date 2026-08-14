@@ -3,6 +3,7 @@ title: Injection / privilege-escalation policy gate (SEC-M1)
 version: "0.2.0"
 executor: collectors/injection-policy-gate.ts
 evidenceClass: code
+emitsEvidenceTier: E2
 alsoEmits: []
 detectorIds: [repo-injection-policy-gate]
 inputs:
