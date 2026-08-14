@@ -645,7 +645,7 @@ assert(
   "REPORT.html must surface Evidence Assurance Tiers (achieved / required / UNVERIFIED)",
 );
 // Executive summary order: verification callout → Evidence coverage → Top threat exposure.
-const verifyCalloutAt = html.indexOf("implemented but unverified");
+const verifyCalloutAt = html.indexOf("UNVERIFIED (below floor)");
 const evidenceCoverageAt = html.indexOf("Evidence coverage");
 const topThreatAt = html.indexOf("Top threat exposure");
 assert(
