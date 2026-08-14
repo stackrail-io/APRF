@@ -240,7 +240,7 @@ const a = JSON.parse(readFileSync(assessmentPath, "utf8")) as {
       acceptable: string[];
       matched: string[];
       verification: string;
-      partialReason?: string;
+      partialReason?: "metrics_incomplete";
     };
     crosswalks?: Array<{
       framework: string;
