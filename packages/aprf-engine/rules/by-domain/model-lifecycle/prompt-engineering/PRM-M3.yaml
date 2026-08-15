@@ -15,7 +15,7 @@ weight: 3
 gate: "mandatory"
 passCondition: >
   Prior prompt version restored in ≤ documented RTO without full app redeploy;
-  demonstrated in the last 90 days (restore evidence measuredAt ≤90 days). If none (production prompts are versioned and released), score NOT_APPLICABLE.
+  demonstrated in the last 90 days (restore evidence measuredAt ≤90 days). If no production prompts exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Prompt rollback procedure documenting RTO and restore without full app redeploy"
   - "Timed restore test record showing prior prompt version restored within RTO (≤90 days)"
@@ -34,8 +34,7 @@ detection:
           prompt version within documented RTO without full app redeploy
           (measuredAt ≤90 days).
 manualVerification: >
-  1) Confirm production prompts are versioned and released. If none, score
-  NOT_APPLICABLE. 2) Open the prompt rollback procedure; confirm a documented
+  1) Confirm production prompts exist. If none, score NOT_APPLICABLE. 2) Open the prompt rollback procedure; confirm a documented
   RTO and a restore path that does not require full app redeploy. 3) Confirm a
   timed restore test in the last 90 days restored a prior prompt version within
   that RTO. 4) PASS only if procedure + timed demo hold with measuredAt ≤90

@@ -15,7 +15,7 @@ gate: "mandatory"
 passCondition: >
   Alert policies exist for each critical journey SLO; an alert test or
   documented fire demonstrates the notification path works (alert evidence
-  measuredAt ≤90 days). If none (critical AI journeys with SLOs are in scope), score NOT_APPLICABLE.
+  measuredAt ≤90 days). If no critical AI journeys with SLOs are in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Burn-rate or SLO alert policies covering each critical AI journey SLO"
   - "Alert test or documented fire proving notification path"

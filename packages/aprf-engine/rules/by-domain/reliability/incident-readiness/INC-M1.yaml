@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   Four playbooks present (abuse, leakage, bad actions, provider outage), each
   with owner and review date ≤12 months (playbook evidence measuredAt ≤90
-  days). If none (a production AI system is in scope), score NOT_APPLICABLE.
+  days). If no production AI system is in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Playbook set covering abuse, leakage, bad actions, and provider outage with owners"
   - "Review dates ≤12 months for each of the four playbooks"

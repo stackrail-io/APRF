@@ -15,7 +15,7 @@ gate: "mandatory"
 passCondition: >
   100% of business-critical AI services have numeric RTO and RPO documented
   and linked to a tested restore/failover procedure (continuity evidence
-  measuredAt ≤90 days). If none (business-critical AI services are in scope), score NOT_APPLICABLE.
+  measuredAt ≤90 days). If no business-critical AI services are in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Business continuity, service-catalog, or disaster-recovery documentation with numeric RTO and RPO for business-critical AI services"
   - "Linkage from each in-scope service to a tested restore/failover procedure"

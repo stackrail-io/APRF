@@ -15,7 +15,7 @@ gate: "recommended"
 passCondition: >
   Named SLOs with numeric targets cover latency, error, and quality burn for
   each critical AI journey; burn-rate alerts fire when burn exceeds the
-  documented threshold (SLO evidence measuredAt ≤90 days). If none (critical AI journeys are in scope), score NOT_APPLICABLE.
+  documented threshold (SLO evidence measuredAt ≤90 days). If no critical AI journeys are in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Named SLO targets for critical AI journeys covering latency, error, and quality burn"
   - "Burn-rate alert config + dashboard screenshot or URL with retention note"

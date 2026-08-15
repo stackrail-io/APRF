@@ -15,7 +15,7 @@ weight: 3
 gate: "recommended"
 passCondition: >
   Level-5 workloads have a documented alternate provider/path and a successful
-  failover test ≤180 days (attest measuredAt ≤90 days). If none (Level-5 / mission-critical AI workloads are in scope), score NOT_APPLICABLE.
+  failover test ≤180 days (attest measuredAt ≤90 days). If no Level-5 / mission-critical AI workloads are in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Provider contract summary or equivalent documenting alternate provider/path options"
   - "Technical failover design + successful failover test evidence (≤180 days)"

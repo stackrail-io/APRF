@@ -15,7 +15,7 @@ gate: "recommended"
 passCondition: >
   Near-real-time operational dashboards visualize latency, error rate,
   throughput, resource utilization, and AI quality metrics for production
-  services (dashboard evidence measuredAt ≤90 days). If none (production AI services with ops metrics are in scope), score NOT_APPLICABLE.
+  services (dashboard evidence measuredAt ≤90 days). If no production AI services with ops metrics are in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Dashboard URL/config covering latency, error rate, throughput, resource utilization, and AI quality"
   - "Near-real-time refresh evidence (e.g. panel freshness ≤15 minutes)"

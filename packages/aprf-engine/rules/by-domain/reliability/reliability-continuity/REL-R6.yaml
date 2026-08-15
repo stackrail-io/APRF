@@ -18,7 +18,7 @@ gate: "recommended"
 passCondition: >
   For in-scope self-hosted inference, failover to warm standby completed
   within documented RTO in a test ≤90 days, and standby capacity covers
-  declared peak for critical workloads (measuredAt ≤90 days). If none (self-hosted inference serves critical workloads), score NOT_APPLICABLE.
+  declared peak for critical workloads (measuredAt ≤90 days). If self-hosted inference does not serve critical workloads, score NOT_APPLICABLE.
 evidenceRequired:
   - "Warm-standby inference architecture for self-hosted critical workloads"
   - "Last failover test report with RTO result (≤90 days)"
