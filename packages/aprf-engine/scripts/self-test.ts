@@ -76,7 +76,22 @@ const selected = selectApplicableRules(sample, {
   criticality: 3,
   capabilityLevel: 5,
 });
-assert(selected.length === sample.filter((r) => r.status !== "draft").length, "select all");
+assert(
+  selected.length ===
+    sample.filter((r) => r.status !== "draft" && r.status !== "deprecated" && !r.deprecated)
+      .length,
+  "select all active",
+);
+
+const deprecated = catalog.rules.filter(
+  (r) => r.status === "deprecated" || r.deprecated === true,
+);
+assert(deprecated.length >= 1, "catalog has deprecated rules");
+const noDeprecated = selectApplicableRules(deprecated, {
+  criticality: 5,
+  capabilityLevel: 5,
+});
+assert(noDeprecated.length === 0, "deprecated rules are not selected");
 
 const gated = selectApplicableRules(catalog.rules, {
   criticality: 3,
@@ -140,6 +155,65 @@ assert(unattested[0]?.status === "failed", "no attestation → failed");
 assert(
   unattested[0]?.summary.includes("No attestation"),
   "attestation-only summary",
+);
+
+const agnM1 = getRuleById(index, "AGN-M1")!;
+assert(agnM1.detection.capability === "hybrid", "AGN-M1 is hybrid");
+assert(
+  (agnM1.detection.detectors ?? []).some((d) => d.id === "manual-attest"),
+  "AGN-M1 still lists manual-attest fallback",
+);
+assert(
+  (agnM1.detection.detectors ?? []).some((d) => d.id === "repo-agent-charter-inventory"),
+  "AGN-M1 has non-manual detector",
+);
+
+const passStub = {
+  id: "repo-agent-charter-inventory",
+  technologies: [],
+  description: "self-test stub",
+  async run() {
+    return { passed: true, summary: "charter inventory ok", evidenceRef: "ev-stub" };
+  },
+};
+const hybridRegistry = createDetectorRegistry([passStub]);
+const detectorFindings = await evaluateRules(
+  [agnM1],
+  { criticality: 3, capabilityLevel: 5 },
+  { runDetectors: true, registry: hybridRegistry },
+);
+assert(detectorFindings[0]?.status === "passed", "hybrid detector mode can PASS");
+assert(
+  !detectorFindings[0]?.summary.includes("Manual attestation required"),
+  "manual-attest is not AND-failed in detector mode",
+);
+assert(
+  detectorFindings[0]?.detectorIds?.includes("repo-agent-charter-inventory") &&
+    !detectorFindings[0]?.detectorIds?.includes("manual-attest"),
+  "manual-attest skipped when scoring detectors",
+);
+
+const failStub = {
+  id: "repo-agent-charter-inventory",
+  technologies: [],
+  description: "self-test fail stub",
+  async run() {
+    return { passed: false, summary: "charter inventory missing" };
+  },
+};
+const failFindings = await evaluateRules(
+  [agnM1],
+  { criticality: 3, capabilityLevel: 5 },
+  { runDetectors: true, registry: createDetectorRegistry([failStub]) },
+);
+assert(failFindings[0]?.status === "failed", "failing non-manual detector still fails");
+assert(
+  failFindings[0]?.summary.includes("charter inventory missing"),
+  "fail summary comes from non-manual detector",
+);
+assert(
+  !failFindings[0]?.summary.includes("Manual attestation required"),
+  "manual-attest does not mask non-manual detector failure",
 );
 
 console.log("aprf-engine self-test OK");

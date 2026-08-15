@@ -7,6 +7,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ## [Unreleased]
 
+### Fixed
+- Engine `evaluateRules({ runDetectors: true })` no longer AND-fails on `manual-attest` (attestation fallback is skipped when scoring real detectors), so hybrids can PASS.
+- `selectApplicableRules` excludes `deprecated` Checks (aligned with CLI assess).
+- Relabel **AGN-M1** from `automated` → `hybrid` (keeps `manual-attest` fallback; default evidence floor E3). Loader rejects `automated` + `manual-attest`.
+
 ## [Catalog 0.12.0] / [@stackrail-io/aprf@0.1.5] — 2026-08-14
 
 MINOR catalog release: Evidence Assurance Tiers (APRF-RFC-0011), peer crosswalks, detector↔plugin bridge, and REPORT honesty fixes.

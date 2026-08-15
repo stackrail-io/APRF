@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:122dd91f42d3c3f4e11168f646da2f1d91a16472f6d0cbe6975f17babb80c5a1",
+  "generatedAt": "sha256:cd7497fbc0d0b2edae4c78258c3ecee76000240339dc3bb68b6c4dcebd941422",
   "ruleCount": 178,
   "domains": [
     {
@@ -562,7 +562,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "Inventory completeness evidence: runtime registry, deployment manifest, CMDB, platform registry, or approved attestation with measuredAt ≤90 days"
       ],
       "detection": {
-        "capability": "automated",
+        "capability": "hybrid",
         "detectors": [
           {
             "id": "repo-agent-charter-inventory",
@@ -646,7 +646,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "tags": [
         "agent-governance",
         "mandatory",
-        "automated",
+        "hybrid",
         "charter",
         "inventory"
       ],
