@@ -17,7 +17,7 @@ gate: "recommended"
 passCondition: >
   Documented controls due in the last cycle were tested on schedule (cycle age
   ≤90 days default); every open exception has owner, expiry, and compensating
-  control (testing/exceptions evidence measuredAt ≤90 days).
+  control (testing/exceptions evidence measuredAt ≤90 days). If none are in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Control-testing schedule + latest test results pack for in-scope AI/compliance controls"
   - "Exceptions register with owner, expiry, and compensating control for every open exception"

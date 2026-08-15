@@ -18,7 +18,7 @@ gate: "recommended"
 passCondition: >
   Public trust doc covers identity, safety/eval, data handling, and incident
   contact; pillar/Core mapping table is explicit; last-updated ≤12 months
-  (trust-doc evidence measuredAt ≤90 days).
+  (trust-doc evidence measuredAt ≤90 days). If no customer-facing production AI surface, score NOT_APPLICABLE.
 evidenceRequired:
   - "Customer-facing trust/security doc with published URL and last-updated date"
   - "Explicit APRF pillar or Core Profile mapping table covering identity, safety/eval, data handling, and incident contact"

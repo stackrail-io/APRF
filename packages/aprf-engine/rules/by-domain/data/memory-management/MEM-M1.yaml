@@ -18,7 +18,7 @@ gate: "mandatory"
 passCondition: >
   0 successful cross-tenant (and cross-user where required) memory reads/writes
   across ≥10 automated attack cases covering in-scope memory APIs (suite
-  evidence measuredAt ≤90 days).
+  evidence measuredAt ≤90 days). If none (the system retains AI memory (conversation, durable, or vector/retrieval) for tenants/users), score NOT_APPLICABLE.
 evidenceRequired:
   - "Inventory or scope note of in-scope AI memory APIs (conversation, durable, vector/retrieval)"
   - "Cross-tenant (and cross-user where required) isolation attack suite results for those memory APIs"

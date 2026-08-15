@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   Policy has version, owner, and review date ≤12 months; includes both
   acceptable-use and prohibited-application sections (policy evidence
-  measuredAt ≤90 days).
+  measuredAt ≤90 days). If AI is not used at all, score NOT_APPLICABLE.
 evidenceRequired:
   - "Approved AI acceptable-use / prohibited-applications policy with version, owner, and review date"
   - "Confirmation that both acceptable-use and prohibited-application sections are present"

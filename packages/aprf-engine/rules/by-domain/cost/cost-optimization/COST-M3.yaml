@@ -18,7 +18,7 @@ gate: "mandatory"
 passCondition: >
   Max retries and max agent/client loops are finite for 100% of production AI
   clients; amplification tests show cost cannot grow without bound under forced
-  failure/retry (bounded token or $ ceiling; test measuredAt ≤90 days).
+  failure/retry (bounded token or $ ceiling; test measuredAt ≤90 days). If no production AI/model clients exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Retry/backoff config (finite maxRetries + backoff) for production AI/model clients"
   - "Agent or client loop budget config where applicable (finite iterations/steps)"

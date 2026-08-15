@@ -16,7 +16,7 @@ gate: "recommended"
 passCondition: >
   Each critical corpus has a documented freshness SLO (e.g. max age hours);
   ≥95% of sampled docs meet the SLO in the last 7 days; an alert fires on
-  freshness breach (sample/alert evidence measuredAt ≤7 days).
+  freshness breach (sample/alert evidence measuredAt ≤7 days). If no critical production corpora/indexes exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Freshness SLO definitions for each critical corpus ID"
   - "Dashboard or job report showing ≥95% SLO compliance over the last 7 days"

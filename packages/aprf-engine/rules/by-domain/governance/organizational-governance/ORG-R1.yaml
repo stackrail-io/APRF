@@ -14,7 +14,7 @@ weight: 3
 gate: "recommended"
 passCondition: >
   Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago;
-  open actions have owners and due dates (review evidence measuredAt ≤90 days).
+  open actions have owners and due dates (review evidence measuredAt ≤90 days). If none (the organization runs production AI systems), score NOT_APPLICABLE.
 evidenceRequired:
   - "Leadership AI risk / APRF maturity review minutes (or board pack excerpt) with review date"
   - "Action log showing owners and due dates for open items"

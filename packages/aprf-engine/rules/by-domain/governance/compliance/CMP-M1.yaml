@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   Every production AI system ID has ≥1 mapped obligation entry or an explicit
   “none in scope” attestation with owner and review date ≤12 months (register
-  evidence measuredAt ≤90 days).
+  evidence measuredAt ≤90 days). If no production AI systems exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Inventory of production AI system IDs in scope"
   - "Obligations register mapping each system to obligations (or none-in-scope) with owner and review date"

@@ -19,7 +19,7 @@ gate: "recommended"
 passCondition: >
   100% of production model providers have a review record ≤12 months covering
   training use and retention; 0 unreviewed providers in the inventory
-  (inventory measuredAt ≤90 days; each review dated ≤365 days).
+  (inventory measuredAt ≤90 days; each review dated ≤365 days). If all models are fully self-hosted with no third-party processing, score NOT_APPLICABLE.
 evidenceRequired:
   - "Inventory of production model providers"
   - "Vendor terms review records (DPA/training/retention) with date and owner per provider"

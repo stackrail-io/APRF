@@ -17,7 +17,7 @@ gate: "recommended"
 passCondition: >
   Documented low-risk task classes route to cheaper models by default; eval
   shows quality within tolerance versus a premium baseline; misroute rate is
-  monitored for a window of ≤30 days (report measuredAt within the last 90 days).
+  monitored for a window of ≤30 days (report measuredAt within the last 90 days). If a single fixed model with no routing surface, score NOT_APPLICABLE.
 evidenceRequired:
   - "Model-routing policy mapping low-risk task classes to cheap vs premium models"
   - "Eval coverage report for low-risk routed tasks vs premium baseline"

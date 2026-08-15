@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   The default AI pipeline runs auth, secret-scan, and basic eval checks; failing
   any blocks merge or promote in the golden-path template (blocking evidence
-  measuredAt ≤90 days).
+  measuredAt ≤90 days). If no AI build/promote surface, score NOT_APPLICABLE.
 evidenceRequired:
   - "CI and/or local check config covering auth, secret-scan, and basic evals"
   - "Evidence those checks are required (blocking) on merge/promote for the AI golden-path template"

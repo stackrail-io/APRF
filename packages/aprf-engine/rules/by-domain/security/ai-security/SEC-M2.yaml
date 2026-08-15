@@ -18,7 +18,7 @@ gate: "mandatory"
 passCondition: >
   100% of high-risk side-effect paths (impact tier write/irreversible/financial)
   reject non-conforming model output in contract tests; coverage inventory lists
-  every such path (measuredAt ≤90 days).
+  every such path (measuredAt ≤90 days). If none (production AI can drive write, irreversible, or financial side effects), score NOT_APPLICABLE.
 evidenceRequired:
   - "Coverage inventory of high-risk side-effect paths (write/irreversible/financial)"
   - "Schema or policy filter definitions applied before those side effects"

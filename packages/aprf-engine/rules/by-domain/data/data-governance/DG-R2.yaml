@@ -17,7 +17,7 @@ gate: "recommended"
 passCondition: >
   A skew job ran within the last 7 days for every production embedding/feature
   pipeline; at least one documented threshold exists; breach creates a tracked
-  ticket or page (job/alert evidence measuredAt ≤7 days).
+  ticket or page (job/alert evidence measuredAt ≤7 days). If no production embedding or feature pipelines exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Skew monitor config covering each production embedding/feature pipeline"
   - "Last weekly (or ≤7-day) skew report comparing train vs serve distributions"

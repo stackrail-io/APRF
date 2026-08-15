@@ -15,7 +15,7 @@ weight: 3
 gate: "recommended"
 passCondition: >
   The last material model or prompt promotion includes a retained change or
-  counterfactual summary (measuredAt ≤90 days).
+  counterfactual summary (measuredAt ≤90 days). If none (material model or prompt promotions occur), score NOT_APPLICABLE.
 evidenceRequired:
   - "Change/counterfactual summary tooling or template for model/prompt promotions"
   - "Retained summary for the last material model or prompt promotion (≤90 days)"

@@ -17,7 +17,7 @@ gate: "recommended"
 passCondition: >
   Named owner team and support channel are documented for the AI platform /
   paved road; either a test ping met the published SLA within 90 days, or an
-  on-call rotation is listed (support proof measuredAt ≤90 days).
+  on-call rotation is listed (support proof measuredAt ≤90 days). If none (the org operates an AI platform or paved road), score NOT_APPLICABLE.
 evidenceRequired:
   - "Platform ownership record naming the owner team for the AI paved road"
   - "Support channel (Slack, ticket queue, or equivalent) documented"

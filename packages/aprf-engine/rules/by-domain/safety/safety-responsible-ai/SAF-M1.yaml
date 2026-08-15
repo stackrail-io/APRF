@@ -18,7 +18,7 @@ gate: "mandatory"
 passCondition: >
   Domain-specific AI safety policy has version, owner, and review date ≤12
   months; maps ≥ domain-minimum harm categories with explicit refuse vs
-  escalate actions for each (measuredAt ≤90 days).
+  escalate actions for each (measuredAt ≤90 days). If none (the product has AI user- or tool-facing behavior in scope), score NOT_APPLICABLE.
 evidenceRequired:
   - "Approved domain-specific AI safety policy (versioned, owned) including harm categories and refusal/escalation"
   - "Evidence each domain-minimum harm category maps refuse vs escalate"

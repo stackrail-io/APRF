@@ -19,7 +19,9 @@ gate: "recommended"
 passCondition: >
   Documented high-sensitivity fields never appear in cleartext in ≥50 sampled
   production model requests; the pre-model tokenization/redaction pipeline fails
-  closed on errors (sample/pipeline evidence measuredAt ≤90 days).
+  closed on errors (sample/pipeline evidence measuredAt ≤90 days). If production
+  does not send data to models or no high-sensitivity fields are in scope,
+  score NOT_APPLICABLE.
 evidenceRequired:
   - "Inventory or policy listing high-sensitivity fields subject to pre-model tokenization/redaction"
   - "Pre-model tokenization/redaction pipeline config with fail-closed on redaction errors"

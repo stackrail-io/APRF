@@ -19,7 +19,7 @@ passCondition: >
   100% of production releases in the last 30 days show an
   abuse/jailbreak/injection suite gate = pass (suite must include those case
   classes), or a time-boxed waiver with owner and expiry ≤30 days
-  (measuredAt ≤90 days).
+  (measuredAt ≤90 days). If no customer-facing / production AI releases exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Abuse/jailbreak/injection suite definition covering those case classes"
   - "CI/release gate configuration that blocks promote on suite fail"
