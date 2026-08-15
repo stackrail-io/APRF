@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   AI-interaction disclosure present on 100% of in-scope user surfaces per
   policy checklist; 0 critical surfaces missing disclosure in the latest
-  audit (measuredAt ≤90 days). If none (policy or law requires AI-interaction disclosure for in-scope surfaces), score NOT_APPLICABLE.
+  audit (measuredAt ≤90 days). If policy or law does not require AI-interaction disclosure for in-scope surfaces, score NOT_APPLICABLE.
 evidenceRequired:
   - "Disclosure UX inventory of in-scope user surfaces (policy checklist)"
   - "Latest screenshot/checklist audit showing coverage + critical-surface status"

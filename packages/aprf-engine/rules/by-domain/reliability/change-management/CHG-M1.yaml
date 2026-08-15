@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   ≥N prior production versions retained per policy (minimum N=2); restore
   dry-run successfully loads the immediate prior version in staging or
-  prod-adjacent env (retention evidence measuredAt ≤90 days). If neither, score NOT_APPLICABLE.
+  prod-adjacent env (retention evidence measuredAt ≤90 days). If no production prompts or model pins are used, score NOT_APPLICABLE.
 evidenceRequired:
   - "Version retention policy + registry listing of prior production prompt and model-pin versions"
   - "Restore dry-run record showing immediate prior version loaded in staging or prod-adjacent env"
@@ -35,8 +35,8 @@ detection:
           versions retained (minimum N=2) and a successful immediate-prior
           restore dry-run in staging or prod-adjacent (measuredAt ≤90 days).
 manualVerification: >
-  1) Confirm production prompts and/or model pins are used. If neither, score
-  NOT_APPLICABLE. 2) Open retention policy; confirm minimum retained prior
+  1) Confirm production prompts and/or model pins are used. If neither is used,
+  score NOT_APPLICABLE. 2) Open retention policy; confirm minimum retained prior
   versions N≥2. 3) Open registry listing; confirm ≥N prior production versions
   are present for prompts and model pins in scope. 4) Confirm a restore dry-run
   loaded the immediate prior version in staging or prod-adjacent. 5) PASS only

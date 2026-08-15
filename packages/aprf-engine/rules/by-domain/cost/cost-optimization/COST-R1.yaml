@@ -17,7 +17,7 @@ gate: "recommended"
 passCondition: >
   Cache is enabled for documented idempotent/repeated prompt paths;
   sensitive/personalized prompts are excluded; hit-rate and savings are
-  reported for a window of ≥30 days (report measuredAt within the last 90 days). If none (production AI traffic with potentially cacheable prompts), score NOT_APPLICABLE.
+  reported for a window of ≥30 days (report measuredAt within the last 90 days). If no production AI traffic with potentially cacheable prompts exists, score NOT_APPLICABLE.
 evidenceRequired:
   - "Prompt/response cache config naming idempotent paths and safety exclusions"
   - "Hit-rate and savings report covering ≥30 days (import or dashboard export)"

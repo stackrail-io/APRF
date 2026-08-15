@@ -18,7 +18,7 @@ gate: "recommended"
 passCondition: >
   ≥5 memory-poisoning scenarios are executed (including cross-tenant write,
   prompt-in-memory, and stale trusted fact); critical fails block promotion or
-  have documented risk acceptance (suite evidence measuredAt ≤90 days). If none (the system uses AI memory that could be poisoned (conversation, durable, or vector/retrieval)), score NOT_APPLICABLE.
+  have documented risk acceptance (suite evidence measuredAt ≤90 days). If no poisonable AI memory exists (conversation, durable, or vector/retrieval), score NOT_APPLICABLE.
 evidenceRequired:
   - "Memory-poisoning cases in the adversarial/eval suite covering the required scenario types"
   - "Latest suite run report with pass/fail per case and gate or risk-acceptance disposition for critical fails"

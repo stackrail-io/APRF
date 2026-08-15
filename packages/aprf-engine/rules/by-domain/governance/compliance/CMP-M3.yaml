@@ -19,7 +19,7 @@ passCondition: >
   Retention is configured ≥ policy minimum (e.g. ≥365 days); a synthetic
   control-plane change appears in the audit log within ≤5 minutes and remains
   queryable after a retention smoke check (config/smoke evidence measuredAt ≤90
-  days). If no critical AI control-plane changes exist (model/prompt/tool promotion, policy, kill-switch, or equivalent), score NOT_APPLICABLE.
+  days). If no critical AI control plane is in scope (model/prompt/tool promotion, policy, kill-switch, or equivalent), score NOT_APPLICABLE.
 evidenceRequired:
   - "Audit log retention config for critical AI control-plane change events (policy minimum documented)"
   - "Synthetic control-plane change test showing ≤5 minute appearance and queryability after retention smoke check"
@@ -38,7 +38,7 @@ detection:
           minimum plus a synthetic control-plane change that appeared ≤5 minutes
           and stayed queryable (measuredAt ≤90 days).
 manualVerification: >
-  1) Confirm critical AI control-plane changes exist (model/prompt/tool
+  1) Confirm a critical AI control plane is in scope (model/prompt/tool
   promotion, policy, kill-switch, or equivalent). If none, score NOT_APPLICABLE.
   2) Open audit retention config; confirm configured retention ≥ documented
   policy minimum (e.g. ≥365 days). 3) Review a synthetic control-plane change

@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   Policy documents retention periods per memory class; a TTL/deletion job
   succeeds in test and sample records older than retention are absent after the
-  job run (policy/job/test evidence measuredAt ≤90 days). If none (the system retains AI memory classes (conversation, durable, vector/retrieval, or equivalent)), score NOT_APPLICABLE.
+  job run (policy/job/test evidence measuredAt ≤90 days). If no in-scope AI memory class is retained (conversation, durable, vector/retrieval, or equivalent), score NOT_APPLICABLE.
 evidenceRequired:
   - "Retention policy naming periods per AI memory class (conversation, durable, vector/retrieval, or equivalent)"
   - "TTL or deletion job config covering those memory classes"

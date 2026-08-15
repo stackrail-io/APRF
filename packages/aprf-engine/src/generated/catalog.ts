@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:e93deaf517d1f05c719aca76f19aa09851a3de634ff96778051c54e269ca8a94",
+  "generatedAt": "sha256:084767bd2217cbc7c394c4726e7d68ce7341a6fbf5d878183604a0a811c2e9eb",
   "ruleCount": 178,
   "domains": [
     {
@@ -2262,7 +2262,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env (retention evidence measuredAt ≤90 days). If neither, score NOT_APPLICABLE.\n",
+      "passCondition": "≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env (retention evidence measuredAt ≤90 days). If no production prompts or model pins are used, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Version retention policy + registry listing of prior production prompt and model-pin versions",
         "Restore dry-run record showing immediate prior version loaded in staging or prod-adjacent env"
@@ -2284,7 +2284,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm production prompts and/or model pins are used. If neither, score NOT_APPLICABLE. 2) Open retention policy; confirm minimum retained prior versions N≥2. 3) Open registry listing; confirm ≥N prior production versions are present for prompts and model pins in scope. 4) Confirm a restore dry-run loaded the immediate prior version in staging or prod-adjacent. 5) PASS only if retention + dry-run hold with measuredAt ≤90 days. PRM-M1 version IDs alone do not satisfy. PRM-M3 prompt-rollback RTO alone does not satisfy retention depth. CHG-M2 on-call runbook drills alone do not satisfy registry retention.\n",
+      "manualVerification": "1) Confirm production prompts and/or model pins are used. If neither is used, score NOT_APPLICABLE. 2) Open retention policy; confirm minimum retained prior versions N≥2. 3) Open registry listing; confirm ≥N prior production versions are present for prompts and model pins in scope. 4) Confirm a restore dry-run loaded the immediate prior version in staging or prod-adjacent. 5) PASS only if retention + dry-run hold with measuredAt ≤90 days. PRM-M1 version IDs alone do not satisfy. PRM-M3 prompt-rollback RTO alone does not satisfy retention depth. CHG-M2 on-call runbook drills alone do not satisfy registry retention.\n",
       "falsePositiveGuidance": "Do not pass git history of a single floating “latest” alias as retained versions. Do not pass a dry-run older than 90 days. Do not pass retention of prompts without model pins when both ship in production (or vice versa) unless the missing class is documented as out of scope. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Retain ≥2 prior production prompt and model-pin versions in a registry",
@@ -2900,7 +2900,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Retention is configured ≥ policy minimum (e.g. ≥365 days); a synthetic control-plane change appears in the audit log within ≤5 minutes and remains queryable after a retention smoke check (config/smoke evidence measuredAt ≤90 days). If no critical AI control-plane changes exist (model/prompt/tool promotion, policy, kill-switch, or equivalent), score NOT_APPLICABLE.\n",
+      "passCondition": "Retention is configured ≥ policy minimum (e.g. ≥365 days); a synthetic control-plane change appears in the audit log within ≤5 minutes and remains queryable after a retention smoke check (config/smoke evidence measuredAt ≤90 days). If no critical AI control plane is in scope (model/prompt/tool promotion, policy, kill-switch, or equivalent), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Audit log retention config for critical AI control-plane change events (policy minimum documented)",
         "Synthetic control-plane change test showing ≤5 minute appearance and queryability after retention smoke check"
@@ -2922,7 +2922,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm critical AI control-plane changes exist (model/prompt/tool promotion, policy, kill-switch, or equivalent). If none, score NOT_APPLICABLE. 2) Open audit retention config; confirm configured retention ≥ documented policy minimum (e.g. ≥365 days). 3) Review a synthetic control-plane change test: event appears in the audit log within ≤5 minutes. 4) Confirm the event remains queryable after the retention smoke check. 5) PASS only if retention + appearance + queryability hold with measuredAt ≤90 days. App access logs that never cover control-plane AI changes do not satisfy. Retention config without a synthetic appearance/queryability test does not satisfy.\n",
+      "manualVerification": "1) Confirm a critical AI control plane is in scope (model/prompt/tool promotion, policy, kill-switch, or equivalent). If none, score NOT_APPLICABLE. 2) Open audit retention config; confirm configured retention ≥ documented policy minimum (e.g. ≥365 days). 3) Review a synthetic control-plane change test: event appears in the audit log within ≤5 minutes. 4) Confirm the event remains queryable after the retention smoke check. 5) PASS only if retention + appearance + queryability hold with measuredAt ≤90 days. App access logs that never cover control-plane AI changes do not satisfy. Retention config without a synthetic appearance/queryability test does not satisfy.\n",
       "falsePositiveGuidance": "Do not pass generic CloudTrail/SIEM retention that never names AI control-plane event types. Do not pass appearance SLAs longer than 5 minutes as meeting this Check. Do not pass smoke tests older than 90 days as current. Do not pass immutable storage claims without a queryability demonstration. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Define critical AI control-plane event types and ship them to an audit sink",
@@ -3116,7 +3116,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Last assessment age ≤12 months; covers every system that claims or attains capability Level 5; lists sampled Check IDs, findings, and remediation owners (assessment evidence measuredAt ≤90 days). If none, score NOT_APPLICABLE.\n",
+      "passCondition": "Last assessment age ≤12 months; covers every system that claims or attains capability Level 5; lists sampled Check IDs, findings, and remediation owners (assessment evidence measuredAt ≤90 days). If no systems claim or attain capability Level 5, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Independent assessment or internal-audit report sampling capability Level-5 AI systems against APRF gates",
         "Coverage proof that every capability Level-5 system ID was in scope, with findings and remediation owners"
@@ -3408,7 +3408,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Cache is enabled for documented idempotent/repeated prompt paths; sensitive/personalized prompts are excluded; hit-rate and savings are reported for a window of ≥30 days (report measuredAt within the last 90 days). If none (production AI traffic with potentially cacheable prompts), score NOT_APPLICABLE.\n",
+      "passCondition": "Cache is enabled for documented idempotent/repeated prompt paths; sensitive/personalized prompts are excluded; hit-rate and savings are reported for a window of ≥30 days (report measuredAt within the last 90 days). If no production AI traffic with potentially cacheable prompts exists, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Prompt/response cache config naming idempotent paths and safety exclusions",
         "Hit-rate and savings report covering ≥30 days (import or dashboard export)"
@@ -3623,7 +3623,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows (budget evidence measuredAt ≤90 days). If none (production AI paths assemble model context (RAG, chat history, tool results, or prompt templates)), score NOT_APPLICABLE.\n",
+      "passCondition": "100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows (budget evidence measuredAt ≤90 days). If no production AI paths assemble model context (RAG, chat history, tool results, or prompt templates), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Context-budget config (max tokens/bytes) for each production context builder",
         "Unit/integration tests showing truncate/reject per priority rules with 0 silent overflows"
@@ -4569,7 +4569,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production indexes have owner + version ID + refresh cadence; 0 indexes missing any field; stale beyond cadence are flagged or rebuilt (inventory measuredAt ≤90 days). If none (the system uses production retrieval corpora or vector indexes), score NOT_APPLICABLE.\n",
+      "passCondition": "100% of production indexes have owner + version ID + refresh cadence; 0 indexes missing any field; stale beyond cadence are flagged or rebuilt (inventory measuredAt ≤90 days). If no production retrieval corpora or vector indexes exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Corpus/index inventory listing production indexes with owner, version ID, and refresh schedule",
         "Evidence stale-beyond-cadence indexes are flagged or rebuilt"
@@ -4644,7 +4644,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of datasets used in production gates or fine-tunes have provenance + quality criteria documented; promotion is blocked if missing (CI or review checklist evidence; inventory measuredAt ≤90 days). If neither, score NOT_APPLICABLE.\n",
+      "passCondition": "100% of datasets used in production gates or fine-tunes have provenance + quality criteria documented; promotion is blocked if missing (CI or review checklist evidence; inventory measuredAt ≤90 days). If no in-scope evaluation or fine-tuning datasets exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Dataset cards or registry entries for eval/fine-tune sets covering provenance and quality criteria",
         "CI or review-checklist evidence that promotion is blocked when cards are missing"
@@ -4666,7 +4666,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm the system uses datasets for production eval gates or fine-tunes. If neither, score NOT_APPLICABLE. 2) Inventory those datasets. 3) Confirm each has documented provenance and quality criteria (dataset card or registry). 4) Confirm promotion/release is blocked when cards are missing (CI check or review checklist). 5) PASS only if coverage is 100% and the promotion brake holds. Retrieval-index inventories (DG-M1) do not satisfy. Informal README lists without provenance/quality fields do not satisfy.\n",
+      "manualVerification": "1) Confirm the system uses datasets for production eval gates or fine-tunes. If no in-scope evaluation or fine-tuning datasets exist, score NOT_APPLICABLE. 2) Inventory those datasets. 3) Confirm each has documented provenance and quality criteria (dataset card or registry). 4) Confirm promotion/release is blocked when cards are missing (CI check or review checklist). 5) PASS only if coverage is 100% and the promotion brake holds. Retrieval-index inventories (DG-M1) do not satisfy. Informal README lists without provenance/quality fields do not satisfy.\n",
       "falsePositiveGuidance": "Do not pass empty Hugging Face card stubs. Do not pass provenance without quality criteria (or the reverse). Do not pass cards for unused sample datasets as covering production gates. Do not pass advisory linters that never block promote. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Publish dataset cards with provenance and quality criteria for every eval/fine-tune set",
@@ -4945,7 +4945,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "100% of major eval/fine-tune sets used in production promotion have a dataset card with purpose, source, PII handling, and last-updated date ≤12 months (inventory measuredAt ≤90 days; card last-updated ≤365 days). If none (major eval or fine-tune sets are used in production promotion), score NOT_APPLICABLE.\n",
+      "passCondition": "100% of major eval/fine-tune sets used in production promotion have a dataset card with purpose, source, PII handling, and last-updated date ≤12 months (inventory measuredAt ≤90 days; card last-updated ≤365 days). If no major eval or fine-tune sets are used in production promotion, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Dataset cards (or registry metadata) for each major eval and fine-tune corpus",
         "Fields covering purpose, source, PII handling, and last-updated date"
@@ -5019,7 +5019,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "medium",
       "weight": 2,
       "gate": "mandatory",
-      "passCondition": "A golden-path document exists with version and owner; it covers authentication, secrets, evals, and promote steps for AI features; last review is within 12 months (review measuredAt ≤365 days). If none (the org builds or deploys AI features), score NOT_APPLICABLE.\n",
+      "passCondition": "A golden-path document exists with version and owner; it covers authentication, secrets, evals, and promote steps for AI features; last review is within 12 months (review measuredAt ≤365 days). If the organization does not build or deploy AI features, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Golden-path documentation from scaffold to production with version and owner",
         "Evidence the doc covers auth, secrets, evals, and promote steps",
@@ -5042,7 +5042,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm the org builds or deploys AI features. If none, score NOT_APPLICABLE. 2) Locate the golden-path / paved-road doc (platform portal, internal handbook, or repo). 3) Confirm version and named owner. 4) Verify sections cover authentication, secrets handling, evals, and promote/release steps. 5) Confirm last review ≤12 months. 6) PASS only if all hold. Generic “how to deploy any service” without AI-specific auth/secrets/evals/promote does not satisfy. DX-M2 CI checks do not substitute for the documented path.\n",
+      "manualVerification": "1) Confirm the organization builds or deploys AI features. If it does not, score NOT_APPLICABLE. 2) Locate the golden-path / paved-road doc (platform portal, internal handbook, or repo). 3) Confirm version and named owner. 4) Verify sections cover authentication, secrets handling, evals, and promote/release steps. 5) Confirm last review ≤12 months. 6) PASS only if all hold. Generic “how to deploy any service” without AI-specific auth/secrets/evals/promote does not satisfy. DX-M2 CI checks do not substitute for the documented path.\n",
       "falsePositiveGuidance": "Do not pass an outdated wiki page without version/owner or review date. Do not pass security policy alone without deploy steps. Do not pass scaffold README that omits auth, secrets, evals, or promote. Do not pass DX-M2 pipeline config as the golden-path document. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Publish a versioned golden-path doc with owner covering auth, secrets, evals, and promote",
@@ -5312,7 +5312,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "medium",
       "weight": 2,
       "gate": "recommended",
-      "passCondition": "Both metrics are defined with formulas; published for ≥30 consecutive days; bypass rate has an alert or review threshold with a named owner (series / ownership proof measuredAt ≤90 days). If none (the org operates an AI platform / paved road with enough traffic to measure), score NOT_APPLICABLE.\n",
+      "passCondition": "Both metrics are defined with formulas; published for ≥30 consecutive days; bypass rate has an alert or review threshold with a named owner (series / ownership proof measuredAt ≤90 days). If the organization lacks an AI platform or paved road with enough traffic to measure the required metrics, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Definitions/formulas for time-to-safe-production and policy-bypass rate",
         "Dashboard or weekly report with ≥30 consecutive days of series",
@@ -5384,7 +5384,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "medium",
       "weight": 2,
       "gate": "recommended",
-      "passCondition": "Named owner team and support channel are documented for the AI platform / paved road; either a test ping met the published SLA within 90 days, or an on-call rotation is listed (support proof measuredAt ≤90 days). If none (the org operates an AI platform or paved road), score NOT_APPLICABLE.\n",
+      "passCondition": "Named owner team and support channel are documented for the AI platform / paved road; either a test ping met the published SLA within 90 days, or an on-call rotation is listed (support proof measuredAt ≤90 days). If the organization operates neither an AI platform nor a paved road, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Platform ownership record naming the owner team for the AI paved road",
         "Support channel (Slack, ticket queue, or equivalent) documented",
@@ -5407,7 +5407,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm the org operates an AI platform or paved road. If none, score NOT_APPLICABLE. 2) Locate ownership record (CODEOWNERS, platform portal, team page) naming the owner team. 3) Locate the support channel (Slack, ticket queue, email alias). 4) Confirm either a recent test ping met the published SLA (≤90 days) or an on-call rotation is listed. 5) PASS only if owner + channel + (ping SLA or on-call) hold. Generic company-wide support without AI-platform ownership does not satisfy. DX-M1 docs alone do not satisfy without a reachable support path.\n",
+      "manualVerification": "1) Confirm the organization operates an AI platform or paved road. If neither exists, score NOT_APPLICABLE. 2) Locate ownership record (CODEOWNERS, platform portal, team page) naming the owner team. 3) Locate the support channel (Slack, ticket queue, email alias). 4) Confirm either a recent test ping met the published SLA (≤90 days) or an on-call rotation is listed. 5) PASS only if owner + channel + (ping SLA or on-call) hold. Generic company-wide support without AI-platform ownership does not satisfy. DX-M1 docs alone do not satisfy without a reachable support path.\n",
       "falsePositiveGuidance": "Do not pass a stale wiki contact with no owner team. Do not pass CODEOWNERS for unrelated paths as AI-platform ownership. Do not pass a Slack channel name without evidence it is the published support path. Do not pass “someone will answer eventually” without SLA or on-call. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Publish a named owner team for the AI platform / paved road",
@@ -5602,7 +5602,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness ≤24 hours on the dashboard (metrics evidence measuredAt ≤90 days). If none (production AI workloads complete user-visible tasks or apply safety refusals), score NOT_APPLICABLE.\n",
+      "passCondition": "Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness ≤24 hours on the dashboard (metrics evidence measuredAt ≤90 days). If no production AI workloads complete user-visible tasks or apply safety refusals, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Dashboard or metric exports for task success/failure rates on production AI workloads",
         "Dashboard or metric exports for safety refusal rates",
@@ -6266,7 +6266,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "The last material model or prompt promotion includes a retained change or counterfactual summary (measuredAt ≤90 days). If none (material model or prompt promotions occur), score NOT_APPLICABLE.\n",
+      "passCondition": "The last material model or prompt promotion includes a retained change or counterfactual summary (measuredAt ≤90 days). If no material model or prompt promotions occur, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Change/counterfactual summary tooling or template for model/prompt promotions",
         "Retained summary for the last material model or prompt promotion (≤90 days)"
@@ -6288,7 +6288,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm material model or prompt promotions occur. If none, score NOT_APPLICABLE. 2) Locate tooling or a template that produces change or counterfactual summaries for those promotions. 3) Confirm the last material promotion retains such a summary ≤90 days. 4) PASS only if tooling/template + retained last-promotion summary hold with measuredAt ≤90 days. PRM-M2 review/eval linkage alone does not prove a human-readable change summary. CHG-M1 version retention alone does not prove a counterfactual/change narrative. EVL-M4 shadow/A-B metrics alone do not prove a retained promotion summary.\n",
+      "manualVerification": "1) Confirm material model or prompt promotions occur. If none occur, score NOT_APPLICABLE. 2) Locate tooling or a template that produces change or counterfactual summaries for those promotions. 3) Confirm the last material promotion retains such a summary ≤90 days. 4) PASS only if tooling/template + retained last-promotion summary hold with measuredAt ≤90 days. PRM-M2 review/eval linkage alone does not prove a human-readable change summary. CHG-M1 version retention alone does not prove a counterfactual/change narrative. EVL-M4 shadow/A-B metrics alone do not prove a retained promotion summary.\n",
       "falsePositiveGuidance": "Do not pass git commit messages as change summaries unless they document expected behavioral impact. Do not pass empty “N/A” summaries for material promotions. Do not pass summaries older than the last material promotion without linking to that promotion. Sibling PRM-M2, CHG-M1, and EVL-M4 do not substitute. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Require a change or counterfactual summary on every material model/prompt promotion",
@@ -7746,7 +7746,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "0 successful cross-tenant (and cross-user where required) memory reads/writes across ≥10 automated attack cases covering in-scope memory APIs (suite evidence measuredAt ≤90 days). If none (the system retains AI memory (conversation, durable, or vector/retrieval) for tenants/users), score NOT_APPLICABLE.\n",
+      "passCondition": "0 successful cross-tenant (and cross-user where required) memory reads/writes across ≥10 automated attack cases covering in-scope memory APIs (suite evidence measuredAt ≤90 days). If no tenant or user AI memory is retained (conversation, durable, or vector/retrieval), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Inventory or scope note of in-scope AI memory APIs (conversation, durable, vector/retrieval)",
         "Cross-tenant (and cross-user where required) isolation attack suite results for those memory APIs"
@@ -7822,7 +7822,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Policy documents retention periods per memory class; a TTL/deletion job succeeds in test and sample records older than retention are absent after the job run (policy/job/test evidence measuredAt ≤90 days). If none (the system retains AI memory classes (conversation, durable, vector/retrieval, or equivalent)), score NOT_APPLICABLE.\n",
+      "passCondition": "Policy documents retention periods per memory class; a TTL/deletion job succeeds in test and sample records older than retention are absent after the job run (policy/job/test evidence measuredAt ≤90 days). If no in-scope AI memory class is retained (conversation, durable, vector/retrieval, or equivalent), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Retention policy naming periods per AI memory class (conversation, durable, vector/retrieval, or equivalent)",
         "TTL or deletion job config covering those memory classes",
@@ -8053,7 +8053,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "≥5 memory-poisoning scenarios are executed (including cross-tenant write, prompt-in-memory, and stale trusted fact); critical fails block promotion or have documented risk acceptance (suite evidence measuredAt ≤90 days). If none (the system uses AI memory that could be poisoned (conversation, durable, or vector/retrieval)), score NOT_APPLICABLE.\n",
+      "passCondition": "≥5 memory-poisoning scenarios are executed (including cross-tenant write, prompt-in-memory, and stale trusted fact); critical fails block promotion or have documented risk acceptance (suite evidence measuredAt ≤90 days). If no poisonable AI memory exists (conversation, durable, or vector/retrieval), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Memory-poisoning cases in the adversarial/eval suite covering the required scenario types",
         "Latest suite run report with pass/fail per case and gate or risk-acceptance disposition for critical fails"
@@ -8206,7 +8206,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "0 “latest”/floating aliases on critical production paths; 100% of those paths reference immutable model IDs; lint or CI rejects floating aliases (pin evidence measuredAt ≤90 days). If none (production AI paths call hosted or self-hosted models), score NOT_APPLICABLE.\n",
+      "passCondition": "0 “latest”/floating aliases on critical production paths; 100% of those paths reference immutable model IDs; lint or CI rejects floating aliases (pin evidence measuredAt ≤90 days). If no production AI paths call hosted or self-hosted models, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Production model pin config (or registry) listing immutable model IDs on critical paths",
         "Lint or CI rule that rejects “latest”/floating aliases on those paths"
@@ -8279,7 +8279,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production model promotions in the last 30 days have linked eval pass artifacts; promote-without-eval is blocked by gate (promotion evidence measuredAt ≤90 days). If none (production model promotions occur (pin changes, registry cutovers, or version bumps)), score NOT_APPLICABLE.\n",
+      "passCondition": "100% of production model promotions in the last 30 days have linked eval pass artifacts; promote-without-eval is blocked by gate (promotion evidence measuredAt ≤90 days). If no production model promotions occur (pin changes, registry cutovers, or version bumps), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Promotion policy or CI/registry rule requiring an eval pass artifact on model version bumps",
         "Promotion log (or CI matrix) for the last 30 days showing linked eval pass artifacts; 0 promote-without-eval"
@@ -8353,7 +8353,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Policy defines notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date in the registry; undocumented pins past sunset = 0 without exception (deprecation evidence measuredAt ≤90 days). If none (production uses hosted or self-hosted models/embeddings that can be superseded), score NOT_APPLICABLE.\n",
+      "passCondition": "Policy defines notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date in the registry; undocumented pins past sunset = 0 without exception (deprecation evidence measuredAt ≤90 days). If production uses no hosted or self-hosted models/embeddings that can be superseded, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Model/embedding deprecation and sunset policy (notice period + forced-sunset rules)",
         "Registry export showing sunset dates for superseded pins; query of undocumented pins past sunset = 0"
@@ -8572,7 +8572,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "100% of production models have owner, residency, and intended-use fields; inventory query returns 0 incomplete rows (inventory evidence measuredAt ≤90 days). If none (production AI paths call hosted or self-hosted models), score NOT_APPLICABLE.\n",
+      "passCondition": "100% of production models have owner, residency, and intended-use fields; inventory query returns 0 incomplete rows (inventory evidence measuredAt ≤90 days). If no production AI paths call hosted or self-hosted models, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Model inventory / registry export listing production models",
         "Query or attestation showing 0 incomplete owner/residency/intended-use rows"
@@ -9168,7 +9168,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago; open actions have owners and due dates (review evidence measuredAt ≤90 days). If none (the organization runs production AI systems), score NOT_APPLICABLE.\n",
+      "passCondition": "Leadership reviewed AI risk posture and APRF capability attained ≤90 days ago; open actions have owners and due dates (review evidence measuredAt ≤90 days). If the organization does not run production AI systems, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Leadership AI risk / APRF maturity review minutes (or board pack excerpt) with review date",
         "Action log showing owners and due dates for open items"
@@ -9315,7 +9315,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; ≥50% of those items closed or have a dated plan (backlog evidence measuredAt ≤90 days). If the org has no AI incident/eval practice, score NOT_APPLICABLE.\n",
+      "passCondition": "≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter produced a backlog item; ≥50% of those items closed or have a dated plan (backlog evidence measuredAt ≤90 days). If the organization does not use AI, or no Sev-1/2 AI incidents or critical eval fails are in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Improvement backlog (tickets) linked from Sev-1/2 AI incidents and critical eval failures",
         "Quarterly sample showing linkage rate ≥80% and closed-or-planned rate ≥50%"
@@ -9337,7 +9337,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm Sev-1/2 AI incidents or critical eval failures occurred in the last quarter (or a defined empty quarter with attestation). If the org has no AI incident/eval practice, score NOT_APPLICABLE. 2) Open the improvement backlog and linkage evidence. 3) Confirm ≥80% of those events produced a backlog item. 4) Confirm ≥50% of those items are closed or have a dated plan. 5) PASS only if both rates hold with measuredAt ≤90 days. A backlog unrelated to incidents or eval fails does not satisfy. Linkage without closure/plan tracking does not satisfy.\n",
+      "manualVerification": "1) Confirm the organization uses AI and Sev-1/2 AI incidents or critical eval failures are in scope for the last quarter (or a defined empty quarter with attestation). If the organization does not use AI, or none are in scope, score NOT_APPLICABLE. 2) Open the improvement backlog and linkage evidence. 3) Confirm ≥80% of those events produced a backlog item. 4) Confirm ≥50% of those items are closed or have a dated plan. 5) PASS only if both rates hold with measuredAt ≤90 days. A backlog unrelated to incidents or eval fails does not satisfy. Linkage without closure/plan tracking does not satisfy.\n",
       "falsePositiveGuidance": "Do not pass generic eng backlogs with no incident/eval links. Do not pass rates below the ≥80% / ≥50% thresholds. Do not pass samples older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Require a backlog item for every Sev-1/2 AI incident and critical eval fail",
@@ -10051,7 +10051,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "A classification scheme covers AI payload classes; ≥1 automated or sampled audit shows 100% of sampled production model requests tagged with a class; sensitive-class handling matches documented policy (audit/scheme measuredAt ≤90 days). If none (production traffic sends data to models), score NOT_APPLICABLE.\n",
+      "passCondition": "A classification scheme covers AI payload classes; ≥1 automated or sampled audit shows 100% of sampled production model requests tagged with a class; sensitive-class handling matches documented policy (audit/scheme measuredAt ≤90 days). If no production traffic sends data to models, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Data classification scheme covering AI/model-bound payload classes",
         "Handling rules for each sensitive class (allow / redact / block or equivalent)",
@@ -10210,7 +10210,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Regulated workloads are labeled; 100% of sampled regulated requests stay in approved regions (routing sample/policy evidence measuredAt ≤90 days). If no regulated workloads or tenants exist and residency constraints do not apply, score NOT_APPLICABLE.\n",
+      "passCondition": "Regulated workloads are labeled; 100% of sampled regulated requests stay in approved regions (routing sample/policy evidence measuredAt ≤90 days). If no regulated workloads or tenants are in scope, or residency constraints do not apply, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Routing policy config naming approved regions for regulated tenants/workloads",
         "Sample routing decisions (or deny logs) showing 100% of sampled regulated requests stayed in approved regions"
@@ -10232,7 +10232,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm regulated workloads or tenants exist (or residency constraints apply). If none, score NOT_APPLICABLE. 2) Confirm regulated workloads are labeled (tenant tag, data class, or equivalent). 3) Open routing policy: approved regions/endpoints for those labels. 4) Review a sample of regulated model/tool requests: 100% stayed in approved regions (or were denied). 5) PASS only if labels + policy + 100% in-region sample hold with measuredAt ≤90 days. DNS/geo defaults without labeled enforcement do not satisfy. Prompt-only “stay in region” does not satisfy.\n",
+      "manualVerification": "1) Confirm regulated workloads/tenants are in scope or residency constraints apply. If neither applies, score NOT_APPLICABLE. 2) Confirm regulated workloads are labeled (tenant tag, data class, or equivalent). 3) Open routing policy: approved regions/endpoints for those labels. 4) Review a sample of regulated model/tool requests: 100% stayed in approved regions (or were denied). 5) PASS only if labels + policy + 100% in-region sample hold with measuredAt ≤90 days. DNS/geo defaults without labeled enforcement do not satisfy. Prompt-only “stay in region” does not satisfy.\n",
       "falsePositiveGuidance": "Do not pass a cloud region preference that agents/APIs can bypass. Do not pass unlabeled “EU customers” spreadsheets without runtime routing evidence. Do not pass samples that mix unregulated traffic into the denominator. Do not pass policy docs older than 90 days without a fresh sample. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Label regulated tenants/workloads and bind them to approved-region model/tool routes",
@@ -10520,7 +10520,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production prompts have an immutable version ID and named owner; 0 unversioned production prompts (registry evidence measuredAt ≤90 days). If none (the system ships production prompts (templates, system prompts, or managed prompt configs)), score NOT_APPLICABLE.\n",
+      "passCondition": "100% of production prompts have an immutable version ID and named owner; 0 unversioned production prompts (registry evidence measuredAt ≤90 days). If the system ships no production prompts (templates, system prompts, or managed prompt configs), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Prompt registry (or versioned prompt store) listing production prompts with immutable version IDs",
         "Owner field populated for each production prompt; query showing 0 unversioned / 0 missing-owner"
@@ -10599,7 +10599,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production prompt releases in the last 30 days have a review ID and eval pass artifact; promote-without-both is blocked (release evidence measuredAt ≤90 days). If none (production prompt releases occur), score NOT_APPLICABLE.\n",
+      "passCondition": "100% of production prompt releases in the last 30 days have a review ID and eval pass artifact; promote-without-both is blocked (release evidence measuredAt ≤90 days). If no production prompt releases occur, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Change records linking prompt versions to review IDs and eval pass artifacts",
         "CI/registry gate (or equivalent) blocking promote without review + eval"
@@ -11919,7 +11919,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Domain-specific AI safety policy has version, owner, and review date ≤12 months; maps ≥ domain-minimum harm categories with explicit refuse vs escalate actions for each (measuredAt ≤90 days). If none (the product has AI user- or tool-facing behavior in scope), score NOT_APPLICABLE.\n",
+      "passCondition": "Domain-specific AI safety policy has version, owner, and review date ≤12 months; maps ≥ domain-minimum harm categories with explicit refuse vs escalate actions for each (measuredAt ≤90 days). If the product has no AI user- or tool-facing behavior in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Approved domain-specific AI safety policy (versioned, owned) including harm categories and refusal/escalation",
         "Evidence each domain-minimum harm category maps refuse vs escalate",
@@ -12068,7 +12068,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "AI-interaction disclosure present on 100% of in-scope user surfaces per policy checklist; 0 critical surfaces missing disclosure in the latest audit (measuredAt ≤90 days). If none (policy or law requires AI-interaction disclosure for in-scope surfaces), score NOT_APPLICABLE.\n",
+      "passCondition": "AI-interaction disclosure present on 100% of in-scope user surfaces per policy checklist; 0 critical surfaces missing disclosure in the latest audit (measuredAt ≤90 days). If policy or law does not require AI-interaction disclosure for in-scope surfaces, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Disclosure UX inventory of in-scope user surfaces (policy checklist)",
         "Latest screenshot/checklist audit showing coverage + critical-surface status"
@@ -13043,7 +13043,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "≥95% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the suite (measuredAt ≤90 days). If none (production AI can invoke tools or privileged side effects), score NOT_APPLICABLE.\n",
+      "passCondition": "≥95% of corpus cases that attempt privilege escalation via untrusted input are denied; 0 cases where model text alone granted a privileged tool call in the suite (measuredAt ≤90 days). If production AI cannot invoke tools or privileged side effects, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Server-side policy mediating privileged tool/actions (not prompt-only)",
         "Versioned injection/privilege-escalation corpus + CI gate report",
@@ -13131,7 +13131,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of high-risk side-effect paths (impact tier write/irreversible/financial) reject non-conforming model output in contract tests; coverage inventory lists every such path (measuredAt ≤90 days). If none (production AI can drive write, irreversible, or financial side effects), score NOT_APPLICABLE.\n",
+      "passCondition": "100% of high-risk side-effect paths (impact tier write/irreversible/financial) reject non-conforming model output in contract tests; coverage inventory lists every such path (measuredAt ≤90 days). If production AI cannot drive write, irreversible, or financial side effects, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Coverage inventory of high-risk side-effect paths (write/irreversible/financial)",
         "Schema or policy filter definitions applied before those side effects",
@@ -13290,7 +13290,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Automated or reviewed probe shows the model/tool runtime can reach only allowlisted destinations; 0 unrestricted routes to internal admin APIs or data stores from the model identity (measuredAt ≤90 days). If none (production AI uses a model or tool runtime that can initiate network calls), score NOT_APPLICABLE.\n",
+      "passCondition": "Automated or reviewed probe shows the model/tool runtime can reach only allowlisted destinations; 0 unrestricted routes to internal admin APIs or data stores from the model identity (measuredAt ≤90 days). If no model or tool runtime can initiate network calls, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Architecture diagram of model/tool trust boundaries",
         "Network policy or egress allowlist export for the model/tool runtime identity",

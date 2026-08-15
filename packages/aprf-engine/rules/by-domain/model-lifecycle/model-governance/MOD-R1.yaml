@@ -19,7 +19,7 @@ passCondition: >
   Policy defines notice period and forced-sunset rules; ≥1 superseded
   production model/embedding has a sunset date in the registry; undocumented
   pins past sunset = 0 without exception (deprecation evidence measuredAt
-  ≤90 days). If none (production uses hosted or self-hosted models/embeddings that can be superseded), score NOT_APPLICABLE.
+  ≤90 days). If production uses no hosted or self-hosted models/embeddings that can be superseded, score NOT_APPLICABLE.
 evidenceRequired:
   - "Model/embedding deprecation and sunset policy (notice period + forced-sunset rules)"
   - "Registry export showing sunset dates for superseded pins; query of undocumented pins past sunset = 0"

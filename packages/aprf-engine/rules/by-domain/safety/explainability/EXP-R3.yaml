@@ -15,7 +15,7 @@ weight: 3
 gate: "recommended"
 passCondition: >
   The last material model or prompt promotion includes a retained change or
-  counterfactual summary (measuredAt ≤90 days). If none (material model or prompt promotions occur), score NOT_APPLICABLE.
+  counterfactual summary (measuredAt ≤90 days). If no material model or prompt promotions occur, score NOT_APPLICABLE.
 evidenceRequired:
   - "Change/counterfactual summary tooling or template for model/prompt promotions"
   - "Retained summary for the last material model or prompt promotion (≤90 days)"
@@ -34,7 +34,7 @@ detection:
           model/prompt promotion has a retained change/counterfactual summary
           (measuredAt ≤90 days).
 manualVerification: >
-  1) Confirm material model or prompt promotions occur. If none, score
+  1) Confirm material model or prompt promotions occur. If none occur, score
   NOT_APPLICABLE. 2) Locate tooling or a template that produces change or
   counterfactual summaries for those promotions. 3) Confirm the last material
   promotion retains such a summary ≤90 days. 4) PASS only if tooling/template
