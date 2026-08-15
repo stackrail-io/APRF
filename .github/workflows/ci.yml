@@ -37,9 +37,13 @@ jobs:
 
       - name: Fail if generated catalog drifted
         run: |
-          if ! git diff --quiet -- packages/aprf-engine/src/generated/catalog.ts; then
+          if ! git diff --quiet -- \
+            packages/aprf-engine/src/generated/catalog.ts \
+            packages/aprf-engine/src/generated/evidence-type-ids.ts; then
             echo "::error::Generated catalog is out of date. Run 'npm run aprf:catalog' and commit the result."
-            git diff -- packages/aprf-engine/src/generated/catalog.ts
+            git diff -- \
+              packages/aprf-engine/src/generated/catalog.ts \
+              packages/aprf-engine/src/generated/evidence-type-ids.ts
             exit 1
           fi
           echo "Generated catalog is in sync."

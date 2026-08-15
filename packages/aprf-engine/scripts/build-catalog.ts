@@ -12,6 +12,7 @@ import { fileURLToPath } from "url";
 import { parse as parseYaml } from "yaml";
 import type { CrosswalkDef, ThreatIntelDef } from "../src/catalog-types";
 import { loadRulesFromDisk, rulesRootDir } from "../src/loader";
+import { validateAllByDomainYaml } from "./validate-catalog";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const outPath = join(here, "..", "src", "generated", "catalog.ts");
@@ -115,6 +116,15 @@ function loadThreatIntel(rulesRoot: string): Record<string, ThreatIntelDef> {
 
 function main() {
   const root = rulesRootDir();
+  const catalogValidation = validateAllByDomainYaml(root);
+  if (catalogValidation.errors.length > 0) {
+    console.error(
+      `aprf-engine build-catalog refused — ${catalogValidation.errors.length} YAML lint / path / spec mapping error(s):`,
+    );
+    for (const e of catalogValidation.errors) console.error(`  - ${e}`);
+    process.exit(1);
+  }
+
   const { rules, domains, pillars, categories, errors } = loadRulesFromDisk(root);
 
   if (errors.length > 0) {

@@ -12,6 +12,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 - `selectApplicableRules` excludes `deprecated` Checks (aligned with CLI assess).
 - Relabel **AGN-M1** from `automated` → `hybrid` (keeps `manual-attest` fallback; default evidence floor E3). Loader rejects `automated` + `manual-attest`.
 
+### Changed
+- Catalog P1 tooling (build/CI hygiene): `build-catalog` runs full YAML lint/path checks; CI diffs `evidence-type-ids.ts` with `catalog.ts`; pruned unused detector allowlist entries; INF siblings `relatedRules` point at `SCI-R1` instead of deprecated `INF-R1`.
+
 ## [Catalog 0.12.0] / [@stackrail-io/aprf@0.1.5] — 2026-08-14
 
 MINOR catalog release: Evidence Assurance Tiers (APRF-RFC-0011), peer crosswalks, detector↔plugin bridge, and REPORT honesty fixes.

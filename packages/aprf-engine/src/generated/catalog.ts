@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:cd7497fbc0d0b2edae4c78258c3ecee76000240339dc3bb68b6c4dcebd941422",
+  "generatedAt": "sha256:125e1c9e4ec83c591487a24a78472d9ef9a583545e9709432390cb7a0ee8bdd6",
   "ruleCount": 178,
   "domains": [
     {
@@ -7277,7 +7277,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "INF-M2",
         "INF-M3",
         "INF-M4",
-        "INF-R1",
+        "SCI-R1",
         "INF-R3",
         "SEC-M4",
         "AUTHN-M1",
@@ -7371,7 +7371,6 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "INF-M1",
         "INF-M3",
         "INF-M4",
-        "INF-R1",
         "INF-R3",
         "SCI-M2",
         "SCI-R1"
@@ -7465,7 +7464,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "INF-M1",
         "INF-M2",
         "INF-M4",
-        "INF-R1",
+        "SCI-R1",
         "INF-R3",
         "SEC-M4",
         "AUTHN-R2",
@@ -7559,7 +7558,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "INF-M1",
         "INF-M2",
         "INF-M3",
-        "INF-R1",
+        "SCI-R1",
         "INF-R3",
         "PERF-M1"
       ],
@@ -7721,7 +7720,6 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "INF-M2",
         "INF-M3",
         "INF-M4",
-        "INF-R1",
         "SCI-R1"
       ],
       "tags": [
@@ -12908,7 +12906,6 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "SCI-M3",
         "SCI-M4",
         "SCI-R2",
-        "INF-R1",
         "CHG-M1"
       ],
       "tags": [

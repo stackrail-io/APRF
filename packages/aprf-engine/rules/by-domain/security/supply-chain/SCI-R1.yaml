@@ -101,7 +101,6 @@ relatedRules:
   - "SCI-M3"
   - "SCI-M4"
   - "SCI-R2"
-  - "INF-R1"
   - "CHG-M1"
 tags:
   - "supply-chain"
