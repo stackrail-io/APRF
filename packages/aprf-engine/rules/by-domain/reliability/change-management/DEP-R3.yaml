@@ -15,7 +15,7 @@ gate: "recommended"
 passCondition: >
   Index/embedding version upgrades run via automated migration with validation
   gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded
-  without dual-write gaps (migration evidence measuredAt ≤90 days).
+  without dual-write gaps (migration evidence measuredAt ≤90 days). If no production embeddings or vector indexes exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Embedding/index migration runbook with validation gates"
   - "Last automated migration job log and validation (≤12 months) or no-upgrade attestation"

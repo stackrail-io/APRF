@@ -16,7 +16,9 @@ weight: 4
 gate: "mandatory"
 passCondition: >
   Regulated workloads are labeled; 100% of sampled regulated requests stay in
-  approved regions (routing sample/policy evidence measuredAt ≤90 days).
+  approved regions (routing sample/policy evidence measuredAt ≤90 days). If no
+  regulated workloads or tenants exist and residency constraints do not apply,
+  score NOT_APPLICABLE.
 evidenceRequired:
   - "Routing policy config naming approved regions for regulated tenants/workloads"
   - "Sample routing decisions (or deny logs) showing 100% of sampled regulated requests stayed in approved regions"

@@ -16,7 +16,7 @@ gate: "recommended"
 passCondition: >
   Defined sample size and cadence (≥ monthly or per release); last packet
   ≤90 days includes disposition for each fail/edge case and links to backlog
-  items when needed, with reviewer names (measuredAt ≤90 days).
+  items when needed, with reviewer names (measuredAt ≤90 days). If no production AI with safety-relevant outputs exists, score NOT_APPLICABLE.
 evidenceRequired:
   - "Safety edge-case sampling plan (sample size + cadence)"
   - "Last review packet ≤90 days (labels, dispositions, reviewer names, backlog links when needed)"

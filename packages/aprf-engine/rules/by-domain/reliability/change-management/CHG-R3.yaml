@@ -15,7 +15,7 @@ gate: "recommended"
 passCondition: >
   Quality SLO burn is wired to automated rollback (or page+runbook with
   measured MTTA) and a test/drill occurred ≤90 days (automation evidence
-  measuredAt ≤90 days).
+  measuredAt ≤90 days). If no AI releases with quality SLOs exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Rollback automation (or page+runbook) config tied to quality SLO burn signals"
   - "Sample trigger/test or drill evidence of that path within ≤90 days"

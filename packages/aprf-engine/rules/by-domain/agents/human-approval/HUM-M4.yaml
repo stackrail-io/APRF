@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   Level 5 irreversible action classes are inventoried; 100% of sampled
   executions of those classes show dual approval by two distinct actors; 0
-  single-approver completes in the sample (sample/config measuredAt ≤90 days).
+  single-approver completes in the sample (sample/config measuredAt ≤90 days). If not in Level 5 scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Inventory of Level 5 irreversible action classes requiring dual control"
   - "Dual-control workflow configuration (two distinct approvers)"

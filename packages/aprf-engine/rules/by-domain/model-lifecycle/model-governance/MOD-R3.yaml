@@ -16,7 +16,7 @@ gate: "recommended"
 passCondition: >
   100% of open-weight/fine-tuned production models have a license+provenance
   review ≤12 months old; blocked licenses have documented exceptions with
-  expiry (review evidence measuredAt ≤90 days).
+  expiry (review evidence measuredAt ≤90 days). If all production models are proprietary hosted APIs with no local/fine-tuned weights, score NOT_APPLICABLE.
 evidenceRequired:
   - "License/provenance review checklist (or registry fields) for open-weight and fine-tuned models"
   - "Completed reviews ≤12 months old for each such production model; exceptions for blocked licenses with expiry"

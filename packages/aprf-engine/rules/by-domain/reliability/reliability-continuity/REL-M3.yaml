@@ -18,7 +18,7 @@ gate: "mandatory"
 passCondition: >
   Test evidence demonstrates that when a tool partially succeeds and a later
   step fails, the workflow does not report overall success without explicit
-  compensation, rollback, retry, or human approval (measuredAt ≤90 days).
+  compensation, rollback, retry, or human approval (measuredAt ≤90 days). If no tool-using agents or workflows exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Agent/tool error-handling policy or code that detects partial tool failure"
   - "Test evidence (integration, chaos, e2e, replay, contract, simulator, or equivalent) showing no false-success without compensation/rollback/retry/approval (≤90 days)"

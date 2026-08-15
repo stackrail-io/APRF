@@ -16,7 +16,7 @@ gate: "recommended"
 passCondition: >
   Every regulated AI feature lists required explanation type and evidence;
   the matrix was reviewed ≤12 months ago with a named owner (attest
-  measuredAt ≤90 days).
+  measuredAt ≤90 days). If no regulated AI features exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Explainability requirements matrix (feature × regulation/obligation)"
   - "Last compliance review record ≤12 months with named owner"

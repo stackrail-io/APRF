@@ -16,7 +16,7 @@ gate: "recommended"
 passCondition: >
   On-call can replay a failed AI trace in a restricted environment within the
   documented RTO; last drill or real replay ≤90 days old (replay evidence
-  measuredAt ≤90 days).
+  measuredAt ≤90 days). If none (production AI tracing with failed traces is in scope), score NOT_APPLICABLE.
 evidenceRequired:
   - "Secure/restricted replay tooling config for failed AI traces"
   - "Documented RTO for replay"

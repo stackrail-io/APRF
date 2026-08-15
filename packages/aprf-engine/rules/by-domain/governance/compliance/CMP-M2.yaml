@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   100% of in-scope obligations map to ≥1 evidence artifact ID; matrix review
   date ≤12 months; 0 orphan obligations without an evidence pointer (matrix
-  evidence measuredAt ≤90 days).
+  evidence measuredAt ≤90 days). If no obligations are in scope (all none-in-scope), score NOT_APPLICABLE.
 evidenceRequired:
   - "Control→evidence matrix linking in-scope obligations to APRF Checks or internal control/evidence IDs"
   - "Matrix review date (≤12 months) and confirmation of zero orphan obligation rows"

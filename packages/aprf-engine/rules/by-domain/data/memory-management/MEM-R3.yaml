@@ -18,7 +18,7 @@ gate: "recommended"
 passCondition: >
   Working memory cannot silently become durable without a promotion rule; the
   last 10 promotions show rule ID and actor; TTL differs by memory class
-  (architecture/audit evidence measuredAt ≤90 days).
+  (architecture/audit evidence measuredAt ≤90 days). If only one class exists with no promotion path, score NOT_APPLICABLE.
 evidenceRequired:
   - "Memory architecture doc or config showing distinct working vs durable stores"
   - "Promotion rules that gate working→durable writes"

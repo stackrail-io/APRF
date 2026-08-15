@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   Each critical journey has ≥1 quality and ≥1 safety metric with numeric
   threshold; failing gate blocks deploy in CI (gate evidence measuredAt ≤90
-  days).
+  days). If no critical customer/partner journeys exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Gate config listing metric names and numeric thresholds per critical journey (quality + safety)"
   - "CI evidence that a failing gate blocks deploy (or equivalent required check)"

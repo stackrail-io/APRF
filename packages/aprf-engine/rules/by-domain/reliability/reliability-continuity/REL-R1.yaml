@@ -17,7 +17,7 @@ passCondition: >
   Circuit breakers are configured around AI/provider clients and open under
   induced failure in test or an observed production trip within 90 days;
   bulkheads limit concurrent calls per provider dependency (measuredAt ≤90
-  days).
+  days). If no production AI/provider clients exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Client library/config showing circuit breakers around model/provider calls"
   - "Bulkhead or concurrency limit per provider dependency"

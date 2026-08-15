@@ -14,7 +14,7 @@ weight: 4
 gate: "recommended"
 passCondition: >
   New agent behaviors ship behind flags; flag state changes are audited;
-  kill/disable path tested ≤90 days ago (flag evidence measuredAt ≤90 days).
+  kill/disable path tested ≤90 days ago (flag evidence measuredAt ≤90 days). If no production agents with shippable behaviors exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Feature-flag config covering new agent behaviors"
   - "Sample flag-change audit trail + kill/disable path test record (≤90 days)"

@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   100% of production prompt releases in the last 30 days have a review ID and
   eval pass artifact; promote-without-both is blocked (release evidence
-  measuredAt ≤90 days).
+  measuredAt ≤90 days). If none (production prompt releases occur), score NOT_APPLICABLE.
 evidenceRequired:
   - "Change records linking prompt versions to review IDs and eval pass artifacts"
   - "CI/registry gate (or equivalent) blocking promote without review + eval"

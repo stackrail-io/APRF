@@ -21,7 +21,7 @@ gate: "mandatory"
 passCondition: >
   Automated or reviewed probe shows the model/tool runtime can reach only
   allowlisted destinations; 0 unrestricted routes to internal admin APIs or
-  data stores from the model identity (measuredAt ≤90 days).
+  data stores from the model identity (measuredAt ≤90 days). If none (production AI uses a model or tool runtime that can initiate network calls), score NOT_APPLICABLE.
 evidenceRequired:
   - "Architecture diagram of model/tool trust boundaries"
   - "Network policy or egress allowlist export for the model/tool runtime identity"

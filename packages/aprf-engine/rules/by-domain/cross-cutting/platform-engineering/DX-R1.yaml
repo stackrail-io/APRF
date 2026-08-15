@@ -17,7 +17,7 @@ gate: "recommended"
 passCondition: >
   Templates exist for agents, RAG, and MCP with auth, secrets, and logging
   defaults on; ≥1 new service used a template in the last 90 days or an
-  adoption target is documented (adoption proof measuredAt ≤90 days).
+  adoption target is documented (adoption proof measuredAt ≤90 days). If none planned and no AI surface, score NOT_APPLICABLE.
 evidenceRequired:
   - "Scaffolding template repo/catalog covering agents, RAG, and MCP"
   - "Evidence auth, secrets, and logging defaults are enabled in those templates"

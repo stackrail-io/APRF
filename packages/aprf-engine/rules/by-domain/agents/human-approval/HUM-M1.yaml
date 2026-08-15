@@ -18,7 +18,8 @@ gate: "mandatory"
 passCondition: >
   100% of inventoried high-impact action classes have an approval gate in
   production; ungated execution tests for those classes fail at 100%
-  (inventory/deny evidence measuredAt ≤90 days).
+  (inventory/deny evidence measuredAt ≤90 days). If no high-impact action classes apply (writes, irreversible, financial,
+  external communications, privileged admin), score NOT_APPLICABLE.
 evidenceRequired:
   - "Versioned high-impact action inventory (class, risk tier, gate id/owner)"
   - "Gate wiring evidence (policy/config) mapping each class to an approval control"

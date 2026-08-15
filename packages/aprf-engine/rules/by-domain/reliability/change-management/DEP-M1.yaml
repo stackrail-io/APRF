@@ -15,7 +15,7 @@ gate: "mandatory"
 passCondition: >
   100% of production prompt/model/tool releases in the last 30 days flowed
   through the documented promotion path; 0 production hot-edits without a
-  linked change record (promotion evidence measuredAt ≤90 days).
+  linked change record (promotion evidence measuredAt ≤90 days). If no production prompt/model/tool releases exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools"
   - "Last-30-day release coverage showing path adherence + 0 hot-edits without change records"

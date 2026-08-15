@@ -18,7 +18,7 @@ gate: "mandatory"
 passCondition: >
   Safety gate executed on 100% of in-scope releases in the last 30 days;
   fail blocks promote unless a time-boxed waiver (expiry ≤14 days) with
-  owner is recorded (measuredAt ≤90 days).
+  owner is recorded (measuredAt ≤90 days). If no in-scope AI releases exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Safety suite definition with numeric thresholds"
   - "CI/gate reports covering in-scope releases in the last 30 days (100%)"

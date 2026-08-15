@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   0 “latest”/floating aliases on critical production paths; 100% of those
   paths reference immutable model IDs; lint or CI rejects floating aliases
-  (pin evidence measuredAt ≤90 days).
+  (pin evidence measuredAt ≤90 days). If none (production AI paths call hosted or self-hosted models), score NOT_APPLICABLE.
 evidenceRequired:
   - "Production model pin config (or registry) listing immutable model IDs on critical paths"
   - "Lint or CI rule that rejects “latest”/floating aliases on those paths"

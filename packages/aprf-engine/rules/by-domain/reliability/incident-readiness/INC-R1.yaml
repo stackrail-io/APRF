@@ -15,7 +15,7 @@ gate: "recommended"
 passCondition: >
   At least two non-infra signals (e.g. refusal-rate spike, eval-score drop,
   toxicity/jailbreak hit rate) page an on-call; each has a documented threshold
-  and owner; policy reviewed ≤90 days ago (alert evidence measuredAt ≤90 days).
+  and owner; policy reviewed ≤90 days ago (alert evidence measuredAt ≤90 days). If none (a production AI system is in scope), score NOT_APPLICABLE.
 evidenceRequired:
   - "On-call alert policy export listing safety/quality pages"
   - "Last 90 days of triggered incidents or drill tickets for those pages"

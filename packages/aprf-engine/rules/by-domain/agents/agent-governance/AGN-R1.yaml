@@ -20,7 +20,7 @@ passCondition: >
   Agent planner runs policy checks for goal conflicts / disallowed goals before
   side-effecting tools; ≥1 synthetic conflict is denied in test or production
   logs within the last 90 days with retained deny/allow traces; the policy rule
-  set has a named owner.
+  set has a named owner. If none (production agents plan or invoke side-effecting tools), score NOT_APPLICABLE.
 evidenceRequired:
   - "Versioned pre-execution policy rules (goal-conflict / disallowed-goal) with named owner"
   - "Sample deny/allow traces showing the planner gated side-effecting tools"

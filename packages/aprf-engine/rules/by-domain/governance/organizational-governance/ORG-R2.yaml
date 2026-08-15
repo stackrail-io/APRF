@@ -17,7 +17,7 @@ gate: "recommended"
 passCondition: >
   0 production AI systems missing any required critical-domain owner in the
   inventory; inventory covers all production AI system IDs; required domain set
-  is declared (inventory evidence measuredAt ≤90 days).
+  is declared (inventory evidence measuredAt ≤90 days). If no production AI systems exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Production AI system inventory listing the org-declared required critical-domain owner fields"
   - "Query/report showing 0 systems missing required domain owners"

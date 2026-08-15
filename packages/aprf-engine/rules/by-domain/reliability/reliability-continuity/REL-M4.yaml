@@ -16,7 +16,7 @@ weight: 3
 gate: "mandatory"
 passCondition: >
   Backup inventory includes required AI control-plane artifacts; a restore test
-  in the last 90 days succeeds for a sample artifact set (measuredAt ≤90 days).
+  in the last 90 days succeeds for a sample artifact set (measuredAt ≤90 days). If no AI control-plane artifacts exist in scope (prompt registry, policies, vector/index state, or equivalent), score NOT_APPLICABLE.
 evidenceRequired:
   - "Backup job or inventory covering required AI control-plane artifacts (prompt registry, policies, indexes, as applicable)"
   - "Restore test report for a sample artifact set (≤90 days)"

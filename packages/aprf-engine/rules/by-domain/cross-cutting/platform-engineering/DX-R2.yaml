@@ -16,7 +16,7 @@ gate: "recommended"
 passCondition: >
   A local or one-command inner-loop runner exists for the core AI eval subset;
   the last sampled AI PR (≤30 days) shows pre-PR eval evidence or a documented
-  waiver (sample/waiver measuredAt ≤30 days).
+  waiver (sample/waiver measuredAt ≤30 days). If no AI eval surface, score NOT_APPLICABLE.
 evidenceRequired:
   - "Local/inner-loop eval runner docs and package or script entrypoint"
   - "Evidence the core eval subset runs in one command (or documented equivalent)"

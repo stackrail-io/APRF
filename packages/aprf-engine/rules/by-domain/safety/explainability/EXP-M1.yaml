@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   On the factual/high-stakes RAG eval set, ≥90% of answers include ≥1 valid
   source ID/citation that resolves to an authorized corpus document
-  (measuredAt ≤90 days).
+  (measuredAt ≤90 days). If no factual or high-stakes RAG outputs exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Factual/high-stakes RAG eval suite measuring citation presence"
   - "Eval report showing ≥90% answers with ≥1 resolvable citation/source ID"

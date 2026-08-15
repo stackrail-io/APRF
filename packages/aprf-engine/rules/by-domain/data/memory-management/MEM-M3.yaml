@@ -16,7 +16,8 @@ gate: "mandatory"
 passCondition: >
   Policy enumerates allowed writers and content classes for durable/long-term
   memory; unauthorized writers are denied at 100% in automated tests (policy/test
-  evidence measuredAt ≤90 days).
+  evidence measuredAt ≤90 days). If no durable/long-term AI memory exists (ephemeral session context alone does
+  not count), score NOT_APPLICABLE.
 evidenceRequired:
   - "Write policy for durable/long-term memory naming allowed writers and content classes"
   - "Write-policy enforcement config (middleware, gateway, or store gate)"

@@ -7,6 +7,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ## [Unreleased]
 
+### Changed
+- Catalog P1 hygiene: `passCondition` now carries existence / `NOT_APPLICABLE` gates previously only in `manualVerification`; validate/build enforce YAML↔spec `method` and `passCondition` match; `build-catalog` runs full YAML lint/path checks; CI diffs `evidence-type-ids.ts` with `catalog.ts`; pruned unused detector allowlist entries; INF siblings `relatedRules` point at `SCI-R1` instead of deprecated `INF-R1`.
+
 ## [Catalog 0.12.0] / [@stackrail-io/aprf@0.1.5] — 2026-08-14
 
 MINOR catalog release: Evidence Assurance Tiers (APRF-RFC-0011), peer crosswalks, detector↔plugin bridge, and REPORT honesty fixes.

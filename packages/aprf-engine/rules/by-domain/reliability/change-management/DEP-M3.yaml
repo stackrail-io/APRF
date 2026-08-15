@@ -15,7 +15,7 @@ gate: "mandatory"
 passCondition: >
   Drift check shows 0 unmanaged production AI config resources outside
   declarative sources; sample of live pins matches declared versions at 100%
-  (drift evidence measuredAt ≤90 days).
+  (drift evidence measuredAt ≤90 days). If no production AI config exists (gateway, model pins, tool catalogs, or prompts), score NOT_APPLICABLE.
 evidenceRequired:
   - "IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts"
   - "Drift check showing 0 unmanaged AI config resources + 100% live-pin match"

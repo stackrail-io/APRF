@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   On-call or operator successfully reconstructs model→retrieval/tools→outcome
   for 3/3 sampled production traces within the documented time budget (e.g.
-  ≤15 minutes each; measuredAt ≤90 days).
+  ≤15 minutes each; measuredAt ≤90 days). If no production AI outcomes with reconstructable paths exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Operator reconstruction procedure with documented time budget"
   - "Timed drill record covering ≥3 sampled production traces (≤90 days)"

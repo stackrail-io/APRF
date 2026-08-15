@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   Critical memory classes are inventoried; cryptographic verification or
   signature checks succeed for 100% of those classes in the latest check
-  (inventory/verification evidence measuredAt ≤90 days).
+  (inventory/verification evidence measuredAt ≤90 days). If no AI memory classes are designated critical, score NOT_APPLICABLE.
 evidenceRequired:
   - "Inventory of critical AI memory classes requiring integrity protection"
   - "Integrity/signing design or config for those classes (MAC, signature, sealed object, or equivalent)"

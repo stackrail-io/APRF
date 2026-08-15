@@ -15,7 +15,7 @@ gate: "recommended"
 passCondition: >
   100% of SEV-eligible AI incidents in last 90 days have a review with ≥1
   tracked action mapped to an APRF pillar or explicit “no action” rationale
-  (review evidence measuredAt ≤90 days).
+  (review evidence measuredAt ≤90 days). If no SEV-eligible AI incidents exist in the last 90 days, score NOT_APPLICABLE.
 evidenceRequired:
   - "Post-incident review template requiring APRF pillar mapping"
   - "Last-90-day coverage: SEV-eligible AI reviews with tracked actions or no-action rationale"

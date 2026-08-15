@@ -15,7 +15,7 @@ gate: "mandatory"
 passCondition: >
   Drill in last 90 days successfully demonstrated pause agents, disable tools,
   and roll back prompt/model within documented time budgets (drill evidence
-  measuredAt ≤90 days).
+  measuredAt ≤90 days). If no production agents, tools, or prompt/model release units exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Containment runbook covering pause agents, disable tools, and prompt/model rollback"
   - "Drill record ≤90 days showing all three actions within documented time budgets"

@@ -87,7 +87,6 @@ relatedRules:
   - "INF-M2"
   - "INF-M3"
   - "INF-M4"
-  - "INF-R1"
   - "SCI-R1"
 tags:
   - "infrastructure"

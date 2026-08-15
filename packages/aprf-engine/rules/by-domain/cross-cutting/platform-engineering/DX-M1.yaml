@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   A golden-path document exists with version and owner; it covers
   authentication, secrets, evals, and promote steps for AI features; last
-  review is within 12 months (review measuredAt ≤365 days).
+  review is within 12 months (review measuredAt ≤365 days). If none (the org builds or deploys AI features), score NOT_APPLICABLE.
 evidenceRequired:
   - "Golden-path documentation from scaffold to production with version and owner"
   - "Evidence the doc covers auth, secrets, evals, and promote steps"

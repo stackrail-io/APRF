@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   100% of production indexes have owner + version ID + refresh cadence;
   0 indexes missing any field; stale beyond cadence are flagged or rebuilt
-  (inventory measuredAt ≤90 days).
+  (inventory measuredAt ≤90 days). If none (the system uses production retrieval corpora or vector indexes), score NOT_APPLICABLE.
 evidenceRequired:
   - "Corpus/index inventory listing production indexes with owner, version ID, and refresh schedule"
   - "Evidence stale-beyond-cadence indexes are flagged or rebuilt"

@@ -14,7 +14,7 @@ gate: "mandatory"
 passCondition: >
   100% of production AI artifact changes in the last 30 days have who/what/when
   fields and a review link (PR, ticket, or approval ID) (change-record evidence
-  measuredAt ≤90 days).
+  measuredAt ≤90 days). If no production AI artifact changes exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Change log or ticket export for AI artifact releases"
   - "Last-30-day coverage showing who/what/when + review link on every change"

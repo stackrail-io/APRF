@@ -16,7 +16,7 @@ gate: "recommended"
 passCondition: >
   ≥99% of production requests in a 24h sample emit context-budget usage; an
   alert fires when usage exceeds the documented % of max context (or hard
-  truncate rate exceeds threshold) (metrics/alert evidence measuredAt ≤90 days).
+  truncate rate exceeds threshold) (metrics/alert evidence measuredAt ≤90 days). If none (production AI requests assemble bounded context), score NOT_APPLICABLE.
 evidenceRequired:
   - "Per-request context token/budget usage metrics (dashboard or telemetry export)"
   - "Alert rule for context saturation and/or hard-truncate rate with notify proof"

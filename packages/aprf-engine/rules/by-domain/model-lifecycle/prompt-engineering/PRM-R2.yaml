@@ -16,7 +16,7 @@ passCondition: >
   Lint runs on every prompt change PR; blocking rules exist for length limits,
   secrets patterns, injection-prone constructs, and unbounded user
   concatenation; last failing lint example retained (lint evidence measuredAt
-  ≤90 days).
+  ≤90 days). If no production prompt files/templates exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Prompt-lint CI config covering length, secrets patterns, injection-prone constructs, unbounded user concatenation"
   - "Proof lint is required on prompt-change PRs + retained example of a failing lint"

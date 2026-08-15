@@ -18,7 +18,7 @@ gate: "recommended"
 passCondition: >
   A provider-loss (or equivalent) continuity drill completed ≤90 days with
   retained RTO/RPO results that met objectives or have named owners and
-  expiry (measuredAt ≤90 days).
+  expiry (measuredAt ≤90 days). If no production AI provider dependencies exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Continuity drill calendar covering provider-loss (or equivalent) scenarios"
   - "Last provider-loss drill report with RTO/RPO results (≤90 days)"

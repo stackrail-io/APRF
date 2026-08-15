@@ -14,7 +14,7 @@ weight: 4
 gate: "mandatory"
 passCondition: >
   ≥1 successful rollback (drill or real) in the last 90 days with measured
-  time-to-restore ≤ documented RTO (drill evidence measuredAt ≤90 days).
+  time-to-restore ≤ documented RTO (drill evidence measuredAt ≤90 days). If none (production AI changes that may need rollback), score NOT_APPLICABLE.
 evidenceRequired:
   - "Documented RTO for AI/prompt/model/deploy rollback"
   - "Drill or incident record with timestamps, outcome, and measured time-to-restore"
