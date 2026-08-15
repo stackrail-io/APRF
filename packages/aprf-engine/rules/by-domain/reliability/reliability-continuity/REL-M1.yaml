@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   100% of production model/tool client call sites have a finite timeout and a
   finite max-retry bound; verified by static check or integration test
-  (measuredAt ≤90 days).
+  (measuredAt ≤90 days). If no production model or tool clients exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Client config or code declaring finite timeout and max-retry for model/tool call sites"
   - "Static analysis report or integration test covering 100% of in-scope call sites (≤90 days)"

@@ -17,7 +17,7 @@ weight: 3
 gate: "recommended"
 passCondition: >
   100% of processes marked critical-AI-dependent have ≥1 documented continuity
-  option with a named owner (continuity evidence measuredAt ≤90 days).
+  option with a named owner (continuity evidence measuredAt ≤90 days). If no processes marked critical-AI-dependent exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Continuity options documentation per critical AI-dependent process (failover, manual, alternate provider, or equivalent)"
   - "Named owner for each continuity option"

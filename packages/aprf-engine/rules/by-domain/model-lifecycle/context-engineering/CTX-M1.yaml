@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   100% of production context builders enforce a max token/byte budget; tests
   show oversized inputs are truncated/rejected per priority rules with 0 silent
-  overflows (budget evidence measuredAt ≤90 days).
+  overflows (budget evidence measuredAt ≤90 days). If none (production AI paths assemble model context (RAG, chat history, tool results, or prompt templates)), score NOT_APPLICABLE.
 evidenceRequired:
   - "Context-budget config (max tokens/bytes) for each production context builder"
   - "Unit/integration tests showing truncate/reject per priority rules with 0 silent overflows"

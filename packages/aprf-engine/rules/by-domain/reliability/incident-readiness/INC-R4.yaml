@@ -13,7 +13,7 @@ weight: 3
 gate: "recommended"
 passCondition: >
   An AI-focused tabletop completed ≤180 days with retained actions and owners
-  (tabletop evidence measuredAt ≤90 days).
+  (tabletop evidence measuredAt ≤90 days). If no production AI system is in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Tabletop plan for an AI-specific incident scenario"
   - "Dated after-action report ≤180 days with retained actions and owners"

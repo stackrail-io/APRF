@@ -17,7 +17,7 @@ gate: "recommended"
 passCondition: >
   All three tracks (regression, adversarial, distribution-shift) exist with
   distinct corpora and named owners; each track ran successfully on the last
-  production model/prompt promotion (catalog/CI evidence measuredAt ≤90 days).
+  production model/prompt promotion (catalog/CI evidence measuredAt ≤90 days). If no production AI model/prompt promotions exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Eval catalog listing separate tracks for regression, adversarial, and distribution-shift with owners and corpora"
   - "Latest CI (or equivalent) matrix showing each track succeeded on the last production promotion"

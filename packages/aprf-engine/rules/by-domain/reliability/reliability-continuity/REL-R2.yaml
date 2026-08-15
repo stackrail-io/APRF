@@ -19,7 +19,7 @@ passCondition: >
   A multi-provider or multi-region fallback path is configured and was
   exercised ≤90 days; a retained eval comparing primary vs fallback meets
   documented minimum quality/safety bars (not connectivity-only; measuredAt
-  ≤90 days).
+  ≤90 days). If no production AI paths that warrant fallback are in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Multi-provider or multi-region fallback configuration"
   - "Evidence the fallback path was exercised ≤90 days"

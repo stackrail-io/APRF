@@ -19,7 +19,7 @@ passCondition: >
   Last new agent behavior promoted to production has a linked sandbox or
   simulation run completed ≤30 days before release with pass/fail criteria
   recorded; the sandbox/simulation environment used for agent behaviors is
-  documented or configured.
+  documented or configured. If agents never change behavior after initial deploy, score NOT_APPLICABLE.
 evidenceRequired:
   - "Sandbox/simulation environment config (or equivalent) for agent behaviors"
   - "Last pre-prod simulation/sandbox report for a behavior change, linked to the production promotion"

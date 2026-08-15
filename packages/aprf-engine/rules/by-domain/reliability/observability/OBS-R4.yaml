@@ -14,7 +14,7 @@ gate: "recommended"
 passCondition: >
   ≥95% of billed model calls in a 24h sample carry request ID + feature +
   tenant (or equivalent) attribution labels (attribution evidence measuredAt
-  ≤90 days).
+  ≤90 days). If no billed model calls are in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Cost/token metrics schema with request, feature, and tenant (or equivalent) labels"
   - "24h sample showing ≥95% attributed billed model calls"

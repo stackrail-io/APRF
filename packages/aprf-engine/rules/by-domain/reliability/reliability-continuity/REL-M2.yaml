@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   100% of critical AI-dependent journeys document degraded behavior; a failover
   test shows non-AI or safe fallback activates when the AI dependency fails
-  (measuredAt ≤90 days).
+  (measuredAt ≤90 days). If no critical AI-dependent user journeys exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Degraded-mode specification covering each critical AI-dependent journey"
   - "Feature-flag, circuit-breaker, or fallback test proving safe activation when AI fails (≤90 days)"

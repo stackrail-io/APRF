@@ -13,7 +13,7 @@ weight: 3
 gate: "mandatory"
 passCondition: >
   100% of journeys marked critical have availability % and latency percentile
-  targets recorded in an SLO catalog (catalog evidence measuredAt ≤90 days).
+  targets recorded in an SLO catalog (catalog evidence measuredAt ≤90 days). If no AI journey is marked critical, score NOT_APPLICABLE.
 evidenceRequired:
   - "SLO catalog listing critical AI journeys with numeric availability and latency targets"
   - "Coverage showing 100% of marked-critical journeys have both target types"

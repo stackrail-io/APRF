@@ -15,7 +15,7 @@ gate: "mandatory"
 passCondition: >
   Metrics for latency, error rate, and at least one AI-specific quality or
   task-success indicator are collected and available for operational monitoring
-  (metrics evidence measuredAt ≤90 days).
+  (metrics evidence measuredAt ≤90 days). If no production AI services are in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Metric definitions or exporters covering latency, error rate, and ≥1 AI quality/task-success signal"
   - "Proof metrics are queryable/available for operational monitoring"

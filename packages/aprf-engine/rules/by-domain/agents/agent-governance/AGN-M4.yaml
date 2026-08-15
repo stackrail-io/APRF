@@ -23,7 +23,7 @@ passCondition: >
   and scoped capabilities; negative tests show unauthenticated, forged-peer,
   and over-scoped handoffs denied at 100%; 0 production handoff paths that
   accept anonymous or network-presence-only trust (deny evidence measuredAt
-  ≤90 days).
+  ≤90 days). If no production A2A or multi-agent handoffs exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Inventory of production A2A/multi-agent handoff paths with authn/authz mechanism per path"
   - "Capability token/schema (or equivalent) examples showing scoped grants for handoffs"

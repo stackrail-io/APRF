@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:125e1c9e4ec83c591487a24a78472d9ef9a583545e9709432390cb7a0ee8bdd6",
+  "generatedAt": "sha256:d36803649cf51f97d168f19b4060a742f10f7ccf828e43a280c66dcdf4b84588",
   "ruleCount": 178,
   "domains": [
     {
@@ -912,7 +912,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers and scoped capabilities; negative tests show unauthenticated, forged-peer, and over-scoped handoffs denied at 100%; 0 production handoff paths that accept anonymous or network-presence-only trust (deny evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of production A2A/multi-agent handoff paths require authenticated peers and scoped capabilities; negative tests show unauthenticated, forged-peer, and over-scoped handoffs denied at 100%; 0 production handoff paths that accept anonymous or network-presence-only trust (deny evidence measuredAt ≤90 days). If no production A2A or multi-agent handoffs exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Inventory of production A2A/multi-agent handoff paths with authn/authz mechanism per path",
         "Capability token/schema (or equivalent) examples showing scoped grants for handoffs",
@@ -986,7 +986,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Agent planner runs policy checks for goal conflicts / disallowed goals before side-effecting tools; ≥1 synthetic conflict is denied in test or production logs within the last 90 days with retained deny/allow traces; the policy rule set has a named owner.\n",
+      "passCondition": "Agent planner runs policy checks for goal conflicts / disallowed goals before side-effecting tools; ≥1 synthetic conflict is denied in test or production logs within the last 90 days with retained deny/allow traces; the policy rule set has a named owner. If no production agents plan or invoke side-effecting tools, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Versioned pre-execution policy rules (goal-conflict / disallowed-goal) with named owner",
         "Sample deny/allow traces showing the planner gated side-effecting tools",
@@ -1061,7 +1061,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Last new agent behavior promoted to production has a linked sandbox or simulation run completed ≤30 days before release with pass/fail criteria recorded; the sandbox/simulation environment used for agent behaviors is documented or configured.\n",
+      "passCondition": "Last new agent behavior promoted to production has a linked sandbox or simulation run completed ≤30 days before release with pass/fail criteria recorded; the sandbox/simulation environment used for agent behaviors is documented or configured. If agents never change behavior after initial deploy, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Sandbox/simulation environment config (or equivalent) for agent behaviors",
         "Last pre-prod simulation/sandbox report for a behavior change, linked to the production promotion",
@@ -1135,7 +1135,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Every production AI system ID (and production agent ID in scope) has non-empty Responsible and Accountable owner fields for the organization’s required domains/roles; inventory query returns 0 orphans (register/export measuredAt ≤90 days).\n",
+      "passCondition": "Every production AI system ID (and production agent ID in scope) has non-empty Responsible and Accountable owner fields for the organization’s required domains/roles; inventory query returns 0 orphans (register/export measuredAt ≤90 days). If no production agents/systems, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Versioned RACI or ownership register covering production AI systems / agents",
         "Required ownership fields defined (at minimum Responsible + Accountable)",
@@ -2262,7 +2262,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env (retention evidence measuredAt ≤90 days).\n",
+      "passCondition": "≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env (retention evidence measuredAt ≤90 days). If neither, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Version retention policy + registry listing of prior production prompt and model-pin versions",
         "Restore dry-run record showing immediate prior version loaded in staging or prod-adjacent env"
@@ -2344,7 +2344,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute (operability evidence measuredAt ≤90 days).\n",
+      "passCondition": "Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer completed a walkthrough or drill in the last 90 days with recorded time-to-execute (operability evidence measuredAt ≤90 days). If no production AI changes may need rollback, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Rollback runbook listing exact commands/UI steps and owners",
         "On-call acknowledgment or drill checklist with recorded time-to-execute (≤90 days)"
@@ -2426,7 +2426,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO (drill evidence measuredAt ≤90 days).\n",
+      "passCondition": "≥1 successful rollback (drill or real) in the last 90 days with measured time-to-restore ≤ documented RTO (drill evidence measuredAt ≤90 days). If no production AI changes may need rollback, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Documented RTO for AI/prompt/model/deploy rollback",
         "Drill or incident record with timestamps, outcome, and measured time-to-restore"
@@ -2508,7 +2508,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO (exercise evidence measuredAt ≤90 days).\n",
+      "passCondition": "AI release unit can be rolled back with a single documented command/action; exercise or real rollback ≤90 days completed within documented RTO (exercise evidence measuredAt ≤90 days). If no AI release units ship, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "One-command or one-click rollback script/action for AI release units",
         "Last rollback exercise or real event log showing completion within documented RTO (≤90 days)"
@@ -2590,7 +2590,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago (flag evidence measuredAt ≤90 days).\n",
+      "passCondition": "New agent behaviors ship behind flags; flag state changes are audited; kill/disable path tested ≤90 days ago (flag evidence measuredAt ≤90 days). If no production agents with shippable behaviors exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Feature-flag config covering new agent behaviors",
         "Sample flag-change audit trail + kill/disable path test record (≤90 days)"
@@ -2674,7 +2674,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred ≤90 days (automation evidence measuredAt ≤90 days).\n",
+      "passCondition": "Quality SLO burn is wired to automated rollback (or page+runbook with measured MTTA) and a test/drill occurred ≤90 days (automation evidence measuredAt ≤90 days). If no AI releases with quality SLOs exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Rollback automation (or page+runbook) config tied to quality SLO burn signals",
         "Sample trigger/test or drill evidence of that path within ≤90 days"
@@ -3623,7 +3623,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows (budget evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of production context builders enforce a max token/byte budget; tests show oversized inputs are truncated/rejected per priority rules with 0 silent overflows (budget evidence measuredAt ≤90 days). If none (production AI paths assemble model context (RAG, chat history, tool results, or prompt templates)), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Context-budget config (max tokens/bytes) for each production context builder",
         "Unit/integration tests showing truncate/reject per priority rules with 0 silent overflows"
@@ -3699,7 +3699,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Automated tests: unauthorized retrieval/tool chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts (label/ACL evidence measuredAt ≤90 days).\n",
+      "passCondition": "Automated tests: unauthorized retrieval/tool chunks are excluded at 100%; included chunks carry a source label/type field in 100% of sampled assembled contexts (label/ACL evidence measuredAt ≤90 days). If context is prompt-only with no retrieval/tools, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Context assembly code enforcing source labels on retrieved and tool-sourced chunks",
         "Automated tests showing ACL exclusion of unauthorized chunks at 100% and labels on included chunks"
@@ -3776,7 +3776,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at ≥95% on the sensitive-class fixture suite (policy/suite evidence measuredAt ≤90 days).\n",
+      "passCondition": "Policy enumerates sensitive classes and allow/deny rules; tests show disallowed classes are stripped or blocked at ≥95% on the sensitive-class fixture suite (policy/suite evidence measuredAt ≤90 days). If context is purely static non-sensitive templates with no such paths, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Data-class inclusion policy enumerating sensitive classes with allow/deny rules",
         "Enforcement tests or DLP hooks showing ≥95% strip/block on the sensitive-class fixture suite"
@@ -3853,7 +3853,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "≥99% of production requests in a 24h sample emit context-budget usage; an alert fires when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold) (metrics/alert evidence measuredAt ≤90 days).\n",
+      "passCondition": "≥99% of production requests in a 24h sample emit context-budget usage; an alert fires when usage exceeds the documented % of max context (or hard truncate rate exceeds threshold) (metrics/alert evidence measuredAt ≤90 days). If no production AI requests assemble model context, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Per-request context token/budget usage metrics (dashboard or telemetry export)",
         "Alert rule for context saturation and/or hard-truncate rate with notify proof"
@@ -3875,7 +3875,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm production AI requests assemble bounded context. If none, score NOT_APPLICABLE. 2) Open per-request context-budget usage metrics for a 24h sample; confirm ≥99% emit usage. 3) Confirm an alert on documented % of max context (saturation) and/or hard-truncate rate with a notify channel. 4) Review notify proof ≤90 days (synthetic fire or production page). 5) PASS only if emit coverage + alert/notify hold with measuredAt ≤90 days. CTX-M1 budget config alone does not satisfy. Generic LLM latency alerts do not satisfy.\n",
+      "manualVerification": "1) Confirm production AI requests assemble model context. If none, score NOT_APPLICABLE. 2) Open per-request context-budget usage metrics for a 24h sample; confirm ≥99% emit usage. 3) Confirm an alert on documented % of max context (saturation) and/or hard-truncate rate with a notify channel. 4) Review notify proof ≤90 days (synthetic fire or production page). 5) PASS only if emit coverage + alert/notify hold with measuredAt ≤90 days. CTX-M1 budget config alone does not satisfy. Generic LLM latency alerts do not satisfy.\n",
       "falsePositiveGuidance": "Do not pass completion max_tokens metrics as context-assembly budget usage. Do not pass dashboards without alert rules or unproven notify routing. Do not pass samples below ≥99% emit coverage. Do not pass COST-M2 spend alerts as context saturation. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Emit per-request context_budget_used / max (or equivalent) on production AI paths",
@@ -3930,7 +3930,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Critical-fact retention ≥ documented threshold after compaction on the eval set; last run ≤90 days; regressions block context-pipeline releases (eval evidence measuredAt ≤90 days).\n",
+      "passCondition": "Critical-fact retention ≥ documented threshold after compaction on the eval set; last run ≤90 days; regressions block context-pipeline releases (eval evidence measuredAt ≤90 days). If no compaction path exists, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Compaction/summarization eval set of critical facts with documented retention threshold",
         "Latest information-loss / retention report ≤90 days with release-blocking gate evidence"
@@ -4006,7 +4006,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test (structure/test evidence measuredAt ≤90 days).\n",
+      "passCondition": "Production assembler emits labeled structured sections (e.g. JSON/XML); untrusted data cannot overwrite the instruction section in a red-team or unit test (structure/test evidence measuredAt ≤90 days). If context is a single trusted static template with no untrusted sections, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Context assembly schema/spec separating instruction vs data blocks + sample rendered request",
         "Red-team or unit test showing untrusted data cannot overwrite the instruction section"
@@ -4082,7 +4082,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record (promotion evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of production prompt/model/tool releases in the last 30 days flowed through the documented promotion path; 0 production hot-edits without a linked change record (promotion evidence measuredAt ≤90 days). If no production prompt/model/tool releases exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Pipeline/runbook documenting non-prod→prod promotion for prompts, models, and tools",
         "Last-30-day release coverage showing path adherence + 0 hot-edits without change records"
@@ -4163,7 +4163,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID) (change-record evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of production AI artifact changes in the last 30 days have who/what/when fields and a review link (PR, ticket, or approval ID) (change-record evidence measuredAt ≤90 days). If no production AI artifact changes exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Change log or ticket export for AI artifact releases",
         "Last-30-day coverage showing who/what/when + review link on every change"
@@ -4243,7 +4243,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100% (drift evidence measuredAt ≤90 days).\n",
+      "passCondition": "Drift check shows 0 unmanaged production AI config resources outside declarative sources; sample of live pins matches declared versions at 100% (drift evidence measuredAt ≤90 days). If no production AI config exists (gateway, model pins, tool catalogs, or prompts), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "IaC/config repo paths for AI gateway, model pins, tool catalogs, and prompts",
         "Drift check showing 0 unmanaged AI config resources + 100% live-pin match"
@@ -4324,7 +4324,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release ≤90 days includes canary metrics link (canary evidence measuredAt ≤90 days).\n",
+      "passCondition": "High-traffic AI changes use canary or progressive rollout with automated rollback criteria; last such release ≤90 days includes canary metrics link (canary evidence measuredAt ≤90 days). If no high-traffic AI changes exist in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Progressive delivery/canary config for high-traffic AI changes",
         "Last canary promotion log with metrics link (≤90 days)"
@@ -4405,7 +4405,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan ≤30 days with 0 unexplained drifts (parity evidence measuredAt ≤90 days).\n",
+      "passCondition": "Prod vs staging model pins and tool catalogs match except documented deltas; last parity scan ≤30 days with 0 unexplained drifts (parity evidence measuredAt ≤90 days). If neither model pins nor tool catalogs exist across prod and staging, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Environment parity checklist for model pins and tool catalogs",
         "Last parity scan across envs with 0 unexplained drifts (≤30 days)"
@@ -4487,7 +4487,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "recommended",
-      "passCondition": "Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps (migration evidence measuredAt ≤90 days).\n",
+      "passCondition": "Index/embedding version upgrades run via automated migration with validation gates; last upgrade ≤12 months (or N/A attestation if no upgrade) succeeded without dual-write gaps (migration evidence measuredAt ≤90 days). If no production embeddings or vector indexes exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Embedding/index migration runbook with validation gates",
         "Last automated migration job log and validation (≤12 months) or no-upgrade attestation"
@@ -5456,7 +5456,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in the last 30 days triggered the suite (or documented waiver ≤14 days) (suite/CI evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of journeys marked critical have a versioned offline suite; 100% of relevant production changes in the last 30 days triggered the suite (or documented waiver ≤14 days) (suite/CI evidence measuredAt ≤90 days). If no journeys are marked critical, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Eval suite registry mapping critical journeys to versioned offline suites",
         "CI (or equivalent) runs on prompt/model/tool changes for the last 30 days, or waivers ≤14 days"
@@ -5478,7 +5478,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm the system has customer (or partner) journeys marked critical. If none, score NOT_APPLICABLE. 2) Open the eval suite registry; confirm each critical journey maps to a versioned offline suite. 3) Review relevant production changes in the last 30 days (prompt/model/tool/config that affects those journeys). 4) Confirm each change triggered the suite in CI (or equivalent) or has a documented waiver ≤14 days with owner. 5) PASS only if registry coverage + change trigger/waiver hold with measuredAt ≤90 days. Ad-hoc notebooks without versioning do not satisfy. Suites that never run on change do not satisfy.\n",
+      "manualVerification": "1) Confirm the system has journeys marked critical. If none, score NOT_APPLICABLE. 2) Open the eval suite registry; confirm each critical journey maps to a versioned offline suite. 3) Review relevant production changes in the last 30 days (prompt/model/tool/config that affects those journeys). 4) Confirm each change triggered the suite in CI (or equivalent) or has a documented waiver ≤14 days with owner. 5) PASS only if registry coverage + change trigger/waiver hold with measuredAt ≤90 days. Ad-hoc notebooks without versioning do not satisfy. Suites that never run on change do not satisfy.\n",
       "falsePositiveGuidance": "Do not pass a single shared “smoke prompt” as coverage for every critical journey. Do not pass unit tests that never exercise model/prompt behavior. Do not pass DX-R2 local inner-loop evals as a substitute for CI-triggered suites on production-relevant changes. Do not pass waivers older than 14 days as current. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Register every critical journey to a versioned offline eval suite (promptfoo or equivalent)",
@@ -5529,7 +5529,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Each critical journey has ≥1 quality and ≥1 safety metric with numeric threshold; failing gate blocks deploy in CI (gate evidence measuredAt ≤90 days).\n",
+      "passCondition": "Each critical journey has ≥1 quality and ≥1 safety metric with numeric threshold; failing gate blocks deploy in CI (gate evidence measuredAt ≤90 days). If no journeys are marked critical, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Gate config listing metric names and numeric thresholds per critical journey (quality + safety)",
         "CI evidence that a failing gate blocks deploy (or equivalent required check)"
@@ -5551,7 +5551,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm critical customer/partner journeys exist. If none, score NOT_APPLICABLE. 2) Open the release-gate config; for each critical journey confirm ≥1 quality metric and ≥1 safety metric with numeric thresholds. 3) Confirm CI (or equivalent) treats gate failure as blocking for deploy/merge. 4) PASS only if thresholds + block-on-fail hold with measuredAt ≤90 days. Dashboards without thresholds do not satisfy. Advisory “warn only” gates that never block deploy do not satisfy. EVL-M1 suite presence without numeric gates does not satisfy.\n",
+      "manualVerification": "1) Confirm journeys marked critical exist. If none, score NOT_APPLICABLE. 2) Open the release-gate config; for each critical journey confirm ≥1 quality metric and ≥1 safety metric with numeric thresholds. 3) Confirm CI (or equivalent) treats gate failure as blocking for deploy/merge. 4) PASS only if thresholds + block-on-fail hold with measuredAt ≤90 days. Dashboards without thresholds do not satisfy. Advisory “warn only” gates that never block deploy do not satisfy. EVL-M1 suite presence without numeric gates does not satisfy.\n",
       "falsePositiveGuidance": "Do not pass latency/cost SLOs as quality/safety eval gates unless the gate config explicitly names them as journey quality/safety metrics. Do not pass a single org-wide threshold that is not mapped to each critical journey. Do not pass non-blocking notifications as deploy gates. Do not pass evidence older than 90 days as current. Sibling Checks (EVL-M1 suites, SAF-M* policy) do not substitute for numeric release thresholds. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Define ≥1 quality and ≥1 safety numeric threshold per critical journey in the release gate",
@@ -5602,7 +5602,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness ≤24 hours on the dashboard (metrics evidence measuredAt ≤90 days).\n",
+      "passCondition": "Online metrics exist and are updating for task success/failure and safety refusals; alert or review cadence defined; freshness ≤24 hours on the dashboard (metrics evidence measuredAt ≤90 days). If none (production AI workloads complete user-visible tasks or apply safety refusals), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Dashboard or metric exports for task success/failure rates on production AI workloads",
         "Dashboard or metric exports for safety refusal rates",
@@ -5751,7 +5751,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "All three tracks (regression, adversarial, distribution-shift) exist with distinct corpora and named owners; each track ran successfully on the last production model/prompt promotion (catalog/CI evidence measuredAt ≤90 days).\n",
+      "passCondition": "All three tracks (regression, adversarial, distribution-shift) exist with distinct corpora and named owners; each track ran successfully on the last production model/prompt promotion (catalog/CI evidence measuredAt ≤90 days). If no production AI model/prompt promotions exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Eval catalog listing separate tracks for regression, adversarial, and distribution-shift with owners and corpora",
         "Latest CI (or equivalent) matrix showing each track succeeded on the last production promotion"
@@ -5824,7 +5824,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Cadence and sample size are defined; last sample ≤90 days covers production-like prompts; disagreements have adjudication recorded (sampling evidence measuredAt ≤90 days).\n",
+      "passCondition": "Cadence and sample size are defined; last sample ≤90 days covers production-like prompts; disagreements have adjudication recorded (sampling evidence measuredAt ≤90 days). If no production AI prompts/outputs exist for review, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Human preference / expert-review sampling protocol (cadence + sample size)",
         "Last scored sample set with production-like prompts and inter-rater / adjudication notes"
@@ -6341,7 +6341,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests for those classes fail at 100% (inventory/deny evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of inventoried high-impact action classes have an approval gate in production; ungated execution tests for those classes fail at 100% (inventory/deny evidence measuredAt ≤90 days). If no high-impact action classes apply (writes, irreversible, financial, external communications, privileged admin), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Versioned high-impact action inventory (class, risk tier, gate id/owner)",
         "Gate wiring evidence (policy/config) mapping each class to an approval control",
@@ -6415,7 +6415,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "100% of sampled approvals in the last 30 days include actor ID, action context, and approve/deny outcome; schema validation for the approval audit log passes.\n",
+      "passCondition": "100% of sampled approvals in the last 30 days include actor ID, action context, and approve/deny outcome; schema validation for the approval audit log passes. If no gated approvals exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Approval audit log schema (actor, context, outcome, timestamp) as code or documented contract",
         "Sample approval records from the last 30 days covering required fields",
@@ -6555,7 +6555,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "Level 5 irreversible action classes are inventoried; 100% of sampled executions of those classes show dual approval by two distinct actors; 0 single-approver completes in the sample (sample/config measuredAt ≤90 days).\n",
+      "passCondition": "Level 5 irreversible action classes are inventoried; 100% of sampled executions of those classes show dual approval by two distinct actors; 0 single-approver completes in the sample (sample/config measuredAt ≤90 days). If not in Level 5 scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Inventory of Level 5 irreversible action classes requiring dual control",
         "Dual-control workflow configuration (two distinct approvers)",
@@ -6768,7 +6768,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date ≤12 months (playbook evidence measuredAt ≤90 days).\n",
+      "passCondition": "Four playbooks present (abuse, leakage, bad actions, provider outage), each with owner and review date ≤12 months (playbook evidence measuredAt ≤90 days). If no production AI system is in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Playbook set covering abuse, leakage, bad actions, and provider outage with owners",
         "Review dates ≤12 months for each of the four playbooks"
@@ -6841,7 +6841,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Drill in last 90 days successfully demonstrated pause agents, disable tools, and roll back prompt/model within documented time budgets (drill evidence measuredAt ≤90 days).\n",
+      "passCondition": "Drill in last 90 days successfully demonstrated pause agents, disable tools, and roll back prompt/model within documented time budgets (drill evidence measuredAt ≤90 days). If no production agents, tools, or prompt/model release units exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Containment runbook covering pause agents, disable tools, and prompt/model rollback",
         "Drill record ≤90 days showing all three actions within documented time budgets"
@@ -6916,7 +6916,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and owner; policy reviewed ≤90 days ago (alert evidence measuredAt ≤90 days).\n",
+      "passCondition": "At least two non-infra signals (e.g. refusal-rate spike, eval-score drop, toxicity/jailbreak hit rate) page an on-call; each has a documented threshold and owner; policy reviewed ≤90 days ago (alert evidence measuredAt ≤90 days). If no production AI system is in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "On-call alert policy export listing safety/quality pages",
         "Last 90 days of triggered incidents or drill tickets for those pages"
@@ -6988,7 +6988,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale (review evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of SEV-eligible AI incidents in last 90 days have a review with ≥1 tracked action mapped to an APRF pillar or explicit “no action” rationale (review evidence measuredAt ≤90 days). If no SEV-eligible AI incidents exist in the last 90 days, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Post-incident review template requiring APRF pillar mapping",
         "Last-90-day coverage: SEV-eligible AI reviews with tracked actions or no-action rationale"
@@ -7064,7 +7064,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps (notification evidence measuredAt ≤90 days).\n",
+      "passCondition": "Criteria map event types (safety incident, widespread quality fail, data exposure) to notify / no-notify; last drill or incident ≤12 months followed the criteria with timestamps (notification evidence measuredAt ≤90 days). If no customer-facing or externally disclosed AI system is in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Customer notification criteria for AI-related events",
         "Last drill or real notification sample ≤12 months with timestamps"
@@ -7136,7 +7136,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "An AI-focused tabletop completed ≤180 days with retained actions and owners (tabletop evidence measuredAt ≤90 days).\n",
+      "passCondition": "An AI-focused tabletop completed ≤180 days with retained actions and owners (tabletop evidence measuredAt ≤90 days). If no production AI system is in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Tabletop plan for an AI-specific incident scenario",
         "Dated after-action report ≤180 days with retained actions and owners"
@@ -8206,7 +8206,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "0 “latest”/floating aliases on critical production paths; 100% of those paths reference immutable model IDs; lint or CI rejects floating aliases (pin evidence measuredAt ≤90 days).\n",
+      "passCondition": "0 “latest”/floating aliases on critical production paths; 100% of those paths reference immutable model IDs; lint or CI rejects floating aliases (pin evidence measuredAt ≤90 days). If none (production AI paths call hosted or self-hosted models), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Production model pin config (or registry) listing immutable model IDs on critical paths",
         "Lint or CI rule that rejects “latest”/floating aliases on those paths"
@@ -8279,7 +8279,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production model promotions in the last 30 days have linked eval pass artifacts; promote-without-eval is blocked by gate (promotion evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of production model promotions in the last 30 days have linked eval pass artifacts; promote-without-eval is blocked by gate (promotion evidence measuredAt ≤90 days). If none (production model promotions occur (pin changes, registry cutovers, or version bumps)), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Promotion policy or CI/registry rule requiring an eval pass artifact on model version bumps",
         "Promotion log (or CI matrix) for the last 30 days showing linked eval pass artifacts; 0 promote-without-eval"
@@ -8353,7 +8353,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Policy defines notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date in the registry; undocumented pins past sunset = 0 without exception (deprecation evidence measuredAt ≤90 days).\n",
+      "passCondition": "Policy defines notice period and forced-sunset rules; ≥1 superseded production model/embedding has a sunset date in the registry; undocumented pins past sunset = 0 without exception (deprecation evidence measuredAt ≤90 days). If none (production uses hosted or self-hosted models/embeddings that can be superseded), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Model/embedding deprecation and sunset policy (notice period + forced-sunset rules)",
         "Registry export showing sunset dates for superseded pins; query of undocumented pins past sunset = 0"
@@ -8425,7 +8425,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Each production workload has an explicit capability allowlist; ≥1 denied capability attempt is recorded in test or prod within 90 days (allowlist evidence measuredAt ≤90 days).\n",
+      "passCondition": "Each production workload has an explicit capability allowlist; ≥1 denied capability attempt is recorded in test or prod within 90 days (allowlist evidence measuredAt ≤90 days). If models are text-only with no optional capabilities, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Per-workload capability allowlist config (code execution, vision, browsing, etc.)",
         "Deny log or test fixture showing a denied capability attempt within 90 days"
@@ -8498,7 +8498,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "100% of open-weight/fine-tuned production models have a license+provenance review ≤12 months old; blocked licenses have documented exceptions with expiry (review evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of open-weight/fine-tuned production models have a license+provenance review ≤12 months old; blocked licenses have documented exceptions with expiry (review evidence measuredAt ≤90 days). If all production models are proprietary hosted APIs with no local/fine-tuned weights, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "License/provenance review checklist (or registry fields) for open-weight and fine-tuned models",
         "Completed reviews ≤12 months old for each such production model; exceptions for blocked licenses with expiry"
@@ -8572,7 +8572,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "100% of production models have owner, residency, and intended-use fields; inventory query returns 0 incomplete rows (inventory evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of production models have owner, residency, and intended-use fields; inventory query returns 0 incomplete rows (inventory evidence measuredAt ≤90 days). If none (production AI paths call hosted or self-hosted models), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Model inventory / registry export listing production models",
         "Query or attestation showing 0 incomplete owner/residency/intended-use rows"
@@ -8644,7 +8644,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Canary or sampled traces show parent request ID linking model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours (trace evidence measuredAt ≤90 days).\n",
+      "passCondition": "Canary or sampled traces show parent request ID linking model spans, tool spans, and outcome in ≥95% of canary requests over 24 hours (trace evidence measuredAt ≤90 days). If no production AI request path is in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Tracing config (or equivalent) instrumenting request → model → tool → outcome",
         "Canary or 24h sampled traces showing ≥95% linked coverage (redacted)"
@@ -8801,7 +8801,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "On-call can replay a failed AI trace in a restricted environment within the documented RTO; last drill or real replay ≤90 days old (replay evidence measuredAt ≤90 days).\n",
+      "passCondition": "On-call can replay a failed AI trace in a restricted environment within the documented RTO; last drill or real replay ≤90 days old (replay evidence measuredAt ≤90 days). If no production AI tracing with failed traces is in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Secure/restricted replay tooling config for failed AI traces",
         "Documented RTO for replay",
@@ -8874,7 +8874,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Annotators can attach quality labels to production traces in a secure tool; ≥50 annotations in the last 90 days feed an eval or review loop (annotation evidence measuredAt ≤90 days).\n",
+      "passCondition": "Annotators can attach quality labels to production traces in a secure tool; ≥50 annotations in the last 90 days feed an eval or review loop (annotation evidence measuredAt ≤90 days). If no production AI traces are in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Trace annotation schema and secure tooling for quality labels on spans",
         "Last-90-day count ≥50 annotations feeding an eval or review loop"
@@ -8946,7 +8946,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Named SLOs with numeric targets cover latency, error, and quality burn for each critical AI journey; burn-rate alerts fire when burn exceeds the documented threshold (SLO evidence measuredAt ≤90 days).\n",
+      "passCondition": "Named SLOs with numeric targets cover latency, error, and quality burn for each critical AI journey; burn-rate alerts fire when burn exceeds the documented threshold (SLO evidence measuredAt ≤90 days). If no critical AI journeys are in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Named SLO targets for critical AI journeys covering latency, error, and quality burn",
         "Burn-rate alert config + dashboard screenshot or URL with retention note"
@@ -9019,7 +9019,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "≥95% of billed model calls in a 24h sample carry request ID + feature + tenant (or equivalent) attribution labels (attribution evidence measuredAt ≤90 days).\n",
+      "passCondition": "≥95% of billed model calls in a 24h sample carry request ID + feature + tenant (or equivalent) attribution labels (attribution evidence measuredAt ≤90 days). If no billed model calls are in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Cost/token metrics schema with request, feature, and tenant (or equivalent) labels",
         "24h sample showing ≥95% attributed billed model calls"
@@ -9530,7 +9530,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of journeys marked critical have availability % and latency percentile targets recorded in an SLO catalog (catalog evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of journeys marked critical have availability % and latency percentile targets recorded in an SLO catalog (catalog evidence measuredAt ≤90 days). If no AI journey is marked critical, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "SLO catalog listing critical AI journeys with numeric availability and latency targets",
         "Coverage showing 100% of marked-critical journeys have both target types"
@@ -9604,7 +9604,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Metrics for latency, error rate, and at least one AI-specific quality or task-success indicator are collected and available for operational monitoring (metrics evidence measuredAt ≤90 days).\n",
+      "passCondition": "Metrics for latency, error rate, and at least one AI-specific quality or task-success indicator are collected and available for operational monitoring (metrics evidence measuredAt ≤90 days). If no production AI services are in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Metric definitions or exporters covering latency, error rate, and ≥1 AI quality/task-success signal",
         "Proof metrics are queryable/available for operational monitoring"
@@ -9680,7 +9680,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Alert policies exist for each critical journey SLO; an alert test or documented fire demonstrates the notification path works (alert evidence measuredAt ≤90 days).\n",
+      "passCondition": "Alert policies exist for each critical journey SLO; an alert test or documented fire demonstrates the notification path works (alert evidence measuredAt ≤90 days). If no critical AI journeys with SLOs are in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Burn-rate or SLO alert policies covering each critical AI journey SLO",
         "Alert test or documented fire proving notification path"
@@ -9755,7 +9755,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days (gate evidence measuredAt ≤90 days).\n",
+      "passCondition": "When error budget for a critical AI journey is exhausted, release velocity is blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90 days (gate evidence measuredAt ≤90 days). If no critical AI journeys with error budgets are in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Error-budget policy linking AI SLOs to release freezes or risk acceptance",
         "Last budget-burn gated release or drill ≤90 days"
@@ -9829,7 +9829,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Last capacity test ≤90 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurrency (capacity evidence measuredAt ≤90 days).\n",
+      "passCondition": "Last capacity test ≤90 days includes adversarial long prompts and multi-step agent loops; p95 latency and error rate stay within SLO under documented concurrency (capacity evidence measuredAt ≤90 days). If no production AI paths with capacity risk are in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Load-test plan including long-prompt and agent-loop scenarios",
         "Latest capacity test report ≤90 days showing p95/error within SLO at documented concurrency"
@@ -9903,7 +9903,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained ≥30 days (streaming evidence measuredAt ≤90 days).\n",
+      "passCondition": "TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts fire on documented thresholds; series retained ≥30 days (streaming evidence measuredAt ≤90 days). If no streaming AI surfaces (SSE/WebSocket/token streams) are in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Streaming SLI definitions/dashboard for TTFT and inter-token latency",
         "Alert config on documented thresholds + retention ≥30 days"
@@ -9977,7 +9977,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Near-real-time operational dashboards visualize latency, error rate, throughput, resource utilization, and AI quality metrics for production services (dashboard evidence measuredAt ≤90 days).\n",
+      "passCondition": "Near-real-time operational dashboards visualize latency, error rate, throughput, resource utilization, and AI quality metrics for production services (dashboard evidence measuredAt ≤90 days). If no production AI services with ops metrics are in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Dashboard URL/config covering latency, error rate, throughput, resource utilization, and AI quality",
         "Near-real-time refresh evidence (e.g. panel freshness ≤15 minutes)"
@@ -10520,7 +10520,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production prompts have an immutable version ID and named owner; 0 unversioned production prompts (registry evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of production prompts have an immutable version ID and named owner; 0 unversioned production prompts (registry evidence measuredAt ≤90 days). If none (the system ships production prompts (templates, system prompts, or managed prompt configs)), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Prompt registry (or versioned prompt store) listing production prompts with immutable version IDs",
         "Owner field populated for each production prompt; query showing 0 unversioned / 0 missing-owner"
@@ -10599,7 +10599,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production prompt releases in the last 30 days have a review ID and eval pass artifact; promote-without-both is blocked (release evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of production prompt releases in the last 30 days have a review ID and eval pass artifact; promote-without-both is blocked (release evidence measuredAt ≤90 days). If none (production prompt releases occur), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Change records linking prompt versions to review IDs and eval pass artifacts",
         "CI/registry gate (or equivalent) blocking promote without review + eval"
@@ -10674,7 +10674,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in the last 90 days (restore evidence measuredAt ≤90 days).\n",
+      "passCondition": "Prior prompt version restored in ≤ documented RTO without full app redeploy; demonstrated in the last 90 days (restore evidence measuredAt ≤90 days). If no production prompts exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Prompt rollback procedure documenting RTO and restore without full app redeploy",
         "Timed restore test record showing prior prompt version restored within RTO (≤90 days)"
@@ -10696,7 +10696,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm production prompts are versioned and released. If none, score NOT_APPLICABLE. 2) Open the prompt rollback procedure; confirm a documented RTO and a restore path that does not require full app redeploy. 3) Confirm a timed restore test in the last 90 days restored a prior prompt version within that RTO. 4) PASS only if procedure + timed demo hold with measuredAt ≤90 days. PRM-M1 version inventory alone does not satisfy. CHG-M2 general rollback runbooks without a prompt-specific path do not satisfy. Full app redeploy as the only restore path does not satisfy.\n",
+      "manualVerification": "1) Confirm production prompts exist. If none, score NOT_APPLICABLE. 2) Open the prompt rollback procedure; confirm a documented RTO and a restore path that does not require full app redeploy. 3) Confirm a timed restore test in the last 90 days restored a prior prompt version within that RTO. 4) PASS only if procedure + timed demo hold with measuredAt ≤90 days. PRM-M1 version inventory alone does not satisfy. CHG-M2 general rollback runbooks without a prompt-specific path do not satisfy. Full app redeploy as the only restore path does not satisfy.\n",
       "falsePositiveGuidance": "Do not pass git revert of the whole service as prompt rollback. Do not pass an undated drill or one older than 90 days. Do not pass “rollback possible” without a measured restore time against RTO. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Document prompt rollback with RTO and a path that avoids full app redeploy",
@@ -10748,7 +10748,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "100% of production prompt templates are parameterized for variable inputs; scan of templates finds 0 secrets and 0 hardcoded customer PII fields (hygiene evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of production prompt templates are parameterized for variable inputs; scan of templates finds 0 secrets and 0 hardcoded customer PII fields (hygiene evidence measuredAt ≤90 days). If no production prompt templates exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Prompt template inventory showing parameterized slots for variable inputs",
         "Static analysis or review finding zero hardcoded secrets and zero hardcoded customer PII"
@@ -10823,7 +10823,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Lint runs on every prompt change PR; blocking rules exist for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example retained (lint evidence measuredAt ≤90 days).\n",
+      "passCondition": "Lint runs on every prompt change PR; blocking rules exist for length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation; last failing lint example retained (lint evidence measuredAt ≤90 days). If no production prompts, including managed prompt configs, exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Prompt-lint CI config covering length, secrets patterns, injection-prone constructs, unbounded user concatenation",
         "Proof lint is required on prompt-change PRs + retained example of a failing lint"
@@ -10845,7 +10845,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           }
         ]
       },
-      "manualVerification": "1) Confirm production prompt files/templates exist. If none, score NOT_APPLICABLE. 2) Open CI/lint config; confirm it runs on prompt-change PRs and is blocking. 3) Confirm rules cover length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation. 4) Confirm a recent failing lint example is retained. 5) PASS only if PR coverage + blocking rules + retained failure hold with measuredAt ≤90 days. PRM-R1 inventory/scan alone does not satisfy. Optional (non-blocking) lint does not satisfy. Generic repo linters without prompt-specific rules do not satisfy.\n",
+      "manualVerification": "1) Confirm production prompts (files, templates, or managed configs) exist. If none, score NOT_APPLICABLE. 2) Open CI/lint config; confirm it runs on prompt-change PRs and is blocking. 3) Confirm rules cover length limits, secrets patterns, injection-prone constructs, and unbounded user concatenation. 4) Confirm a recent failing lint example is retained. 5) PASS only if PR coverage + blocking rules + retained failure hold with measuredAt ≤90 days. PRM-R1 inventory/scan alone does not satisfy. Optional (non-blocking) lint does not satisfy. Generic repo linters without prompt-specific rules do not satisfy.\n",
       "falsePositiveGuidance": "Do not pass warn-only checks as blocking. Do not pass a green lint run without a retained failing example proving the gate fires. Do not pass evidence older than 90 days as current. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
         "Add blocking prompt-lint CI on every prompt-change PR",
@@ -10970,7 +10970,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of production model/tool client call sites have a finite timeout and a finite max-retry bound; verified by static check or integration test (measuredAt ≤90 days).\n",
+      "passCondition": "100% of production model/tool client call sites have a finite timeout and a finite max-retry bound; verified by static check or integration test (measuredAt ≤90 days). If no production model or tool clients exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Client config or code declaring finite timeout and max-retry for model/tool call sites",
         "Static analysis report or integration test covering 100% of in-scope call sites (≤90 days)"
@@ -11048,7 +11048,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of critical AI-dependent journeys document degraded behavior; a failover test shows non-AI or safe fallback activates when the AI dependency fails (measuredAt ≤90 days).\n",
+      "passCondition": "100% of critical AI-dependent journeys document degraded behavior; a failover test shows non-AI or safe fallback activates when the AI dependency fails (measuredAt ≤90 days). If no critical AI-dependent user journeys exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Degraded-mode specification covering each critical AI-dependent journey",
         "Feature-flag, circuit-breaker, or fallback test proving safe activation when AI fails (≤90 days)"
@@ -11125,7 +11125,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Test evidence demonstrates that when a tool partially succeeds and a later step fails, the workflow does not report overall success without explicit compensation, rollback, retry, or human approval (measuredAt ≤90 days).\n",
+      "passCondition": "Test evidence demonstrates that when a tool partially succeeds and a later step fails, the workflow does not report overall success without explicit compensation, rollback, retry, or human approval (measuredAt ≤90 days). If no tool-using agents or workflows exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Agent/tool error-handling policy or code that detects partial tool failure",
         "Test evidence (integration, chaos, e2e, replay, contract, simulator, or equivalent) showing no false-success without compensation/rollback/retry/approval (≤90 days)"
@@ -11203,7 +11203,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "Backup inventory includes required AI control-plane artifacts; a restore test in the last 90 days succeeds for a sample artifact set (measuredAt ≤90 days).\n",
+      "passCondition": "Backup inventory includes required AI control-plane artifacts; a restore test in the last 90 days succeeds for a sample artifact set (measuredAt ≤90 days). If no AI control-plane artifacts exist in scope (prompt registry, policies, vector/index state, or equivalent), score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Backup job or inventory covering required AI control-plane artifacts (prompt registry, policies, indexes, as applicable)",
         "Restore test report for a sample artifact set (≤90 days)"
@@ -11281,7 +11281,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "mandatory",
-      "passCondition": "100% of business-critical AI services have numeric RTO and RPO documented and linked to a tested restore/failover procedure (continuity evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of business-critical AI services have numeric RTO and RPO documented and linked to a tested restore/failover procedure (continuity evidence measuredAt ≤90 days). If no business-critical AI services are in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Business continuity, service-catalog, or disaster-recovery documentation with numeric RTO and RPO for business-critical AI services",
         "Linkage from each in-scope service to a tested restore/failover procedure"
@@ -11362,7 +11362,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Circuit breakers are configured around AI/provider clients and open under induced failure in test or an observed production trip within 90 days; bulkheads limit concurrent calls per provider dependency (measuredAt ≤90 days).\n",
+      "passCondition": "Circuit breakers are configured around AI/provider clients and open under induced failure in test or an observed production trip within 90 days; bulkheads limit concurrent calls per provider dependency (measuredAt ≤90 days). If no production AI/provider clients exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Client library/config showing circuit breakers around model/provider calls",
         "Bulkhead or concurrency limit per provider dependency",
@@ -11440,7 +11440,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "A multi-provider or multi-region fallback path is configured and was exercised ≤90 days; a retained eval comparing primary vs fallback meets documented minimum quality/safety bars (not connectivity-only; measuredAt ≤90 days).\n",
+      "passCondition": "A multi-provider or multi-region fallback path is configured and was exercised ≤90 days; a retained eval comparing primary vs fallback meets documented minimum quality/safety bars (not connectivity-only; measuredAt ≤90 days). If no production AI paths that warrant fallback are in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Multi-provider or multi-region fallback configuration",
         "Evidence the fallback path was exercised ≤90 days",
@@ -11519,7 +11519,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "100% of processes marked critical-AI-dependent have ≥1 documented continuity option with a named owner (continuity evidence measuredAt ≤90 days).\n",
+      "passCondition": "100% of processes marked critical-AI-dependent have ≥1 documented continuity option with a named owner (continuity evidence measuredAt ≤90 days). If no processes marked critical-AI-dependent exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Continuity options documentation per critical AI-dependent process (failover, manual, alternate provider, or equivalent)",
         "Named owner for each continuity option"
@@ -11601,7 +11601,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "A provider-loss (or equivalent) continuity drill completed ≤90 days with retained RTO/RPO results that met objectives or have named owners and expiry (measuredAt ≤90 days).\n",
+      "passCondition": "A provider-loss (or equivalent) continuity drill completed ≤90 days with retained RTO/RPO results that met objectives or have named owners and expiry (measuredAt ≤90 days). If no production AI provider dependencies exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Continuity drill calendar covering provider-loss (or equivalent) scenarios",
         "Last provider-loss drill report with RTO/RPO results (≤90 days)",
@@ -11679,7 +11679,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "At least one AI-dependency chaos exercise completed in the last 180 days with retained after-action actions (attest measuredAt ≤90 days).\n",
+      "passCondition": "At least one AI-dependency chaos exercise completed in the last 180 days with retained after-action actions (attest measuredAt ≤90 days). If no production AI dependencies exist, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Chaos experiment plan covering AI provider/tool/gateway failure modes",
         "Dated after-action report with retained actions (exercise ≤180 days)"
@@ -11761,7 +11761,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "For in-scope self-hosted inference, failover to warm standby completed within documented RTO in a test ≤90 days, and standby capacity covers declared peak for critical workloads (measuredAt ≤90 days).\n",
+      "passCondition": "For in-scope self-hosted inference, failover to warm standby completed within documented RTO in a test ≤90 days, and standby capacity covers declared peak for critical workloads (measuredAt ≤90 days). If self-hosted inference does not serve critical workloads, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Warm-standby inference architecture for self-hosted critical workloads",
         "Last failover test report with RTO result (≤90 days)",
@@ -11838,7 +11838,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "severity": "high",
       "weight": 3,
       "gate": "recommended",
-      "passCondition": "Level-5 workloads have a documented alternate provider/path and a successful failover test ≤180 days (attest measuredAt ≤90 days).\n",
+      "passCondition": "Level-5 workloads have a documented alternate provider/path and a successful failover test ≤180 days (attest measuredAt ≤90 days). If no Level-5 / mission-critical AI workloads are in scope, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
         "Provider contract summary or equivalent documenting alternate provider/path options",
         "Technical failover design + successful failover test evidence (≤180 days)"

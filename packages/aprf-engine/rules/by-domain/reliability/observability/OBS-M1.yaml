@@ -14,7 +14,7 @@ gate: "mandatory"
 passCondition: >
   Canary or sampled traces show parent request ID linking model spans, tool
   spans, and outcome in ≥95% of canary requests over 24 hours (trace evidence
-  measuredAt ≤90 days).
+  measuredAt ≤90 days). If no production AI request path is in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Tracing config (or equivalent) instrumenting request → model → tool → outcome"
   - "Canary or 24h sampled traces showing ≥95% linked coverage (redacted)"

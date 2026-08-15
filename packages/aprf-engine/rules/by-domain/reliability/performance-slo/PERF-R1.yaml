@@ -15,7 +15,7 @@ gate: "recommended"
 passCondition: >
   When error budget for a critical AI journey is exhausted, release velocity is
   blocked or requires explicit risk acceptance; ≥1 gated event or drill in 90
-  days (gate evidence measuredAt ≤90 days).
+  days (gate evidence measuredAt ≤90 days). If no critical AI journeys with error budgets are in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Error-budget policy linking AI SLOs to release freezes or risk acceptance"
   - "Last budget-burn gated release or drill ≤90 days"

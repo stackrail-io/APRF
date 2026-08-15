@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   Policy enumerates sensitive classes and allow/deny rules; tests show
   disallowed classes are stripped or blocked at ≥95% on the sensitive-class
-  fixture suite (policy/suite evidence measuredAt ≤90 days).
+  fixture suite (policy/suite evidence measuredAt ≤90 days). If context is purely static non-sensitive templates with no such paths, score NOT_APPLICABLE.
 evidenceRequired:
   - "Data-class inclusion policy enumerating sensitive classes with allow/deny rules"
   - "Enforcement tests or DLP hooks showing ≥95% strip/block on the sensitive-class fixture suite"

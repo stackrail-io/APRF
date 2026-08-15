@@ -15,7 +15,7 @@ gate: "recommended"
 passCondition: >
   Criteria map event types (safety incident, widespread quality fail, data
   exposure) to notify / no-notify; last drill or incident ≤12 months followed
-  the criteria with timestamps (notification evidence measuredAt ≤90 days).
+  the criteria with timestamps (notification evidence measuredAt ≤90 days). If no customer-facing or externally disclosed AI system is in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Customer notification criteria for AI-related events"
   - "Last drill or real notification sample ≤12 months with timestamps"

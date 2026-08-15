@@ -14,7 +14,7 @@ gate: "recommended"
 passCondition: >
   TTFT and inter-token latency SLIs exist for each streaming AI surface; alerts
   fire on documented thresholds; series retained ≥30 days (streaming evidence
-  measuredAt ≤90 days).
+  measuredAt ≤90 days). If no streaming AI surfaces (SSE/WebSocket/token streams) are in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Streaming SLI definitions/dashboard for TTFT and inter-token latency"
   - "Alert config on documented thresholds + retention ≥30 days"

@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   100% of journeys marked critical have a versioned offline suite; 100% of
   relevant production changes in the last 30 days triggered the suite (or
-  documented waiver ≤14 days) (suite/CI evidence measuredAt ≤90 days).
+  documented waiver ≤14 days) (suite/CI evidence measuredAt ≤90 days). If no journeys are marked critical, score NOT_APPLICABLE.
 evidenceRequired:
   - "Eval suite registry mapping critical journeys to versioned offline suites"
   - "CI (or equivalent) runs on prompt/model/tool changes for the last 30 days, or waivers ≤14 days"
@@ -37,8 +37,8 @@ detection:
           production changes in the last 30 days triggered the suite or have
           a waiver ≤14 days (measuredAt ≤90 days).
 manualVerification: >
-  1) Confirm the system has customer (or partner) journeys marked critical.
-  If none, score NOT_APPLICABLE. 2) Open the eval suite registry; confirm each
+  1) Confirm the system has journeys marked critical. If none, score
+  NOT_APPLICABLE. 2) Open the eval suite registry; confirm each
   critical journey maps to a versioned offline suite. 3) Review relevant
   production changes in the last 30 days (prompt/model/tool/config that affects
   those journeys). 4) Confirm each change triggered the suite in CI (or

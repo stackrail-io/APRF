@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   100% of sampled approvals in the last 30 days include actor ID, action
   context, and approve/deny outcome; schema validation for the approval audit
-  log passes.
+  log passes. If no gated approvals exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Approval audit log schema (actor, context, outcome, timestamp) as code or documented contract"
   - "Sample approval records from the last 30 days covering required fields"
