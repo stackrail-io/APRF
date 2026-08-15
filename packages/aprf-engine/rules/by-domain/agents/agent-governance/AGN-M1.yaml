@@ -39,7 +39,7 @@ evidenceRequired:
   - "Inventory completeness evidence: runtime registry, deployment manifest, CMDB, platform
     registry, or approved attestation with measuredAt ≤90 days"
 detection:
-  capability: "automated"
+  capability: "hybrid"
   detectors:
     - id: "repo-agent-charter-inventory"
       params:
@@ -144,7 +144,7 @@ relatedRules:
 tags:
   - "agent-governance"
   - "mandatory"
-  - "automated"
+  - "hybrid"
   - "charter"
   - "inventory"
 applicability:

@@ -51,7 +51,8 @@ export function selectApplicableRules(
       : null;
 
   return rules.filter((rule) => {
-    if (rule.status === "draft") return false;
+    if (rule.status === "draft" || rule.status === "deprecated") return false;
+    if (rule.deprecated === true) return false;
 
     if (rule.applicability.minCriticality > ctx.criticality) return false;
 
@@ -92,6 +93,10 @@ export function selectApplicableRules(
  *
  * Default: attestation-only (`runDetectors: false`). Product engines that supply
  * a real `DetectorRegistry` may set `runDetectors: true`.
+ *
+ * When scoring detectors, `manual-attest` is skipped (it is an attestation
+ * fallback via `attested`, not an auto-scored detector). Remaining detectors
+ * are AND-ed.
  */
 export async function evaluateRules(
   rules: AprfRule[],
@@ -159,13 +164,20 @@ export async function evaluateRules(
       continue;
     }
 
+    // manual-attest is an attestation fallback channel, not an auto-scored
+    // detector. AND only non-manual detectors so hybrids can PASS when their
+    // real detectors pass (attestation path remains via `attested` above).
+    const scoredDetectors = detectors.filter((d) => d.id !== "manual-attest");
+    const refsToRun =
+      scoredDetectors.length > 0 ? scoredDetectors : detectors;
+
     let allPassed = true;
     const summaries: string[] = [];
     const detectorIds: string[] = [];
     let evidenceRef: string | undefined;
     let errored = false;
 
-    for (const ref of detectors) {
+    for (const ref of refsToRun) {
       const detector = registry.get(ref.id);
       detectorIds.push(ref.id);
       if (!detector) {

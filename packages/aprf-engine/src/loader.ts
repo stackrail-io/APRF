@@ -208,10 +208,13 @@ export function loadRulesFromDisk(rulesRoot?: string): {
 
     if (rule.detection.capability === "automated") {
       const dets = rule.detection.detectors ?? [];
-      const hasNonManual = dets.some((d) => d.id !== "manual-attest");
-      if (!hasNonManual) {
+      if (dets.some((d) => d.id === "manual-attest")) {
         errors.push(
-          `${file}: capability "automated" requires at least one non-manual-attest detector (use hybrid or manual)`,
+          `${file}: capability "automated" must not include manual-attest (use hybrid)`,
+        );
+      } else if (dets.length === 0) {
+        errors.push(
+          `${file}: capability "automated" requires at least one detector (use hybrid or manual)`,
         );
       }
     }
