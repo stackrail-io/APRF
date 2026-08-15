@@ -17,7 +17,7 @@ gate: "recommended"
 passCondition: >
   Critical-fact retention ≥ documented threshold after compaction on the eval
   set; last run ≤90 days; regressions block context-pipeline releases (eval
-  evidence measuredAt ≤90 days).
+  evidence measuredAt ≤90 days). If no compaction path exists, score NOT_APPLICABLE.
 evidenceRequired:
   - "Compaction/summarization eval set of critical facts with documented retention threshold"
   - "Latest information-loss / retention report ≤90 days with release-blocking gate evidence"

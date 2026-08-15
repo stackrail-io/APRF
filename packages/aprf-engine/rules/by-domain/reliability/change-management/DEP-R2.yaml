@@ -15,7 +15,7 @@ gate: "recommended"
 passCondition: >
   Prod vs staging model pins and tool catalogs match except documented deltas;
   last parity scan ≤30 days with 0 unexplained drifts (parity evidence
-  measuredAt ≤90 days).
+  measuredAt ≤90 days). If no model pins and/or tool catalogs exist across prod and staging, score NOT_APPLICABLE.
 evidenceRequired:
   - "Environment parity checklist for model pins and tool catalogs"
   - "Last parity scan across envs with 0 unexplained drifts (≤30 days)"

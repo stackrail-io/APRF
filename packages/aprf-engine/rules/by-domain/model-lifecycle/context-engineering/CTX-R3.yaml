@@ -18,7 +18,7 @@ gate: "recommended"
 passCondition: >
   Production assembler emits labeled structured sections (e.g. JSON/XML);
   untrusted data cannot overwrite the instruction section in a red-team or unit
-  test (structure/test evidence measuredAt ≤90 days).
+  test (structure/test evidence measuredAt ≤90 days). If context is a single trusted static template with no untrusted sections, score NOT_APPLICABLE.
 evidenceRequired:
   - "Context assembly schema/spec separating instruction vs data blocks + sample rendered request"
   - "Red-team or unit test showing untrusted data cannot overwrite the instruction section"

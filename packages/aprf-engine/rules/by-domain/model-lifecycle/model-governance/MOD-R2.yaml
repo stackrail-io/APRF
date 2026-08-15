@@ -18,7 +18,7 @@ gate: "recommended"
 passCondition: >
   Each production workload has an explicit capability allowlist; ≥1 denied
   capability attempt is recorded in test or prod within 90 days (allowlist
-  evidence measuredAt ≤90 days).
+  evidence measuredAt ≤90 days). If models are text-only with no optional capabilities, score NOT_APPLICABLE.
 evidenceRequired:
   - "Per-workload capability allowlist config (code execution, vision, browsing, etc.)"
   - "Deny log or test fixture showing a denied capability attempt within 90 days"

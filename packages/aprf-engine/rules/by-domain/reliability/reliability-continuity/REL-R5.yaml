@@ -16,7 +16,7 @@ weight: 3
 gate: "recommended"
 passCondition: >
   At least one AI-dependency chaos exercise completed in the last 180 days
-  with retained after-action actions (attest measuredAt ≤90 days).
+  with retained after-action actions (attest measuredAt ≤90 days). If no production AI dependencies exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Chaos experiment plan covering AI provider/tool/gateway failure modes"
   - "Dated after-action report with retained actions (exercise ≤180 days)"

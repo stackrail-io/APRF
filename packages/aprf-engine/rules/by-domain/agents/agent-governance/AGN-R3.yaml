@@ -21,7 +21,7 @@ passCondition: >
   Every production AI system ID (and production agent ID in scope) has non-empty
   Responsible and Accountable owner fields for the organization’s required
   domains/roles; inventory query returns 0 orphans (register/export measuredAt
-  ≤90 days).
+  ≤90 days). If no production agents/systems, score NOT_APPLICABLE.
 evidenceRequired:
   - "Versioned RACI or ownership register covering production AI systems / agents"
   - "Required ownership fields defined (at minimum Responsible + Accountable)"

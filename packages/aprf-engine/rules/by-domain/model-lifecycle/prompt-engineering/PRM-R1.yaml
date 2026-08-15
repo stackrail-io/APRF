@@ -14,7 +14,7 @@ gate: "recommended"
 passCondition: >
   100% of production prompt templates are parameterized for variable inputs;
   scan of templates finds 0 secrets and 0 hardcoded customer PII fields
-  (hygiene evidence measuredAt ≤90 days).
+  (hygiene evidence measuredAt ≤90 days). If no production prompt templates exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Prompt template inventory showing parameterized slots for variable inputs"
   - "Static analysis or review finding zero hardcoded secrets and zero hardcoded customer PII"

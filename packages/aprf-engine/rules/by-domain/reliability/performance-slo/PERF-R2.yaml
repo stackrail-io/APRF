@@ -15,7 +15,7 @@ gate: "recommended"
 passCondition: >
   Last capacity test ≤90 days includes adversarial long prompts and multi-step
   agent loops; p95 latency and error rate stay within SLO under documented
-  concurrency (capacity evidence measuredAt ≤90 days).
+  concurrency (capacity evidence measuredAt ≤90 days). If none (production AI paths with capacity risk are in scope), score NOT_APPLICABLE.
 evidenceRequired:
   - "Load-test plan including long-prompt and agent-loop scenarios"
   - "Latest capacity test report ≤90 days showing p95/error within SLO at documented concurrency"

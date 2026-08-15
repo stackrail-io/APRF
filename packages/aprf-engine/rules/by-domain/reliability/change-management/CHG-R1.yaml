@@ -15,7 +15,7 @@ gate: "recommended"
 passCondition: >
   AI release unit can be rolled back with a single documented command/action;
   exercise or real rollback ≤90 days completed within documented RTO
-  (exercise evidence measuredAt ≤90 days).
+  (exercise evidence measuredAt ≤90 days). If none (AI release units ship (prompts, model pins, tools, or AI deploys)), score NOT_APPLICABLE.
 evidenceRequired:
   - "One-command or one-click rollback script/action for AI release units"
   - "Last rollback exercise or real event log showing completion within documented RTO (≤90 days)"

@@ -15,7 +15,7 @@ gate: "mandatory"
 passCondition: >
   Runbook lists exact commands/UI steps and owners; ≥1 on-call engineer
   completed a walkthrough or drill in the last 90 days with recorded
-  time-to-execute (operability evidence measuredAt ≤90 days).
+  time-to-execute (operability evidence measuredAt ≤90 days). If none (production AI changes (prompts, models, tools, or AI deploys) that may need rollback), score NOT_APPLICABLE.
 evidenceRequired:
   - "Rollback runbook listing exact commands/UI steps and owners"
   - "On-call acknowledgment or drill checklist with recorded time-to-execute (≤90 days)"

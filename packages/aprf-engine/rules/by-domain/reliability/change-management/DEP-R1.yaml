@@ -16,7 +16,7 @@ gate: "recommended"
 passCondition: >
   High-traffic AI changes use canary or progressive rollout with automated
   rollback criteria; last such release ≤90 days includes canary metrics link
-  (canary evidence measuredAt ≤90 days).
+  (canary evidence measuredAt ≤90 days). If no high-traffic AI changes exist in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Progressive delivery/canary config for high-traffic AI changes"
   - "Last canary promotion log with metrics link (≤90 days)"

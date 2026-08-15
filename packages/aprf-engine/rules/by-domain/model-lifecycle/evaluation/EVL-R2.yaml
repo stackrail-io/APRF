@@ -17,7 +17,7 @@ gate: "recommended"
 passCondition: >
   Cadence and sample size are defined; last sample ≤90 days covers
   production-like prompts; disagreements have adjudication recorded
-  (sampling evidence measuredAt ≤90 days).
+  (sampling evidence measuredAt ≤90 days). If no production AI prompts/outputs exist for review, score NOT_APPLICABLE.
 evidenceRequired:
   - "Human preference / expert-review sampling protocol (cadence + sample size)"
   - "Last scored sample set with production-like prompts and inter-rater / adjudication notes"

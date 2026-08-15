@@ -15,7 +15,7 @@ gate: "recommended"
 passCondition: >
   Annotators can attach quality labels to production traces in a secure tool;
   ≥50 annotations in the last 90 days feed an eval or review loop (annotation
-  evidence measuredAt ≤90 days).
+  evidence measuredAt ≤90 days). If none (production AI traces are in scope), score NOT_APPLICABLE.
 evidenceRequired:
   - "Trace annotation schema and secure tooling for quality labels on spans"
   - "Last-90-day count ≥50 annotations feeding an eval or review loop"

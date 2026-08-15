@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   Online metrics exist and are updating for task success/failure and safety
   refusals; alert or review cadence defined; freshness ≤24 hours on the
-  dashboard (metrics evidence measuredAt ≤90 days).
+  dashboard (metrics evidence measuredAt ≤90 days). If none (production AI workloads complete user-visible tasks or apply safety refusals), score NOT_APPLICABLE.
 evidenceRequired:
   - "Dashboard or metric exports for task success/failure rates on production AI workloads"
   - "Dashboard or metric exports for safety refusal rates"

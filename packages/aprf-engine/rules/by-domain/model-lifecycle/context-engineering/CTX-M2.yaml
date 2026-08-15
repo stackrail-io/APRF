@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   Automated tests: unauthorized retrieval/tool chunks are excluded at 100%;
   included chunks carry a source label/type field in 100% of sampled assembled
-  contexts (label/ACL evidence measuredAt ≤90 days).
+  contexts (label/ACL evidence measuredAt ≤90 days). If context is prompt-only with no retrieval/tools, score NOT_APPLICABLE.
 evidenceRequired:
   - "Context assembly code enforcing source labels on retrieved and tool-sourced chunks"
   - "Automated tests showing ACL exclusion of unauthorized chunks at 100% and labels on included chunks"
