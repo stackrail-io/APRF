@@ -94,9 +94,11 @@ export function selectApplicableRules(
  * Default: attestation-only (`runDetectors: false`). Product engines that supply
  * a real `DetectorRegistry` may set `runDetectors: true`.
  *
- * When scoring detectors, `manual-attest` is skipped (it is an attestation
- * fallback via `attested`, not an auto-scored detector). Remaining detectors
- * are AND-ed.
+ * When scoring detectors, `manual-attest` is skipped only if at least one
+ * non-manual detector is configured (it is an attestation fallback via
+ * `attested`, not an auto-scored detector alongside real ones). If it is the
+ * sole configured detector, it still runs and cannot auto-PASS. Remaining
+ * detectors are AND-ed.
  */
 export async function evaluateRules(
   rules: AprfRule[],
@@ -164,9 +166,8 @@ export async function evaluateRules(
       continue;
     }
 
-    // manual-attest is an attestation fallback channel, not an auto-scored
-    // detector. AND only non-manual detectors so hybrids can PASS when their
-    // real detectors pass (attestation path remains via `attested` above).
+    // Skip manual-attest when other detectors exist (attestation via `attested`).
+    // If it is the only configured detector, it still runs and cannot auto-PASS.
     const scoredDetectors = detectors.filter((d) => d.id !== "manual-attest");
     const refsToRun =
       scoredDetectors.length > 0 ? scoredDetectors : detectors;
