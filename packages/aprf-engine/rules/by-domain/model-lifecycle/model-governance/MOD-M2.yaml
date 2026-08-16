@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   100% of production model promotions in the last 30 days have linked eval
   pass artifacts; promote-without-eval is blocked by gate (promotion evidence
-  measuredAt ≤90 days). If none (production model promotions occur (pin changes, registry cutovers, or version bumps)), score NOT_APPLICABLE.
+  measuredAt ≤90 days). If no production model promotions occur (pin changes, registry cutovers, or version bumps), score NOT_APPLICABLE.
 evidenceRequired:
   - "Promotion policy or CI/registry rule requiring an eval pass artifact on model version bumps"
   - "Promotion log (or CI matrix) for the last 30 days showing linked eval pass artifacts; 0 promote-without-eval"

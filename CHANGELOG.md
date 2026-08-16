@@ -14,7 +14,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ### Changed
 - Catalog P1 tooling (build/CI hygiene): `build-catalog` runs full YAML lint/path checks; CI diffs `evidence-type-ids.ts` with `catalog.ts`; pruned unused detector allowlist entries; INF siblings `relatedRules` point at `SCI-R1` instead of deprecated `INF-R1`.
-- N/A existence gates in `passCondition` for reliability, model-lifecycle, and agents Checks (synced into `aprf-spec.json`); polished gate wording (explicit subjects; PRM-M3/EVL/AGN-R1/PRM-R2 scope fixes).
+- N/A existence gates in `passCondition` for reliability, model-lifecycle, and agents Checks (synced into `aprf-spec.json`); polished gate wording (explicit subjects; PRM-M3/EVL/AGN-R1/PRM-R2 scope fixes); **CHG-M1** / `prompt-model-version-retention` evaluate prompts and model pins per in-scope type (pin inference excludes provider SDK names; explicit `inUse=false` → N/A).
+- N/A existence gates in `passCondition` for data, governance, safety, security, cost, and cross-cutting Checks (synced into `aprf-spec.json`); polished gate wording (explicit subjects; DG-M2/PRI-M3/CMP-M3/CMP-R3/ORG-R3 scope fixes).
+- Validate/build enforce YAML↔spec `method` and `passCondition` match.
 
 ## [Catalog 0.12.0] / [@stackrail-io/aprf@0.1.5] — 2026-08-14
 

@@ -17,7 +17,7 @@ gate: "recommended"
 passCondition: >
   100% of decision types marked material in the catalog return a rationale
   field or UI explanation in a ≥20-case sample; gaps are tracked with named
-  owners (measuredAt ≤90 days).
+  owners (measuredAt ≤90 days). If no material automated decisions exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Material automated-decision catalog (decision types marked material)"
   - "≥20-case sample showing user-facing rationale for each material type (100% coverage)"

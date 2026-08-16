@@ -249,7 +249,7 @@ PRM-R3 A/B or shadow eval for high-traffic prompt changes:
 
 CHG-M1 prior prompt/model-pin versions retained + restore dry-run:
   npm run aprf:prompt-model-version-retention -- --target <app> --out <app>/aprf-assessment
-  # PASS needs retainedPriorProductionVersions≥2 + immediatePriorRestoreDryRunPassed under imports/prompt-model-version-retention/
+  # PASS needs per in-scope type retainedPriorProductionVersions≥2 + immediatePriorRestoreDryRunPassed (prompts{}/modelPins{}) under imports/prompt-model-version-retention/
 
 CHG-M2 rollback runbook operable by on-call:
   npm run aprf:rollback-runbook -- --target <app> --out <app>/aprf-assessment

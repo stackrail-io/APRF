@@ -16,7 +16,7 @@ gate: "recommended"
 passCondition: >
   Both metrics are defined with formulas; published for ≥30 consecutive days;
   bypass rate has an alert or review threshold with a named owner (series /
-  ownership proof measuredAt ≤90 days).
+  ownership proof measuredAt ≤90 days). If the organization lacks an AI platform or paved road with enough traffic to measure the required metrics, score NOT_APPLICABLE.
 evidenceRequired:
   - "Definitions/formulas for time-to-safe-production and policy-bypass rate"
   - "Dashboard or weekly report with ≥30 consecutive days of series"

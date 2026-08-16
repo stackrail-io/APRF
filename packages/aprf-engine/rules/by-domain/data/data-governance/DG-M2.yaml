@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   100% of datasets used in production gates or fine-tunes have provenance +
   quality criteria documented; promotion is blocked if missing (CI or review
-  checklist evidence; inventory measuredAt ≤90 days).
+  checklist evidence; inventory measuredAt ≤90 days). If no in-scope evaluation or fine-tuning datasets exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Dataset cards or registry entries for eval/fine-tune sets covering provenance and quality criteria"
   - "CI or review-checklist evidence that promotion is blocked when cards are missing"
@@ -38,7 +38,7 @@ detection:
           promotionBlockedIfMissing (measuredAt ≤90 days).
 manualVerification: >
   1) Confirm the system uses datasets for production eval gates or fine-tunes.
-  If neither, score NOT_APPLICABLE. 2) Inventory those datasets. 3) Confirm
+  If no in-scope evaluation or fine-tuning datasets exist, score NOT_APPLICABLE. 2) Inventory those datasets. 3) Confirm
   each has documented provenance and quality criteria (dataset card or
   registry). 4) Confirm promotion/release is blocked when cards are missing
   (CI check or review checklist). 5) PASS only if coverage is 100% and the

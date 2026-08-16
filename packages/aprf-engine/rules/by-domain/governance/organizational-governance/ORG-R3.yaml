@@ -16,7 +16,7 @@ gate: "recommended"
 passCondition: >
   ≥80% of Sev-1/2 AI incidents and critical eval fails in the last quarter
   produced a backlog item; ≥50% of those items closed or have a dated plan
-  (backlog evidence measuredAt ≤90 days).
+  (backlog evidence measuredAt ≤90 days). If the organization does not use AI, or no Sev-1/2 AI incidents or critical eval fails are in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Improvement backlog (tickets) linked from Sev-1/2 AI incidents and critical eval failures"
   - "Quarterly sample showing linkage rate ≥80% and closed-or-planned rate ≥50%"
@@ -35,9 +35,10 @@ detection:
           and critical eval fails last quarter produced backlog items and ≥50%
           of those are closed or have a dated plan (measuredAt ≤90 days).
 manualVerification: >
-  1) Confirm Sev-1/2 AI incidents or critical eval failures occurred in the last
-  quarter (or a defined empty quarter with attestation). If the org has no AI
-  incident/eval practice, score NOT_APPLICABLE. 2) Open the improvement backlog
+  1) Confirm the organization uses AI and Sev-1/2 AI incidents or critical eval
+  failures are in scope for the last quarter (or a defined empty quarter with
+  attestation). If the organization does not use AI, or none are in scope, score
+  NOT_APPLICABLE. 2) Open the improvement backlog
   and linkage evidence. 3) Confirm ≥80% of those events produced a backlog item.
   4) Confirm ≥50% of those items are closed or have a dated plan. 5) PASS only
   if both rates hold with measuredAt ≤90 days. A backlog unrelated to incidents

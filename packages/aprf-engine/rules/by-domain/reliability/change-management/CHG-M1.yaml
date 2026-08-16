@@ -1,11 +1,11 @@
 id: "CHG-M1"
 category: "change-management"
-title: "Prior production versions of prompts and model pins must be retained and restorable"
+title: "Prior production versions of prompts and/or model pins must be retained and restorable"
 description: >
-  Production systems shall retain at least N prior production versions of
-  prompts and model pins per policy (minimum N=2) and prove a restore dry-run
-  that loads the immediate prior version in staging or a prod-adjacent
-  environment.
+  Production systems shall retain at least N prior production versions of each
+  in-scope artifact type (prompts and/or model pins) per policy (minimum N=2)
+  and prove a restore dry-run that loads the immediate prior version in staging
+  or a prod-adjacent environment.
 whyItMatters: >
   Without retained prior pins, a bad prompt or model bump has no safe landing.
   Inventory alone is not enough—operators must prove the immediate prior
@@ -14,11 +14,13 @@ severity: "critical"
 weight: 4
 gate: "mandatory"
 passCondition: >
-  ≥N prior production versions retained per policy (minimum N=2); restore
-  dry-run successfully loads the immediate prior version in staging or
-  prod-adjacent env (retention evidence measuredAt ≤90 days). If neither, score NOT_APPLICABLE.
+  ≥N prior production versions retained per policy (minimum N=2) for each
+  in-scope artifact type (prompts and/or model pins); restore dry-run
+  successfully loads the immediate prior version in staging or prod-adjacent
+  env (retention evidence measuredAt ≤90 days). If no production prompts or
+  model pins are used, score NOT_APPLICABLE.
 evidenceRequired:
-  - "Version retention policy + registry listing of prior production prompt and model-pin versions"
+  - "Version retention policy + registry listing of prior production prompt and/or model-pin versions (for artifact types in use)"
   - "Restore dry-run record showing immediate prior version loaded in staging or prod-adjacent env"
 detection:
   capability: "hybrid"
@@ -27,30 +29,35 @@ detection:
       params:
         hint: >
           Discover retention policy and registries keeping prior production
-          prompt and model-pin versions, plus restore dry-run evidence.
+          prompt and/or model-pin versions for artifact types in use, plus
+          restore dry-run evidence evaluated separately per type.
     - id: "manual-attest"
       params:
         hint: >
           If automation cannot prove coverage, attest ≥N prior production
           versions retained (minimum N=2) and a successful immediate-prior
-          restore dry-run in staging or prod-adjacent (measuredAt ≤90 days).
+          restore dry-run for each in-scope artifact type (prompts and/or model
+          pins) — not one aggregate covering both (measuredAt ≤90 days).
 manualVerification: >
-  1) Confirm production prompts and/or model pins are used. If neither, score
-  NOT_APPLICABLE. 2) Open retention policy; confirm minimum retained prior
+  1) Confirm production prompts and/or model pins are used. If neither is used,
+  score NOT_APPLICABLE. 2) Open retention policy; confirm minimum retained prior
   versions N≥2. 3) Open registry listing; confirm ≥N prior production versions
-  are present for prompts and model pins in scope. 4) Confirm a restore dry-run
-  loaded the immediate prior version in staging or prod-adjacent. 5) PASS only
-  if retention + dry-run hold with measuredAt ≤90 days. PRM-M1 version IDs alone
-  do not satisfy. PRM-M3 prompt-rollback RTO alone does not satisfy retention
-  depth. CHG-M2 on-call runbook drills alone do not satisfy registry retention.
+  are present for each artifact type in use (prompts only, model pins only, or
+  both). 4) Confirm a restore dry-run loaded the immediate prior version in
+  staging or prod-adjacent. 5) PASS only if retention + dry-run hold with
+  measuredAt ≤90 days. Do not require evidence for an artifact type that is not
+  used. PRM-M1 version IDs alone do not satisfy. PRM-M3 prompt-rollback RTO alone
+  does not satisfy retention depth. CHG-M2 on-call runbook drills alone do not
+  satisfy registry retention.
 falsePositiveGuidance: >
   Do not pass git history of a single floating “latest” alias as retained
-  versions. Do not pass a dry-run older than 90 days. Do not pass retention of
-  prompts without model pins when both ship in production (or vice versa) unless
-  the missing class is documented as out of scope. Named exceptions need owner
-  and expiry ≤90 days.
+  versions. Do not pass a dry-run older than 90 days. Do not fail prompt-only or
+  model-pin-only systems for lacking the unused artifact class. Do not pass
+  retention of prompts without model pins when both ship in production (or vice
+  versa) unless the missing class is documented as out of scope. Named
+  exceptions need owner and expiry ≤90 days.
 recommendedFixes:
-  - "Retain ≥2 prior production prompt and model-pin versions in a registry"
+  - "Retain ≥2 prior production versions in a registry for each in-scope artifact type (prompts and/or model pins)"
   - "Run and retain an immediate-prior restore dry-run in staging or prod-adjacent"
   - "Retain evidence under imports/prompt-model-version-retention/"
   - "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"

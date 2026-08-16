@@ -1437,8 +1437,8 @@ checks:
       NOT_APPLICABLE when highTrafficPromptChangeCount=0 or no prompt signals.
   CHG-M1:
     requiredEvidence:
-      - "Version retention policy + registry of prior prompt/model-pin versions"
-      - "retainedPriorProductionVersions≥2 + immediatePriorRestoreDryRunPassed under imports/prompt-model-version-retention/"
+      - "Version retention policy + registry of prior prompt and/or model-pin versions (for artifact types in use)"
+      - "Per in-scope type: retainedPriorProductionVersions≥2 + immediatePriorRestoreDryRunPassed under imports/prompt-model-version-retention/ (prompts{} / modelPins{}; aggregate only when a single type is in scope)"
     searchExtra:
       - "**/*version*retention*"
       - "**/*restore*dry*"
@@ -1448,8 +1448,8 @@ checks:
     plugins: [prompt-model-version-retention, repo-filesystem]
     naWhen: "No production prompts or model pins"
     evaluation: |
-      PASS if prompt-model-version-retention statusHint=pass (retainedPriorProductionVersions≥max(2,policyMinimumN) + immediatePriorRestoreDryRunPassed + measuredAt ≤90d).
-      PARTIAL if retention/registry/dry-run signals without complete import.
+      PASS if prompt-model-version-retention statusHint=pass (each in-scope artifact type has retainedPriorProductionVersions≥max(2,policyMinimumN) + immediatePriorRestoreDryRunPassed + measuredAt ≤90d).
+      PARTIAL if retention/registry/dry-run signals without complete per-type import, or when both types are in scope with aggregate-only evidence.
       NOT_APPLICABLE when no prompt/model-pin signals.
   CHG-M2:
     requiredEvidence:

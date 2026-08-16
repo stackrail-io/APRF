@@ -1,6 +1,6 @@
 id: prompt-model-version-retention
 title: Retain prior prompt/model-pin versions + restore dry-run (CHG-M1)
-version: "0.2.0"
+version: "0.3.0"
 executor: collectors/prompt-model-version-retention.ts
 evidenceClass: ci
 alsoEmits: []
@@ -10,16 +10,20 @@ inputs:
   - "Optional suite: aprf-assessment/imports/prompt-model-version-retention/*.{json}"
 collect:
   - "Detect retention policy, registries, and immediate-prior restore dry-runs"
-  - "Ingest coverage; write prompt-model-version-retention-report.json"
+  - "Ingest per-artifact (prompts/modelPins) coverage; write prompt-model-version-retention-report.json"
 emits:
   nodeClass: ci
   refPattern: "aprf-assessment/imports/prompt-model-version-retention/*"
   signals: [prompt-model-version-retention, chg-m1, repo-prompt-model-version-retention]
 mapsToChecks: [CHG-M1]
 whenUnavailable: >
-  Retention signals alone are PARTIAL. CHG-M1 PASS needs
-  retainedPriorProductionVersions≥2 (or ≥policyMinimumN),
-  immediatePriorRestoreDryRunPassed, measuredAt ≤90 days.
+  Retention signals alone are PARTIAL. CHG-M1 PASS needs retainedPriorProductionVersions≥2
+  (or ≥policyMinimumN) and immediatePriorRestoreDryRunPassed for each in-scope artifact
+  type (prompts and/or modelPins), with measuredAt ≤90 days. Prefer prompts{} / modelPins{}
+  (or artifactTypesInUse). Aggregate-only fields PASS only when a single type is in scope.
+  Model-pin scope is inferred from pin/version indicators only (not provider SDK names).
+  Explicit prompts.inUse=false and modelPins.inUse=false → NOT_APPLICABLE.
 live:
   required: false
   note: Offline retention heuristics + optional imported JSON.
+

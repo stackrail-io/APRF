@@ -17,7 +17,7 @@ gate: "recommended"
 passCondition: >
   Each customer-facing AI product has unit-cost metrics for the last quarter;
   a FinOps review occurred within the last 90 days with named owners for
-  outliers above documented thresholds (review measuredAt ≤90 days).
+  outliers above documented thresholds (review measuredAt ≤90 days). If no customer-facing AI products exist, score NOT_APPLICABLE.
 evidenceRequired:
   - "Per-product AI unit-economics report (cost per successful task / journey) for the last quarter"
   - "FinOps review minutes ≤90 days with outlier owners and thresholds"

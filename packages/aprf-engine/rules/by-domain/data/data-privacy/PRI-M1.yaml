@@ -18,7 +18,7 @@ passCondition: >
   A classification scheme covers AI payload classes; ≥1 automated or sampled
   audit shows 100% of sampled production model requests tagged with a class;
   sensitive-class handling matches documented policy (audit/scheme measuredAt
-  ≤90 days).
+  ≤90 days). If no production traffic sends data to models, score NOT_APPLICABLE.
 evidenceRequired:
   - "Data classification scheme covering AI/model-bound payload classes"
   - "Handling rules for each sensitive class (allow / redact / block or equivalent)"

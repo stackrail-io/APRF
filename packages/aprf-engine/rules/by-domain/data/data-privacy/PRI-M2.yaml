@@ -18,7 +18,8 @@ gate: "mandatory"
 passCondition: >
   Documented API/runbook covers AI memory and in-scope logs; a test shows
   deletion/export completes within SLA for a sample tenant/user with measured
-  duration recorded (test evidence measuredAt ≤90 days).
+  duration recorded (test evidence measuredAt ≤90 days). If neither memory nor
+  in-scope logs exist, or deletion/export is not required, score NOT_APPLICABLE.
 evidenceRequired:
   - "Deletion/export procedure or API covering AI memory and in-scope AI logs"
   - "Successful test execution record for a sample tenant/user with measured duration vs SLA"

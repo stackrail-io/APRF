@@ -14,7 +14,7 @@ weight: 3
 gate: "mandatory"
 passCondition: >
   100% of production prompts have an immutable version ID and named owner; 0
-  unversioned production prompts (registry evidence measuredAt ≤90 days). If none (the system ships production prompts (templates, system prompts, or managed prompt configs)), score NOT_APPLICABLE.
+  unversioned production prompts (registry evidence measuredAt ≤90 days). If the system ships no production prompts (templates, system prompts, or managed prompt configs), score NOT_APPLICABLE.
 evidenceRequired:
   - "Prompt registry (or versioned prompt store) listing production prompts with immutable version IDs"
   - "Owner field populated for each production prompt; query showing 0 unversioned / 0 missing-owner"

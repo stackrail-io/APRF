@@ -19,7 +19,7 @@ passCondition: >
   A jailbreak-to-harm red-team suite (distinct from the security injection
   suite) covers documented harm categories; the latest run ≤90 days meets
   refusal/safety thresholds; findings feed the safety backlog with named
-  owners (measuredAt ≤90 days).
+  owners (measuredAt ≤90 days). If no production AI with user- or tool-facing generation exists, score NOT_APPLICABLE.
 evidenceRequired:
   - "Jailbreak-to-harm red-team suite definition (explicitly distinct from security injection suite)"
   - "Latest scored run report ≤90 days vs refusal/safety thresholds"

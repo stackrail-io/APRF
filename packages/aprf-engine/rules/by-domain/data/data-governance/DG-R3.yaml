@@ -16,7 +16,7 @@ gate: "recommended"
 passCondition: >
   100% of major eval/fine-tune sets used in production promotion have a dataset
   card with purpose, source, PII handling, and last-updated date ≤12 months
-  (inventory measuredAt ≤90 days; card last-updated ≤365 days).
+  (inventory measuredAt ≤90 days; card last-updated ≤365 days). If no major eval or fine-tune sets are used in production promotion, score NOT_APPLICABLE.
 evidenceRequired:
   - "Dataset cards (or registry metadata) for each major eval and fine-tune corpus"
   - "Fields covering purpose, source, PII handling, and last-updated date"

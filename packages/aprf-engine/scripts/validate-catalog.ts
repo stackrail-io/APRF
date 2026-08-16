@@ -61,8 +61,8 @@ export function loadSpecContext(rulesRoot: string): YamlLintContext {
   return {
     pillarSlugs,
     specById,
-    enforceMethodMatch: false,
-    enforcePassConditionMatch: false,
+    enforceMethodMatch: true,
+    enforcePassConditionMatch: true,
   };
 }
 

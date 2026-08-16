@@ -15,7 +15,7 @@ weight: 3
 gate: "recommended"
 passCondition: >
   100% of open control-gap waivers have owner + expiry; 0 expired waivers
-  without an escalation record (register evidence measuredAt ≤90 days).
+  without an escalation record (register evidence measuredAt ≤90 days). If the organization has no open or expired control-gap waivers and no AI control gaps in scope, score NOT_APPLICABLE.
 evidenceRequired:
   - "Risk-acceptance / control-gap waiver register for in-scope AI systems"
   - "Confirmation that open waivers have owner+expiry and expired waivers have escalation (or are closed)"

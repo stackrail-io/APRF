@@ -16,7 +16,7 @@ gate: "mandatory"
 passCondition: >
   Alerts exist for both budget burn and spend anomaly covering production AI
   spend; a synthetic or historical burn/anomaly event would page/notify per
-  runbook (alert test or documented fire measuredAt ≤90 days).
+  runbook (alert test or documented fire measuredAt ≤90 days). If no production AI spend exists, score NOT_APPLICABLE.
 evidenceRequired:
   - "Cost/spend dashboard or telemetry views covering production AI workloads"
   - "Alert policies for budget burn and spend anomaly (IaC, provider, or gateway)"

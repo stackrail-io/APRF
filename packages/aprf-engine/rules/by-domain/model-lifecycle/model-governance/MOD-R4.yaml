@@ -16,7 +16,7 @@ gate: "recommended"
 passCondition: >
   100% of production models have owner, residency, and intended-use fields;
   inventory query returns 0 incomplete rows (inventory evidence measuredAt
-  ≤90 days). If none (production AI paths call hosted or self-hosted models), score NOT_APPLICABLE.
+  ≤90 days). If no production AI paths call hosted or self-hosted models, score NOT_APPLICABLE.
 evidenceRequired:
   - "Model inventory / registry export listing production models"
   - "Query or attestation showing 0 incomplete owner/residency/intended-use rows"

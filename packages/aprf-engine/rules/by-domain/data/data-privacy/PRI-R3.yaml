@@ -17,7 +17,7 @@ gate: "recommended"
 passCondition: >
   100% of major in-scope AI features have a completed DPIA/PIA (or equivalent)
   with owner sign-off dated before production traffic (inventory/assessment
-  evidence measuredAt ≤90 days).
+  evidence measuredAt ≤90 days). If no major in-scope AI features exist (or are entering production), score NOT_APPLICABLE.
 evidenceRequired:
   - "Inventory of major in-scope AI features in or entering production"
   - "Completed DPIA/PIA (or equivalent) with owner sign-off per feature, dated before production traffic"

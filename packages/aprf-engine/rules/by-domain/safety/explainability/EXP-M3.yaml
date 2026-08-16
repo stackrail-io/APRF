@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   Synthetic secret/PII fixtures in explanation paths are redacted or blocked
   at 100% in tests; latest production explanation sample scan shows 0
-  privileged secret pattern hits (measuredAt ≤90 days).
+  privileged secret pattern hits (measuredAt ≤90 days). If no explanation payloads exist (user rationale, operator reconstruction, citation snippets, or equivalent), score NOT_APPLICABLE.
 evidenceRequired:
   - "Explanation redaction/blocking policy covering explanation payloads"
   - "Automated test showing 100% redaction/block of synthetic secret/PII fixtures"

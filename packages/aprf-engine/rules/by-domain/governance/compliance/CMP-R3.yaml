@@ -20,7 +20,7 @@ gate: "recommended"
 passCondition: >
   Last assessment age ≤12 months; covers every system that claims or attains
   capability Level 5; lists sampled Check IDs, findings, and remediation owners
-  (assessment evidence measuredAt ≤90 days).
+  (assessment evidence measuredAt ≤90 days). If no systems claim or attain capability Level 5, score NOT_APPLICABLE.
 evidenceRequired:
   - "Independent assessment or internal-audit report sampling capability Level-5 AI systems against APRF gates"
   - "Coverage proof that every capability Level-5 system ID was in scope, with findings and remediation owners"

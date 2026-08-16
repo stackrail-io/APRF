@@ -17,7 +17,7 @@ gate: "mandatory"
 passCondition: >
   100% of feedback→durable-memory/training promotion paths require a policy
   check or human approval; automated tests show ungated promotion is denied
-  (deny evidence measuredAt ≤90 days).
+  (deny evidence measuredAt ≤90 days). If no such write path exists, score NOT_APPLICABLE.
 evidenceRequired:
   - "Promotion policy listing feedback/memory→durable/training write paths"
   - "Write-path controls (policy engine or human approval) on those paths"
