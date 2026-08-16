@@ -48,8 +48,9 @@ const ARTIFACT_KINDS: ArtifactKind[] = ["prompts", "modelPins"];
 
 const PROMPT_SIGNAL_RE =
   /\b(prompt|prompts|system[\s_-]*prompt|\.prompt\.)\b/i;
+/** Pin/version indicators only — provider SDK names alone do not imply model pins. */
 const MODEL_PIN_SIGNAL_RE =
-  /\b(model[\s_-]*pin|model[\s_-]*version|pinned[\s_-]*model|llm|openai|anthropic|bedrock|vertex)\b/i;
+  /\b(model[\s_-]*pin|model[\s_-]*version|pinned[\s_-]*model|pin[\s_-]*model|immutable[\s_-]*model[\s_-]*version)\b/i;
 
 const RETENTION_RE =
   /\b(retain\w*[\s_-]*(prior|previous|n[\s_-]*version)|version[\s_-]*retention|prior[\s_-]*(production[\s_-]*)?version\w*|keep[\s_-]*last[\s_-]*\d+|min(?:imum)?[\s_-]*n\s*=?\s*\d+)\b/i;
@@ -294,11 +295,19 @@ function loadImported(
 }
 
 function artifactHasExplicitEvidence(a: ArtifactTypeEvidence): boolean {
+  // Explicit out-of-scope attestation must not put the type into scope.
+  if (a.inUse === false) return false;
   return (
     a.retainedPriorProductionVersions !== null ||
     a.immediatePriorRestoreDryRunPassed !== null ||
-    a.inUse !== null
+    a.inUse === true
   );
+}
+
+function attestedNeitherInUse(
+  imported: PromptModelVersionRetentionReport["importedResults"],
+): boolean {
+  return ARTIFACT_KINDS.every((k) => imported.byArtifact[k].inUse === false);
 }
 
 function resolveInScope(opts: {
@@ -308,7 +317,9 @@ function resolveInScope(opts: {
 }): ArtifactKind[] {
   const { imported, promptsPresent, modelPinsPresent } = opts;
   if (imported.artifactTypesInUse?.length) {
-    return imported.artifactTypesInUse;
+    return imported.artifactTypesInUse.filter(
+      (k) => imported.byArtifact[k].inUse !== false,
+    );
   }
 
   const fromInUse = ARTIFACT_KINDS.filter(
@@ -316,14 +327,23 @@ function resolveInScope(opts: {
   );
   if (fromInUse.length) return fromInUse;
 
+  // Explicit negative attestation for both types → empty scope (N/A), do not infer.
+  if (attestedNeitherInUse(imported)) {
+    return [];
+  }
+
   const fromExplicit = ARTIFACT_KINDS.filter((k) =>
     artifactHasExplicitEvidence(imported.byArtifact[k]),
   );
   if (fromExplicit.length) return fromExplicit;
 
   const inferred: ArtifactKind[] = [];
-  if (promptsPresent) inferred.push("prompts");
-  if (modelPinsPresent) inferred.push("modelPins");
+  if (promptsPresent && imported.byArtifact.prompts.inUse !== false) {
+    inferred.push("prompts");
+  }
+  if (modelPinsPresent && imported.byArtifact.modelPins.inUse !== false) {
+    inferred.push("modelPins");
+  }
   return inferred;
 }
 
@@ -471,6 +491,12 @@ export function buildPromptModelVersionRetentionReport(opts: {
   if (!aiVersionSignals && !retentionSignalsPresent && !opts.imported.found) {
     statusHint = "not_applicable";
     chgM1Satisfied = null;
+  } else if (inScope.length === 0 && attestedNeitherInUse(opts.imported)) {
+    statusHint = "not_applicable";
+    chgM1Satisfied = null;
+    notes.push(
+      "Import attests prompts.inUse=false and modelPins.inUse=false — CHG-M1 NOT_APPLICABLE.",
+    );
   } else if (opts.imported.found && anyFail) {
     statusHint = "fail";
     chgM1Satisfied = false;

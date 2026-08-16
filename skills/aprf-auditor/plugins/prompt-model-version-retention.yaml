@@ -21,6 +21,8 @@ whenUnavailable: >
   (or ≥policyMinimumN) and immediatePriorRestoreDryRunPassed for each in-scope artifact
   type (prompts and/or modelPins), with measuredAt ≤90 days. Prefer prompts{} / modelPins{}
   (or artifactTypesInUse). Aggregate-only fields PASS only when a single type is in scope.
+  Model-pin scope is inferred from pin/version indicators only (not provider SDK names).
+  Explicit prompts.inUse=false and modelPins.inUse=false → NOT_APPLICABLE.
 live:
   required: false
   note: Offline retention heuristics + optional imported JSON.

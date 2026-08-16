@@ -191,6 +191,101 @@ async function main() {
       throw new Error(`fail expected: ${JSON.stringify(r3.summary)}`);
     }
 
+    // Explicit inUse=false for both → NOT_APPLICABLE (even with prompt/model signals)
+    const t4 = join(root, "t4");
+    mkdirSync(join(t4, "ops"), { recursive: true });
+    writeFileSync(
+      join(t4, "ops", "prompt-and-pin.md"),
+      "prompt registry and model pin version retention restore dry-run\n",
+    );
+    const out4 = join(root, "o4");
+    mkdirSync(join(out4, "imports", "prompt-model-version-retention"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(out4, "imports", "prompt-model-version-retention", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        prompts: { inUse: false },
+        modelPins: { inUse: false },
+      }),
+    );
+    const r4 = await run(t4, out4);
+    if (
+      r4.summary.statusHint !== "not_applicable" ||
+      r4.summary.inScopeArtifactTypes.length !== 0
+    ) {
+      throw new Error(
+        `inUse=false N/A expected: ${JSON.stringify(r4.summary)}`,
+      );
+    }
+
+    // Stale measuredAt (>90d) blocks PASS even with complete per-type evidence
+    const t5 = join(root, "t5");
+    mkdirSync(join(t5, "ops"), { recursive: true });
+    writeFileSync(
+      join(t5, "ops", "prompt-registry.md"),
+      "prompt registry retention restore dry-run immediate prior\n",
+    );
+    const out5 = join(root, "o5");
+    mkdirSync(join(out5, "imports", "prompt-model-version-retention"), {
+      recursive: true,
+    });
+    const stale = new Date();
+    stale.setUTCDate(stale.getUTCDate() - 120);
+    writeFileSync(
+      join(out5, "imports", "prompt-model-version-retention", "coverage.json"),
+      JSON.stringify({
+        measuredAt: stale.toISOString(),
+        artifactTypesInUse: ["prompts"],
+        retainedPriorProductionVersions: 3,
+        immediatePriorRestoreDryRunPassed: true,
+      }),
+    );
+    const r5 = await run(t5, out5);
+    if (
+      r5.summary.statusHint !== "partial" ||
+      r5.summary.chgM1Satisfied !== false
+    ) {
+      throw new Error(`stale measuredAt partial expected: ${JSON.stringify(r5.summary)}`);
+    }
+
+    // Provider SDK import alone must not invent modelPins scope
+    const t6 = join(root, "t6");
+    mkdirSync(join(t6, "src"), { recursive: true });
+    mkdirSync(join(t6, "docs"), { recursive: true });
+    writeFileSync(
+      join(t6, "src", "client.ts"),
+      'import OpenAI from "openai";\n// system prompt template for chat\n',
+    );
+    writeFileSync(
+      join(t6, "docs", "version-retention.md"),
+      "version retention policy keep last 3 prior production versions\nprompt registry restore dry-run\n",
+    );
+    const out6 = join(root, "o6");
+    mkdirSync(join(out6, "imports", "prompt-model-version-retention"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(out6, "imports", "prompt-model-version-retention", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        retainedPriorProductionVersions: 3,
+        immediatePriorRestoreDryRunPassed: true,
+      }),
+    );
+    const r6 = await run(t6, out6);
+    if (
+      r6.signals.modelPinsPresent !== false ||
+      !r6.summary.inScopeArtifactTypes.includes("prompts") ||
+      r6.summary.inScopeArtifactTypes.includes("modelPins") ||
+      r6.summary.statusHint !== "pass"
+    ) {
+      throw new Error(
+        `provider SDK must not invent modelPins: ${JSON.stringify({ signals: r6.signals, summary: r6.summary })}`,
+      );
+    }
+
     console.log("prompt-model-version-retention smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });
