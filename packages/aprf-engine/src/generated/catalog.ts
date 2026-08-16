@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:084767bd2217cbc7c394c4726e7d68ce7341a6fbf5d878183604a0a811c2e9eb",
+  "generatedAt": "sha256:e417a525b3e77682d73f2bfdd0faf9d690765a5ca26b7ee9a65ba1e1d0d57c4b",
   "ruleCount": 178,
   "domains": [
     {
@@ -2256,15 +2256,15 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
     {
       "id": "CHG-M1",
       "category": "change-management",
-      "title": "Prior production versions of prompts and model pins must be retained and restorable",
-      "description": "Production systems shall retain at least N prior production versions of prompts and model pins per policy (minimum N=2) and prove a restore dry-run that loads the immediate prior version in staging or a prod-adjacent environment.\n",
+      "title": "Prior production versions of prompts and/or model pins must be retained and restorable",
+      "description": "Production systems shall retain at least N prior production versions of each in-scope artifact type (prompts and/or model pins) per policy (minimum N=2) and prove a restore dry-run that loads the immediate prior version in staging or a prod-adjacent environment.\n",
       "whyItMatters": "Without retained prior pins, a bad prompt or model bump has no safe landing. Inventory alone is not enough—operators must prove the immediate prior version still loads before an incident forces improvisation.\n",
       "severity": "critical",
       "weight": 4,
       "gate": "mandatory",
-      "passCondition": "≥N prior production versions retained per policy (minimum N=2); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env (retention evidence measuredAt ≤90 days). If no production prompts or model pins are used, score NOT_APPLICABLE.\n",
+      "passCondition": "≥N prior production versions retained per policy (minimum N=2) for each in-scope artifact type (prompts and/or model pins); restore dry-run successfully loads the immediate prior version in staging or prod-adjacent env (retention evidence measuredAt ≤90 days). If no production prompts or model pins are used, score NOT_APPLICABLE.\n",
       "evidenceRequired": [
-        "Version retention policy + registry listing of prior production prompt and model-pin versions",
+        "Version retention policy + registry listing of prior production prompt and/or model-pin versions (for artifact types in use)",
         "Restore dry-run record showing immediate prior version loaded in staging or prod-adjacent env"
       ],
       "detection": {
@@ -2273,21 +2273,21 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "repo-prompt-model-version-retention",
             "params": {
-              "hint": "Discover retention policy and registries keeping prior production prompt and model-pin versions, plus restore dry-run evidence.\n"
+              "hint": "Discover retention policy and registries keeping prior production prompt and/or model-pin versions for artifact types in use, plus restore dry-run evidence.\n"
             }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove coverage, attest ≥N prior production versions retained (minimum N=2) and a successful immediate-prior restore dry-run in staging or prod-adjacent (measuredAt ≤90 days).\n"
+              "hint": "If automation cannot prove coverage, attest ≥N prior production versions retained (minimum N=2) for each in-scope artifact type (prompts and/or model pins) and a successful immediate-prior restore dry-run in staging or prod-adjacent (measuredAt ≤90 days).\n"
             }
           }
         ]
       },
-      "manualVerification": "1) Confirm production prompts and/or model pins are used. If neither is used, score NOT_APPLICABLE. 2) Open retention policy; confirm minimum retained prior versions N≥2. 3) Open registry listing; confirm ≥N prior production versions are present for prompts and model pins in scope. 4) Confirm a restore dry-run loaded the immediate prior version in staging or prod-adjacent. 5) PASS only if retention + dry-run hold with measuredAt ≤90 days. PRM-M1 version IDs alone do not satisfy. PRM-M3 prompt-rollback RTO alone does not satisfy retention depth. CHG-M2 on-call runbook drills alone do not satisfy registry retention.\n",
-      "falsePositiveGuidance": "Do not pass git history of a single floating “latest” alias as retained versions. Do not pass a dry-run older than 90 days. Do not pass retention of prompts without model pins when both ship in production (or vice versa) unless the missing class is documented as out of scope. Named exceptions need owner and expiry ≤90 days.\n",
+      "manualVerification": "1) Confirm production prompts and/or model pins are used. If neither is used, score NOT_APPLICABLE. 2) Open retention policy; confirm minimum retained prior versions N≥2. 3) Open registry listing; confirm ≥N prior production versions are present for each artifact type in use (prompts only, model pins only, or both). 4) Confirm a restore dry-run loaded the immediate prior version in staging or prod-adjacent. 5) PASS only if retention + dry-run hold with measuredAt ≤90 days. Do not require evidence for an artifact type that is not used. PRM-M1 version IDs alone do not satisfy. PRM-M3 prompt-rollback RTO alone does not satisfy retention depth. CHG-M2 on-call runbook drills alone do not satisfy registry retention.\n",
+      "falsePositiveGuidance": "Do not pass git history of a single floating “latest” alias as retained versions. Do not pass a dry-run older than 90 days. Do not fail prompt-only or model-pin-only systems for lacking the unused artifact class. Do not pass retention of prompts without model pins when both ship in production (or vice versa) unless the missing class is documented as out of scope. Named exceptions need owner and expiry ≤90 days.\n",
       "recommendedFixes": [
-        "Retain ≥2 prior production prompt and model-pin versions in a registry",
+        "Retain ≥2 prior production versions in a registry for each in-scope artifact type (prompts and/or model pins)",
         "Run and retain an immediate-prior restore dry-run in staging or prod-adjacent",
         "Retain evidence under imports/prompt-model-version-retention/",
         "Block release (or open a time-boxed waiver with owner and expiry) until this Check passes"
