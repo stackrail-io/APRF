@@ -213,10 +213,13 @@ async function main() {
     const r4 = await run(t4, out4);
     if (
       r4.summary.statusHint !== "not_applicable" ||
-      r4.summary.inScopeArtifactTypes.length !== 0
+      r4.summary.inScopeArtifactTypes.length !== 0 ||
+      r4.summary.chgM1Satisfied !== null ||
+      r4.signals.promptsPresent !== true ||
+      r4.signals.modelPinsPresent !== true
     ) {
       throw new Error(
-        `inUse=false N/A expected: ${JSON.stringify(r4.summary)}`,
+        `inUse=false N/A expected: ${JSON.stringify({ summary: r4.summary, signals: r4.signals })}`,
       );
     }
 
