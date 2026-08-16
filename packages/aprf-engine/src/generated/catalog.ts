@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:e417a525b3e77682d73f2bfdd0faf9d690765a5ca26b7ee9a65ba1e1d0d57c4b",
+  "generatedAt": "sha256:6e568ff0072b40b198895715263663335a841bc121fb5f24df7681a7c94b73a5",
   "ruleCount": 178,
   "domains": [
     {
@@ -2273,13 +2273,13 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           {
             "id": "repo-prompt-model-version-retention",
             "params": {
-              "hint": "Discover retention policy and registries keeping prior production prompt and/or model-pin versions for artifact types in use, plus restore dry-run evidence.\n"
+              "hint": "Discover retention policy and registries keeping prior production prompt and/or model-pin versions for artifact types in use, plus restore dry-run evidence evaluated separately per type.\n"
             }
           },
           {
             "id": "manual-attest",
             "params": {
-              "hint": "If automation cannot prove coverage, attest ≥N prior production versions retained (minimum N=2) for each in-scope artifact type (prompts and/or model pins) and a successful immediate-prior restore dry-run in staging or prod-adjacent (measuredAt ≤90 days).\n"
+              "hint": "If automation cannot prove coverage, attest ≥N prior production versions retained (minimum N=2) and a successful immediate-prior restore dry-run for each in-scope artifact type (prompts and/or model pins) — not one aggregate covering both (measuredAt ≤90 days).\n"
             }
           }
         ]

@@ -1,5 +1,6 @@
 /**
- * Smoke: prompt-model-version-retention needs ≥2 retained + dry-run for PASS.
+ * Smoke: prompt-model-version-retention evaluates retention/restore per
+ * in-scope artifact type (prompts and/or modelPins).
  */
 import {
   mkdtempSync,
@@ -44,6 +45,7 @@ async function run(
 async function main() {
   const root = mkdtempSync(join(tmpdir(), "aprf-chg-m1-"));
   try {
+    // Signals without import → PARTIAL
     const t1 = join(root, "t1");
     mkdirSync(join(t1, "docs"), { recursive: true });
     writeFileSync(
@@ -58,6 +60,7 @@ async function main() {
       throw new Error(`partial expected: ${JSON.stringify(r1.summary)}`);
     }
 
+    // Both artifact types in scope + per-type evidence → PASS
     const t2 = join(root, "t2");
     mkdirSync(join(t2, "ops"), { recursive: true });
     writeFileSync(
@@ -72,21 +75,97 @@ async function main() {
       join(out2, "imports", "prompt-model-version-retention", "coverage.json"),
       JSON.stringify({
         measuredAt: new Date().toISOString(),
-        retainedPriorProductionVersions: 3,
         policyMinimumN: 2,
-        immediatePriorRestoreDryRunPassed: true,
+        artifactTypesInUse: ["prompts", "modelPins"],
+        prompts: {
+          retainedPriorProductionVersions: 3,
+          immediatePriorRestoreDryRunPassed: true,
+        },
+        modelPins: {
+          retainedPriorProductionVersions: 2,
+          immediatePriorRestoreDryRunPassed: true,
+        },
       }),
     );
     const r2 = await run(t2, out2);
     if (r2.summary.statusHint !== "pass" || r2.summary.chgM1Satisfied !== true) {
       throw new Error(`pass expected: ${JSON.stringify(r2.summary)}`);
     }
+    if (
+      r2.summary.perArtifactSatisfied.prompts !== true ||
+      r2.summary.perArtifactSatisfied.modelPins !== true
+    ) {
+      throw new Error(`per-type pass expected: ${JSON.stringify(r2.summary)}`);
+    }
 
+    // Aggregate-only when both types in scope → PARTIAL (not PASS)
+    const t2b = join(root, "t2b");
+    mkdirSync(join(t2b, "ops"), { recursive: true });
+    writeFileSync(
+      join(t2b, "ops", "restore-dry-run.md"),
+      "restore dry-run loads immediate prior version in staging\nmodel pin and prompt version registry\n",
+    );
+    const out2b = join(root, "o2b");
+    mkdirSync(join(out2b, "imports", "prompt-model-version-retention"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(out2b, "imports", "prompt-model-version-retention", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        retainedPriorProductionVersions: 3,
+        policyMinimumN: 2,
+        immediatePriorRestoreDryRunPassed: true,
+      }),
+    );
+    const r2b = await run(t2b, out2b);
+    if (
+      r2b.summary.statusHint !== "partial" ||
+      r2b.summary.chgM1Satisfied !== false
+    ) {
+      throw new Error(
+        `aggregate-both partial expected: ${JSON.stringify(r2b.summary)}`,
+      );
+    }
+
+    // Prompt-only + legacy aggregate → PASS
+    const t2c = join(root, "t2c");
+    mkdirSync(join(t2c, "ops"), { recursive: true });
+    writeFileSync(
+      join(t2c, "ops", "prompt-registry.md"),
+      "prompt registry retention restore dry-run immediate prior\n",
+    );
+    const out2c = join(root, "o2c");
+    mkdirSync(join(out2c, "imports", "prompt-model-version-retention"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(out2c, "imports", "prompt-model-version-retention", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        artifactTypesInUse: ["prompts"],
+        retainedPriorProductionVersions: 3,
+        immediatePriorRestoreDryRunPassed: true,
+      }),
+    );
+    const r2c = await run(t2c, out2c);
+    if (
+      r2c.summary.statusHint !== "pass" ||
+      r2c.summary.chgM1Satisfied !== true ||
+      r2c.summary.perArtifactSatisfied.prompts !== true ||
+      r2c.summary.perArtifactSatisfied.modelPins !== null
+    ) {
+      throw new Error(
+        `prompt-only aggregate pass expected: ${JSON.stringify(r2c.summary)}`,
+      );
+    }
+
+    // Both in scope; prompts pass, modelPins below N → FAIL
     const t3 = join(root, "t3");
     mkdirSync(join(t3, "registry"), { recursive: true });
     writeFileSync(
       join(t3, "registry", "pins.md"),
-      "pinned model versions retained\n",
+      "pinned model versions retained\nprompt registry\n",
     );
     const out3 = join(root, "o3");
     mkdirSync(join(out3, "imports", "prompt-model-version-retention"), {
@@ -96,8 +175,15 @@ async function main() {
       join(out3, "imports", "prompt-model-version-retention", "coverage.json"),
       JSON.stringify({
         measuredAt: new Date().toISOString(),
-        retainedPriorProductionVersions: 1,
-        immediatePriorRestoreDryRunPassed: true,
+        artifactTypesInUse: ["prompts", "modelPins"],
+        prompts: {
+          retainedPriorProductionVersions: 3,
+          immediatePriorRestoreDryRunPassed: true,
+        },
+        modelPins: {
+          retainedPriorProductionVersions: 1,
+          immediatePriorRestoreDryRunPassed: true,
+        },
       }),
     );
     const r3 = await run(t3, out3);

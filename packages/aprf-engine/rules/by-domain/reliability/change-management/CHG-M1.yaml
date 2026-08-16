@@ -30,14 +30,14 @@ detection:
         hint: >
           Discover retention policy and registries keeping prior production
           prompt and/or model-pin versions for artifact types in use, plus
-          restore dry-run evidence.
+          restore dry-run evidence evaluated separately per type.
     - id: "manual-attest"
       params:
         hint: >
           If automation cannot prove coverage, attest ≥N prior production
-          versions retained (minimum N=2) for each in-scope artifact type
-          (prompts and/or model pins) and a successful immediate-prior restore
-          dry-run in staging or prod-adjacent (measuredAt ≤90 days).
+          versions retained (minimum N=2) and a successful immediate-prior
+          restore dry-run for each in-scope artifact type (prompts and/or model
+          pins) — not one aggregate covering both (measuredAt ≤90 days).
 manualVerification: >
   1) Confirm production prompts and/or model pins are used. If neither is used,
   score NOT_APPLICABLE. 2) Open retention policy; confirm minimum retained prior

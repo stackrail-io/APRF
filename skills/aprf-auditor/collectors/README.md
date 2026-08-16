@@ -165,7 +165,7 @@ Live mode is **opt-in**. Default collectors only read the local repo + `imports/
 | **prompt-template-hygiene** | `prompt-template-hygiene.ts` | parameterized templates; no secrets/PII (PRM-R1) | `imports/prompt-template-hygiene/` | — |
 | **prompt-lint-ci** | `prompt-lint-ci.ts` | blocking prompt lint on change PRs (PRM-R2) | `imports/prompt-lint-ci/` | — |
 | **prompt-ab-shadow-eval** | `prompt-ab-shadow-eval.ts` | A/B or shadow eval for high-traffic prompt changes (PRM-R3) | `imports/prompt-ab-shadow-eval/` | — |
-| **prompt-model-version-retention** | `prompt-model-version-retention.ts` | prior prompt/model-pin versions + restore dry-run (CHG-M1) | `imports/prompt-model-version-retention/` | — |
+| **prompt-model-version-retention** | `prompt-model-version-retention.ts` | prior prompt and/or model-pin versions + restore dry-run per in-scope type (CHG-M1) | `imports/prompt-model-version-retention/` | — |
 | **rollback-runbook** | `rollback-runbook.ts` | rollback runbook operable by on-call (CHG-M2) | `imports/rollback-runbook/` | — |
 | **rollback-drill** | `rollback-drill.ts` | successful rollback drill within RTO (CHG-M3) | `imports/rollback-drill/` | — |
 | **quality-slo-auto-rollback** | `quality-slo-auto-rollback.ts` | quality SLO burn → auto-rollback or page (CHG-R3) | `imports/quality-slo-auto-rollback/` | — |
