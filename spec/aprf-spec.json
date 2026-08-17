@@ -398,6 +398,18 @@
       "slug": "0011-evidence-assurance-tiers",
       "href": "/aprf/rfc/0011-evidence-assurance-tiers/",
       "markdownPath": "/aprf/rfc/0011-evidence-assurance-tiers.md"
+    },
+    {
+      "id": "APRF-RFC-0012",
+      "number": 12,
+      "title": "Cognitive Assurance Experimental Extension (COG)",
+      "status": "draft",
+      "created": "2026-08-16",
+      "semverImpact": "MINOR",
+      "summary": "Proposes an optional future Cognitive Assurance (COG) Experimental Extension for long-lived persistent autonomous agents—objective governance, memory lineage, policy evolution, decision provenance, and behavioral continuity—without changing APRF 1.x Core/Regulated philosophy or Checks.",
+      "slug": "0012-cognitive-assurance",
+      "href": "/aprf/rfc/0012-cognitive-assurance/",
+      "markdownPath": "/aprf/rfc/0012-cognitive-assurance.md"
     }
   ],
   "scope": {

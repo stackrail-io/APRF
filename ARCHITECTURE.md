@@ -151,6 +151,10 @@ PII/residency handled by products; the standard requires digests in the Conforma
 
 **Full registry (planned):** versioned evidence *kind* IDs + JSON schemas (e.g. `git.repo_snapshot`, `k8s.manifest`, `otel.trace_summary`, `prompt.bundle`) — analogous to OpenTelemetry semantic conventions. New platforms should prefer new evidence types (once registered) over new Checks when principles already exist.
 
+### Future extensions (roadmap)
+
+APRF 1.x remains **Production Assurance** (Security, Governance, Reliability, Safety, and the existing Core domains). A later **APRF 2.x** may add optional Persistent Agent Assurance for long-lived memory and adaptive policies; **APRF 3.x** may introduce full **Cognitive Assurance (COG)**—governing long-term behavior, memory, objectives, and decision continuity of persistent autonomous systems. COG is an Experimental Extension only: it does not change Core/Regulated philosophy or weaken existing Controls. See draft [APRF-RFC-0012](rfcs/0012-cognitive-assurance.md).
+
 ---
 
 ## Mapping and satisfaction
