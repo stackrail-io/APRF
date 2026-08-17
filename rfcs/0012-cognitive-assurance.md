@@ -29,7 +29,7 @@ This RFC defines **Cognitive Assurance** as an engineering discipline—not AGI,
 ### Normative intent (this RFC)
 
 1. Accept **COG** as a **future Experimental Extension** (draft roadmap), not a Core or Regulated requirement in APRF 1.x.
-2. Record pillar purpose, applicability, twelve proposed Checks, related-rule crosswalk, assurance-layer integration, and adoption path.
+2. Record pillar purpose, applicability, thirteen proposed Checks, related-rule crosswalk, assurance-layer integration, and adoption path.
 3. **Do not** ship YAML Checks, profile JSON, collectors, evidence-type registry entries, or scoring changes in the same change set as this draft RFC.
 
 When this RFC is later **accepted** and implemented, SemVer impact is **MINOR** (new optional profile/lens + Checks; Core/Regulated unchanged).
@@ -101,7 +101,7 @@ Examples: long-lived enterprise agents with durable memory and policy updates; m
 | **Profile placement** | **Not** Core or Regulated. Ship as Experimental Extension via e.g. `aprf-profile-persistent-agent` (2.x) and/or `aprf-lens-cognitive` (3.x). |
 | **Philosophy constraint** | Does not alter APRF’s evidence-first, Check-based, framework-neutral stance. No consciousness, psychology, or AGI claims. Prefer engineering language: persistent objectives, behavioral consistency, policy evolution, decision provenance, memory governance, identity continuity. |
 
-### Proposed Checks (12)
+### Proposed Checks (13)
 
 Check shape follows [`packages/aprf-engine/rules/_schema/rule.schema.json`](../packages/aprf-engine/rules/_schema/rule.schema.json). Implementation (later) under e.g. `rules/by-domain/cognitive-assurance/cognitive-assurance/`. Gates below are **within the COG profile/lens only**—they are not Core mandatories.
 
@@ -173,13 +173,13 @@ Check shape follows [`packages/aprf-engine/rules/_schema/rule.schema.json`](../p
 
 #### COG-M7 — Memory integrity and tamper evidence
 
-- **Description:** Durable agent memory and objective/policy stores shall support integrity verification (checksums, signed records, or equivalent) with detectable unauthorized mutation.
-- **Why it matters:** Silent corruption or rewrite breaks continuity assurance.
+- **Description:** Durable agent memory and objective/policy stores shall support integrity verification that detects unauthorized mutation via a cryptographic MAC or signature with protected key material, or an independently protected immutable anchor (for example WORM / append-only ledger with write-once semantics). Bare checksums alone are acceptable only for accidental-corruption detection, not as sole evidence of tamper resistance.
+- **Why it matters:** Silent corruption or rewrite breaks continuity assurance; an attacker who can rewrite the store can recompute an unkeyed checksum.
 - **Severity:** high | **gate:** mandatory
-- **Evidence:** Integrity mechanism config; tamper-detection test results
+- **Evidence:** Integrity mechanism config showing MAC/signature (or immutable anchor); key-protection or anchor-protection evidence; tamper-detection test results that fail on unauthorized mutation
 - **Detection:** hybrid
-- **False positives:** Read-replica lag mistaken for integrity failure
-- **Recommended fixes:** Signed memory entries; WORM or append-only store for critical state
+- **False positives:** Read-replica lag mistaken for integrity failure; checksum-only health checks used for corruption monitoring (allowed as a supplement, not as the COG-M7 control)
+- **Recommended fixes:** Sign or MAC memory/continuity entries with keys outside the writable store; or place critical state in an independently protected immutable anchor; keep bare checksums only as secondary corruption detectors
 - **relatedRules:** `MEM-M4`, `SEC-M1`
 
 #### COG-M8 — Agent identity continuity is defined and verified
@@ -239,14 +239,14 @@ Check shape follows [`packages/aprf-engine/rules/_schema/rule.schema.json`](../p
 
 #### COG-R3 — Reflection / deliberation artifacts retained when used for control
 
-- **Description:** If the system persists reflection or deliberation artifacts that later influence objectives, memory, or actions, those artifacts shall be retained with provenance and retention policy (not required if unused for control).
-- **Why it matters:** Hidden control inputs are unauditable.
+- **Description:** If the system persists reflection or deliberation artifacts that later influence objectives, memory, or actions, those artifacts shall be retained as structured, redacted control summaries with provenance, access control, and bounded retention (not required if unused for control). Raw model chain-of-thought, full prompts, unrestricted tool payloads, or unredacted PII are not required and shall not be the default retained form.
+- **Why it matters:** Hidden control inputs are unauditable; retaining raw reasoning creates an unbounded sensitive-data store.
 - **Severity:** medium | **gate:** recommended
-- **Evidence:** Artifact store schema; linkage to decisions; retention
+- **Evidence:** Artifact store schema for structured/redacted summaries; access-control config; bounded retention policy; linkage to decisions/objectives/memory; samples showing redaction
 - **Detection:** hybrid
-- **False positives:** Ephemeral chain-of-thought never written to durable store (`NOT_APPLICABLE`)
-- **Recommended fixes:** Treat control-influencing reflections as governed memory (COG-M5)
-- **relatedRules:** `COG-M5`, `MEM-M3`, `OBS-M1`
+- **False positives:** Ephemeral chain-of-thought never written to durable store (`NOT_APPLICABLE`); raw CoT logs kept only in short-TTL debug sinks outside the control path
+- **Recommended fixes:** Persist control-influencing reflections as governed, redacted summaries (align with COG-M5 / OBS-M2); enforce ACL and TTL; exclude raw CoT from the required retention set
+- **relatedRules:** `COG-M5`, `MEM-M3`, `OBS-M1`, `OBS-M2`
 
 ### Related-rule crosswalk (non-weakening)
 
@@ -258,13 +258,13 @@ Check shape follows [`packages/aprf-engine/rules/_schema/rule.schema.json`](../p
 | COG-M4 | OBS-M1, TOL-M*, HUM-M2, AGN-M2 | Provenance bound to **objective/policy versions** for consequential acts |
 | COG-M5 | MEM-M3, MEM-M1, MEM-R3 | Provenance/lineage fields beyond write-policy deny tests |
 | COG-M6 | MEM-M2, MEM-R3 | TTL/invalidation tied to **objective/policy epochs** |
-| COG-M7 | MEM-M4, SEC-M1 | Integrity of continuity stores (objectives/policies + durable memory) |
+| COG-M7 | MEM-M4, SEC-M1 | Authenticated integrity (MAC/signature or immutable anchor) of continuity stores |
 | COG-M8 | AGN-M1, MEM-M1, AGN-M4 | Longitudinal **identity continuity** across deploys/namespaces |
 | COG-R1 | OBS-R3, EVL-M2/M3, ORG-R3 | Drift vs **declared behavioral envelopes** from approved objectives |
 | COG-R2 | EVL-M1/M2, EVL-R1, AGN-R2, MEM-R1 | Multi-step **memory-dependent** long-horizon regression |
 | COG-M9 | AGN-M2, HUM-M1/M3, CHG-R2/M2 | Deny-by-default **online** objective/policy self-update |
 | COG-M10 | TOL-M2/M5, AGN-M1/M2/M3, SEC-M1, HUM-M3 | Block **self-expansion** of tools/privileges/code in production |
-| COG-R3 | MEM-M3, OBS-M1 | Retention only when reflection artifacts **influence control** |
+| COG-R3 | MEM-M3, OBS-M1, OBS-M2 | Redacted control summaries only when reflection artifacts **influence control** |
 
 **N/A rules:**
 
@@ -359,7 +359,7 @@ COG strengthens long-horizon accountability (provenance, integrity, self-modific
    - `long_horizon_regression_suite` — multi-step memory-dependent regression results
    - `online_learning_approval_boundary` — deny-by-default flags + approval scope for self-update
    - `self_modification_deny_test` — tests that block self-grant of tools/privileges/code
-   - `reflection_artifact_store` — control-influencing deliberation artifacts with retention
+   - `reflection_artifact_store` — structured/redacted control-influencing deliberation summaries with ACL and bounded retention (not raw chain-of-thought)
 3. **Profile naming:** Prefer `aprf-profile-persistent-agent` (2.x) then `aprf-lens-cognitive` (3.x), or a single experimental lens from day one?
 4. **Partial COG applicability:** Confirm per-Check N/A when only a subset of continuity surfaces exist (e.g. objectives without durable memory).
 5. **Relationship to Evidence Assurance Tiers:** Should COG mandatories default to `minimumTier: E4` (runtime) given long-horizon claims?
