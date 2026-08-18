@@ -91,11 +91,22 @@ Other evidence via `./aprf-assessment/imports/<plugin>/` or env (`GITHUB_TOKEN`,
 
 ## Step-by-step (when not using `audit`)
 
+Carry the Phase 0 classification into every command (do **not** hard-code Core for framework/non-AI targets):
+
 ```bash
+# Dry-run resolution first
+npx @stackrail-io/aprf@0.1.5 resolve-target --system-type <type> --capabilities <caps> --json
+
+# ai-application (example)
 npx @stackrail-io/aprf@0.1.5 collect --target . --out ./aprf-assessment
-npx @stackrail-io/aprf@0.1.5 assess  --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.5 assess  --out ./aprf-assessment --system-type ai-application --profile core
 npx @stackrail-io/aprf@0.1.5 report  --in ./aprf-assessment/assessment.json --out ./aprf-assessment/REPORT.html
 npx @stackrail-io/aprf@0.1.5 verify  ./aprf-assessment/REPORT.html
+
+# ai-framework / SDK
+… assess --out ./aprf-assessment --system-type ai-framework --profile framework
+
+# non-ai-platform: CLI assess is not supported yet — use APRF Auditor skill + scopes/non-ai-platform.yaml
 ```
 
 ## After the run (summarize, then ask)

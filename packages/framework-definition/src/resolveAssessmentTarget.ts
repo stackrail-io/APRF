@@ -149,6 +149,19 @@ function resolveAppProfile(profileId: string | undefined): AprfProfile {
   return p;
 }
 
+const NON_AI_PLACEHOLDER_PROFILE: AprfProfile = {
+  id: "aprf-scope-non-ai-platform",
+  name: "Non-AI platform (legacy auditor scope)",
+  summary:
+    "Placeholder profile object for systemType=non-ai-platform. Check IDs come from skills/aprf-auditor/scopes/non-ai-platform.yaml — not from this profile. Do not claim Core or Regulated readiness.",
+  targetCriticality: 2,
+  targetCapability: 3,
+  mandatoryCheckIds: [],
+  rationale: [
+    "v1 keeps non-AI Check lists in the auditor scope YAML to avoid forking SoT into profiles.ts.",
+  ],
+};
+
 /**
  * Canonical assessment target resolution (RFC-0013 precedence).
  * Consumers (CLI, skill via `aprf resolve-target`, tests, UI) must call this
@@ -173,11 +186,11 @@ export function resolveAssessmentTarget(
       );
     }
     warnings.push(
-      "use-legacy-non-ai-scope: load skills/aprf-auditor/scopes/non-ai-platform.yaml for Check IDs until a non-ai profile exists. Ignored placeholder profile.id=aprf-profile-core — do not claim Core from this result.",
+      "use-legacy-non-ai-scope: load skills/aprf-auditor/scopes/non-ai-platform.yaml for Check IDs until a non-ai profile exists. profile.id=aprf-scope-non-ai-platform is a placeholder — do not claim Core from this result.",
     );
     return {
-      // Placeholder only: mandatoryCheckIds/effectiveCheckIds are empty; use legacy scope YAML.
-      profile: PROFILE_CORE,      mandatoryCheckIds: [],
+      profile: NON_AI_PLACEHOLDER_PROFILE,
+      mandatoryCheckIds: [],
       lensIds: [],
       effectiveCheckIds: [],
       assessmentKind: "non-ai-platform-subset",

@@ -96,7 +96,7 @@ Core / Regulated / **Framework** profiles and lenses (RAG, Agents, …) are **se
 - **Profiles** answer: which mandatory Checks exist for this gate?
 - **Lenses** answer: which additional Checks become applicable for a product shape?
 - **`resolveAssessmentTarget()`** is the canonical resolver (systemType → profile → applicationCapabilities → `--lens`). CLI and auditor consume it; do not hand-assemble unions. See [APRF-RFC-0013](rfcs/0013-assessment-target-kinds.md).
-- **`aprf-profile-framework`** is a Framework / SDK *primitive* gate — not Core production readiness.
+- **`aprf-profile-framework`** is a Framework / SDK *primitive* gate — not Core or Regulated production readiness.
 
 ### Crosswalks and threat context (informative metadata)
 

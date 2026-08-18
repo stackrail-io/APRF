@@ -115,8 +115,7 @@ function parseSystemType(argv: string[]): AssessmentSystemType | undefined {
   if (
     raw === "ai-application" ||
     raw === "ai-framework" ||
-    raw === "non-ai-platform" ||
-    raw === "unknown"
+    raw === "non-ai-platform"
   ) {
     return raw;
   }
@@ -277,6 +276,12 @@ function cmdVersion() {
 async function cmdAudit(argv: string[]) {
   const collectOpts = parseCollectOptions(argv);
   const flags = parseAssessFlags(argv);
+  if (flags.systemType === "non-ai-platform") {
+    console.error(
+      "systemType=non-ai-platform is not supported by aprf audit. Use the APRF Auditor skill with scopes/non-ai-platform.yaml.",
+    );
+    process.exit(1);
+  }
   if (!collectOpts.plugins?.length && !flags.fullCatalog) {
     const resolved = resolveAssessTargetFromOptions(flags);
     for (const w of resolved.warnings) {

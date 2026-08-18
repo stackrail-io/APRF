@@ -37,8 +37,8 @@ Read first: `capabilities.yaml`, `evidence-precedence.yaml`, `confidence.yaml`.
      - If **not yet** → ask them to start the app (or paste URL when ready); do **not** PASS AUTHN-M1 from code alone; you may continue repo discovery but keep AUTHN-M1 open until probe or explicit Phase 2b
      - If **no runnable instance** (library-only / docs-only / framework SDK) → document that; AUTHN-M1 stays NOT_DEMONSTRATED or N/A with justified `naReason` (no customer-facing HTTP API)
    - **MCP/S2S inventory (AUTHN-M2, when the app has tools/MCP):** ask with the live URL —
-     *“Can you export tool-server/MCP connection config (redact secrets), or provide an admin token for inventory fetch?”*
-     - Prefer `imports/mcp-s2s-inventory/*.json`, or `--base-url` with `--admin-token` / `APRF_ADMIN_TOKEN`, or `--admin-email` + `--admin-password` (sign-in → JWT)
+     *“Can you export tool-server/MCP connection config (redact secrets), or confirm admin creds are set locally for inventory fetch?”*
+     - Prefer `imports/mcp-s2s-inventory/*.json`, or `--base-url` with env `APRF_ADMIN_TOKEN`, or `APRF_ADMIN_EMAIL` + `APRF_ADMIN_PASSWORD` (CLI reads env; do **not** pass passwords/tokens on argv)
      - Never commit tokens; never store raw API keys in reports
 5. Load in-scope Check IDs via resolver (or CLI assess/audit which call it):
    - `ai-application` → profile ∪ capability lenses ∪ `--lens`

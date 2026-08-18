@@ -213,6 +213,11 @@ const nonAi = resolveAssessmentTarget({ systemType: "non-ai-platform" });
 assert(nonAi.assessmentKind === "non-ai-platform-subset", "non-ai kind");
 assert(nonAi.effectiveCheckIds.length === 0, "non-ai empty checks");
 assert(
+  nonAi.profile.id === "aprf-scope-non-ai-platform",
+  "non-ai placeholder profile id",
+);
+assert(nonAi.profile.id !== PROFILE_ID_CORE, "non-ai must not surface Core id");
+assert(
   nonAi.warnings.some((w) => w.includes("use-legacy-non-ai-scope")),
   "non-ai legacy warning",
 );

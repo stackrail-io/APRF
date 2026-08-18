@@ -38,10 +38,10 @@ Package: `@stackrail-io/aprf` (Node ≥ 22)
 ## Live audit example
 
 ```bash
+# Prerequisites already set in the local shell (never pass passwords/tokens on argv):
+#   APRF_ADMIN_EMAIL + APRF_ADMIN_PASSWORD  — or — APRF_ADMIN_TOKEN
 npx @stackrail-io/aprf@0.1.5 audit --target . --out ./aprf-assessment --profile core \
-  --base-url http://127.0.0.1:8080 \
-  --admin-email "$APRF_ADMIN_EMAIL" \
-  --admin-password "$APRF_ADMIN_PASSWORD"
+  --base-url http://127.0.0.1:8080
 ```
 
 Framework / SDK:

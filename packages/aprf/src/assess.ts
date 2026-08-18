@@ -1338,7 +1338,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     },
     disclaimer:
       resolved.assessmentKind === "aprf-framework"
-        ? "Framework / SDK primitive gate (assessmentKind=aprf-framework). Not an APRF Core or Regulated production-readiness claim. Deterministic CLI assess from collector statusHints + evidence-graph nodes. Not a StackRail attestation."
+        ? "Framework / SDK primitive gate (assessmentKind=aprf-framework). Not an APRF Core or Regulated production-readiness claim. Deterministic CLI assess from collector statusHints + evidence-graph nodes. Not a StackRail attestation. NOT_DEMONSTRATED means no scored collector report — not necessarily FAIL."
         : "Deterministic CLI assess from collector statusHints + evidence-graph nodes. Not a StackRail attestation. NOT_DEMONSTRATED means no scored collector report — not necessarily FAIL. Use the APRF Auditor skill for YES/NO/DON'T KNOW attestation fills.",
   };
 }
