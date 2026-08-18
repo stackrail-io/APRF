@@ -410,6 +410,18 @@
       "slug": "0012-cognitive-assurance",
       "href": "/aprf/rfc/0012-cognitive-assurance/",
       "markdownPath": "/aprf/rfc/0012-cognitive-assurance.md"
+    },
+    {
+      "id": "APRF-RFC-0013",
+      "number": 13,
+      "title": "Assessment Target Kinds and Framework Profile",
+      "status": "draft",
+      "created": "2026-08-18",
+      "semverImpact": "MINOR",
+      "summary": "Adds systemType classification, official aprf-profile-framework, applicationCapabilities→lenses, and resolveAssessmentTarget() so assessments select Checks from framework-definition SoT without mislabeling frameworks as Core.",
+      "slug": "0013-assessment-target-kinds",
+      "href": "/aprf/rfc/0013-assessment-target-kinds/",
+      "markdownPath": "/aprf/rfc/0013-assessment-target-kinds.md"
     }
   ],
   "scope": {
@@ -761,6 +773,29 @@
         "Adds residency, fairness, dual control, and signed admission for regulated blast radius.",
         "Requires chaos/continuity drills and independent assessment sampling.",
         "Target capability Level 5 — Tier 3 is not Core with a different label."
+      ]
+    },
+    {
+      "id": "aprf-profile-framework",
+      "name": "Framework / SDK (primitives)",
+      "summary": "Mandatory gates for agent/orchestration SDKs and libraries: execution bounds, tool allowlist/schema hooks, injection mediation, secrets hygiene, and supply chain. This is NOT an APRF Core or Regulated production-readiness gate — assess the customer application with Core/Regulated for that claim.",
+      "targetCriticality": 2,
+      "targetCapability": 3,
+      "mandatoryCheckIds": [
+        "AGN-M2",
+        "TOL-M2",
+        "TOL-M4",
+        "SEC-M1",
+        "SEC2-M1",
+        "SEC2-M2",
+        "SCI-M2"
+      ],
+      "rationale": [
+        "SDK runtimes must enforce finite step/time/spawn bounds (AGN-M2).",
+        "Tool allowlists and argument schema validation are framework primitives (TOL-M2/M4).",
+        "Untrusted input must not authorize privileged actions via framework mediation (SEC-M1).",
+        "Package secrets hygiene and supply-chain review remain library concerns (SEC2/SCI).",
+        "Charters, spend, SLOs, and org AuthN/Z are application concerns — not on this profile."
       ]
     }
   ],
@@ -9073,7 +9108,7 @@
       "package": "@stackrail-io/aprf-engine",
       "note": "Normative rule bodies live in packages/aprf-engine/rules/; pillars hydrate checks at load time."
     },
-    "profileCount": 2,
+    "profileCount": 3,
     "coreProfileCheckCount": 39,
     "crosswalkCount": 11,
     "crosswalkMappingCount": 261,

@@ -13,11 +13,11 @@ runtime inputs and import evidence — do not only summarize gaps.
 ## Do this
 
 1. Ensure Node.js ≥ 22 is available.
-2. **Before the first run (AI apps):** ask for a running **base URL**, and either an MCP inventory path or confirmation that admin/limited **email+password** or **bearer token** env vars are set locally (`APRF_ADMIN_*` / `APRF_AUTHZ_*`). **Never ask the user to paste passwords or tokens into chat.** If none, say you will run code-only and live Checks will stay undemonstrated.
+2. **Before the first run:** classify `systemType`. If unsure, **ask the user** (AI app vs framework/SDK vs non-AI platform) and wait — do not default to Core. For AI apps, also ask for a running **base URL**, and either an MCP inventory path or confirmation that admin/limited **email+password** or **bearer token** env vars are set locally (`APRF_ADMIN_*` / `APRF_AUTHZ_*`). **Never ask the user to paste passwords or tokens into chat.** If none, say you will run code-only and live Checks will stay undemonstrated.
 3. Shell (offline / code-only) when no URL yet:
 
 ```bash
-npx @stackrail-io/aprf@0.1.4 audit --target . --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.5 audit --target . --out ./aprf-assessment --system-type ai-application --profile core
 ```
 
 4. When the user provides a running app and confirms credential env vars are available (auto-enables live collectors; secrets never persisted). Prefer **env vars** set outside chat (secret manager or non-echoing prompt) — the CLI reads them without `--*-password` / `--*-token` flags:
@@ -28,13 +28,13 @@ npx @stackrail-io/aprf@0.1.4 audit --target . --out ./aprf-assessment --profile 
 #   — or — token-only: APRF_ADMIN_TOKEN
 # Optional AUTHZ-M1: APRF_AUTHZ_LIMITED_EMAIL + APRF_AUTHZ_LIMITED_PASSWORD
 #   — or — APRF_AUTHZ_LIMITED_TOKEN
-npx @stackrail-io/aprf@0.1.4 audit --target . --out ./aprf-assessment --profile core \
+npx @stackrail-io/aprf@0.1.5 audit --target . --out ./aprf-assessment --system-type ai-application --profile core \
   --base-url http://127.0.0.1:8080
 ```
 
 Do **not** pass `--admin-password`, `--limited-password`, `--admin-token`, or `--limited-token` on the command line (argv is visible to process lists / CI logs). Equivalent flags exist for tooling but are discouraged for secrets.
 
-5. If the user asked for regulated / lenses, adjust flags (`--profile regulated`, `--lens rag,agents`).
+5. If the user asked for regulated / framework / capabilities / lenses, adjust flags (`--profile regulated|framework`, `--capabilities rag,agents`, `--lens rag,agents`, `--system-type ai-framework`).
 6. Other collector evidence: drop measured JSON under `./aprf-assessment/imports/<pluginId>/` (or set env like `GITHUB_TOKEN`).
 7. Open/summarize `./aprf-assessment/assessment.json` and confirm `REPORT.html` has `stackrail.io` + `Visual overview`.
 8. List gate result, blocker count, and top P0/P1 findings.

@@ -16,8 +16,10 @@ export {
 export {
   PROFILE_ID_CORE,
   PROFILE_ID_REGULATED,
+  PROFILE_ID_FRAMEWORK,
   PROFILE_CORE,
   PROFILE_REGULATED,
+  PROFILE_FRAMEWORK,
   APRF_PROFILES,
   getProfileById,
   getTier3OnlyMandatoryIds,
@@ -36,5 +38,25 @@ export {
   getLensById,
   unionProfileAndLenses,
 } from "./lenses.js";
+
+export {
+  APPLICATION_CAPABILITY_IDS,
+  APPLICATION_CAPABILITIES,
+  lensIdsForCapabilities,
+  normalizeCapabilities,
+} from "./applicationCapabilities.js";
+export type {
+  ApplicationCapabilityId,
+  ApplicationCapabilityDef,
+} from "./applicationCapabilities.js";
+
+export { resolveAssessmentTarget } from "./resolveAssessmentTarget.js";
+export type {
+  AssessmentSystemType,
+  AssessmentKind,
+  ClaimMetadata,
+  ResolveAssessmentTargetInput,
+  ResolveAssessmentTargetResult,
+} from "./resolveAssessmentTarget.js";
 
 export { buildPolicyDigest, withPolicyDigest } from "./policy.js";

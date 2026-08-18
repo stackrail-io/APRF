@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@stackrail-io/aprf-engine": "0.12.0",
-    "@stackrail-io/aprf-framework-definition": "0.11.0",
+    "@stackrail-io/aprf-framework-definition": "0.12.0",
     "yaml": "^2.7.0"
   },
   "devDependencies": {

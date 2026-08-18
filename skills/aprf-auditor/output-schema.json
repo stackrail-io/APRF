@@ -50,16 +50,38 @@
         },
         "systemType": {
           "type": "string",
-          "enum": ["ai-application", "non-ai-platform", "unknown"]
+          "enum": [
+            "ai-application",
+            "ai-framework",
+            "non-ai-platform"
+          ],
+          "description": "Resolved target kind. Pre-resolution 'unknown' is not valid on finalized assessment.json."
         },
         "assessmentKind": {
           "type": "string",
           "enum": [
             "aprf-core",
             "aprf-regulated",
+            "aprf-framework",
             "full-catalog",
             "non-ai-platform-subset"
           ]
+        },
+        "applicationCapabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "chatbot",
+              "rag",
+              "agents",
+              "multi-agent-a2a",
+              "mcp-server",
+              "voice",
+              "coding-agent",
+              "other"
+            ]
+          }
         },
         "scopeId": { "type": "string" },
         "excludedCheckIds": {
@@ -74,7 +96,49 @@
           }
         },
         "reportBanner": { "type": "string" }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "systemType": { "const": "ai-framework" } },
+            "required": ["systemType"]
+          },
+          "then": {
+            "properties": {
+              "assessmentKind": { "const": "aprf-framework" },
+              "profileId": { "const": "aprf-profile-framework" },
+              "applicationCapabilities": { "maxItems": 0 },
+              "lensIds": { "maxItems": 0 }
+            },
+            "required": ["assessmentKind", "profileId", "reportBanner"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "systemType": { "const": "non-ai-platform" } },
+            "required": ["systemType"]
+          },
+          "then": {
+            "properties": {
+              "assessmentKind": { "const": "non-ai-platform-subset" }
+            },
+            "required": ["assessmentKind", "reportBanner"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "assessmentKind": { "const": "aprf-framework" } },
+            "required": ["assessmentKind"]
+          },
+          "then": {
+            "properties": {
+              "systemType": { "const": "ai-framework" },
+              "profileId": { "const": "aprf-profile-framework" }
+            },
+            "required": ["systemType", "profileId", "reportBanner"]
+          }
+        }
+      ]
     },
     "evidenceGraphPath": { "type": "string" },
     "executiveSummary": {

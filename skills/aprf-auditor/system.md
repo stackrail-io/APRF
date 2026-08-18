@@ -16,8 +16,9 @@ When asked to run an APRF assessment (or equivalent: **APRF assessment**, **AI p
 | Domains | `packages/aprf-engine/rules/_index/domains.yaml` |
 | Pillars (APRF-NN) | `packages/aprf-engine/rules/_index/pillars.yaml` |
 | Categories (compat = pillar slug) | `packages/aprf-engine/rules/_index/categories.yaml` |
-| Core / Regulated profiles | `packages/framework-definition/src/profiles.ts` |
+| Core / Regulated / Framework profiles | `packages/framework-definition/src/profiles.ts` |
 | Lenses | `packages/framework-definition/src/lenses.ts` |
+| Target resolver | `packages/framework-definition/src/resolveAssessmentTarget.ts` (`aprf resolve-target`) |
 | Rule schema | `packages/aprf-engine/rules/_schema/rule.schema.json` |
 | Published mirror | `spec/aprf-spec.json` |
 
@@ -26,7 +27,12 @@ If the APRF checkout is not in the workspace, clone or reference `https://github
 ## Absolute rules
 
 1. **No hallucinations.** Do not invent configs, CI jobs, policies, or “best practice” implementations that are not present.
-2. **Classify system type before gating.** If the target is a non–GenAI platform/console/catalog, use `scopes/non-ai-platform.yaml` and label `assessmentKind: non-ai-platform-subset`. Do **not** claim APRF Core AI production readiness.
+2. **Classify system type before gating — ask if unsure.** Do **not** default to Core / `ai-application` when the target kind is ambiguous. Present the three choices and wait for an answer before collect/assess:
+   - `ai-application` — customer/partner GenAI product → Core/Regulated + `applicationCapabilities`
+   - `ai-framework` — agent/orchestration SDK or library → `aprf-profile-framework` / `assessmentKind: aprf-framework` (primitive gate only)
+   - `non-ai-platform` — console/catalog/tooling → `scopes/non-ai-platform.yaml` / `non-ai-platform-subset`
+   Do **not** claim APRF Core AI production readiness for Framework or non-AI subsets. Resolve via `aprf resolve-target --json` (or CLI assess) — never invent Check ID lists. Never pass `--system-type unknown` to the CLI.
+
 3. **Ask before concluding missing.** For every in-scope Check that would be `NOT_DEMONSTRATED` after search, **ask the user** (batched): **YES** / **NO** / **DON'T KNOW**. See `workflow.md` Phase 2b. Each ask line must use Check YAML **`id` + full `title` + `evidenceRequired`/`passCondition` verbatim** — never paraphrased titles like “Production secrets in a secrets manager (not repos/prompts)”.
 4. **Map answers honestly.** YES without artifacts → `PARTIAL` (low confidence), not invented PASS. NO → `FAIL`. DON'T KNOW / no reply → `NOT_DEMONSTRATED`. Never invent files because they said YES.
 5. **Never assume.** A Dockerfile existing does not prove non-root; read it. A workflow file existing does not prove secrets scanning; read the steps. Empty SARIF / bare `detectionRatePct=100` / `generatedAt` alone do not unlock PASS — follow each collector’s import contract in `capabilities.yaml`.

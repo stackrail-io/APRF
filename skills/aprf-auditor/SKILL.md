@@ -65,7 +65,7 @@ Collectors: local by default; `aprf-assessment/imports/<plugin>/` for runtime ex
 
 ## Hard rules
 
-- **Classify `systemType` first.** Consoles / catalogs / tooling → `non-ai-platform` + `scopes/non-ai-platform.yaml` (subset gate). Only `ai-application` uses Core/Regulated as an AI production-readiness claim.
+- **Classify `systemType` first — ask the user if unsure.** Do **not** omit `--system-type` / silently run Core when the target could be an SDK, platform, or app. Offer: `ai-application` | `ai-framework` | `non-ai-platform`, wait for confirmation, then proceed. Agent SDKs / orchestration libraries → `ai-framework` + `--profile framework` (primitive gate; not Core). Consoles / catalogs / tooling → `non-ai-platform` + `scopes/non-ai-platform.yaml`. Only `ai-application` + Core/Regulated is an AI production-readiness claim. Dry-run: `aprf resolve-target --system-type … --capabilities … --json`.
 - **Ask for a live base URL early (Phase 0)** on `ai-application` assessments: running local/staging URL for `http-auth-probe` (AUTHN-M1). Do not wait until Phase 2b to discover you needed runtime. If none, say so and do not invent PASS.
 - **Ask for MCP/S2S inventory (AUTHN-M2)** when tools/MCP exist: redacted export under `imports/mcp-s2s-inventory/` or admin token for live fetch — never commit tokens.
 - **Never market subset PASS/FAIL as APRF Core.**
@@ -81,7 +81,7 @@ Collectors: local by default; `aprf-assessment/imports/<plugin>/` for runtime ex
 
 ## Modes
 
-- **assess** — default (`ai-application` or `non-ai-platform`)
+- **assess** — default (`ai-application`, `ai-framework`, or `non-ai-platform`)
 - **compare** — branch/ref diff → `comparison.json`
 - **history-append** — trend entries under `history/`
 

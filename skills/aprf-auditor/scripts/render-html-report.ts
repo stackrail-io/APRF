@@ -1558,9 +1558,11 @@ function render(a: Assessment): string {
   const lenses = (a.scope.lensIds ?? []).join(", ") || "none";
   const banner = a.scope.reportBanner
     ? `<div class="banner">${esc(a.scope.reportBanner)}</div>`
-    : a.scope.assessmentKind === "non-ai-platform-subset"
-      ? `<div class="banner">NON-AI / PLATFORM SUBSET — not an APRF Core AI production-readiness claim.</div>`
-      : "";
+    : a.scope.assessmentKind === "aprf-framework"
+      ? `<div class="banner">FRAMEWORK / SDK PRIMITIVE GATE — not an APRF Core or Regulated production-readiness claim.</div>`
+      : a.scope.assessmentKind === "non-ai-platform-subset"
+        ? `<div class="banner">NON-AI / PLATFORM SUBSET — not an APRF Core AI production-readiness claim.</div>`
+        : "";
 
   const statusCounts = countByStatus(a.controls);
   const severityCounts = countBySeverity(a.controls);

@@ -11,40 +11,50 @@ Read first: `capabilities.yaml`, `evidence-precedence.yaml`, `confidence.yaml`.
 
 1. Locate APRF source of truth (Check YAML is primary; `spec/aprf-spec.json` is published ID/`passCondition` mirror).
 2. Confirm SemVer (`skill.yaml` → `aprfVersion` or spec `governance.version`).
-3. **Classify system type** (required before profile):
+3. **Classify system type** (required before profile). Prefer CLI dry-run:
+   `npx @stackrail-io/aprf resolve-target --system-type … --capabilities … --json`
+   (canonical resolver in `@stackrail-io/aprf-framework-definition` — do **not** paste Check ID arrays as SoT).
 
-   | `systemType` | Meaning | Default profile / scope |
-   | --- | --- | --- |
-   | `ai-application` | Customer/partner-facing GenAI product (models, agents, RAG, tools in prod) | `aprf-profile-core` (or regulated) |
-   | `non-ai-platform` | Console, control plane, framework catalog, admin/tooling — **not** an AI product | `scopes/non-ai-platform.yaml` |
-   | `unknown` | Ambiguous | Ask the user; do not assume Core |
+   | `systemType` | Meaning | Default profile / scope | Claim |
+   | --- | --- | --- | --- |
+   | `ai-application` | Customer/partner-facing GenAI product | Core or Regulated ∪ `applicationCapabilities` lenses | Core / Regulated production readiness |
+   | `ai-framework` | Agent/orchestration SDK or library | `aprf-profile-framework` only | Framework / SDK **primitive** gate — **not** Core |
+   | `non-ai-platform` | Console, control plane, admin/tooling — **not** GenAI product | `scopes/non-ai-platform.yaml` (legacy) | Platform subset — **not** Core |
+   | `unknown` | Ambiguous | — | **Stop and ask the user** (do not run assess/audit); resolver throws; do not assume Core |
 
-   Detection hints for `non-ai-platform`: assessment console / cloudOps-style product, APRF catalog repo, no product prompts/agents/RAG/eval harness. Confirm with the user when unsure.
+   **If you cannot confidently classify:** ask in chat before any collect/assess, e.g.  
+   *“Is this (A) a customer-facing AI application, (B) an AI framework/SDK/library, or (C) a non-AI platform/console?”*  
+   The CLI also requires `--system-type` (or prompts on a TTY); do not omit it. `--profile framework` alone is enough to infer `ai-framework`.
+
+   Detection hints: agent SDK / CrewAI / LangGraph library → `ai-framework`; assessment console / catalog with no product prompts/agents/RAG → `non-ai-platform`. Confirm when unsure.
 
 4. Ask (or infer with stated defaults):
    - **Criticality tier (0–3):** Sandbox / Internal / Production / Mission Critical — map to `scope.criticality` and copy names into `executiveSummary` per `scoring.yaml` → `criticalityTiers` ([maturity model](https://stackrail.io/aprf/how/#maturity))
    - **Required capability level:** from that tier (L1–L4 floor; Regulated often targets L5)
-   - **Profile / scope:** Core | Regulated | full-catalog | **non-ai-platform subset**
-   - **Lenses:** none unless `ai-application` (RAG | Agents | Voice | Coding)
+   - **Profile / scope:** Core | Regulated | Framework | full-catalog | **non-ai-platform subset**
+   - **`applicationCapabilities` (ai-application only, multi-select):** `chatbot` | `rag` | `agents` | `multi-agent-a2a` | `mcp-server` | `voice` | `coding-agent` | `other` — additive lenses only; never remove Core mandatories
+   - **Extra `--lens`:** optional; ignored for `ai-framework`
    - **Target path** (+ optional **baseline** git ref for compare mode)
    - **Live base URL (required for `ai-application` before collect finishes):** ask up front —
      *“Is there a running instance I can probe (local/staging URL)?”*
      - If **yes** → record as `APRF_AUTH_PROBE_BASE_URL` / `--base-url` and run `http-auth-probe` during Phase 2
      - If **not yet** → ask them to start the app (or paste URL when ready); do **not** PASS AUTHN-M1 from code alone; you may continue repo discovery but keep AUTHN-M1 open until probe or explicit Phase 2b
-     - If **no runnable instance** (library-only / docs-only) → document that; AUTHN-M1 stays NOT_DEMONSTRATED or N/A with justified `naReason` (no customer-facing HTTP API)
+     - If **no runnable instance** (library-only / docs-only / framework SDK) → document that; AUTHN-M1 stays NOT_DEMONSTRATED or N/A with justified `naReason` (no customer-facing HTTP API)
    - **MCP/S2S inventory (AUTHN-M2, when the app has tools/MCP):** ask with the live URL —
-     *“Can you export tool-server/MCP connection config (redact secrets), or provide an admin token for inventory fetch?”*
-     - Prefer `imports/mcp-s2s-inventory/*.json`, or `--base-url` with `--admin-token` / `APRF_ADMIN_TOKEN`, or `--admin-email` + `--admin-password` (sign-in → JWT)
+     *“Can you export tool-server/MCP connection config (redact secrets), or confirm admin creds are set locally for inventory fetch?”*
+     - Prefer `imports/mcp-s2s-inventory/*.json`, or `--base-url` with env `APRF_ADMIN_TOKEN`, or `APRF_ADMIN_EMAIL` + `APRF_ADMIN_PASSWORD` (CLI reads env; do **not** pass passwords/tokens on argv)
      - Never commit tokens; never store raw API keys in reports
-5. Load in-scope Check IDs:
-   - `ai-application` → profile ∪ lenses
+5. Load in-scope Check IDs via resolver (or CLI assess/audit which call it):
+   - `ai-application` → profile ∪ capability lenses ∪ `--lens`
+   - `ai-framework` → `aprf-profile-framework` mandatories only (7 Checks)
    - `non-ai-platform` → **only** `scopes/non-ai-platform.yaml` → `mandatoryCheckIds` (do **not** evaluate excluded AI Checks as blockers; list them under `scope.excludedCheckIds` with reasons)
-6. Set report labels:
-   - `scope.systemType`
-   - `scope.assessmentKind`: `aprf-core` | `aprf-regulated` | `full-catalog` | `non-ai-platform-subset`
+6. Set report labels from resolver output:
+   - `scope.systemType`, `scope.applicationCapabilities`, `scope.profileId`, `scope.lensIds`
+   - `scope.assessmentKind`: `aprf-core` | `aprf-regulated` | `aprf-framework` | `full-catalog` | `non-ai-platform-subset`
+   - `scope.reportBanner` from `claimMetadata.reportBanner` whenever set (Framework / non-AI)
    - `executiveSummary.criticalityTier` / `criticalityName` / `requiredCapabilityLevel` / `requiredCapabilityName` / `maturityUrl`
    - `overallGrade` / `riskLevel` are **secondary** only (optional communication)
-   - For subset: copy `claimLanguage.reportBanner` into executive summary + disclaimer (**forbidden** to claim Core/Regulated AI production readiness)
+   - **Forbidden** to claim Core/Regulated AI production readiness for `aprf-framework` or `non-ai-platform-subset`
 
 ## Phase 1 — Discover + select collectors
 

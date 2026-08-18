@@ -38,15 +38,13 @@ import {
   type EvidenceTier,
 } from "@stackrail-io/aprf-engine";
 import {
-  PROFILE_CORE,
-  PROFILE_REGULATED,
-  PROFILE_ID_CORE,
-  PROFILE_ID_REGULATED,
-  getProfileById,
+  PROFILE_FRAMEWORK,
+  PROFILE_ID_FRAMEWORK,
   getLensById,
-  unionProfileAndLenses,
-  type AprfProfile,
+  resolveAssessmentTarget,
   type AprfLens,
+  type AssessmentSystemType,
+  type ResolveAssessmentTargetResult,
 } from "@stackrail-io/aprf-framework-definition";
 import {
   customerFacingImportGap,
@@ -399,33 +397,6 @@ function mergeHints(
 ): Map<string, HintHit> {
   const out = new Map(imports);
   for (const [id, hit] of details) setHint(out, id, hit);
-  return out;
-}
-
-function resolveProfile(profileId: string): AprfProfile {
-  if (profileId === PROFILE_ID_REGULATED || profileId === "regulated") {
-    return PROFILE_REGULATED;
-  }
-  if (profileId === PROFILE_ID_CORE || profileId === "core") {
-    return PROFILE_CORE;
-  }
-  const profile = getProfileById(profileId);
-  if (!profile) {
-    throw new Error(
-      `Unknown APRF profile: ${profileId}. Use "core", "regulated", or a catalog profile id.`,
-    );
-  }
-  return profile;
-}
-
-function resolveLenses(lensIds: string[]): AprfLens[] {
-  const out: AprfLens[] = [];
-  for (const raw of lensIds) {
-    const id =
-      raw.startsWith("aprf-lens-") ? raw : `aprf-lens-${raw.replace(/^lens-/, "")}`;
-    const lens = getLensById(id);
-    if (lens) out.push(lens);
-  }
   return out;
 }
 
@@ -845,23 +816,74 @@ export type AssessOptions = {
   outDir: string;
   profileId?: string;
   lensIds?: string[];
+  /** applicationCapabilities (ai-application). */
+  capabilities?: string[];
+  /** When omitted in programmatic assess, defaults to ai-application. CLI requires --system-type (or TTY prompt / APRF_SYSTEM_TYPE / --profile framework). */
+  systemType?: AssessmentSystemType;
   /** Score full non-deprecated catalog. */
   fullCatalog?: boolean;
   graph?: EvidenceGraph;
 };
 
+/** Normalize CLI profile/systemType into a resolveAssessmentTarget call. */
+export function resolveAssessTargetFromOptions(opts: {
+  profileId?: string;
+  lensIds?: string[];
+  capabilities?: string[];
+  systemType?: AssessmentSystemType;
+  fullCatalog?: boolean;
+}): ResolveAssessmentTargetResult {
+  let systemType: AssessmentSystemType = opts.systemType ?? "ai-application";
+  const profileRaw = opts.profileId;
+  const isFrameworkProfile =
+    profileRaw === "framework" ||
+    profileRaw === PROFILE_ID_FRAMEWORK ||
+    profileRaw === PROFILE_FRAMEWORK.id;
+
+  // G2: --profile framework without systemType ⇒ infer ai-framework
+  if (opts.systemType == null && isFrameworkProfile) {
+    systemType = "ai-framework";
+  }
+
+  if (systemType === "ai-application" && isFrameworkProfile) {
+    throw new Error(
+      "systemType=ai-application is incompatible with --profile framework. Use --system-type ai-framework or a Core/Regulated profile.",
+    );
+  }
+
+  // Pass requested profile through so ai-framework + core/regulated hard-errors in the resolver.
+  // Omit profile on ai-framework ⇒ default Framework profile.
+  const profileId = isFrameworkProfile
+    ? PROFILE_ID_FRAMEWORK
+    : systemType === "ai-framework" && !profileRaw
+      ? PROFILE_ID_FRAMEWORK
+      : profileRaw;
+
+  return resolveAssessmentTarget({
+    systemType,
+    profileId,
+    capabilities: opts.capabilities,
+    explicitLensIds: opts.lensIds,
+    fullCatalog: opts.fullCatalog,
+  });
+}
+
 export function assessFromStatusHints(opts: AssessOptions): unknown {
   const outDir = resolve(opts.outDir);
-  const profile = resolveProfile(opts.profileId ?? PROFILE_ID_CORE);
-  const lenses = resolveLenses(opts.lensIds ?? []);
-  const mandatoryIds = new Set(
-    lenses.length
-      ? unionProfileAndLenses(
-          profile.mandatoryCheckIds,
-          lenses.map((l) => l.id),
-        )
-      : [...profile.mandatoryCheckIds],
-  );
+  const resolved = resolveAssessTargetFromOptions(opts);
+  for (const w of resolved.warnings) {
+    console.warn(`aprf assess: ${w}`);
+  }
+  if (resolved.systemType === "non-ai-platform") {
+    throw new Error(
+      "systemType=non-ai-platform is not supported by CLI assess yet. Use the APRF Auditor skill with scopes/non-ai-platform.yaml.",
+    );
+  }
+  const profile = resolved.profile;
+  const lenses = resolved.lensIds
+    .map((id) => getLensById(id))
+    .filter((l): l is AprfLens => Boolean(l));
+  const mandatoryIds = new Set(resolved.effectiveCheckIds);
 
   const catalog = getGeneratedCatalog();
   const rulesById = new Map(catalog.rules.map((r) => [r.id, r]));
@@ -1269,12 +1291,15 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     scope: {
       profileId: profile.id,
       criticality: profile.targetCriticality,
-      lensIds: lenses.map((l) => l.id),
+      lensIds: resolved.lensIds,
       checkIds: [...checkIds].sort(),
       mode: "assess",
-      assessmentKind:
-        profile.id === PROFILE_ID_REGULATED ? "aprf-regulated" : "aprf-core",
-      systemType: "ai-application",
+      assessmentKind: resolved.assessmentKind,
+      systemType: resolved.systemType,
+      applicationCapabilities: resolved.applicationCapabilities,
+      ...(resolved.claimMetadata.reportBanner
+        ? { reportBanner: resolved.claimMetadata.reportBanner }
+        : {}),
     },
     evidenceGraphPath: "evidence-graph.json",
     executiveSummary: {
@@ -1292,7 +1317,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       recommendedScore,
       blockerCount: blockers.length,
       criticalBlockerCount: criticalBlockers.length,
-      narrative: `APRF CLI assess against ${profile.name}${lenses.length ? ` + lenses [${lenses.map((l) => l.name).join(", ")}]` : ""}: ${hintedCount}/${controls.length} Checks scored from collector statusHints; unscored → NOT_DEMONSTRATED. Gate ${overallGatePassed ? "PASS" : "FAIL"} (${blockers.length} mandatory blockers, ${criticalBlockers.length} critical). recommendedScore=${recommendedScore == null ? "n/a" : recommendedScore} (prioritization only).`,
+      narrative: `APRF CLI assess (${resolved.assessmentKind}) against ${profile.name}${lenses.length ? ` + lenses [${lenses.map((l) => l.name).join(", ")}]` : ""}${resolved.applicationCapabilities.length ? ` + capabilities [${resolved.applicationCapabilities.join(", ")}]` : ""}: ${hintedCount}/${controls.length} Checks scored from collector statusHints; unscored → NOT_DEMONSTRATED. Gate ${overallGatePassed ? "PASS" : "FAIL"} (${blockers.length} mandatory blockers, ${criticalBlockers.length} critical). recommendedScore=${recommendedScore == null ? "n/a" : recommendedScore} (prioritization only).${resolved.assessmentKind === "aprf-framework" ? " This is a Framework/SDK primitive gate — not Core production readiness." : ""}`,
     },
     domainScores,
     controls,
@@ -1312,7 +1337,9 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       longTerm: roadmapLater,
     },
     disclaimer:
-      "Deterministic CLI assess from collector statusHints + evidence-graph nodes. Not a StackRail attestation. NOT_DEMONSTRATED means no scored collector report — not necessarily FAIL. Use the APRF Auditor skill for YES/NO/DON'T KNOW attestation fills.",
+      resolved.assessmentKind === "aprf-framework"
+        ? "Framework / SDK primitive gate (assessmentKind=aprf-framework). Not an APRF Core or Regulated production-readiness claim. Deterministic CLI assess from collector statusHints + evidence-graph nodes. Not a StackRail attestation. NOT_DEMONSTRATED means no scored collector report — not necessarily FAIL."
+        : "Deterministic CLI assess from collector statusHints + evidence-graph nodes. Not a StackRail attestation. NOT_DEMONSTRATED means no scored collector report — not necessarily FAIL. Use the APRF Auditor skill for YES/NO/DON'T KNOW attestation fills.",
   };
 }
 

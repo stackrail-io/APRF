@@ -22,15 +22,26 @@ Requires **Node.js ≥ 22**.
 # Collect evidence graph + per-plugin import reports
 aprf collect --target /path/to/app --out ./aprf-assessment
 
-# Score profile mandatories only (39 for core). Use --full for the whole catalog.
-aprf assess --out ./aprf-assessment --profile core
+# Score profile mandatories (requires --system-type, or TTY prompt)
+aprf assess --out ./aprf-assessment --system-type ai-application --profile core
+
+# Framework / SDK primitive gate (infers systemType=ai-framework)
+aprf assess --out ./aprf-assessment --profile framework
+
+# Application with capability lenses (additive)
+aprf assess --out ./aprf-assessment --system-type ai-application \
+  --capabilities rag,agents --profile core
+
+# Dry-run Check set / claim metadata (skill Phase 0)
+aprf resolve-target --system-type ai-framework --json
 
 # Render + verify HTML
 aprf report --in ./aprf-assessment/assessment.json --out ./aprf-assessment/REPORT.html
 aprf verify ./aprf-assessment/REPORT.html
 
 # One shot: collect → assess → report → verify
-aprf audit --target . --out ./aprf-assessment --profile core
+aprf audit --target . --out ./aprf-assessment --system-type ai-application --profile core
+aprf audit --target . --out ./aprf-assessment --profile framework
 ```
 
 ### Live credentials (collect / audit)
@@ -44,7 +55,7 @@ Prefer **environment variables** set outside chat (secret manager or non-echoing
 #   APRF_ADMIN_EMAIL + APRF_ADMIN_PASSWORD  — or — APRF_ADMIN_TOKEN
 # Optional AUTHZ-M1: APRF_AUTHZ_LIMITED_EMAIL + APRF_AUTHZ_LIMITED_PASSWORD
 #   — or — APRF_AUTHZ_LIMITED_TOKEN
-npx @stackrail-io/aprf audit --target . --out ./aprf-assessment --profile core \
+npx @stackrail-io/aprf audit --target . --out ./aprf-assessment --system-type ai-application --profile core \
   --base-url http://127.0.0.1:8080
 ```
 
@@ -65,11 +76,15 @@ Aligned with auditor `scoring.yaml` / `confidence.yaml` / `evidence-precedence.y
 - Evidence-graph nodes with `relatedCheckIds` attached (precedence-ranked)
 - Mandatory gate: every applicable mandatory is `PASS` or `NOT_APPLICABLE`
 - `NOT_APPLICABLE` is excluded (`passed: false`) — not a vanity pass
-- Default assess scores **profile mandatories only** (collector hints outside the gate are ignored). `--full` scores the non-deprecated catalog.
+- Default assess scores **profile mandatories only** (collector hints outside the gate are ignored). `--full` scores the non-deprecated catalog (`ai-application` only; forbidden with `--system-type ai-framework`).
 - Unscored profile Checks → `NOT_DEMONSTRATED` (blocker if mandatory)
 - `recommendedScore` = severity-weighted recommended Checks only (`null` / n/a under default profile assess; use `--full` to score recommended)
-- `audit` without `--plugins` / `--full` collects only plugins that map to the profile gate
+- `audit` without `--plugins` / `--full` collects only plugins that map to resolver **`effectiveCheckIds`** (profile ∪ capabilities ∪ lenses)
+- Required `--system-type ai-application|ai-framework|non-ai-platform` for assess/audit/resolve-target (TTY prompts when omitted; non-TTY needs the flag, `APRF_SYSTEM_TYPE`, or `--profile framework`). No silent Core default.
+- Optional `--capabilities chatbot,rag,agents,…` (ai-application; additive lenses)
 - Optional `--lens rag,agents,voice,coding`
+- `aprf resolve-target --json` prints resolver output for skill/dry-run
+- Framework assessments set `assessmentKind=aprf-framework` + `scope.reportBanner` (not a Core production claim)
 - Each control may include informative `crosswalks` and `threatIntel` from the pinned catalog (never gate inputs)
 - `REPORT.html` executive summary includes **Top threat exposure** across unmet controls
 
@@ -81,7 +96,7 @@ Agent YES/NO/DON'T KNOW attestation fills remain in [`skills/aprf-auditor`](../.
 | --- | --- |
 | `@stackrail-io/aprf` | This CLI |
 | `@stackrail-io/aprf-engine` | Normative Check catalog |
-| `@stackrail-io/aprf-framework-definition` | Profiles / lenses |
+| `@stackrail-io/aprf-framework-definition` | Profiles / lenses / `resolveAssessmentTarget` |
 
 `aprf version` prints CLI + catalog SemVer.
 

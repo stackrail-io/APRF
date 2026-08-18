@@ -6,6 +6,7 @@ aprfVersion: "0.11.0"
 
 principles:
   - "Mandatory Checks in profile ∪ lenses form the gate for ai-application assessments."
+  - "aprf-framework uses aprf-profile-framework only — Framework/SDK primitive gate; never claim Core/Regulated AI readiness."
   - "non-ai-platform-subset uses scopes/non-ai-platform.yaml only — never claim Core/Regulated AI readiness."
   - "Recommended Checks never alone define Core/Regulated gate pass."
   - "NOT_DEMONSTRATED on a mandatory Check is a blocker (same as DON'T KNOW / unanswered after ask)."
