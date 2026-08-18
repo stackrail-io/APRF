@@ -40,15 +40,15 @@ Package: `@stackrail-io/aprf` (Node ≥ 22)
 ```bash
 # Prerequisites already set in the local shell (never pass passwords/tokens on argv):
 #   APRF_ADMIN_EMAIL + APRF_ADMIN_PASSWORD  — or — APRF_ADMIN_TOKEN
-npx @stackrail-io/aprf@0.1.5 audit --target . --out ./aprf-assessment --system-type ai-application --profile core \
+npx @stackrail-io/aprf@0.1.6 audit --target . --out ./aprf-assessment --system-type ai-application --profile core \
   --base-url http://127.0.0.1:8080
 ```
 
 Framework / SDK:
 
 ```bash
-npx @stackrail-io/aprf@0.1.5 audit --target . --out ./aprf-assessment --profile framework
-npx @stackrail-io/aprf@0.1.5 resolve-target --system-type ai-framework --json
+npx @stackrail-io/aprf@0.1.6 audit --target . --out ./aprf-assessment --profile framework
+npx @stackrail-io/aprf@0.1.6 resolve-target --system-type ai-framework --json
 ```
 
 Other evidence: `./aprf-assessment/imports/<pluginId>/*.json`, or env such as `GITHUB_TOKEN`.
@@ -56,7 +56,7 @@ Other evidence: `./aprf-assessment/imports/<pluginId>/*.json`, or env such as `G
 ## npm
 
 ```bash
-npx @stackrail-io/aprf@0.1.5 <command> …
+npx @stackrail-io/aprf@0.1.6 <command> …
 # or after publish:
 npm install -g @stackrail-io/aprf
 aprf audit --target . --system-type ai-application --profile core
