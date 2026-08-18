@@ -60,6 +60,7 @@ invariants:
   - Check IDs are immutable; do not renumber or invent new normative IDs.
   - Confidence from confidence.yaml (class × freshness), not vibes.
   - non-ai-platform subset must never be labeled as APRF Core/Regulated AI production readiness.
+  - When systemType is ambiguous, ask the user (ai-application | ai-framework | non-ai-platform) before collect/assess — never silently default to Core.
   - REPORT.html must be produced only by scripts/render-html-report.ts (never hand-written); must contain stackrail.io and Visual overview.
 
 defaultProfile: aprf-profile-core

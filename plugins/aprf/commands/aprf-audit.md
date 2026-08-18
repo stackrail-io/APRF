@@ -13,7 +13,7 @@ runtime inputs and import evidence — do not only summarize gaps.
 ## Do this
 
 1. Ensure Node.js ≥ 22 is available.
-2. **Before the first run (AI apps):** ask for a running **base URL**, and either an MCP inventory path or confirmation that admin/limited **email+password** or **bearer token** env vars are set locally (`APRF_ADMIN_*` / `APRF_AUTHZ_*`). **Never ask the user to paste passwords or tokens into chat.** If none, say you will run code-only and live Checks will stay undemonstrated.
+2. **Before the first run:** classify `systemType`. If unsure, **ask the user** (AI app vs framework/SDK vs non-AI platform) and wait — do not default to Core. For AI apps, also ask for a running **base URL**, and either an MCP inventory path or confirmation that admin/limited **email+password** or **bearer token** env vars are set locally (`APRF_ADMIN_*` / `APRF_AUTHZ_*`). **Never ask the user to paste passwords or tokens into chat.** If none, say you will run code-only and live Checks will stay undemonstrated.
 3. Shell (offline / code-only) when no URL yet:
 
 ```bash

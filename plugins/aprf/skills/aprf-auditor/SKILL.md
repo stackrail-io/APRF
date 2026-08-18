@@ -31,9 +31,14 @@ runtime URLs, credentials, and import paths — never finish with gap lists alon
 
 ## Before the first audit (required)
 
-Classify the target (`ai-application` | `ai-framework` | `non-ai-platform`). Dry-run:
-`npx @stackrail-io/aprf@0.1.5 resolve-target --system-type … --capabilities … --json`.
-For an AI app, **ask up front** (do not wait until after a code-only run):
+**Classify the target — ask if unsure.** Do **not** start `audit`/`assess` until `systemType` is confirmed:
+`ai-application` | `ai-framework` | `non-ai-platform`.
+
+If ambiguous, ask in chat first, e.g.  
+*“Is this (A) a customer-facing AI app, (B) an AI framework/SDK, or (C) a non-AI platform/console?”*  
+Then dry-run: `npx @stackrail-io/aprf@0.1.5 resolve-target --system-type … --capabilities … --json`.
+
+For an AI app, **also ask up front** (do not wait until after a code-only run):
 
 1. **Running base URL?** (e.g. `http://127.0.0.1:8080`) — needed for AUTHN-M1 / live probes.
 2. If tools/MCP look present: **MCP/S2S inventory path** under `./aprf-assessment/imports/mcp-s2s-inventory/`, or confirm live fetch via env (`APRF_ADMIN_TOKEN`, or `APRF_ADMIN_EMAIL` + `APRF_ADMIN_PASSWORD`) for AUTHN-M2.
