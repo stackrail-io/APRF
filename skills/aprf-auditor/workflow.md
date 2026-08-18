@@ -24,7 +24,7 @@ Read first: `capabilities.yaml`, `evidence-precedence.yaml`, `confidence.yaml`.
 
    **If you cannot confidently classify:** ask in chat before any collect/assess, e.g.  
    *“Is this (A) a customer-facing AI application, (B) an AI framework/SDK/library, or (C) a non-AI platform/console?”*  
-   Do **not** omit `--system-type` to “get started” — CLI defaulting to `ai-application` is for scripted apps only, not for ambiguous agent runs.
+   The CLI also requires `--system-type` (or prompts on a TTY); do not omit it. `--profile framework` alone is enough to infer `ai-framework`.
 
    Detection hints: agent SDK / CrewAI / LangGraph library → `ai-framework`; assessment console / catalog with no product prompts/agents/RAG → `non-ai-platform`. Confirm when unsure.
 

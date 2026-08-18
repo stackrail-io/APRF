@@ -56,13 +56,13 @@ Requires **Node.js ≥ 22**. Resolve the CLI in this order:
 
 ```bash
 npm run build -w @stackrail-io/aprf
-node packages/aprf/dist/cli.js audit --target . --out ./aprf-assessment --profile core
+node packages/aprf/dist/cli.js audit --target . --out ./aprf-assessment --system-type ai-application --profile core
 ```
 
 2. **Published npm** (any other project):
 
 ```bash
-npx @stackrail-io/aprf@0.1.5 audit --target . --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.5 audit --target . --out ./aprf-assessment --system-type ai-application --profile core
 ```
 
 Variants (same flags on either binary):
@@ -73,7 +73,7 @@ Variants (same flags on either binary):
 #   APRF_ADMIN_EMAIL + APRF_ADMIN_PASSWORD  — or —  APRF_ADMIN_TOKEN
 # Optional AUTHZ-M1: APRF_AUTHZ_LIMITED_EMAIL + APRF_AUTHZ_LIMITED_PASSWORD  — or —  APRF_AUTHZ_LIMITED_TOKEN
 # Avoid --*-password / --*-token on argv
-… audit --target . --out ./aprf-assessment --profile core \
+… audit --target . --out ./aprf-assessment --system-type ai-application --profile core \
   --base-url http://127.0.0.1:8080
 
 # Regulated profile
@@ -83,10 +83,10 @@ Variants (same flags on either binary):
 … audit --target . --profile framework
 
 # Application capabilities (additive lenses)
-… audit --target . --profile core --capabilities rag,agents
+… audit --target . --system-type ai-application --profile core --capabilities rag,agents
 
 # Extra lenses
-… audit --target . --profile core --lens rag,agents
+… audit --target . --system-type ai-application --profile core --lens rag,agents
 
 # Full catalog (ai-application only)
 … audit --target . --full

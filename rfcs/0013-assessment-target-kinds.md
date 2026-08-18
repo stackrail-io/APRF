@@ -54,7 +54,7 @@ Non-goals: capabilities/`--lens` never replace the profile; collectors never add
 - `ai-framework` + Core/Regulated profile → hard error.
 - `ai-application` + Framework profile → hard error.
 - `ai-framework` + `--full` → hard error.
-- Omit `--system-type` → default `ai-application` (CLI compat).
+- Omit `--system-type` → CLI **asks** on a TTY; non-TTY requires the flag, `APRF_SYSTEM_TYPE`, or `--profile framework` (no silent Core default).
 - `--profile framework` without systemType → infer `ai-framework`.
 - Empty capabilities on application → Core/Regulated only + warning; empty ≠ `other`.
 - Invalid capability ID → hard error.

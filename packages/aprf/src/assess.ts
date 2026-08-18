@@ -818,7 +818,7 @@ export type AssessOptions = {
   lensIds?: string[];
   /** applicationCapabilities (ai-application). */
   capabilities?: string[];
-  /** Defaults to ai-application when omitted (CLI compat). */
+  /** When omitted in programmatic assess, defaults to ai-application. CLI requires --system-type (or TTY prompt / APRF_SYSTEM_TYPE / --profile framework). */
   systemType?: AssessmentSystemType;
   /** Score full non-deprecated catalog. */
   fullCatalog?: boolean;

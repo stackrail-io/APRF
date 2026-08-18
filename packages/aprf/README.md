@@ -22,8 +22,8 @@ Requires **Node.js ≥ 22**.
 # Collect evidence graph + per-plugin import reports
 aprf collect --target /path/to/app --out ./aprf-assessment
 
-# Score profile mandatories only (39 for core). Use --full for the whole catalog.
-aprf assess --out ./aprf-assessment --profile core
+# Score profile mandatories (requires --system-type, or TTY prompt)
+aprf assess --out ./aprf-assessment --system-type ai-application --profile core
 
 # Framework / SDK primitive gate (infers systemType=ai-framework)
 aprf assess --out ./aprf-assessment --profile framework
@@ -40,7 +40,7 @@ aprf report --in ./aprf-assessment/assessment.json --out ./aprf-assessment/REPOR
 aprf verify ./aprf-assessment/REPORT.html
 
 # One shot: collect → assess → report → verify
-aprf audit --target . --out ./aprf-assessment --profile core
+aprf audit --target . --out ./aprf-assessment --system-type ai-application --profile core
 aprf audit --target . --out ./aprf-assessment --profile framework
 ```
 
@@ -55,7 +55,7 @@ Prefer **environment variables** set outside chat (secret manager or non-echoing
 #   APRF_ADMIN_EMAIL + APRF_ADMIN_PASSWORD  — or — APRF_ADMIN_TOKEN
 # Optional AUTHZ-M1: APRF_AUTHZ_LIMITED_EMAIL + APRF_AUTHZ_LIMITED_PASSWORD
 #   — or — APRF_AUTHZ_LIMITED_TOKEN
-npx @stackrail-io/aprf audit --target . --out ./aprf-assessment --profile core \
+npx @stackrail-io/aprf audit --target . --out ./aprf-assessment --system-type ai-application --profile core \
   --base-url http://127.0.0.1:8080
 ```
 
@@ -80,7 +80,7 @@ Aligned with auditor `scoring.yaml` / `confidence.yaml` / `evidence-precedence.y
 - Unscored profile Checks → `NOT_DEMONSTRATED` (blocker if mandatory)
 - `recommendedScore` = severity-weighted recommended Checks only (`null` / n/a under default profile assess; use `--full` to score recommended)
 - `audit` without `--plugins` / `--full` collects only plugins that map to resolver **`effectiveCheckIds`** (profile ∪ capabilities ∪ lenses)
-- Optional `--system-type ai-application|ai-framework|non-ai-platform` (default `ai-application`; `--profile framework` infers `ai-framework`)
+- Required `--system-type ai-application|ai-framework|non-ai-platform` for assess/audit/resolve-target (TTY prompts when omitted; non-TTY needs the flag, `APRF_SYSTEM_TYPE`, or `--profile framework`). No silent Core default.
 - Optional `--capabilities chatbot,rag,agents,…` (ai-application; additive lenses)
 - Optional `--lens rag,agents,voice,coding`
 - `aprf resolve-target --json` prints resolver output for skill/dry-run

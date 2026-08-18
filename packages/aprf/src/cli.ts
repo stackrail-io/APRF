@@ -10,6 +10,8 @@
  *   npx @stackrail-io/aprf version
  */
 import { resolve } from "node:path";
+import { createInterface } from "node:readline/promises";
+import { stdin as input, stdout as output } from "node:process";
 import {
   runCollectors,
   type CollectOptions,
@@ -72,15 +74,19 @@ Collect / audit options (live credentials are never written to reports):
 
 Assess / audit / resolve-target options:
   --profile <id>         core | regulated | framework | aprf-profile-*
-  --system-type <t>      ai-application (default) | ai-framework | non-ai-platform
+  --system-type <t>      Required for assess/audit/resolve-target unless
+                         --profile framework (infers ai-framework).
+                         Values: ai-application | ai-framework | non-ai-platform
+                         Interactive TTY prompts when omitted; non-TTY requires
+                         the flag or APRF_SYSTEM_TYPE. No silent Core default.
   --capabilities a,b     applicationCapabilities (ai-application): chatbot,rag,agents,
                          multi-agent-a2a,mcp-server,voice,coding-agent,other
   --lens a,b             Optional extra lenses: rag, agents, voice, coding
   --full                 Score full catalog (forbidden with ai-framework)
 
 Examples:
-  aprf audit --target . --out ./aprf-assessment --profile core
-  aprf audit --target . --profile framework --system-type ai-framework
+  aprf audit --target . --out ./aprf-assessment --system-type ai-application --profile core
+  aprf audit --target . --profile framework
   aprf assess --out ./aprf-assessment --system-type ai-application \\
     --capabilities rag,agents --profile core
   aprf resolve-target --system-type ai-framework --json
@@ -109,9 +115,7 @@ function defaultOut(argv: string[]): string {
   return resolve(takeFlag(argv, "--out") ?? "aprf-assessment");
 }
 
-function parseSystemType(argv: string[]): AssessmentSystemType | undefined {
-  const raw = takeFlag(argv, "--system-type");
-  if (!raw) return undefined;
+function parseSystemTypeValue(raw: string): AssessmentSystemType {
   if (
     raw === "ai-application" ||
     raw === "ai-framework" ||
@@ -120,12 +124,69 @@ function parseSystemType(argv: string[]): AssessmentSystemType | undefined {
     return raw;
   }
   throw new Error(
-    `Invalid --system-type ${raw}. Use ai-application | ai-framework | non-ai-platform`,
+    `Invalid system type ${raw}. Use ai-application | ai-framework | non-ai-platform`,
   );
 }
 
-function parseAssessFlags(argv: string[]) {
-  return {
+function parseSystemType(argv: string[]): AssessmentSystemType | undefined {
+  const raw = takeFlag(argv, "--system-type") ?? process.env.APRF_SYSTEM_TYPE;
+  if (!raw) return undefined;
+  return parseSystemTypeValue(raw);
+}
+
+function isFrameworkProfileFlag(profileId: string | undefined): boolean {
+  return (
+    profileId === "framework" || profileId === "aprf-profile-framework"
+  );
+}
+
+/** Interactive / fail-closed resolution — never silently default to Core. */
+async function requireSystemType(opts: {
+  systemType?: AssessmentSystemType;
+  profileId?: string;
+}): Promise<AssessmentSystemType> {
+  if (opts.systemType) return opts.systemType;
+  if (isFrameworkProfileFlag(opts.profileId)) return "ai-framework";
+
+  const canPrompt = Boolean(input.isTTY && output.isTTY);
+  if (canPrompt) {
+    console.log(`
+Select assessment target kind (required — do not assume Core):
+  1) ai-application   Customer/partner-facing GenAI product (Core/Regulated claim)
+  2) ai-framework     Agent/orchestration SDK or library (primitive gate only)
+  3) non-ai-platform  Console/catalog/tooling (legacy auditor scope; not CLI assess yet)
+`);
+    const rl = createInterface({ input, output });
+    try {
+      const answer = (await rl.question("Enter 1, 2, 3, or type the id: ")).trim();
+      const map: Record<string, AssessmentSystemType> = {
+        "1": "ai-application",
+        "2": "ai-framework",
+        "3": "non-ai-platform",
+        "ai-application": "ai-application",
+        "ai-framework": "ai-framework",
+        "non-ai-platform": "non-ai-platform",
+      };
+      const chosen = map[answer];
+      if (!chosen) {
+        throw new Error(
+          `Unrecognized system type "${answer}". Pass --system-type ai-application|ai-framework|non-ai-platform`,
+        );
+      }
+      console.log(`Using --system-type ${chosen}`);
+      return chosen;
+    } finally {
+      rl.close();
+    }
+  }
+
+  throw new Error(
+    "Missing --system-type. Pass --system-type ai-application|ai-framework|non-ai-platform (or APRF_SYSTEM_TYPE), or --profile framework. Interactive prompt is available only on a TTY.",
+  );
+}
+
+async function parseAssessFlags(argv: string[]) {
+  const flags = {
     profileId: takeFlag(argv, "--profile"),
     lensIds: takeFlag(argv, "--lens")?.split(",").filter(Boolean) ?? [],
     capabilities:
@@ -133,6 +194,8 @@ function parseAssessFlags(argv: string[]) {
     systemType: parseSystemType(argv),
     fullCatalog: hasFlag(argv, "--full"),
   };
+  const systemType = await requireSystemType(flags);
+  return { ...flags, systemType };
 }
 
 /** Shared collect options for `collect` and `audit`. */
@@ -191,9 +254,9 @@ async function cmdCollect(argv: string[]) {
   return runCollectors(parseCollectOptions(argv));
 }
 
-function cmdAssess(argv: string[]) {
+async function cmdAssess(argv: string[]) {
   const outDir = defaultOut(argv);
-  const flags = parseAssessFlags(argv);
+  const flags = await parseAssessFlags(argv);
   const { path } = writeAssessment({
     outDir,
     ...flags,
@@ -202,8 +265,8 @@ function cmdAssess(argv: string[]) {
   return path;
 }
 
-function cmdResolveTarget(argv: string[]) {
-  const flags = parseAssessFlags(argv);
+async function cmdResolveTarget(argv: string[]) {
+  const flags = await parseAssessFlags(argv);
   const resolved = resolveAssessTargetFromOptions(flags);
   if (hasFlag(argv, "--json")) {
     console.log(
@@ -275,7 +338,7 @@ function cmdVersion() {
 
 async function cmdAudit(argv: string[]) {
   const collectOpts = parseCollectOptions(argv);
-  const flags = parseAssessFlags(argv);
+  const flags = await parseAssessFlags(argv);
   if (flags.systemType === "non-ai-platform") {
     console.error(
       "systemType=non-ai-platform is not supported by aprf audit. Use the APRF Auditor skill with scopes/non-ai-platform.yaml.",
@@ -306,7 +369,12 @@ async function cmdAudit(argv: string[]) {
   }
   await runCollectors(collectOpts);
   const outDir = collectOpts.outDir;
-  cmdAssess(argv);
+  // Reuse already-resolved flags (avoid a second interactive prompt).
+  const { path: assessmentPath } = writeAssessment({
+    outDir,
+    ...flags,
+  });
+  console.log(`Wrote ${assessmentPath}`);
   const input = resolve(outDir, "assessment.json");
   const htmlOut = resolve(outDir, "REPORT.html");
   writeAssessmentHtmlReport(input, htmlOut);
@@ -331,10 +399,10 @@ async function main() {
       await cmdCollect(argv.slice(1));
       break;
     case "assess":
-      cmdAssess(argv.slice(1));
+      await cmdAssess(argv.slice(1));
       break;
     case "resolve-target":
-      cmdResolveTarget(argv.slice(1));
+      await cmdResolveTarget(argv.slice(1));
       break;
     case "report":
       cmdReport(argv.slice(1));
