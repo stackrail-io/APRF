@@ -77,7 +77,7 @@ Variants (same flags on either binary):
   --base-url http://127.0.0.1:8080
 
 # Regulated profile
-… audit --target . --profile regulated
+… audit --target . --system-type ai-application --profile regulated
 
 # Framework / SDK primitive gate (not Core)
 … audit --target . --profile framework
@@ -89,7 +89,7 @@ Variants (same flags on either binary):
 … audit --target . --system-type ai-application --profile core --lens rag,agents
 
 # Full catalog (ai-application only)
-… audit --target . --full
+… audit --target . --system-type ai-application --full
 ```
 
 Other evidence via `./aprf-assessment/imports/<plugin>/` or env (`GITHUB_TOKEN`, …).

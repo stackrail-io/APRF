@@ -117,11 +117,13 @@ assert(chatbot.assessmentKind === "aprf-core", "chatbot core kind");
 
 let threw = false;
 try {
-  resolveAssessmentTarget({ systemType: "unknown" });
+  resolveAssessmentTarget({
+    systemType: "ai-applicaton" as never,
+  });
 } catch {
   threw = true;
 }
-assert(threw, "#5 unknown throws");
+assert(threw, "typo systemType throws");
 
 threw = false;
 try {

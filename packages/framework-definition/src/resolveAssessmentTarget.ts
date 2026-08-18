@@ -173,6 +173,17 @@ export function resolveAssessmentTarget(
   const warnings: string[] = [];
   const systemType = input.systemType;
 
+  if (
+    systemType !== "ai-application" &&
+    systemType !== "ai-framework" &&
+    systemType !== "non-ai-platform" &&
+    systemType !== "unknown"
+  ) {
+    throw new Error(
+      `Unsupported systemType: ${String(systemType)}. Use ai-application | ai-framework | non-ai-platform (classify before resolve; unknown is not resolvable).`,
+    );
+  }
+
   if (systemType === "unknown") {
     throw new Error(
       'systemType "unknown" cannot resolve an assessment target. Classify as ai-application, ai-framework, or non-ai-platform first.',
