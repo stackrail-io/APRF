@@ -50,16 +50,38 @@
         },
         "systemType": {
           "type": "string",
-          "enum": ["ai-application", "non-ai-platform", "unknown"]
+          "enum": [
+            "ai-application",
+            "ai-framework",
+            "non-ai-platform",
+            "unknown"
+          ]
         },
         "assessmentKind": {
           "type": "string",
           "enum": [
             "aprf-core",
             "aprf-regulated",
+            "aprf-framework",
             "full-catalog",
             "non-ai-platform-subset"
           ]
+        },
+        "applicationCapabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "chatbot",
+              "rag",
+              "agents",
+              "multi-agent-a2a",
+              "mcp-server",
+              "voice",
+              "coding-agent",
+              "other"
+            ]
+          }
         },
         "scopeId": { "type": "string" },
         "excludedCheckIds": {

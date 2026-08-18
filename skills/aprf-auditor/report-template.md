@@ -14,7 +14,7 @@
 
 > Self-attested / local agent assessment against the public APRF catalog.  
 > **Not** third-party certification. **Not** a StackRail cloud product run.  
-> If `assessmentKind` is `non-ai-platform-subset`, this is **not** an APRF Core AI production-readiness claim.
+> If `assessmentKind` is `non-ai-platform-subset` or `aprf-framework`, this is **not** an APRF Core AI production-readiness claim.
 >
 > **StackRail / APRF:** [stackrail.io](https://stackrail.io) · [APRF](https://stackrail.io/aprf/) · [How it works](https://stackrail.io/aprf/how/) · [Assess](https://stackrail.io/aprf/assess/) · [GitHub](https://github.com/stackrail-io/APRF)
 

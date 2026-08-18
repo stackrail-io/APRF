@@ -6,6 +6,7 @@ import type { AprfProfile } from "./types.js";
  */
 export const PROFILE_ID_CORE = "aprf-profile-core";
 export const PROFILE_ID_REGULATED = "aprf-profile-regulated";
+export const PROFILE_ID_FRAMEWORK = "aprf-profile-framework";
 
 /**
  * Tier-2 Core Profile — minimum mandatory gates for customer-facing AI.
@@ -101,8 +102,41 @@ export const PROFILE_REGULATED: AprfProfile = {
   ],
 };
 
+/**
+ * Framework / SDK Profile — primitive gates for agent/orchestration libraries.
+ * NOT customer-facing AI production readiness (see claim language via resolveAssessmentTarget).
+ */
+export const PROFILE_FRAMEWORK: AprfProfile = {
+  id: PROFILE_ID_FRAMEWORK,
+  name: "Framework / SDK (primitives)",
+  summary:
+    "Mandatory gates for agent/orchestration SDKs and libraries: execution bounds, tool allowlist/schema hooks, injection mediation, secrets hygiene, and supply chain. This is NOT an APRF Core or Regulated production-readiness gate — assess the customer application with Core/Regulated for that claim.",
+  targetCriticality: 2,
+  targetCapability: 3,
+  mandatoryCheckIds: [
+    "AGN-M2",
+    "TOL-M2",
+    "TOL-M4",
+    "SEC-M1",
+    "SEC2-M1",
+    "SEC2-M2",
+    "SCI-M2",
+  ],
+  rationale: [
+    "SDK runtimes must enforce finite step/time/spawn bounds (AGN-M2).",
+    "Tool allowlists and argument schema validation are framework primitives (TOL-M2/M4).",
+    "Untrusted input must not authorize privileged actions via framework mediation (SEC-M1).",
+    "Package secrets hygiene and supply-chain review remain library concerns (SEC2/SCI).",
+    "Charters, spend, SLOs, and org AuthN/Z are application concerns — not on this profile.",
+  ],
+};
+
 /** Built-in profiles list. */
-export const APRF_PROFILES: AprfProfile[] = [PROFILE_CORE, PROFILE_REGULATED];
+export const APRF_PROFILES: AprfProfile[] = [
+  PROFILE_CORE,
+  PROFILE_REGULATED,
+  PROFILE_FRAMEWORK,
+];
 
 export function getProfileById(id: string): AprfProfile | undefined {
   return APRF_PROFILES.find((p) => p.id === id);

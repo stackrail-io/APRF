@@ -7,6 +7,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ## [Unreleased]
 
+### Added
+- **Assessment target kinds + Framework profile** ([APRF-RFC-0013](rfcs/0013-assessment-target-kinds.md)): `systemType` (`ai-application` | `ai-framework` | `non-ai-platform` | `unknown`), orthogonal `applicationCapabilities`, official `aprf-profile-framework` (7 primitive Checks), and canonical `resolveAssessmentTarget()` in `@stackrail-io/aprf-framework-definition@0.12.0`. CLI: `--system-type`, `--capabilities`, `aprf resolve-target --json`; `assessmentKind=aprf-framework` + `scope.reportBanner` for claim honesty. `@stackrail-io/aprf` pins framework-definition `0.12.0`.
+
 ### Fixed
 - Engine `evaluateRules({ runDetectors: true })` no longer AND-fails on `manual-attest` (attestation fallback is skipped when scoring real detectors), so hybrids can PASS.
 - `selectApplicableRules` excludes `deprecated` Checks (aligned with CLI assess).

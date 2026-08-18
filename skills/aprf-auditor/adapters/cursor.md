@@ -32,7 +32,7 @@ Submit via [cursor.com/marketplace/publish](https://cursor.com/marketplace/publi
 The plugin skill runs the CLI (no APRF clone required):
 
 ```bash
-npx @stackrail-io/aprf@0.1.4 audit --target . --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.5 audit --target . --out ./aprf-assessment --profile core
 ```
 
 ## Legacy — skill symlink (full portable package)
@@ -57,7 +57,7 @@ Or personal: `ln -sf … ~/.cursor/skills/aprf-auditor`
 Verify:
 
 ```bash
-npx @stackrail-io/aprf@0.1.4 verify ./aprf-assessment/REPORT.html
+npx @stackrail-io/aprf@0.1.5 verify ./aprf-assessment/REPORT.html
 ```
 
 ## Failure (wrong pipeline)

@@ -3,6 +3,7 @@
  *
  *   npx @stackrail-io/aprf collect --target . --out ./aprf-assessment
  *   npx @stackrail-io/aprf assess  --out ./aprf-assessment --profile core
+ *   npx @stackrail-io/aprf resolve-target --system-type ai-framework --json
  *   npx @stackrail-io/aprf report  --in ./aprf-assessment/assessment.json
  *   npx @stackrail-io/aprf verify  ./aprf-assessment/REPORT.html
  *   npx @stackrail-io/aprf audit   --target . --profile core --base-url … …
@@ -10,40 +11,20 @@
  */
 import { resolve } from "node:path";
 import {
-  PROFILE_CORE,
-  PROFILE_REGULATED,
-  PROFILE_ID_CORE,
-  PROFILE_ID_REGULATED,
-  getProfileById,
-  unionProfileAndLenses,
-} from "@stackrail-io/aprf-framework-definition";
-import {
   runCollectors,
   type CollectOptions,
 } from "../../../skills/aprf-auditor/collectors/runner.ts";
 import { writeAssessmentHtmlReport } from "../../../skills/aprf-auditor/scripts/render-html-report.ts";
 import { verifyHtmlReport } from "../../../skills/aprf-auditor/scripts/verify-html-report.ts";
-import { writeAssessment } from "./assess.ts";
+import {
+  resolveAssessTargetFromOptions,
+  writeAssessment,
+} from "./assess.ts";
 import pluginCheckMap from "./generated/plugin-check-map.json" with {
   type: "json",
 };
 import { catalogVersion, cliVersion, frameworkVersion } from "./versions.ts";
-
-function resolveCliProfile(profileId: string) {
-  if (profileId === PROFILE_ID_REGULATED || profileId === "regulated") {
-    return PROFILE_REGULATED;
-  }
-  if (profileId === PROFILE_ID_CORE || profileId === "core") {
-    return PROFILE_CORE;
-  }
-  const profile = getProfileById(profileId);
-  if (!profile) {
-    throw new Error(
-      `Unknown APRF profile: ${profileId}. Use "core", "regulated", or a catalog profile id.`,
-    );
-  }
-  return profile;
-}
+import type { AssessmentSystemType } from "@stackrail-io/aprf-framework-definition";
 
 /** Collectors that map to at least one Check in `checkIds` (plus catch-alls). */
 function pluginsForCheckIds(checkIds: Set<string>): string[] {
@@ -59,12 +40,16 @@ function usage(exitCode = 0): never {
   console.log(`APRF CLI v${cliVersion()} (catalog ${catalogVersion()})
 
 Usage:
-  aprf collect  [collect options]
-  aprf assess   [--out <dir>] [--profile core|regulated] [--lens rag,agents] [--full]
-  aprf report   [--in assessment.json] [--out REPORT.html]
-  aprf verify   [REPORT.html]
-  aprf audit    [collect options] [--profile …] [--lens …] [--full]
-                (collect → assess → report → verify)
+  aprf collect        [collect options]
+  aprf assess         [--out <dir>] [--profile core|regulated|framework]
+                      [--system-type ai-application|ai-framework|non-ai-platform]
+                      [--capabilities rag,agents,…] [--lens rag,agents] [--full]
+  aprf resolve-target [--system-type …] [--profile …] [--capabilities …]
+                      [--lens …] [--full] [--json]
+  aprf report         [--in assessment.json] [--out REPORT.html]
+  aprf verify         [REPORT.html]
+  aprf audit          [collect options] [assess options]
+                      (collect → assess → report → verify)
   aprf version
 
 Collect / audit options (live credentials are never written to reports):
@@ -74,40 +59,34 @@ Collect / audit options (live credentials are never written to reports):
   --live                 Allow credentialed API calls
                          (auto-on when --base-url or admin/limited creds are set)
   --base-url <url>       Running app URL for live collectors
-                         (AUTHN-M1 probe, AUTHZ-M1 denial, AUTHN-M2 inventory)
-                         Env: APRF_AUTH_PROBE_BASE_URL
-  --admin-token <tok>    Admin bearer token (AUTHN-M2 / AUTHZ-M1)
-                         Env: APRF_ADMIN_TOKEN
+                         (AUTHN-M1, AUTHZ-M1, AUTHN-M2). Env: APRF_AUTH_PROBE_BASE_URL
+  --admin-token <tok>    Admin bearer token. Env: APRF_ADMIN_TOKEN
   --admin-email <e>      Admin email for password sign-in
                          Env: APRF_ADMIN_EMAIL (alias: --admin-user / APRF_ADMIN_USER)
-  --admin-password <p>   Admin password (never persisted)
-                         Env: APRF_ADMIN_PASSWORD
+  --admin-password <p>   Admin password (never persisted). Env: APRF_ADMIN_PASSWORD
   --limited-email <e>    Non-admin user for AUTHZ-M1 denial probe
                          Env: APRF_AUTHZ_LIMITED_EMAIL
-  --limited-password <p> Limited-user password
-                         Env: APRF_AUTHZ_LIMITED_PASSWORD
-  --limited-token <t>    Limited-user bearer token
-                         Env: APRF_AUTHZ_LIMITED_TOKEN
+  --limited-password <p> Limited-user password. Env: APRF_AUTHZ_LIMITED_PASSWORD
+  --limited-token <t>    Limited-user bearer token. Env: APRF_AUTHZ_LIMITED_TOKEN
   --max-files <n>        Filesystem walk cap (default: 4000)
 
-Assess / audit options:
-  --profile <id>         aprf-profile-core | aprf-profile-regulated | core | regulated
-  --lens a,b             Optional lenses: rag, agents, voice, coding
-  --full                 Score full catalog (default: profile mandatories only)
-
-Other collector evidence (no extra CLI flags required):
-  Drop measured JSON under ./aprf-assessment/imports/<pluginId>/ before or after collect.
-  Optional live APIs also read env (e.g. GITHUB_TOKEN with --live for github-actions).
+Assess / audit / resolve-target options:
+  --profile <id>         core | regulated | framework | aprf-profile-*
+  --system-type <t>      ai-application (default) | ai-framework | non-ai-platform
+  --capabilities a,b     applicationCapabilities (ai-application): chatbot,rag,agents,
+                         multi-agent-a2a,mcp-server,voice,coding-agent,other
+  --lens a,b             Optional extra lenses: rag, agents, voice, coding
+  --full                 Score full catalog (forbidden with ai-framework)
 
 Examples:
   aprf audit --target . --out ./aprf-assessment --profile core
-
-  aprf audit --target . --out ./aprf-assessment --profile core \\
-    --base-url http://127.0.0.1:8080 \\
-    --admin-email "$APRF_ADMIN_EMAIL" \\
-    --admin-password "$APRF_ADMIN_PASSWORD"
+  aprf audit --target . --profile framework --system-type ai-framework
+  aprf assess --out ./aprf-assessment --system-type ai-application \\
+    --capabilities rag,agents --profile core
+  aprf resolve-target --system-type ai-framework --json
 
 Assess is deterministic: collector statusHints + evidence-graph nodes. Unscored → NOT_DEMONSTRATED.
+Resolution uses @stackrail-io/aprf-framework-definition resolveAssessmentTarget (RFC-0013).
 `);
   process.exit(exitCode);
 }
@@ -128,6 +107,33 @@ function hasFlag(argv: string[], name: string): boolean {
 
 function defaultOut(argv: string[]): string {
   return resolve(takeFlag(argv, "--out") ?? "aprf-assessment");
+}
+
+function parseSystemType(argv: string[]): AssessmentSystemType | undefined {
+  const raw = takeFlag(argv, "--system-type");
+  if (!raw) return undefined;
+  if (
+    raw === "ai-application" ||
+    raw === "ai-framework" ||
+    raw === "non-ai-platform" ||
+    raw === "unknown"
+  ) {
+    return raw;
+  }
+  throw new Error(
+    `Invalid --system-type ${raw}. Use ai-application | ai-framework | non-ai-platform`,
+  );
+}
+
+function parseAssessFlags(argv: string[]) {
+  return {
+    profileId: takeFlag(argv, "--profile"),
+    lensIds: takeFlag(argv, "--lens")?.split(",").filter(Boolean) ?? [],
+    capabilities:
+      takeFlag(argv, "--capabilities")?.split(",").filter(Boolean) ?? [],
+    systemType: parseSystemType(argv),
+    fullCatalog: hasFlag(argv, "--full"),
+  };
 }
 
 /** Shared collect options for `collect` and `audit`. */
@@ -156,7 +162,6 @@ export function parseCollectOptions(argv: string[]): CollectOptions {
 
   const liveRequested =
     hasFlag(argv, "--live") || process.env.APRF_AUDITOR_LIVE === "1";
-  // Credentialed/base-url runs imply live without requiring a separate --live.
   const live =
     liveRequested ||
     Boolean(
@@ -189,14 +194,47 @@ async function cmdCollect(argv: string[]) {
 
 function cmdAssess(argv: string[]) {
   const outDir = defaultOut(argv);
+  const flags = parseAssessFlags(argv);
   const { path } = writeAssessment({
     outDir,
-    profileId: takeFlag(argv, "--profile") ?? "core",
-    lensIds: takeFlag(argv, "--lens")?.split(",").filter(Boolean) ?? [],
-    fullCatalog: hasFlag(argv, "--full"),
+    ...flags,
   });
   console.log(`Wrote ${path}`);
   return path;
+}
+
+function cmdResolveTarget(argv: string[]) {
+  const flags = parseAssessFlags(argv);
+  const resolved = resolveAssessTargetFromOptions(flags);
+  if (hasFlag(argv, "--json")) {
+    console.log(
+      JSON.stringify(
+        {
+          systemType: resolved.systemType,
+          profileId: resolved.profile.id,
+          assessmentKind: resolved.assessmentKind,
+          applicationCapabilities: resolved.applicationCapabilities,
+          mandatoryCheckIds: resolved.mandatoryCheckIds,
+          lensIds: resolved.lensIds,
+          effectiveCheckIds: resolved.effectiveCheckIds,
+          claimMetadata: resolved.claimMetadata,
+          warnings: resolved.warnings,
+        },
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+  console.log(`systemType: ${resolved.systemType}`);
+  console.log(`profile: ${resolved.profile.id} (${resolved.profile.name})`);
+  console.log(`assessmentKind: ${resolved.assessmentKind}`);
+  console.log(
+    `capabilities: ${resolved.applicationCapabilities.join(", ") || "(none)"}`,
+  );
+  console.log(`lenses: ${resolved.lensIds.join(", ") || "(none)"}`);
+  console.log(`effectiveChecks: ${resolved.effectiveCheckIds.length}`);
+  for (const w of resolved.warnings) console.warn(`warning: ${w}`);
 }
 
 function cmdReport(argv: string[]) {
@@ -238,28 +276,16 @@ function cmdVersion() {
 
 async function cmdAudit(argv: string[]) {
   const collectOpts = parseCollectOptions(argv);
-  const profileId = takeFlag(argv, "--profile") ?? "core";
-  const lensIds = takeFlag(argv, "--lens")?.split(",").filter(Boolean) ?? [];
-  const fullCatalog = hasFlag(argv, "--full");
-  // Default audit collect is scoped to the profile gate (not the full collector set).
-  if (!collectOpts.plugins?.length && !fullCatalog) {
-    const profile = resolveCliProfile(profileId);
-    const normalizedLensIds = lensIds.map((raw) =>
-      raw.startsWith("aprf-lens-")
-        ? raw
-        : `aprf-lens-${raw.replace(/^lens-/, "")}`,
-    );
-    const mandatoryIds = new Set(
-      normalizedLensIds.length
-        ? unionProfileAndLenses(
-            profile.mandatoryCheckIds,
-            normalizedLensIds,
-          )
-        : [...profile.mandatoryCheckIds],
-    );
+  const flags = parseAssessFlags(argv);
+  if (!collectOpts.plugins?.length && !flags.fullCatalog) {
+    const resolved = resolveAssessTargetFromOptions(flags);
+    for (const w of resolved.warnings) {
+      console.warn(`aprf audit: ${w}`);
+    }
+    const mandatoryIds = new Set(resolved.effectiveCheckIds);
     collectOpts.plugins = pluginsForCheckIds(mandatoryIds);
     console.log(
-      `Collect scoped to ${collectOpts.plugins.length} plugins for ${profile.id} (${mandatoryIds.size} Checks). Pass --plugins or --full to override.`,
+      `Collect scoped to ${collectOpts.plugins.length} plugins for ${resolved.profile.id} (${mandatoryIds.size} Checks, ${resolved.assessmentKind}). Pass --plugins or --full to override.`,
     );
   }
   if (collectOpts.baseUrl) {
@@ -301,6 +327,9 @@ async function main() {
       break;
     case "assess":
       cmdAssess(argv.slice(1));
+      break;
+    case "resolve-target":
+      cmdResolveTarget(argv.slice(1));
       break;
     case "report":
       cmdReport(argv.slice(1));

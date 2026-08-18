@@ -5,7 +5,7 @@ name: aprf-auditor
 user-invocable: false
 description: >-
   Local APRF assessment via @stackrail-io/aprf CLI (no StackRail console, no
-  localhost:3001, no run_* IDs). Prefer `npx @stackrail-io/aprf@0.1.4 audit`.
+  localhost:3001, no run_* IDs). Prefer `npx @stackrail-io/aprf@0.1.5 audit`.
   Writes aprf-assessment/ with evidence-graph.json, assessment.json, REPORT.html.
   Ask the user for missing runtime inputs and import evidence; do not only
   summarize gaps. Use for "Run an APRF assessment", "APRF audit", "AI production
@@ -31,7 +31,9 @@ runtime URLs, credentials, and import paths — never finish with gap lists alon
 
 ## Before the first audit (required)
 
-Classify the target (`ai-application` vs `non-ai-platform`). For an AI app, **ask up front** (do not wait until after a code-only run):
+Classify the target (`ai-application` | `ai-framework` | `non-ai-platform`). Dry-run:
+`npx @stackrail-io/aprf@0.1.5 resolve-target --system-type … --capabilities … --json`.
+For an AI app, **ask up front** (do not wait until after a code-only run):
 
 1. **Running base URL?** (e.g. `http://127.0.0.1:8080`) — needed for AUTHN-M1 / live probes.
 2. If tools/MCP look present: **MCP/S2S inventory path** under `./aprf-assessment/imports/mcp-s2s-inventory/`, or confirm live fetch via env (`APRF_ADMIN_TOKEN`, or `APRF_ADMIN_EMAIL` + `APRF_ADMIN_PASSWORD`) for AUTHN-M2.
@@ -55,7 +57,7 @@ node packages/aprf/dist/cli.js audit --target . --out ./aprf-assessment --profil
 2. **Published npm** (any other project):
 
 ```bash
-npx @stackrail-io/aprf@0.1.4 audit --target . --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.5 audit --target . --out ./aprf-assessment --profile core
 ```
 
 Variants (same flags on either binary):
@@ -72,10 +74,16 @@ Variants (same flags on either binary):
 # Regulated profile
 … audit --target . --profile regulated
 
-# Lenses (extra mandatories)
+# Framework / SDK primitive gate (not Core)
+… audit --target . --profile framework
+
+# Application capabilities (additive lenses)
+… audit --target . --profile core --capabilities rag,agents
+
+# Extra lenses
 … audit --target . --profile core --lens rag,agents
 
-# Full catalog
+# Full catalog (ai-application only)
 … audit --target . --full
 ```
 
@@ -84,10 +92,10 @@ Other evidence via `./aprf-assessment/imports/<plugin>/` or env (`GITHUB_TOKEN`,
 ## Step-by-step (when not using `audit`)
 
 ```bash
-npx @stackrail-io/aprf@0.1.4 collect --target . --out ./aprf-assessment
-npx @stackrail-io/aprf@0.1.4 assess  --out ./aprf-assessment --profile core
-npx @stackrail-io/aprf@0.1.4 report  --in ./aprf-assessment/assessment.json --out ./aprf-assessment/REPORT.html
-npx @stackrail-io/aprf@0.1.4 verify  ./aprf-assessment/REPORT.html
+npx @stackrail-io/aprf@0.1.5 collect --target . --out ./aprf-assessment
+npx @stackrail-io/aprf@0.1.5 assess  --out ./aprf-assessment --profile core
+npx @stackrail-io/aprf@0.1.5 report  --in ./aprf-assessment/assessment.json --out ./aprf-assessment/REPORT.html
+npx @stackrail-io/aprf@0.1.5 verify  ./aprf-assessment/REPORT.html
 ```
 
 ## After the run (summarize, then ask)
@@ -117,8 +125,9 @@ For full YES/NO/DON'T KNOW attestation methodology, see the portable skill in th
 
 ## Wrong pipeline (abort and restart)
 
-If you find yourself opening StackRail Assessments UI, `http://127.0.0.1:3001`, or inventing `run_*` IDs — **stop**. Re-run with this skill and `npx @stackrail-io/aprf@0.1.4 audit`.
+If you find yourself opening StackRail Assessments UI, `http://127.0.0.1:3001`, or inventing `run_*` IDs — **stop**. Re-run with this skill and `npx @stackrail-io/aprf@0.1.5 audit`.
 
-## Non-AI / platform repos
+## Non-AI / framework repos
 
-If the workspace is a console, catalog, or non–GenAI platform (not a customer AI app), say so in the summary and prefer `--profile core` without claiming full AI production readiness. Optional scope docs live in the APRF repo under `skills/aprf-auditor/scopes/`. Skip live base-URL asks when there is no customer-facing HTTP AI API.
+- **AI framework / SDK** (CrewAI, LangGraph library, …): `--profile framework` / `--system-type ai-framework`. Report `assessmentKind=aprf-framework` — **not** Core production readiness.
+- **Console / catalog / non–GenAI platform:** say so in the summary; use auditor `scopes/non-ai-platform.yaml` (CLI assess does not score non-ai yet). Skip live base-URL asks when there is no customer-facing HTTP AI API.

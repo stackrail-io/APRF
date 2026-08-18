@@ -673,4 +673,65 @@ assert(
 );
 
 console.log(`aprf assess engine smoke OK → ${htmlPath}`);
+
+// G10: Framework profile control count + claim honesty
+writeAssessment({
+  outDir: root,
+  profileId: "framework",
+});
+const fwAssessment = JSON.parse(
+  readFileSync(join(root, "assessment.json"), "utf8"),
+) as {
+  scope: {
+    systemType: string;
+    assessmentKind: string;
+    reportBanner?: string;
+    profileId: string;
+  };
+  controls: unknown[];
+  executiveSummary: { narrative: string };
+};
+const FRAMEWORK_MANDATORY_COUNT = 7;
+assert(
+  fwAssessment.controls.length === FRAMEWORK_MANDATORY_COUNT,
+  `framework profile must score ${FRAMEWORK_MANDATORY_COUNT} Checks, got ${fwAssessment.controls.length}`,
+);
+assert(
+  fwAssessment.scope.systemType === "ai-framework",
+  `framework assess must set systemType=ai-framework, got ${fwAssessment.scope.systemType}`,
+);
+assert(
+  fwAssessment.scope.assessmentKind === "aprf-framework",
+  `framework assess must set assessmentKind=aprf-framework, got ${fwAssessment.scope.assessmentKind}`,
+);
+assert(
+  fwAssessment.scope.profileId === "aprf-profile-framework",
+  `framework profileId, got ${fwAssessment.scope.profileId}`,
+);
+assert(
+  Boolean(fwAssessment.scope.reportBanner) &&
+    /not an APRF Core/i.test(fwAssessment.scope.reportBanner!),
+  "framework assess must set reportBanner forbidding Core claim",
+);
+assert(
+  /Framework\/SDK primitive gate|Framework \/ SDK primitive gate/i.test(
+    fwAssessment.executiveSummary.narrative,
+  ),
+  "framework narrative must qualify as Framework/SDK gate",
+);
+
+const fwHtmlPath = join(root, "REPORT.framework.html");
+writeAssessmentHtmlReport(join(root, "assessment.json"), fwHtmlPath);
+const fwHtml = readFileSync(fwHtmlPath, "utf8");
+assert(
+  /FRAMEWORK \/ SDK PRIMITIVE GATE/i.test(fwHtml) &&
+    /not an APRF Core/i.test(fwHtml),
+  "REPORT.html must render Framework claim-boundary banner",
+);
+const fwVerify = verifyHtmlReport(fwHtmlPath);
+assert(fwVerify.ok, `framework REPORT.html verify failed: ${fwVerify.missing?.join(", ")}`);
+console.log(
+  `aprf framework profile smoke OK — ${FRAMEWORK_MANDATORY_COUNT} Checks, assessmentKind=aprf-framework, banner in HTML`,
+);
+
 rmSync(root, { recursive: true, force: true });

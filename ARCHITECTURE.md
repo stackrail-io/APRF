@@ -91,7 +91,12 @@ Machine-evaluable or attest-able expectations.
 
 ### Profiles and lenses (normative selectors)
 
-Core / Regulated / custom profiles and lenses (RAG, Agents, …) are **sets of Check IDs**, not new layers and not Detections. In this repo they are exported from `@stackrail-io/aprf-framework-definition` and mirrored in `spec/aprf-spec.json`.
+Core / Regulated / **Framework** profiles and lenses (RAG, Agents, …) are **sets of Check IDs**, not new layers and not Detections. In this repo they are exported from `@stackrail-io/aprf-framework-definition` and mirrored in `spec/aprf-spec.json`.
+
+- **Profiles** answer: which mandatory Checks exist for this gate?
+- **Lenses** answer: which additional Checks become applicable for a product shape?
+- **`resolveAssessmentTarget()`** is the canonical resolver (systemType → profile → applicationCapabilities → `--lens`). CLI and auditor consume it; do not hand-assemble unions. See [APRF-RFC-0013](rfcs/0013-assessment-target-kinds.md).
+- **`aprf-profile-framework`** is a Framework / SDK *primitive* gate — not Core production readiness.
 
 ### Crosswalks and threat context (informative metadata)
 

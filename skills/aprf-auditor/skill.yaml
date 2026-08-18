@@ -66,13 +66,25 @@ defaultProfile: aprf-profile-core
 supportedProfiles:
   - aprf-profile-core
   - aprf-profile-regulated
+  - aprf-profile-framework
   - full-catalog
 supportedScopes:
   - scopes/non-ai-platform.yaml
 systemTypes:
   - ai-application
+  - ai-framework
   - non-ai-platform
   - unknown
+applicationCapabilities:
+  - chatbot
+  - rag
+  - agents
+  - multi-agent-a2a
+  - mcp-server
+  - voice
+  - coding-agent
+  - other
+resolveTargetCli: "aprf resolve-target --json"
 
 entrypoints:
   system: system.md

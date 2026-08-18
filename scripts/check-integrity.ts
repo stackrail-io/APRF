@@ -13,6 +13,8 @@ import type { EvidenceTier } from "../packages/aprf-engine/src/types.ts";
 import {
   PROFILE_CORE,
   PROFILE_REGULATED,
+  PROFILE_FRAMEWORK,
+  APRF_PROFILES,
   getTier3OnlyMandatoryIds,
   APRF_LENSES,
   getLensById,
@@ -128,6 +130,24 @@ assert(
   "framework-definition Regulated profile ≠ spec.profiles Regulated mandatoryCheckIds",
 );
 
+const fwSpec = specProfiles.get("aprf-profile-framework") ?? [];
+assert(
+  JSON.stringify(fwSpec) ===
+    JSON.stringify(PROFILE_FRAMEWORK.mandatoryCheckIds),
+  "framework-definition Framework profile ≠ spec.profiles Framework mandatoryCheckIds",
+);
+
+const pkgProfileIds = [...APRF_PROFILES.map((p) => p.id)].sort();
+const specProfileIds = [...(spec.profiles ?? []).map((p) => p.id)].sort();
+assert(
+  JSON.stringify(pkgProfileIds) === JSON.stringify(specProfileIds),
+  `framework-definition APRF_PROFILES ids ≠ spec.profiles ids.\n  pkg: ${pkgProfileIds.join(", ")}\n  spec: ${specProfileIds.join(", ")}`,
+);
+
+for (const id of PROFILE_FRAMEWORK.mandatoryCheckIds) {
+  assert(catalogIds.has(id), `Framework profile Check missing from YAML catalog: ${id}`);
+}
+
 for (const lens of spec.lenses ?? []) {
   for (const id of lens.additionalMandatoryCheckIds ?? []) {
     assert(
@@ -186,5 +206,5 @@ assert(
 );
 
 console.log(
-  `aprf:integrity OK — catalog=${catalogIds.size} spec=${specIds.size} core=${PROFILE_CORE.mandatoryCheckIds.length} regulated=${PROFILE_REGULATED.mandatoryCheckIds.length} lenses=${APRF_LENSES.length} version=${spec.governance?.version}`,
+  `aprf:integrity OK — catalog=${catalogIds.size} spec=${specIds.size} core=${PROFILE_CORE.mandatoryCheckIds.length} regulated=${PROFILE_REGULATED.mandatoryCheckIds.length} framework=${PROFILE_FRAMEWORK.mandatoryCheckIds.length} lenses=${APRF_LENSES.length} version=${spec.governance?.version}`,
 );
