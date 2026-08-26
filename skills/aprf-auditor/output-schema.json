@@ -495,6 +495,83 @@
         ]
       }
     },
+    "threatExposure": {
+      "type": "array",
+      "description": "APRF-RFC-0014 structured threat evaluation — informative only; never affects the mandatory gate",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "threatId",
+          "title",
+          "status",
+          "indicated",
+          "confirmed",
+          "mitigated",
+          "exposure",
+          "primaryCheckIds"
+        ],
+        "properties": {
+          "threatId": { "type": "string", "pattern": "^THR-" },
+          "title": { "type": "string" },
+          "severityHint": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_indicated",
+              "mitigated",
+              "confirmed_exposure",
+              "suspected_exposure"
+            ]
+          },
+          "indicated": { "type": "boolean" },
+          "confirmed": { "type": "boolean" },
+          "mitigated": { "type": "boolean" },
+          "exposure": { "type": "boolean" },
+          "primaryCheckIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "supportingCheckIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "contributingSignalIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "displayThreats": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "signalObservations": {
+      "type": "array",
+      "description": "Fired SignalObservations from evidence-graph registered signal ids",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["signalId", "fired"],
+        "properties": {
+          "signalId": { "type": "string" },
+          "fired": { "type": "boolean" },
+          "polarity": { "type": "string", "enum": ["positive", "negative"] },
+          "measuredAt": { "type": "string" },
+          "origin": {
+            "type": "string",
+            "enum": ["system", "owner", "external", "independent"]
+          },
+          "assurance": {
+            "type": "string",
+            "enum": ["gate-eligible", "signal-only"]
+          },
+          "confidence": { "type": "number" },
+          "evidenceNode": { "type": "string" }
+        }
+      }
+    },
     "findings": {
       "type": "object",
       "required": [

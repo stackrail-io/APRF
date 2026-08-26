@@ -10,7 +10,7 @@ import { writeFileSync, mkdirSync, readFileSync, existsSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { parse as parseYaml } from "yaml";
-import type { CrosswalkDef, ThreatIntelDef } from "../src/catalog-types";
+import type { CrosswalkDef, GeneratedCatalog, ThreatIntelDef } from "../src/catalog-types";
 import { loadRulesFromDisk, rulesRootDir } from "../src/loader";
 import { validateAllByDomainYaml } from "./validate-catalog";
 
@@ -67,6 +67,8 @@ function contentStamp(
   rules: unknown,
   crosswalks: unknown,
   threatIntel: unknown,
+  signalRegistry: unknown,
+  threatComposition: unknown,
 ): string {
   const digest = createHash("sha256")
     .update(
@@ -77,6 +79,8 @@ function contentStamp(
         rules,
         crosswalks,
         threatIntel,
+        signalRegistry,
+        threatComposition,
       }),
     )
     .digest("hex");
@@ -112,6 +116,52 @@ function loadThreatIntel(rulesRoot: string): Record<string, ThreatIntelDef> {
     rules?: Record<string, ThreatIntelDef>;
   };
   return doc.rules ?? {};
+}
+
+function loadSignalRegistry(repoRoot: string): GeneratedCatalog["signalRegistry"] {
+  const path = join(repoRoot, "spec", "aprf-signal-registry.yaml");
+  if (!existsSync(path)) return undefined;
+  const doc = parseYaml(readFileSync(path, "utf8")) as {
+    version?: string;
+    kinds?: GeneratedCatalog["signalRegistry"] extends infer S
+      ? S extends { kinds: infer K }
+        ? K
+        : never
+      : never;
+    signals?: NonNullable<GeneratedCatalog["signalRegistry"]>["signals"];
+  };
+  if (!doc.version || !doc.kinds || !doc.signals) {
+    throw new Error("spec/aprf-signal-registry.yaml incomplete");
+  }
+  return {
+    version: doc.version,
+    kinds: doc.kinds,
+    signals: doc.signals,
+  };
+}
+
+function loadThreatComposition(repoRoot: string): {
+  threats: NonNullable<GeneratedCatalog["threatComposition"]>;
+  checkThreatIndex: Record<string, string[]>;
+} | null {
+  const path = join(repoRoot, "spec", "aprf-threat-composition.yaml");
+  if (!existsSync(path)) return null;
+  const doc = parseYaml(readFileSync(path, "utf8")) as {
+    threats?: NonNullable<GeneratedCatalog["threatComposition"]>;
+  };
+  const threats = doc.threats ?? {};
+  const checkThreatIndex: Record<string, string[]> = {};
+  for (const [threatId, body] of Object.entries(threats)) {
+    for (const m of body.mitigations ?? []) {
+      const list = checkThreatIndex[m.checkId] ?? [];
+      if (!list.includes(threatId)) list.push(threatId);
+      checkThreatIndex[m.checkId] = list;
+    }
+  }
+  for (const id of Object.keys(checkThreatIndex)) {
+    checkThreatIndex[id].sort((a, b) => a.localeCompare(b));
+  }
+  return { threats, checkThreatIndex };
 }
 
 function main() {
@@ -221,6 +271,41 @@ function main() {
   }
   const wroteEvidenceIds = writeEvidenceTypeIds(evidenceTypeIds);
 
+  let signalRegistry: GeneratedCatalog["signalRegistry"];
+  let threatComposition: GeneratedCatalog["threatComposition"];
+  let checkThreatIndex: GeneratedCatalog["checkThreatIndex"];
+  try {
+    signalRegistry = loadSignalRegistry(repoRoot);
+    const composition = loadThreatComposition(repoRoot);
+    if (composition) {
+      threatComposition = composition.threats;
+      checkThreatIndex = composition.checkThreatIndex;
+      if (!signalRegistry?.signals?.length) {
+        console.error(
+          "aprf-engine build-catalog refused — threat composition present but signal registry empty",
+        );
+        process.exit(1);
+      }
+      for (const [tid, body] of Object.entries(threatComposition)) {
+        for (const m of body.mitigations) {
+          if (!ruleIds.has(m.checkId)) {
+            console.error(
+              `aprf-engine build-catalog refused — threat ${tid} cites unknown Check ${m.checkId}`,
+            );
+            process.exit(1);
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error(
+      `aprf-engine build-catalog refused — signal/threat composition load failed: ${
+        e instanceof Error ? e.message : String(e)
+      }`,
+    );
+    process.exit(1);
+  }
+
   const catalog = {
     generatedAt: contentStamp(
       domains,
@@ -229,6 +314,8 @@ function main() {
       rules,
       crosswalks,
       threatIntel,
+      signalRegistry,
+      threatComposition,
     ),
     ruleCount: rules.length,
     domains,
@@ -237,6 +324,9 @@ function main() {
     rules,
     crosswalks,
     threatIntel,
+    ...(signalRegistry ? { signalRegistry } : {}),
+    ...(threatComposition ? { threatComposition } : {}),
+    ...(checkThreatIndex ? { checkThreatIndex } : {}),
   };
 
   const body = `/* eslint-disable */

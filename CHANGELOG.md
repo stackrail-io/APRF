@@ -8,6 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Added
+- **Threat composition from multi-kind signals** ([APRF-RFC-0014](rfcs/0014-threat-composition-from-signals.md)): `spec/aprf-signal-registry.yaml` (production-mechanism kinds + SignalDefs), `spec/aprf-threat-composition.yaml` (pilot `THR-shadow-agents`), deterministic `evaluateThreatComposition` in `@stackrail-io/aprf-engine`, assess `threatExposure` / `signalObservations`, REPORT suspected vs confirmed exposure. Checks remain the sole gate unit. CI: `aprf:signals`, `aprf:threats`.
 - **Assessment target kinds + Framework profile** ([APRF-RFC-0013](rfcs/0013-assessment-target-kinds.md)): `systemType` (`ai-application` | `ai-framework` | `non-ai-platform` | `unknown`), orthogonal `applicationCapabilities`, official `aprf-profile-framework` (7 primitive Checks), and canonical `resolveAssessmentTarget()` in `@stackrail-io/aprf-framework-definition@0.12.0`. CLI: `--system-type` required for assess/audit/resolve-target (TTY interactive prompt when omitted; non-TTY needs the flag, `APRF_SYSTEM_TYPE`, or `--profile framework` — no silent Core default); `--capabilities`; `aprf resolve-target --json`; `assessmentKind=aprf-framework` + `scope.reportBanner` for claim honesty. `@stackrail-io/aprf@0.1.6` pins framework-definition `0.12.0`.
 
 ### Fixed

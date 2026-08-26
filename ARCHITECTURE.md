@@ -106,10 +106,22 @@ These enrich assessments; they **never** change pass/fail, severity, weight, or 
 | --- | --- |
 | `spec/aprf-spec.json` → `crosswalks[]` | Peer frameworks (NIST AI RMF, ISO 42001, OWASP LLM Top 10 + AISVS bridges, AISVS, ASVS, OpenCRE, MAESTRO, FIASSE, SOC 2, AWS WA, SLSA, …) mapped to APRF Checks and/or pillar slugs. Pillar-only rows expand via Check `category`. Optional `relatedPeerControlIds` bridge peer controls across frameworks. |
 | `spec/aprf-threat-map.yaml` | Per-Check `securityIntent`, `threats`, `protects`, optional MITRE ATLAS/ATT&CK IDs, `mappingRationale`. Full Check coverage required once the map exists. |
+| `spec/aprf-signal-registry.yaml` | SignalDefs + kind meta (`confirmingEligible`) — observation vocabulary (APRF-RFC-0014). |
+| `spec/aprf-threat-composition.yaml` | Threat-first composition (recursive indicators + primary/supporting mitigations). |
 | `spec/mitre-technique-index.json` | Pinned offline technique IDs; `npm run aprf:threat-map` validates against it. |
-| Generated catalog | `build-catalog` embeds both; `getCrosswalksForCheck` / `getThreatIntelForCheck` expose them. |
+| Generated catalog | `build-catalog` embeds crosswalks, threat-map, signal registry, and threat composition; `getCrosswalksForCheck` / `getThreatIntelForCheck` / `evaluateThreatComposition` expose them. |
 
-Reporting: each control may show crosswalks + threat chips/MITRE links; the executive summary ranks **Top threat exposure** across unmet controls (FAIL / PARTIAL / NOT_DEMONSTRATED), severity-weighted with mandatory Checks counting double. Unmet means unmitigated or unproven — not that an attack occurred.
+**Coupling invariant (APRF-RFC-0014):** Threats never participate in gate computation. Checks never participate in signal composition. The only coupling is that threats may cite Checks as mitigations.
+
+```text
+Evidence → Signal Observations → Threat Evaluation → Exposure Report
+                                      ↓
+                              Mitigation Lookup → Referenced Checks → Mandatory Gate
+```
+
+Signal **kind** = production mechanism (`artifact` \| `config` \| `process` \| `behavioral` \| `exercise` \| `attested` \| `inferred`), orthogonal to E0–E5 tier, freshness, polarity, assurance, and `origin`. Only `behavioral` / `exercise` observations may confirm a threat (`kinds[].confirmingEligible`). Unknown emitted `signalId`s must resolve to the registry (warn during migration; fail after).
+
+Reporting: each control may show crosswalks + threat chips/MITRE links; the executive summary ranks **Top threat exposure** from structured composition when present (suspected vs confirmed), otherwise falls back to unmet Check threat-map labels. Unmet/exposure means unmitigated or unproven — not that an attack occurred.
 
 ### Detections (operational — not in this repo’s normative catalog)
 

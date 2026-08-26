@@ -58,6 +58,19 @@ for (const rule of catalog.rules) {
   }
 }
 
+assert(
+  (catalog.signalRegistry?.signals?.length ?? 0) >= 1,
+  "signal registry embedded in catalog",
+);
+assert(
+  catalog.threatComposition?.["THR-shadow-agents"] != null,
+  "THR-shadow-agents embedded in catalog",
+);
+assert(
+  (catalog.checkThreatIndex?.["AGN-M1"] ?? []).includes("THR-shadow-agents"),
+  "AGN-M1 reverse-index includes THR-shadow-agents",
+);
+
 const index = getGeneratedRuleIndex();
 assert(index.byId.size === 178, "index size");
 assert(getRuleById(index, "SEC-M1")?.id === "SEC-M1", "getRuleById SEC-M1");

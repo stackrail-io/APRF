@@ -11,6 +11,10 @@ import type {
 import type { RuleIndex } from "./types.js";
 import { buildRuleIndex } from "./index-builder.js";
 import { GENERATED_CATALOG } from "./generated/catalog.js";
+import type {
+  SignalRegistry,
+  ThreatCompositionDoc,
+} from "./threat-composition.js";
 
 export function getGeneratedCatalog(): GeneratedCatalog {
   return GENERATED_CATALOG;
@@ -121,6 +125,36 @@ export function getCrosswalksForCheck(checkId: string): CheckCrosswalk[] {
  */
 export function getThreatIntelForCheck(checkId: string): ThreatIntelDef | null {
   return getGeneratedCatalog().threatIntel?.[checkId] ?? null;
+}
+
+/** Embedded signal registry (APRF-RFC-0014), or null if catalog predates it. */
+export function getSignalRegistry(): SignalRegistry | null {
+  const embedded = getGeneratedCatalog().signalRegistry;
+  if (!embedded) return null;
+  return {
+    id: "aprf-signal-registry",
+    name: "APRF Signal Registry",
+    version: embedded.version,
+    kinds: embedded.kinds as SignalRegistry["kinds"],
+    signals: embedded.signals as SignalRegistry["signals"],
+  };
+}
+
+/** Threat composition document from catalog, or null. */
+export function getThreatCompositionDoc(): ThreatCompositionDoc | null {
+  const threats = getGeneratedCatalog().threatComposition;
+  if (!threats || Object.keys(threats).length === 0) return null;
+  return {
+    id: "aprf-threat-composition",
+    name: "APRF Threat Composition",
+    version: getGeneratedCatalog().signalRegistry?.version ?? "0.1.0",
+    threats: threats as ThreatCompositionDoc["threats"],
+  };
+}
+
+/** THR-* ids that cite this Check as a mitigation. */
+export function getThreatIdsForCheck(checkId: string): string[] {
+  return getGeneratedCatalog().checkThreatIndex?.[checkId] ?? [];
 }
 
 export function getGeneratedRuleIndex(): RuleIndex {

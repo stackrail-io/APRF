@@ -27,8 +27,17 @@ This repository is the **normative public home** for APRF, plus the **reference 
 1. Edit / add YAML under `packages/aprf-engine/rules/`.
 2. Keep `spec/aprf-spec.json` pillar Check lists / pass conditions in sync when those fields are the published SoT for the site.
 3. Add or update the matching row in [`spec/aprf-threat-map.yaml`](spec/aprf-threat-map.yaml) (MITRE mapping optional — do not force-fit).
-4. Run `npm run aprf:catalog` and commit `packages/aprf-engine/src/generated/catalog.ts` if it changed.
-5. Run `npm run validate` (includes `aprf:threat-map`, `aprf:integrity`, and `aprf:detector-bridge`).
+4. If the Check mitigates a composed threat, update [`spec/aprf-threat-composition.yaml`](spec/aprf-threat-composition.yaml) mitigations (and add SignalDefs to [`spec/aprf-signal-registry.yaml`](spec/aprf-signal-registry.yaml) when collectors emit new observation ids). **Do not change `kind` on an existing signal id** — mint a new id (APRF-RFC-0014).
+5. Run `npm run aprf:catalog` and commit `packages/aprf-engine/src/generated/catalog.ts` if it changed.
+6. Run `npm run validate` (includes `aprf:threat-map`, `aprf:signals`, `aprf:threats`, `aprf:integrity`, and `aprf:detector-bridge`).
+
+### When you add a SignalDef or Threat composition
+
+1. Add the SignalDef under `spec/aprf-signal-registry.yaml` (`kind` from the closed production-mechanism set; confirmation eligibility is on `kinds[]`, not per signal).
+2. Reference only registered signal ids from `spec/aprf-threat-composition.yaml` indicators (`signal` \| recursive `allOf`/`anyOf`). Prefer explicit ids (`….present` / `….missing`) over negation.
+3. Cite Checks only as mitigations (`primary` affects exposure; `supporting` is report-only). Threats never gate.
+4. Dual-emit registered signal ids from collectors alongside legacy free-form tags during migration.
+5. Run `npm run aprf:signals && npm run aprf:threats && npm run aprf:catalog`.
 
 ### When you add or accept an RFC
 

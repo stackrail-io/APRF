@@ -81,4 +81,42 @@ export interface GeneratedCatalog {
   crosswalks: CrosswalkDef[];
   /** Threat context keyed by Check ID (spec/aprf-threat-map.yaml). */
   threatIntel: Record<string, ThreatIntelDef>;
+  /**
+   * Signal registry + threat composition (APRF-RFC-0014). Informative —
+   * never affects Check gate/score. Embedded for offline evaluateThreatComposition.
+   */
+  signalRegistry?: {
+    version: string;
+    kinds: Record<
+      string,
+      {
+        question: string;
+        confirmingEligible: boolean;
+        defaultAssurance: "gate-eligible" | "signal-only";
+        description?: string;
+      }
+    >;
+    signals: Array<{
+      id: string;
+      kind: string;
+      defaultTier: string;
+      description: string;
+      evidenceTypes?: string[];
+      emitters?: string[];
+    }>;
+  };
+  /** Threat-first composition defs keyed by THR-* id. */
+  threatComposition?: Record<
+    string,
+    {
+      title: string;
+      severityHint: "critical" | "high" | "medium" | "low";
+      description: string;
+      displayThreats?: string[];
+      indicators: unknown[];
+      mitigations: Array<{ checkId: string; role: "primary" | "supporting" }>;
+    }
+  >;
+  /** Check ID → THR-* ids that cite it as a mitigation. */
+  checkThreatIndex?: Record<string, string[]>;
 }
