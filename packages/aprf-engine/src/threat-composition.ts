@@ -173,11 +173,12 @@ export function indicatorSatisfied(
     return contrib;
   }
   if (isAnyOf(ind)) {
+    const contrib: SignalObservation[] = [];
     for (const x of ind.anyOf) {
       const part = indicatorSatisfied(x, firedById);
-      if (part) return part;
+      if (part) contrib.push(...part);
     }
-    return null;
+    return contrib.length > 0 ? contrib : null;
   }
   return null;
 }

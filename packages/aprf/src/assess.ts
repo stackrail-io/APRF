@@ -28,7 +28,6 @@ import {
   getSignalRegistry,
   getThreatCompositionDoc,
   evaluateThreatComposition,
-  unknownSignalIds,
   SEVERITY_WEIGHT,
   classifyAchievedTier,
   matchedEvidenceTypes,
@@ -938,8 +937,6 @@ function evaluateThreatExposureForAssessment(
     graph,
     known,
   );
-  const unknown = unknownSignalIds(observations, registry);
-  // Observations are already filtered to known ids; unknown comes from graph scan warn path.
   const checkStatuses: Record<string, string> = {};
   for (const c of controls) {
     checkStatuses[c.checkId] = c.status;
@@ -953,10 +950,7 @@ function evaluateThreatExposureForAssessment(
   return {
     threatExposure,
     signalObservations: observations,
-    signalWarnings: [
-      ...migrationWarnings,
-      ...unknown.map((id) => `unknown emitted signalId: ${id}`),
-    ],
+    signalWarnings: migrationWarnings,
   };
 }
 

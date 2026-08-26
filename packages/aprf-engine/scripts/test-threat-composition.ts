@@ -133,6 +133,64 @@ const nestedOk = indicatorSatisfied(
 );
 assert(nestedOk && nestedOk.length >= 2, "recursive allOf/anyOf must satisfy");
 
+// anyOf must accumulate all satisfied branches (order-independent confirmation)
+{
+  const anyOfBoth = indicatorSatisfied(
+    {
+      anyOf: [
+        { signal: "agent.inventory.missing" },
+        { signal: "agent.runtime.unenumerated" },
+      ],
+    },
+    new Map([
+      [
+        "agent.inventory.missing",
+        [{ signalId: "agent.inventory.missing", fired: true }],
+      ],
+      [
+        "agent.runtime.unenumerated",
+        [{ signalId: "agent.runtime.unenumerated", fired: true }],
+      ],
+    ]),
+  );
+  assert(
+    anyOfBoth &&
+      anyOfBoth.some((o) => o.signalId === "agent.inventory.missing") &&
+      anyOfBoth.some((o) => o.signalId === "agent.runtime.unenumerated"),
+    "anyOf must collect every satisfied branch",
+  );
+
+  const threatAnyOf: ThreatDef = {
+    id: "THR-anyof-order",
+    title: "Order test",
+    severityHint: "high",
+    description: "test",
+    indicators: [
+      {
+        anyOf: [
+          { signal: "agent.inventory.missing" },
+          { signal: "agent.runtime.unenumerated" },
+        ],
+      },
+    ],
+    mitigations: [{ checkId: "AGN-M1", role: "primary" }],
+  };
+  const r = evaluateThreat(
+    threatAnyOf,
+    [
+      { signalId: "agent.inventory.missing", fired: true },
+      { signalId: "agent.runtime.unenumerated", fired: true },
+    ],
+    { "AGN-M1": "FAIL" },
+    kinds,
+    signalDefs,
+  );
+  assert(
+    r.confirmed && r.status === "confirmed_exposure",
+    "artifact-first anyOf must still confirm when behavioral also fires",
+  );
+}
+
 // Artifact-only → suspected
 {
   const obs: SignalObservation[] = [

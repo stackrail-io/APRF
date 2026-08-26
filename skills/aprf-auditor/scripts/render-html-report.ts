@@ -1175,8 +1175,15 @@ function topThreatExposure(controls: Control[], limit = 6): ThreatExposure[] {
 }
 
 function topThreatsBlock(a: Assessment): string {
+  const hasComposition = Array.isArray(a.threatExposure);
   const composed = (a.threatExposure ?? []).filter((t) => t.exposure);
-  if (composed.length > 0) {
+  if (hasComposition) {
+    if (composed.length === 0) {
+      return `<section class="threat-rollup">
+  <h3>Top threat exposure</h3>
+  <p class="meta">No composed threat is currently exposed. Threats never affect the mandatory gate.</p>
+  </section>`;
+    }
     const SEV_W: Record<string, number> = {
       critical: 4,
       high: 3,

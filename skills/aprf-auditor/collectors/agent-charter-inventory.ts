@@ -535,7 +535,9 @@ function loadImported(
       ];
       let listUnenumerated = 0;
       for (const list of unenumeratedLists) {
-        if (Array.isArray(list)) listUnenumerated += list.length;
+        if (Array.isArray(list)) {
+          listUnenumerated = Math.max(listUnenumerated, list.length);
+        }
       }
       const fromImport = Math.max(explicitUnenumerated ?? 0, listUnenumerated);
       if (fromImport > 0) {

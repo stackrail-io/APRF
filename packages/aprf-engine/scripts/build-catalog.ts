@@ -12,6 +12,7 @@ import { fileURLToPath } from "url";
 import { parse as parseYaml } from "yaml";
 import type { CrosswalkDef, GeneratedCatalog, ThreatIntelDef } from "../src/catalog-types";
 import { loadRulesFromDisk, rulesRootDir } from "../src/loader";
+import { collectSignalIds, type Indicator } from "../src/threat-composition";
 import { validateAllByDomainYaml } from "./validate-catalog";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -132,6 +133,13 @@ function loadSignalRegistry(repoRoot: string): GeneratedCatalog["signalRegistry"
   };
   if (!doc.version || !doc.kinds || !doc.signals) {
     throw new Error("spec/aprf-signal-registry.yaml incomplete");
+  }
+  const ids = doc.signals.map((s) => s.id);
+  const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+  if (dupes.length > 0) {
+    throw new Error(
+      `spec/aprf-signal-registry.yaml duplicate signal id(s): ${[...new Set(dupes)].join(", ")}`,
+    );
   }
   return {
     version: doc.version,
@@ -286,11 +294,24 @@ function main() {
         );
         process.exit(1);
       }
+      const knownSignals = new Set(signalRegistry.signals.map((s) => s.id));
       for (const [tid, body] of Object.entries(threatComposition)) {
         for (const m of body.mitigations) {
           if (!ruleIds.has(m.checkId)) {
             console.error(
               `aprf-engine build-catalog refused — threat ${tid} cites unknown Check ${m.checkId}`,
+            );
+            process.exit(1);
+          }
+        }
+        const referenced = new Set<string>();
+        for (const ind of body.indicators as Indicator[]) {
+          collectSignalIds(ind, referenced);
+        }
+        for (const sid of referenced) {
+          if (!knownSignals.has(sid)) {
+            console.error(
+              `aprf-engine build-catalog refused — threat ${tid} references unknown signal ${sid}`,
             );
             process.exit(1);
           }

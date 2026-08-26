@@ -37,6 +37,7 @@
     "signals": {
       "type": "array",
       "minItems": 1,
+      "description": "SignalDefs; each id must be unique (enforced by validators and build-catalog).",
       "items": { "$ref": "#/$defs/signalDef" }
     }
   },
