@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:6e568ff0072b40b198895715263663335a841bc121fb5f24df7681a7c94b73a5",
+  "generatedAt": "sha256:0b6e8f6e5671313e386939e03725455518f09cf3b1f38248c99505a21e142696",
   "ruleCount": 178,
   "domains": [
     {
@@ -23082,5 +23082,282 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       },
       "mappingRationale": "Rate and blast-radius budgets cap the volume of actions available to a hijacked agent before a human can intervene. They limit bulk exfiltration and mass destructive operations even when each individual authorization check legitimately passes."
     }
+  },
+  "signalRegistry": {
+    "version": "0.1.0",
+    "kinds": {
+      "artifact": {
+        "question": "What exists?",
+        "confirmingEligible": false,
+        "defaultAssurance": "signal-only",
+        "description": "Repository artifacts, documentation, source layout."
+      },
+      "config": {
+        "question": "What is configured?",
+        "confirmingEligible": false,
+        "defaultAssurance": "signal-only",
+        "description": "Runtime/IaC configuration, cloud state, policy definitions."
+      },
+      "process": {
+        "question": "What was executed during delivery?",
+        "confirmingEligible": false,
+        "defaultAssurance": "signal-only",
+        "description": "CI/CD execution evidence, build attestations, pipeline outputs."
+      },
+      "behavioral": {
+        "question": "What actually happened?",
+        "confirmingEligible": true,
+        "defaultAssurance": "gate-eligible",
+        "description": "Organic production/runtime observation."
+      },
+      "exercise": {
+        "question": "What happened when intentionally tested?",
+        "confirmingEligible": true,
+        "defaultAssurance": "gate-eligible",
+        "description": "Drills, canaries, red-team, test corpus."
+      },
+      "attested": {
+        "question": "What did an authorized human state?",
+        "confirmingEligible": false,
+        "defaultAssurance": "signal-only",
+        "description": "Human assertion or approved exception."
+      },
+      "inferred": {
+        "question": "What does an analysis believe?",
+        "confirmingEligible": false,
+        "defaultAssurance": "signal-only",
+        "description": "Statistical, heuristic, or ML-derived conclusion."
+      }
+    },
+    "signals": [
+      {
+        "id": "agent.inventory.present",
+        "kind": "artifact",
+        "defaultTier": "E2",
+        "description": "Version-controlled production-agent inventory artifact is present in the repo or export pack.",
+        "evidenceTypes": [
+          "repo_signal"
+        ],
+        "emitters": [
+          "agent-charter-inventory"
+        ]
+      },
+      {
+        "id": "agent.inventory.missing",
+        "kind": "artifact",
+        "defaultTier": "E2",
+        "description": "No version-controlled production-agent inventory artifact found (explicit absence id; do not use !present).",
+        "evidenceTypes": [
+          "repo_signal"
+        ],
+        "emitters": [
+          "agent-charter-inventory"
+        ]
+      },
+      {
+        "id": "agent.charter.fields_complete",
+        "kind": "artifact",
+        "defaultTier": "E2",
+        "description": "Inventory/charter records include required governance fields (purpose, owner, tools, autonomy, etc.).",
+        "evidenceTypes": [
+          "repo_signal"
+        ],
+        "emitters": [
+          "agent-charter-inventory"
+        ]
+      },
+      {
+        "id": "agent.charter.absent",
+        "kind": "artifact",
+        "defaultTier": "E2",
+        "description": "One or more inventory rows lack a charter or required charter fields.",
+        "evidenceTypes": [
+          "repo_signal"
+        ],
+        "emitters": [
+          "agent-charter-inventory"
+        ]
+      },
+      {
+        "id": "agent.inventory.cmdb_export",
+        "kind": "config",
+        "defaultTier": "E3",
+        "description": "CMDB, platform registry, or deployment-manifest style completeness export present.",
+        "evidenceTypes": [
+          "cloud_configuration",
+          "runtime_network_config"
+        ],
+        "emitters": [
+          "agent-charter-inventory"
+        ]
+      },
+      {
+        "id": "agent.inventory.completeness_attested",
+        "kind": "attested",
+        "defaultTier": "E1",
+        "description": "Approved attestation that the inventory covers all production agents (measuredAt freshness is an observation qualifier).",
+        "evidenceTypes": [
+          "self_attestation"
+        ],
+        "emitters": [
+          "agent-charter-inventory",
+          "manual-attest"
+        ]
+      },
+      {
+        "id": "agent.runtime.unenumerated",
+        "kind": "behavioral",
+        "defaultTier": "E4",
+        "description": "Runtime/agent registry export shows agents not present in the approved inventory.",
+        "evidenceTypes": [
+          "application_logs"
+        ],
+        "emitters": [
+          "agent-charter-inventory"
+        ]
+      },
+      {
+        "id": "agent.owner.unassigned",
+        "kind": "artifact",
+        "defaultTier": "E2",
+        "description": "Inventory or charter rows lack an accountable owner field.",
+        "evidenceTypes": [
+          "repo_signal"
+        ],
+        "emitters": [
+          "agent-charter-inventory"
+        ]
+      },
+      {
+        "id": "agent.owner.missing_on_active",
+        "kind": "behavioral",
+        "defaultTier": "E4",
+        "description": "Live or exported active agent list includes agents with null/empty owner.",
+        "evidenceTypes": [
+          "application_logs"
+        ],
+        "emitters": [
+          "agent-charter-inventory"
+        ]
+      },
+      {
+        "id": "agent.kill_drill.fresh",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Kill-switch drill pack with measuredAt within the Check freshness window (≤90d).",
+        "evidenceTypes": [
+          "application_logs"
+        ],
+        "emitters": [
+          "agent-kill-switch"
+        ]
+      },
+      {
+        "id": "agent.shadow.attested",
+        "kind": "attested",
+        "defaultTier": "E1",
+        "description": "Authorized human attested that unknown or shadow production agents are present or inventory is incomplete.",
+        "evidenceTypes": [
+          "self_attestation"
+        ],
+        "emitters": [
+          "manual-attest"
+        ]
+      },
+      {
+        "id": "agent.shadow.heuristic",
+        "kind": "inferred",
+        "defaultTier": "E2",
+        "description": "Heuristic/stochastic detector suspects undeclared agent runtimes (never confirms alone).",
+        "evidenceTypes": [
+          "repo_signal"
+        ],
+        "emitters": [
+          "agent-charter-inventory"
+        ]
+      }
+    ]
+  },
+  "threatComposition": {
+    "THR-shadow-agents": {
+      "title": "Shadow Agents",
+      "severityHint": "critical",
+      "description": "Production agents not represented in an approved inventory, without an accountable owner, or observed at runtime outside the declared set.\n",
+      "displayThreats": [
+        "Shadow Agents",
+        "Excessive Agency",
+        "Unauthorized Tool Use"
+      ],
+      "indicators": [
+        {
+          "allOf": [
+            {
+              "signal": "agent.inventory.missing"
+            },
+            {
+              "signal": "agent.runtime.unenumerated"
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "signal": "agent.charter.absent"
+            },
+            {
+              "signal": "agent.owner.unassigned"
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "signal": "agent.charter.absent"
+            },
+            {
+              "signal": "agent.owner.missing_on_active"
+            }
+          ]
+        },
+        {
+          "signal": "agent.shadow.attested"
+        },
+        {
+          "allOf": [
+            {
+              "signal": "agent.inventory.missing"
+            },
+            {
+              "signal": "agent.shadow.heuristic"
+            }
+          ]
+        }
+      ],
+      "mitigations": [
+        {
+          "checkId": "AGN-M1",
+          "role": "primary"
+        },
+        {
+          "checkId": "AGN-M2",
+          "role": "supporting"
+        },
+        {
+          "checkId": "AGN-M3",
+          "role": "supporting"
+        }
+      ]
+    }
+  },
+  "checkThreatIndex": {
+    "AGN-M1": [
+      "THR-shadow-agents"
+    ],
+    "AGN-M2": [
+      "THR-shadow-agents"
+    ],
+    "AGN-M3": [
+      "THR-shadow-agents"
+    ]
   }
 } as GeneratedCatalog;

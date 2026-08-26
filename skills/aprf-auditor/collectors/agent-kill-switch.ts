@@ -538,6 +538,7 @@ export const agentKillSwitchCollector: Collector = {
           ...(report.summary.agnM3Satisfied
             ? ["agn-m3-satisfied"]
             : ["agn-m3-incomplete"]),
+          ...(report.summary.drillOk ? ["agent.kill_drill.fresh"] : []),
         ],
         relatedCheckIds: [...RELATED],
       },

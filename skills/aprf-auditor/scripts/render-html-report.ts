@@ -301,6 +301,21 @@ type Assessment = {
     mandatoryGatePassed: boolean;
   }>;
   controls: Control[];
+  /** APRF-RFC-0014 structured threat evaluation (informative; never gates). */
+  threatExposure?: Array<{
+    threatId: string;
+    title: string;
+    severityHint?: string;
+    status: string;
+    indicated: boolean;
+    confirmed: boolean;
+    mitigated: boolean;
+    exposure: boolean;
+    primaryCheckIds: string[];
+    supportingCheckIds?: string[];
+    contributingSignalIds?: string[];
+    displayThreats?: string[];
+  }>;
   findings: {
     critical: Finding[];
     high: Finding[];
@@ -1159,8 +1174,64 @@ function topThreatExposure(controls: Control[], limit = 6): ThreatExposure[] {
     .slice(0, limit);
 }
 
-function topThreatsBlock(controls: Control[]): string {
-  const top = topThreatExposure(controls);
+function topThreatsBlock(a: Assessment): string {
+  const hasComposition = Array.isArray(a.threatExposure);
+  const composed = (a.threatExposure ?? []).filter((t) => t.exposure);
+  if (hasComposition) {
+    if (composed.length === 0) {
+      return `<section class="threat-rollup">
+  <h3>Top threat exposure</h3>
+  <p class="meta">No composed threat is currently exposed. Threats never affect the mandatory gate.</p>
+  </section>`;
+    }
+    const SEV_W: Record<string, number> = {
+      critical: 4,
+      high: 3,
+      medium: 2,
+      low: 1,
+    };
+    const ranked = [...composed].sort(
+      (x, y) =>
+        (SEV_W[y.severityHint ?? ""] ?? 1) - (SEV_W[x.severityHint ?? ""] ?? 1) ||
+        x.threatId.localeCompare(y.threatId),
+    );
+    const rows = ranked
+      .slice(0, 6)
+      .map((t) => {
+        const statusPill =
+          t.status === "confirmed_exposure"
+            ? `<span class="pill bad">confirmed</span>`
+            : `<span class="pill muted">suspected</span>`;
+        const checks = [...(t.primaryCheckIds ?? [])]
+          .slice(0, 4)
+          .map(esc)
+          .join(", ");
+        const signals = (t.contributingSignalIds ?? [])
+          .slice(0, 3)
+          .map(esc)
+          .join(", ");
+        return `<tr>
+        <td><span class="chip risk">${esc(t.title)}</span> <span class="meta">${esc(t.threatId)}</span></td>
+        <td>${statusPill}</td>
+        <td class="meta">${checks || "—"}</td>
+        <td class="meta">${signals || "—"}</td>
+      </tr>`;
+      })
+      .join("");
+    return `<section class="threat-rollup">
+  <h3>Top threat exposure</h3>
+  <p class="meta" style="max-width:72ch">Structured threat composition (APRF-RFC-0014). <strong>Confirmed</strong> requires a firing behavioral or exercise observation; artifact/config/process/attested/inferred alone stay <strong>suspected</strong>. Primary mitigation Checks determine mitigated vs exposure; supporting Checks are report-only. Threats never affect the mandatory gate.</p>
+  <div class="panel">
+  <table>
+    <thead><tr><th>Threat</th><th>Status</th><th>Primary Checks</th><th>Signals</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  </div>
+  </section>`;
+  }
+
+  // Fallback: roll up unmet Check threat-map labels (pre-composition assessments).
+  const top = topThreatExposure(a.controls);
   if (top.length === 0) return "";
 
   const rows = top
@@ -2095,7 +2166,7 @@ function render(a: Assessment): string {
         : ""
     }
     ${evidenceCoverageBlock(a.controls)}
-    ${topThreatsBlock(a.controls)}
+    ${topThreatsBlock(a)}
 
     <h2>Visual overview</h2>
     <div class="viz-grid">

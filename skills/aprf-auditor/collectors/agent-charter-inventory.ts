@@ -134,6 +134,13 @@ export interface AgentCharterInventoryReport {
     agentCount: number | null;
     missingFieldCount: number | null;
     missingOwnerCount: number | null;
+    /** Owners missing on agents whose lifecycle is Active (behavioral evidence). */
+    missingOwnerOnActiveCount: number | null;
+    /**
+     * Runtime/registry agents not present in the approved inventory
+     * (explicit import field — never inferred from incomplete charters alone).
+     */
+    unenumeratedAgentCount: number | null;
     complete: boolean | null;
     coversAllProductionAgents: boolean | null;
     completenessEvidence: string | null;
@@ -163,6 +170,70 @@ export interface AgentCharterInventoryReport {
   notes: string[];
   /** Gap-only guidance for assess/report flyouts (excludes informational scan notes). */
   gapNotes: string[];
+}
+
+/**
+ * Dual-emit APRF-RFC-0014 SignalDef ids from collector outcomes.
+ * Confirming-eligible kinds (behavioral/exercise) only fire from matching
+ * observation evidence — never from repo/config gaps alone.
+ */
+function registeredSignalIdsForReport(
+  report: AgentCharterInventoryReport,
+): string[] {
+  const ids: string[] = [];
+  const s = report.summary;
+  const imported = report.importedResults;
+  if (!s.inScope) return ids;
+
+  if (s.inventoryPresent) ids.push("agent.inventory.present");
+  else ids.push("agent.inventory.missing");
+
+  if (s.allRequiredFieldsPresent) ids.push("agent.charter.fields_complete");
+  else if (s.inventoryPresent || report.charters.found) {
+    ids.push("agent.charter.absent");
+  }
+
+  const completeness = imported.completenessEvidence;
+  if (
+    completeness &&
+    ["cmdb", "platform-registry", "deployment-manifest", "runtime-registry"].includes(
+      completeness,
+    )
+  ) {
+    ids.push("agent.inventory.cmdb_export");
+  }
+  if (
+    completeness === "approved-attestation" ||
+    imported.coversAllProductionAgents === true
+  ) {
+    ids.push("agent.inventory.completeness_attested");
+  }
+
+  // Artifact: owner field missing in repo scan or any import row.
+  const ownerUnassigned =
+    report.fields.owner === false || (imported.missingOwnerCount ?? 0) > 0;
+  if (ownerUnassigned) ids.push("agent.owner.unassigned");
+
+  // Behavioral: only when export lists Active agents with empty owner.
+  if ((imported.missingOwnerOnActiveCount ?? 0) > 0) {
+    ids.push("agent.owner.missing_on_active");
+  }
+
+  if (
+    imported.found &&
+    imported.productionAgentsPresent !== false &&
+    !s.completenessProven &&
+    (imported.agentCount ?? 0) > 0
+  ) {
+    ids.push("agent.shadow.heuristic");
+  }
+
+  // Behavioral: only when import explicitly reports runtime agents outside inventory.
+  if ((imported.unenumeratedAgentCount ?? 0) > 0) {
+    ids.push("agent.runtime.unenumerated");
+  }
+
+  return [...new Set(ids)];
 }
 
 function agentHasGovernanceField(
@@ -389,6 +460,22 @@ function detectScopeSignals(
   };
 }
 
+function agentLifecycleStatus(a: Record<string, unknown>): string | null {
+  const raw = a.lifecycleStatus ?? a.lifecycle_status ?? a.lifecycle;
+  if (typeof raw !== "string") return null;
+  return raw.trim().toLowerCase();
+}
+
+function agentIsActive(a: Record<string, unknown>): boolean {
+  return agentLifecycleStatus(a) === "active";
+}
+
+function asNonNegInt(v: unknown): number | null {
+  if (typeof v === "number" && Number.isFinite(v) && v >= 0) return Math.floor(v);
+  if (typeof v === "string" && /^\d+$/.test(v.trim())) return Number(v.trim());
+  return null;
+}
+
 function loadImported(
   ctx: CollectorContext,
 ): AgentCharterInventoryReport["importedResults"] {
@@ -396,6 +483,8 @@ function loadImported(
   let agentCount: number | null = null;
   let missingFieldCount: number | null = null;
   let missingOwnerCount: number | null = null;
+  let missingOwnerOnActiveCount: number | null = null;
+  let unenumeratedAgentCount: number | null = null;
   let complete: boolean | null = null;
   let coversAllProductionAgents: boolean | null = null;
   let completenessEvidence: string | null = null;
@@ -429,6 +518,32 @@ function loadImported(
       }
       if (typeof data.complete === "boolean") complete = data.complete;
 
+      const explicitUnenumerated =
+        asNonNegInt(data.unenumeratedAgentCount) ??
+        asNonNegInt(data.unenumerated_agent_count) ??
+        asNonNegInt(data.shadowAgentCount) ??
+        asNonNegInt(data.shadow_agent_count);
+      const unenumeratedLists = [
+        data.unenumeratedAgents,
+        data.unenumerated_agents,
+        data.shadowAgents,
+        data.shadow_agents,
+        data.runtimeAgentsNotInInventory,
+        data.runtime_agents_not_in_inventory,
+        data.agentsNotInInventory,
+        data.agents_not_in_inventory,
+      ];
+      let listUnenumerated = 0;
+      for (const list of unenumeratedLists) {
+        if (Array.isArray(list)) {
+          listUnenumerated = Math.max(listUnenumerated, list.length);
+        }
+      }
+      const fromImport = Math.max(explicitUnenumerated ?? 0, listUnenumerated);
+      if (fromImport > 0) {
+        unenumeratedAgentCount = (unenumeratedAgentCount ?? 0) + fromImport;
+      }
+
       const agents = Array.isArray(data.agents)
         ? (data.agents as Array<Record<string, unknown>>)
         : Array.isArray(data.inventory)
@@ -438,6 +553,7 @@ function loadImported(
         agentCount = (agentCount ?? 0) + agents.length;
         let missing = 0;
         let missingOwners = 0;
+        let missingOwnersOnActive = 0;
         for (const a of agents) {
           const hasPurpose = agentHasGovernanceField(a, [
             "purpose",
@@ -497,7 +613,10 @@ function loadImported(
           const hasChange = agentHasChangeControl(a);
           const hasApproval = agentHasStructuredApproval(a);
           const exceptionsOk = agentExceptionsValid(a, measuredAt);
-          if (!hasOwner) missingOwners++;
+          if (!hasOwner) {
+            missingOwners++;
+            if (agentIsActive(a)) missingOwnersOnActive++;
+          }
           if (
             !hasPurpose ||
             !hasTools ||
@@ -518,6 +637,10 @@ function loadImported(
         }
         missingFieldCount = (missingFieldCount ?? 0) + missing;
         missingOwnerCount = (missingOwnerCount ?? 0) + missingOwners;
+        if (missingOwnersOnActive > 0) {
+          missingOwnerOnActiveCount =
+            (missingOwnerOnActiveCount ?? 0) + missingOwnersOnActive;
+        }
         complete =
           complete === null ? missing === 0 : complete && missing === 0;
       }
@@ -531,6 +654,8 @@ function loadImported(
     agentCount,
     missingFieldCount,
     missingOwnerCount,
+    missingOwnerOnActiveCount,
+    unenumeratedAgentCount,
     complete,
     coversAllProductionAgents,
     completenessEvidence,
@@ -921,6 +1046,8 @@ export const agentCharterInventoryCollector: Collector = {
           ...(report.summary.inScope
             ? ["production-agent-scope"]
             : ["framework-or-library-na"]),
+          // APRF-RFC-0014 registered SignalDef ids (dual-emit with legacy tags)
+          ...registeredSignalIdsForReport(report),
         ],
         relatedCheckIds: [...RELATED],
       },

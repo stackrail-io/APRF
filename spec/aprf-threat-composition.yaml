@@ -1,0 +1,45 @@
+# APRF Threat Composition (APRF-RFC-0014)
+# Threat-first definitions that compose registered SignalObservations.
+# Informative exposure only — never participates in the mandatory Check gate.
+# Per-Check chips remain in aprf-threat-map.yaml; this file owns composition.
+id: aprf-threat-composition
+name: APRF Threat Composition
+version: "0.1.0"
+aprfVersion: "0.11.0"
+disclaimer: >-
+  Threats never participate in gate computation. Checks never participate in
+  signal composition. The only coupling is that threats may cite Checks as
+  mitigations. Confirmation eligibility is owned by the signal registry kinds.
+
+threats:
+  THR-shadow-agents:
+    title: Shadow Agents
+    severityHint: critical
+    description: >
+      Production agents not represented in an approved inventory, without an
+      accountable owner, or observed at runtime outside the declared set.
+    displayThreats:
+      - Shadow Agents
+      - Excessive Agency
+      - Unauthorized Tool Use
+    indicators:
+      - allOf:
+          - signal: agent.inventory.missing
+          - signal: agent.runtime.unenumerated
+      - allOf:
+          - signal: agent.charter.absent
+          - signal: agent.owner.unassigned
+      - allOf:
+          - signal: agent.charter.absent
+          - signal: agent.owner.missing_on_active
+      - signal: agent.shadow.attested
+      - allOf:
+          - signal: agent.inventory.missing
+          - signal: agent.shadow.heuristic
+    mitigations:
+      - checkId: AGN-M1
+        role: primary
+      - checkId: AGN-M2
+        role: supporting
+      - checkId: AGN-M3
+        role: supporting

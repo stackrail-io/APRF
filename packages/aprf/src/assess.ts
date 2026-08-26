@@ -25,6 +25,9 @@ import {
   getCrosswalksForCheck,
   getThreatIntelForCheck,
   getGeneratedCatalog,
+  getSignalRegistry,
+  getThreatCompositionDoc,
+  evaluateThreatComposition,
   SEVERITY_WEIGHT,
   classifyAchievedTier,
   matchedEvidenceTypes,
@@ -36,6 +39,8 @@ import {
   type ControlEvidenceTier,
   type DomainDef,
   type EvidenceTier,
+  type SignalObservation,
+  type ThreatEvalResult,
 } from "@stackrail-io/aprf-engine";
 import {
   PROFILE_FRAMEWORK,
@@ -868,6 +873,87 @@ export function resolveAssessTargetFromOptions(opts: {
   });
 }
 
+/** Collect APRF-RFC-0014 SignalObservations from evidence-graph node tags. */
+function collectSignalObservationsFromGraph(
+  graph: EvidenceGraph | undefined,
+  knownSignalIds: Set<string>,
+): { observations: SignalObservation[]; unknownIds: string[]; migrationWarnings: string[] } {
+  const observations: SignalObservation[] = [];
+  const unknownIds = new Set<string>();
+  const migrationWarnings: string[] = [];
+  const seen = new Set<string>();
+
+  for (const n of graph?.nodes ?? []) {
+    for (const raw of n.signals ?? []) {
+      if (typeof raw !== "string" || !raw.includes(".")) continue;
+      // Registered ids are dotted (agent.inventory.missing). Legacy tags rarely use dots.
+      if (!knownSignalIds.has(raw)) {
+        // Only flag dotted ids that look like registry candidates
+        if (/^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)+$/.test(raw)) {
+          unknownIds.add(raw);
+        }
+        continue;
+      }
+      const key = `${raw}::${n.id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      observations.push({
+        signalId: raw,
+        fired: true,
+        origin: "owner",
+        evidenceNode: n.id,
+        ...(typeof n.lastModified === "string" ? { measuredAt: n.lastModified } : {}),
+      });
+    }
+  }
+
+  if (unknownIds.size > 0) {
+    migrationWarnings.push(
+      `Unknown signalId(s) on evidence-graph (migration warn): ${[...unknownIds].sort().join(", ")}`,
+    );
+  }
+
+  return {
+    observations,
+    unknownIds: [...unknownIds].sort(),
+    migrationWarnings,
+  };
+}
+
+function evaluateThreatExposureForAssessment(
+  controls: ControlOut[],
+  graph: EvidenceGraph | undefined,
+): {
+  threatExposure: ThreatEvalResult[];
+  signalObservations: SignalObservation[];
+  signalWarnings: string[];
+} | null {
+  const registry = getSignalRegistry();
+  const composition = getThreatCompositionDoc();
+  if (!registry || !composition) return null;
+
+  const known = new Set(registry.signals.map((s) => s.id));
+  const { observations, migrationWarnings } = collectSignalObservationsFromGraph(
+    graph,
+    known,
+  );
+  const checkStatuses: Record<string, string> = {};
+  for (const c of controls) {
+    checkStatuses[c.checkId] = c.status;
+  }
+  const threatExposure = evaluateThreatComposition(
+    composition,
+    observations,
+    checkStatuses,
+    registry,
+  );
+  return {
+    threatExposure,
+    signalObservations: observations,
+    signalWarnings: migrationWarnings,
+  };
+}
+
 export function assessFromStatusHints(opts: AssessOptions): unknown {
   const outDir = resolve(opts.outDir);
   const resolved = resolveAssessTargetFromOptions(opts);
@@ -1282,6 +1368,11 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
 
   const hintedCount = [...hints.keys()].filter((id) => checkIds.has(id)).length;
 
+  const threatEval = evaluateThreatExposureForAssessment(controls, graph);
+  for (const w of threatEval?.signalWarnings ?? []) {
+    console.warn(`aprf assess: ${w}`);
+  }
+
   return {
     schemaVersion: "0.2.0",
     aprfVersion: catalogVersion(),
@@ -1321,6 +1412,12 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     },
     domainScores,
     controls,
+    ...(threatEval
+      ? {
+          threatExposure: threatEval.threatExposure,
+          signalObservations: threatEval.signalObservations,
+        }
+      : {}),
     findings: blockers.map((c) => ({
       checkId: c.checkId,
       title: c.title,
@@ -1338,8 +1435,8 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     },
     disclaimer:
       resolved.assessmentKind === "aprf-framework"
-        ? "Framework / SDK primitive gate (assessmentKind=aprf-framework). Not an APRF Core or Regulated production-readiness claim. Deterministic CLI assess from collector statusHints + evidence-graph nodes. Not a StackRail attestation. NOT_DEMONSTRATED means no scored collector report — not necessarily FAIL."
-        : "Deterministic CLI assess from collector statusHints + evidence-graph nodes. Not a StackRail attestation. NOT_DEMONSTRATED means no scored collector report — not necessarily FAIL. Use the APRF Auditor skill for YES/NO/DON'T KNOW attestation fills.",
+        ? "Framework / SDK primitive gate (assessmentKind=aprf-framework). Not an APRF Core or Regulated production-readiness claim. Deterministic CLI assess from collector statusHints + evidence-graph nodes. Not a StackRail attestation. NOT_DEMONSTRATED means no scored collector report — not necessarily FAIL. Threat exposure (when present) is informative only and never affects the gate."
+        : "Deterministic CLI assess from collector statusHints + evidence-graph nodes. Not a StackRail attestation. NOT_DEMONSTRATED means no scored collector report — not necessarily FAIL. Use the APRF Auditor skill for YES/NO/DON'T KNOW attestation fills. Threat exposure (when present) is informative only and never affects the gate.",
   };
 }
 

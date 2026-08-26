@@ -422,6 +422,18 @@
       "slug": "0013-assessment-target-kinds",
       "href": "/aprf/rfc/0013-assessment-target-kinds/",
       "markdownPath": "/aprf/rfc/0013-assessment-target-kinds.md"
+    },
+    {
+      "id": "APRF-RFC-0014",
+      "number": 14,
+      "title": "Threat Composition from Multi-Kind Signals",
+      "status": "draft",
+      "created": "2026-08-26",
+      "semverImpact": "MINOR",
+      "summary": "Adds a signal registry (production-mechanism kinds) and threat-first composition with a formal evaluator; Checks remain the sole gate unit; threats drive suspected/confirmed exposure only.",
+      "slug": "0014-threat-composition-from-signals",
+      "href": "/aprf/rfc/0014-threat-composition-from-signals/",
+      "markdownPath": "/aprf/rfc/0014-threat-composition-from-signals.md"
     }
   ],
   "scope": {

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stackrail.io/aprf/signal-registry-schema/0.1",
+  "title": "AprfSignalRegistry",
+  "description": "APRF Signal Registry (APRF-RFC-0014). Kind = production mechanism.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "version", "kinds", "signals"],
+  "properties": {
+    "id": { "type": "string", "const": "aprf-signal-registry" },
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 },
+    "aprfVersion": { "type": "string" },
+    "disclaimer": { "type": "string" },
+    "kinds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact",
+        "config",
+        "process",
+        "behavioral",
+        "exercise",
+        "attested",
+        "inferred"
+      ],
+      "properties": {
+        "artifact": { "$ref": "#/$defs/kindMeta" },
+        "config": { "$ref": "#/$defs/kindMeta" },
+        "process": { "$ref": "#/$defs/kindMeta" },
+        "behavioral": { "$ref": "#/$defs/kindMeta" },
+        "exercise": { "$ref": "#/$defs/kindMeta" },
+        "attested": { "$ref": "#/$defs/kindMeta" },
+        "inferred": { "$ref": "#/$defs/kindMeta" }
+      }
+    },
+    "signals": {
+      "type": "array",
+      "minItems": 1,
+      "description": "SignalDefs; each id must be unique (enforced by validators and build-catalog).",
+      "items": { "$ref": "#/$defs/signalDef" }
+    }
+  },
+  "$defs": {
+    "kindMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["question", "confirmingEligible", "defaultAssurance"],
+      "properties": {
+        "question": { "type": "string", "minLength": 1 },
+        "confirmingEligible": { "type": "boolean" },
+        "defaultAssurance": {
+          "type": "string",
+          "enum": ["gate-eligible", "signal-only"]
+        },
+        "description": { "type": "string" }
+      }
+    },
+    "signalDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "defaultTier", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "artifact",
+            "config",
+            "process",
+            "behavioral",
+            "exercise",
+            "attested",
+            "inferred"
+          ]
+        },
+        "defaultTier": {
+          "type": "string",
+          "enum": ["E0", "E1", "E2", "E3", "E4", "E5"]
+        },
+        "description": { "type": "string", "minLength": 1 },
+        "evidenceTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          }
+        },
+        "emitters": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

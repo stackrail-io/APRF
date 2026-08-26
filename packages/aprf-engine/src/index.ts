@@ -63,7 +63,38 @@ export {
   getGeneratedRuleIndex,
   getCrosswalksForCheck,
   getThreatIntelForCheck,
+  getSignalRegistry,
+  getThreatCompositionDoc,
+  getThreatIdsForCheck,
 } from "./catalog.js";
+
+export {
+  evaluateThreat,
+  evaluateThreatComposition,
+  indicatorSatisfied,
+  collectSignalIds,
+  buildCheckThreatReverseIndex,
+  unknownSignalIds,
+  signalIdsReferencedByThreats,
+} from "./threat-composition.js";
+export type {
+  SignalKind,
+  SignalAssurance,
+  SignalOrigin,
+  SignalPolarity,
+  SignalKindMeta,
+  SignalDef,
+  SignalRegistry,
+  SignalObservation,
+  Indicator,
+  MitigationRole,
+  ThreatMitigation,
+  ThreatDef,
+  ThreatCompositionDoc,
+  ThreatEvalStatus,
+  ThreatEvalResult,
+  CheckStatusLike,
+} from "./threat-composition.js";
 
 export {
   createDetectorRegistry,
