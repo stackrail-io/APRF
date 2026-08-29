@@ -638,14 +638,57 @@ assert(
 );
 assert(
   html.includes("Top threat exposure") &&
-    html.includes("gate-blocking") &&
-    html.includes("Unmet controls"),
-  "REPORT.html executive summary must roll up top threats across unmet controls",
+    html.includes("No composed threat is currently exposed") &&
+    html.includes("Threats never affect the mandatory gate"),
+  "REPORT.html executive summary must render structured top threat exposure (empty exposure state)",
 );
-// The rollup must not imply an incident occurred, only unmitigated exposure.
+
+// Verify structured threat composition rendering when a composed threat IS exposed
+const sampleExposedAssessmentPath = join(root, "assessment.exposed-threat.json");
+const sampleExposedHtmlPath = join(root, "REPORT.exposed-threat.html");
+const sampleExposedDoc = JSON.parse(readFileSync(assessmentPath, "utf8")) as Record<string, unknown>;
+sampleExposedDoc.threatExposure = [
+  {
+    threatId: "THR-shadow-agents",
+    title: "Shadow Agents",
+    severityHint: "critical",
+    exposure: true,
+    status: "suspected_exposure",
+    indicated: true,
+    confirmed: false,
+    mitigated: false,
+    contributingSignalIds: ["agent.inventory.missing", "agent.runtime.unenumerated"],
+    primaryCheckIds: ["AGN-M1"],
+    supportingCheckIds: ["AGN-M2", "AGN-M3"],
+  },
+];
+writeFileSync(sampleExposedAssessmentPath, JSON.stringify(sampleExposedDoc, null, 2));
+writeAssessmentHtmlReport(sampleExposedAssessmentPath, sampleExposedHtmlPath);
+const exposedHtml = readFileSync(sampleExposedHtmlPath, "utf8");
 assert(
-  html.includes("not that an attack has occurred"),
-  "top threat rollup must caveat that unmet means unmitigated or unproven",
+  exposedHtml.includes("Top threat exposure") &&
+    exposedHtml.includes("Structured threat composition (APRF-RFC-0014)") &&
+    exposedHtml.includes("Shadow Agents") &&
+    exposedHtml.includes("THR-shadow-agents") &&
+    exposedHtml.includes("suspected") &&
+    exposedHtml.includes("AGN-M1"),
+  "REPORT.html executive summary must render composed threats when exposed",
+);
+
+// Verify legacy fallback rendering when threatExposure is absent
+const sampleLegacyAssessmentPath = join(root, "assessment.legacy-threat.json");
+const sampleLegacyHtmlPath = join(root, "REPORT.legacy-threat.html");
+const sampleLegacyDoc = JSON.parse(readFileSync(assessmentPath, "utf8")) as Record<string, unknown>;
+delete sampleLegacyDoc.threatExposure;
+writeFileSync(sampleLegacyAssessmentPath, JSON.stringify(sampleLegacyDoc, null, 2));
+writeAssessmentHtmlReport(sampleLegacyAssessmentPath, sampleLegacyHtmlPath);
+const legacyHtml = readFileSync(sampleLegacyHtmlPath, "utf8");
+assert(
+  legacyHtml.includes("Top threat exposure") &&
+    legacyHtml.includes("gate-blocking") &&
+    legacyHtml.includes("Unmet controls") &&
+    legacyHtml.includes("not that an attack has occurred"),
+  "REPORT.html executive summary must fall back to legacy threat rollup when threatExposure is absent",
 );
 assert(
   html.includes("Evidence coverage") &&
