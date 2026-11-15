@@ -8,6 +8,9 @@
   "agent-behavior-feature-flags": [
     "CHG-R2"
   ],
+  "agent-capability-graph": [
+    "TOL-M6"
+  ],
   "agent-charter-inventory": [
     "AGN-M1"
   ],
@@ -31,6 +34,9 @@
   ],
   "agent-tool-connectivity": [
     "INF-M3"
+  ],
+  "agent-trace-attributes": [
+    "OBS-M3"
   ],
   "ai-acceptable-use-policy": [
     "ORG-M1"
@@ -260,6 +266,9 @@
   "ai-warm-standby": [
     "REL-R6"
   ],
+  "approval-replay": [
+    "HUM-M5"
+  ],
   "artifact-provenance-integrity": [
     "SCI-M1"
   ],
@@ -333,6 +342,9 @@
   "eval-human-review": [
     "EVL-R2"
   ],
+  "eval-methodology": [
+    "EVL-M5"
+  ],
   "eval-online-signals": [
     "EVL-M3"
   ],
@@ -370,6 +382,9 @@
     "OBS-M1",
     "PERF-M1",
     "COST-M1"
+  ],
+  "harness-integrity": [
+    "AGN-M5"
   ],
   "helicone": [
     "OBS-M1",
@@ -478,6 +493,9 @@
   ],
   "multimodal-input-scan": [
     "SEC-R2"
+  ],
+  "non-idempotent-retry": [
+    "REL-M9"
   ],
   "one-click-ai-rollback": [
     "CHG-R1"
@@ -599,6 +617,9 @@
   ],
   "train-serve-skew-monitor": [
     "DG-R2"
+  ],
+  "transitive-tool-access": [
+    "TOL-M6"
   ],
   "vendor-model-terms": [
     "PRI-R2"

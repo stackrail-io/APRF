@@ -1,0 +1,80 @@
+id: "HUM-M5"
+category: "human-approval"
+title: "High-impact approvals must resist replay and self-approval"
+description: >
+  Human approval for high-impact actions shall be bound to actor, action,
+  arguments, expiry, and a non-replayable token. The agent (or its identity)
+  shall not approve its own restricted action. Distinct from approval audit
+  logging and from alternate-path ungated execution tests.
+whyItMatters: >
+  Logged approvals that can be replayed, reused after expiry, or issued by the
+  agent identity convert human gates into theater. Attackers and confused
+  deputies prefer a captured token over an ungated API.
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: >
+  Exercise evidence shows replayed approvals denied, expired approvals denied,
+  and agent-identity self-approval denied at 100% for inventoried high-impact
+  actions (measuredAt ≤90 days). If no high-impact actions require human
+  approval, score NOT_APPLICABLE.
+evidenceRequired:
+  - "Approval token/schema binding actor, action, argument hash, expiry, and nonce"
+  - "Separation-of-duties policy: agent identity cannot be the sole approver"
+  - "Exercise results: replay, expiry, and self-approval denied at 100% (measuredAt ≤90 days)"
+evidencePolicy:
+  minimumTier: E4
+  acceptableEvidence:
+    - harness_exercise_report
+    - application_logs
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-approval-replay"
+      params:
+        hint: >
+          Discover approval-token/SoD signals; ingest imports/approval-replay/
+          requiring replayDenied, expiryDenied, and selfApprovalDenied at 100%
+          (measuredAt ≤90 days).
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest the exercise pack
+          (measuredAt ≤90 days) or N/A if no high-impact approvals.
+manualVerification: >
+  1) Confirm high-impact gated actions exist. If none, score NOT_APPLICABLE.
+  2) Review token binding and expiry. 3) Confirm the agent identity cannot
+  approve its own restricted action. 4) Review replay, expiry, and
+  self-approval exercises. 5) PASS only at 100% deny with measuredAt ≤90 days.
+  Audit logs without replay tests do not PASS. Alternate-path bypass tests
+  without token binding do not PASS.
+falsePositiveGuidance: >
+  Do not pass UI confirmations without a non-replayable token. Do not pass
+  because a human can approve if the agent service account can also approve.
+  Named exceptions need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Bind approvals to argument hash, actor, expiry, and nonce"
+  - "Require a distinct human identity; deny agent-identity self-approval"
+  - "Reject reused and expired tokens at the execution layer"
+  - "Retain packs under imports/approval-replay/"
+references:
+  - title: "NIST AI RMF — Govern and Manage (human oversight)"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+  - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
+    url: "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+relatedRules:
+  - "HUM-M1"
+  - "HUM-M2"
+  - "HUM-M3"
+  - "TOL-M3"
+tags:
+  - "human-approval"
+  - "mandatory"
+  - "hybrid"
+  - "replay"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.11.0"

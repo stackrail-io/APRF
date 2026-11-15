@@ -1,0 +1,26 @@
+id: agent-capability-graph
+title: Agent capability graph (feeds TOL-M6)
+version: "0.1.0"
+executor: collectors/agent-capability-graph.ts
+evidenceClass: code
+emitsEvidenceTier: E2
+detectorIds: [repo-agent-capability-graph]
+inputs:
+  - "aprf-assessment/agent-inventory.json"
+  - "Target repo (MCP/tool refs)"
+  - "Optional graph overlay: aprf-assessment/imports/agent-capability-graph/*.json"
+collect:
+  - "Merge inventory, repo heuristics, and imported graph"
+  - "Write agent-capability-graph.json with inferred derived paths"
+emits:
+  nodeClass: code
+  refPattern: "aprf-assessment/agent-capability-graph.json"
+  signals: [agent-capability-graph, agent.graph.edge_direct]
+mapsToChecks: [TOL-M6]
+whenUnavailable: >
+  Graph-only output is PARTIAL for TOL-M6. Exercise deny packs under
+  imports/transitive-tool-access/ are required to PASS. Inferred paths never
+  confirm threats alone.
+live:
+  required: false
+  note: Operational graph builder; does not unlock PASS by itself.

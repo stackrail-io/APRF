@@ -179,6 +179,26 @@ rules:
       agent from being trusted inside a workflow. Scoping the delegated capability
       stops privilege from accumulating as a task is handed between agents.
 
+  AGN-M5:
+    securityIntent: Ensure production tool and MCP side effects cannot execute outside the declared harness.
+    threats:
+      - Unauthorized Tool Use
+      - Excessive Agency
+      - Tool Abuse
+    protects:
+      - Tools
+      - Runtime
+      - External Systems
+    mitre:
+      atlas:
+        - AML.T0053
+        - AML.T0086
+      attack: []
+    mappingRationale: >-
+      Policy engines only constrain traffic they see. Exercises that deny
+      out-of-band invocation close the path that otherwise turns a gated
+      gateway into optional middleware.
+
   AGN-R1:
     securityIntent: Detect conflicting or policy-violating agent goals before a plan is allowed to execute.
     threats:
@@ -1640,6 +1660,24 @@ rules:
       which curated suites do not reproduce. It reduces release risk; no adversary
       technique maps.
 
+  EVL-M5:
+    securityIntent: Require independently verifiable agent evals so security and task success are not self-attested.
+    threats:
+      - Prompt Injection
+      - Unauthorized Tool Use
+      - Misinformation
+    protects:
+      - Safety
+      - Tools
+      - Users
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Agent self-report and LLM-as-judge-only security cases cannot prove
+      authorization. Versioned datasets, tool-use cases, and deterministic
+      oracles keep evaluation from becoming theater.
+
   EVL-R1:
     securityIntent: Ensure adversarial robustness is measured on its own and not averaged away by aggregate quality scores.
     threats:
@@ -1900,6 +1938,27 @@ rules:
       manipulated agent path, because two independent principals must agree. It is
       reserved for irreversible actions precisely because no recovery exists after
       the fact.
+
+  HUM-M5:
+    securityIntent: Prevent replayed, expired, or agent-issued approvals from authorizing high-impact actions.
+    threats:
+      - Privilege Escalation
+      - Excessive Agency
+      - Unauthorized Tool Use
+    protects:
+      - External Systems
+      - Tools
+      - Safety
+      - Audit Trail
+    mitre:
+      atlas:
+        - AML.T0053
+        - AML.T0086
+      attack: []
+    mappingRationale: >-
+      A captured or self-issued approval token bypasses the human gate without
+      using an alternate API. Binding actor, arguments, expiry, and nonce makes
+      replay and self-approval fail at the execution layer.
 
   HUM-R1:
     securityIntent: Give approvers the context needed to make approval a real decision rather than a reflex.
@@ -2498,6 +2557,24 @@ rules:
       arguments including credentials, then replicate them into log stores with far
       broader access than the secrets manager. Redaction at ingest prevents
       observability from becoming the softest credential target in the system.
+
+  OBS-M3:
+    securityIntent: Make agent runs reconstructable from traces without retaining unnecessary sensitive payloads.
+    threats:
+      - Repudiation
+      - Unauthorized Tool Use
+      - Agent Hijacking
+    protects:
+      - Audit Trail
+      - Logs
+      - Runtime
+    mitre:
+      atlas: []
+      attack: []
+    mappingRationale: >-
+      Linkage coverage without agent identity, authz, approval, or termination
+      reason cannot reconstruct an incident. Required attributes plus redaction
+      keep forensics usable without creating a second secrets store.
 
   OBS-R1:
     securityIntent: Enable safe reproduction of failed AI interactions without exposing production data.
@@ -3100,6 +3177,26 @@ rules:
       RTO and RPO targets are what make backup and failover design decisions
       testable rather than aspirational. This is continuity planning with no
       adversary technique mapping.
+
+  REL-M9:
+    securityIntent: Prevent retries and recovery from duplicating non-idempotent or irreversible tool side effects.
+    threats:
+      - Hallucinated Actions
+      - Excessive Agency
+      - Denial of Wallet
+    protects:
+      - External Systems
+      - Data
+      - Cost
+      - Safety
+    mitre:
+      atlas:
+        - AML.T0101
+      attack: []
+    mappingRationale: >-
+      Bounded retries still duplicate payments and deletes unless tools are
+      classified and replay-safe. Exercises that forbid duplicate commits close
+      that recovery gap.
 
   REL-R1:
     securityIntent: Stop a failing AI provider from cascading into total service failure.
@@ -3729,6 +3826,29 @@ rules:
       modified catalog both a supply-chain compromise and a prompt-injection
       vector. Signing and reviewing catalogs detects silent redefinition of a tool
       after it was approved.
+
+  TOL-M6:
+    securityIntent: Constrain an agent's effective data and API access including transitive MCP and tool hops.
+    threats:
+      - Privilege Escalation
+      - Data Exfiltration
+      - Unauthorized Tool Use
+      - Excessive Agency
+    protects:
+      - Data
+      - Tools
+      - APIs
+      - External Systems
+    mitre:
+      atlas:
+        - AML.T0012
+        - AML.T0053
+      attack:
+        - T1078
+    mappingRationale: >-
+      Direct allowlists miss confused-deputy paths through MCP servers and
+      internal APIs. Mapping those hops and denying unauthorized ones is what
+      makes charter data scope enforceable.
 
   TOL-R1:
     securityIntent: Let destructive tool behaviour be validated without producing irreversible effects.

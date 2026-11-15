@@ -434,6 +434,18 @@
       "slug": "0014-threat-composition-from-signals",
       "href": "/aprf/rfc/0014-threat-composition-from-signals/",
       "markdownPath": "/aprf/rfc/0014-threat-composition-from-signals.md"
+    },
+    {
+      "id": "APRF-RFC-0015",
+      "number": 15,
+      "title": "Agent, Harness, and Evaluation Production Readiness",
+      "status": "accepted",
+      "created": "2026-11-13",
+      "semverImpact": "MINOR",
+      "summary": "Extends APRF 1.x with a versioned agent inventory, an evidence-backed capability graph, a small set of new Checks, Agents-lens applicability, and composed agent threats—without a new Agent profile, readiness scores, or Cognitive Assurance (COG).",
+      "slug": "0015-agent-harness-eval-production-readiness",
+      "href": "/aprf/rfc/0015-agent-harness-eval-production-readiness/",
+      "markdownPath": "/aprf/rfc/0015-agent-harness-eval-production-readiness.md"
     }
   ],
   "scope": {
@@ -878,13 +890,26 @@
         "COST-M3",
         "OBS-M1",
         "REL-M1",
-        "REL-M3"
+        "REL-M3",
+        "AGN-M5",
+        "TOL-M6",
+        "HUM-M5",
+        "EVL-M5",
+        "OBS-M3",
+        "REL-M9",
+        "MEM-M2",
+        "MEM-M3",
+        "CTX-M2",
+        "MEM-R1",
+        "EVL-R1"
       ],
       "rationale": [
         "Every production agent needs a charter and hard step/time limits (AGN).",
         "Tools fail closed with allowlists and schema validation (TOL).",
         "High-impact actions require non-bypassable human approval (HUM).",
-        "Agent identities stay least-privilege; loops cannot burn unbounded spend (AUTHZ/COST)."
+        "Agent identities stay least-privilege; loops cannot burn unbounded spend (AUTHZ/COST).",
+        "Harness integrity, transitive access, eval methodology, reconstructable runs, and retry safety are agent-specific gates (APRF-RFC-0015).",
+        "Durable memory, retrieved-context labeling, poisoning tests, and adversarial eval tracks apply when those surfaces exist (N/A otherwise)."
       ]
     },
     {
@@ -6205,6 +6230,16 @@
           "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
+        },
+        {
+          "id": "TOL-M6",
+          "requirement": "Effective (including transitive and delegated) data and API access of each production agent shall be inventoried from an evidence-backed capability graph and shall not exceed the approved charter data scope. Unauthorized effective paths shall be denied in exercise. Direct tool allowlists alone do not prove the absence of MCP-to-API-to-database hops.",
+          "artifact": "Capability graph with evidence provenance for relationships and derived paths + Charter data-scope mapping for inventoried agents + Exercise or reachability deny on unauthorized transitive/delegated paths, or graph proof that none exist (measuredAt ≤90 days)",
+          "passCondition": "A provenance-backed capability graph covers in-scope agents, tools, MCP servers, and data stores; high-risk transitive or delegated paths are mapped to charter data scope; unauthorized effective paths are denied in exercise (or documented absence of transitive hops is graph-proven) (measuredAt ≤90 days). If no production agents use tools, MCP, or delegation, score NOT_APPLICABLE.",
+          "method": "hybrid",
+          "minimumTier": "E4",
+          "requiredFromLevel": 3,
+          "minCriticality": 2
         }
       ],
       "recommendedChecks": [
@@ -6232,7 +6267,8 @@
       "evidenceRequired": [
         "Tool inventory with owners, scopes, and impact ratings",
         "Authorization policy examples",
-        "Logs of denied tool invocations"
+        "Logs of denied tool invocations",
+        "Effective agent data and API access must not exceed the charter (TOL-M6)"
       ],
       "engineeringBestPractices": [
         "Map each tool to an impact tier (read, write, irreversible, financial)",
@@ -7507,6 +7543,16 @@
           "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
+        },
+        {
+          "id": "EVL-M5",
+          "requirement": "Each production agent version shall be linked to versioned eval datasets and runs covering independently verifiable task-success criteria (not agent self-report), tool-use correctness where tools exist, and—when model-based judging is used—an explicit rubric, versioned judge prompt, model identification, calibration or human-reviewed sample, and a prohibition on using an LLM judge as the sole oracle for access-control or security enforcement. This Check does not introduce an overall eval quality score.",
+          "artifact": "Versioned eval dataset manifests with owners and provenance + Eval run reports linked to agent versions + Independent task-success criteria (schema, ground truth, human, or deterministic oracles) + Tool-use cases when tools exist; LLM-judge rubric pack if used; security cases without LLM-judge-only oracles",
+          "passCondition": "Every in-scope production agent version maps to versioned eval datasets and runs; task-success criteria are independently verifiable (not agent self-report); tool-using agents have tool-use cases; if an LLM judge is used it has a rubric, versioned prompt, model id, and human sample; access-control and security cases use deterministic, schema, or exercise oracles rather than an LLM judge alone (evidence measuredAt ≤90 days). If no production agents exist, score NOT_APPLICABLE.",
+          "method": "hybrid",
+          "minimumTier": "E4",
+          "requiredFromLevel": 3,
+          "minCriticality": 2
         }
       ],
       "recommendedChecks": [
@@ -7534,7 +7580,8 @@
       "evidenceRequired": [
         "Eval suite definitions and ownership",
         "Gate thresholds and recent pass/fail reports",
-        "Dashboards for online quality metrics"
+        "Dashboards for online quality metrics",
+        "Production agent versions must have independent eval methodology (EVL-M5)"
       ],
       "engineeringBestPractices": [
         "Version eval datasets; treat label quality as seriously as code quality",
@@ -7627,6 +7674,16 @@
           "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
+        },
+        {
+          "id": "AGN-M5",
+          "requirement": "Every production tool, MCP, or side-effect path used by in-scope agents shall execute only through the declared harness (gateway, middleware, or runtime policy engine). Alternate entry points shall be denied. Distinct from approval alternate-path tests and from per-call authz that only covers traffic that already reached the gateway.",
+          "artifact": "Inventory of production agent/tool/MCP execution entry points and the declared harness + Harness/middleware/policy-engine configuration covering those entry points + Exercise results: out-of-band invoke, unregistered tool, disabled middleware, dynamic registration, and tool substitution denied at 100% (measuredAt ≤90 days)",
+          "passCondition": "Exercise evidence shows unregistered tool invocation, out-of-band/direct tool invocation, disabled or missing middleware, unauthorized dynamic tool registration, and tool substitution or spoofing are denied at 100% on inventoried production entry points (measuredAt ≤90 days). If no production agents or workloads invoke tools or MCP side effects, score NOT_APPLICABLE.",
+          "method": "hybrid",
+          "minimumTier": "E4",
+          "requiredFromLevel": 3,
+          "minCriticality": 2
         }
       ],
       "recommendedChecks": [
@@ -7668,7 +7725,8 @@
         "A2A/multi-agent handoff inventory with peer auth, scoped capabilities, and deny tests (AGN-M4)",
         "Goal-conflict / disallowed-goal plan policy with named owner and synthetic deny traces (AGN-R1)",
         "Agent sandbox/simulation environment config and linked ≤30-day pre-release sim reports (AGN-R2)",
-        "Agent/AI-system RACI register with Responsible + Accountable and 0 orphans (AGN-R3)"
+        "Agent/AI-system RACI register with Responsible + Accountable and 0 orphans (AGN-R3)",
+        "Production tool and MCP side effects must execute only through the declared harness (AGN-M5)"
       ],
       "engineeringBestPractices": [
         "Prefer narrow agents composed into workflows over one universal agent",
@@ -7769,6 +7827,16 @@
           "minimumTier": "E3",
           "requiredFromLevel": 5,
           "minCriticality": 3
+        },
+        {
+          "id": "HUM-M5",
+          "requirement": "Human approval for high-impact actions shall be bound to actor, action, arguments, expiry, and a non-replayable token. The agent (or its identity) shall not approve its own restricted action. Distinct from approval audit logging and from alternate-path ungated execution tests.",
+          "artifact": "Approval token/schema binding actor, action, argument hash, expiry, and nonce + Separation-of-duties policy: agent identity cannot be the sole approver + Exercise results: replay, expiry, and self-approval denied at 100% (measuredAt ≤90 days)",
+          "passCondition": "Exercise evidence shows replayed approvals denied, expired approvals denied, and agent-identity self-approval denied at 100% for inventoried high-impact actions (measuredAt ≤90 days). If no high-impact actions require human approval, score NOT_APPLICABLE.",
+          "method": "hybrid",
+          "minimumTier": "E4",
+          "requiredFromLevel": 3,
+          "minCriticality": 2
         }
       ],
       "recommendedChecks": [
@@ -7799,7 +7867,8 @@
         "Bypass-path tests across UI/API/agent with 0 ungated successes (HUM-M3)",
         "Dual-control workflow and samples for Level 5 irreversible actions (HUM-M4)",
         "Approval UI/spec showing tool args, diffs, and confidence + ≥10 samples (HUM-R1)",
-        "Approval-queue SLA definition + ≤30-day queue metrics (HUM-R3)"
+        "Approval-queue SLA definition + ≤30-day queue metrics (HUM-R3)",
+        "High-impact approvals must resist replay and self-approval (HUM-M5)"
       ],
       "engineeringBestPractices": [
         "Classify actions by impact tier with default gates",
@@ -7877,6 +7946,16 @@
           "minimumTier": "E3",
           "requiredFromLevel": 3,
           "minCriticality": 2
+        },
+        {
+          "id": "OBS-M3",
+          "requirement": "Sampled production or canary traces shall allow reconstruction of an agent run without retaining unnecessary sensitive prompt or customer payload: agent id, agent version, run id, parent run id, model identifier, prompt/configuration version, tool invocation, redacted tool arguments and results, authorization decision, human approval reference, memory retrieval reference, duration, token consumption, error details, and termination reason. Distinct from request-to-model-to-tool linkage coverage.",
+          "artifact": "Trace schema or semantic convention listing required agent-run attributes + Canary or 24h sampled traces (redacted) showing ≥95% attribute completeness",
+          "passCondition": "Canary or sampled traces show the required reconstructable agent-run attributes on ≥95% of in-scope canary runs over 24 hours, with redaction consistent with sensitive-field controls (trace evidence measuredAt ≤90 days). If no production agent request path is in scope, score NOT_APPLICABLE.",
+          "method": "hybrid",
+          "minimumTier": "E4",
+          "requiredFromLevel": 3,
+          "minCriticality": 2
         }
       ],
       "recommendedChecks": [
@@ -7924,7 +8003,8 @@
       "evidenceRequired": [
         "Example traces (redacted) showing full path",
         "Cost attribution dashboards",
-        "Access control policy for prompt/completion logs"
+        "Access control policy for prompt/completion logs",
+        "Sampled agent runs must be reconstructable from traces (OBS-M3)"
       ],
       "engineeringBestPractices": [
         "Adopt OpenTelemetry-compatible tracing for LLM spans where possible",
@@ -8156,6 +8236,16 @@
           "minimumTier": "E3",
           "requiredFromLevel": 4,
           "minCriticality": 3
+        },
+        {
+          "id": "REL-M9",
+          "requirement": "The harness shall classify in-scope tools as read-only, idempotent, non-idempotent, or irreversible. Retries, recovery, and workflow resume shall not repeat non-idempotent or irreversible actions without an idempotency key, compensation, or human approval. Distinct from finite retry bounds and from partial-failure false-success detection.",
+          "artifact": "Tool classification inventory (read-only / idempotent / non-idempotent / irreversible) + Retry/resume policy for non-idempotent and irreversible classes + Exercise results showing no duplicate commit without idempotency key, compensation, or approval (measuredAt ≤90 days)",
+          "passCondition": "In-scope tools are classified as read-only, idempotent, non-idempotent, or irreversible; exercise evidence shows retries or resume do not commit duplicate non-idempotent or irreversible side effects without an idempotency key, compensation, or human approval (measuredAt ≤90 days). If no production tools exist, or all in-scope tools are classified read-only or idempotent, score NOT_APPLICABLE.",
+          "method": "hybrid",
+          "minimumTier": "E4",
+          "requiredFromLevel": 3,
+          "minCriticality": 2
         }
       ],
       "recommendedChecks": [
@@ -8236,7 +8326,8 @@
         "Postmortems referencing resilience controls where applicable",
         "Continuity plans for critical journeys",
         "Backup/restore test records",
-        "RTO/RPO definitions"
+        "RTO/RPO definitions",
+        "Non-idempotent and irreversible tool retries must not duplicate side effects (REL-M9)"
       ],
       "engineeringBestPractices": [
         "Idempotent tools where retries are possible",
@@ -9112,10 +9203,10 @@
   "stats": {
     "domainCount": 8,
     "pillarCount": 27,
-    "mandatoryCheckCount": 92,
+    "mandatoryCheckCount": 98,
     "recommendedCheckCount": 85,
     "deprecatedCheckCount": 1,
-    "checkCount": 178,
+    "checkCount": 184,
     "ruleEngine": {
       "package": "@stackrail-io/aprf-engine",
       "note": "Normative rule bodies live in packages/aprf-engine/rules/; pillars hydrate checks at load time."
@@ -9125,7 +9216,7 @@
     "crosswalkCount": 11,
     "crosswalkMappingCount": 261,
     "lensCount": 4,
-    "lensCheckCount": 50
+    "lensCheckCount": 58
   },
   "metadata": {
     "compatibility": {

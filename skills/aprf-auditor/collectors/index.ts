@@ -95,6 +95,15 @@ import { multimodalInputScanCollector } from "./multimodal-input-scan.ts";
 import { agentLoopLimitsCollector } from "./agent-loop-limits.ts";
 import { a2aPeerAuthCollector } from "./a2a-peer-auth.ts";
 import { agentCharterInventoryCollector } from "./agent-charter-inventory.ts";
+import { agentCapabilityGraphCollector } from "./agent-capability-graph.ts";
+import {
+  harnessIntegrityCollector,
+  transitiveToolAccessCollector,
+  approvalReplayCollector,
+  evalMethodologyCollector,
+  agentTraceAttributesCollector,
+  nonIdempotentRetryCollector,
+} from "./rfc0015-collectors.ts";
 import { agentGoalPolicyCollector } from "./agent-goal-policy.ts";
 import { agentKillSwitchCollector } from "./agent-kill-switch.ts";
 import { agentSandboxSimCollector } from "./agent-sandbox-sim.ts";
@@ -285,6 +294,13 @@ export const COLLECTORS: Collector[] = [
   multiTurnIndirectInjectionRedteamCollector,
   multimodalInputScanCollector,
   agentCharterInventoryCollector,
+  agentCapabilityGraphCollector,
+  harnessIntegrityCollector,
+  transitiveToolAccessCollector,
+  approvalReplayCollector,
+  evalMethodologyCollector,
+  agentTraceAttributesCollector,
+  nonIdempotentRetryCollector,
   agentLoopLimitsCollector,
   agentKillSwitchCollector,
   agentGoalPolicyCollector,

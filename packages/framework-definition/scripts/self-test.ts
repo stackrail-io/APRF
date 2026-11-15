@@ -16,6 +16,7 @@ import {
   getLensById,
   unionProfileAndLenses,
   LENS_ID_RAG,
+  LENS_ID_AGENTS,
   resolveAssessmentTarget,
   type AprfPolicy,
 } from "../src/index.js";
@@ -106,6 +107,19 @@ const union = unionProfileAndLenses(PROFILE_CORE.mandatoryCheckIds, [
 assert(union.includes("AUTHN-M1"), "union keeps profile");
 assert(union.includes("DG-M1"), "union adds lens");
 assert(union.length === new Set(union).size, "union dedupes");
+
+const agentsUnion = unionProfileAndLenses(PROFILE_CORE.mandatoryCheckIds, [
+  LENS_ID_AGENTS,
+]);
+assert(agentsUnion.includes("AGN-M5"), "agents lens adds AGN-M5");
+assert(agentsUnion.includes("MEM-R1"), "agents lens adds MEM-R1");
+assert(agentsUnion.includes("EVL-R1"), "agents lens adds EVL-R1");
+assert(agentsUnion.includes("REL-M9"), "agents lens adds REL-M9");
+assert(
+  !PROFILE_CORE.mandatoryCheckIds.includes("AGN-M5"),
+  "Core list unchanged (no AGN-M5)",
+);
+assert(agentsUnion.length === new Set(agentsUnion).size, "agents union dedupes");
 
 const chatbot = resolveAssessmentTarget({
   systemType: "ai-application",

@@ -75,3 +75,24 @@ types:
   - id: independent_assessment
     defaultTier: E5
     description: External or independent verification pack.
+  - id: agent_inventory_record
+    defaultTier: E2
+    description: Normalized production-agent inventory row with discovery class and evidence provenance (APRF-RFC-0015).
+  - id: agent_capability_graph
+    defaultTier: E2
+    description: Evidence-backed agent capability graph artifact; inferred paths remain inferred (APRF-RFC-0015).
+  - id: harness_exercise_report
+    defaultTier: E4
+    description: Deny/exercise pack for harness integrity, approval replay, or transitive access (APRF-RFC-0015).
+  - id: eval_dataset_manifest
+    defaultTier: E2
+    description: Versioned evaluation dataset manifest with owner and provenance (APRF-RFC-0015).
+  - id: eval_run_report
+    defaultTier: E3
+    description: Evaluation run report linked to an agent or model version (APRF-RFC-0015).
+  - id: agent_trace_sample
+    defaultTier: E4
+    description: Redacted canary or sampled traces with reconstructable agent-run attributes (APRF-RFC-0015).
+  - id: idempotency_exercise_report
+    defaultTier: E4
+    description: Exercise pack proving non-idempotent or irreversible tools are not duplicated on retry (APRF-RFC-0015).

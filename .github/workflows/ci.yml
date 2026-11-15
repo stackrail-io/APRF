@@ -60,6 +60,15 @@ jobs:
       - name: Threat map coverage, vocabularies, and MITRE IDs
         run: npm run aprf:threat-map
 
+      - name: Signal registry vocabulary
+        run: npm run aprf:signals
+
+      - name: Threat composition document
+        run: npm run aprf:threats
+
+      - name: Agent extension architectural invariants
+        run: npm run aprf:agent-invariants
+
       - name: Collectors unused locals / useless assignments
         run: npm run aprf:collectors:unused
 
@@ -145,6 +154,21 @@ jobs:
           assert(
             ruleSchema.$id === "https://stackrail.io/aprf/rule-schema/1.0",
             `rule schema $id unexpected: ${ruleSchema.$id}`
+          );
+
+          const agentInventory = JSON.parse(
+            fs.readFileSync("schemas/aprf-agent-inventory-0.1.json", "utf8")
+          );
+          const agentGraph = JSON.parse(
+            fs.readFileSync("schemas/aprf-agent-capability-graph-0.1.json", "utf8")
+          );
+          assert(
+            agentInventory.$id === "https://stackrail.io/aprf/agent-inventory/0.1",
+            `agent inventory schema $id unexpected: ${agentInventory.$id}`
+          );
+          assert(
+            agentGraph.$id === "https://stackrail.io/aprf/agent-capability-graph/0.1",
+            `agent capability graph schema $id unexpected: ${agentGraph.$id}`
           );
 
           console.log(

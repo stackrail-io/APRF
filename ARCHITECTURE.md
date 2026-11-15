@@ -170,7 +170,7 @@ PII/residency handled by products; the standard requires digests in the Conforma
 
 ### Future extensions (roadmap)
 
-APRF 1.x remains **Production Assurance** (Security, Governance, Reliability, Safety, and the existing Core domains). A later **APRF 2.x** may add optional Persistent Agent Assurance for long-lived memory and adaptive policies; **APRF 3.x** may introduce full **Cognitive Assurance (COG)**—governing long-term behavior, memory, objectives, and decision continuity of persistent autonomous systems. COG is an Experimental Extension only: it does not change Core/Regulated philosophy or weaken existing Controls. See draft [APRF-RFC-0012](rfcs/0012-cognitive-assurance.md).
+APRF 1.x remains **Production Assurance** (Security, Governance, Reliability, Safety, and the existing Core domains). Agent harness, inventory, capability-graph, and evaluation methodology Controls are additive on `aprf-lens-agents` ([APRF-RFC-0015](rfcs/0015-agent-harness-eval-production-readiness.md)) — not a fourth profile. A later **APRF 2.x** may add optional Persistent Agent Assurance for long-lived memory and adaptive policies; **APRF 3.x** may introduce full **Cognitive Assurance (COG)**—governing long-term behavior, memory, objectives, and decision continuity of persistent autonomous systems. COG is an Experimental Extension only: it does not change Core/Regulated philosophy or weaken existing Controls. See draft [APRF-RFC-0012](rfcs/0012-cognitive-assurance.md).
 
 ---
 

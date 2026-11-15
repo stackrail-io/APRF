@@ -1,0 +1,27 @@
+id: harness-integrity
+title: Harness integrity exercises (AGN-M5)
+version: "0.1.0"
+executor: collectors/rfc0015-collectors.ts
+evidenceClass: ci
+emitsEvidenceTier: E4
+detectorIds: [repo-harness-integrity]
+inputs:
+  - "Target repo (harness/gateway/middleware)"
+  - "Optional pack: aprf-assessment/imports/harness-integrity/*.json"
+collect:
+  - "Detect harness/gateway signals"
+  - "Ingest deny-suite flags; write harness-integrity-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/harness-integrity/*"
+  signals: [harness-integrity, agn-m5, repo-harness-integrity]
+mapsToChecks: [AGN-M5]
+whenUnavailable: >
+  Repo signals are PARTIAL. AGN-M5 PASS needs ≥5 listed deny cases plus
+  outOfBandInvokeDenied, unregisteredToolDenied, disabledMiddlewareDenied,
+  dynamicRegistrationDenied, and toolSubstitutionDenied true with
+  measuredAt ≤90 days. Numeric caseCount is not a pack.
+  toolOrMcpSideEffectsPresent=false → NOT_APPLICABLE when no repo surface.
+live:
+  required: false
+  note: Offline heuristics + imported exercise pack.

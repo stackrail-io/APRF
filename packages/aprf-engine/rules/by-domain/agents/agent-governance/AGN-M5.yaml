@@ -1,0 +1,85 @@
+id: "AGN-M5"
+category: "agent-governance"
+title: "Production tool and MCP side effects must execute only through the declared harness"
+description: >
+  Every production tool, MCP, or side-effect path used by in-scope agents shall
+  execute only through the declared harness (gateway, middleware, or runtime
+  policy engine). Alternate entry points shall be denied. Distinct from approval
+  alternate-path tests and from per-call authz that only covers traffic that
+  already reached the gateway.
+whyItMatters: >
+  A correctly configured policy engine is ineffective if agents or operators can
+  invoke tools beside it. Out-of-band SDKs, disabled middleware, and post-init
+  tool registration recreate excessive agency without touching the gated path.
+severity: "critical"
+weight: 4
+gate: "mandatory"
+passCondition: >
+  Exercise evidence shows unregistered tool invocation, out-of-band/direct tool
+  invocation, disabled or missing middleware, unauthorized dynamic tool
+  registration, and tool substitution or spoofing are denied at 100% on
+  inventoried production entry points (measuredAt ≤90 days). If no production
+  agents or workloads invoke tools or MCP side effects, score NOT_APPLICABLE.
+evidenceRequired:
+  - "Inventory of production agent/tool/MCP execution entry points and the declared harness"
+  - "Harness/middleware/policy-engine configuration covering those entry points"
+  - "Exercise results: out-of-band invoke, unregistered tool, disabled middleware, dynamic registration, and tool substitution denied at 100% (measuredAt ≤90 days)"
+evidencePolicy:
+  minimumTier: E4
+  acceptableEvidence:
+    - harness_exercise_report
+    - application_logs
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-harness-integrity"
+      params:
+        hint: >
+          Discover harness/gateway/middleware signals; ingest
+          imports/harness-integrity/ requiring deny rates at 100% for
+          out-of-band, unregistered, disabled-middleware, dynamic-register,
+          and substitution cases (measuredAt ≤90 days).
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest the exercise pack
+          (measuredAt ≤90 days) or document N/A if no tool/MCP side effects.
+manualVerification: >
+  1) Confirm production agents/workloads invoke tools or MCP. If none, score
+  NOT_APPLICABLE with reason. 2) Inventory execution entry points (HTTP, jobs,
+  SDK, MCP). 3) Identify the declared harness. 4) Review exercises that attempt
+  to skip it. 5) PASS only if all required abuse cases are denied at 100% with
+  measuredAt ≤90 days. Per-call gateway authz alone does not prove there is no
+  path around the gateway. Approval bypass tests alone do not prove harness
+  integrity.
+falsePositiveGuidance: >
+  Do not pass prompt instructions or allowlist YAML without deny exercises. Do
+  not pass because the gateway exists if SDKs can call tools directly. Do not
+  treat collector success as control success. Named exceptions need owner and
+  expiry ≤90 days.
+recommendedFixes:
+  - "Fail closed: production identities may invoke tools only through the harness"
+  - "Disable raw provider/SDK tool execution in production agent identities"
+  - "Register every entry point; deny dynamic unsigned tool registration"
+  - "Retain harness exercise packs under imports/harness-integrity/"
+references:
+  - title: "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency"
+    url: "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+  - title: "NIST AI Risk Management Framework — Govern / Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "HUM-M3"
+  - "TOL-M1"
+  - "TOL-M2"
+  - "AGN-M1"
+tags:
+  - "agent-governance"
+  - "mandatory"
+  - "hybrid"
+  - "harness"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.11.0"

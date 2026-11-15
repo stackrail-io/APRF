@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stackrail.io/aprf/agent-capability-graph/0.1",
+  "title": "APRF Agent Capability Graph (draft — APRF-RFC-0015)",
+  "description": "Evidence-backed agent capability graph. Operational artifact. Emits SignalObservations; never computes Check PASS/FAIL. Distinct from evidence-graph provenance edges.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "graphId",
+    "generatedAt",
+    "nodes",
+    "edges"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "0.1.0" },
+    "graphId": { "type": "string", "minLength": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "inventoryId": { "type": "string" },
+    "collectorId": { "type": "string" },
+    "collectorVersion": { "type": "string" },
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/edge" }
+    },
+    "derivedPaths": {
+      "type": "array",
+      "description": "Transitive high-risk paths. Each hop cites an edge id. Kind of the path is inferred unless every hop is behavioral or exercise.",
+      "items": { "$ref": "#/$defs/derivedPath" }
+    }
+  },
+  "$defs": {
+    "nodeType": {
+      "type": "string",
+      "enum": [
+        "Agent",
+        "Model",
+        "Tool",
+        "MCPServer",
+        "API",
+        "Database",
+        "MemoryStore",
+        "FileSystem",
+        "ExternalService",
+        "HumanApproval",
+        "ExecutionEnvironment",
+        "Identity",
+        "Secret",
+        "DataSource"
+      ]
+    },
+    "edgeRel": {
+      "type": "string",
+      "enum": [
+        "agent_uses_model",
+        "agent_invokes_tool",
+        "agent_connects_to_mcp",
+        "agent_reads_data",
+        "agent_writes_data",
+        "agent_delegates_to",
+        "agent_shares_memory",
+        "agent_assumes_identity",
+        "agent_accesses_secret",
+        "tool_invokes_api",
+        "tool_accesses_database",
+        "agent_executes_in",
+        "agent_requires_approval"
+      ]
+    },
+    "accessKind": {
+      "type": "string",
+      "enum": [
+        "direct",
+        "transitive",
+        "delegated",
+        "shared_credential",
+        "cross_agent"
+      ]
+    },
+    "signalKind": {
+      "type": "string",
+      "enum": [
+        "artifact",
+        "config",
+        "process",
+        "behavioral",
+        "exercise",
+        "attested",
+        "inferred"
+      ]
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "$ref": "#/$defs/nodeType" },
+        "label": { "type": "string" },
+        "agentId": { "type": "string" },
+        "attributes": { "type": "object" },
+        "evidenceNodeIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "from", "to", "rel", "accessKind", "signalKind", "evidenceNodeIds"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "rel": { "$ref": "#/$defs/edgeRel" },
+        "accessKind": { "$ref": "#/$defs/accessKind" },
+        "signalKind": { "$ref": "#/$defs/signalKind" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "evidenceNodeIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "derivedPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "from", "to", "edgeIds", "riskHint", "signalKind"],
+      "properties": {
+        "id": { "type": "string" },
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "edgeIds": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "type": "string" }
+        },
+        "riskHint": {
+          "type": "string",
+          "enum": ["privilege_escalation", "unrestricted_tool", "unintended_egress", "data_access", "other"]
+        },
+        "signalKind": { "$ref": "#/$defs/signalKind" },
+        "evidenceNodeIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}
