@@ -18,13 +18,13 @@ passCondition: >
   A provenance-backed capability graph covers in-scope agents, tools, MCP
   servers, and data stores; high-risk transitive or delegated paths are mapped
   to charter data scope; unauthorized effective paths are denied in exercise
-  (or documented absence of transitive hops is graph-proven) (measuredAt ≤90
-  days). If no production agents use tools, MCP, or delegation, score
-  NOT_APPLICABLE.
+  or a connectivity deny probe (measuredAt ≤90 days). Graph-only proof of
+  absence cannot PASS. If no production agents use tools, MCP, or delegation,
+  score NOT_APPLICABLE.
 evidenceRequired:
   - "Capability graph with evidence provenance for relationships and derived paths"
   - "Charter data-scope mapping for inventoried agents"
-  - "Exercise or reachability deny on unauthorized transitive/delegated paths, or graph proof that none exist (measuredAt ≤90 days)"
+  - "Exercise or reachability deny on unauthorized transitive/delegated paths (measuredAt ≤90 days)"
 evidencePolicy:
   minimumTier: E4
   acceptableEvidence:
@@ -54,9 +54,8 @@ manualVerification: >
   1) Confirm tools, MCP, or delegation exist. If none, score NOT_APPLICABLE.
   2) Open the capability graph and charter data scope. 3) Identify derived
   paths to data stores and APIs. 4) Review deny exercises on unauthorized
-  hops. 5) PASS only with exercise or runtime deny (or proven absence of
-  transitive hops). Inferred graph edges alone do not PASS. Per-agent
-  allowlists alone do not prove effective access.
+  hops. 5) PASS only with exercise or runtime deny. Inferred graph edges
+  alone do not PASS. Per-agent allowlists alone do not prove effective access.
 falsePositiveGuidance: >
   Do not pass because a graph file exists without provenance. Do not treat
   inferred MCP hops as independently verified. Do not pass connectivity

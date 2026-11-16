@@ -21,7 +21,10 @@ export const harnessIntegrityCollector = exerciseImportCollector({
     "tool.dynamic_register.denied",
   ],
   minCases: 5,
-  registeredFailSignals: ["harness.bypass.attempt_succeeded"],
+  caseSemantics: "deny",
+  registeredFailSignals: [
+    { signal: "harness.bypass.attempt_succeeded", onUnauthorized: true },
+  ],
   evidenceTypes: ["harness_exercise_report", "repo_signal"],
   emptyDetail:
     "Repo harness signals are PARTIAL — import ≥5 deny cases (cases[]) plus deny flags under imports/harness-integrity/ (measuredAt ≤90d) to PASS.",
@@ -42,11 +45,18 @@ export const transitiveToolAccessCollector = exerciseImportCollector({
   repoContentPattern:
     /\b(mcp[_-]?server|tool[_-]?allowlist|capability[_-]?graph|unauthorized[_-]?effective[_-]?path)\b/i,
   minCases: 1,
+  caseSemantics: "deny",
   registeredPassSignals: [
     "agent.graph.path_transitive_exercised",
     "tool.unauthorized.denied",
   ],
-  registeredFailSignals: ["tool.unauthorized.succeeded"],
+  registeredFailSignals: [
+    {
+      signal: "tool.unauthorized.succeeded",
+      onUnauthorized: true,
+      whenFalse: "unauthorizedEffectivePathsDenied",
+    },
+  ],
   evidenceTypes: [
     "agent_capability_graph",
     "harness_exercise_report",
@@ -67,8 +77,15 @@ export const approvalReplayCollector = exerciseImportCollector({
   repoContentPattern:
     /\b(approval[_-]?token|replay[_-]?protect|self[_-]?approv)\b/i,
   minCases: 3,
+  caseSemantics: "deny",
   registeredPassSignals: ["approval.replay.denied", "approval.self.denied"],
-  registeredFailSignals: ["approval.replay.succeeded"],
+  registeredFailSignals: [
+    {
+      signal: "approval.replay.succeeded",
+      onUnauthorized: true,
+      whenFalse: "replayDenied",
+    },
+  ],
   evidenceTypes: ["harness_exercise_report", "repo_signal"],
   emptyDetail:
     "Repo approval signals are PARTIAL — import replayDenied, expiryDenied, selfApprovalDenied=true under imports/approval-replay/.",
@@ -89,6 +106,7 @@ export const evalMethodologyCollector = exerciseImportCollector({
     { whenKey: "toolsPresent", requireKey: "toolUseCasesPresent" },
   ],
   minCases: 1,
+  caseSemantics: "sample",
   repoPathPattern: /\b(eval[_-]?dataset|eval[_-]?suite|tool[_-]?use[_-]?eval)\b/i,
   repoContentPattern:
     /\b(eval[_-]?dataset|llm[_-]?as[_-]?judge|tool[_-]?use[_-]?eval)\b/i,
@@ -96,7 +114,12 @@ export const evalMethodologyCollector = exerciseImportCollector({
     "eval.dataset.versioned",
     "eval.run.linked_to_agent_version",
   ],
-  registeredFailSignals: ["eval.security.llm_judge_only"],
+  registeredFailSignals: [
+    {
+      signal: "eval.security.llm_judge_only",
+      whenFalse: "securityCasesNotLlmJudgeOnly",
+    },
+  ],
   evidenceTypes: [
     "eval_dataset_manifest",
     "eval_run_report",
@@ -114,6 +137,7 @@ export const agentTraceAttributesCollector = exerciseImportCollector({
   passBoolKeys: ["redactionConsistentWithSensitiveFieldPolicy"],
   passPctKeys: [{ key: "reconstructableAttributeCoveragePct", min: 95 }],
   minCases: 1,
+  caseSemantics: "sample",
   repoPathPattern:
     /\b(agent[_-]?trace|span[_-]?processor|otel[_-]?genai)\b/i,
   repoContentPattern:
@@ -140,7 +164,14 @@ export const nonIdempotentRetryCollector = exerciseImportCollector({
   repoContentPattern:
     /\b(idempotency[_-]?key|non[_-]?idempotent|irreversible[_-]?tool)\b/i,
   registeredPassSignals: [],
-  registeredFailSignals: ["rel.non_idempotent.duplicate_commit"],
+  caseSemantics: "deny",
+  registeredFailSignals: [
+    {
+      signal: "rel.non_idempotent.duplicate_commit",
+      onUnauthorized: true,
+      whenFalse: "noDuplicateCommitWithoutSafeguard",
+    },
+  ],
   evidenceTypes: ["idempotency_exercise_report", "repo_signal"],
   emptyDetail:
     "Repo retry signals are PARTIAL — import toolsClassified + noDuplicateCommitWithoutSafeguard=true under imports/non-idempotent-retry/.",

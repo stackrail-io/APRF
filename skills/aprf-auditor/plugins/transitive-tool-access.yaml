@@ -20,7 +20,7 @@ whenUnavailable: >
   Signals alone are PARTIAL. TOL-M6 PASS needs ≥1 deny case plus
   capabilityGraphPresent, charterScopeMapped,
   unauthorizedEffectivePathsDenied=true, measuredAt ≤90d. Graph artifacts
-  are operational (E2) and cannot satisfy the E4 floor alone.
+  are operational (E2) and cannot PASS, including graph-proven absence of hops.
   toolsMcpOrDelegationPresent=false → NOT_APPLICABLE when no repo surface.
 live:
   required: false

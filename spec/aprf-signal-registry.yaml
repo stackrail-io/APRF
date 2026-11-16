@@ -293,6 +293,13 @@ signals:
     evidenceTypes: [idempotency_exercise_report]
     emitters: [non-idempotent-retry]
 
+  - id: injection.tool.unauthorized_invoke
+    kind: exercise
+    defaultTier: E4
+    description: Untrusted content caused an agent to invoke a tool the user or charter did not authorize.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [injection-policy-gate, multi-turn-indirect-injection-redteam]
+
   - id: memory.poison.write_accepted
     kind: exercise
     defaultTier: E4

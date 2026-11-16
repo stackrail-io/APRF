@@ -97,8 +97,7 @@ threats:
       - Unauthorized Tool Use
       - Excessive Agency
     indicators:
-      - signal: harness.bypass.attempt_succeeded
-      - signal: harness.out_of_band.invoke
+      - signal: injection.tool.unauthorized_invoke
     mitigations:
       - checkId: SEC-M1
         role: primary

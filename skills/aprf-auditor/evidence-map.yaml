@@ -1141,6 +1141,12 @@ checks:
       (productionToolCatalogsInventoriedPct=100 + unsignedOrUnapprovedCatalogsRejected +
       supplyChainReviewWithin90DaysOrSinceLastChange + measuredAt ≤90d).
       NOT_APPLICABLE if productionToolCatalogsPresent=false and no in-repo signed-catalog signals.
+      PARTIAL if reject/review without catalog inventory coverage
+      (reject/review without inventory ≠ PASS).
+      FAIL if inventoriedPct<100, unsignedOrUnapprovedCatalogsRejected=false, or
+      supplyChainReviewWithin90DaysOrSinceLastChange=false
+      (failing import metrics beat present=false N/A).
+      SCI-M1/M2/M4, SCI-R1, TOL-M2 do not substitute.
   TOL-M6:
     requiredEvidence:
       - "Agent capability graph covering tools/MCP/delegation"
@@ -1153,16 +1159,13 @@ checks:
     plugins: [transitive-tool-access, agent-capability-graph, repo-filesystem]
     naWhen: "No tools, MCP, or delegation in production agents"
     evaluation: |
-      PASS if transitive-tool-access statusHint=pass (capabilityGraphPresent +
-      charterScopeMapped + unauthorizedEffectivePathsDenied + measuredAt ≤90d).
+      PASS if transitive-tool-access statusHint=pass (≥1 deny case +
+      capabilityGraphPresent + charterScopeMapped +
+      unauthorizedEffectivePathsDenied + measuredAt ≤90d).
       Graph collector alone is PARTIAL (inferred paths cannot confirm).
-      NOT_APPLICABLE when toolsMcpOrDelegationPresent=false and no repo surface.
-      PARTIAL if reject/review without catalog inventory coverage
-      (reject/review without inventory ≠ PASS).
-      FAIL if inventoriedPct<100, unsignedOrUnapprovedCatalogsRejected=false, or
-      supplyChainReviewWithin90DaysOrSinceLastChange=false
+      FAIL if unauthorizedEffectivePathsDenied=false or unauthorizedSuccessCount>0
       (failing import metrics beat present=false N/A).
-      SCI-M1/M2/M4, SCI-R1, TOL-M2 do not substitute.
+      NOT_APPLICABLE when toolsMcpOrDelegationPresent=false and no repo surface.
   TOL-R1:
     requiredEvidence:
       - "Inventory/catalog of destructive tools marking dry-run/simulation support"

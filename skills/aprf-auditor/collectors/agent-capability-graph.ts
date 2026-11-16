@@ -156,37 +156,59 @@ export const agentCapabilityGraphCollector: Collector = {
       ctx.maxFiles ?? 4000,
       /\b(tool[_-]?handler|function_call)\b/i,
     );
-    let importedGraph: { nodes?: GraphNode[]; edges?: GraphEdge[] } | null =
-      null;
+    let importedGraph: { nodes?: unknown; edges?: unknown } | null = null;
     for (const f of listImportFiles(ctx.outputDir, PLUGIN_ID)) {
       if (f.endsWith(`${PLUGIN_ID}-report.json`)) continue;
       const text = readText(f);
       if (!text) continue;
       try {
-        importedGraph = JSON.parse(text) as typeof importedGraph;
+        const parsed: unknown = JSON.parse(text);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          importedGraph = parsed as { nodes?: unknown; edges?: unknown };
+        }
       } catch {
         continue;
       }
     }
-    if (importedGraph?.nodes) {
+    if (Array.isArray(importedGraph?.nodes)) {
       for (const n of importedGraph.nodes) {
-        const node = {
-          ...n,
+        if (!n || typeof n !== "object" || Array.isArray(n)) continue;
+        const raw = n as GraphNode;
+        if (typeof raw.id !== "string" || !raw.id) continue;
+        const node: GraphNode = {
+          ...raw,
+          id: raw.id,
+          type: typeof raw.type === "string" ? raw.type : "ExternalService",
           evidenceNodeIds:
-            n.evidenceNodeIds?.length > 0
-              ? n.evidenceNodeIds
+            Array.isArray(raw.evidenceNodeIds) && raw.evidenceNodeIds.length > 0
+              ? raw.evidenceNodeIds.filter((id) => typeof id === "string")
               : [GRAPH_EVIDENCE_ID],
         };
         if (!nodes.some((x) => x.id === node.id)) nodes.push(node);
       }
     }
-    if (importedGraph?.edges) {
+    if (Array.isArray(importedGraph?.edges)) {
       for (const e of importedGraph.edges) {
-        const edge = {
-          ...e,
+        if (!e || typeof e !== "object" || Array.isArray(e)) continue;
+        const raw = e as GraphEdge;
+        if (
+          typeof raw.id !== "string" ||
+          typeof raw.from !== "string" ||
+          typeof raw.to !== "string"
+        ) {
+          continue;
+        }
+        const edge: GraphEdge = {
+          ...raw,
+          id: raw.id,
+          from: raw.from,
+          to: raw.to,
+          rel: typeof raw.rel === "string" ? raw.rel : "agent_invokes_tool",
+          accessKind: raw.accessKind ?? "direct",
+          signalKind: raw.signalKind ?? "inferred",
           evidenceNodeIds:
-            e.evidenceNodeIds?.length > 0
-              ? e.evidenceNodeIds
+            Array.isArray(raw.evidenceNodeIds) && raw.evidenceNodeIds.length > 0
+              ? raw.evidenceNodeIds.filter((id) => typeof id === "string")
               : [GRAPH_EVIDENCE_ID],
         };
         if (!edges.some((x) => x.id === edge.id)) edges.push(edge);

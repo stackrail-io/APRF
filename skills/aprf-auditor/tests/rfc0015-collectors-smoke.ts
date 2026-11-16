@@ -157,6 +157,34 @@ async function main() {
       );
     }
 
+    const oEmpty = join(root, "oEmpty");
+    mkdirSync(join(oEmpty, "imports", "harness-integrity"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(oEmpty, "imports", "harness-integrity", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        toolOrMcpSideEffectsPresent: true,
+        outOfBandInvokeDenied: true,
+        unregisteredToolDenied: true,
+        disabledMiddlewareDenied: true,
+        dynamicRegistrationDenied: true,
+        toolSubstitutionDenied: true,
+        cases: [0, 0, 0, 0, 0, {}, "x"],
+      }),
+    );
+    await collect(harnessIntegrityCollector, t1, oEmpty);
+    const rEmpty = report(oEmpty, "harness-integrity");
+    if (
+      rEmpty.summary.statusHint !== "partial" ||
+      rEmpty.summary.measuredEvidence !== false
+    ) {
+      throw new Error(
+        `empty/non-object cases must not PASS: ${JSON.stringify(rEmpty.summary)}`,
+      );
+    }
+
     const oObs = join(root, "oObs");
     mkdirSync(join(oObs, "imports", "agent-trace-attributes"), {
       recursive: true,
@@ -182,6 +210,38 @@ async function main() {
     ) {
       throw new Error(
         `OBS-M3 pct-only must be partial: ${JSON.stringify(rObs.summary)}`,
+      );
+    }
+
+    const oObsOk = join(root, "oObsOk");
+    mkdirSync(join(oObsOk, "imports", "agent-trace-attributes"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(oObsOk, "imports", "agent-trace-attributes", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionAgentRequestPathPresent: true,
+        redactionConsistentWithSensitiveFieldPolicy: true,
+        reconstructableAttributeCoveragePct: 99,
+        samples: [
+          { id: "s1", outcome: "success" },
+          { id: "s2", success: true },
+        ],
+      }),
+    );
+    await agentTraceAttributesCollector.collect({
+      targetPath: empty,
+      outputDir: oObsOk,
+      ...ctxBase,
+    } as CollectorContext);
+    const rObsOk = report(oObsOk, "agent-trace-attributes");
+    if (
+      rObsOk.summary.statusHint !== "pass" ||
+      rObsOk.summary.measuredEvidence !== true
+    ) {
+      throw new Error(
+        `OBS-M3 sample success must PASS not FAIL: ${JSON.stringify(rObsOk.summary)}`,
       );
     }
 

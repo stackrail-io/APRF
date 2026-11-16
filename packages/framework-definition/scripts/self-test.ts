@@ -13,6 +13,7 @@ import {
   getProfileById,
   APRF_LENSES,
   LENS_RAG,
+  LENS_AGENTS,
   getLensById,
   unionProfileAndLenses,
   LENS_ID_RAG,
@@ -120,6 +121,17 @@ assert(
   "Core list unchanged (no AGN-M5)",
 );
 assert(agentsUnion.length === new Set(agentsUnion).size, "agents union dedupes");
+assert(
+  LENS_AGENTS.additionalMandatoryCheckIds.length ===
+    new Set(LENS_AGENTS.additionalMandatoryCheckIds).size,
+  "Agents lens additional IDs have no duplicates",
+);
+assert(
+  LENS_AGENTS.additionalMandatoryCheckIds.every((id) =>
+    agentsUnion.includes(id),
+  ),
+  "every Agents lens additional ID is in Core∪Agents union",
+);
 
 const chatbot = resolveAssessmentTarget({
   systemType: "ai-application",

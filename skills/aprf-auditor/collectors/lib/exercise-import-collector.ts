@@ -43,10 +43,19 @@ export type ExerciseImportSpec = {
   minCases?: number;
   /** When whenKey is true, requireKey must be true to PASS. */
   conditionalBoolKeys?: Array<{ whenKey: string; requireKey: string }>;
+  /**
+   * deny: listed rows must be explicit deny outcomes; success ⇒ unauthorized.
+   * sample: listed objects count toward the pack; unauthorizedSuccess must be explicit.
+   */
+  caseSemantics?: "deny" | "sample";
   repoPathPattern: RegExp;
   repoContentPattern: RegExp;
   registeredPassSignals: string[];
-  registeredFailSignals: string[];
+  registeredFailSignals: Array<{
+    signal: string;
+    whenFalse?: string;
+    onUnauthorized?: boolean;
+  }>;
   evidenceTypes: string[];
   emptyDetail: string;
 };
@@ -91,6 +100,59 @@ function asNum(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
 
+function listedRows(data: Record<string, unknown>): unknown[] {
+  if (Array.isArray(data.cases)) return data.cases;
+  if (Array.isArray(data.results)) return data.results;
+  if (Array.isArray(data.samples)) return data.samples;
+  return [];
+}
+
+function isPlainObject(raw: unknown): raw is Record<string, unknown> {
+  return !!raw && typeof raw === "object" && !Array.isArray(raw);
+}
+
+function rowCountsTowardPack(
+  c: Record<string, unknown>,
+  semantics: "deny" | "sample",
+): boolean {
+  if (semantics === "deny") {
+    return (
+      c.denied === true || c.outcome === "denied" || c.success === false
+    );
+  }
+  return (
+    typeof c.id === "string" ||
+    "denied" in c ||
+    "outcome" in c ||
+    "success" in c ||
+    "unauthorizedSuccess" in c ||
+    "attributes" in c
+  );
+}
+
+function rowUnauthorized(
+  c: Record<string, unknown>,
+  semantics: "deny" | "sample",
+): boolean {
+  if (semantics === "sample") return c.unauthorizedSuccess === true;
+  const denied =
+    c.denied === true || c.outcome === "denied" || c.success === false;
+  const succeeded =
+    c.denied === false ||
+    c.outcome === "success" ||
+    c.success === true ||
+    c.unauthorizedSuccess === true;
+  return succeeded && !denied;
+}
+
+function olderIso(a: string, b: string): string {
+  const ta = Date.parse(a);
+  const tb = Date.parse(b);
+  if (Number.isNaN(ta)) return b;
+  if (Number.isNaN(tb)) return a;
+  return ta <= tb ? a : b;
+}
+
 function loadImported(
   ctx: CollectorContext,
   spec: ExerciseImportSpec,
@@ -102,6 +164,7 @@ function loadImported(
   let found = false;
   let listedCaseCount = 0;
   let unauthorizedSuccessCount = 0;
+  const semantics = spec.caseSemantics ?? "deny";
 
   for (const f of listImportFiles(ctx.outputDir, spec.pluginId)) {
     if (f.endsWith(`${spec.pluginId}-report.json`)) continue;
@@ -115,9 +178,12 @@ function loadImported(
     }
     found = true;
     sources.push(rel(ctx.outputDir, f));
-    measuredAt = parseMeasuredAt(data) ?? measuredAt;
     const sp = asBool(data[spec.surfacePresentKey]);
     if (sp !== null) surfacePresent = surfacePresent === null ? sp : surfacePresent || sp;
+    const fileAt = parseMeasuredAt(data);
+    const fileFresh = measuredAtFresh(fileAt);
+    if (!fileFresh) continue;
+    if (fileAt) measuredAt = measuredAt ? olderIso(measuredAt, fileAt) : fileAt;
     const boolKeys = [
       ...spec.passBoolKeys,
       ...(spec.conditionalBoolKeys ?? []).flatMap((c) => [
@@ -136,29 +202,11 @@ function loadImported(
       const prev = typeof flags[p.key] === "number" ? (flags[p.key] as number) : null;
       flags[p.key] = prev === null ? v : Math.min(prev, v);
     }
-    const listed = Array.isArray(data.cases)
-      ? (data.cases as unknown[])
-      : Array.isArray(data.results)
-        ? (data.results as unknown[])
-        : Array.isArray(data.samples)
-          ? (data.samples as unknown[])
-          : [];
-    if (listed.length) {
-      listedCaseCount += listed.length;
-      for (const raw of listed) {
-        if (!raw || typeof raw !== "object") continue;
-        const c = raw as Record<string, unknown>;
-        const denied =
-          c.denied === true ||
-          c.outcome === "denied" ||
-          c.success === false;
-        const succeeded =
-          c.denied === false ||
-          c.outcome === "success" ||
-          c.success === true ||
-          c.unauthorizedSuccess === true;
-        if (succeeded && !denied) unauthorizedSuccessCount += 1;
-      }
+    for (const raw of listedRows(data)) {
+      if (!isPlainObject(raw)) continue;
+      if (!rowCountsTowardPack(raw, semantics)) continue;
+      listedCaseCount += 1;
+      if (rowUnauthorized(raw, semantics)) unauthorizedSuccessCount += 1;
     }
     const explicitFail = asNum(data.unauthorizedSuccessCount);
     if (explicitFail !== null) {
@@ -250,7 +298,13 @@ export function exerciseImportCollector(spec: ExerciseImportSpec): Collector {
         measuredAtFresh(imported.measuredAt) &&
         packMeasured;
 
-      if (imported.surfacePresent === false && !repoFound) {
+      if (imported.unauthorizedSuccessCount > 0) {
+        statusHint = "fail";
+        satisfied = false;
+        notes.push(
+          `Exercise unauthorizedSuccessCount=${imported.unauthorizedSuccessCount}.`,
+        );
+      } else if (imported.surfacePresent === false && !repoFound) {
         statusHint = "not_applicable";
         naReason = `${spec.surfacePresentKey}=false and no repo surface — Check N/A.`;
         notes.push(naReason);
@@ -258,12 +312,6 @@ export function exerciseImportCollector(spec: ExerciseImportSpec): Collector {
         statusHint = "partial";
         notes.push(
           "Import attested surface absent but repo signals exist — cannot N/A.",
-        );
-      } else if (imported.unauthorizedSuccessCount > 0) {
-        statusHint = "fail";
-        satisfied = false;
-        notes.push(
-          `Exercise unauthorizedSuccessCount=${imported.unauthorizedSuccessCount}.`,
         );
       } else if (imported.found && measuredAtFresh(imported.measuredAt)) {
         const boolFail =
@@ -296,7 +344,19 @@ export function exerciseImportCollector(spec: ExerciseImportSpec): Collector {
       const passSignals =
         statusHint === "pass" ? spec.registeredPassSignals : [];
       const failSignals =
-        statusHint === "fail" ? spec.registeredFailSignals : [];
+        statusHint === "fail"
+          ? spec.registeredFailSignals
+              .filter((s) => {
+                if (s.onUnauthorized && imported.unauthorizedSuccessCount > 0) {
+                  return true;
+                }
+                if (s.whenFalse && imported.flags[s.whenFalse] === false) {
+                  return true;
+                }
+                return false;
+              })
+              .map((s) => s.signal)
+          : [];
 
       const report = withReportEvidenceTypes(
         {

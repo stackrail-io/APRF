@@ -314,7 +314,7 @@ N/A remains collector/attestation-driven with a written reason (existing pattern
 
 ### Integrity / stats
 
-Phase 2 must update [`lenses.ts`](../packages/framework-definition/src/lenses.ts), `spec/aprf-spec.json` lens lists, `npm run aprf:sync-stats`, and framework-definition self-test expected union counts (Core remains 39 mandatories; Agents lens additional IDs bring `lensCheckCount` to 58).
+Phase 2 must update [`lenses.ts`](../packages/framework-definition/src/lenses.ts), `spec/aprf-spec.json` lens lists, `npm run aprf:sync-stats`, and framework-definition self-test expected union counts (Core remains 39 mandatories; the union of additional IDs across all four lenses brings `lensCheckCount` to 58, while the Agents lens alone has 29 IDs).
 
 ---
 
@@ -487,7 +487,7 @@ Phase 3: `npm run validate`, typecheck, lint, unit, integration, invariants, ful
 - New Checks are **additive** (MINOR).
 - Existing Check IDs and Core/Regulated lists unchanged.
 - New Agents-lens IDs change Core+`agents` effective set (expected; document in CHANGELOG when implemented).
-- Draft JSON schemas are not wired into `npm run validate` until Phase 2.
+- Inventory and capability-graph schemas are compiled in `aprf:agent-invariants` (`npm run validate`).
 - Dual-emit signals until unknown `signalId` hard-fail (RFC-0014 migration).
 
 ## Security considerations

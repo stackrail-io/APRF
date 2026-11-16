@@ -77,6 +77,7 @@ for (const id of [
   "memory.poison.write_accepted",
   "tool.result.treated_as_instruction",
   "agent.loop.continue_after_abort",
+  "injection.tool.unauthorized_invoke",
 ]) {
   assert(
     registry.signals.some((s) => s.id === id),
@@ -180,14 +181,14 @@ assert(validateGraph(sampleGraph), `graph schema: ${JSON.stringify(validateGraph
 
 const assess = readFileSync(join(root, "packages/aprf/src/assess.ts"), "utf8");
 assert(
-  assess.includes("Never treat statusHint=pass as measured"),
-  "3/9: assess must not treat statusHint=pass as measured evidence",
+  /statusHint\s*===\s*["']pass["']/.test(assess) === false ||
+    assess.includes("Never treat statusHint=pass as measured"),
+  "3/9: documentation guard — statusHint=pass is not the measured-import path",
 );
 assert(
-  assess.includes("threats remain informative") ||
-    assess.includes("Threats never participate") ||
-    /threatExposure/.test(assess),
-  "threats stay out of gate math",
+  !/overallGatePassed[^\n]*threatExposure/.test(assess) &&
+    !/if\s*\(\s*threatExposure/.test(assess),
+  "threats stay out of gate math (threatExposure not in gate predicate)",
 );
 
 const exercise = readFileSync(
@@ -195,25 +196,39 @@ const exercise = readFileSync(
   "utf8",
 );
 assert(
-  exercise.includes("listedCaseCount"),
-  "3: exercise PASS requires listed cases/results/samples",
+  exercise.includes("listedCaseCount") && exercise.includes("caseSemantics"),
+  "3: exercise PASS requires listed cases/results/samples with deny/sample semantics",
 );
 assert(
   exercise.includes("naReason"),
   "5: N/A must record naReason",
 );
 
-const threats = readFileSync(
-  join(root, "spec/aprf-threat-composition.yaml"),
-  "utf8",
+const threatsDoc = yaml.parse(
+  readFileSync(join(root, "spec/aprf-threat-composition.yaml"), "utf8"),
+) as {
+  threats?: Record<
+    string,
+    { indicators?: Array<{ signal?: string }> }
+  >;
+};
+const memPoison = JSON.stringify(
+  threatsDoc.threats?.["THR-memory-poisoning"]?.indicators ?? [],
 );
 assert(
-  threats.includes("memory.poison.write_accepted"),
+  memPoison.includes("memory.poison.write_accepted"),
   "THR-memory-poisoning uses memory poison signal",
 );
 assert(
-  !/THR-memory-poisoning[\s\S]*eval\.security\.llm_judge_only/.test(threats),
+  !memPoison.includes("eval.security.llm_judge_only"),
   "THR-memory-poisoning must not use eval.security.llm_judge_only",
+);
+const injection = JSON.stringify(
+  threatsDoc.threats?.["THR-injection-tool-exec"]?.indicators ?? [],
+);
+assert(
+  injection.includes("injection.tool.unauthorized_invoke"),
+  "THR-injection-tool-exec uses injection-tool signal",
 );
 
 console.log("check-agent-extension-invariants OK");

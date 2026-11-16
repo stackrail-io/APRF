@@ -3,7 +3,6 @@
  */
 import {
   evaluateThreatComposition,
-  type SignalDef,
   type SignalRegistry,
   type ThreatCompositionDoc,
 } from "../src/threat-composition.js";
@@ -108,8 +107,6 @@ const composition: ThreatCompositionDoc = {
   },
 };
 
-void (registry.signals as SignalDef[]);
-
 function fired(id: string) {
   return { signalId: id, fired: true };
 }
@@ -203,8 +200,14 @@ const noEvidence = evaluateThreatComposition(
   { "AGN-M5": "FAIL", "TOL-M1": "FAIL", "TOL-M6": "FAIL" },
   registry,
 );
+assert(noEvidence.length === 2, "3/9: composition evaluates every threat");
 assert(
-  noEvidence.every((r) => r.indicated !== true && r.confirmed !== true),
+  noEvidence.every(
+    (r) =>
+      r.status === "not_indicated" &&
+      r.indicated !== true &&
+      r.confirmed !== true,
+  ),
   "3/9: no observations → threats not indicated or confirmed (collector ran ≠ evidence)",
 );
 

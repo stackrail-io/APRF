@@ -14,6 +14,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 
 ### Fixed
 - RFC-0015 collectors: no synthetic `agent-N` inventory rows; exercise PASS requires listed `cases`/`results`/`samples` (numeric `caseCount` is not a pack); capability-graph confused-deputy only when an MCP hop is followed later by data/API; Agents-lens repo heuristics narrowed; inventory history records the current digest on every write.
+- RFC-0015 follow-up: deny vs sample case semantics; fresh-file case counting; graph import shape checks; TOL-M6 no longer PASSes on graph-proven absence.
 - Engine `evaluateRules({ runDetectors: true })` no longer AND-fails on `manual-attest` (attestation fallback is skipped when scoring real detectors), so hybrids can PASS.
 - `selectApplicableRules` excludes `deprecated` Checks (aligned with CLI assess).
 - Relabel **AGN-M1** from `automated` → `hybrid` (keeps `manual-attest` fallback; default evidence floor E3). Loader rejects `automated` + `manual-attest`.

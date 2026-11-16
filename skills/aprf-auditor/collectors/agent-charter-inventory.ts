@@ -471,6 +471,18 @@ function agentIsActive(a: Record<string, unknown>): boolean {
   return agentLifecycleStatus(a) === "active";
 }
 
+function digestOfAgents(rows: unknown[]): string {
+  const projected = rows.map((r) => {
+    if (!r || typeof r !== "object") return r;
+    const { provenance: _p, ...rest } = r as Record<string, unknown>;
+    return rest;
+  });
+  return createHash("sha256")
+    .update(JSON.stringify(projected))
+    .digest("hex")
+    .slice(0, 16);
+}
+
 type LoadedInventoryImport = AgentCharterInventoryReport["importedResults"] & {
   records: Array<Record<string, unknown>>;
 };
@@ -1140,24 +1152,22 @@ export const agentCharterInventoryCollector: Collector = {
           generatedAt?: string;
         };
         history = Array.isArray(prev.history) ? [...prev.history] : [];
-        const digest = createHash("sha256")
-          .update(JSON.stringify(prev.agents ?? []))
-          .digest("hex")
-          .slice(0, 16);
-        history.push({
-          at: prev.generatedAt ?? ctx.assessedAt.toISOString(),
-          inventoryDigest: `sha256:${digest}`,
-          agentCount: Array.isArray(prev.agents) ? prev.agents.length : 0,
-        });
+        const last = history[history.length - 1] as
+          | { at?: string }
+          | undefined;
+        if (!last || last.at !== prev.generatedAt) {
+          history.push({
+            at: prev.generatedAt ?? ctx.assessedAt.toISOString(),
+            inventoryDigest: `sha256:${digestOfAgents(prev.agents ?? [])}`,
+            agentCount: Array.isArray(prev.agents) ? prev.agents.length : 0,
+          });
+        }
         history = history.slice(-20);
       } catch {
         /* ignore prior */
       }
     }
-    const currentDigest = createHash("sha256")
-      .update(JSON.stringify(inventoryAgents))
-      .digest("hex")
-      .slice(0, 16);
+    const currentDigest = digestOfAgents(inventoryAgents);
     history.push({
       at: ctx.assessedAt.toISOString(),
       inventoryDigest: `sha256:${currentDigest}`,
