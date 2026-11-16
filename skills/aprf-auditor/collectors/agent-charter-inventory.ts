@@ -560,11 +560,15 @@ function loadImported(ctx: CollectorContext): LoadedInventoryImport {
         unenumeratedAgentCount = (unenumeratedAgentCount ?? 0) + fromImport;
       }
 
-      const agents = Array.isArray(data.agents)
-        ? (data.agents as Array<Record<string, unknown>>)
+      const agentsRaw = Array.isArray(data.agents)
+        ? data.agents
         : Array.isArray(data.inventory)
-          ? (data.inventory as Array<Record<string, unknown>>)
+          ? data.inventory
           : [];
+      const agents = agentsRaw.filter(
+        (a): a is Record<string, unknown> =>
+          !!a && typeof a === "object" && !Array.isArray(a),
+      );
       if (agents.length) {
         records.push(...agents);
         agentCount = (agentCount ?? 0) + agents.length;
@@ -717,6 +721,7 @@ function normalizeInventoryRecord(
     "allowedTools",
     "allowed_tools",
     "toolAllowlist",
+    "tool_allowlist",
     "mcpTools",
   ]);
   const mcpServers = asStringList(a, [

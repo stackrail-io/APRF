@@ -198,7 +198,7 @@ Each Check: hybrid detection, `minimumTier` E4 where enforcement/exercise is req
 | **Mandatory** | YAML mandatory; Agents lens |
 | **Applicability** | Agents with tools, MCP, or delegation. N/A if no tools/MCP/delegation. |
 | **Evidence required** | Capability graph with provenance; charter data-scope mapping; exercise or reachability deny on at least one unauthorized transitive path per high-risk class present (`measuredAt` ≤90d) |
-| **Verification** | Direct edges may be config/artifact. **PASS requires** exercise/behavioral deny (or documented absence of transitive hops with graph proof). Inferred-only paths → indicate threat, not PASS. |
+| **Verification** | Direct edges may be config/artifact. **PASS requires** exercise/behavioral deny on unauthorized transitive paths. Graph-only or inferred-only paths indicate threat; they do not PASS. |
 | **Failure** | Unchartered high-risk derived path without deny evidence; graph missing with tools present → NOT_DEMONSTRATED. |
 | **Remediation** | Narrow MCP/tool grants; charter the effective scope; add deny tests on data stores. |
 

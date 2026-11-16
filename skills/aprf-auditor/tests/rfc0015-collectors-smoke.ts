@@ -12,6 +12,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   agentTraceAttributesCollector,
+  evalMethodologyCollector,
   harnessIntegrityCollector,
 } from "../collectors/rfc0015-collectors.ts";
 import { agentCapabilityGraphCollector } from "../collectors/agent-capability-graph.ts";
@@ -288,6 +289,7 @@ async function main() {
       JSON.stringify({
         schemaVersion: "0.1.0",
         inventoryId: "inv-test",
+        generatedAt: ctxBase.assessedAt.toISOString(),
         agents: [
           {
             agentId: "a1",
@@ -422,6 +424,180 @@ async function main() {
       throw new Error(
         `API then MCP must not emit confused deputy: ${JSON.stringify(g3.nodes[0]?.signals)}`,
       );
+    }
+
+    const oMix = join(root, "oMix");
+    mkdirSync(join(oMix, "imports", "harness-integrity"), { recursive: true });
+    writeFileSync(
+      join(oMix, "imports", "harness-integrity", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        toolOrMcpSideEffectsPresent: true,
+        outOfBandInvokeDenied: true,
+        unregisteredToolDenied: true,
+        disabledMiddlewareDenied: true,
+        dynamicRegistrationDenied: true,
+        toolSubstitutionDenied: true,
+        cases: [...deniedCases(5), { outcome: "success" }],
+      }),
+    );
+    await collect(harnessIntegrityCollector, t1, oMix);
+    const rMix = report(oMix, "harness-integrity");
+    if (rMix.summary.statusHint !== "fail") {
+      throw new Error(
+        `mixed deny+success must FAIL: ${JSON.stringify(rMix.summary)}`,
+      );
+    }
+
+    const oNull = join(root, "oNull");
+    mkdirSync(join(oNull, "imports", "harness-integrity"), { recursive: true });
+    writeFileSync(
+      join(oNull, "imports", "harness-integrity", "null.json"),
+      "null",
+    );
+    await collect(harnessIntegrityCollector, empty, oNull);
+    const rNull = report(oNull, "harness-integrity");
+    if (rNull.summary.statusHint !== "not_demonstrated") {
+      throw new Error(
+        `null JSON import must skip: ${JSON.stringify(rNull.summary)}`,
+      );
+    }
+
+    const oTools = join(root, "oTools");
+    mkdirSync(join(oTools, "imports", "eval-methodology"), { recursive: true });
+    writeFileSync(
+      join(oTools, "imports", "eval-methodology", "a.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionAgentsPresent: true,
+        datasetsVersioned: true,
+        runsLinkedToAgentVersion: true,
+        successNotSelfReported: true,
+        securityCasesNotLlmJudgeOnly: true,
+        toolsPresent: true,
+        toolUseCasesPresent: false,
+        cases: [{ id: "e1", outcome: "success" }],
+      }),
+    );
+    writeFileSync(
+      join(oTools, "imports", "eval-methodology", "b.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionAgentsPresent: true,
+        datasetsVersioned: true,
+        runsLinkedToAgentVersion: true,
+        successNotSelfReported: true,
+        securityCasesNotLlmJudgeOnly: true,
+        toolsPresent: false,
+        toolUseCasesPresent: true,
+        cases: [{ id: "e2", outcome: "success" }],
+      }),
+    );
+    await evalMethodologyCollector.collect({
+      targetPath: empty,
+      outputDir: oTools,
+      ...ctxBase,
+    } as CollectorContext);
+    const rTools = report(oTools, "eval-methodology");
+    if (rTools.summary.statusHint !== "fail") {
+      throw new Error(
+        `toolsPresent true from any file must still require tool-use: ${JSON.stringify(rTools.summary)}`,
+      );
+    }
+
+    const ogMerge = join(root, "ogMerge");
+    mkdirSync(join(ogMerge, "imports", "agent-capability-graph"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(ogMerge, "imports", "agent-capability-graph", "a.json"),
+      JSON.stringify({
+        nodes: [
+          { id: "agent:a1", type: "Agent", evidenceNodeIds: ["imp"] },
+          { id: "mcp:kb", type: "MCPServer", evidenceNodeIds: ["imp"] },
+        ],
+        edges: [
+          {
+            id: "m1",
+            from: "agent:a1",
+            to: "mcp:kb",
+            rel: "agent_connects_to_mcp",
+            accessKind: "direct",
+            signalKind: "config",
+            evidenceNodeIds: ["imp"],
+          },
+        ],
+      }),
+    );
+    writeFileSync(
+      join(ogMerge, "imports", "agent-capability-graph", "b.json"),
+      JSON.stringify({
+        nodes: [
+          { id: "api:crm", type: "API", evidenceNodeIds: ["imp"] },
+          { id: "db:cust", type: "Database", evidenceNodeIds: ["imp"] },
+        ],
+        edges: [
+          {
+            id: "m2",
+            from: "mcp:kb",
+            to: "api:crm",
+            rel: "tool_invokes_api",
+            accessKind: "transitive",
+            signalKind: "inferred",
+            evidenceNodeIds: ["imp"],
+          },
+          {
+            id: "m3",
+            from: "api:crm",
+            to: "db:cust",
+            rel: "tool_accesses_database",
+            accessKind: "transitive",
+            signalKind: "inferred",
+            evidenceNodeIds: ["imp"],
+          },
+        ],
+      }),
+    );
+    await agentCapabilityGraphCollector.collect({
+      targetPath: empty,
+      outputDir: ogMerge,
+      ...ctxBase,
+      maxFiles: 50,
+    } as CollectorContext);
+    const graphMerge = JSON.parse(
+      readFileSync(join(ogMerge, "agent-capability-graph.json"), "utf8"),
+    );
+    if (
+      !graphMerge.derivedPaths?.some(
+        (p: { edgeIds: string[] }) => p.edgeIds.length >= 3,
+      )
+    ) {
+      throw new Error("expected merged overlays Agent→MCP→API→DB");
+    }
+
+    const ogStale = join(root, "ogStale");
+    mkdirSync(ogStale);
+    writeFileSync(
+      join(ogStale, "agent-inventory.json"),
+      JSON.stringify({
+        schemaVersion: "0.1.0",
+        inventoryId: "inv-stale",
+        generatedAt: "2020-01-01T00:00:00.000Z",
+        agents: [
+          { agentId: "stale", tools: ["search"], mcpServers: ["kb"] },
+        ],
+      }),
+    );
+    await agentCapabilityGraphCollector.collect({
+      targetPath: empty,
+      outputDir: ogStale,
+      ...ctxBase,
+    } as CollectorContext);
+    const graphStale = JSON.parse(
+      readFileSync(join(ogStale, "agent-capability-graph.json"), "utf8"),
+    );
+    if (graphStale.edges?.length) {
+      throw new Error("stale inventory must not seed graph edges");
     }
 
     console.log("rfc0015-collectors smoke OK");

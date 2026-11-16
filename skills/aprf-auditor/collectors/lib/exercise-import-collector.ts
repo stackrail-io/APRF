@@ -22,6 +22,8 @@ import { withReportEvidenceTypes } from "./evidence-types.ts";
 import {
   asBool,
   measuredAtFresh,
+  mergeAndBool,
+  mergeOrBool,
   parseMeasuredAt,
 } from "./import-attest.ts";
 
@@ -170,12 +172,14 @@ function loadImported(
     if (f.endsWith(`${spec.pluginId}-report.json`)) continue;
     const text = readText(f);
     if (!text) continue;
-    let data: Record<string, unknown>;
+    let parsed: unknown;
     try {
-      data = JSON.parse(text) as Record<string, unknown>;
+      parsed = JSON.parse(text);
     } catch {
       continue;
     }
+    if (!isPlainObject(parsed)) continue;
+    const data = parsed;
     found = true;
     sources.push(rel(ctx.outputDir, f));
     const sp = asBool(data[spec.surfacePresentKey]);
@@ -184,6 +188,9 @@ function loadImported(
     const fileFresh = measuredAtFresh(fileAt);
     if (!fileFresh) continue;
     if (fileAt) measuredAt = measuredAt ? olderIso(measuredAt, fileAt) : fileAt;
+    const whenKeys = new Set(
+      (spec.conditionalBoolKeys ?? []).map((c) => c.whenKey),
+    );
     const boolKeys = [
       ...spec.passBoolKeys,
       ...(spec.conditionalBoolKeys ?? []).flatMap((c) => [
@@ -194,7 +201,10 @@ function loadImported(
     for (const k of boolKeys) {
       const v = asBool(data[k]);
       if (v === null) continue;
-      flags[k] = flags[k] === false ? false : v;
+      const prev = typeof flags[k] === "boolean" ? flags[k] : null;
+      flags[k] = whenKeys.has(k)
+        ? mergeOrBool(prev, v)
+        : mergeAndBool(prev, v);
     }
     for (const p of spec.passPctKeys ?? []) {
       const v = asNum(data[p.key]);
@@ -204,9 +214,9 @@ function loadImported(
     }
     for (const raw of listedRows(data)) {
       if (!isPlainObject(raw)) continue;
+      if (rowUnauthorized(raw, semantics)) unauthorizedSuccessCount += 1;
       if (!rowCountsTowardPack(raw, semantics)) continue;
       listedCaseCount += 1;
-      if (rowUnauthorized(raw, semantics)) unauthorizedSuccessCount += 1;
     }
     const explicitFail = asNum(data.unauthorizedSuccessCount);
     if (explicitFail !== null) {

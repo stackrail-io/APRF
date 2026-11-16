@@ -72,6 +72,57 @@ function scanRefs(targetPath: string, maxFiles: number, re: RegExp): string[] {
   return [...new Set(refs)];
 }
 
+function ingestImportedGraph(
+  parsed: { nodes?: unknown; edges?: unknown },
+  nodes: GraphNode[],
+  edges: GraphEdge[],
+): void {
+  if (Array.isArray(parsed.nodes)) {
+    for (const n of parsed.nodes) {
+      if (!n || typeof n !== "object" || Array.isArray(n)) continue;
+      const raw = n as GraphNode;
+      if (typeof raw.id !== "string" || !raw.id) continue;
+      const node: GraphNode = {
+        ...raw,
+        id: raw.id,
+        type: typeof raw.type === "string" ? raw.type : "ExternalService",
+        evidenceNodeIds:
+          Array.isArray(raw.evidenceNodeIds) && raw.evidenceNodeIds.length > 0
+            ? raw.evidenceNodeIds.filter((id) => typeof id === "string")
+            : [GRAPH_EVIDENCE_ID],
+      };
+      if (!nodes.some((x) => x.id === node.id)) nodes.push(node);
+    }
+  }
+  if (Array.isArray(parsed.edges)) {
+    for (const e of parsed.edges) {
+      if (!e || typeof e !== "object" || Array.isArray(e)) continue;
+      const raw = e as GraphEdge;
+      if (
+        typeof raw.id !== "string" ||
+        typeof raw.from !== "string" ||
+        typeof raw.to !== "string"
+      ) {
+        continue;
+      }
+      const edge: GraphEdge = {
+        ...raw,
+        id: raw.id,
+        from: raw.from,
+        to: raw.to,
+        rel: typeof raw.rel === "string" ? raw.rel : "agent_invokes_tool",
+        accessKind: raw.accessKind ?? "direct",
+        signalKind: raw.signalKind ?? "inferred",
+        evidenceNodeIds:
+          Array.isArray(raw.evidenceNodeIds) && raw.evidenceNodeIds.length > 0
+            ? raw.evidenceNodeIds.filter((id) => typeof id === "string")
+            : [GRAPH_EVIDENCE_ID],
+      };
+      if (!edges.some((x) => x.id === edge.id)) edges.push(edge);
+    }
+  }
+}
+
 export const agentCapabilityGraphCollector: Collector = {
   id: PLUGIN_ID,
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
@@ -80,16 +131,25 @@ export const agentCapabilityGraphCollector: Collector = {
 
     const inventoryPath = join(ctx.outputDir, "agent-inventory.json");
     let inventoryId: string | undefined;
+    const runAt = ctx.assessedAt.toISOString();
     if (existsSync(inventoryPath)) {
       try {
         const inv = JSON.parse(readFileSync(inventoryPath, "utf8")) as {
           inventoryId?: string;
+          generatedAt?: string;
+          assessedAt?: string;
+          collectorId?: string;
           agents?: Array<{
             agentId?: string;
             tools?: string[];
             mcpServers?: string[];
           }>;
         };
+        const inventoryFromThisRun =
+          inv.generatedAt === runAt || inv.assessedAt === runAt;
+        if (!inventoryFromThisRun) {
+          inventoryId = undefined;
+        } else {
         inventoryId = inv.inventoryId;
         for (const a of inv.agents ?? []) {
           if (!a.agentId) continue;
@@ -141,6 +201,7 @@ export const agentCapabilityGraphCollector: Collector = {
             });
           }
         }
+        }
       } catch {
         /* ignore malformed inventory */
       }
@@ -156,62 +217,18 @@ export const agentCapabilityGraphCollector: Collector = {
       ctx.maxFiles ?? 4000,
       /\b(tool[_-]?handler|function_call)\b/i,
     );
-    let importedGraph: { nodes?: unknown; edges?: unknown } | null = null;
     for (const f of listImportFiles(ctx.outputDir, PLUGIN_ID)) {
       if (f.endsWith(`${PLUGIN_ID}-report.json`)) continue;
       const text = readText(f);
       if (!text) continue;
       try {
         const parsed: unknown = JSON.parse(text);
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-          importedGraph = parsed as { nodes?: unknown; edges?: unknown };
-        }
-      } catch {
-        continue;
-      }
-    }
-    if (Array.isArray(importedGraph?.nodes)) {
-      for (const n of importedGraph.nodes) {
-        if (!n || typeof n !== "object" || Array.isArray(n)) continue;
-        const raw = n as GraphNode;
-        if (typeof raw.id !== "string" || !raw.id) continue;
-        const node: GraphNode = {
-          ...raw,
-          id: raw.id,
-          type: typeof raw.type === "string" ? raw.type : "ExternalService",
-          evidenceNodeIds:
-            Array.isArray(raw.evidenceNodeIds) && raw.evidenceNodeIds.length > 0
-              ? raw.evidenceNodeIds.filter((id) => typeof id === "string")
-              : [GRAPH_EVIDENCE_ID],
-        };
-        if (!nodes.some((x) => x.id === node.id)) nodes.push(node);
-      }
-    }
-    if (Array.isArray(importedGraph?.edges)) {
-      for (const e of importedGraph.edges) {
-        if (!e || typeof e !== "object" || Array.isArray(e)) continue;
-        const raw = e as GraphEdge;
-        if (
-          typeof raw.id !== "string" ||
-          typeof raw.from !== "string" ||
-          typeof raw.to !== "string"
-        ) {
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
           continue;
         }
-        const edge: GraphEdge = {
-          ...raw,
-          id: raw.id,
-          from: raw.from,
-          to: raw.to,
-          rel: typeof raw.rel === "string" ? raw.rel : "agent_invokes_tool",
-          accessKind: raw.accessKind ?? "direct",
-          signalKind: raw.signalKind ?? "inferred",
-          evidenceNodeIds:
-            Array.isArray(raw.evidenceNodeIds) && raw.evidenceNodeIds.length > 0
-              ? raw.evidenceNodeIds.filter((id) => typeof id === "string")
-              : [GRAPH_EVIDENCE_ID],
-        };
-        if (!edges.some((x) => x.id === edge.id)) edges.push(edge);
+        ingestImportedGraph(parsed as { nodes?: unknown; edges?: unknown }, nodes, edges);
+      } catch {
+        continue;
       }
     }
 
