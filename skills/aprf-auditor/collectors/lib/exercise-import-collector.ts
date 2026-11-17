@@ -118,6 +118,7 @@ function rowCountsTowardPack(
   semantics: "deny" | "sample",
 ): boolean {
   if (semantics === "deny") {
+    if (c.unauthorizedSuccess === true) return false;
     return (
       c.denied === true || c.outcome === "denied" || c.success === false
     );
@@ -136,14 +137,12 @@ function rowUnauthorized(
   c: Record<string, unknown>,
   semantics: "deny" | "sample",
 ): boolean {
-  if (semantics === "sample") return c.unauthorizedSuccess === true;
+  if (c.unauthorizedSuccess === true) return true;
+  if (semantics === "sample") return false;
   const denied =
     c.denied === true || c.outcome === "denied" || c.success === false;
   const succeeded =
-    c.denied === false ||
-    c.outcome === "success" ||
-    c.success === true ||
-    c.unauthorizedSuccess === true;
+    c.denied === false || c.outcome === "success" || c.success === true;
   return succeeded && !denied;
 }
 
@@ -182,11 +181,13 @@ function loadImported(
     const data = parsed;
     found = true;
     sources.push(rel(ctx.outputDir, f));
-    const sp = asBool(data[spec.surfacePresentKey]);
-    if (sp !== null) surfacePresent = surfacePresent === null ? sp : surfacePresent || sp;
     const fileAt = parseMeasuredAt(data);
     const fileFresh = measuredAtFresh(fileAt);
     if (!fileFresh) continue;
+    const sp = asBool(data[spec.surfacePresentKey]);
+    if (sp !== null) {
+      surfacePresent = surfacePresent === null ? sp : surfacePresent || sp;
+    }
     if (fileAt) measuredAt = measuredAt ? olderIso(measuredAt, fileAt) : fileAt;
     const whenKeys = new Set(
       (spec.conditionalBoolKeys ?? []).map((c) => c.whenKey),

@@ -600,6 +600,122 @@ async function main() {
       throw new Error("stale inventory must not seed graph edges");
     }
 
+    const oConflict = join(root, "oConflict");
+    mkdirSync(join(oConflict, "imports", "harness-integrity"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(oConflict, "imports", "harness-integrity", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        toolOrMcpSideEffectsPresent: true,
+        outOfBandInvokeDenied: true,
+        unregisteredToolDenied: true,
+        disabledMiddlewareDenied: true,
+        dynamicRegistrationDenied: true,
+        toolSubstitutionDenied: true,
+        cases: [
+          ...deniedCases(4),
+          { denied: true, unauthorizedSuccess: true },
+        ],
+      }),
+    );
+    await collect(harnessIntegrityCollector, t1, oConflict);
+    const rConflict = report(oConflict, "harness-integrity");
+    if (rConflict.summary.statusHint !== "fail") {
+      throw new Error(
+        `denied+unauthorizedSuccess must FAIL: ${JSON.stringify(rConflict.summary)}`,
+      );
+    }
+
+    const oStaleNa = join(root, "oStaleNa");
+    mkdirSync(join(oStaleNa, "imports", "harness-integrity"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(oStaleNa, "imports", "harness-integrity", "coverage.json"),
+      JSON.stringify({
+        measuredAt: "2020-01-01T00:00:00.000Z",
+        toolOrMcpSideEffectsPresent: false,
+      }),
+    );
+    await collect(harnessIntegrityCollector, empty, oStaleNa);
+    const rStaleNa = report(oStaleNa, "harness-integrity");
+    if (rStaleNa.summary.statusHint === "not_applicable") {
+      throw new Error(
+        `stale surface=false must not N/A: ${JSON.stringify(rStaleNa.summary)}`,
+      );
+    }
+
+    const ogDup = join(root, "ogDup");
+    mkdirSync(join(ogDup, "imports", "agent-capability-graph"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(ogDup, "imports", "agent-capability-graph", "a.json"),
+      JSON.stringify({
+        nodes: [
+          { id: "agent:a1", type: "Agent", evidenceNodeIds: ["imp"] },
+          { id: "mcp:kb", type: "MCPServer", evidenceNodeIds: ["imp"] },
+        ],
+        edges: [
+          {
+            id: "e1",
+            from: "agent:a1",
+            to: "mcp:kb",
+            rel: "agent_connects_to_mcp",
+            accessKind: "direct",
+            signalKind: "config",
+            evidenceNodeIds: ["imp"],
+          },
+        ],
+      }),
+    );
+    writeFileSync(
+      join(ogDup, "imports", "agent-capability-graph", "b.json"),
+      JSON.stringify({
+        nodes: [
+          { id: "agent:a1", type: "Agent", evidenceNodeIds: ["imp"] },
+          { id: "api:crm", type: "API", evidenceNodeIds: ["imp"] },
+        ],
+        edges: [
+          {
+            id: "e1",
+            from: "agent:a1",
+            to: "api:crm",
+            rel: "tool_invokes_api",
+            accessKind: "direct",
+            signalKind: "inferred",
+            evidenceNodeIds: ["imp"],
+          },
+        ],
+      }),
+    );
+    await agentCapabilityGraphCollector.collect({
+      targetPath: empty,
+      outputDir: ogDup,
+      ...ctxBase,
+      maxFiles: 50,
+    } as CollectorContext);
+    const graphDup = JSON.parse(
+      readFileSync(join(ogDup, "agent-capability-graph.json"), "utf8"),
+    );
+    const hops = (graphDup.edges ?? []).map(
+      (e: { from: string; to: string }) => `${e.from}->${e.to}`,
+    );
+    if (
+      !hops.includes("agent:a1->mcp:kb") ||
+      !hops.includes("agent:a1->api:crm")
+    ) {
+      throw new Error(
+        `reused edge id must keep both hops: ${JSON.stringify(hops)}`,
+      );
+    }
+    const dupIds = (graphDup.edges ?? []).map((e: { id: string }) => e.id);
+    if (new Set(dupIds).size !== dupIds.length) {
+      throw new Error(`derived-path edge ids must stay unique: ${dupIds}`);
+    }
+
     console.log("rfc0015-collectors smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

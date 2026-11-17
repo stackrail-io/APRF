@@ -76,6 +76,8 @@ function ingestImportedGraph(
   parsed: { nodes?: unknown; edges?: unknown },
   nodes: GraphNode[],
   edges: GraphEdge[],
+  sourceKey: string,
+  notes: string[],
 ): void {
   if (Array.isArray(parsed.nodes)) {
     for (const n of parsed.nodes) {
@@ -105,12 +107,30 @@ function ingestImportedGraph(
       ) {
         continue;
       }
+      const relKind =
+        typeof raw.rel === "string" ? raw.rel : "agent_invokes_tool";
+      const scopedId = `${sourceKey}::${raw.id}`;
+      const sameHop = edges.some(
+        (x) => x.from === raw.from && x.to === raw.to && x.rel === relKind,
+      );
+      if (sameHop) continue;
+      const idConflict = edges.find((x) => {
+        const original = x.id.includes("::")
+          ? x.id.slice(x.id.lastIndexOf("::") + 2)
+          : x.id;
+        return original === raw.id && (x.from !== raw.from || x.to !== raw.to);
+      });
+      if (idConflict) {
+        notes.push(
+          `Imported edge id "${raw.id}" reused for different endpoints; kept ${idConflict.id} and ${scopedId}.`,
+        );
+      }
       const edge: GraphEdge = {
         ...raw,
-        id: raw.id,
+        id: scopedId,
         from: raw.from,
         to: raw.to,
-        rel: typeof raw.rel === "string" ? raw.rel : "agent_invokes_tool",
+        rel: relKind,
         accessKind: raw.accessKind ?? "direct",
         signalKind: raw.signalKind ?? "inferred",
         evidenceNodeIds:
@@ -207,6 +227,7 @@ export const agentCapabilityGraphCollector: Collector = {
       }
     }
 
+    const importNotes: string[] = [];
     const mcpRefs = scanRefs(
       ctx.targetPath,
       ctx.maxFiles ?? 4000,
@@ -226,7 +247,13 @@ export const agentCapabilityGraphCollector: Collector = {
         if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
           continue;
         }
-        ingestImportedGraph(parsed as { nodes?: unknown; edges?: unknown }, nodes, edges);
+        ingestImportedGraph(
+          parsed as { nodes?: unknown; edges?: unknown },
+          nodes,
+          edges,
+          rel(ctx.outputDir, f),
+          importNotes,
+        );
       } catch {
         continue;
       }
@@ -349,6 +376,7 @@ export const agentCapabilityGraphCollector: Collector = {
         notes: [
           "Capability graph is operational evidence. Exercise packs under imports/transitive-tool-access/ are required to PASS TOL-M6.",
           `Wrote agent-capability-graph.json (nodes=${nodes.length} edges=${edges.length} paths=${derivedPaths.length}).`,
+          ...importNotes,
           ...(mcpRefs.length
             ? [`MCP repo refs: ${mcpRefs.slice(0, 4).join(", ")}`]
             : []),
