@@ -716,6 +716,113 @@ async function main() {
       throw new Error(`derived-path edge ids must stay unique: ${dupIds}`);
     }
 
+    const oMixArr = join(root, "oMixArr");
+    mkdirSync(join(oMixArr, "imports", "harness-integrity"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(oMixArr, "imports", "harness-integrity", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        toolOrMcpSideEffectsPresent: true,
+        outOfBandInvokeDenied: true,
+        unregisteredToolDenied: true,
+        disabledMiddlewareDenied: true,
+        dynamicRegistrationDenied: true,
+        toolSubstitutionDenied: true,
+        cases: deniedCases(5),
+        results: [{ unauthorizedSuccess: true }],
+      }),
+    );
+    await collect(harnessIntegrityCollector, t1, oMixArr);
+    const rMixArr = report(oMixArr, "harness-integrity");
+    if (rMixArr.summary.statusHint !== "fail") {
+      throw new Error(
+        `unauthorized in results[] must FAIL: ${JSON.stringify(rMixArr.summary)}`,
+      );
+    }
+
+    const oDenySuccess = join(root, "oDenySuccess");
+    mkdirSync(join(oDenySuccess, "imports", "harness-integrity"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(oDenySuccess, "imports", "harness-integrity", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        toolOrMcpSideEffectsPresent: true,
+        outOfBandInvokeDenied: true,
+        unregisteredToolDenied: true,
+        disabledMiddlewareDenied: true,
+        dynamicRegistrationDenied: true,
+        toolSubstitutionDenied: true,
+        cases: [...deniedCases(4), { denied: true, outcome: "success" }],
+      }),
+    );
+    await collect(harnessIntegrityCollector, t1, oDenySuccess);
+    const rDenySuccess = report(oDenySuccess, "harness-integrity");
+    if (rDenySuccess.summary.statusHint !== "fail") {
+      throw new Error(
+        `denied+outcome success must FAIL: ${JSON.stringify(rDenySuccess.summary)}`,
+      );
+    }
+
+    const ogDel = join(root, "ogDel");
+    mkdirSync(join(ogDel, "imports", "agent-capability-graph"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(ogDel, "imports", "agent-capability-graph", "a.json"),
+      JSON.stringify({
+        nodes: [
+          { id: "agent:a1", type: "Agent", evidenceNodeIds: ["imp"] },
+          { id: "mcp:kb", type: "MCPServer", evidenceNodeIds: ["imp"] },
+        ],
+        edges: [
+          {
+            id: "d1",
+            from: "agent:a1",
+            to: "mcp:kb",
+            rel: "agent_connects_to_mcp",
+            accessKind: "direct",
+            signalKind: "config",
+            evidenceNodeIds: ["imp"],
+          },
+        ],
+      }),
+    );
+    writeFileSync(
+      join(ogDel, "imports", "agent-capability-graph", "b.json"),
+      JSON.stringify({
+        nodes: [
+          { id: "agent:a1", type: "Agent", evidenceNodeIds: ["imp"] },
+          { id: "mcp:kb", type: "MCPServer", evidenceNodeIds: ["imp"] },
+        ],
+        edges: [
+          {
+            id: "d1",
+            from: "agent:a1",
+            to: "mcp:kb",
+            rel: "agent_connects_to_mcp",
+            accessKind: "delegated",
+            signalKind: "inferred",
+            evidenceNodeIds: ["imp2"],
+          },
+        ],
+      }),
+    );
+    const gDel = await agentCapabilityGraphCollector.collect({
+      targetPath: empty,
+      outputDir: ogDel,
+      ...ctxBase,
+      maxFiles: 50,
+    } as CollectorContext);
+    if (!gDel.nodes[0]?.signals?.includes("agent.graph.edge_delegated")) {
+      throw new Error(
+        `delegated overlay on same hop must emit: ${JSON.stringify(gDel.nodes[0]?.signals)}`,
+      );
+    }
+
     console.log("rfc0015-collectors smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

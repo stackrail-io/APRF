@@ -110,10 +110,25 @@ function ingestImportedGraph(
       const relKind =
         typeof raw.rel === "string" ? raw.rel : "agent_invokes_tool";
       const scopedId = `${sourceKey}::${raw.id}`;
-      const sameHop = edges.some(
+      const sameHop = edges.find(
         (x) => x.from === raw.from && x.to === raw.to && x.rel === relKind,
       );
-      if (sameHop) continue;
+      if (sameHop) {
+        if (
+          raw.accessKind === "delegated" &&
+          sameHop.accessKind !== "delegated"
+        ) {
+          sameHop.accessKind = "delegated";
+        }
+        const extraIds = Array.isArray(raw.evidenceNodeIds)
+          ? raw.evidenceNodeIds.filter((id): id is string => typeof id === "string")
+          : [];
+        sameHop.evidenceNodeIds = [
+          ...sameHop.evidenceNodeIds,
+          ...extraIds,
+        ].filter((id, i, arr) => arr.indexOf(id) === i);
+        continue;
+      }
       const idConflict = edges.find((x) => {
         const original = x.id.includes("::")
           ? x.id.slice(x.id.lastIndexOf("::") + 2)

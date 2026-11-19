@@ -103,14 +103,27 @@ function asNum(v: unknown): number | null {
 }
 
 function listedRows(data: Record<string, unknown>): unknown[] {
-  if (Array.isArray(data.cases)) return data.cases;
-  if (Array.isArray(data.results)) return data.results;
-  if (Array.isArray(data.samples)) return data.samples;
-  return [];
+  const out: unknown[] = [];
+  for (const key of ["cases", "results", "samples"] as const) {
+    const v = data[key];
+    if (Array.isArray(v)) out.push(...v);
+  }
+  return out;
 }
 
 function isPlainObject(raw: unknown): raw is Record<string, unknown> {
   return !!raw && typeof raw === "object" && !Array.isArray(raw);
+}
+
+function rowHasConflictingOutcomes(c: Record<string, unknown>): boolean {
+  const denyMarked =
+    c.denied === true || c.outcome === "denied" || c.success === false;
+  const successMarked =
+    c.denied === false ||
+    c.outcome === "success" ||
+    c.success === true ||
+    c.unauthorizedSuccess === true;
+  return denyMarked && successMarked;
 }
 
 function rowCountsTowardPack(
@@ -118,7 +131,7 @@ function rowCountsTowardPack(
   semantics: "deny" | "sample",
 ): boolean {
   if (semantics === "deny") {
-    if (c.unauthorizedSuccess === true) return false;
+    if (rowHasConflictingOutcomes(c)) return false;
     return (
       c.denied === true || c.outcome === "denied" || c.success === false
     );
@@ -138,6 +151,7 @@ function rowUnauthorized(
   semantics: "deny" | "sample",
 ): boolean {
   if (c.unauthorizedSuccess === true) return true;
+  if (rowHasConflictingOutcomes(c)) return true;
   if (semantics === "sample") return false;
   const denied =
     c.denied === true || c.outcome === "denied" || c.success === false;
