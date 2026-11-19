@@ -151,8 +151,8 @@ function rowUnauthorized(
   semantics: "deny" | "sample",
 ): boolean {
   if (c.unauthorizedSuccess === true) return true;
-  if (rowHasConflictingOutcomes(c)) return true;
   if (semantics === "sample") return false;
+  if (rowHasConflictingOutcomes(c)) return true;
   const denied =
     c.denied === true || c.outcome === "denied" || c.success === false;
   const succeeded =

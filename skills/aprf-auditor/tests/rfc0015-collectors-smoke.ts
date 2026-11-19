@@ -246,6 +246,35 @@ async function main() {
       );
     }
 
+    const oObsMixed = join(root, "oObsMixed");
+    mkdirSync(join(oObsMixed, "imports", "agent-trace-attributes"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(oObsMixed, "imports", "agent-trace-attributes", "coverage.json"),
+      JSON.stringify({
+        measuredAt: new Date().toISOString(),
+        productionAgentRequestPathPresent: true,
+        redactionConsistentWithSensitiveFieldPolicy: true,
+        reconstructableAttributeCoveragePct: 99,
+        samples: [{ id: "eval-1", denied: false, success: false }],
+      }),
+    );
+    await agentTraceAttributesCollector.collect({
+      targetPath: empty,
+      outputDir: oObsMixed,
+      ...ctxBase,
+    } as CollectorContext);
+    const rObsMixed = report(oObsMixed, "agent-trace-attributes");
+    if (
+      rObsMixed.summary.statusHint !== "pass" ||
+      rObsMixed.importedResults.unauthorizedSuccessCount !== 0
+    ) {
+      throw new Error(
+        `OBS-M3 sample denied:false+success:false must not FAIL: ${JSON.stringify(rObsMixed)}`,
+      );
+    }
+
     const o3 = join(root, "o3");
     mkdirSync(join(o3, "imports", "harness-integrity"), { recursive: true });
     writeFileSync(
