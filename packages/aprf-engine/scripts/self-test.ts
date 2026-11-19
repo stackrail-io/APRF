@@ -17,8 +17,8 @@ function assert(cond: unknown, msg: string): asserts cond {
 }
 
 const catalog = getGeneratedCatalog();
-assert(catalog.ruleCount === 178, `expected 178 rules, got ${catalog.ruleCount}`);
-assert(catalog.rules.length === 178, "rules array length");
+assert(catalog.ruleCount === 184, `expected 184 rules, got ${catalog.ruleCount}`);
+assert(catalog.rules.length === 184, "rules array length");
 assert(
   catalog.generatedAt.startsWith("sha256:"),
   "generatedAt should be content hash",
@@ -67,12 +67,20 @@ assert(
   "THR-shadow-agents embedded in catalog",
 );
 assert(
+  catalog.threatComposition?.["THR-harness-bypass"] != null,
+  "THR-harness-bypass embedded in catalog",
+);
+assert(
   (catalog.checkThreatIndex?.["AGN-M1"] ?? []).includes("THR-shadow-agents"),
   "AGN-M1 reverse-index includes THR-shadow-agents",
 );
+assert(
+  (catalog.checkThreatIndex?.["AGN-M5"] ?? []).includes("THR-harness-bypass"),
+  "AGN-M5 reverse-index includes THR-harness-bypass",
+);
 
 const index = getGeneratedRuleIndex();
-assert(index.byId.size === 178, "index size");
+assert(index.byId.size === 184, "index size");
 assert(getRuleById(index, "SEC-M1")?.id === "SEC-M1", "getRuleById SEC-M1");
 
 const allowlist = new Set(listCatalogDetectorIds());

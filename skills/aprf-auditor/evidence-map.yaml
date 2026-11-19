@@ -1147,6 +1147,25 @@ checks:
       supplyChainReviewWithin90DaysOrSinceLastChange=false
       (failing import metrics beat present=false N/A).
       SCI-M1/M2/M4, SCI-R1, TOL-M2 do not substitute.
+  TOL-M6:
+    requiredEvidence:
+      - "Agent capability graph covering tools/MCP/delegation"
+      - "Charter-to-effective-path mapping"
+      - "Exercise: unauthorized transitive/delegated paths denied (imports/transitive-tool-access/, measuredAt ≤90d)"
+    searchExtra:
+      - "**/*mcp*"
+      - "**/*capability*graph*"
+      - "**/*tool*allowlist*"
+    plugins: [transitive-tool-access, agent-capability-graph, repo-filesystem]
+    naWhen: "No tools, MCP, or delegation in production agents"
+    evaluation: |
+      PASS if transitive-tool-access statusHint=pass (≥1 deny case +
+      capabilityGraphPresent + charterScopeMapped +
+      unauthorizedEffectivePathsDenied + measuredAt ≤90d).
+      Graph collector alone is PARTIAL (inferred paths cannot confirm).
+      FAIL if unauthorizedEffectivePathsDenied=false or unauthorizedSuccessCount>0
+      (failing import metrics beat present=false N/A).
+      NOT_APPLICABLE when toolsMcpOrDelegationPresent=false and no repo surface.
   TOL-R1:
     requiredEvidence:
       - "Inventory/catalog of destructive tools marking dry-run/simulation support"
@@ -1579,6 +1598,21 @@ checks:
       PARTIAL if redaction/ACL signals without complete import.
       NOT_APPLICABLE when tracesContainSecretsOrSensitiveData=false or no control signals.
       Distinct from SEC2-M2 general log redaction and OBS-M1 linkage alone.
+  OBS-M3:
+    requiredEvidence:
+      - "Agent-run traces with required reconstructable attributes"
+      - "Coverage import under imports/agent-trace-attributes/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*agent*trace*"
+      - "**/*trace*attribute*"
+      - "**/otel*"
+    plugins: [agent-trace-attributes, otel, repo-filesystem]
+    naWhen: "No production agent runs"
+    evaluation: |
+      PASS if agent-trace-attributes statusHint=pass (≥1 trace sample + required
+      attributes at coverage floor + measuredAt ≤90d). Percent-only JSON is PARTIAL.
+      OBS-M1 request→model→tool linkage does not substitute. NOT_APPLICABLE when
+      productionAgentRequestPathPresent=false and no repo surface.
   OBS-R1:
     requiredEvidence:
       - "Secure/restricted replay tooling config for failed AI traces"
@@ -1942,6 +1976,20 @@ checks:
       PASS if ai-rto-rpo-catalog statusHint=pass (BCP/service-catalog/DR docs + ≥1 business-critical AI service + 100% numeric RTO/RPO + tested restore/failover link + measuredAt ≤90d).
       PARTIAL if continuity signals without complete import.
       NOT_APPLICABLE when no continuity signals. Distinct from REL-M4 backup inventory and PERF-M1 SLOs.
+  REL-M9:
+    requiredEvidence:
+      - "Classification of non-idempotent / irreversible tool calls"
+      - "Retry-replay deny exercises under imports/non-idempotent-retry/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*idempoten*"
+      - "**/*retry*"
+      - "**/*replay*"
+    plugins: [non-idempotent-retry, repo-filesystem]
+    naWhen: "No non-idempotent or irreversible tool calls"
+    evaluation: |
+      PASS if non-idempotent-retry statusHint=pass (classified + replay denied +
+      measuredAt ≤90d). REL-M1/M3 retry bounds do not substitute.
+      NOT_APPLICABLE when nonIdempotentOrIrreversibleToolsPresent=false and no repo surface.
   EVL-M1:
     requiredEvidence:
       - "Eval suite registry mapping critical journeys to versioned offline suites"
@@ -2105,6 +2153,24 @@ checks:
       PASS if eval-shadow-cutover statusHint=pass (highRiskCutoversMissingShadowComparison=0 + promotionCriteriaMetBeforeFullTraffic + measuredAt ≤90d).
       PARTIAL if shadow/canary signals without complete import.
       NOT_APPLICABLE when highRiskCutoverCount=0 or no AI/cutover signals.
+  EVL-M5:
+    requiredEvidence:
+      - "Versioned eval datasets + runs linked to agent version"
+      - "Independent success criteria; security cases not LLM-judge-only (imports/eval-methodology/, measuredAt ≤90d)"
+    searchExtra:
+      - "**/*eval*"
+      - "**/*dataset*"
+      - "**/*llm*judge*"
+    plugins: [eval-methodology, promptfoo, repo-filesystem]
+    naWhen: "No production agents"
+    evaluation: |
+      PASS if eval-methodology statusHint=pass (datasetsVersioned +
+      runsLinkedToAgentVersion + successNotSelfReported +
+      securityCasesNotLlmJudgeOnly + ≥1 run/case + measuredAt ≤90d;
+      toolUseCasesPresent when toolsPresent).
+      FAIL if securityCasesNotLlmJudgeOnly=false or unauthorized cases.
+      Boolean-only imports are PARTIAL (measuredEvidence=false).
+      NOT_APPLICABLE when productionAgentsPresent=false and no repo surface.
   EVL-R1:
     requiredEvidence:
       - "Eval catalog with regression, adversarial, and distribution-shift tracks + owners"
@@ -2316,6 +2382,20 @@ checks:
       PASS if a2a-peer-auth report statusHint=pass (auth+scope + unauth/forged/over-scoped deny + measuredAt ≤90d).
       PARTIAL if handoff/auth config found without measured deny results.
       NOT_APPLICABLE when no multi-agent handoff signals.
+  AGN-M5:
+    requiredEvidence:
+      - "Inventory of production tool/MCP entry points and declared harness"
+      - "Exercise pack under imports/harness-integrity/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*harness*"
+      - "**/*tool*gateway*"
+      - "**/*mcp*gateway*"
+    plugins: [harness-integrity, repo-filesystem]
+    naWhen: "No production tool or MCP side effects"
+    evaluation: |
+      PASS if harness-integrity statusHint=pass (≥5 listed deny cases + all deny flags true + measuredAt ≤90d).
+      Boolean JSON or numeric caseCount without cases[] is PARTIAL. Repo heuristics alone are PARTIAL. Collector ran ≠ PASS.
+      NOT_APPLICABLE when toolOrMcpSideEffectsPresent=false and no repo surface.
   AGN-R1:
     requiredEvidence:
       - "Versioned goal-conflict / disallowed-goal plan policy with named owner"
@@ -2392,6 +2472,19 @@ checks:
     naWhen: "Not Level 5 / no irreversible dual-control actions"
     evaluation: |
       PASS if human-dual-control statusHint=pass (dualApprovalPct=100, singleApproverCount=0).
+  HUM-M5:
+    requiredEvidence:
+      - "Approval replay/expiry/self-approval deny exercises under imports/approval-replay/ (measuredAt ≤90d)"
+    searchExtra:
+      - "**/*approval*"
+      - "**/*hitl*"
+    plugins: [approval-replay, repo-filesystem]
+    naWhen: "No high-impact approvals (Agents lens only)"
+    evaluation: |
+      PASS if approval-replay statusHint=pass (replayDenied + expiryDenied +
+      selfApprovalDenied + measuredAt ≤90d). HUM-M3 alternate-path tests do not
+      substitute. NOT_APPLICABLE when highImpactApprovalsPresent=false and no
+      repo surface.
   HUM-R1:
     requiredEvidence:
       - "Approval UI context + ≥10 samples under imports/human-approval-ui/"

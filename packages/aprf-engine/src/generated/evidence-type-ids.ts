@@ -23,5 +23,12 @@ export const KNOWN_EVIDENCE_TYPE_IDS = [
   "network_flow_logs",
   "repo_signal",
   "self_attestation",
-  "independent_assessment"
+  "independent_assessment",
+  "agent_inventory_record",
+  "agent_capability_graph",
+  "harness_exercise_report",
+  "eval_dataset_manifest",
+  "eval_run_report",
+  "agent_trace_sample",
+  "idempotency_exercise_report"
 ] as const;

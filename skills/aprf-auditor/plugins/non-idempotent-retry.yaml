@@ -1,0 +1,26 @@
+id: non-idempotent-retry
+title: Non-idempotent tool replay safeguards (REL-M9)
+version: "0.1.0"
+executor: collectors/rfc0015-collectors.ts
+evidenceClass: ci
+emitsEvidenceTier: E4
+detectorIds: [repo-non-idempotent-retry]
+inputs:
+  - "Target repo (idempotency keys / retry policy)"
+  - "Optional pack: aprf-assessment/imports/non-idempotent-retry/*.json"
+collect:
+  - "Detect classification and retry-safety signals"
+  - "Ingest exercise flags; write non-idempotent-retry-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/non-idempotent-retry/*"
+  signals: [non-idempotent-retry, rel-m9, repo-non-idempotent-retry]
+mapsToChecks: [REL-M9]
+whenUnavailable: >
+  Repo signals are PARTIAL. REL-M9 PASS needs toolsClassified and
+  noDuplicateCommitWithoutSafeguard=true, measuredAt ≤90 days.
+  nonIdempotentOrIrreversibleToolsPresent=false → NOT_APPLICABLE when no repo
+  surface (all tools read-only/idempotent).
+live:
+  required: false
+  note: Offline heuristics + imported exercise pack.

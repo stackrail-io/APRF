@@ -6,8 +6,8 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:0b6e8f6e5671313e386939e03725455518f09cf3b1f38248c99505a21e142696",
-  "ruleCount": 178,
+  "generatedAt": "sha256:16d19ab8a944144762241ac96f18d1c173f6726d5a5880eeecd55ce5b8eb6ea2",
+  "ruleCount": 184,
   "domains": [
     {
       "id": "security",
@@ -976,6 +976,83 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       },
       "status": "active",
       "introducedIn": "0.10.0"
+    },
+    {
+      "id": "AGN-M5",
+      "category": "agent-governance",
+      "title": "Production tool and MCP side effects must execute only through the declared harness",
+      "description": "Every production tool, MCP, or side-effect path used by in-scope agents shall execute only through the declared harness (gateway, middleware, or runtime policy engine). Alternate entry points shall be denied. Distinct from approval alternate-path tests and from per-call authz that only covers traffic that already reached the gateway.\n",
+      "whyItMatters": "A correctly configured policy engine is ineffective if agents or operators can invoke tools beside it. Out-of-band SDKs, disabled middleware, and post-init tool registration recreate excessive agency without touching the gated path.\n",
+      "severity": "critical",
+      "weight": 4,
+      "gate": "mandatory",
+      "passCondition": "Exercise evidence shows unregistered tool invocation, out-of-band/direct tool invocation, disabled or missing middleware, unauthorized dynamic tool registration, and tool substitution or spoofing are denied at 100% on inventoried production entry points (measuredAt ≤90 days). If no production agents or workloads invoke tools or MCP side effects, score NOT_APPLICABLE.\n",
+      "evidenceRequired": [
+        "Inventory of production agent/tool/MCP execution entry points and the declared harness",
+        "Harness/middleware/policy-engine configuration covering those entry points",
+        "Exercise results: out-of-band invoke, unregistered tool, disabled middleware, dynamic registration, and tool substitution denied at 100% (measuredAt ≤90 days)"
+      ],
+      "evidencePolicy": {
+        "minimumTier": "E4",
+        "acceptableEvidence": [
+          "harness_exercise_report",
+          "application_logs"
+        ]
+      },
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-harness-integrity",
+            "params": {
+              "hint": "Discover harness/gateway/middleware signals; ingest imports/harness-integrity/ requiring deny rates at 100% for out-of-band, unregistered, disabled-middleware, dynamic-register, and substitution cases (measuredAt ≤90 days).\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest the exercise pack (measuredAt ≤90 days) or document N/A if no tool/MCP side effects.\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm production agents/workloads invoke tools or MCP. If none, score NOT_APPLICABLE with reason. 2) Inventory execution entry points (HTTP, jobs, SDK, MCP). 3) Identify the declared harness. 4) Review exercises that attempt to skip it. 5) PASS only if all required abuse cases are denied at 100% with measuredAt ≤90 days. Per-call gateway authz alone does not prove there is no path around the gateway. Approval bypass tests alone do not prove harness integrity.\n",
+      "falsePositiveGuidance": "Do not pass prompt instructions or allowlist YAML without deny exercises. Do not pass because the gateway exists if SDKs can call tools directly. Do not treat collector success as control success. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Fail closed: production identities may invoke tools only through the harness",
+        "Disable raw provider/SDK tool execution in production agent identities",
+        "Register every entry point; deny dynamic unsigned tool registration",
+        "Retain harness exercise packs under imports/harness-integrity/"
+      ],
+      "references": [
+        {
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+        },
+        {
+          "title": "NIST AI Risk Management Framework — Govern / Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        }
+      ],
+      "relatedRules": [
+        "HUM-M3",
+        "TOL-M1",
+        "TOL-M2",
+        "AGN-M1"
+      ],
+      "tags": [
+        "agent-governance",
+        "mandatory",
+        "hybrid",
+        "harness"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 3
+      },
+      "status": "active",
+      "introducedIn": "0.11.0"
     },
     {
       "id": "AGN-R1",
@@ -5743,6 +5820,81 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "introducedIn": "0.10.0"
     },
     {
+      "id": "EVL-M5",
+      "category": "evaluation",
+      "title": "Production agent versions must have independent eval methodology",
+      "description": "Each production agent version shall be linked to versioned eval datasets and runs covering independently verifiable task-success criteria (not agent self-report), tool-use correctness where tools exist, and—when model-based judging is used—an explicit rubric, versioned judge prompt, model identification, calibration or human-reviewed sample, and a prohibition on using an LLM judge as the sole oracle for access-control or security enforcement. This Check does not introduce an overall eval quality score.\n",
+      "whyItMatters": "Offline suites with numeric gates can still accept the agent's own \"done\" flag, skip tool-use failures, or let an uncalibrated judge bless security cases. Independent oracles keep evaluation from becoming self-attestation.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "mandatory",
+      "passCondition": "Every in-scope production agent version maps to versioned eval datasets and runs; task-success criteria are independently verifiable (not agent self-report); tool-using agents have tool-use cases; if an LLM judge is used it has a rubric, versioned prompt, model id, and human sample; access-control and security cases use deterministic, schema, or exercise oracles rather than an LLM judge alone (evidence measuredAt ≤90 days). If no production agents exist, score NOT_APPLICABLE.\n",
+      "evidenceRequired": [
+        "Versioned eval dataset manifests with owners and provenance",
+        "Eval run reports linked to agent versions",
+        "Independent task-success criteria (schema, ground truth, human, or deterministic oracles)",
+        "Tool-use cases when tools exist; LLM-judge rubric pack if used; security cases without LLM-judge-only oracles"
+      ],
+      "evidencePolicy": {
+        "minimumTier": "E4",
+        "acceptableEvidence": [
+          "eval_dataset_manifest",
+          "eval_run_report",
+          "harness_exercise_report"
+        ]
+      },
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-eval-methodology",
+            "params": {
+              "hint": "Discover versioned datasets and agent-version-linked runs; ingest imports/eval-methodology/. Security cases judged only by an LLM cannot PASS.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest dataset versions, linked runs, independent success criteria, and non-LLM security oracles (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm production agents exist. If none, score NOT_APPLICABLE. 2) Map each agent version to versioned datasets and runs. 3) Confirm success is not the agent's self-report. 4) Confirm tool-use cases when tools exist. 5) If LLM-as-judge is used, review rubric, prompt version, model id, and human sample. 6) Confirm security/authz cases use deterministic or exercise oracles. Presence of an offline suite without agent-version linkage does not PASS. Numeric release thresholds without independent oracles do not PASS.\n",
+      "falsePositiveGuidance": "Do not pass volume of test cases as quality. Do not pass fabricated or undated eval reports. Do not pass LLM-judge-only access-control tests. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Version datasets and pin runs to agent versions in CI",
+        "Replace self-reported success with schema, ground-truth, or human oracles",
+        "Add tool-use and unauthorized-attempt cases",
+        "Keep security evals on deterministic/exercise oracles"
+      ],
+      "references": [
+        {
+          "title": "NIST AI Risk Management Framework — Measure",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        }
+      ],
+      "relatedRules": [
+        "EVL-M1",
+        "EVL-M2",
+        "EVL-R1",
+        "AGN-M1"
+      ],
+      "tags": [
+        "evaluation",
+        "mandatory",
+        "hybrid",
+        "agents"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 3
+      },
+      "status": "active",
+      "introducedIn": "0.11.0"
+    },
+    {
       "id": "EVL-R1",
       "category": "evaluation",
       "title": "Production systems should have separate eval tracks for regression, adversarial, and distribution-shift cases",
@@ -6617,6 +6769,83 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       },
       "status": "active",
       "introducedIn": "0.10.0"
+    },
+    {
+      "id": "HUM-M5",
+      "category": "human-approval",
+      "title": "High-impact approvals must resist replay and self-approval",
+      "description": "Human approval for high-impact actions shall be bound to actor, action, arguments, expiry, and a non-replayable token. The agent (or its identity) shall not approve its own restricted action. Distinct from approval audit logging and from alternate-path ungated execution tests.\n",
+      "whyItMatters": "Logged approvals that can be replayed, reused after expiry, or issued by the agent identity convert human gates into theater. Attackers and confused deputies prefer a captured token over an ungated API.\n",
+      "severity": "critical",
+      "weight": 4,
+      "gate": "mandatory",
+      "passCondition": "Exercise evidence shows replayed approvals denied, expired approvals denied, and agent-identity self-approval denied at 100% for inventoried high-impact actions (measuredAt ≤90 days). If no high-impact actions require human approval, score NOT_APPLICABLE.\n",
+      "evidenceRequired": [
+        "Approval token/schema binding actor, action, argument hash, expiry, and nonce",
+        "Separation-of-duties policy: agent identity cannot be the sole approver",
+        "Exercise results: replay, expiry, and self-approval denied at 100% (measuredAt ≤90 days)"
+      ],
+      "evidencePolicy": {
+        "minimumTier": "E4",
+        "acceptableEvidence": [
+          "harness_exercise_report",
+          "application_logs"
+        ]
+      },
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-approval-replay",
+            "params": {
+              "hint": "Discover approval-token/SoD signals; ingest imports/approval-replay/ requiring replayDenied, expiryDenied, and selfApprovalDenied at 100% (measuredAt ≤90 days).\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest the exercise pack (measuredAt ≤90 days) or N/A if no high-impact approvals.\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm high-impact gated actions exist. If none, score NOT_APPLICABLE. 2) Review token binding and expiry. 3) Confirm the agent identity cannot approve its own restricted action. 4) Review replay, expiry, and self-approval exercises. 5) PASS only at 100% deny with measuredAt ≤90 days. Audit logs without replay tests do not PASS. Alternate-path bypass tests without token binding do not PASS.\n",
+      "falsePositiveGuidance": "Do not pass UI confirmations without a non-replayable token. Do not pass because a human can approve if the agent service account can also approve. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Bind approvals to argument hash, actor, expiry, and nonce",
+        "Require a distinct human identity; deny agent-identity self-approval",
+        "Reject reused and expired tokens at the execution layer",
+        "Retain packs under imports/approval-replay/"
+      ],
+      "references": [
+        {
+          "title": "NIST AI RMF — Govern and Manage (human oversight)",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+        }
+      ],
+      "relatedRules": [
+        "HUM-M1",
+        "HUM-M2",
+        "HUM-M3",
+        "TOL-M3"
+      ],
+      "tags": [
+        "human-approval",
+        "mandatory",
+        "hybrid",
+        "replay"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 3
+      },
+      "status": "active",
+      "introducedIn": "0.11.0"
     },
     {
       "id": "HUM-R1",
@@ -8791,6 +9020,78 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       },
       "status": "active",
       "introducedIn": "0.10.0"
+    },
+    {
+      "id": "OBS-M3",
+      "category": "observability",
+      "title": "Sampled agent runs must be reconstructable from traces",
+      "description": "Sampled production or canary traces shall allow reconstruction of an agent run without retaining unnecessary sensitive prompt or customer payload: agent id, agent version, run id, parent run id, model identifier, prompt/configuration version, tool invocation, redacted tool arguments and results, authorization decision, human approval reference, memory retrieval reference, duration, token consumption, error details, and termination reason. Distinct from request-to-model-to-tool linkage coverage.\n",
+      "whyItMatters": "Linkage without run identity, authz decisions, approvals, or termination reason leaves incidents as log archaeology. Reconstruction must not dump raw prompts or customer data into default retention.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "mandatory",
+      "passCondition": "Canary or sampled traces show the required reconstructable agent-run attributes on ≥95% of in-scope canary runs over 24 hours, with redaction consistent with sensitive-field controls (trace evidence measuredAt ≤90 days). If no production agent request path is in scope, score NOT_APPLICABLE.\n",
+      "evidenceRequired": [
+        "Trace schema or semantic convention listing required agent-run attributes",
+        "Canary or 24h sampled traces (redacted) showing ≥95% attribute completeness"
+      ],
+      "evidencePolicy": {
+        "minimumTier": "E4",
+        "acceptableEvidence": [
+          "agent_trace_sample",
+          "application_logs"
+        ]
+      },
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-agent-trace-attributes",
+            "params": {
+              "hint": "Discover agent-span conventions; ingest imports/agent-trace-attributes/ requiring reconstructableAttributeCoveragePct=95 (measuredAt ≤90 days).\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest canary traces with required attributes at ≥95% (measuredAt ≤90 days).\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm a production agent request path exists. If none, score NOT_APPLICABLE. 2) Review the trace schema. 3) Sample canary traces for required fields. 4) Confirm redaction of sensitive payloads. 5) PASS only at ≥95% completeness with measuredAt ≤90 days. Request-to-tool linkage coverage without agent-run attributes does not PASS.\n",
+      "falsePositiveGuidance": "Do not pass OpenTelemetry config without sampled traces. Do not require raw prompts in default retention. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Adopt agent-run semantic conventions on spans",
+        "Record authz, approval, memory-ref, and termination reason",
+        "Redact tool args/results per sensitive-field policy",
+        "Retain redacted samples under imports/agent-trace-attributes/"
+      ],
+      "references": [
+        {
+          "title": "OpenTelemetry — traces",
+          "url": "https://opentelemetry.io/docs/concepts/signals/traces/"
+        }
+      ],
+      "relatedRules": [
+        "OBS-M1",
+        "OBS-M2",
+        "AGN-M1",
+        "HUM-M2"
+      ],
+      "tags": [
+        "observability",
+        "mandatory",
+        "hybrid",
+        "agents"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 3
+      },
+      "status": "active",
+      "introducedIn": "0.11.0"
     },
     {
       "id": "OBS-R1",
@@ -11352,6 +11653,79 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       },
       "status": "active",
       "introducedIn": "0.10.0"
+    },
+    {
+      "id": "REL-M9",
+      "category": "reliability-continuity",
+      "title": "Non-idempotent and irreversible tool retries must not duplicate side effects",
+      "description": "The harness shall classify in-scope tools as read-only, idempotent, non-idempotent, or irreversible. Retries, recovery, and workflow resume shall not repeat non-idempotent or irreversible actions without an idempotency key, compensation, or human approval. Distinct from finite retry bounds and from partial-failure false-success detection.\n",
+      "whyItMatters": "Bounded retries that replay a payment or irreversible delete create duplicate real-world effects. Recovery after a crash is unsafe unless the harness knows which actions may be repeated.\n",
+      "severity": "high",
+      "weight": 3,
+      "gate": "mandatory",
+      "passCondition": "In-scope tools are classified as read-only, idempotent, non-idempotent, or irreversible; exercise evidence shows retries or resume do not commit duplicate non-idempotent or irreversible side effects without an idempotency key, compensation, or human approval (measuredAt ≤90 days). If no production tools exist, or all in-scope tools are classified read-only or idempotent, score NOT_APPLICABLE.\n",
+      "evidenceRequired": [
+        "Tool classification inventory (read-only / idempotent / non-idempotent / irreversible)",
+        "Retry/resume policy for non-idempotent and irreversible classes",
+        "Exercise results showing no duplicate commit without idempotency key, compensation, or approval (measuredAt ≤90 days)"
+      ],
+      "evidencePolicy": {
+        "minimumTier": "E4",
+        "acceptableEvidence": [
+          "idempotency_exercise_report",
+          "application_logs"
+        ]
+      },
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-non-idempotent-retry",
+            "params": {
+              "hint": "Discover tool classification and retry policy; ingest imports/non-idempotent-retry/ requiring no duplicate commit on non-idempotent/irreversible classes (measuredAt ≤90 days).\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest classification plus exercise (measuredAt ≤90 days) or N/A if only read-only/idempotent tools.\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Inventory production tools and classifications. If none, or all are read-only/idempotent with evidence, score NOT_APPLICABLE. 2) Review retry/resume behavior. 3) Review exercises that retry a non-idempotent or irreversible call. 4) PASS only if duplicates are prevented or compensated with measuredAt ≤90 days. Finite max-retry config without classification does not PASS. Partial-failure tests without replay safety do not PASS.\n",
+      "falsePositiveGuidance": "Do not pass unclassified side-effect tools. Do not pass \"retry=3\" as idempotency. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Classify every production tool; default unknown side effects to non-idempotent",
+        "Require idempotency keys or disable auto-retry on irreversible tools",
+        "Add resume/compensation tests for payments and deletes",
+        "Retain packs under imports/non-idempotent-retry/"
+      ],
+      "references": [
+        {
+          "title": "NIST AI Risk Management Framework — Manage",
+          "url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        }
+      ],
+      "relatedRules": [
+        "REL-M1",
+        "REL-M3",
+        "TOL-M3",
+        "HUM-M1"
+      ],
+      "tags": [
+        "reliability-continuity",
+        "mandatory",
+        "hybrid",
+        "idempotency"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 3
+      },
+      "status": "active",
+      "introducedIn": "0.11.0"
     },
     {
       "id": "REL-R1",
@@ -14577,6 +14951,92 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       },
       "status": "active",
       "introducedIn": "0.10.0"
+    },
+    {
+      "id": "TOL-M6",
+      "category": "tool-safety",
+      "title": "Effective agent data and API access must not exceed the charter",
+      "description": "Effective (including transitive and delegated) data and API access of each production agent shall be inventoried from an evidence-backed capability graph and shall not exceed the approved charter data scope. Unauthorized effective paths shall be denied in exercise. Direct tool allowlists alone do not prove the absence of MCP-to-API-to-database hops.\n",
+      "whyItMatters": "Agents inherit the blast radius of every MCP server, tool, and shared credential they can reach. A confused-deputy path to a customer database is still unauthorized access even when the agent has no direct database tool.\n",
+      "severity": "critical",
+      "weight": 4,
+      "gate": "mandatory",
+      "passCondition": "A provenance-backed capability graph covers in-scope agents, tools, MCP servers, and data stores; high-risk transitive or delegated paths are mapped to charter data scope; unauthorized effective paths are denied in exercise or a connectivity deny probe (measuredAt ≤90 days). Graph-only proof of absence cannot PASS. If no production agents use tools, MCP, or delegation, score NOT_APPLICABLE.\n",
+      "evidenceRequired": [
+        "Capability graph with evidence provenance for relationships and derived paths",
+        "Charter data-scope mapping for inventoried agents",
+        "Exercise or reachability deny on unauthorized transitive/delegated paths (measuredAt ≤90 days)"
+      ],
+      "evidencePolicy": {
+        "minimumTier": "E4",
+        "acceptableEvidence": [
+          "harness_exercise_report",
+          "connectivity_deny_probe",
+          "application_logs"
+        ]
+      },
+      "detection": {
+        "capability": "hybrid",
+        "detectors": [
+          {
+            "id": "repo-transitive-tool-access",
+            "params": {
+              "hint": "Build or ingest a capability graph; require exercise deny on unauthorized effective paths (measuredAt ≤90 days). Inferred-only paths cannot unlock PASS.\n"
+            }
+          },
+          {
+            "id": "repo-agent-capability-graph",
+            "params": {
+              "hint": "Emit agent-capability-graph.json from inventory/repo/import. Graph output is operational evidence only and cannot unlock PASS.\n"
+            }
+          },
+          {
+            "id": "manual-attest",
+            "params": {
+              "hint": "If automation cannot prove coverage, attest graph plus deny exercises (measuredAt ≤90 days) or N/A if no tools/MCP/delegation.\n"
+            }
+          }
+        ]
+      },
+      "manualVerification": "1) Confirm tools, MCP, or delegation exist. If none, score NOT_APPLICABLE. 2) Open the capability graph and charter data scope. 3) Identify derived paths to data stores and APIs. 4) Review deny exercises on unauthorized hops. 5) PASS only with exercise or runtime deny. Inferred graph edges alone do not PASS. Per-agent allowlists alone do not prove effective access.\n",
+      "falsePositiveGuidance": "Do not pass because a graph file exists without provenance. Do not treat inferred MCP hops as independently verified. Do not pass connectivity allowlists without mapping to charter scope. Named exceptions need owner and expiry ≤90 days.\n",
+      "recommendedFixes": [
+        "Narrow MCP and tool grants to charter data scope",
+        "Add deny tests on data stores reachable only through tool chains",
+        "Record graph provenance to evidence-graph nodes",
+        "Retain packs under imports/transitive-tool-access/ and agent-capability-graph.json"
+      ],
+      "references": [
+        {
+          "title": "OWASP Top 10 for LLM Applications — LLM06 Excessive Agency",
+          "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/"
+        },
+        {
+          "title": "Model Context Protocol — security considerations",
+          "url": "https://modelcontextprotocol.io/"
+        }
+      ],
+      "relatedRules": [
+        "TOL-M1",
+        "TOL-M2",
+        "AGN-M1",
+        "INF-M3",
+        "AUTHZ-M3"
+      ],
+      "tags": [
+        "tool-safety",
+        "mandatory",
+        "hybrid",
+        "mcp",
+        "capability-graph"
+      ],
+      "applicability": {
+        "technologies": [],
+        "minCriticality": 2,
+        "requiredFromLevel": 3
+      },
+      "status": "active",
+      "introducedIn": "0.11.0"
     },
     {
       "id": "TOL-R1",
@@ -19458,6 +19918,27 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       },
       "mappingRationale": "Authenticating the peer agent prevents an attacker-controlled or spoofed agent from being trusted inside a workflow. Scoping the delegated capability stops privilege from accumulating as a task is handed between agents."
     },
+    "AGN-M5": {
+      "securityIntent": "Ensure production tool and MCP side effects cannot execute outside the declared harness.",
+      "threats": [
+        "Unauthorized Tool Use",
+        "Excessive Agency",
+        "Tool Abuse"
+      ],
+      "protects": [
+        "Tools",
+        "Runtime",
+        "External Systems"
+      ],
+      "mitre": {
+        "atlas": [
+          "AML.T0053",
+          "AML.T0086"
+        ],
+        "attack": []
+      },
+      "mappingRationale": "Policy engines only constrain traffic they see. Exercises that deny out-of-band invocation close the path that otherwise turns a gated gateway into optional middleware."
+    },
     "AGN-R1": {
       "securityIntent": "Detect conflicting or policy-violating agent goals before a plan is allowed to execute.",
       "threats": [
@@ -20931,6 +21412,24 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       },
       "mappingRationale": "Shadow comparison exposes regressions under the real traffic distribution, which curated suites do not reproduce. It reduces release risk; no adversary technique maps."
     },
+    "EVL-M5": {
+      "securityIntent": "Require independently verifiable agent evals so security and task success are not self-attested.",
+      "threats": [
+        "Prompt Injection",
+        "Unauthorized Tool Use",
+        "Misinformation"
+      ],
+      "protects": [
+        "Safety",
+        "Tools",
+        "Users"
+      ],
+      "mitre": {
+        "atlas": [],
+        "attack": []
+      },
+      "mappingRationale": "Agent self-report and LLM-as-judge-only security cases cannot prove authorization. Versioned datasets, tool-use cases, and deterministic oracles keep evaluation from becoming theater."
+    },
     "EVL-R1": {
       "securityIntent": "Ensure adversarial robustness is measured on its own and not averaged away by aggregate quality scores.",
       "threats": [
@@ -21188,6 +21687,28 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         ]
       },
       "mappingRationale": "Dual control defeats both a single compromised approver and a single manipulated agent path, because two independent principals must agree. It is reserved for irreversible actions precisely because no recovery exists after the fact."
+    },
+    "HUM-M5": {
+      "securityIntent": "Prevent replayed, expired, or agent-issued approvals from authorizing high-impact actions.",
+      "threats": [
+        "Privilege Escalation",
+        "Excessive Agency",
+        "Unauthorized Tool Use"
+      ],
+      "protects": [
+        "External Systems",
+        "Tools",
+        "Safety",
+        "Audit Trail"
+      ],
+      "mitre": {
+        "atlas": [
+          "AML.T0053",
+          "AML.T0086"
+        ],
+        "attack": []
+      },
+      "mappingRationale": "A captured or self-issued approval token bypasses the human gate without using an alternate API. Binding actor, arguments, expiry, and nonce makes replay and self-approval fail at the execution layer."
     },
     "HUM-R1": {
       "securityIntent": "Give approvers the context needed to make approval a real decision rather than a reflex.",
@@ -21792,6 +22313,24 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       },
       "mappingRationale": "AI traces routinely capture full prompts, retrieved documents, and tool arguments including credentials, then replicate them into log stores with far broader access than the secrets manager. Redaction at ingest prevents observability from becoming the softest credential target in the system."
     },
+    "OBS-M3": {
+      "securityIntent": "Make agent runs reconstructable from traces without retaining unnecessary sensitive payloads.",
+      "threats": [
+        "Repudiation",
+        "Unauthorized Tool Use",
+        "Agent Hijacking"
+      ],
+      "protects": [
+        "Audit Trail",
+        "Logs",
+        "Runtime"
+      ],
+      "mitre": {
+        "atlas": [],
+        "attack": []
+      },
+      "mappingRationale": "Linkage coverage without agent identity, authz, approval, or termination reason cannot reconstruct an incident. Required attributes plus redaction keep forensics usable without creating a second secrets store."
+    },
     "OBS-R1": {
       "securityIntent": "Enable safe reproduction of failed AI interactions without exposing production data.",
       "threats": [
@@ -22391,6 +22930,27 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "attack": []
       },
       "mappingRationale": "RTO and RPO targets are what make backup and failover design decisions testable rather than aspirational. This is continuity planning with no adversary technique mapping."
+    },
+    "REL-M9": {
+      "securityIntent": "Prevent retries and recovery from duplicating non-idempotent or irreversible tool side effects.",
+      "threats": [
+        "Hallucinated Actions",
+        "Excessive Agency",
+        "Denial of Wallet"
+      ],
+      "protects": [
+        "External Systems",
+        "Data",
+        "Cost",
+        "Safety"
+      ],
+      "mitre": {
+        "atlas": [
+          "AML.T0101"
+        ],
+        "attack": []
+      },
+      "mappingRationale": "Bounded retries still duplicate payments and deletes unless tools are classified and replay-safe. Exercises that forbid duplicate commits close that recovery gap."
     },
     "REL-R1": {
       "securityIntent": "Stop a failing AI provider from cascading into total service failure.",
@@ -23036,6 +23596,31 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       },
       "mappingRationale": "Tool descriptions are read directly into the model's context, which makes a modified catalog both a supply-chain compromise and a prompt-injection vector. Signing and reviewing catalogs detects silent redefinition of a tool after it was approved."
     },
+    "TOL-M6": {
+      "securityIntent": "Constrain an agent's effective data and API access including transitive MCP and tool hops.",
+      "threats": [
+        "Privilege Escalation",
+        "Data Exfiltration",
+        "Unauthorized Tool Use",
+        "Excessive Agency"
+      ],
+      "protects": [
+        "Data",
+        "Tools",
+        "APIs",
+        "External Systems"
+      ],
+      "mitre": {
+        "atlas": [
+          "AML.T0012",
+          "AML.T0053"
+        ],
+        "attack": [
+          "T1078"
+        ]
+      },
+      "mappingRationale": "Direct allowlists miss confused-deputy paths through MCP servers and internal APIs. Mapping those hops and denying unauthorized ones is what makes charter data scope enforceable."
+    },
     "TOL-R1": {
       "securityIntent": "Let destructive tool behaviour be validated without producing irreversible effects.",
       "threats": [
@@ -23275,6 +23860,332 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "emitters": [
           "agent-charter-inventory"
         ]
+      },
+      {
+        "id": "agent.inventory.normalized",
+        "kind": "artifact",
+        "defaultTier": "E2",
+        "description": "Normalized versioned agent inventory artifact was written for this assessment.",
+        "evidenceTypes": [
+          "agent_inventory_record"
+        ],
+        "emitters": [
+          "agent-charter-inventory"
+        ]
+      },
+      {
+        "id": "agent.discovery.runtime_observed",
+        "kind": "behavioral",
+        "defaultTier": "E4",
+        "description": "At least one inventory row is classified runtime-observed from logs, traces, or a live registry.",
+        "evidenceTypes": [
+          "application_logs"
+        ],
+        "emitters": [
+          "agent-charter-inventory"
+        ]
+      },
+      {
+        "id": "agent.discovery.unverified_only",
+        "kind": "inferred",
+        "defaultTier": "E2",
+        "description": "Agent rows exist only as declared or heuristically discovered records without runtime or independent verification.",
+        "evidenceTypes": [
+          "repo_signal"
+        ],
+        "emitters": [
+          "agent-charter-inventory"
+        ]
+      },
+      {
+        "id": "agent.graph.edge_direct",
+        "kind": "config",
+        "defaultTier": "E3",
+        "description": "Capability graph contains at least one direct relationship with evidence provenance.",
+        "evidenceTypes": [
+          "agent_capability_graph"
+        ],
+        "emitters": [
+          "agent-capability-graph"
+        ]
+      },
+      {
+        "id": "agent.graph.path_transitive",
+        "kind": "inferred",
+        "defaultTier": "E2",
+        "description": "Capability graph derived a transitive path (inferred unless every hop is behavioral or exercise).",
+        "evidenceTypes": [
+          "agent_capability_graph"
+        ],
+        "emitters": [
+          "agent-capability-graph"
+        ]
+      },
+      {
+        "id": "agent.graph.path_transitive_exercised",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "A transitive capability path was confirmed or denied by an exercise pack.",
+        "evidenceTypes": [
+          "harness_exercise_report"
+        ],
+        "emitters": [
+          "transitive-tool-access"
+        ]
+      },
+      {
+        "id": "harness.bypass.attempt_denied",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Harness-integrity exercise denied out-of-band or unregistered tool invocation.",
+        "evidenceTypes": [
+          "harness_exercise_report"
+        ],
+        "emitters": [
+          "harness-integrity"
+        ]
+      },
+      {
+        "id": "harness.bypass.attempt_succeeded",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Harness-integrity exercise observed a successful out-of-band or unregistered tool invocation.",
+        "evidenceTypes": [
+          "harness_exercise_report"
+        ],
+        "emitters": [
+          "harness-integrity"
+        ]
+      },
+      {
+        "id": "harness.out_of_band.invoke",
+        "kind": "behavioral",
+        "defaultTier": "E4",
+        "description": "Runtime traces show tool invocation outside the declared harness.",
+        "evidenceTypes": [
+          "application_logs"
+        ],
+        "emitters": [
+          "harness-integrity"
+        ]
+      },
+      {
+        "id": "mcp.confused_deputy.path",
+        "kind": "inferred",
+        "defaultTier": "E2",
+        "description": "Graph analysis infers an agent can reach a data store or API through MCP or tool hops outside charter scope.",
+        "evidenceTypes": [
+          "agent_capability_graph"
+        ],
+        "emitters": [
+          "agent-capability-graph"
+        ]
+      },
+      {
+        "id": "tool.unauthorized.denied",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Unauthorized tool or data-path invocation was denied in exercise.",
+        "evidenceTypes": [
+          "harness_exercise_report"
+        ],
+        "emitters": [
+          "transitive-tool-access"
+        ]
+      },
+      {
+        "id": "tool.unauthorized.succeeded",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Unauthorized tool or data-path invocation succeeded in exercise.",
+        "evidenceTypes": [
+          "harness_exercise_report"
+        ],
+        "emitters": [
+          "transitive-tool-access"
+        ]
+      },
+      {
+        "id": "agent.graph.memory_hop",
+        "kind": "inferred",
+        "defaultTier": "E2",
+        "description": "Graph analysis infers a path that includes a memory store.",
+        "evidenceTypes": [
+          "agent_capability_graph"
+        ],
+        "emitters": [
+          "agent-capability-graph"
+        ]
+      },
+      {
+        "id": "agent.graph.edge_delegated",
+        "kind": "config",
+        "defaultTier": "E2",
+        "description": "Inventory or graph records an agent_delegates_to or delegated access edge.",
+        "evidenceTypes": [
+          "agent_capability_graph"
+        ],
+        "emitters": [
+          "agent-capability-graph"
+        ]
+      },
+      {
+        "id": "tool.dynamic_register.denied",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Unauthorized dynamic tool registration was denied in exercise.",
+        "evidenceTypes": [
+          "harness_exercise_report"
+        ],
+        "emitters": [
+          "harness-integrity"
+        ]
+      },
+      {
+        "id": "approval.replay.denied",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Replayed or expired approval tokens were denied in exercise.",
+        "evidenceTypes": [
+          "harness_exercise_report"
+        ],
+        "emitters": [
+          "approval-replay"
+        ]
+      },
+      {
+        "id": "approval.self.denied",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Agent-identity self-approval of a restricted action was denied in exercise.",
+        "evidenceTypes": [
+          "harness_exercise_report"
+        ],
+        "emitters": [
+          "approval-replay"
+        ]
+      },
+      {
+        "id": "approval.replay.succeeded",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Replayed approval or self-approval succeeded in exercise.",
+        "evidenceTypes": [
+          "harness_exercise_report"
+        ],
+        "emitters": [
+          "approval-replay"
+        ]
+      },
+      {
+        "id": "eval.dataset.versioned",
+        "kind": "artifact",
+        "defaultTier": "E2",
+        "description": "Versioned evaluation dataset manifests are present.",
+        "evidenceTypes": [
+          "eval_dataset_manifest"
+        ],
+        "emitters": [
+          "eval-methodology"
+        ]
+      },
+      {
+        "id": "eval.security.llm_judge_only",
+        "kind": "artifact",
+        "defaultTier": "E2",
+        "description": "Security or access-control eval cases are scored only by an LLM judge.",
+        "evidenceTypes": [
+          "eval_dataset_manifest"
+        ],
+        "emitters": [
+          "eval-methodology"
+        ]
+      },
+      {
+        "id": "eval.run.linked_to_agent_version",
+        "kind": "process",
+        "defaultTier": "E3",
+        "description": "Eval runs are linked to production agent versions in CI or process evidence.",
+        "evidenceTypes": [
+          "eval_run_report"
+        ],
+        "emitters": [
+          "eval-methodology"
+        ]
+      },
+      {
+        "id": "obs.agent_run.attributes_complete",
+        "kind": "behavioral",
+        "defaultTier": "E4",
+        "description": "Sampled traces include reconstructable agent-run attributes at the Check coverage floor.",
+        "evidenceTypes": [
+          "agent_trace_sample"
+        ],
+        "emitters": [
+          "agent-trace-attributes"
+        ]
+      },
+      {
+        "id": "rel.non_idempotent.duplicate_commit",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Retry or resume duplicated a non-idempotent or irreversible side effect in exercise.",
+        "evidenceTypes": [
+          "idempotency_exercise_report"
+        ],
+        "emitters": [
+          "non-idempotent-retry"
+        ]
+      },
+      {
+        "id": "injection.tool.unauthorized_invoke",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Untrusted content caused an agent to invoke a tool the user or charter did not authorize.",
+        "evidenceTypes": [
+          "harness_exercise_report"
+        ],
+        "emitters": [
+          "injection-policy-gate",
+          "multi-turn-indirect-injection-redteam"
+        ]
+      },
+      {
+        "id": "memory.poison.write_accepted",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Writable or shared memory accepted untrusted content that later retrieval could treat as fact.",
+        "evidenceTypes": [
+          "harness_exercise_report"
+        ],
+        "emitters": [
+          "memory-poisoning-evals"
+        ]
+      },
+      {
+        "id": "tool.result.treated_as_instruction",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Untrusted tool or MCP output was treated as instruction or trusted fact by a downstream agent.",
+        "evidenceTypes": [
+          "harness_exercise_report"
+        ],
+        "emitters": [
+          "eval-methodology",
+          "injection-policy-gate"
+        ]
+      },
+      {
+        "id": "agent.loop.continue_after_abort",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Agent execution continued after a configured loop, step, time, or spend bound abort.",
+        "evidenceTypes": [
+          "application_logs"
+        ],
+        "emitters": [
+          "agent-loop-limits"
+        ]
       }
     ]
   },
@@ -23347,17 +24258,468 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "role": "supporting"
         }
       ]
+    },
+    "THR-excessive-tool-privileges": {
+      "title": "Excessive tool privileges",
+      "severityHint": "high",
+      "description": "An agent can invoke tools or reach data beyond its charter through over-broad allowlists or unchartered transitive hops.\n",
+      "displayThreats": [
+        "Excessive Agency",
+        "Unauthorized Tool Use",
+        "Tool Abuse"
+      ],
+      "indicators": [
+        {
+          "signal": "mcp.confused_deputy.path"
+        }
+      ],
+      "mitigations": [
+        {
+          "checkId": "TOL-M2",
+          "role": "primary"
+        },
+        {
+          "checkId": "TOL-M6",
+          "role": "primary"
+        },
+        {
+          "checkId": "TOL-M3",
+          "role": "supporting"
+        },
+        {
+          "checkId": "AUTHZ-M3",
+          "role": "supporting"
+        }
+      ]
+    },
+    "THR-confused-deputy-mcp": {
+      "title": "Confused deputy through MCP",
+      "severityHint": "critical",
+      "description": "An agent inherits internal API or database access through an MCP server or tool chain without a direct database integration.\n",
+      "displayThreats": [
+        "Privilege Escalation",
+        "Unauthorized Tool Use",
+        "Data Exfiltration"
+      ],
+      "indicators": [
+        {
+          "signal": "mcp.confused_deputy.path"
+        }
+      ],
+      "mitigations": [
+        {
+          "checkId": "TOL-M6",
+          "role": "primary"
+        },
+        {
+          "checkId": "TOL-M1",
+          "role": "supporting"
+        },
+        {
+          "checkId": "AGN-M1",
+          "role": "supporting"
+        },
+        {
+          "checkId": "INF-M3",
+          "role": "supporting"
+        }
+      ]
+    },
+    "THR-injection-tool-exec": {
+      "title": "Prompt injection to unauthorized tool execution",
+      "severityHint": "critical",
+      "description": "Untrusted content causes an agent to invoke tools the user or charter did not authorize.\n",
+      "displayThreats": [
+        "Prompt Injection",
+        "Unauthorized Tool Use",
+        "Excessive Agency"
+      ],
+      "indicators": [
+        {
+          "signal": "injection.tool.unauthorized_invoke"
+        }
+      ],
+      "mitigations": [
+        {
+          "checkId": "SEC-M1",
+          "role": "primary"
+        },
+        {
+          "checkId": "TOL-M1",
+          "role": "primary"
+        },
+        {
+          "checkId": "CTX-M2",
+          "role": "supporting"
+        },
+        {
+          "checkId": "AGN-M5",
+          "role": "supporting"
+        }
+      ]
+    },
+    "THR-delegated-privilege-escalation": {
+      "title": "Compromised agent delegating privileges",
+      "severityHint": "critical",
+      "description": "A peer handoff or child agent receives a broader capability set than the caller was granted.\n",
+      "displayThreats": [
+        "Privilege Escalation",
+        "Agent Hijacking",
+        "Unauthorized Tool Use"
+      ],
+      "indicators": [
+        {
+          "signal": "agent.graph.edge_delegated"
+        }
+      ],
+      "mitigations": [
+        {
+          "checkId": "AGN-M4",
+          "role": "primary"
+        },
+        {
+          "checkId": "TOL-M6",
+          "role": "supporting"
+        },
+        {
+          "checkId": "AUTHZ-M3",
+          "role": "supporting"
+        }
+      ]
+    },
+    "THR-memory-poisoning": {
+      "title": "Memory poisoning of future decisions",
+      "severityHint": "high",
+      "description": "Writable or shared memory accepts untrusted content that later retrieval treats as trusted fact.\n",
+      "displayThreats": [
+        "Memory Poisoning",
+        "Prompt Injection",
+        "Data and Model Poisoning"
+      ],
+      "indicators": [
+        {
+          "signal": "memory.poison.write_accepted"
+        }
+      ],
+      "mitigations": [
+        {
+          "checkId": "MEM-M3",
+          "role": "primary"
+        },
+        {
+          "checkId": "MEM-R1",
+          "role": "primary"
+        },
+        {
+          "checkId": "MEM-M1",
+          "role": "supporting"
+        },
+        {
+          "checkId": "SEC-M1",
+          "role": "supporting"
+        }
+      ]
+    },
+    "THR-cross-tenant-memory": {
+      "title": "Cross-tenant memory leakage",
+      "severityHint": "critical",
+      "description": "Memory retrieval or writes cross tenant (or required user) isolation boundaries.\n",
+      "displayThreats": [
+        "Unauthorized Memory Access",
+        "Sensitive Information Disclosure",
+        "Data Exfiltration"
+      ],
+      "indicators": [
+        {
+          "signal": "agent.graph.memory_hop"
+        }
+      ],
+      "mitigations": [
+        {
+          "checkId": "MEM-M1",
+          "role": "primary"
+        },
+        {
+          "checkId": "PRI-M1",
+          "role": "supporting"
+        }
+      ]
+    },
+    "THR-harness-bypass": {
+      "title": "Harness bypass",
+      "severityHint": "critical",
+      "description": "Tools or MCP side effects execute outside the declared harness, with disabled middleware, or via unauthorized dynamic registration.\n",
+      "displayThreats": [
+        "Unauthorized Tool Use",
+        "Excessive Agency",
+        "Tool Abuse"
+      ],
+      "indicators": [
+        {
+          "signal": "harness.bypass.attempt_succeeded"
+        },
+        {
+          "signal": "harness.out_of_band.invoke"
+        }
+      ],
+      "mitigations": [
+        {
+          "checkId": "AGN-M5",
+          "role": "primary"
+        },
+        {
+          "checkId": "HUM-M3",
+          "role": "supporting"
+        },
+        {
+          "checkId": "TOL-M1",
+          "role": "supporting"
+        }
+      ]
+    },
+    "THR-agent-resource-exhaustion": {
+      "title": "Agent execution loop resource exhaustion",
+      "severityHint": "high",
+      "description": "Unbounded agent loops, retries, or tool calls exhaust compute, tokens, or spend.\n",
+      "displayThreats": [
+        "Denial of Wallet",
+        "Denial of Service",
+        "Excessive Agency"
+      ],
+      "indicators": [
+        {
+          "signal": "agent.loop.continue_after_abort"
+        }
+      ],
+      "mitigations": [
+        {
+          "checkId": "AGN-M2",
+          "role": "primary"
+        },
+        {
+          "checkId": "COST-M3",
+          "role": "primary"
+        },
+        {
+          "checkId": "AGN-M3",
+          "role": "supporting"
+        }
+      ]
+    },
+    "THR-tool-exfiltration": {
+      "title": "Unauthorized data exfiltration through tools",
+      "severityHint": "critical",
+      "description": "Tool or MCP hops send data to destinations outside the charter or approved egress set.\n",
+      "displayThreats": [
+        "Data Exfiltration",
+        "Unauthorized Tool Use",
+        "Sensitive Information Disclosure"
+      ],
+      "indicators": [
+        {
+          "signal": "mcp.confused_deputy.path"
+        }
+      ],
+      "mitigations": [
+        {
+          "checkId": "TOL-M6",
+          "role": "primary"
+        },
+        {
+          "checkId": "INF-M3",
+          "role": "primary"
+        },
+        {
+          "checkId": "SEC-M1",
+          "role": "supporting"
+        },
+        {
+          "checkId": "OBS-M3",
+          "role": "supporting"
+        }
+      ]
+    },
+    "THR-approval-bypass": {
+      "title": "Approval workflow bypass",
+      "severityHint": "critical",
+      "description": "High-impact actions complete via replayed tokens, self-approval, or alternate ungated paths.\n",
+      "displayThreats": [
+        "Privilege Escalation",
+        "Excessive Agency",
+        "Unauthorized Tool Use"
+      ],
+      "indicators": [
+        {
+          "signal": "approval.replay.succeeded"
+        }
+      ],
+      "mitigations": [
+        {
+          "checkId": "HUM-M5",
+          "role": "primary"
+        },
+        {
+          "checkId": "HUM-M3",
+          "role": "primary"
+        },
+        {
+          "checkId": "HUM-M1",
+          "role": "supporting"
+        }
+      ]
+    },
+    "THR-malicious-tool-result": {
+      "title": "Malicious tool result influencing downstream agents",
+      "severityHint": "high",
+      "description": "Untrusted tool or MCP output is treated as instruction or trusted fact by a downstream agent.\n",
+      "displayThreats": [
+        "Prompt Injection",
+        "Agent Hijacking",
+        "Tool Abuse"
+      ],
+      "indicators": [
+        {
+          "signal": "tool.result.treated_as_instruction"
+        }
+      ],
+      "mitigations": [
+        {
+          "checkId": "CTX-M2",
+          "role": "primary"
+        },
+        {
+          "checkId": "EVL-M5",
+          "role": "supporting"
+        },
+        {
+          "checkId": "AGN-M4",
+          "role": "supporting"
+        },
+        {
+          "checkId": "TOL-M4",
+          "role": "supporting"
+        }
+      ]
+    },
+    "THR-untrusted-a2a": {
+      "title": "Untrusted agent-to-agent communication",
+      "severityHint": "critical",
+      "description": "Multi-agent handoffs accept anonymous, network-presence-only, or over-scoped peers.\n",
+      "displayThreats": [
+        "Identity Spoofing",
+        "Agent Hijacking",
+        "Privilege Escalation"
+      ],
+      "indicators": [
+        {
+          "signal": "agent.graph.edge_delegated"
+        }
+      ],
+      "mitigations": [
+        {
+          "checkId": "AGN-M4",
+          "role": "primary"
+        },
+        {
+          "checkId": "AUTHN-M2",
+          "role": "supporting"
+        }
+      ]
     }
   },
   "checkThreatIndex": {
     "AGN-M1": [
+      "THR-confused-deputy-mcp",
       "THR-shadow-agents"
     ],
     "AGN-M2": [
+      "THR-agent-resource-exhaustion",
       "THR-shadow-agents"
     ],
     "AGN-M3": [
+      "THR-agent-resource-exhaustion",
       "THR-shadow-agents"
+    ],
+    "TOL-M2": [
+      "THR-excessive-tool-privileges"
+    ],
+    "TOL-M6": [
+      "THR-confused-deputy-mcp",
+      "THR-delegated-privilege-escalation",
+      "THR-excessive-tool-privileges",
+      "THR-tool-exfiltration"
+    ],
+    "TOL-M3": [
+      "THR-excessive-tool-privileges"
+    ],
+    "AUTHZ-M3": [
+      "THR-delegated-privilege-escalation",
+      "THR-excessive-tool-privileges"
+    ],
+    "TOL-M1": [
+      "THR-confused-deputy-mcp",
+      "THR-harness-bypass",
+      "THR-injection-tool-exec"
+    ],
+    "INF-M3": [
+      "THR-confused-deputy-mcp",
+      "THR-tool-exfiltration"
+    ],
+    "SEC-M1": [
+      "THR-injection-tool-exec",
+      "THR-memory-poisoning",
+      "THR-tool-exfiltration"
+    ],
+    "CTX-M2": [
+      "THR-injection-tool-exec",
+      "THR-malicious-tool-result"
+    ],
+    "AGN-M5": [
+      "THR-harness-bypass",
+      "THR-injection-tool-exec"
+    ],
+    "AGN-M4": [
+      "THR-delegated-privilege-escalation",
+      "THR-malicious-tool-result",
+      "THR-untrusted-a2a"
+    ],
+    "MEM-M3": [
+      "THR-memory-poisoning"
+    ],
+    "MEM-R1": [
+      "THR-memory-poisoning"
+    ],
+    "MEM-M1": [
+      "THR-cross-tenant-memory",
+      "THR-memory-poisoning"
+    ],
+    "PRI-M1": [
+      "THR-cross-tenant-memory"
+    ],
+    "HUM-M3": [
+      "THR-approval-bypass",
+      "THR-harness-bypass"
+    ],
+    "COST-M3": [
+      "THR-agent-resource-exhaustion"
+    ],
+    "OBS-M3": [
+      "THR-tool-exfiltration"
+    ],
+    "HUM-M5": [
+      "THR-approval-bypass"
+    ],
+    "HUM-M1": [
+      "THR-approval-bypass"
+    ],
+    "EVL-M5": [
+      "THR-malicious-tool-result"
+    ],
+    "TOL-M4": [
+      "THR-malicious-tool-result"
+    ],
+    "AUTHN-M2": [
+      "THR-untrusted-a2a"
     ]
   }
 } as GeneratedCatalog;

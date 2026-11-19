@@ -1,0 +1,88 @@
+id: "EVL-M5"
+category: "evaluation"
+title: "Production agent versions must have independent eval methodology"
+description: >
+  Each production agent version shall be linked to versioned eval datasets and
+  runs covering independently verifiable task-success criteria (not agent
+  self-report), tool-use correctness where tools exist, and—when model-based
+  judging is used—an explicit rubric, versioned judge prompt, model
+  identification, calibration or human-reviewed sample, and a prohibition on
+  using an LLM judge as the sole oracle for access-control or security
+  enforcement. This Check does not introduce an overall eval quality score.
+whyItMatters: >
+  Offline suites with numeric gates can still accept the agent's own "done"
+  flag, skip tool-use failures, or let an uncalibrated judge bless security
+  cases. Independent oracles keep evaluation from becoming self-attestation.
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: >
+  Every in-scope production agent version maps to versioned eval datasets and
+  runs; task-success criteria are independently verifiable (not agent
+  self-report); tool-using agents have tool-use cases; if an LLM judge is used
+  it has a rubric, versioned prompt, model id, and human sample; access-control
+  and security cases use deterministic, schema, or exercise oracles rather than
+  an LLM judge alone (evidence measuredAt ≤90 days). If no production agents
+  exist, score NOT_APPLICABLE.
+evidenceRequired:
+  - "Versioned eval dataset manifests with owners and provenance"
+  - "Eval run reports linked to agent versions"
+  - "Independent task-success criteria (schema, ground truth, human, or deterministic oracles)"
+  - "Tool-use cases when tools exist; LLM-judge rubric pack if used; security cases without LLM-judge-only oracles"
+evidencePolicy:
+  minimumTier: E4
+  acceptableEvidence:
+    - eval_dataset_manifest
+    - eval_run_report
+    - harness_exercise_report
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-eval-methodology"
+      params:
+        hint: >
+          Discover versioned datasets and agent-version-linked runs; ingest
+          imports/eval-methodology/. Security cases judged only by an LLM
+          cannot PASS.
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest dataset versions, linked
+          runs, independent success criteria, and non-LLM security oracles
+          (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm production agents exist. If none, score NOT_APPLICABLE. 2) Map
+  each agent version to versioned datasets and runs. 3) Confirm success is not
+  the agent's self-report. 4) Confirm tool-use cases when tools exist. 5) If
+  LLM-as-judge is used, review rubric, prompt version, model id, and human
+  sample. 6) Confirm security/authz cases use deterministic or exercise
+  oracles. Presence of an offline suite without agent-version linkage does not
+  PASS. Numeric release thresholds without independent oracles do not PASS.
+falsePositiveGuidance: >
+  Do not pass volume of test cases as quality. Do not pass fabricated or
+  undated eval reports. Do not pass LLM-judge-only access-control tests.
+  Named exceptions need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Version datasets and pin runs to agent versions in CI"
+  - "Replace self-reported success with schema, ground-truth, or human oracles"
+  - "Add tool-use and unauthorized-attempt cases"
+  - "Keep security evals on deterministic/exercise oracles"
+references:
+  - title: "NIST AI Risk Management Framework — Measure"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "EVL-M1"
+  - "EVL-M2"
+  - "EVL-R1"
+  - "AGN-M1"
+tags:
+  - "evaluation"
+  - "mandatory"
+  - "hybrid"
+  - "agents"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.11.0"

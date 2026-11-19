@@ -75,6 +75,9 @@
   "repo-agent-behavior-feature-flags": [
     "agent-behavior-feature-flags"
   ],
+  "repo-agent-capability-graph": [
+    "agent-capability-graph"
+  ],
   "repo-agent-charter-inventory": [
     "agent-charter-inventory"
   ],
@@ -92,6 +95,9 @@
   ],
   "repo-agent-tool-connectivity": [
     "agent-tool-connectivity"
+  ],
+  "repo-agent-trace-attributes": [
+    "agent-trace-attributes"
   ],
   "repo-ai-acceptable-use-policy": [
     "ai-acceptable-use-policy"
@@ -312,6 +318,9 @@
   "repo-approval-queue-sla": [
     "human-approval-sla"
   ],
+  "repo-approval-replay": [
+    "approval-replay"
+  ],
   "repo-approval-ui-context": [
     "human-approval-ui"
   ],
@@ -378,6 +387,9 @@
   "repo-eval-human-review": [
     "eval-human-review"
   ],
+  "repo-eval-methodology": [
+    "eval-methodology"
+  ],
   "repo-eval-online-signals": [
     "eval-online-signals"
   ],
@@ -401,6 +413,9 @@
   ],
   "repo-golden-path-docs": [
     "platform-golden-path"
+  ],
+  "repo-harness-integrity": [
+    "harness-integrity"
   ],
   "repo-high-impact-tool-gates": [
     "high-impact-tool-gates"
@@ -479,6 +494,9 @@
   ],
   "repo-multimodal-input-scan": [
     "multimodal-input-scan"
+  ],
+  "repo-non-idempotent-retry": [
+    "non-idempotent-retry"
   ],
   "repo-one-click-ai-rollback": [
     "one-click-ai-rollback"
@@ -572,6 +590,9 @@
   ],
   "repo-train-serve-skew": [
     "train-serve-skew-monitor"
+  ],
+  "repo-transitive-tool-access": [
+    "transitive-tool-access"
   ],
   "repo-vendor-model-terms": [
     "vendor-model-terms"

@@ -1,0 +1,26 @@
+id: agent-trace-attributes
+title: Reconstructable agent-run traces (OBS-M3)
+version: "0.1.0"
+executor: collectors/rfc0015-collectors.ts
+evidenceClass: runtime
+emitsEvidenceTier: E4
+detectorIds: [repo-agent-trace-attributes]
+inputs:
+  - "Target repo (OTel / agent span conventions)"
+  - "Optional pack: aprf-assessment/imports/agent-trace-attributes/*.json"
+collect:
+  - "Detect agent-run trace attribute signals"
+  - "Ingest coverage pct; write agent-trace-attributes-report.json"
+emits:
+  nodeClass: runtime
+  refPattern: "aprf-assessment/imports/agent-trace-attributes/*"
+  signals: [agent-trace-attributes, obs-m3, repo-agent-trace-attributes]
+mapsToChecks: [OBS-M3]
+whenUnavailable: >
+  Repo signals are PARTIAL. OBS-M3 PASS needs ≥1 trace sample,
+  reconstructableAttributeCoveragePct>=95 and
+  redactionConsistentWithSensitiveFieldPolicy=true, measuredAt ≤90 days.
+  productionAgentRequestPathPresent=false → NOT_APPLICABLE when no repo surface.
+live:
+  required: false
+  note: Offline heuristics + imported trace samples.

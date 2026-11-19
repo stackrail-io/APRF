@@ -1,0 +1,78 @@
+id: "OBS-M3"
+category: "observability"
+title: "Sampled agent runs must be reconstructable from traces"
+description: >
+  Sampled production or canary traces shall allow reconstruction of an agent
+  run without retaining unnecessary sensitive prompt or customer payload:
+  agent id, agent version, run id, parent run id, model identifier,
+  prompt/configuration version, tool invocation, redacted tool arguments and
+  results, authorization decision, human approval reference, memory retrieval
+  reference, duration, token consumption, error details, and termination
+  reason. Distinct from request-to-model-to-tool linkage coverage.
+whyItMatters: >
+  Linkage without run identity, authz decisions, approvals, or termination
+  reason leaves incidents as log archaeology. Reconstruction must not dump raw
+  prompts or customer data into default retention.
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: >
+  Canary or sampled traces show the required reconstructable agent-run
+  attributes on ≥95% of in-scope canary runs over 24 hours, with redaction
+  consistent with sensitive-field controls (trace evidence measuredAt ≤90
+  days). If no production agent request path is in scope, score NOT_APPLICABLE.
+evidenceRequired:
+  - "Trace schema or semantic convention listing required agent-run attributes"
+  - "Canary or 24h sampled traces (redacted) showing ≥95% attribute completeness"
+evidencePolicy:
+  minimumTier: E4
+  acceptableEvidence:
+    - agent_trace_sample
+    - application_logs
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-agent-trace-attributes"
+      params:
+        hint: >
+          Discover agent-span conventions; ingest imports/agent-trace-attributes/
+          requiring reconstructableAttributeCoveragePct=95 (measuredAt ≤90 days).
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest canary traces with
+          required attributes at ≥95% (measuredAt ≤90 days).
+manualVerification: >
+  1) Confirm a production agent request path exists. If none, score
+  NOT_APPLICABLE. 2) Review the trace schema. 3) Sample canary traces for
+  required fields. 4) Confirm redaction of sensitive payloads. 5) PASS only at
+  ≥95% completeness with measuredAt ≤90 days. Request-to-tool linkage
+  coverage without agent-run attributes does not PASS.
+falsePositiveGuidance: >
+  Do not pass OpenTelemetry config without sampled traces. Do not require raw
+  prompts in default retention. Named exceptions need owner and expiry ≤90
+  days.
+recommendedFixes:
+  - "Adopt agent-run semantic conventions on spans"
+  - "Record authz, approval, memory-ref, and termination reason"
+  - "Redact tool args/results per sensitive-field policy"
+  - "Retain redacted samples under imports/agent-trace-attributes/"
+references:
+  - title: "OpenTelemetry — traces"
+    url: "https://opentelemetry.io/docs/concepts/signals/traces/"
+relatedRules:
+  - "OBS-M1"
+  - "OBS-M2"
+  - "AGN-M1"
+  - "HUM-M2"
+tags:
+  - "observability"
+  - "mandatory"
+  - "hybrid"
+  - "agents"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.11.0"

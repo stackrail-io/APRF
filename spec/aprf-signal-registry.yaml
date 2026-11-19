@@ -131,3 +131,192 @@ signals:
     description: Heuristic/stochastic detector suspects undeclared agent runtimes (never confirms alone).
     evidenceTypes: [repo_signal]
     emitters: [agent-charter-inventory]
+
+  - id: agent.inventory.normalized
+    kind: artifact
+    defaultTier: E2
+    description: Normalized versioned agent inventory artifact was written for this assessment.
+    evidenceTypes: [agent_inventory_record]
+    emitters: [agent-charter-inventory]
+
+  - id: agent.discovery.runtime_observed
+    kind: behavioral
+    defaultTier: E4
+    description: At least one inventory row is classified runtime-observed from logs, traces, or a live registry.
+    evidenceTypes: [application_logs]
+    emitters: [agent-charter-inventory]
+
+  - id: agent.discovery.unverified_only
+    kind: inferred
+    defaultTier: E2
+    description: Agent rows exist only as declared or heuristically discovered records without runtime or independent verification.
+    evidenceTypes: [repo_signal]
+    emitters: [agent-charter-inventory]
+
+  - id: agent.graph.edge_direct
+    kind: config
+    defaultTier: E3
+    description: Capability graph contains at least one direct relationship with evidence provenance.
+    evidenceTypes: [agent_capability_graph]
+    emitters: [agent-capability-graph]
+
+  - id: agent.graph.path_transitive
+    kind: inferred
+    defaultTier: E2
+    description: Capability graph derived a transitive path (inferred unless every hop is behavioral or exercise).
+    evidenceTypes: [agent_capability_graph]
+    emitters: [agent-capability-graph]
+
+  - id: agent.graph.path_transitive_exercised
+    kind: exercise
+    defaultTier: E4
+    description: A transitive capability path was confirmed or denied by an exercise pack.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [transitive-tool-access]
+
+  - id: harness.bypass.attempt_denied
+    kind: exercise
+    defaultTier: E4
+    description: Harness-integrity exercise denied out-of-band or unregistered tool invocation.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [harness-integrity]
+
+  - id: harness.bypass.attempt_succeeded
+    kind: exercise
+    defaultTier: E4
+    description: Harness-integrity exercise observed a successful out-of-band or unregistered tool invocation.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [harness-integrity]
+
+  - id: harness.out_of_band.invoke
+    kind: behavioral
+    defaultTier: E4
+    description: Runtime traces show tool invocation outside the declared harness.
+    evidenceTypes: [application_logs]
+    emitters: [harness-integrity]
+
+  - id: mcp.confused_deputy.path
+    kind: inferred
+    defaultTier: E2
+    description: Graph analysis infers an agent can reach a data store or API through MCP or tool hops outside charter scope.
+    evidenceTypes: [agent_capability_graph]
+    emitters: [agent-capability-graph]
+
+  - id: tool.unauthorized.denied
+    kind: exercise
+    defaultTier: E4
+    description: Unauthorized tool or data-path invocation was denied in exercise.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [transitive-tool-access]
+
+  - id: tool.unauthorized.succeeded
+    kind: exercise
+    defaultTier: E4
+    description: Unauthorized tool or data-path invocation succeeded in exercise.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [transitive-tool-access]
+
+  - id: agent.graph.memory_hop
+    kind: inferred
+    defaultTier: E2
+    description: Graph analysis infers a path that includes a memory store.
+    evidenceTypes: [agent_capability_graph]
+    emitters: [agent-capability-graph]
+
+  - id: agent.graph.edge_delegated
+    kind: config
+    defaultTier: E2
+    description: Inventory or graph records an agent_delegates_to or delegated access edge.
+    evidenceTypes: [agent_capability_graph]
+    emitters: [agent-capability-graph]
+
+  - id: tool.dynamic_register.denied
+    kind: exercise
+    defaultTier: E4
+    description: Unauthorized dynamic tool registration was denied in exercise.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [harness-integrity]
+
+  - id: approval.replay.denied
+    kind: exercise
+    defaultTier: E4
+    description: Replayed or expired approval tokens were denied in exercise.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [approval-replay]
+
+  - id: approval.self.denied
+    kind: exercise
+    defaultTier: E4
+    description: Agent-identity self-approval of a restricted action was denied in exercise.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [approval-replay]
+
+  - id: approval.replay.succeeded
+    kind: exercise
+    defaultTier: E4
+    description: Replayed approval or self-approval succeeded in exercise.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [approval-replay]
+
+  - id: eval.dataset.versioned
+    kind: artifact
+    defaultTier: E2
+    description: Versioned evaluation dataset manifests are present.
+    evidenceTypes: [eval_dataset_manifest]
+    emitters: [eval-methodology]
+
+  - id: eval.security.llm_judge_only
+    kind: artifact
+    defaultTier: E2
+    description: Security or access-control eval cases are scored only by an LLM judge.
+    evidenceTypes: [eval_dataset_manifest]
+    emitters: [eval-methodology]
+
+  - id: eval.run.linked_to_agent_version
+    kind: process
+    defaultTier: E3
+    description: Eval runs are linked to production agent versions in CI or process evidence.
+    evidenceTypes: [eval_run_report]
+    emitters: [eval-methodology]
+
+  - id: obs.agent_run.attributes_complete
+    kind: behavioral
+    defaultTier: E4
+    description: Sampled traces include reconstructable agent-run attributes at the Check coverage floor.
+    evidenceTypes: [agent_trace_sample]
+    emitters: [agent-trace-attributes]
+
+  - id: rel.non_idempotent.duplicate_commit
+    kind: exercise
+    defaultTier: E4
+    description: Retry or resume duplicated a non-idempotent or irreversible side effect in exercise.
+    evidenceTypes: [idempotency_exercise_report]
+    emitters: [non-idempotent-retry]
+
+  - id: injection.tool.unauthorized_invoke
+    kind: exercise
+    defaultTier: E4
+    description: Untrusted content caused an agent to invoke a tool the user or charter did not authorize.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [injection-policy-gate, multi-turn-indirect-injection-redteam]
+
+  - id: memory.poison.write_accepted
+    kind: exercise
+    defaultTier: E4
+    description: Writable or shared memory accepted untrusted content that later retrieval could treat as fact.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [memory-poisoning-evals]
+
+  - id: tool.result.treated_as_instruction
+    kind: exercise
+    defaultTier: E4
+    description: Untrusted tool or MCP output was treated as instruction or trusted fact by a downstream agent.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [eval-methodology, injection-policy-gate]
+
+  - id: agent.loop.continue_after_abort
+    kind: exercise
+    defaultTier: E4
+    description: Agent execution continued after a configured loop, step, time, or spend bound abort.
+    evidenceTypes: [application_logs]
+    emitters: [agent-loop-limits]

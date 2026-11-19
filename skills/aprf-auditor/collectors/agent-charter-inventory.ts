@@ -7,7 +7,8 @@
  * severity is high; escalate to critical when inventory completeness or
  * ownership cannot be demonstrated. Frameworks/SDKs/libraries alone are N/A.
  */
-import { writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
 import { getGeneratedCatalog } from "@stackrail-io/aprf-engine";
 import type {
@@ -470,16 +471,31 @@ function agentIsActive(a: Record<string, unknown>): boolean {
   return agentLifecycleStatus(a) === "active";
 }
 
+function digestOfAgents(rows: unknown[]): string {
+  const projected = rows.map((r) => {
+    if (!r || typeof r !== "object") return r;
+    const { provenance: _p, ...rest } = r as Record<string, unknown>;
+    return rest;
+  });
+  return createHash("sha256")
+    .update(JSON.stringify(projected))
+    .digest("hex")
+    .slice(0, 16);
+}
+
+type LoadedInventoryImport = AgentCharterInventoryReport["importedResults"] & {
+  records: Array<Record<string, unknown>>;
+};
+
 function asNonNegInt(v: unknown): number | null {
   if (typeof v === "number" && Number.isFinite(v) && v >= 0) return Math.floor(v);
   if (typeof v === "string" && /^\d+$/.test(v.trim())) return Number(v.trim());
   return null;
 }
 
-function loadImported(
-  ctx: CollectorContext,
-): AgentCharterInventoryReport["importedResults"] {
+function loadImported(ctx: CollectorContext): LoadedInventoryImport {
   const sources: string[] = [];
+  const records: Array<Record<string, unknown>> = [];
   let agentCount: number | null = null;
   let missingFieldCount: number | null = null;
   let missingOwnerCount: number | null = null;
@@ -544,12 +560,17 @@ function loadImported(
         unenumeratedAgentCount = (unenumeratedAgentCount ?? 0) + fromImport;
       }
 
-      const agents = Array.isArray(data.agents)
-        ? (data.agents as Array<Record<string, unknown>>)
+      const agentsRaw = Array.isArray(data.agents)
+        ? data.agents
         : Array.isArray(data.inventory)
-          ? (data.inventory as Array<Record<string, unknown>>)
+          ? data.inventory
           : [];
+      const agents = agentsRaw.filter(
+        (a): a is Record<string, unknown> =>
+          !!a && typeof a === "object" && !Array.isArray(a),
+      );
       if (agents.length) {
+        records.push(...agents);
         agentCount = (agentCount ?? 0) + agents.length;
         let missing = 0;
         let missingOwners = 0;
@@ -662,7 +683,92 @@ function loadImported(
     productionAgentsPresent,
     measuredAt,
     sources,
+    records,
   };
+}
+
+function asStringList(a: Record<string, unknown>, keys: string[]): string[] {
+  for (const k of keys) {
+    const v = a[k];
+    if (Array.isArray(v)) {
+      return v
+        .filter((x): x is string => typeof x === "string" && x.trim().length > 0)
+        .map((s) => s.trim());
+    }
+    if (typeof v === "string" && v.trim()) {
+      return v.split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
+function asOptString(a: Record<string, unknown>, keys: string[]): string | undefined {
+  for (const k of keys) {
+    const v = a[k];
+    if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  return undefined;
+}
+
+function normalizeInventoryRecord(
+  a: Record<string, unknown>,
+  provenance: Array<Record<string, unknown>>,
+): Record<string, unknown> | null {
+  const agentId = asOptString(a, ["agentId", "agent_id", "id", "name"]);
+  if (!agentId) return null;
+  const tools = asStringList(a, [
+    "tools",
+    "allowedTools",
+    "allowed_tools",
+    "toolAllowlist",
+    "tool_allowlist",
+    "mcpTools",
+  ]);
+  const mcpServers = asStringList(a, [
+    "mcpServers",
+    "mcp_servers",
+    "mcp",
+  ]);
+  const discoveryClass = Array.isArray(a.discovery)
+    ? undefined
+    : undefined;
+  const rec: Record<string, unknown> = {
+    agentId,
+    provenance,
+    discovery: {
+      classes: ["declared"],
+      sources: (() => {
+        const s = provenance
+          .map((p) => (typeof p.source === "string" ? p.source : ""))
+          .filter(Boolean)
+          .slice(0, 4);
+        return s.length ? s : ["import"];
+      })(),
+      highestClass: "declared",
+    },
+  };
+  const name = asOptString(a, ["name", "title"]);
+  if (name) rec.name = name;
+  const ver = asOptString(a, ["agentVersion", "agent_version", "version"]);
+  if (ver) rec.agentVersion = ver;
+  const purpose = asOptString(a, ["purpose", "goal", "mission"]);
+  if (purpose) rec.purpose = purpose;
+  const owner = asOptString(a, ["owner", "owned_by", "team", "owningTeam"]);
+  if (owner) rec.owningTeam = owner;
+  const ident = asOptString(a, [
+    "executionIdentity",
+    "identity",
+    "serviceAccount",
+  ]);
+  if (ident) rec.executionIdentity = ident;
+  if (tools.length) rec.tools = tools;
+  if (mcpServers.length) rec.mcpServers = mcpServers;
+  const data = asStringList(a, ["connectedDataSources", "dataScope", "data_scope"]);
+  if (data.length) rec.connectedDataSources = data;
+  const mem = asStringList(a, ["memorySystems", "memory"]);
+  if (mem.length) rec.memorySystems = mem;
+  void discoveryClass;
+  return rec;
 }
 
 function allRequiredFieldsPresent(
@@ -1002,6 +1108,7 @@ export const agentCharterInventoryCollector: Collector = {
 
     const scope = detectScopeSignals(ctx.targetPath, maxFiles);
     const imported = loadImported(ctx);
+    const { records: importedRecords, ...importedMeta } = imported;
 
     const report = buildAgentCharterInventoryReport({
       assessedAt: ctx.assessedAt.toISOString(),
@@ -1011,13 +1118,80 @@ export const agentCharterInventoryCollector: Collector = {
       fieldRefs,
       agentSignals: scope.agent,
       frameworkOnly: scope.frameworkOnly,
-      imported,
+      imported: importedMeta,
     });
 
     ensureDir(importDir(ctx));
     writeFileSync(
       join(importDir(ctx), "agent-charter-inventory-report.json"),
       JSON.stringify(report, null, 2) + "\n",
+      "utf8",
+    );
+
+    const src0 =
+      imported.sources[0] ?? inventory.refs[0] ?? charters.refs[0] ?? "repo";
+    const provenance = [
+      {
+        evidenceNodeId: `${PLUGIN_ID}:report`,
+        pluginId: PLUGIN_ID,
+        source: src0,
+        collectedAt: ctx.assessedAt.toISOString(),
+      },
+    ];
+    const seenIds = new Set<string>();
+    const inventoryAgents: Array<Record<string, unknown>> = [];
+    for (const rec of importedRecords) {
+      const row = normalizeInventoryRecord(rec, provenance);
+      if (!row || typeof row.agentId !== "string") continue;
+      if (seenIds.has(row.agentId)) continue;
+      seenIds.add(row.agentId);
+      inventoryAgents.push(row);
+    }
+    const prevPath = join(ctx.outputDir, "agent-inventory.json");
+    let history: Array<Record<string, unknown>> = [];
+    if (existsSync(prevPath)) {
+      try {
+        const prev = JSON.parse(readFileSync(prevPath, "utf8")) as {
+          history?: Array<Record<string, unknown>>;
+          agents?: unknown[];
+          generatedAt?: string;
+        };
+        history = Array.isArray(prev.history) ? [...prev.history] : [];
+        const last = history[history.length - 1] as
+          | { at?: string }
+          | undefined;
+        if (!last || last.at !== prev.generatedAt) {
+          history.push({
+            at: prev.generatedAt ?? ctx.assessedAt.toISOString(),
+            inventoryDigest: `sha256:${digestOfAgents(prev.agents ?? [])}`,
+            agentCount: Array.isArray(prev.agents) ? prev.agents.length : 0,
+          });
+        }
+        history = history.slice(-20);
+      } catch {
+        /* ignore prior */
+      }
+    }
+    const currentDigest = digestOfAgents(inventoryAgents);
+    history.push({
+      at: ctx.assessedAt.toISOString(),
+      inventoryDigest: `sha256:${currentDigest}`,
+      agentCount: inventoryAgents.length,
+    });
+    history = history.slice(-20);
+    const inventoryDoc = {
+      schemaVersion: "0.1.0",
+      inventoryId: `inv:${createHash("sha256").update(ctx.targetPath).digest("hex").slice(0, 16)}`,
+      generatedAt: ctx.assessedAt.toISOString(),
+      collectorId: PLUGIN_ID,
+      collectorVersion: "0.4.0",
+      subject: { path: ctx.targetPath },
+      agents: inventoryAgents,
+      history,
+    };
+    writeFileSync(
+      join(ctx.outputDir, "agent-inventory.json"),
+      JSON.stringify(inventoryDoc, null, 2) + "\n",
       "utf8",
     );
 
@@ -1048,6 +1222,7 @@ export const agentCharterInventoryCollector: Collector = {
             : ["framework-or-library-na"]),
           // APRF-RFC-0014 registered SignalDef ids (dual-emit with legacy tags)
           ...registeredSignalIdsForReport(report),
+          "agent.inventory.normalized",
         ],
         relatedCheckIds: [...RELATED],
       },
