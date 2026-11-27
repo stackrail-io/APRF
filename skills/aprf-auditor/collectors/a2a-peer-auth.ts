@@ -437,6 +437,11 @@ export const a2aPeerAuthCollector: Collector = {
           ...(report.summary.agnM4Satisfied
             ? ["agn-m4-satisfied"]
             : ["agn-m4-incomplete"]),
+          ...(report.importedResults.unauthenticatedDenied === false ||
+          report.importedResults.forgedDenied === false ||
+          report.importedResults.overScopedDenied === false
+            ? ["a2a.peer.untrusted_accepted"]
+            : []),
         ],
         relatedCheckIds: [...RELATED],
       },

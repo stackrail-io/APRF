@@ -119,7 +119,9 @@ threats:
       - Agent Hijacking
       - Unauthorized Tool Use
     indicators:
-      - signal: agent.graph.edge_delegated
+      - allOf:
+          - signal: agent.graph.edge_delegated
+          - signal: tool.unauthorized.succeeded
     mitigations:
       - checkId: AGN-M4
         role: primary
@@ -161,7 +163,7 @@ threats:
       - Sensitive Information Disclosure
       - Data Exfiltration
     indicators:
-      - signal: agent.graph.memory_hop
+      - signal: memory.cross_tenant.unauthorized_success
     mitigations:
       - checkId: MEM-M1
         role: primary
@@ -220,7 +222,7 @@ threats:
       - Unauthorized Tool Use
       - Sensitive Information Disclosure
     indicators:
-      - signal: mcp.confused_deputy.path
+      - signal: model.path.unapproved_egress
     mitigations:
       - checkId: TOL-M6
         role: primary
@@ -284,7 +286,7 @@ threats:
       - Agent Hijacking
       - Privilege Escalation
     indicators:
-      - signal: agent.graph.edge_delegated
+      - signal: a2a.peer.untrusted_accepted
     mitigations:
       - checkId: AGN-M4
         role: primary

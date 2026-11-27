@@ -298,7 +298,7 @@ signals:
     defaultTier: E4
     description: Untrusted content caused an agent to invoke a tool the user or charter did not authorize.
     evidenceTypes: [harness_exercise_report]
-    emitters: [injection-policy-gate, multi-turn-indirect-injection-redteam]
+    emitters: [injection-policy-gate]
 
   - id: memory.poison.write_accepted
     kind: exercise
@@ -313,6 +313,27 @@ signals:
     description: Untrusted tool or MCP output was treated as instruction or trusted fact by a downstream agent.
     evidenceTypes: [harness_exercise_report]
     emitters: [eval-methodology, injection-policy-gate]
+
+  - id: memory.cross_tenant.unauthorized_success
+    kind: exercise
+    defaultTier: E4
+    description: Memory isolation exercise recorded a cross-tenant or cross-user unauthorized success.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [memory-isolation]
+
+  - id: model.path.unapproved_egress
+    kind: exercise
+    defaultTier: E4
+    description: Model or tool identity reached an unapproved destination or unrestricted internal admin/data-store route in probe or exercise.
+    evidenceTypes: [reachability_probe]
+    emitters: [model-path-egress-boundary]
+
+  - id: a2a.peer.untrusted_accepted
+    kind: exercise
+    defaultTier: E4
+    description: A2A negative tests accepted an unauthenticated, forged, or over-scoped peer.
+    evidenceTypes: [harness_exercise_report]
+    emitters: [a2a-peer-auth]
 
   - id: agent.loop.continue_after_abort
     kind: exercise

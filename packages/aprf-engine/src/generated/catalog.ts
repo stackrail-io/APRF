@@ -6,7 +6,7 @@
 import type { GeneratedCatalog } from "../catalog-types.js";
 
 export const GENERATED_CATALOG: GeneratedCatalog = {
-  "generatedAt": "sha256:16d19ab8a944144762241ac96f18d1c173f6726d5a5880eeecd55ce5b8eb6ea2",
+  "generatedAt": "sha256:be8d66dd98bdd8b5c8724acd42e28daacf6648ac2694097518d0e7ed61a0b618",
   "ruleCount": 184,
   "domains": [
     {
@@ -5838,7 +5838,6 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       "evidencePolicy": {
         "minimumTier": "E4",
         "acceptableEvidence": [
-          "eval_dataset_manifest",
           "eval_run_report",
           "harness_exercise_report"
         ]
@@ -24146,8 +24145,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
           "harness_exercise_report"
         ],
         "emitters": [
-          "injection-policy-gate",
-          "multi-turn-indirect-injection-redteam"
+          "injection-policy-gate"
         ]
       },
       {
@@ -24173,6 +24171,42 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
         "emitters": [
           "eval-methodology",
           "injection-policy-gate"
+        ]
+      },
+      {
+        "id": "memory.cross_tenant.unauthorized_success",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Memory isolation exercise recorded a cross-tenant or cross-user unauthorized success.",
+        "evidenceTypes": [
+          "harness_exercise_report"
+        ],
+        "emitters": [
+          "memory-isolation"
+        ]
+      },
+      {
+        "id": "model.path.unapproved_egress",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "Model or tool identity reached an unapproved destination or unrestricted internal admin/data-store route in probe or exercise.",
+        "evidenceTypes": [
+          "reachability_probe"
+        ],
+        "emitters": [
+          "model-path-egress-boundary"
+        ]
+      },
+      {
+        "id": "a2a.peer.untrusted_accepted",
+        "kind": "exercise",
+        "defaultTier": "E4",
+        "description": "A2A negative tests accepted an unauthenticated, forged, or over-scoped peer.",
+        "evidenceTypes": [
+          "harness_exercise_report"
+        ],
+        "emitters": [
+          "a2a-peer-auth"
         ]
       },
       {
@@ -24369,7 +24403,14 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "indicators": [
         {
-          "signal": "agent.graph.edge_delegated"
+          "allOf": [
+            {
+              "signal": "agent.graph.edge_delegated"
+            },
+            {
+              "signal": "tool.unauthorized.succeeded"
+            }
+          ]
         }
       ],
       "mitigations": [
@@ -24431,7 +24472,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "indicators": [
         {
-          "signal": "agent.graph.memory_hop"
+          "signal": "memory.cross_tenant.unauthorized_success"
         }
       ],
       "mitigations": [
@@ -24517,7 +24558,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "indicators": [
         {
-          "signal": "mcp.confused_deputy.path"
+          "signal": "model.path.unapproved_egress"
         }
       ],
       "mitigations": [
@@ -24612,7 +24653,7 @@ export const GENERATED_CATALOG: GeneratedCatalog = {
       ],
       "indicators": [
         {
-          "signal": "agent.graph.edge_delegated"
+          "signal": "a2a.peer.untrusted_accepted"
         }
       ],
       "mitigations": [

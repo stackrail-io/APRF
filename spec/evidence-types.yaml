@@ -88,8 +88,8 @@ types:
     defaultTier: E2
     description: Versioned evaluation dataset manifest with owner and provenance (APRF-RFC-0015).
   - id: eval_run_report
-    defaultTier: E3
-    description: Evaluation run report linked to an agent or model version (APRF-RFC-0015).
+    defaultTier: E4
+    description: Measured evaluation run report linked to an agent or model version (APRF-RFC-0015).
   - id: agent_trace_sample
     defaultTier: E4
     description: Redacted canary or sampled traces with reconstructable agent-run attributes (APRF-RFC-0015).

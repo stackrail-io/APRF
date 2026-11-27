@@ -32,7 +32,6 @@ evidenceRequired:
 evidencePolicy:
   minimumTier: E4
   acceptableEvidence:
-    - eval_dataset_manifest
     - eval_run_report
     - harness_exercise_report
 detection:

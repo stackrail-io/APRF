@@ -485,6 +485,9 @@ export const injectionPolicyGateCollector: Collector = {
           ...(report.policyEngine.found ? ["policy-engine"] : []),
           ...(report.summary.corpusPresent ? ["injection-corpus"] : []),
           ...(report.summary.secM1Satisfied ? ["sec-m1-satisfied"] : []),
+          ...((report.importedResults.modelTextPrivilegeGrants ?? 0) > 0
+            ? ["injection.tool.unauthorized_invoke"]
+            : []),
         ],
         relatedCheckIds: [...RELATED],
       },
