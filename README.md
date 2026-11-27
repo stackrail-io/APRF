@@ -82,7 +82,7 @@ npx @stackrail-io/aprf audit --target . --profile core
 | `@stackrail-io/aprf-framework-definition` | Core / Regulated profiles, lenses (RAG/Agents/Voice/Coding), Policy overlays, Check applicability |
 | `@stackrail-io/aprf` | CLI: `collect` / `assess` / `report` / `audit` — pinned catalog, no repo clone |
 
-Today the catalog holds **178 Checks** across **27 pillars** (**92** mandatory / **85** recommended active, plus **1** deprecated recommended stub `INF-R1`). New Checks are data files — no engine code changes required — but each Check needs a row in [`spec/aprf-threat-map.yaml`](spec/aprf-threat-map.yaml).
+Today the catalog holds **184 Checks** across **27 pillars** (see `spec/aprf-spec.json` `stats` after `npm run aprf:sync-stats`). New Checks are data files — no engine code changes required — but each Check needs a row in [`spec/aprf-threat-map.yaml`](spec/aprf-threat-map.yaml). Agent harness, inventory, capability-graph, and eval methodology gates are additive on `aprf-lens-agents` ([APRF-RFC-0015](rfcs/0015-agent-harness-eval-production-readiness.md)).
 
 ## Quick start
 

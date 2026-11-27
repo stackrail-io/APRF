@@ -1,0 +1,26 @@
+id: eval-methodology
+title: Agent evaluation methodology (EVL-M5)
+version: "0.1.0"
+executor: collectors/rfc0015-collectors.ts
+evidenceClass: ci
+emitsEvidenceTier: E3
+detectorIds: [repo-eval-methodology]
+inputs:
+  - "Target repo (eval datasets / LLM-as-judge)"
+  - "Optional pack: aprf-assessment/imports/eval-methodology/*.json"
+collect:
+  - "Detect versioned eval dataset signals"
+  - "Ingest methodology coverage; write eval-methodology-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/eval-methodology/*"
+  signals: [eval-methodology, evl-m5, repo-eval-methodology]
+mapsToChecks: [EVL-M5]
+whenUnavailable: >
+  Repo signals are PARTIAL. EVL-M5 PASS needs datasetsVersioned,
+  runsLinkedToAgentVersion, successNotSelfReported,
+  securityCasesNotLlmJudgeOnly=true, measuredAt ≤90 days.
+  productionAgentsPresent=false → NOT_APPLICABLE when no repo surface.
+live:
+  required: false
+  note: Offline heuristics + imported eval reports.

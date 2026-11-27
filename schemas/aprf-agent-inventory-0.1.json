@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stackrail.io/aprf/agent-inventory/0.1",
+  "title": "APRF Agent Inventory (draft — APRF-RFC-0015)",
+  "description": "Normalized, versioned production-agent inventory. Operational artifact; does not participate in the mandatory gate. AGN-M1 consumes charter completeness from these records plus provenance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "inventoryId",
+    "generatedAt",
+    "subject",
+    "agents",
+    "history"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "0.1.0" },
+    "inventoryId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable id for this inventory document across assessment runs (not a Check ID)."
+    },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "collectorId": { "type": "string" },
+    "collectorVersion": { "type": "string" },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "path": { "type": "string" },
+        "name": { "type": "string" },
+        "gitCommit": { "type": "string" },
+        "environment": { "type": "string" }
+      }
+    },
+    "agents": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/agentRecord" }
+    },
+    "history": {
+      "type": "array",
+      "description": "Prior inventory snapshots or diffs retained for discovery history.",
+      "items": { "$ref": "#/$defs/historyEntry" }
+    }
+  },
+  "$defs": {
+    "discoveryClass": {
+      "type": "string",
+      "enum": [
+        "declared",
+        "discovered",
+        "runtime-observed",
+        "independently-verified"
+      ]
+    },
+    "autonomyClass": {
+      "type": "string",
+      "enum": [
+        "autonomous",
+        "human-supervised",
+        "multi-agent",
+        "background",
+        "scheduled",
+        "embedded",
+        "framework-managed",
+        "mcp-exposed"
+      ]
+    },
+    "evidenceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidenceNodeId"],
+      "properties": {
+        "evidenceNodeId": { "type": "string" },
+        "pluginId": { "type": "string" },
+        "source": { "type": "string" },
+        "collectedAt": { "type": "string", "format": "date-time" },
+        "observedAt": { "type": "string", "format": "date-time" },
+        "signalIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "historyEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["at", "inventoryDigest"],
+      "properties": {
+        "at": { "type": "string", "format": "date-time" },
+        "inventoryDigest": { "type": "string" },
+        "agentCount": { "type": "integer", "minimum": 0 },
+        "addedAgentIds": { "type": "array", "items": { "type": "string" } },
+        "removedAgentIds": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "agentRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agentId", "discovery", "provenance"],
+      "properties": {
+        "agentId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier unique within environment/application."
+        },
+        "name": { "type": "string" },
+        "agentVersion": { "type": "string" },
+        "framework": { "type": "string" },
+        "runtime": { "type": "string" },
+        "modelProvider": { "type": "string" },
+        "modelIdentifier": { "type": "string" },
+        "modelVersion": { "type": "string" },
+        "deploymentEnvironment": { "type": "string" },
+        "executionIdentity": { "type": "string" },
+        "owningApplication": { "type": "string" },
+        "owningTeam": { "type": "string" },
+        "purpose": { "type": "string" },
+        "autonomyClassification": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/autonomyClass" },
+          "uniqueItems": true
+        },
+        "tools": { "type": "array", "items": { "type": "string" } },
+        "mcpServers": { "type": "array", "items": { "type": "string" } },
+        "connectedDataSources": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "memorySystems": { "type": "array", "items": { "type": "string" } },
+        "humanApprovalRequired": { "type": "boolean" },
+        "executionEntryPoints": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "delegationCapabilities": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "configurationSource": { "type": "string" },
+        "lastObservedExecution": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "charterRef": { "type": "string" },
+        "lifecycleStatus": {
+          "type": "string",
+          "enum": ["Active", "Deprecated", "Retired", "Experimental"]
+        },
+        "discovery": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["classes", "sources"],
+          "properties": {
+            "classes": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/discoveryClass" },
+              "uniqueItems": true
+            },
+            "sources": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string" }
+            },
+            "highestClass": { "$ref": "#/$defs/discoveryClass" }
+          }
+        },
+        "provenance": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/evidenceRef" }
+        }
+      }
+    }
+  }
+}

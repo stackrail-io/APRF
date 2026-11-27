@@ -614,7 +614,9 @@ function reportHasMeasuredImport(
     }
 
     if (imported?.found === true && measuredAtFresh(declaredAt)) {
-      return true;
+      // Collectors may set measuredEvidence=false for boolean attestations
+      // that are not an exercise/runtime pack (APRF-RFC-0015).
+      if (summary?.measuredEvidence !== false) return true;
     }
     // Coverage JSON style: top-level measuredAt with PASS-unlock fields present.
     if (

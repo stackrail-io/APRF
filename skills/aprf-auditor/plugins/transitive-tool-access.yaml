@@ -1,0 +1,27 @@
+id: transitive-tool-access
+title: Transitive tool and data access (TOL-M6)
+version: "0.1.0"
+executor: collectors/rfc0015-collectors.ts
+evidenceClass: ci
+emitsEvidenceTier: E4
+detectorIds: [repo-transitive-tool-access]
+inputs:
+  - "Target repo (MCP/tools)"
+  - "Optional pack: aprf-assessment/imports/transitive-tool-access/*.json"
+collect:
+  - "Detect MCP/tool signals"
+  - "Ingest graph+deny coverage; write transitive-tool-access-report.json"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/transitive-tool-access/*"
+  signals: [transitive-tool-access, tol-m6, repo-transitive-tool-access]
+mapsToChecks: [TOL-M6]
+whenUnavailable: >
+  Signals alone are PARTIAL. TOL-M6 PASS needs ≥1 deny case plus
+  capabilityGraphPresent, charterScopeMapped,
+  unauthorizedEffectivePathsDenied=true, measuredAt ≤90d. Graph artifacts
+  are operational (E2) and cannot PASS, including graph-proven absence of hops.
+  toolsMcpOrDelegationPresent=false → NOT_APPLICABLE when no repo surface.
+live:
+  required: false
+  note: Offline heuristics + imported exercise pack.

@@ -439,6 +439,9 @@ export const memoryIsolationCollector: Collector = {
           DETECTOR_ID,
           ...(report.summary.memorySignalsPresent ? ["memory-signals"] : []),
           ...(report.summary.memM1Satisfied ? ["mem-m1-satisfied"] : []),
+          ...((report.importedResults.unauthorizedSuccesses ?? 0) > 0
+            ? ["memory.cross_tenant.unauthorized_success"]
+            : []),
         ],
       },
     ];

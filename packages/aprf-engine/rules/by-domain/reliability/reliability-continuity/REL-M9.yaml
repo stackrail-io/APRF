@@ -1,0 +1,81 @@
+id: "REL-M9"
+category: "reliability-continuity"
+title: "Non-idempotent and irreversible tool retries must not duplicate side effects"
+description: >
+  The harness shall classify in-scope tools as read-only, idempotent,
+  non-idempotent, or irreversible. Retries, recovery, and workflow resume
+  shall not repeat non-idempotent or irreversible actions without an
+  idempotency key, compensation, or human approval. Distinct from finite
+  retry bounds and from partial-failure false-success detection.
+whyItMatters: >
+  Bounded retries that replay a payment or irreversible delete create duplicate
+  real-world effects. Recovery after a crash is unsafe unless the harness
+  knows which actions may be repeated.
+severity: "high"
+weight: 3
+gate: "mandatory"
+passCondition: >
+  In-scope tools are classified as read-only, idempotent, non-idempotent, or
+  irreversible; exercise evidence shows retries or resume do not commit
+  duplicate non-idempotent or irreversible side effects without an idempotency
+  key, compensation, or human approval (measuredAt ≤90 days). If no production
+  tools exist, or all in-scope tools are classified read-only or idempotent,
+  score NOT_APPLICABLE.
+evidenceRequired:
+  - "Tool classification inventory (read-only / idempotent / non-idempotent / irreversible)"
+  - "Retry/resume policy for non-idempotent and irreversible classes"
+  - "Exercise results showing no duplicate commit without idempotency key, compensation, or approval (measuredAt ≤90 days)"
+evidencePolicy:
+  minimumTier: E4
+  acceptableEvidence:
+    - idempotency_exercise_report
+    - application_logs
+detection:
+  capability: "hybrid"
+  detectors:
+    - id: "repo-non-idempotent-retry"
+      params:
+        hint: >
+          Discover tool classification and retry policy; ingest
+          imports/non-idempotent-retry/ requiring no duplicate commit on
+          non-idempotent/irreversible classes (measuredAt ≤90 days).
+    - id: "manual-attest"
+      params:
+        hint: >
+          If automation cannot prove coverage, attest classification plus
+          exercise (measuredAt ≤90 days) or N/A if only read-only/idempotent
+          tools.
+manualVerification: >
+  1) Inventory production tools and classifications. If none, or all are
+  read-only/idempotent with evidence, score NOT_APPLICABLE. 2) Review
+  retry/resume behavior. 3) Review exercises that retry a non-idempotent or
+  irreversible call. 4) PASS only if duplicates are prevented or compensated
+  with measuredAt ≤90 days. Finite max-retry config without classification
+  does not PASS. Partial-failure tests without replay safety do not PASS.
+falsePositiveGuidance: >
+  Do not pass unclassified side-effect tools. Do not pass "retry=3" as
+  idempotency. Named exceptions need owner and expiry ≤90 days.
+recommendedFixes:
+  - "Classify every production tool; default unknown side effects to non-idempotent"
+  - "Require idempotency keys or disable auto-retry on irreversible tools"
+  - "Add resume/compensation tests for payments and deletes"
+  - "Retain packs under imports/non-idempotent-retry/"
+references:
+  - title: "NIST AI Risk Management Framework — Manage"
+    url: "https://www.nist.gov/itl/ai-risk-management-framework"
+relatedRules:
+  - "REL-M1"
+  - "REL-M3"
+  - "TOL-M3"
+  - "HUM-M1"
+tags:
+  - "reliability-continuity"
+  - "mandatory"
+  - "hybrid"
+  - "idempotency"
+applicability:
+  technologies: []
+  minCriticality: 2
+  requiredFromLevel: 3
+status: "active"
+introducedIn: "0.11.0"

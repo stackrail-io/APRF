@@ -1,0 +1,25 @@
+id: approval-replay
+title: Approval replay and self-approval (HUM-M5)
+version: "0.1.0"
+executor: collectors/rfc0015-collectors.ts
+evidenceClass: ci
+emitsEvidenceTier: E4
+detectorIds: [repo-approval-replay]
+inputs:
+  - "Target repo (approval tokens / HITL)"
+  - "Optional pack: aprf-assessment/imports/approval-replay/*.json"
+collect:
+  - "Detect approval-token signals"
+  - "Ingest replay/expiry/self-approval deny flags"
+emits:
+  nodeClass: ci
+  refPattern: "aprf-assessment/imports/approval-replay/*"
+  signals: [approval-replay, hum-m5, repo-approval-replay]
+mapsToChecks: [HUM-M5]
+whenUnavailable: >
+  Repo signals are PARTIAL. HUM-M5 PASS needs replayDenied, expiryDenied,
+  selfApprovalDenied=true, measuredAt ≤90 days.
+  highImpactApprovalsPresent=false → NOT_APPLICABLE when no repo surface.
+live:
+  required: false
+  note: Offline heuristics + imported exercise pack.

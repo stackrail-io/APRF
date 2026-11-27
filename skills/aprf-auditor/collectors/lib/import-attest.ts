@@ -19,7 +19,8 @@ export function measuredAtFresh(
   const t = Date.parse(measuredAt);
   if (Number.isNaN(t)) return false;
   const ageMs = now.getTime() - t;
-  if (ageMs < 0) return true; // clock skew / future — accept
+  const MAX_SKEW_MS = 24 * 60 * 60 * 1000;
+  if (ageMs < 0) return -ageMs <= MAX_SKEW_MS;
   return ageMs <= maxAgeDays * 24 * 60 * 60 * 1000;
 }
 

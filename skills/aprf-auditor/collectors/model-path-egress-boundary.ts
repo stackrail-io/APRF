@@ -448,6 +448,12 @@ export const modelPathEgressBoundaryCollector: Collector = {
           "sec-m4",
           DETECTOR_ID,
           ...(report.summary.secM4Satisfied ? ["sec-m4-satisfied"] : []),
+          ...((report.importedResults
+            .unrestrictedInternalAdminOrDataStoreRoutesFromModelIdentity ?? 0) >
+            0 ||
+          report.importedResults.probeShowsOnlyAllowlistedDestinations === false
+            ? ["model.path.unapproved_egress"]
+            : []),
         ],
         excerpt: redact(report.notes.slice(0, 3).join(" | ").slice(0, 400)),
         relatedCheckIds: [...RELATED],
