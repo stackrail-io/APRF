@@ -3,7 +3,9 @@
  * Asserts scoring.yaml semantics (N/A ≠ passed, gate blockers, domain taxonomy).
  */
 import { mkdirSync, writeFileSync, rmSync, readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { tmpdir } from "node:os";
 import { writeAssessment } from "../src/assess.ts";
 import { writeAssessmentHtmlReport } from "../../../skills/aprf-auditor/scripts/render-html-report.ts";
@@ -716,6 +718,64 @@ assert(
 );
 
 console.log(`aprf assess engine smoke OK → ${htmlPath}`);
+
+const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+function runAprfCli(args: string[], extraEnv: NodeJS.ProcessEnv = {}) {
+  return spawnSync("npx", ["tsx", "src/cli.ts", ...args], {
+    cwd: pkgRoot,
+    encoding: "utf8",
+    env: { ...process.env, APRF_SYSTEM_TYPE: "", ...extraEnv },
+  });
+}
+const gateFail = runAprfCli([
+  "assess",
+  "--out",
+  root,
+  "--system-type",
+  "ai-application",
+  "--profile",
+  "core",
+]);
+assert(
+  gateFail.status === 2,
+  `assess on gate FAIL must exit 2, got ${gateFail.status} stderr=${gateFail.stderr}`,
+);
+const gateKeep = runAprfCli([
+  "assess",
+  "--out",
+  root,
+  "--system-type",
+  "ai-application",
+  "--profile",
+  "core",
+  "--no-fail-on-gate",
+]);
+assert(
+  gateKeep.status === 0,
+  `--no-fail-on-gate must exit 0, got ${gateKeep.status} stderr=${gateKeep.stderr}`,
+);
+const missingTarget = runAprfCli([
+  "audit",
+  "--target",
+  join(root, "no-such-target-dir"),
+  "--system-type",
+  "ai-application",
+  "--profile",
+  "core",
+]);
+assert(
+  missingTarget.status === 1,
+  `missing --target must exit 1, got ${missingTarget.status} stderr=${missingTarget.stderr}`,
+);
+const missingType = runAprfCli(["assess", "--out", root, "--profile", "core"]);
+assert(
+  missingType.status === 1 && /Missing --system-type/.test(missingType.stderr),
+  `missing --system-type must exit 1 without a stack dump, got ${missingType.status} ${missingType.stderr}`,
+);
+assert(
+  !/at requireSystemType/.test(missingType.stderr),
+  "non-TTY missing --system-type must not print a stack",
+);
 
 // G10: Framework profile control count + claim honesty
 writeAssessment({

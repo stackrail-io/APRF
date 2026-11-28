@@ -1308,7 +1308,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       domain,
       score:
         row.applicable === 0
-          ? 100
+          ? null
           : Math.round((row.satisfied / row.applicable) * 100),
       mandatoryGatePassed: !row.failGate,
       applicable: row.applicable,
@@ -1369,10 +1369,29 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     }));
 
   const hintedCount = [...hints.keys()].filter((id) => checkIds.has(id)).length;
+  const codeFoundCount = controls.filter(
+    (c) => c.status === "PARTIAL" || c.status === "FAIL",
+  ).length;
+  const measuredPassCount = controls.filter((c) => c.status === "PASS").length;
+  const notDemonstratedCount = controls.filter(
+    (c) => c.status === "NOT_DEMONSTRATED",
+  ).length;
 
   const threatEval = evaluateThreatExposureForAssessment(controls, graph);
   for (const w of threatEval?.signalWarnings ?? []) {
     console.warn(`aprf assess: ${w}`);
+  }
+
+  let walkMeta: { truncated?: boolean; scanned?: number; cappedAt?: number } | undefined;
+  const graphMeta = (graph as { walkMeta?: typeof walkMeta } | undefined)?.walkMeta;
+  if (graphMeta) walkMeta = graphMeta;
+  const walkMetaPath = join(outDir, "walk-meta.json");
+  if (!walkMeta && existsSync(walkMetaPath)) {
+    try {
+      walkMeta = JSON.parse(readFileSync(walkMetaPath, "utf8")) as typeof walkMeta;
+    } catch {
+      walkMeta = undefined;
+    }
   }
 
   return {
@@ -1395,6 +1414,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
         : {}),
     },
     evidenceGraphPath: "evidence-graph.json",
+    ...(walkMeta ? { walkMeta } : {}),
     executiveSummary: {
       overallGatePassed,
       criticalityTier: profile.targetCriticality,
@@ -1410,7 +1430,10 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
       recommendedScore,
       blockerCount: blockers.length,
       criticalBlockerCount: criticalBlockers.length,
-      narrative: `APRF CLI assess (${resolved.assessmentKind}) against ${profile.name}${lenses.length ? ` + lenses [${lenses.map((l) => l.name).join(", ")}]` : ""}${resolved.applicationCapabilities.length ? ` + capabilities [${resolved.applicationCapabilities.join(", ")}]` : ""}: ${hintedCount}/${controls.length} Checks scored from collector statusHints; unscored → NOT_DEMONSTRATED. Gate ${overallGatePassed ? "PASS" : "FAIL"} (${blockers.length} mandatory blockers, ${criticalBlockers.length} critical). recommendedScore=${recommendedScore == null ? "n/a" : recommendedScore} (prioritization only).${resolved.assessmentKind === "aprf-framework" ? " This is a Framework/SDK primitive gate — not Core production readiness." : ""}`,
+      codeFoundCount,
+      measuredPassCount,
+      notDemonstratedCount,
+      narrative: `APRF CLI assess (${resolved.assessmentKind}) against ${profile.name}${lenses.length ? ` + lenses [${lenses.map((l) => l.name).join(", ")}]` : ""}${resolved.applicationCapabilities.length ? ` + capabilities [${resolved.applicationCapabilities.join(", ")}]` : ""}: ${hintedCount}/${controls.length} Checks scored from collector statusHints; unscored → NOT_DEMONSTRATED. Code/repo signals (PARTIAL+FAIL)=${codeFoundCount}; measured PASS=${measuredPassCount}; NOT_DEMONSTRATED=${notDemonstratedCount}. Gate ${overallGatePassed ? "PASS" : "FAIL"} (${blockers.length} mandatory blockers, ${criticalBlockers.length} critical). recommendedScore=${recommendedScore == null ? "n/a" : recommendedScore} (prioritization only).${resolved.assessmentKind === "aprf-framework" ? " This is a Framework/SDK primitive gate — not Core production readiness." : ""}`,
     },
     domainScores,
     controls,

@@ -8,11 +8,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ## [Unreleased]
 
 ### Added
+- CLI `aprf init-imports` writes empty `imports/<plugin>/README.md` stubs for measured packs. REPORT/assess show code-found vs measured PASS vs NOT_DEMONSTRATED counts (not a new gate).
+- Build stamps git SHA into `BUILD.json` / `aprf version` (`@stackrail-io/aprf@0.1.7`).
 - **Agent, harness, and evaluation production readiness** ([APRF-RFC-0015](rfcs/0015-agent-harness-eval-production-readiness.md), accepted): operational inventory + capability-graph schemas; new Checks `AGN-M5`, `TOL-M6`, `HUM-M5`, `EVL-M5`, `OBS-M3`, `REL-M9`; Agents lens adds those IDs plus `MEM-M2`, `MEM-M3`, `CTX-M2`, `MEM-R1`, `EVL-R1` (Core/Regulated lists unchanged); SignalDefs and composed `THR-*` agent scenarios; reference collectors and architectural invariant tests. No Agent profile; threats remain informative.
 - **Threat composition from multi-kind signals** ([APRF-RFC-0014](rfcs/0014-threat-composition-from-signals.md)): `spec/aprf-signal-registry.yaml` (production-mechanism kinds + SignalDefs), `spec/aprf-threat-composition.yaml` (pilot `THR-shadow-agents`), deterministic `evaluateThreatComposition` in `@stackrail-io/aprf-engine`, assess `threatExposure` / `signalObservations`, REPORT suspected vs confirmed exposure. Checks remain the sole gate unit. CI: `aprf:signals`, `aprf:threats`.
 - **Assessment target kinds + Framework profile** ([APRF-RFC-0013](rfcs/0013-assessment-target-kinds.md)): `systemType` (`ai-application` | `ai-framework` | `non-ai-platform` | `unknown`), orthogonal `applicationCapabilities`, official `aprf-profile-framework` (7 primitive Checks), and canonical `resolveAssessmentTarget()` in `@stackrail-io/aprf-framework-definition@0.12.0`. CLI: `--system-type` required for assess/audit/resolve-target (TTY interactive prompt when omitted; non-TTY needs the flag, `APRF_SYSTEM_TYPE`, or `--profile framework` — no silent Core default); `--capabilities`; `aprf resolve-target --json`; `assessmentKind=aprf-framework` + `scope.reportBanner` for claim honesty. `@stackrail-io/aprf@0.1.6` pins framework-definition `0.12.0`.
 
 ### Fixed
+- Filesystem walk is BFS with a 20000-file default, skips i18n/locales/static/_next/out (not `examples/`), shares one file index per collect, and records `walkMeta` on `assessment.json` (informational; never gates). Truncation is true only when matching files remain after the cap.
+- Empty domains score `null`, not 100.
 - RFC-0015 collectors: no synthetic `agent-N` inventory rows; exercise PASS requires listed `cases`/`results`/`samples` (numeric `caseCount` is not a pack); capability-graph confused-deputy only when an MCP hop is followed later by data/API; Agents-lens repo heuristics narrowed; inventory history records the current digest on every write.
 - RFC-0015 follow-up: deny vs sample case semantics; fresh-file case counting; graph import shape checks; TOL-M6 no longer PASSes on graph-proven absence.
 - Engine `evaluateRules({ runDetectors: true })` no longer AND-fails on `manual-attest` (attestation fallback is skipped when scoring real detectors), so hybrids can PASS.
@@ -20,6 +24,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 - Relabel **AGN-M1** from `automated` → `hybrid` (keeps `manual-attest` fallback; default evidence floor E3). Loader rejects `automated` + `manual-attest`.
 
 ### Changed
+- **Breaking CLI:** `aprf audit` / `aprf assess` exit **2** when the mandatory gate FAILs. Pass `--no-fail-on-gate` for the previous exit 0. Missing `--target` exits 1. Non-TTY missing `--system-type` prints a one-line error (no stack).
 - Catalog P1 tooling (build/CI hygiene): `build-catalog` runs full YAML lint/path checks; CI diffs `evidence-type-ids.ts` with `catalog.ts`; pruned unused detector allowlist entries; INF siblings `relatedRules` point at `SCI-R1` instead of deprecated `INF-R1`.
 - N/A existence gates in `passCondition` for reliability, model-lifecycle, and agents Checks (synced into `aprf-spec.json`); polished gate wording (explicit subjects; PRM-M3/EVL/AGN-R1/PRM-R2 scope fixes); **CHG-M1** / `prompt-model-version-retention` evaluate prompts and model pins per in-scope type (pin inference excludes provider SDK names; explicit `inUse=false` → N/A).
 - N/A existence gates in `passCondition` for data, governance, safety, security, cost, and cross-cutting Checks (synced into `aprf-spec.json`); polished gate wording (explicit subjects; DG-M2/PRI-M3/CMP-M3/CMP-R3/ORG-R3 scope fixes).

@@ -71,7 +71,7 @@ This is the **normative public home** for APRF (three planes + governance), plus
 ```bash
 npm install @stackrail-io/aprf-engine @stackrail-io/aprf-framework-definition
 # Optional CLI (collect → assess v0 → REPORT.html):
-npx @stackrail-io/aprf audit --target . --profile core
+npx @stackrail-io/aprf audit --target . --system-type ai-application --profile core
 ```
 
 ### Packages at a glance

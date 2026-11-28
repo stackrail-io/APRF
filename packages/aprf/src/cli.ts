@@ -1,21 +1,24 @@
 /**
  * @stackrail-io/aprf — local APRF CLI (no StackRail backend).
  *
- *   npx @stackrail-io/aprf collect --target . --out ./aprf-assessment
- *   npx @stackrail-io/aprf assess  --out ./aprf-assessment --profile core
+ *   npx @stackrail-io/aprf collect --target . --out ./aprf-assessment --system-type ai-application
+ *   npx @stackrail-io/aprf assess  --out ./aprf-assessment --system-type ai-application --profile core
  *   npx @stackrail-io/aprf resolve-target --system-type ai-framework --json
  *   npx @stackrail-io/aprf report  --in ./aprf-assessment/assessment.json
  *   npx @stackrail-io/aprf verify  ./aprf-assessment/REPORT.html
- *   npx @stackrail-io/aprf audit   --target . --profile core --base-url … …
+ *   npx @stackrail-io/aprf audit   --target . --system-type ai-application --profile core --base-url … …
  *   npx @stackrail-io/aprf version
  */
-import { resolve } from "node:path";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import {
   runCollectors,
   type CollectOptions,
 } from "../../../skills/aprf-auditor/collectors/runner.ts";
+import { COLLECTORS } from "../../../skills/aprf-auditor/collectors/index.ts";
+import { DEFAULT_MAX_FILES } from "../../../skills/aprf-auditor/collectors/lib/fs.ts";
 import { writeAssessmentHtmlReport } from "../../../skills/aprf-auditor/scripts/render-html-report.ts";
 import { verifyHtmlReport } from "../../../skills/aprf-auditor/scripts/verify-html-report.ts";
 import {
@@ -52,6 +55,7 @@ Usage:
   aprf verify         [REPORT.html]
   aprf audit          [collect options] [assess options]
                       (collect → assess → report → verify)
+  aprf init-imports   [--out <dir>]
   aprf version
 
 Collect / audit options (live credentials are never written to reports):
@@ -70,7 +74,9 @@ Collect / audit options (live credentials are never written to reports):
                          Env: APRF_AUTHZ_LIMITED_EMAIL
   --limited-password <p> Limited-user password. Env: APRF_AUTHZ_LIMITED_PASSWORD
   --limited-token <t>    Limited-user bearer token. Env: APRF_AUTHZ_LIMITED_TOKEN
-  --max-files <n>        Filesystem walk cap (default: 4000)
+  --max-files <n>        Filesystem walk cap (default: 20000)
+  --no-fail-on-gate      Keep exit 0 when the mandatory gate FAILs
+                         (default: audit/assess exit 2 on gate FAIL)
 
 Assess / audit / resolve-target options:
   --profile <id>         core | regulated | framework | aprf-profile-*
@@ -180,9 +186,10 @@ Select assessment target kind (required — do not assume Core):
     }
   }
 
-  throw new Error(
+  console.error(
     "Missing --system-type. Pass --system-type ai-application|ai-framework|non-ai-platform (or APRF_SYSTEM_TYPE), or --profile framework. Interactive prompt is available only on a TTY.",
   );
+  process.exit(1);
 }
 
 async function parseAssessFlags(argv: string[]) {
@@ -234,12 +241,20 @@ export function parseCollectOptions(argv: string[]): CollectOptions {
         (limitedEmail && limitedPassword),
     );
 
+  const targetFlag = takeFlag(argv, "--target");
+  const target = resolve(targetFlag ?? process.cwd());
+  if (targetFlag && !existsSync(target)) {
+    console.error(`aprf: --target does not exist: ${target}`);
+    process.exit(1);
+  }
+
   return {
-    target: resolve(takeFlag(argv, "--target") ?? process.cwd()),
+    target,
     outDir: defaultOut(argv),
     live,
     plugins: takeFlag(argv, "--plugins")?.split(",").filter(Boolean),
-    maxFiles: Number(takeFlag(argv, "--max-files") ?? 4000),
+    maxFiles: Number(takeFlag(argv, "--max-files") ?? DEFAULT_MAX_FILES),
+    systemType: parseSystemType(argv),
     baseUrl,
     adminToken,
     adminEmail,
@@ -250,6 +265,22 @@ export function parseCollectOptions(argv: string[]): CollectOptions {
   };
 }
 
+function gateFailed(assessment: unknown): boolean {
+  const exec = (assessment as { executiveSummary?: { overallGatePassed?: boolean } })
+    ?.executiveSummary;
+  return exec?.overallGatePassed === false;
+}
+
+function exitOnGateFail(assessment: unknown, argv: string[]): void {
+  if (hasFlag(argv, "--no-fail-on-gate")) return;
+  if (gateFailed(assessment)) {
+    console.error(
+      "aprf: overall mandatory gate FAIL (exit 2). Pass --no-fail-on-gate to keep exit 0.",
+    );
+    process.exit(2);
+  }
+}
+
 async function cmdCollect(argv: string[]) {
   return runCollectors(parseCollectOptions(argv));
 }
@@ -257,11 +288,12 @@ async function cmdCollect(argv: string[]) {
 async function cmdAssess(argv: string[]) {
   const outDir = defaultOut(argv);
   const flags = await parseAssessFlags(argv);
-  const { path } = writeAssessment({
+  const { path, assessment } = writeAssessment({
     outDir,
     ...flags,
   });
   console.log(`Wrote ${path}`);
+  exitOnGateFail(assessment, argv);
   return path;
 }
 
@@ -336,6 +368,31 @@ function cmdVersion() {
   );
 }
 
+function cmdInitImports(argv: string[]) {
+  const outDir = defaultOut(argv);
+  for (const c of COLLECTORS) {
+    const dir = join(outDir, "imports", c.id);
+    mkdirSync(dir, { recursive: true });
+    const readme = join(dir, "README.md");
+    if (existsSync(readme)) continue;
+    writeFileSync(
+      readme,
+      `# ${c.id}
+
+Drop measured import JSON here (with a recent \`measuredAt\`) to unlock PASS for related Checks.
+
+Repo-only scans find code signals (often PARTIAL / NOT_DEMONSTRATED) and cannot PASS E4 hybrid Checks.
+
+See the collector plugin YAML under \`skills/aprf-auditor/plugins/${c.id}.yaml\`.
+`,
+      "utf8",
+    );
+  }
+  console.log(
+    `Wrote import stubs under ${join(outDir, "imports")} (${COLLECTORS.length} collectors).`,
+  );
+}
+
 async function cmdAudit(argv: string[]) {
   const collectOpts = parseCollectOptions(argv);
   const flags = await parseAssessFlags(argv);
@@ -367,10 +424,11 @@ async function cmdAudit(argv: string[]) {
           : ""),
     );
   }
+  collectOpts.systemType = flags.systemType;
   await runCollectors(collectOpts);
   const outDir = collectOpts.outDir;
   // Reuse already-resolved flags (avoid a second interactive prompt).
-  const { path: assessmentPath } = writeAssessment({
+  const { path: assessmentPath, assessment } = writeAssessment({
     outDir,
     ...flags,
   });
@@ -387,6 +445,7 @@ async function cmdAudit(argv: string[]) {
     process.exit(1);
   }
   console.log(`OK: audit complete → ${htmlOut}`);
+  exitOnGateFail(assessment, argv);
 }
 
 async function main() {
@@ -412,6 +471,9 @@ async function main() {
       break;
     case "audit":
       await cmdAudit(argv.slice(1));
+      break;
+    case "init-imports":
+      cmdInitImports(argv.slice(1));
       break;
     case "version":
     case "--version":

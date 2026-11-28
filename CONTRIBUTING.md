@@ -55,7 +55,7 @@ npm run validate   # rules + catalog + integrity + threat-map + collectors + tes
 npm run build      # publishable dist/ (engine, framework-definition, CLI)
 npm run publish:packages   # requires npm login to @stackrail-io org
 # Local CLI without publish:
-npm run build -w @stackrail-io/aprf && node packages/aprf/dist/cli.js audit --target . --profile core
+npm run build -w @stackrail-io/aprf && node packages/aprf/dist/cli.js audit --target . --system-type ai-application --profile core
 ```
 
 If YAML Checks change, commit the regenerated:

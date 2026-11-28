@@ -7,6 +7,7 @@ import {
   existsSync,
   cpSync,
 } from "node:fs";
+import { execSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as esbuild from "esbuild";
@@ -17,6 +18,17 @@ const dist = resolve(pkgRoot, "dist");
 const repoRoot = resolve(pkgRoot, "../..");
 
 mkdirSync(dist, { recursive: true });
+
+let gitSha = "unknown";
+try {
+  gitSha = execSync("git rev-parse --short HEAD", {
+    cwd: repoRoot,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+  }).trim();
+} catch {
+  gitSha = "unknown";
+}
 
 // Charter spec/examples are read at report-render time from disk (bundled path).
 const charterExamples = resolve(
@@ -55,6 +67,9 @@ await esbuild.build({
   // Collectors / skill scripts live outside this package.
   absWorkingDir: repoRoot,
   logLevel: "info",
+  define: {
+    __APRF_GIT_SHA__: JSON.stringify(gitSha === "unknown" ? "" : gitSha),
+  },
 });
 
 chmodSync(resolve(dist, "cli.js"), 0o755);
@@ -62,7 +77,7 @@ chmodSync(resolve(dist, "cli.js"), 0o755);
 // Tiny package marker for runtime version reporting inside the bundle path.
 writeFileSync(
   resolve(dist, "BUILD.json"),
-  `${JSON.stringify({ builtAt: new Date().toISOString() }, null, 2)}\n`,
+  `${JSON.stringify({ builtAt: new Date().toISOString(), gitSha }, null, 2)}\n`,
 );
 
 for (const name of ["LICENSE", "NOTICE"]) {
