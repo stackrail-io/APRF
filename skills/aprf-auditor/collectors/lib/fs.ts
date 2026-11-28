@@ -150,6 +150,11 @@ export function walkCap(maxFiles?: number): number {
   return maxFiles ?? DEFAULT_MAX_FILES;
 }
 
+function indexCoversRequestedExtensions(exts?: string[]): boolean {
+  if (!exts || exts.length === 0) return false;
+  return exts.every((ext) => INDEX_EXTENSIONS.includes(ext));
+}
+
 export function isSkippedScanRelPath(relPath: string): boolean {
   return SKIP_SCAN_DIR_RE.test(relPath);
 }
@@ -252,7 +257,9 @@ export function walkFiles(
   if (
     !opts.skipIndex &&
     sharedIndex &&
-    absRoot === sharedIndex.root
+    absRoot === sharedIndex.root &&
+    !sharedIndex.meta.truncated &&
+    indexCoversRequestedExtensions(exts)
   ) {
     const filtered = sharedIndex.files.filter((p) => {
       if (exts && !exts.some((x) => p.endsWith(x))) return false;
@@ -264,7 +271,7 @@ export function walkFiles(
     });
     const sliced = filtered.slice(0, max);
     lastMeta = {
-      truncated: sharedIndex.meta.truncated || filtered.length > max,
+      truncated: filtered.length > max,
       scanned: sliced.length,
       cappedAt: max,
     };
@@ -288,11 +295,54 @@ export function walkFiles(
     return false;
   };
 
+  const fileMatches = (p: string, name: string): boolean => {
+    if (exts && !exts.some((x) => name.endsWith(x))) return false;
+    if (isUnderSkipAbsoluteDir(p)) return false;
+    if (callSkips.some((skip) => p === skip || p.startsWith(skip + sep))) {
+      return false;
+    }
+    return true;
+  };
+
+  const pendingHasMatchingFile = (dirs: string[]): boolean => {
+    const pending = [...dirs];
+    const seen = new Set<string>();
+    while (pending.length) {
+      const d = pending.shift()!;
+      if (seen.has(d)) continue;
+      seen.add(d);
+      let entries;
+      try {
+        entries = readdirSync(d, { withFileTypes: true });
+      } catch {
+        continue;
+      }
+      for (const e of entries) {
+        const name = e.name;
+        if (
+          name.startsWith(".") &&
+          name !== ".github" &&
+          name !== ".env.example"
+        ) {
+          if (e.isDirectory() && name !== ".github") continue;
+        }
+        const p = join(d, name);
+        if (e.isDirectory()) {
+          if (shouldSkipDir(resolve(p), name, d)) continue;
+          pending.push(p);
+        } else if (e.isFile() && fileMatches(p, name)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
   const queue: string[] = [root];
   let truncated = false;
   while (queue.length) {
     if (out.length >= max) {
-      truncated = true;
+      truncated = truncated || pendingHasMatchingFile(queue);
       break;
     }
     const dir = queue.shift()!;
@@ -320,11 +370,7 @@ export function walkFiles(
         if (isDeprioritizedDirName(name)) delayedDirs.push(p);
         else nextDirs.push(p);
       } else if (e.isFile()) {
-        if (exts && !exts.some((x) => name.endsWith(x))) continue;
-        if (isUnderSkipAbsoluteDir(p)) continue;
-        if (callSkips.some((skip) => p === skip || p.startsWith(skip + sep))) {
-          continue;
-        }
+        if (!fileMatches(p, name)) continue;
         if (out.length >= max) {
           truncated = true;
           continue;
@@ -333,9 +379,9 @@ export function walkFiles(
       }
     }
     if (out.length >= max) {
-      if (nextDirs.length || delayedDirs.length || queue.length) {
-        truncated = true;
-      }
+      truncated =
+        truncated ||
+        pendingHasMatchingFile([...nextDirs, ...delayedDirs, ...queue]);
       break;
     }
     queue.push(...nextDirs, ...delayedDirs);

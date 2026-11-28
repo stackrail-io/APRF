@@ -5,12 +5,14 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+  buildSharedFileIndex,
   clearWalkSkipAbsoluteDirs,
   configureWalkSkipForCollect,
   DEFAULT_MAX_FILES,
   isSkippedScanRelPath,
   lastWalkMeta,
   rel,
+  setSharedFileIndex,
   walkFiles,
 } from "../collectors/lib/fs.ts";
 
@@ -146,6 +148,69 @@ function main() {
     );
   }
   rmSync(capRoot, { recursive: true, force: true });
+
+  const emptyDirRoot = mkdtempSync(join(tmpdir(), "aprf-walk-empty-dir-"));
+  mkdirSync(join(emptyDirRoot, "empty"), { recursive: true });
+  writeFileSync(join(emptyDirRoot, "a.py"), "a=1\n", "utf8");
+  walkFiles(emptyDirRoot, {
+    maxFiles: 1,
+    extensions: [".py"],
+    skipIndex: true,
+  });
+  const emptyDirMeta = lastWalkMeta();
+  rmSync(emptyDirRoot, { recursive: true, force: true });
+  if (emptyDirMeta.truncated) {
+    throw new Error(
+      `empty pending dir must not truncate: ${JSON.stringify(emptyDirMeta)}`,
+    );
+  }
+
+  const htmlRoot = mkdtempSync(join(tmpdir(), "aprf-walk-html-"));
+  writeFileSync(join(htmlRoot, "notice.html"), "<p>ai disclosure</p>\n", "utf8");
+  writeFileSync(join(htmlRoot, "app.py"), "print(1)\n", "utf8");
+  const htmlIndex = buildSharedFileIndex(htmlRoot, 20);
+  setSharedFileIndex(htmlIndex);
+  try {
+    const htmlFiles = walkFiles(htmlRoot, {
+      maxFiles: 20,
+      extensions: [".html"],
+    });
+    if (!htmlFiles.some((f) => f.endsWith("notice.html"))) {
+      throw new Error(
+        `index must not hide .html: ${JSON.stringify(htmlFiles)}`,
+      );
+    }
+  } finally {
+    setSharedFileIndex(null);
+    rmSync(htmlRoot, { recursive: true, force: true });
+  }
+
+  const floodRoot = mkdtempSync(join(tmpdir(), "aprf-walk-flood-"));
+  mkdirSync(join(floodRoot, "src"), { recursive: true });
+  for (let i = 0; i < 40; i++) {
+    writeFileSync(join(floodRoot, `pad-${i}.sh`), `echo ${i}\n`, "utf8");
+  }
+  writeFileSync(join(floodRoot, "src", "app.py"), "print(1)\n", "utf8");
+  const floodIndex = buildSharedFileIndex(floodRoot, 8);
+  if (!floodIndex.meta.truncated) {
+    throw new Error(`expected truncated shared index: ${JSON.stringify(floodIndex.meta)}`);
+  }
+  setSharedFileIndex(floodIndex);
+  try {
+    const pyFiles = walkFiles(floodRoot, {
+      maxFiles: 50,
+      extensions: [".py"],
+    });
+    if (!pyFiles.some((f) => f.endsWith("app.py"))) {
+      throw new Error(
+        `truncated index must fall back so .py is found: ${JSON.stringify(pyFiles)}`,
+      );
+    }
+  } finally {
+    setSharedFileIndex(null);
+    rmSync(floodRoot, { recursive: true, force: true });
+  }
+
   console.log("walk-skip-assessment smoke OK");
 }
 

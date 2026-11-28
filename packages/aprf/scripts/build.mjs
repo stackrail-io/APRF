@@ -21,13 +21,14 @@ mkdirSync(dist, { recursive: true });
 
 let gitSha = "unknown";
 try {
-  gitSha = execSync("git rev-parse --short HEAD", {
+  const sha = execSync("git rev-parse --short HEAD", {
     cwd: repoRoot,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "ignore"],
   }).trim();
+  if (sha) gitSha = sha;
 } catch {
-  gitSha = "unknown";
+  /* keep unknown */
 }
 
 // Charter spec/examples are read at report-render time from disk (bundled path).

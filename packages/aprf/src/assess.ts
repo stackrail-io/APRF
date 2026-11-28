@@ -1002,6 +1002,7 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
   }
 
   const controls: ControlOut[] = [];
+  let measuredPassCount = 0;
 
   for (const checkId of [...checkIds].sort()) {
     const rule = rulesById.get(checkId);
@@ -1054,6 +1055,9 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
     // Below-floor evidence cannot PASS (APRF-RFC-0011).
     if (status === "PASS" && !tierMeetsFloor(achievedTier, minimumTier)) {
       status = "PARTIAL";
+    }
+    if (status === "PASS" && measuredImportPresent) {
+      measuredPassCount += 1;
     }
     const notApplicable = status === "NOT_APPLICABLE";
     // scoring.yaml: N/A is excluded, not a pass
@@ -1372,7 +1376,6 @@ export function assessFromStatusHints(opts: AssessOptions): unknown {
   const codeFoundCount = controls.filter(
     (c) => c.status === "PARTIAL" || c.status === "FAIL",
   ).length;
-  const measuredPassCount = controls.filter((c) => c.status === "PASS").length;
   const notDemonstratedCount = controls.filter(
     (c) => c.status === "NOT_DEMONSTRATED",
   ).length;
