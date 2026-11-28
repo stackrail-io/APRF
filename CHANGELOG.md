@@ -17,6 +17,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versioning is Se
 ### Fixed
 - Filesystem walk is BFS with a 20000-file default, skips i18n/locales/static/_next/out (not `examples/`), shares one file index per collect, and records `walkMeta` on `assessment.json` (informational; never gates). Truncation is true only when matching files remain after the cap.
 - Empty domains score `null`, not 100.
+- SEC2-M1 no longer FAILs on PEM headers, generic `api_key` assigns, comments/docstrings, regex literals, or parser/example keys.
+- In-scope AI apps score missing harm-policy / disclosure / playbooks / journey-SLO as NOT_DEMONSTRATED, not N/A.
+- Eval-CI, traces, agent-loop, and injection-policy matching ignore generic PR workflows, bare `openai`/`anthropic`/`mcp`, `has_permission`, and credential-injection tests.
+- HTTP auth probe no longer seeds builtin AI prefixes when no OpenAPI/FastAPI routes were found.
 - RFC-0015 collectors: no synthetic `agent-N` inventory rows; exercise PASS requires listed `cases`/`results`/`samples` (numeric `caseCount` is not a pack); capability-graph confused-deputy only when an MCP hop is followed later by data/API; Agents-lens repo heuristics narrowed; inventory history records the current digest on every write.
 - RFC-0015 follow-up: deny vs sample case semantics; fresh-file case counting; graph import shape checks; TOL-M6 no longer PASSes on graph-proven absence.
 - Engine `evaluateRules({ runDetectors: true })` no longer AND-fails on `manual-attest` (attestation fallback is skipped when scoring real detectors), so hybrids can PASS.

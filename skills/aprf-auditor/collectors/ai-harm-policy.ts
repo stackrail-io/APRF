@@ -9,11 +9,12 @@
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
-import type {
-  Collector,
-  CollectorContext,
-  CollectorResult,
-  EvidenceNode,
+import {
+  missingCoreSurfaceStatus,
+  type Collector,
+  type CollectorContext,
+  type CollectorResult,
+  type EvidenceNode,
 } from "./types.ts";
 import {
   ensureDir,
@@ -23,6 +24,7 @@ import {
   redact,
   rel,
   walkFiles,
+  walkCap,
 } from "./lib/fs.ts";
 import {
   asBool,
@@ -99,7 +101,7 @@ function collectRefs(
 ): string[] {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [".md", ".txt", ".yml", ".yaml", ".json", ".pdf", ".html"],
   });
   for (const f of files) {
@@ -182,16 +184,20 @@ export function buildAiHarmPolicyReport(opts: {
   actions: { found: boolean; refs: string[] };
   metadata: { found: boolean; refs: string[] };
   imported: AiHarmPolicyReport["importedResults"];
+  systemType?: string;
 }): AiHarmPolicyReport {
   const notes: string[] = [];
   const policySignalsPresent =
     opts.taxonomy.found ||
     (opts.categories.found && opts.actions.found) ||
     opts.metadata.found;
+  const emptyHint = missingCoreSurfaceStatus(opts.systemType);
+  const emptyLabel =
+    emptyHint === "not_applicable" ? "NOT_APPLICABLE" : "NOT_DEMONSTRATED";
 
   if (!policySignalsPresent && !opts.imported.found) {
     notes.push(
-      "No domain-specific AI safety policy signals — SAF-M1 may be NOT_APPLICABLE if there is no AI user- or tool-facing behavior in scope.",
+      `No domain-specific AI safety policy signals — SAF-M1 is ${emptyLabel} until policy evidence or an explicit N/A import is present.`,
     );
   }
   if (opts.taxonomy.found) {
@@ -242,8 +248,11 @@ export function buildAiHarmPolicyReport(opts: {
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
   if (!policySignalsPresent && !opts.imported.found) {
-    statusHint = "not_applicable";
+    statusHint = emptyHint;
     safM1Satisfied = null;
+    notes.push(
+      `No harm-policy signals — SAF-M1 remains ${emptyLabel} until policy evidence or an explicit N/A import is present.`,
+    );
   } else if (explicitFail) {
     statusHint = "fail";
     safM1Satisfied = false;
@@ -281,7 +290,7 @@ export function buildAiHarmPolicyReport(opts: {
       );
     }
   } else {
-    statusHint = "not_demonstrated";
+    statusHint = emptyHint;
     safM1Satisfied = null;
   }
 
@@ -310,7 +319,7 @@ export function buildAiHarmPolicyReport(opts: {
 export const aiHarmPolicyCollector: Collector = {
   id: PLUGIN_ID,
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
-    const maxFiles = ctx.maxFiles ?? 8000;
+    const maxFiles = walkCap(ctx.maxFiles);
 
     const taxonomyRefs = collectRefs(
       ctx.targetPath,
@@ -349,6 +358,7 @@ export const aiHarmPolicyCollector: Collector = {
       actions: { found: actionRefs.length > 0, refs: actionRefs },
       metadata: { found: metadataRefs.length > 0, refs: metadataRefs },
       imported,
+      systemType: ctx.systemType,
     });
 
     ensureDir(importDir(ctx));

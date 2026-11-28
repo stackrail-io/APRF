@@ -96,6 +96,57 @@ async function main() {
     if (r3.summary.statusHint !== "fail" || r3.summary.evlM1Satisfied !== false) {
       throw new Error(`fail expected: ${JSON.stringify(r3.summary)}`);
     }
+    const tCi = join(root, "t-ci");
+    mkdirSync(join(tCi, ".github", "workflows"), { recursive: true });
+    mkdirSync(join(tCi, "src"), { recursive: true });
+    writeFileSync(join(tCi, "src", "app.py"), "import openai\nclient = openai.OpenAI()\n");
+    writeFileSync(
+      join(tCi, ".github", "workflows", "ci.yml"),
+      "name: CI\non:\n  pull_request:\n  push:\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - run: pytest\n",
+    );
+    const rCi = await run(tCi, join(root, "o-ci"));
+    if (rCi.signals.ciTriggers.found) {
+      throw new Error(
+        `generic pull_request/push workflow must not count as eval CI: ${JSON.stringify(rCi.signals.ciTriggers)}`,
+      );
+    }
+    if (rCi.summary.evalSignalsPresent) {
+      throw new Error(
+        `bare openai import must not count as eval signals: ${JSON.stringify(rCi.summary)}`,
+      );
+    }
+    if (rCi.summary.statusHint === "partial") {
+      throw new Error(
+        `ciTriggers alone must not yield PARTIAL: ${JSON.stringify(rCi.summary)}`,
+      );
+    }
+
+    const tEvalWf = join(root, "t-eval-wf");
+    mkdirSync(join(tEvalWf, ".github", "workflows"), { recursive: true });
+    writeFileSync(
+      join(tEvalWf, ".github", "workflows", "run_evals.yml"),
+      "name: run_evals\non:\n  pull_request:\njobs:\n  eval:\n    runs-on: ubuntu-latest\n    steps:\n      - run: npx promptfoo eval\n",
+    );
+    const rEvalWf = await run(tEvalWf, join(root, "o-eval-wf"));
+    if (!rEvalWf.signals.ciTriggers.found) {
+      throw new Error(
+        `run_evals.yml must count as eval CI: ${JSON.stringify(rEvalWf.signals)}`,
+      );
+    }
+
+    const tOnyx = join(root, "t-onyx");
+    mkdirSync(join(tOnyx, ".github", "workflows"), { recursive: true });
+    writeFileSync(
+      join(tOnyx, ".github", "workflows", "pr-connector-filter-eval.yml"),
+      "name: Connector Filter Eval\non:\n  pull_request:\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - run: pytest tests/eval\n",
+    );
+    const rOnyx = await run(tOnyx, join(root, "o-onyx"));
+    if (!rOnyx.signals.ciTriggers.found) {
+      throw new Error(
+        `pr-connector-filter-eval.yml must count as eval CI: ${JSON.stringify(rOnyx.signals)}`,
+      );
+    }
+
     console.log("eval-suite-ci smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

@@ -21,6 +21,7 @@ import {
   readText,
   redact,
   rel,
+  walkCap,
   walkFiles,
 } from "./lib/fs.ts";
 import { withReportEvidenceTypes } from "./lib/evidence-types.ts";
@@ -83,12 +84,22 @@ const EMBEDDED_PATTERNS: Array<{ id: string; re: RegExp }> = [
 const PROMPT_FIXTURE_HINT =
   /(prompt|fixture|notebook|\.ipynb|eval|testdata|sample|__tests__|__mocks__|\.test\.|\.spec\.|(^|[/\\])(tests?|specs?|e2e|mocks?)[/\\])/i;
 
+const HIGH_CONFIDENCE_IDS = new Set([
+  "aws-access-key",
+  "aws-secret-assign",
+  "openai-sk",
+  "github-pat",
+  "slack-token",
+]);
+
 export interface EmbeddedFinding {
   patternId: string;
   ref: string;
   /** Line number only — never the secret value */
   line: number;
   inPromptOrFixture: boolean;
+  /** Weak hits (generic api_key / PEM header) never FAIL SEC2-M1. */
+  confidence: "high" | "weak";
 }
 
 export interface SecretsHygieneReport {
@@ -165,7 +176,7 @@ function detectSecretsManager(
 ): { found: boolean; refs: string[] } {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [
       ".yaml",
       ".yml",
@@ -210,7 +221,7 @@ function detectSecretScanConfig(
     }
   }
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 3000),
+    maxFiles,
     extensions: [".toml", ".yml", ".yaml", ".json", ".cfg", ".baseline"],
   });
   for (const f of files) {
@@ -237,13 +248,92 @@ function lineOf(text: string, index: number): number {
   return text.slice(0, index).split(/\r?\n/).length;
 }
 
+function lineAt(text: string, index: number): string {
+  const start = text.lastIndexOf("\n", index - 1) + 1;
+  const end = text.indexOf("\n", index);
+  return text.slice(start, end < 0 ? text.length : end);
+}
+
+function fullPemBody(text: string, index: number): boolean {
+  return /-----END (?:RSA |OPENSSH |EC )?PRIVATE KEY-----/.test(
+    text.slice(index, index + 4000),
+  );
+}
+
+function skipHeuristicHit(
+  path: string,
+  text: string,
+  index: number,
+  matched: string,
+  id: string,
+): boolean {
+  const lead = text.slice(Math.max(0, index - 160), index);
+  const trail = text.slice(index + matched.length, index + matched.length + 160);
+  const line = lineAt(text, index);
+  const trimmed = line.trimStart();
+  if (
+    trimmed.startsWith("#") ||
+    trimmed.startsWith("//") ||
+    trimmed.startsWith("*") ||
+    trimmed.startsWith("/*")
+  ) {
+    return true;
+  }
+  if (/(^|[^A-Za-z])Example\b/.test(line)) {
+    return true;
+  }
+  const docLead = text.slice(Math.max(0, index - 400), index);
+  for (const q of ['"""', "'''"] as const) {
+    const open = docLead.lastIndexOf(q);
+    if (open < 0) continue;
+    const body = docLead.slice(open + q.length);
+    if (!body.includes(q) && /\bExample\b/.test(docLead.slice(open))) {
+      return true;
+    }
+  }
+  if (
+    /\/[gimuy]{0,5}\s*[,;)]/.test(trail) &&
+    /[=(,]\s*\//.test(lead)
+  ) {
+    return true;
+  }
+  if (
+    /re\.(compile|search|match|findall|fullmatch)\s*\(\s*[rRfF]?['"]?$/.test(
+      lead.trimEnd(),
+    ) ||
+    /new\s+RegExp\s*\(/.test(lead)
+  ) {
+    return true;
+  }
+  if (/(parser|testdata|fixtures?|_next)([/\\]|$)/i.test(path)) {
+    return true;
+  }
+  if (
+    id === "generic-api-key-assign" &&
+    /algolia/i.test(path + "\n" + text.slice(0, 400)) &&
+    /search.?only|searchOnly|ALGOLIA_SEARCH/i.test(path + text)
+  ) {
+    return true;
+  }
+  const window = lead + trail;
+  if (
+    HIGH_CONFIDENCE_IDS.has(id) &&
+    /\.\.\.|your[_-]|changeme|placeholder|<[^>]*>|xxx+|not[_-]?a[_-]?real|dummy|sk-your/i.test(
+      window,
+    )
+  ) {
+    return true;
+  }
+  return false;
+}
+
 function heuristicEmbeddedScan(
   targetPath: string,
   maxFiles: number,
 ): EmbeddedFinding[] {
   const findings: EmbeddedFinding[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 4000),
+    maxFiles,
     extensions: [
       ".py",
       ".ts",
@@ -294,6 +384,7 @@ function heuristicEmbeddedScan(
         // about what follows, so inspect a short trailing window: an elided or
         // placeholder body means this is documentation, not a real key.
         if (
+          skipHeuristicHit(r, text, m.index, matched, id) ||
           /\.\.\.|your[_-]|changeme|example|placeholder|<[^>]*>/i.test(
             text.slice(m.index + matched.length, m.index + matched.length + 40),
           )
@@ -303,18 +394,20 @@ function heuristicEmbeddedScan(
         if (/\.env\.example$/i.test(r) && id === "generic-api-key-assign") {
           continue;
         }
-        // Markdown documents usage; an assignment in prose is an illustrative
-        // example, not a production runtime secret. Same rationale as
-        // .env.example above. Higher-entropy provider patterns (aws-access-key,
-        // slack-token, private-key-block) still count wherever they appear.
         if (/\.md$/i.test(r) && id === "generic-api-key-assign") {
           continue;
         }
+        const pemComplete =
+          id !== "private-key-block" || fullPemBody(text, m.index);
+        const weak =
+          id === "generic-api-key-assign" ||
+          (id === "private-key-block" && !pemComplete);
         findings.push({
           patternId: id,
           ref: r,
           line: lineOf(text, m.index),
           inPromptOrFixture: inPrompt,
+          confidence: weak ? "weak" : "high",
         });
         if (findings.length >= 50) return findings;
       }
@@ -524,7 +617,10 @@ export function buildSecretsReport(opts: {
   // SEC2-M1 governs *production* runtime secrets. Test and fixture material is
   // reported for visibility but must not fail the control or block N/A on its own.
   const embeddedProductionCount = opts.embedded.filter(
-    (f) => !f.inPromptOrFixture,
+    (f) => !f.inPromptOrFixture && f.confidence !== "weak",
+  ).length;
+  const embeddedWeakProductionCount = opts.embedded.filter(
+    (f) => !f.inPromptOrFixture && f.confidence === "weak",
   ).length;
   // Only production-path embeds (or manager wiring) prove the surface exists.
   const surfaceProvedForNaOverride =
@@ -564,7 +660,7 @@ export function buildSecretsReport(opts: {
   }
   if (embeddedCount > 0) {
     notes.push(
-      `Heuristic scan found ${embeddedCount} high-confidence embedded secret pattern(s) (values redacted; ${embeddedInPrompts} in prompt/fixture/test paths, ${embeddedProductionCount} in production paths). Only production-path findings fail SEC2-M1.`,
+      `Heuristic scan found ${embeddedCount} embedded secret pattern(s) (values redacted; ${embeddedInPrompts} in prompt/fixture/test paths, ${embeddedProductionCount} high-confidence production, ${embeddedWeakProductionCount} weak/generic production). Only high-confidence production-path findings fail SEC2-M1.`,
     );
   }
 
@@ -672,6 +768,15 @@ export function buildSecretsReport(opts: {
       statusHint = "partial";
       sec2M1Satisfied = false;
     }
+  } else if (
+    embeddedWeakProductionCount > 0 &&
+    !opts.imported.found
+  ) {
+    statusHint = "partial";
+    sec2M1Satisfied = false;
+    notes.push(
+      "Generic api_key assignments or PEM headers without a key body are PARTIAL — not SEC2-M1 FAIL.",
+    );
   } else if (!gateSignalsPresent && !opts.imported.found) {
     statusHint = "not_demonstrated";
     sec2M1Satisfied = null;
@@ -755,12 +860,10 @@ export function buildSecretsReport(opts: {
 export const secretsHygieneCollector: Collector = {
   id: PLUGIN_ID,
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
-    const manager = detectSecretsManager(ctx.targetPath, ctx.maxFiles ?? 4000);
-    const scan = detectSecretScanConfig(ctx.targetPath, ctx.maxFiles ?? 4000);
-    const embedded = heuristicEmbeddedScan(
-      ctx.targetPath,
-      ctx.maxFiles ?? 4000,
-    );
+    const maxFiles = walkCap(ctx.maxFiles);
+    const manager = detectSecretsManager(ctx.targetPath, maxFiles);
+    const scan = detectSecretScanConfig(ctx.targetPath, maxFiles);
+    const embedded = heuristicEmbeddedScan(ctx.targetPath, maxFiles);
     const imported = loadImported(ctx);
 
     const report = withReportEvidenceTypes(

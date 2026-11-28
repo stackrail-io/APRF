@@ -101,6 +101,19 @@ async function main() {
     if (r3.summary.statusHint !== "fail" || r3.summary.evlM2Satisfied !== false) {
       throw new Error(`fail expected: ${JSON.stringify(r3.summary)}`);
     }
+
+    const tNoise = join(root, "t-noise");
+    mkdirSync(join(tNoise, "docs"), { recursive: true });
+    writeFileSync(
+      join(tNoise, "docs", "user-journey.md"),
+      "Customer journey docs mention a score threshold and benchmark quality.\n",
+    );
+    const rNoise = await run(tNoise, join(root, "o-noise"));
+    if (rNoise.signals.thresholds.found) {
+      throw new Error(
+        `journey+threshold prose must not count as eval gates: ${JSON.stringify(rNoise.signals)}`,
+      );
+    }
     console.log("eval-release-gates smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

@@ -36,6 +36,16 @@ export interface CollectorResult {
   nodes: EvidenceNode[];
 }
 
+/** Core user-facing AI apps: missing surface → ND. Framework/non-AI → N/A. Unset (direct collect) → ND. */
+export function missingCoreSurfaceStatus(
+  systemType?: string,
+): "not_demonstrated" | "not_applicable" {
+  if (systemType === "ai-framework" || systemType === "non-ai-platform") {
+    return "not_applicable";
+  }
+  return "not_demonstrated";
+}
+
 export interface CollectorContext {
   targetPath: string;
   outputDir: string;
@@ -45,7 +55,10 @@ export interface CollectorContext {
   live: boolean;
   /** Limit filesystem walk depth / file count for determinism + speed */
   maxFiles?: number;
-  /** Assessment target kind when known (audit/collect --system-type). */
+  /**
+   * Assessment target kind when known (audit/collect --system-type).
+   * User-facing AI apps score missing Core surfaces as NOT_DEMONSTRATED, not N/A.
+   */
   systemType?: string;
   /** Shared BFS walk + content cache for this collect run. */
   fileIndex?: import("./lib/fs.ts").SharedFileIndex;

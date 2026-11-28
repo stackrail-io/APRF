@@ -349,6 +349,43 @@ jobs:
       );
     }
 
+    const tFp = join(root, "t-fp");
+    mkdirSync(join(tFp, "src"), { recursive: true });
+    mkdirSync(join(tFp, "litellm"), { recursive: true });
+    mkdirSync(join(tFp, "_next", "static", "chunks"), { recursive: true });
+    const fakeSk = `sk-${"a".repeat(24)}`;
+    writeFileSync(
+      join(tFp, "src", "docs.py"),
+      `"""Example usage\n${fakeSk}\n"""\n# ${fakeSk}\napi_key = "xxxxxxxxxxxxxxxxxxxxxxxxxx"\n`,
+    );
+    writeFileSync(
+      join(tFp, "src", "algolia.ts"),
+      `export const ALGOLIA_SEARCH_ONLY_KEY = "algoliaSearchOnlyKeyValue12345";\n`,
+    );
+    writeFileSync(
+      join(tFp, "src", "pem_header.py"),
+      `print("-----BEGIN PRIVATE KEY-----")\n`,
+    );
+    writeFileSync(
+      join(tFp, "litellm", "key_management_endpoints.py"),
+      `def create_key():\n    """Example\n    ${fakeSk}\n    """\n    return True\n`,
+    );
+    mkdirSync(join(tFp, "testdata"), { recursive: true });
+    writeFileSync(
+      join(tFp, "testdata", "sample_key.py"),
+      `OPENAI_KEY = "${fakeSk}"\n`,
+    );
+    writeFileSync(
+      join(tFp, "_next", "static", "chunks", "main.js"),
+      `const k="${["AKIA", "JTESTKEYNOTREAL0"].join("")}";\n`,
+    );
+    const rFp = await run(tFp, join(root, "o-fp"));
+    if (rFp.summary.statusHint === "fail") {
+      throw new Error(
+        `benchmark-style placeholders must not FAIL: ${JSON.stringify(rFp.summary)} ${JSON.stringify(rFp.embeddedFindings)}`,
+      );
+    }
+
     console.log("aprf-auditor secrets-hygiene smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

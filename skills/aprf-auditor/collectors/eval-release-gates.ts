@@ -21,6 +21,7 @@ import {
   redact,
   rel,
   walkFiles,
+  walkCap,
   SCAN_EXTENSIONS,
 } from "./lib/fs.ts";
 import {
@@ -34,8 +35,9 @@ const RELATED = ["EVL-M2"] as const;
 const DETECTOR_ID = "repo-eval-release-gates";
 const IMPORT_MAX_AGE_DAYS = 90;
 
+/** Path token for eval/gate artifacts — not "journey" / "quality" substrings. */
 const EVAL_PATH_RE =
-  /(eval|evals|promptfoo|gate|threshold|quality|safety|journey)/i;
+  /(^|[/\\._-])(eval|evals|promptfoo|redteam|gates?|thresholds?)([/\\._-]|$)/i;
 
 const THRESHOLD_RE =
   /\b(threshold|min[_-]?score|pass[_-]?rate|quality[\s_-]*(metric|gate|threshold)|safety[\s_-]*(metric|gate|threshold)|numeric[\s_-]*threshold)\b/i;
@@ -100,7 +102,7 @@ function collectRefs(
 ): string[] {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [...SCAN_EXTENSIONS],
   });
   for (const f of files) {
@@ -120,7 +122,7 @@ function detectEvalSignals(targetPath: string, maxFiles: number): boolean {
       Math.min(maxFiles, 2000),
       (path, text) =>
         EVAL_PATH_RE.test(path) ||
-        /\b(promptfoo|openai|anthropic|llm|eval[\s_-]*suite)\b/i.test(text),
+        /\b(promptfoo|redteam|eval[\s_-]*suite|npx promptfoo)\b/i.test(text),
       5,
     ).length > 0
   );
@@ -325,7 +327,7 @@ export function buildEvalReleaseGatesReport(opts: {
 export const evalReleaseGatesCollector: Collector = {
   id: PLUGIN_ID,
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
-    const maxFiles = ctx.maxFiles ?? 8000;
+    const maxFiles = walkCap(ctx.maxFiles);
     const evalSignals = detectEvalSignals(ctx.targetPath, maxFiles);
 
     const thresholdRefs = collectRefs(
@@ -333,11 +335,7 @@ export const evalReleaseGatesCollector: Collector = {
       maxFiles,
       (path, text) => {
         if (!THRESHOLD_RE.test(path) && !THRESHOLD_RE.test(text)) return false;
-        return (
-          EVAL_PATH_RE.test(path) ||
-          EVAL_PATH_RE.test(text) ||
-          THRESHOLD_RE.test(path)
-        );
+        return EVAL_PATH_RE.test(path) || THRESHOLD_RE.test(path);
       },
     );
     const gateRefs = collectRefs(
@@ -350,7 +348,10 @@ export const evalReleaseGatesCollector: Collector = {
       ctx.targetPath,
       maxFiles,
       (path, text) =>
-        (THRESHOLD_RE.test(text) || GATE_RE.test(text) || EVAL_PATH_RE.test(path)) &&
+        (THRESHOLD_RE.test(path) ||
+          THRESHOLD_RE.test(text) ||
+          GATE_RE.test(path) ||
+          GATE_RE.test(text)) &&
         QUALITY_RE.test(text),
       12,
     );
@@ -358,7 +359,10 @@ export const evalReleaseGatesCollector: Collector = {
       ctx.targetPath,
       maxFiles,
       (path, text) =>
-        (THRESHOLD_RE.test(text) || GATE_RE.test(text) || EVAL_PATH_RE.test(path)) &&
+        (THRESHOLD_RE.test(path) ||
+          THRESHOLD_RE.test(text) ||
+          GATE_RE.test(path) ||
+          GATE_RE.test(text)) &&
         SAFETY_RE.test(text),
       12,
     );

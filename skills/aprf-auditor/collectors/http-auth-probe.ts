@@ -28,6 +28,7 @@ import {
   readText,
   redact,
   rel,
+  walkCap,
   walkFiles,
 } from "./lib/fs.ts";
 import {
@@ -417,7 +418,7 @@ function discoverFastapiRoutes(
   ].map((p) => join(targetPath, p));
 
   const pyFiles = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 8000),
+    maxFiles,
     extensions: [".py"],
   });
   const mainFiles = [
@@ -589,19 +590,24 @@ export function discoverRoutes(ctx: CollectorContext): {
     routes = override;
     sources.push("imports/http-auth-probe/routes.json");
   } else {
-    const fastapi = discoverFastapiRoutes(ctx.targetPath, ctx.maxFiles ?? 4000);
+    const cap = walkCap(ctx.maxFiles);
+    const fastapi = discoverFastapiRoutes(ctx.targetPath, cap);
     if (fastapi.routes.length) {
       routes.push(...fastapi.routes);
       sources.push("fastapi-router-methods");
       declaredAiRoutesTruncated = fastapi.declaredAiRoutesTruncated;
       declaredAiRouteTotal = fastapi.declaredAiRouteTotal;
     }
-    const openapi = discoverOpenApiFiles(ctx.targetPath, ctx.maxFiles ?? 4000);
+    const openapi = discoverOpenApiFiles(ctx.targetPath, cap);
     if (openapi.length) {
       routes.push(...openapi);
       sources.push("openapi-json");
     }
-    if (routes.filter((r) => r.aiSurface).length < 3) {
+    const discovered = fastapi.routes.length > 0 || openapi.length > 0;
+    const declaredAiCount = routes.filter(
+      (r) => r.aiSurface && r.declaredInCode,
+    ).length;
+    if (discovered && declaredAiCount > 0 && declaredAiCount < 3) {
       routes.push(...seedAiRoutes());
       sources.push("builtin-ai-prefix-hints");
     }
@@ -850,7 +856,7 @@ export async function runAuthProbe(
   ];
   if (get405.length) {
     notes.push(
-      `${get405.length} path(s) have no declared GET and returned 405. Hardening only — GET should also return 401/403; AUTHN-M1 is gated by declared methods from the repo.`,
+      `${get405.length} undeclared GET path(s) returned 405. Advisory only — AUTHN-M1 scores declared methods from the repo, not these GETs.`,
     );
   }
   if (getOpen.length) {

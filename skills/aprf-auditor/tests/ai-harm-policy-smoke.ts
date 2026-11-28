@@ -19,6 +19,7 @@ import type { CollectorContext } from "../collectors/types.ts";
 async function run(
   target: string,
   outDir: string,
+  systemType?: string,
 ): Promise<AiHarmPolicyReport> {
   await aiHarmPolicyCollector.collect({
     targetPath: target,
@@ -27,6 +28,7 @@ async function run(
     gitCommit: undefined,
     live: false,
     maxFiles: 2000,
+    systemType,
   } as CollectorContext);
   return JSON.parse(
     readFileSync(
@@ -97,6 +99,23 @@ async function main() {
     const r3 = await run(t3, out3);
     if (r3.summary.statusHint !== "fail" || r3.summary.safM1Satisfied !== false) {
       throw new Error(`fail expected: ${JSON.stringify(r3.summary)}`);
+    }
+
+    const tEmpty = join(root, "t-empty");
+    mkdirSync(tEmpty, { recursive: true });
+    const rEmpty = await run(tEmpty, join(root, "o-empty"));
+    if (rEmpty.summary.statusHint !== "not_demonstrated") {
+      throw new Error(
+        `empty in-scope app expected not_demonstrated, got ${rEmpty.summary.statusHint}`,
+      );
+    }
+    const tFw = join(root, "t-fw");
+    mkdirSync(tFw, { recursive: true });
+    const rFw = await run(tFw, join(root, "o-fw"), "ai-framework");
+    if (rFw.summary.statusHint !== "not_applicable") {
+      throw new Error(
+        `empty framework expected not_applicable, got ${rFw.summary.statusHint}`,
+      );
     }
 
     console.log("ai-harm-policy smoke OK");

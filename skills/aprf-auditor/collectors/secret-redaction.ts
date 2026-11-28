@@ -21,6 +21,7 @@ import {
   redact,
   rel,
   walkFiles,
+  walkCap,
 } from "./lib/fs.ts";
 import {
   asBool,
@@ -124,7 +125,7 @@ function detectRedactionConfig(
 ): { found: boolean; refs: string[] } {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [
       ".py",
       ".ts",
@@ -164,7 +165,7 @@ function detectCanaryTests(
 ): { found: boolean; refs: string[] } {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".go"],
   });
   for (const f of files) {
@@ -474,8 +475,9 @@ export function buildSecretRedactionReport(opts: {
 export const secretRedactionCollector: Collector = {
   id: PLUGIN_ID,
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
-    const config = detectRedactionConfig(ctx.targetPath, ctx.maxFiles ?? 4000);
-    const canary = detectCanaryTests(ctx.targetPath, ctx.maxFiles ?? 4000);
+    const maxFiles = walkCap(ctx.maxFiles);
+    const config = detectRedactionConfig(ctx.targetPath, maxFiles);
+    const canary = detectCanaryTests(ctx.targetPath, maxFiles);
     const imported = loadImported(ctx);
 
     const report = buildSecretRedactionReport({

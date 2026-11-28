@@ -20,6 +20,7 @@ import {
   redact,
   rel,
   walkFiles,
+  walkCap,
   SCAN_EXTENSIONS,
 } from "./lib/fs.ts";
 import { withReportEvidenceTypes } from "./lib/evidence-types.ts";
@@ -36,7 +37,7 @@ const DETECTOR_ID = "repo-injection-policy-gate";
 const MIN_DENY_RATE = 95;
 
 const POLICY_RE =
-  /\b(policy.?engine|tool.?allowlist|tool.?policy|privilege.?check|authorize.?tool|server.?side.?policy|has_permission|tool.?filter|function.?call.?guard|deny.?tool|blocked.?tool|unsafe.?tool)\b/i;
+  /\b(policy.?engine|tool.?allowlist|tool.?policy|privilege.?check|authorize.?tool|server.?side.?policy|tool.?filter|function.?call.?guard|deny.?tool|blocked.?tool|unsafe.?tool)\b/i;
 
 const INJECTION_RE =
   /\b(prompt.?injection|jailbreak|privilege.?escalat|indirect.?injection|injection.?corpus|red.?team|owasp.?llm|untrusted.?input)\b/i;
@@ -96,7 +97,7 @@ function collectRefs(
 ): string[] {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [...SCAN_EXTENSIONS],
   });
   for (const f of files) {
@@ -113,10 +114,14 @@ function detectPolicy(targetPath: string, maxFiles: number) {
   const refs = collectRefs(
     targetPath,
     maxFiles,
-    (path, text) =>
-      POLICY_RE.test(path) ||
-      (POLICY_RE.test(text) &&
-        /\b(tool|function.?call|mcp|privileged|permission)\b/i.test(text)),
+    (path, text) => {
+      if (/credential[\s_-]*injection/i.test(path + "\n" + text)) return false;
+      return (
+        POLICY_RE.test(path) ||
+        (POLICY_RE.test(text) &&
+          /\b(tool|function.?call|mcp|privileged)\b/i.test(text))
+      );
+    },
   );
   return { found: refs.length > 0, refs };
 }
@@ -125,10 +130,14 @@ function detectCorpus(targetPath: string, maxFiles: number) {
   const refs = collectRefs(
     targetPath,
     maxFiles,
-    (path, text) =>
-      CORPUS_PATH_RE.test(path) ||
-      (INJECTION_RE.test(text) &&
-        /\b(case|corpus|dataset|fixture|prompt|test)\b/i.test(path + text)),
+    (path, text) => {
+      if (/credential[\s_-]*injection/i.test(path + "\n" + text)) return false;
+      return (
+        CORPUS_PATH_RE.test(path) ||
+        (INJECTION_RE.test(text) &&
+          /\b(case|corpus|dataset|fixture|prompt|test)\b/i.test(path + text))
+      );
+    },
   );
   // Prefer paths that look like corpora over one-line warnings
   const preferred = refs.filter((r) => CORPUS_PATH_RE.test(r));
@@ -428,9 +437,10 @@ export function buildInjectionPolicyReport(opts: {
 export const injectionPolicyGateCollector: Collector = {
   id: PLUGIN_ID,
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
-    const policy = detectPolicy(ctx.targetPath, ctx.maxFiles ?? 4000);
-    const corpus = detectCorpus(ctx.targetPath, ctx.maxFiles ?? 4000);
-    const ciGate = detectCiGate(ctx.targetPath, ctx.maxFiles ?? 4000);
+    const maxFiles = walkCap(ctx.maxFiles);
+    const policy = detectPolicy(ctx.targetPath, maxFiles);
+    const corpus = detectCorpus(ctx.targetPath, maxFiles);
+    const ciGate = detectCiGate(ctx.targetPath, maxFiles);
     const imported = loadImported(ctx);
 
     const report = withReportEvidenceTypes(
