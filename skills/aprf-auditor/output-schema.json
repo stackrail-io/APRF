@@ -141,6 +141,16 @@
       ]
     },
     "evidenceGraphPath": { "type": "string" },
+    "walkMeta": {
+      "type": "object",
+      "description": "Filesystem walk cap for this collect run (informational; never gates)",
+      "additionalProperties": false,
+      "properties": {
+        "truncated": { "type": "boolean" },
+        "scanned": { "type": "integer", "minimum": 0 },
+        "cappedAt": { "type": "integer", "minimum": 0 }
+      }
+    },
     "executiveSummary": {
       "type": "object",
       "required": [
@@ -228,7 +238,12 @@
         "additionalProperties": true,
         "properties": {
           "domain": { "type": "string" },
-          "score": { "type": "number", "minimum": 0, "maximum": 100 },
+          "score": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 100 },
+              { "type": "null" }
+            ]
+          },
           "mandatoryGatePassed": { "type": "boolean" },
           "applicable": { "type": "integer" },
           "satisfied": { "type": "integer" },

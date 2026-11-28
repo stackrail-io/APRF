@@ -15,10 +15,13 @@ import { pathToFileURL } from "node:url";
 import { COLLECTORS } from "./index.ts";
 import type { CollectorContext, EvidenceGraph, EvidenceNode } from "./types.ts";
 import {
+  buildSharedFileIndex,
   clearWalkSkipAbsoluteDirs,
   configureWalkSkipForCollect,
+  DEFAULT_MAX_FILES,
   ensureDir,
   projectName,
+  setSharedFileIndex,
   tryGitCommit,
   writeJson,
 } from "./lib/fs.ts";
@@ -41,7 +44,7 @@ function parseArgs(argv: string[]) {
     target: process.cwd(),
     outDir: resolve(process.cwd(), "aprf-assessment"),
     live: process.env.APRF_AUDITOR_LIVE === "1",
-    maxFiles: 4000,
+    maxFiles: DEFAULT_MAX_FILES,
     baseUrl: process.env.APRF_AUTH_PROBE_BASE_URL,
     adminToken: process.env.APRF_ADMIN_TOKEN,
     adminEmail: process.env.APRF_ADMIN_EMAIL || process.env.APRF_ADMIN_USER,
@@ -69,7 +72,7 @@ function parseArgs(argv: string[]) {
     else if (a === "--plugins") {
       out.plugins = (argv[++i] ?? "").split(",").filter(Boolean);
     } else if (a === "--max-files") {
-      out.maxFiles = Number(argv[++i] ?? 4000);
+      out.maxFiles = Number(argv[++i] ?? DEFAULT_MAX_FILES);
     } else if (a === "--help" || a === "-h") {
       console.log(`APRF Auditor collectors
 
@@ -90,7 +93,7 @@ Options:
                       (also APRF_AUTHZ_LIMITED_EMAIL)
   --limited-password <p> Limited-user password (APRF_AUTHZ_LIMITED_PASSWORD)
   --limited-token <t> Limited-user bearer token (APRF_AUTHZ_LIMITED_TOKEN)
-  --max-files <n>     Cap filesystem walk (default: 4000)
+  --max-files <n>     Cap filesystem walk (default: 20000)
 
 AUTHN-M1 live probe:
   npm run aprf:auth-probe -- --target <app> --out <app>/aprf-assessment \\
@@ -684,6 +687,7 @@ export type CollectOptions = {
   limitedToken?: string;
   /** When false, suppress per-collector console lines (default true). */
   log?: boolean;
+  systemType?: string;
 };
 
 /** Run selected collectors and write `evidence-graph.json` under `outDir`. */
@@ -703,6 +707,14 @@ export async function runCollectors(
 
   const assessedAt = new Date();
   const gitCommit = tryGitCommit(target);
+  configureWalkSkipForCollect(target, outDir);
+  const fileIndex = buildSharedFileIndex(target, args.maxFiles);
+  const walkMeta = fileIndex.meta;
+  if (walkMeta.truncated && args.log !== false) {
+    console.warn(
+      `aprf: filesystem walk truncated at ${walkMeta.cappedAt} files (scanned ${walkMeta.scanned}). Pass --max-files to raise the cap; skipped i18n/locales/static/_next/out.`,
+    );
+  }
   const ctx: CollectorContext = {
     targetPath: target,
     outputDir: outDir,
@@ -710,6 +722,9 @@ export async function runCollectors(
     gitCommit,
     live: args.live,
     maxFiles: args.maxFiles,
+    systemType: args.systemType,
+    fileIndex,
+    walkMeta,
     baseUrl: args.baseUrl,
     adminToken: args.adminToken,
     adminEmail: args.adminEmail,
@@ -728,7 +743,6 @@ export async function runCollectors(
   const log = args.log !== false;
 
   // Never treat assessment output under the target as repo evidence.
-  configureWalkSkipForCollect(target, outDir);
   try {
     for (const c of selected) {
       // Re-assert after each collector in case a collect path mutated module skips.
@@ -748,6 +762,7 @@ export async function runCollectors(
     }
   } finally {
     clearWalkSkipAbsoluteDirs();
+    setSharedFileIndex(null);
   }
 
   nodes.sort((a, b) => a.id.localeCompare(b.id));
@@ -764,10 +779,12 @@ export async function runCollectors(
     collectors: collectorsMeta,
     nodes,
     edges: [],
+    walkMeta,
   };
 
   const outPath = resolve(args.outDir, "evidence-graph.json");
   writeJson(outPath, graph);
+  writeJson(resolve(args.outDir, "walk-meta.json"), walkMeta);
   if (log) console.log(`\nWrote ${outPath} (${nodes.length} nodes)`);
   return graph;
 }

@@ -52,6 +52,9 @@ export function redact(text: string, max = 200): string {
   return t.length <= max ? t : t.slice(0, max - 1) + "…";
 }
 
+/** Default filesystem walk cap (CLI `--max-files`). Raised so core packages stay in-scan. */
+export const DEFAULT_MAX_FILES = 20_000;
+
 const SKIP_DIRS = new Set([
   "node_modules",
   ".git",
@@ -59,18 +62,98 @@ const SKIP_DIRS = new Set([
   "build",
   "coverage",
   ".next",
+  "_next",
   ".turbo",
   "vendor",
   "__pycache__",
   ".venv",
   "venv",
+  "i18n",
+  "locales",
+  // Benchmark noise: locale packs, static assets, Next export. Also skips any
+  // directory named static/ or out/ (including src/out). Prefer --max-files
+  // over walking those trees. Do not skip examples/.
+  "static",
+  "out",
   // Prior audit output under the target must never count as repo evidence.
   "aprf-assessment",
 ]);
 
 /** Shared path filter for collectors that post-filter walk results. */
 export const SKIP_SCAN_DIR_RE =
-  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.next|\.turbo|\.venv|venv|__pycache__|vendor|aprf-assessment)([/\\]|$)/i;
+  /(^|[/\\])(node_modules|\.git|dist|build|coverage|\.next|_next|\.turbo|\.venv|venv|__pycache__|vendor|i18n|locales|static|out|aprf-assessment|public[/\\]assets)([/\\]|$)/i;
+
+/** Control-evidence ranking: walk these last, never skip (secrets/config live here). */
+function isDeprioritizedDirName(name: string): boolean {
+  const n = name.toLowerCase();
+  return n === "examples" || n === "example";
+}
+
+export interface WalkMeta {
+  truncated: boolean;
+  scanned: number;
+  cappedAt: number;
+}
+
+export interface SharedFileIndex {
+  root: string;
+  files: string[];
+  meta: WalkMeta;
+  content: Map<string, string | null>;
+}
+
+let lastMeta: WalkMeta = {
+  truncated: false,
+  scanned: 0,
+  cappedAt: DEFAULT_MAX_FILES,
+};
+
+let sharedIndex: SharedFileIndex | null = null;
+
+export function lastWalkMeta(): WalkMeta {
+  return lastMeta;
+}
+
+export function setSharedFileIndex(index: SharedFileIndex | null): void {
+  sharedIndex = index;
+}
+
+export function getSharedFileIndex(): SharedFileIndex | null {
+  return sharedIndex;
+}
+
+export const INDEX_EXTENSIONS: readonly string[] = [
+  ".py",
+  ".ts",
+  ".tsx",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".cjs",
+  ".yml",
+  ".yaml",
+  ".json",
+  ".toml",
+  ".md",
+  ".txt",
+  ".sh",
+  ".tf",
+  ".hcl",
+  ".rego",
+  ".env",
+  ".cfg",
+  ".baseline",
+  ".ipynb",
+];
+
+export function walkCap(maxFiles?: number): number {
+  return maxFiles ?? DEFAULT_MAX_FILES;
+}
+
+function indexCoversRequestedExtensions(exts?: string[]): boolean {
+  if (!exts || exts.length === 0) return false;
+  return exts.every((ext) => INDEX_EXTENSIONS.includes(ext));
+}
 
 export function isSkippedScanRelPath(relPath: string): boolean {
   return SKIP_SCAN_DIR_RE.test(relPath);
@@ -161,16 +244,50 @@ export function walkFiles(
     extensions?: string[];
     /** Extra absolute directory trees to prune for this call only. */
     skipAbsoluteDirs?: string[];
+    /** Skip the shared audit index (imports walks, tests). */
+    skipIndex?: boolean;
   } = {},
 ): string[] {
-  const max = opts.maxFiles ?? 4000;
+  const max = opts.maxFiles ?? DEFAULT_MAX_FILES;
   const exts = opts.extensions;
   const out: string[] = [];
   const callSkips = (opts.skipAbsoluteDirs ?? []).map((d) => resolve(d));
+  const absRoot = resolve(root);
 
-  const shouldSkipDir = (absDir: string, name: string): boolean => {
-    // Match SKIP_SCAN_DIR_RE's case-insensitive rule (e.g. APRF-ASSESSMENT).
-    if (SKIP_DIRS.has(name.toLowerCase())) return true;
+  if (
+    !opts.skipIndex &&
+    sharedIndex &&
+    absRoot === sharedIndex.root &&
+    !sharedIndex.meta.truncated &&
+    indexCoversRequestedExtensions(exts)
+  ) {
+    const filtered = sharedIndex.files.filter((p) => {
+      if (exts && !exts.some((x) => p.endsWith(x))) return false;
+      if (isUnderSkipAbsoluteDir(p)) return false;
+      if (callSkips.some((skip) => p === skip || p.startsWith(skip + sep))) {
+        return false;
+      }
+      return true;
+    });
+    const sliced = filtered.slice(0, max);
+    lastMeta = {
+      truncated: filtered.length > max,
+      scanned: sliced.length,
+      cappedAt: max,
+    };
+    return sliced;
+  }
+
+  const shouldSkipDir = (
+    absDir: string,
+    name: string,
+    parentDir: string,
+  ): boolean => {
+    const lower = name.toLowerCase();
+    if (SKIP_DIRS.has(lower)) return true;
+    if (lower === "assets" && basename(parentDir).toLowerCase() === "public") {
+      return true;
+    }
     if (isUnderSkipAbsoluteDir(absDir)) return true;
     for (const skip of callSkips) {
       if (absDir === skip || absDir.startsWith(skip + sep)) return true;
@@ -178,53 +295,152 @@ export function walkFiles(
     return false;
   };
 
-  const stack = [root];
-  while (stack.length && out.length < max) {
-    const dir = stack.pop()!;
+  const fileMatches = (p: string, name: string): boolean => {
+    if (exts && !exts.some((x) => name.endsWith(x))) return false;
+    if (isUnderSkipAbsoluteDir(p)) return false;
+    if (callSkips.some((skip) => p === skip || p.startsWith(skip + sep))) {
+      return false;
+    }
+    return true;
+  };
+
+  const pendingHasMatchingFile = (dirs: string[]): boolean => {
+    const pending = [...dirs];
+    const seen = new Set<string>();
+    while (pending.length) {
+      const d = pending.shift()!;
+      if (seen.has(d)) continue;
+      seen.add(d);
+      let entries;
+      try {
+        entries = readdirSync(d, { withFileTypes: true });
+      } catch {
+        continue;
+      }
+      for (const e of entries) {
+        const name = e.name;
+        if (
+          name.startsWith(".") &&
+          name !== ".github" &&
+          name !== ".env.example"
+        ) {
+          if (e.isDirectory() && name !== ".github") continue;
+        }
+        const p = join(d, name);
+        if (e.isDirectory()) {
+          if (shouldSkipDir(resolve(p), name, d)) continue;
+          pending.push(p);
+        } else if (e.isFile() && fileMatches(p, name)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  const queue: string[] = [root];
+  let truncated = false;
+  while (queue.length) {
+    if (out.length >= max) {
+      truncated = truncated || pendingHasMatchingFile(queue);
+      break;
+    }
+    const dir = queue.shift()!;
     let entries;
     try {
       entries = readdirSync(dir, { withFileTypes: true });
     } catch {
       continue;
     }
+    entries.sort((a, b) => a.name.localeCompare(b.name));
+    const nextDirs: string[] = [];
+    const delayedDirs: string[] = [];
     for (const e of entries) {
-      if (out.length >= max) break;
       const name = e.name;
-      if (name.startsWith(".") && name !== ".github" && name !== ".env.example") {
+      if (
+        name.startsWith(".") &&
+        name !== ".github" &&
+        name !== ".env.example"
+      ) {
         if (e.isDirectory() && name !== ".github") continue;
       }
       const p = join(dir, name);
       if (e.isDirectory()) {
-        if (shouldSkipDir(resolve(p), name)) continue;
-        stack.push(p);
+        if (shouldSkipDir(resolve(p), name, dir)) continue;
+        if (isDeprioritizedDirName(name)) delayedDirs.push(p);
+        else nextDirs.push(p);
       } else if (e.isFile()) {
-        if (exts && !exts.some((x) => name.endsWith(x))) continue;
-        // Defense: never emit files under a pruned assessment out tree.
-        if (isUnderSkipAbsoluteDir(p)) continue;
-        if (callSkips.some((skip) => p === skip || p.startsWith(skip + sep))) {
+        if (!fileMatches(p, name)) continue;
+        if (out.length >= max) {
+          truncated = true;
           continue;
         }
         out.push(p);
       }
     }
+    if (out.length >= max) {
+      truncated =
+        truncated ||
+        pendingHasMatchingFile([...nextDirs, ...delayedDirs, ...queue]);
+      break;
+    }
+    queue.push(...nextDirs, ...delayedDirs);
   }
+  lastMeta = { truncated, scanned: out.length, cappedAt: max };
   return out.sort((a, b) => a.localeCompare(b));
+}
+
+export function buildSharedFileIndex(
+  root: string,
+  maxFiles: number,
+): SharedFileIndex {
+  const files = walkFiles(root, {
+    maxFiles,
+    skipIndex: true,
+    extensions: [...INDEX_EXTENSIONS],
+  });
+  const index: SharedFileIndex = {
+    root: resolve(root),
+    files,
+    meta: { ...lastWalkMeta() },
+    content: new Map(),
+  };
+  sharedIndex = index;
+  return index;
 }
 
 export function rel(root: string, file: string): string {
   return relative(root, file).split(sep).join("/");
 }
 
+const CONTENT_CACHE_MAX_ENTRIES = 512;
+const CONTENT_CACHE_MAX_BYTES = 64_000;
+
 export function readText(file: string, maxBytes = 256_000): string | null {
+  const cacheKey = `${file}\0${maxBytes}`;
+  if (sharedIndex?.content.has(cacheKey)) {
+    return sharedIndex.content.get(cacheKey) ?? null;
+  }
+  let result: string | null = null;
   try {
     const st = statSync(file);
     if (st.size > maxBytes) {
-      return readFileSync(file, { encoding: "utf8" }).slice(0, maxBytes);
+      result = readFileSync(file, { encoding: "utf8" }).slice(0, maxBytes);
+    } else {
+      result = readFileSync(file, "utf8");
     }
-    return readFileSync(file, "utf8");
   } catch {
-    return null;
+    result = null;
   }
+  if (
+    sharedIndex &&
+    result !== null &&
+    result.length <= CONTENT_CACHE_MAX_BYTES &&
+    sharedIndex.content.size < CONTENT_CACHE_MAX_ENTRIES
+  ) {
+    sharedIndex.content.set(cacheKey, result);
+  }
+  return result;
 }
 
 export function mtimeIso(file: string): string | undefined {

@@ -5,10 +5,14 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+  buildSharedFileIndex,
   clearWalkSkipAbsoluteDirs,
   configureWalkSkipForCollect,
+  DEFAULT_MAX_FILES,
   isSkippedScanRelPath,
+  lastWalkMeta,
   rel,
+  setSharedFileIndex,
   walkFiles,
 } from "../collectors/lib/fs.ts";
 
@@ -89,6 +93,124 @@ function main() {
   }
 
   rmSync(target, { recursive: true, force: true });
+
+  const capRoot = mkdtempSync(join(tmpdir(), "aprf-walk-cap-"));
+  mkdirSync(join(capRoot, "i18n"), { recursive: true });
+  mkdirSync(join(capRoot, "examples"), { recursive: true });
+  mkdirSync(join(capRoot, "api"), { recursive: true });
+  mkdirSync(join(capRoot, "_next"), { recursive: true });
+  writeFileSync(join(capRoot, "i18n", "en.json"), "{}\n", "utf8");
+  writeFileSync(join(capRoot, "_next", "bundle.js"), "sk-not-scanned\n", "utf8");
+  writeFileSync(join(capRoot, "examples", "secret.env"), "AKIAEXAMPLE\n", "utf8");
+  writeFileSync(join(capRoot, "api", "main.py"), "print(1)\n", "utf8");
+  const full = walkFiles(capRoot, {
+    maxFiles: 200,
+    extensions: [".py", ".js", ".json", ".env"],
+    skipIndex: true,
+  });
+  const fullRels = full.map((f) => rel(capRoot, f));
+  if (fullRels.some((r) => r.includes("i18n") || r.includes("_next"))) {
+    throw new Error(`noise dirs leaked: ${JSON.stringify(fullRels)}`);
+  }
+  if (!fullRels.some((r) => r.includes("examples/"))) {
+    throw new Error(`examples/ must still be walked: ${JSON.stringify(fullRels)}`);
+  }
+  for (let i = 0; i < 30; i++) {
+    writeFileSync(join(capRoot, `pad-${i}.py`), `x=${i}\n`, "utf8");
+  }
+  walkFiles(capRoot, {
+    maxFiles: 8,
+    extensions: [".py", ".js", ".json", ".env"],
+    skipIndex: true,
+  });
+  const meta = lastWalkMeta();
+  if (!meta.truncated) {
+    throw new Error(`expected truncation warning meta, got ${JSON.stringify(meta)}`);
+  }
+  if (DEFAULT_MAX_FILES < 20000) {
+    throw new Error(`default cap should be >= 20000, got ${DEFAULT_MAX_FILES}`);
+  }
+  const exactRoot = mkdtempSync(join(tmpdir(), "aprf-walk-exact-"));
+  mkdirSync(join(exactRoot, "src"), { recursive: true });
+  writeFileSync(join(exactRoot, "src", "a.py"), "a=1\n", "utf8");
+  writeFileSync(join(exactRoot, "src", "b.py"), "b=1\n", "utf8");
+  writeFileSync(join(exactRoot, "src", "c.py"), "c=1\n", "utf8");
+  walkFiles(exactRoot, {
+    maxFiles: 10,
+    extensions: [".py"],
+    skipIndex: true,
+  });
+  const exactMeta = lastWalkMeta();
+  rmSync(exactRoot, { recursive: true, force: true });
+  if (exactMeta.truncated || exactMeta.scanned !== 3) {
+    throw new Error(
+      `exact fit must not truncate: ${JSON.stringify(exactMeta)}`,
+    );
+  }
+  rmSync(capRoot, { recursive: true, force: true });
+
+  const emptyDirRoot = mkdtempSync(join(tmpdir(), "aprf-walk-empty-dir-"));
+  mkdirSync(join(emptyDirRoot, "empty"), { recursive: true });
+  writeFileSync(join(emptyDirRoot, "a.py"), "a=1\n", "utf8");
+  walkFiles(emptyDirRoot, {
+    maxFiles: 1,
+    extensions: [".py"],
+    skipIndex: true,
+  });
+  const emptyDirMeta = lastWalkMeta();
+  rmSync(emptyDirRoot, { recursive: true, force: true });
+  if (emptyDirMeta.truncated) {
+    throw new Error(
+      `empty pending dir must not truncate: ${JSON.stringify(emptyDirMeta)}`,
+    );
+  }
+
+  const htmlRoot = mkdtempSync(join(tmpdir(), "aprf-walk-html-"));
+  writeFileSync(join(htmlRoot, "notice.html"), "<p>ai disclosure</p>\n", "utf8");
+  writeFileSync(join(htmlRoot, "app.py"), "print(1)\n", "utf8");
+  const htmlIndex = buildSharedFileIndex(htmlRoot, 20);
+  setSharedFileIndex(htmlIndex);
+  try {
+    const htmlFiles = walkFiles(htmlRoot, {
+      maxFiles: 20,
+      extensions: [".html"],
+    });
+    if (!htmlFiles.some((f) => f.endsWith("notice.html"))) {
+      throw new Error(
+        `index must not hide .html: ${JSON.stringify(htmlFiles)}`,
+      );
+    }
+  } finally {
+    setSharedFileIndex(null);
+    rmSync(htmlRoot, { recursive: true, force: true });
+  }
+
+  const floodRoot = mkdtempSync(join(tmpdir(), "aprf-walk-flood-"));
+  mkdirSync(join(floodRoot, "src"), { recursive: true });
+  for (let i = 0; i < 40; i++) {
+    writeFileSync(join(floodRoot, `pad-${i}.sh`), `echo ${i}\n`, "utf8");
+  }
+  writeFileSync(join(floodRoot, "src", "app.py"), "print(1)\n", "utf8");
+  const floodIndex = buildSharedFileIndex(floodRoot, 8);
+  if (!floodIndex.meta.truncated) {
+    throw new Error(`expected truncated shared index: ${JSON.stringify(floodIndex.meta)}`);
+  }
+  setSharedFileIndex(floodIndex);
+  try {
+    const pyFiles = walkFiles(floodRoot, {
+      maxFiles: 50,
+      extensions: [".py"],
+    });
+    if (!pyFiles.some((f) => f.endsWith("app.py"))) {
+      throw new Error(
+        `truncated index must fall back so .py is found: ${JSON.stringify(pyFiles)}`,
+      );
+    }
+  } finally {
+    setSharedFileIndex(null);
+    rmSync(floodRoot, { recursive: true, force: true });
+  }
+
   console.log("walk-skip-assessment smoke OK");
 }
 

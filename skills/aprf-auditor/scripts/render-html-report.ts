@@ -297,10 +297,11 @@ type Assessment = {
   };
   domainScores: Array<{
     domain: string;
-    score: number;
+    score: number | null;
     mandatoryGatePassed: boolean;
   }>;
   controls: Control[];
+  walkMeta?: { truncated?: boolean; scanned?: number; cappedAt?: number };
   /** APRF-RFC-0014 structured threat evaluation (informative; never gates). */
   threatExposure?: Array<{
     threatId: string;
@@ -873,7 +874,7 @@ function domainScoresFromControls(
     );
     const score =
       applicable.length === 0
-        ? 100
+        ? null
         : Math.round((satisfied.length / applicable.length) * 100);
     return {
       domain: titleCaseDomain(domain),
@@ -1645,7 +1646,7 @@ function render(a: Assessment): string {
   const domainsTable = domainScores
     .map(
       (d) =>
-        `<tr><td>${esc(d.domain)}</td><td>${esc(d.score)}</td><td class="${d.mandatoryGatePassed ? "ok" : "bad"}">${d.mandatoryGatePassed ? "pass" : "fail"}</td></tr>`,
+        `<tr><td>${esc(d.domain)}</td><td>${esc(d.score == null ? "n/a" : d.score)}</td><td class="${d.mandatoryGatePassed ? "ok" : "bad"}">${d.mandatoryGatePassed ? "pass" : "fail"}</td></tr>`,
     )
     .join("\n");
 
@@ -2154,6 +2155,11 @@ function render(a: Assessment): string {
       ${a.executiveSummary.overallGrade != null ? ` · Grade (secondary): ${esc(a.executiveSummary.overallGrade)}` : ""}
       ${a.executiveSummary.riskLevel != null ? ` · Risk (secondary): ${esc(a.executiveSummary.riskLevel)}` : ""}
     </p>
+    ${
+      a.walkMeta?.truncated
+        ? `<p class="verify-callout" style="max-width:72ch"><strong>Filesystem walk truncated</strong> at ${esc(a.walkMeta.cappedAt)} files (scanned ${esc(a.walkMeta.scanned)}). Raise <code>--max-files</code> if core packages were missed. Noise dirs (i18n/locales/static/_next/out) are skipped; <code>examples/</code> is still walked.</p>`
+        : ""
+    }
     <p class="lede" style="max-width:72ch">${esc(a.executiveSummary.narrative)}</p>
     ${
       belowFloorCount > 0

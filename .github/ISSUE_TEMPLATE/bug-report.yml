@@ -24,7 +24,7 @@ body:
     id: repro
     attributes:
       label: Reproduction
-      description: Steps, expected vs actual, relevant Check IDs. For CLI issues, include the command and `npx @stackrail-io/aprf@0.1.6 version` output.
+      description: Steps, expected vs actual, relevant Check IDs. For CLI issues, include the command and `npx @stackrail-io/aprf@0.1.7 version` output.
     validations:
       required: true
   - type: input

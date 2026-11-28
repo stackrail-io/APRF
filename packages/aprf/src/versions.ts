@@ -44,17 +44,45 @@ function readPkgVersion(name: string): string {
   }
 }
 
+declare const __APRF_GIT_SHA__: string | undefined;
+
+function readBuildGitSha(): string | undefined {
+  for (const rel of ["../BUILD.json", "./BUILD.json"]) {
+    try {
+      const p = resolve(HERE, rel);
+      if (!existsSync(p)) continue;
+      const j = JSON.parse(readFileSync(p, "utf8")) as { gitSha?: string };
+      if (j.gitSha && j.gitSha !== "unknown") return String(j.gitSha);
+    } catch {
+      /* continue */
+    }
+  }
+  try {
+    const defined =
+      typeof __APRF_GIT_SHA__ !== "undefined" ? __APRF_GIT_SHA__ : "";
+    if (defined) return defined;
+  } catch {
+    /* no esbuild define */
+  }
+  return undefined;
+}
+
 export function cliVersion(): string {
+  let v = "0.1.0";
   try {
     // dist/cli.js → ../package.json (published) or ../../package.json (src via tsx)
     for (const rel of ["../package.json", "../../package.json"]) {
-      const v = readJsonVersion(resolve(HERE, rel));
-      if (v) return v;
+      const found = readJsonVersion(resolve(HERE, rel));
+      if (found) {
+        v = found;
+        break;
+      }
     }
   } catch {
     /* fall through */
   }
-  return "0.1.0";
+  const sha = readBuildGitSha();
+  return sha ? `${v}+${sha}` : v;
 }
 
 export function catalogVersion(): string {

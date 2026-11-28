@@ -45,6 +45,11 @@ export interface CollectorContext {
   live: boolean;
   /** Limit filesystem walk depth / file count for determinism + speed */
   maxFiles?: number;
+  /** Assessment target kind when known (audit/collect --system-type). */
+  systemType?: string;
+  /** Shared BFS walk + content cache for this collect run. */
+  fileIndex?: import("./lib/fs.ts").SharedFileIndex;
+  walkMeta?: import("./lib/fs.ts").WalkMeta;
   /**
    * Optional base URL for live HTTP probes (http-auth-probe / AUTHN-M1).
    * Also accepted via APRF_AUTH_PROBE_BASE_URL.
@@ -88,4 +93,5 @@ export interface EvidenceGraph {
   }>;
   nodes: EvidenceNode[];
   edges: Array<{ from: string; to: string; rel: string }>;
+  walkMeta?: import("./lib/fs.ts").WalkMeta;
 }
