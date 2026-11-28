@@ -19,6 +19,7 @@ import type { CollectorContext } from "../collectors/types.ts";
 async function run(
   target: string,
   outDir: string,
+  maxFiles = 2000,
 ): Promise<EvalReleaseGatesReport> {
   await evalReleaseGatesCollector.collect({
     targetPath: target,
@@ -26,7 +27,7 @@ async function run(
     assessedAt: new Date(),
     gitCommit: undefined,
     live: false,
-    maxFiles: 2000,
+    maxFiles,
   } as CollectorContext);
   return JSON.parse(
     readFileSync(
@@ -114,6 +115,24 @@ async function main() {
         `journey+threshold prose must not count as eval gates: ${JSON.stringify(rNoise.signals)}`,
       );
     }
+
+    const tLate = join(root, "t-late");
+    mkdirSync(join(tLate, "aaa"), { recursive: true });
+    mkdirSync(join(tLate, "zzz", "evals"), { recursive: true });
+    for (let i = 0; i < 2100; i++) {
+      writeFileSync(
+        join(tLate, "aaa", `pad-${String(i).padStart(4, "0")}.ts`),
+        `export const n = ${i};\n`,
+      );
+    }
+    writeFileSync(join(tLate, "zzz", "evals", "cases.json"), "{}\n");
+    const rLate = await run(tLate, join(root, "o-late"), 10000);
+    if (!rLate.summary.evalSignalsPresent) {
+      throw new Error(
+        `late evals/ path must remain in-scope with full maxFiles: ${JSON.stringify(rLate.summary)}`,
+      );
+    }
+
     console.log("eval-release-gates smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

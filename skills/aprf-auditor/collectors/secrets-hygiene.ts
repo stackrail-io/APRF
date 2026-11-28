@@ -305,7 +305,7 @@ function skipHeuristicHit(
   ) {
     return true;
   }
-  if (/(parser|testdata|fixtures?|_next)([/\\]|$)/i.test(path)) {
+  if (/(testdata|fixtures?|_next)([/\\]|$)/i.test(path)) {
     return true;
   }
   if (
@@ -315,12 +315,13 @@ function skipHeuristicHit(
   ) {
     return true;
   }
-  const window = lead + trail;
+  const placeholder =
+    /your[_-]|changeme|placeholder|<[^>]*>|xxx+|not[_-]?a[_-]?real|dummy|sk-your/i;
   if (
     HIGH_CONFIDENCE_IDS.has(id) &&
-    /\.\.\.|your[_-]|changeme|placeholder|<[^>]*>|xxx+|not[_-]?a[_-]?real|dummy|sk-your/i.test(
-      window,
-    )
+    (/\.\.\./.test(matched) ||
+      placeholder.test(matched) ||
+      placeholder.test(lead + trail))
   ) {
     return true;
   }
@@ -332,6 +333,7 @@ function heuristicEmbeddedScan(
   maxFiles: number,
 ): EmbeddedFinding[] {
   const findings: EmbeddedFinding[] = [];
+  let weakCount = 0;
   const files = walkFiles(targetPath, {
     maxFiles,
     extensions: [
@@ -402,6 +404,10 @@ function heuristicEmbeddedScan(
         const weak =
           id === "generic-api-key-assign" ||
           (id === "private-key-block" && !pemComplete);
+        if (weak) {
+          if (weakCount >= 50) continue;
+          weakCount += 1;
+        }
         findings.push({
           patternId: id,
           ref: r,
@@ -409,7 +415,6 @@ function heuristicEmbeddedScan(
           inPromptOrFixture: inPrompt,
           confidence: weak ? "weak" : "high",
         });
-        if (findings.length >= 50) return findings;
       }
     }
   }

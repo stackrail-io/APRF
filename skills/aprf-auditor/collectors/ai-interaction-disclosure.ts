@@ -190,7 +190,7 @@ export function buildAiInteractionDisclosureReport(opts: {
 
   if (!disclosureSignalsPresent && !opts.imported.found) {
     notes.push(
-      `No AI-interaction disclosure signals — SAF-M3 is ${emptyLabel} until disclosure evidence or an explicit N/A import is present.`,
+      `No AI-interaction disclosure signals — SAF-M3 is ${emptyLabel} until disclosure evidence or a measured import pack is present. NOT_APPLICABLE is for --system-type ai-framework or non-ai-platform.`,
     );
   }
   if (opts.disclosure.found) {
@@ -241,7 +241,7 @@ export function buildAiInteractionDisclosureReport(opts: {
     statusHint = emptyHint;
     safM3Satisfied = null;
     notes.push(
-      `No AI-interaction disclosure signals — SAF-M3 remains ${emptyLabel} until disclosure evidence or an explicit N/A import is present.`,
+      `No AI-interaction disclosure signals — SAF-M3 remains ${emptyLabel} until disclosure evidence or a measured import pack is present. NOT_APPLICABLE is for --system-type ai-framework or non-ai-platform.`,
     );
   } else if (explicitFail) {
     statusHint = "fail";

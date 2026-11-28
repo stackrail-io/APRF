@@ -50,7 +50,8 @@ async function main() {
     join(targetDir, "policy", "tool_policy.py"),
     `
 def authorize_tool(user, tool_name):
-    """server-side policy — never trust model text alone for privileged tool calls"""
+    """server-side policy — never trust model text alone for privileged tool calls.
+    Also prevent credential injection via tool args."""
     return has_permission(user, f"tool.{tool_name}")
 `,
     "utf8",

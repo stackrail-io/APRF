@@ -48,6 +48,13 @@ const CI_TRIGGER_RE =
 const EVAL_WORKFLOW_TOKEN_RE =
   /(^|[/\\._-])(eval|evals|promptfoo|redteam)([/\\._-]|$)/i;
 
+/** Root/config filenames that declare suites even when "promptfoo" is followed by "config". */
+function isEvalConfigFile(path: string): boolean {
+  return /(^|[/\\])(promptfooconfig|promptfoo\.config|evalconfig)(\.[^/\\]+)?$/i.test(
+    path,
+  );
+}
+
 function isEvalCiWorkflow(path: string, text: string): boolean {
   if (
     !/(\.github\/workflows|cicd|gitlab-ci|azure-pipelines|Jenkinsfile)/i.test(
@@ -133,10 +140,11 @@ function detectEvalSignals(targetPath: string, maxFiles: number): boolean {
   return (
     collectRefs(
       targetPath,
-      Math.min(maxFiles, 2000),
+      maxFiles,
       (path, text) =>
         EVAL_WORKFLOW_TOKEN_RE.test(path) ||
         SUITE_RE.test(path) ||
+        isEvalConfigFile(path) ||
         /\b(promptfoo|redteam|eval[\s_-]*suite|npx promptfoo)\b/i.test(text),
       5,
     ).length > 0
@@ -341,7 +349,8 @@ export const evalSuiteCiCollector: Collector = {
       maxFiles,
       (path, text) =>
         SUITE_RE.test(path) ||
-        (SUITE_RE.test(text) && EVAL_WORKFLOW_TOKEN_RE.test(path)),
+        (SUITE_RE.test(text) &&
+          (EVAL_WORKFLOW_TOKEN_RE.test(path) || isEvalConfigFile(path))),
     );
     const journeyRefs = collectRefs(
       ctx.targetPath,

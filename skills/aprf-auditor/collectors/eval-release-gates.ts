@@ -119,7 +119,7 @@ function detectEvalSignals(targetPath: string, maxFiles: number): boolean {
   return (
     collectRefs(
       targetPath,
-      Math.min(maxFiles, 2000),
+      maxFiles,
       (path, text) =>
         EVAL_PATH_RE.test(path) ||
         /\b(promptfoo|redteam|eval[\s_-]*suite|npx promptfoo)\b/i.test(text),

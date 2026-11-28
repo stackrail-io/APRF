@@ -197,7 +197,7 @@ export function buildAiHarmPolicyReport(opts: {
 
   if (!policySignalsPresent && !opts.imported.found) {
     notes.push(
-      `No domain-specific AI safety policy signals — SAF-M1 is ${emptyLabel} until policy evidence or an explicit N/A import is present.`,
+      `No domain-specific AI safety policy signals — SAF-M1 is ${emptyLabel} until policy evidence or a measured import pack is present. NOT_APPLICABLE is for --system-type ai-framework or non-ai-platform.`,
     );
   }
   if (opts.taxonomy.found) {
@@ -251,7 +251,7 @@ export function buildAiHarmPolicyReport(opts: {
     statusHint = emptyHint;
     safM1Satisfied = null;
     notes.push(
-      `No harm-policy signals — SAF-M1 remains ${emptyLabel} until policy evidence or an explicit N/A import is present.`,
+      `No harm-policy signals — SAF-M1 remains ${emptyLabel} until policy evidence or a measured import pack is present. NOT_APPLICABLE is for --system-type ai-framework or non-ai-platform.`,
     );
   } else if (explicitFail) {
     statusHint = "fail";

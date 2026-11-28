@@ -184,7 +184,7 @@ export function buildAiJourneySloCatalogReport(opts: {
 
   if (!catalogSignalsPresent && !opts.imported.found) {
     notes.push(
-      `No AI journey SLO-catalog signals — PERF-M1 is ${emptyLabel} until catalog evidence or an explicit N/A import is present.`,
+      `No AI journey SLO-catalog signals — PERF-M1 is ${emptyLabel} until catalog evidence or a measured import pack is present. NOT_APPLICABLE is for --system-type ai-framework or non-ai-platform.`,
     );
   }
   if (opts.catalog.found) {
@@ -237,7 +237,7 @@ export function buildAiJourneySloCatalogReport(opts: {
     statusHint = emptyHint;
     perfM1Satisfied = null;
     notes.push(
-      `No AI journey SLO-catalog signals — PERF-M1 remains ${emptyLabel} until catalog evidence or an explicit N/A import is present.`,
+      `No AI journey SLO-catalog signals — PERF-M1 remains ${emptyLabel} until catalog evidence or a measured import pack is present. NOT_APPLICABLE is for --system-type ai-framework or non-ai-platform.`,
     );
   } else if (explicitFail) {
     statusHint = "fail";

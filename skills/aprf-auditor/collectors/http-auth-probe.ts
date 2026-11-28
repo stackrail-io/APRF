@@ -28,6 +28,7 @@ import {
   readText,
   redact,
   rel,
+  lastWalkMeta,
   walkCap,
   walkFiles,
 } from "./lib/fs.ts";
@@ -402,6 +403,7 @@ function discoverFastapiRoutes(
   routes: ProbeRoute[];
   declaredAiRoutesTruncated: boolean;
   declaredAiRouteTotal: number;
+  walkTruncated: boolean;
 } {
   const routes: ProbeRoute[] = [];
   const includeRe =
@@ -421,6 +423,7 @@ function discoverFastapiRoutes(
     maxFiles,
     extensions: [".py"],
   });
+  const walkTruncated = lastWalkMeta().truncated;
   const mainFiles = [
     ...preferred.filter((f) => existsSync(f)),
     ...pyFiles.filter((f) => {
@@ -478,14 +481,19 @@ function discoverFastapiRoutes(
     : aiDeclared;
   return {
     routes: [...capped, ...rest],
-    declaredAiRoutesTruncated,
+    declaredAiRoutesTruncated: declaredAiRoutesTruncated || walkTruncated,
     declaredAiRouteTotal: aiDeclared.length,
+    walkTruncated,
   };
 }
 
 /** Load OpenAPI/Swagger path+method pairs from repo files. */
-function discoverOpenApiFiles(targetPath: string, maxFiles: number): ProbeRoute[] {
+function discoverOpenApiFiles(
+  targetPath: string,
+  maxFiles: number,
+): { routes: ProbeRoute[]; walkTruncated: boolean } {
   const files = walkFiles(targetPath, { maxFiles });
+  const walkTruncated = lastWalkMeta().truncated;
   const routes: ProbeRoute[] = [];
   for (const file of files) {
     const r = rel(targetPath, file);
@@ -515,7 +523,7 @@ function discoverOpenApiFiles(targetPath: string, maxFiles: number): ProbeRoute[
       // YAML OpenAPI not parsed here — JSON only for determinism without deps
     }
   }
-  return routes;
+  return { routes, walkTruncated };
 }
 
 function loadRoutesOverride(ctx: CollectorContext): ProbeRoute[] {
@@ -599,11 +607,14 @@ export function discoverRoutes(ctx: CollectorContext): {
       declaredAiRouteTotal = fastapi.declaredAiRouteTotal;
     }
     const openapi = discoverOpenApiFiles(ctx.targetPath, cap);
-    if (openapi.length) {
-      routes.push(...openapi);
+    if (openapi.routes.length) {
+      routes.push(...openapi.routes);
       sources.push("openapi-json");
     }
-    const discovered = fastapi.routes.length > 0 || openapi.length > 0;
+    if (fastapi.walkTruncated || openapi.walkTruncated) {
+      declaredAiRoutesTruncated = true;
+    }
+    const discovered = fastapi.routes.length > 0 || openapi.routes.length > 0;
     const declaredAiCount = routes.filter(
       (r) => r.aiSurface && r.declaredInCode,
     ).length;
@@ -828,12 +839,16 @@ export async function runAuthProbe(
 
   // Score only declared methods — advisory GET is hardening, not the gate.
   const scored = results.filter(
-    (r) => !r.skipped && r.ok !== null && !r.advisoryGet,
+    (r) =>
+      !r.skipped &&
+      r.ok !== null &&
+      !r.advisoryGet &&
+      r.declaredInCode,
   );
   const pass = scored.filter((r) => r.ok === true).length;
   const fail = scored.filter((r) => r.ok === false && !r.error).length;
   const errors = results.filter(
-    (r) => Boolean(r.error) && !r.advisoryGet,
+    (r) => Boolean(r.error) && !r.advisoryGet && r.declaredInCode,
   ).length;
   const skipped = results.filter((r) => r.skipped).length;
   const get405 = results.filter(

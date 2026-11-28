@@ -115,12 +115,17 @@ function detectPolicy(targetPath: string, maxFiles: number) {
     targetPath,
     maxFiles,
     (path, text) => {
-      if (/credential[\s_-]*injection/i.test(path + "\n" + text)) return false;
-      return (
+      const policy =
         POLICY_RE.test(path) ||
         (POLICY_RE.test(text) &&
-          /\b(tool|function.?call|mcp|privileged)\b/i.test(text))
-      );
+          /\b(tool|function.?call|mcp|privileged)\b/i.test(text));
+      if (
+        !policy &&
+        /credential[\s_-]*injection/i.test(path + "\n" + text)
+      ) {
+        return false;
+      }
+      return policy;
     },
   );
   return { found: refs.length > 0, refs };
@@ -131,10 +136,16 @@ function detectCorpus(targetPath: string, maxFiles: number) {
     targetPath,
     maxFiles,
     (path, text) => {
-      if (/credential[\s_-]*injection/i.test(path + "\n" + text)) return false;
+      const promptInjection = INJECTION_RE.test(text);
+      if (
+        /credential[\s_-]*injection/i.test(path + "\n" + text) &&
+        !promptInjection
+      ) {
+        return false;
+      }
       return (
         CORPUS_PATH_RE.test(path) ||
-        (INJECTION_RE.test(text) &&
+        (promptInjection &&
           /\b(case|corpus|dataset|fixture|prompt|test)\b/i.test(path + text))
       );
     },

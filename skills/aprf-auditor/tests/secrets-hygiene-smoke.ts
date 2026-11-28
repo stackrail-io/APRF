@@ -386,6 +386,51 @@ jobs:
       );
     }
 
+    const tParser = join(root, "t-parser");
+    mkdirSync(join(tParser, "src", "parser"), { recursive: true });
+    writeFileSync(
+      join(tParser, "src", "parser", "config.ts"),
+      `export const OPENAI_KEY = "${fakeSk}";\n`,
+    );
+    const rParser = await run(tParser, join(root, "o-parser"));
+    if (rParser.summary.statusHint !== "fail") {
+      throw new Error(
+        `production src/parser credential must FAIL: ${JSON.stringify(rParser.summary)}`,
+      );
+    }
+
+    const tSpread = join(root, "t-spread");
+    mkdirSync(join(tSpread, "src"), { recursive: true });
+    writeFileSync(
+      join(tSpread, "src", "config.ts"),
+      `const config = { ...defaults, apiKey: "${fakeSk}" };\n`,
+    );
+    const rSpread = await run(tSpread, join(root, "o-spread"));
+    if (rSpread.summary.statusHint !== "fail") {
+      throw new Error(
+        `spread-syntax neighbor must not hide credential: ${JSON.stringify(rSpread.summary)}`,
+      );
+    }
+
+    const tWeak = join(root, "t-weak");
+    mkdirSync(join(tWeak, "src"), { recursive: true });
+    const weakLines = Array.from(
+      { length: 50 },
+      (_, i) =>
+        `const api_key = "abcdefghijklmnopqrstuvwxyz${String(i).padStart(2, "0")}";`,
+    ).join("\n");
+    writeFileSync(join(tWeak, "src", "a-config.ts"), `${weakLines}\n`);
+    writeFileSync(
+      join(tWeak, "src", "z-secret.ts"),
+      `export const OPENAI_KEY = "${fakeSk}";\n`,
+    );
+    const rWeak = await run(tWeak, join(root, "o-weak"));
+    if (rWeak.summary.statusHint !== "fail") {
+      throw new Error(
+        `weak quota must not hide later production credential: ${JSON.stringify(rWeak.summary)} ${JSON.stringify(rWeak.embeddedFindings)}`,
+      );
+    }
+
     console.log("aprf-auditor secrets-hygiene smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

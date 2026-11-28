@@ -147,6 +147,19 @@ async function main() {
       );
     }
 
+    const tRootCfg = join(root, "t-root-cfg");
+    mkdirSync(tRootCfg, { recursive: true });
+    writeFileSync(
+      join(tRootCfg, "promptfooconfig.yaml"),
+      "description: offline eval suite for checkout\n",
+    );
+    const rRootCfg = await run(tRootCfg, join(root, "o-root-cfg"));
+    if (!rRootCfg.signals.suites.found) {
+      throw new Error(
+        `root promptfooconfig.yaml must count as a suite: ${JSON.stringify(rRootCfg.signals)}`,
+      );
+    }
+
     console.log("eval-suite-ci smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });
