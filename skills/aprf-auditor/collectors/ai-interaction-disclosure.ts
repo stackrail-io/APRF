@@ -9,11 +9,12 @@
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
-import type {
-  Collector,
-  CollectorContext,
-  CollectorResult,
-  EvidenceNode,
+import {
+  missingCoreSurfaceStatus,
+  type Collector,
+  type CollectorContext,
+  type CollectorResult,
+  type EvidenceNode,
 } from "./types.ts";
 import {
   ensureDir,
@@ -23,6 +24,7 @@ import {
   redact,
   rel,
   walkFiles,
+  walkCap,
 } from "./lib/fs.ts";
 import {
   asBool,
@@ -93,7 +95,7 @@ function collectRefs(
 ): string[] {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [
       ".md",
       ".txt",
@@ -177,14 +179,18 @@ export function buildAiInteractionDisclosureReport(opts: {
   inventory: { found: boolean; refs: string[] };
   audit: { found: boolean; refs: string[] };
   imported: AiInteractionDisclosureReport["importedResults"];
+  systemType?: string;
 }): AiInteractionDisclosureReport {
   const notes: string[] = [];
   const disclosureSignalsPresent =
     opts.disclosure.found || opts.inventory.found || opts.audit.found;
+  const emptyHint = missingCoreSurfaceStatus(opts.systemType);
+  const emptyLabel =
+    emptyHint === "not_applicable" ? "NOT_APPLICABLE" : "NOT_DEMONSTRATED";
 
   if (!disclosureSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No AI-interaction disclosure signals — SAF-M3 may be NOT_APPLICABLE if no in-scope user surfaces require disclosure.",
+      `No AI-interaction disclosure signals — SAF-M3 is ${emptyLabel} until disclosure evidence or a measured import pack is present. NOT_APPLICABLE is for --system-type ai-framework or non-ai-platform.`,
     );
   }
   if (opts.disclosure.found) {
@@ -232,8 +238,11 @@ export function buildAiInteractionDisclosureReport(opts: {
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
   if (!disclosureSignalsPresent && !opts.imported.found) {
-    statusHint = "not_applicable";
+    statusHint = emptyHint;
     safM3Satisfied = null;
+    notes.push(
+      `No AI-interaction disclosure signals — SAF-M3 remains ${emptyLabel} until disclosure evidence or a measured import pack is present. NOT_APPLICABLE is for --system-type ai-framework or non-ai-platform.`,
+    );
   } else if (explicitFail) {
     statusHint = "fail";
     safM3Satisfied = false;
@@ -275,7 +284,7 @@ export function buildAiInteractionDisclosureReport(opts: {
       );
     }
   } else {
-    statusHint = "not_demonstrated";
+    statusHint = emptyHint;
     safM3Satisfied = null;
   }
 
@@ -303,7 +312,7 @@ export function buildAiInteractionDisclosureReport(opts: {
 export const aiInteractionDisclosureCollector: Collector = {
   id: PLUGIN_ID,
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
-    const maxFiles = ctx.maxFiles ?? 8000;
+    const maxFiles = walkCap(ctx.maxFiles);
 
     const disclosureRefs = collectRefs(
       ctx.targetPath,
@@ -331,6 +340,7 @@ export const aiInteractionDisclosureCollector: Collector = {
       inventory: { found: inventoryRefs.length > 0, refs: inventoryRefs },
       audit: { found: auditRefs.length > 0, refs: auditRefs },
       imported,
+      systemType: ctx.systemType,
     });
 
     ensureDir(importDir(ctx));

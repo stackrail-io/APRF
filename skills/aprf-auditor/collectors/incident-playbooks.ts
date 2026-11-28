@@ -8,11 +8,12 @@
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
-import type {
-  Collector,
-  CollectorContext,
-  CollectorResult,
-  EvidenceNode,
+import {
+  missingCoreSurfaceStatus,
+  type Collector,
+  type CollectorContext,
+  type CollectorResult,
+  type EvidenceNode,
 } from "./types.ts";
 import {
   ensureDir,
@@ -22,6 +23,7 @@ import {
   redact,
   rel,
   walkFiles,
+  walkCap,
 } from "./lib/fs.ts";
 import {
   asBool,
@@ -110,7 +112,7 @@ function collectRefs(
 ): string[] {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [
       ".md",
       ".txt",
@@ -240,6 +242,7 @@ export function buildIncidentPlaybooksReport(opts: {
   providerOutage: { found: boolean; refs: string[] };
   ownerOrReview: { found: boolean; refs: string[] };
   imported: IncidentPlaybooksReport["importedResults"];
+  systemType?: string;
 }): IncidentPlaybooksReport {
   const notes: string[] = [];
   const scenarioCoverageCount = [
@@ -250,10 +253,13 @@ export function buildIncidentPlaybooksReport(opts: {
   ].filter(Boolean).length;
   const playbookSignalsPresent =
     scenarioCoverageCount > 0 || opts.ownerOrReview.found;
+  const emptyHint = missingCoreSurfaceStatus(opts.systemType);
+  const emptyLabel =
+    emptyHint === "not_applicable" ? "NOT_APPLICABLE" : "NOT_DEMONSTRATED";
 
   if (!playbookSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No AI incident-playbook signals — INC-M1 may be NOT_APPLICABLE if no production AI system is in scope.",
+      `No AI incident-playbook signals — INC-M1 is ${emptyLabel} until playbook evidence or a measured import pack is present. NOT_APPLICABLE is for --system-type ai-framework or non-ai-platform.`,
     );
   }
   if (opts.abuse.found) {
@@ -314,8 +320,11 @@ export function buildIncidentPlaybooksReport(opts: {
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
   if (!playbookSignalsPresent && !opts.imported.found) {
-    statusHint = "not_applicable";
+    statusHint = emptyHint;
     incM1Satisfied = null;
+    notes.push(
+      `No incident-playbook signals — INC-M1 remains ${emptyLabel} until playbook evidence or a measured import pack is present. NOT_APPLICABLE is for --system-type ai-framework or non-ai-platform.`,
+    );
   } else if (explicitFail) {
     statusHint = "fail";
     incM1Satisfied = false;
@@ -357,7 +366,7 @@ export function buildIncidentPlaybooksReport(opts: {
       );
     }
   } else {
-    statusHint = "not_demonstrated";
+    statusHint = emptyHint;
     incM1Satisfied = null;
   }
 
@@ -388,7 +397,7 @@ export function buildIncidentPlaybooksReport(opts: {
 export const incidentPlaybooksCollector: Collector = {
   id: PLUGIN_ID,
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
-    const maxFiles = ctx.maxFiles ?? 8000;
+    const maxFiles = walkCap(ctx.maxFiles);
 
     const abuse = scenarioRefs(ctx.targetPath, maxFiles, ABUSE_RE);
     const leakage = scenarioRefs(ctx.targetPath, maxFiles, LEAKAGE_RE);
@@ -422,6 +431,7 @@ export const incidentPlaybooksCollector: Collector = {
         refs: ownerOrReview,
       },
       imported,
+      systemType: ctx.systemType,
     });
 
     ensureDir(importDir(ctx));

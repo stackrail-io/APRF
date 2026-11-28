@@ -21,6 +21,7 @@ import {
   redact,
   rel,
   walkFiles,
+  walkCap,
   SCAN_EXTENSIONS,
 } from "./lib/fs.ts";
 import {
@@ -100,7 +101,7 @@ function collectRefs(
 ): string[] {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [...SCAN_EXTENSIONS],
   });
   for (const f of files) {
@@ -117,10 +118,10 @@ function detectEvalSignals(targetPath: string, maxFiles: number): boolean {
   return (
     collectRefs(
       targetPath,
-      Math.min(maxFiles, 2000),
+      maxFiles,
       (path, text) =>
         EVAL_PATH_RE.test(path) ||
-        /\b(promptfoo|openai|anthropic|llm|eval[\s_-]*suite)\b/i.test(text),
+        /\b(promptfoo|redteam|eval[\s_-]*suite|npx promptfoo)\b/i.test(text),
       5,
     ).length > 0
   );
@@ -347,7 +348,7 @@ export function buildEvalTrackCatalogReport(opts: {
 export const evalTrackCatalogCollector: Collector = {
   id: PLUGIN_ID,
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
-    const maxFiles = ctx.maxFiles ?? 8000;
+    const maxFiles = walkCap(ctx.maxFiles);
     const evalSignals = detectEvalSignals(ctx.targetPath, maxFiles);
 
     const regressionRefs = collectRefs(

@@ -23,6 +23,7 @@ import {
   rel,
   SCAN_EXTENSIONS,
   walkFiles,
+  walkCap,
 } from "./lib/fs.ts";
 import { measuredAtFresh, parseMeasuredAt } from "./lib/import-attest.ts";
 
@@ -47,10 +48,10 @@ const AGENT_PATH_RE =
 
 /** Broader text cue used only to associate limit keys with agentish files. */
 const AGENTISH_TEXT_RE =
-  /\b(agent|orchestrat\w*|autonom\w*|langgraph|crewai|autogen|swarm|planner|a2a|mcp)\b/i;
+  /\b(agent|orchestrat\w*|autonom\w*|langgraph|crewai|autogen|swarm|planner|a2a)\b/i;
 
 const STRONG_AGENT_RE =
-  /\b(AgentExecutor|create_react_agent|langgraph|CrewAI|AutoGen|OpenAIAgents|BrowserUse|multi[_-]?agent|agent[_-]?runtime|agent[_-]?loop|tool[_-]?calling[_-]?agent|ReAct\s*agent|mcp[_-]?(client|server|host)|a2a[_-]?(runtime|peer|agent))\b/i;
+  /\b(AgentExecutor|create_react_agent|langgraph|CrewAI|AutoGen|OpenAIAgents|BrowserUse|multi[_-]?agent|agent[_-]?runtime|agent[_-]?loop|tool[_-]?calling[_-]?agent|ReAct\s*agent|a2a[_-]?(runtime|peer|agent))\b/i;
 
 /** Surfaces that are out of AGN-M2 scope when no agent runtime is present. */
 const OUT_OF_SCOPE_RE =
@@ -153,7 +154,7 @@ function collectLimitRefs(
   const limit = opts?.limit ?? 16;
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [...SCAN_EXTENSIONS],
   });
   for (const f of files) {
@@ -178,7 +179,7 @@ function collectSpawnCapability(
 ): { found: boolean; refs: string[] } {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [...SCAN_EXTENSIONS],
   });
   for (const f of files) {
@@ -202,7 +203,7 @@ function collectSpawnCapability(
 function detectEnforcementTests(targetPath: string, maxFiles: number) {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [...SCAN_EXTENSIONS],
   });
   for (const f of files) {
@@ -615,7 +616,7 @@ export function buildAgentLoopLimitsReport(opts: {
 export const agentLoopLimitsCollector: Collector = {
   id: PLUGIN_ID,
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
-    const maxFiles = ctx.maxFiles ?? 4000;
+    const maxFiles = walkCap(ctx.maxFiles);
     const maxSteps = {
       found: false,
       refs: collectLimitRefs(ctx.targetPath, maxFiles, MAX_STEPS_RE),

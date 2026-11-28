@@ -8,11 +8,12 @@
  */
 import { writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
-import type {
-  Collector,
-  CollectorContext,
-  CollectorResult,
-  EvidenceNode,
+import {
+  missingCoreSurfaceStatus,
+  type Collector,
+  type CollectorContext,
+  type CollectorResult,
+  type EvidenceNode,
 } from "./types.ts";
 import {
   ensureDir,
@@ -22,6 +23,7 @@ import {
   redact,
   rel,
   walkFiles,
+  walkCap,
   SCAN_EXTENSIONS_DOCS,
 } from "./lib/fs.ts";
 import {
@@ -98,7 +100,7 @@ function collectRefs(
 ): string[] {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [...SCAN_EXTENSIONS_DOCS],
   });
   for (const f of files) {
@@ -168,6 +170,7 @@ export function buildAiJourneySloCatalogReport(opts: {
   latency: { found: boolean; refs: string[] };
   criticalJourney: { found: boolean; refs: string[] };
   imported: AiJourneySloCatalogReport["importedResults"];
+  systemType?: string;
 }): AiJourneySloCatalogReport {
   const notes: string[] = [];
   const catalogSignalsPresent =
@@ -175,10 +178,13 @@ export function buildAiJourneySloCatalogReport(opts: {
     opts.availability.found ||
     opts.latency.found ||
     opts.criticalJourney.found;
+  const emptyHint = missingCoreSurfaceStatus(opts.systemType);
+  const emptyLabel =
+    emptyHint === "not_applicable" ? "NOT_APPLICABLE" : "NOT_DEMONSTRATED";
 
   if (!catalogSignalsPresent && !opts.imported.found) {
     notes.push(
-      "No AI journey SLO-catalog signals — PERF-M1 may be NOT_APPLICABLE if no critical AI journeys are in scope.",
+      `No AI journey SLO-catalog signals — PERF-M1 is ${emptyLabel} until catalog evidence or a measured import pack is present. NOT_APPLICABLE is for --system-type ai-framework or non-ai-platform.`,
     );
   }
   if (opts.catalog.found) {
@@ -228,8 +234,11 @@ export function buildAiJourneySloCatalogReport(opts: {
         opts.imported.ageDays > IMPORT_MAX_AGE_DAYS));
 
   if (!catalogSignalsPresent && !opts.imported.found) {
-    statusHint = "not_applicable";
+    statusHint = emptyHint;
     perfM1Satisfied = null;
+    notes.push(
+      `No AI journey SLO-catalog signals — PERF-M1 remains ${emptyLabel} until catalog evidence or a measured import pack is present. NOT_APPLICABLE is for --system-type ai-framework or non-ai-platform.`,
+    );
   } else if (explicitFail) {
     statusHint = "fail";
     perfM1Satisfied = false;
@@ -267,7 +276,7 @@ export function buildAiJourneySloCatalogReport(opts: {
       );
     }
   } else {
-    statusHint = "not_demonstrated";
+    statusHint = emptyHint;
     perfM1Satisfied = null;
   }
 
@@ -296,7 +305,7 @@ export function buildAiJourneySloCatalogReport(opts: {
 export const aiJourneySloCatalogCollector: Collector = {
   id: PLUGIN_ID,
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
-    const maxFiles = ctx.maxFiles ?? 8000;
+    const maxFiles = walkCap(ctx.maxFiles);
 
     const catalog = collectRefs(
       ctx.targetPath,
@@ -343,6 +352,7 @@ export const aiJourneySloCatalogCollector: Collector = {
         refs: criticalJourney,
       },
       imported,
+      systemType: ctx.systemType,
     });
 
     ensureDir(importDir(ctx));

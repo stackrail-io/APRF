@@ -28,6 +28,8 @@ import {
   readText,
   redact,
   rel,
+  lastWalkMeta,
+  walkCap,
   walkFiles,
 } from "./lib/fs.ts";
 import {
@@ -401,6 +403,7 @@ function discoverFastapiRoutes(
   routes: ProbeRoute[];
   declaredAiRoutesTruncated: boolean;
   declaredAiRouteTotal: number;
+  walkTruncated: boolean;
 } {
   const routes: ProbeRoute[] = [];
   const includeRe =
@@ -417,9 +420,10 @@ function discoverFastapiRoutes(
   ].map((p) => join(targetPath, p));
 
   const pyFiles = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 8000),
+    maxFiles,
     extensions: [".py"],
   });
+  const walkTruncated = lastWalkMeta().truncated;
   const mainFiles = [
     ...preferred.filter((f) => existsSync(f)),
     ...pyFiles.filter((f) => {
@@ -477,14 +481,19 @@ function discoverFastapiRoutes(
     : aiDeclared;
   return {
     routes: [...capped, ...rest],
-    declaredAiRoutesTruncated,
+    declaredAiRoutesTruncated: declaredAiRoutesTruncated || walkTruncated,
     declaredAiRouteTotal: aiDeclared.length,
+    walkTruncated,
   };
 }
 
 /** Load OpenAPI/Swagger path+method pairs from repo files. */
-function discoverOpenApiFiles(targetPath: string, maxFiles: number): ProbeRoute[] {
+function discoverOpenApiFiles(
+  targetPath: string,
+  maxFiles: number,
+): { routes: ProbeRoute[]; walkTruncated: boolean } {
   const files = walkFiles(targetPath, { maxFiles });
+  const walkTruncated = lastWalkMeta().truncated;
   const routes: ProbeRoute[] = [];
   for (const file of files) {
     const r = rel(targetPath, file);
@@ -514,7 +523,7 @@ function discoverOpenApiFiles(targetPath: string, maxFiles: number): ProbeRoute[
       // YAML OpenAPI not parsed here — JSON only for determinism without deps
     }
   }
-  return routes;
+  return { routes, walkTruncated };
 }
 
 function loadRoutesOverride(ctx: CollectorContext): ProbeRoute[] {
@@ -589,19 +598,27 @@ export function discoverRoutes(ctx: CollectorContext): {
     routes = override;
     sources.push("imports/http-auth-probe/routes.json");
   } else {
-    const fastapi = discoverFastapiRoutes(ctx.targetPath, ctx.maxFiles ?? 4000);
+    const cap = walkCap(ctx.maxFiles);
+    const fastapi = discoverFastapiRoutes(ctx.targetPath, cap);
     if (fastapi.routes.length) {
       routes.push(...fastapi.routes);
       sources.push("fastapi-router-methods");
       declaredAiRoutesTruncated = fastapi.declaredAiRoutesTruncated;
       declaredAiRouteTotal = fastapi.declaredAiRouteTotal;
     }
-    const openapi = discoverOpenApiFiles(ctx.targetPath, ctx.maxFiles ?? 4000);
-    if (openapi.length) {
-      routes.push(...openapi);
+    const openapi = discoverOpenApiFiles(ctx.targetPath, cap);
+    if (openapi.routes.length) {
+      routes.push(...openapi.routes);
       sources.push("openapi-json");
     }
-    if (routes.filter((r) => r.aiSurface).length < 3) {
+    if (fastapi.walkTruncated || openapi.walkTruncated) {
+      declaredAiRoutesTruncated = true;
+    }
+    const discovered = fastapi.routes.length > 0 || openapi.routes.length > 0;
+    const declaredAiCount = routes.filter(
+      (r) => r.aiSurface && r.declaredInCode,
+    ).length;
+    if (discovered && declaredAiCount > 0 && declaredAiCount < 3) {
       routes.push(...seedAiRoutes());
       sources.push("builtin-ai-prefix-hints");
     }
@@ -822,12 +839,16 @@ export async function runAuthProbe(
 
   // Score only declared methods — advisory GET is hardening, not the gate.
   const scored = results.filter(
-    (r) => !r.skipped && r.ok !== null && !r.advisoryGet,
+    (r) =>
+      !r.skipped &&
+      r.ok !== null &&
+      !r.advisoryGet &&
+      r.declaredInCode,
   );
   const pass = scored.filter((r) => r.ok === true).length;
   const fail = scored.filter((r) => r.ok === false && !r.error).length;
   const errors = results.filter(
-    (r) => Boolean(r.error) && !r.advisoryGet,
+    (r) => Boolean(r.error) && !r.advisoryGet && r.declaredInCode,
   ).length;
   const skipped = results.filter((r) => r.skipped).length;
   const get405 = results.filter(
@@ -850,7 +871,7 @@ export async function runAuthProbe(
   ];
   if (get405.length) {
     notes.push(
-      `${get405.length} path(s) have no declared GET and returned 405. Hardening only — GET should also return 401/403; AUTHN-M1 is gated by declared methods from the repo.`,
+      `${get405.length} undeclared GET path(s) returned 405. Advisory only — AUTHN-M1 scores declared methods from the repo, not these GETs.`,
     );
   }
   if (getOpen.length) {

@@ -349,6 +349,88 @@ jobs:
       );
     }
 
+    const tFp = join(root, "t-fp");
+    mkdirSync(join(tFp, "src"), { recursive: true });
+    mkdirSync(join(tFp, "litellm"), { recursive: true });
+    mkdirSync(join(tFp, "_next", "static", "chunks"), { recursive: true });
+    const fakeSk = `sk-${"a".repeat(24)}`;
+    writeFileSync(
+      join(tFp, "src", "docs.py"),
+      `"""Example usage\n${fakeSk}\n"""\n# ${fakeSk}\napi_key = "xxxxxxxxxxxxxxxxxxxxxxxxxx"\n`,
+    );
+    writeFileSync(
+      join(tFp, "src", "algolia.ts"),
+      `export const ALGOLIA_SEARCH_ONLY_KEY = "algoliaSearchOnlyKeyValue12345";\n`,
+    );
+    writeFileSync(
+      join(tFp, "src", "pem_header.py"),
+      `print("-----BEGIN PRIVATE KEY-----")\n`,
+    );
+    writeFileSync(
+      join(tFp, "litellm", "key_management_endpoints.py"),
+      `def create_key():\n    """Example\n    ${fakeSk}\n    """\n    return True\n`,
+    );
+    mkdirSync(join(tFp, "testdata"), { recursive: true });
+    writeFileSync(
+      join(tFp, "testdata", "sample_key.py"),
+      `OPENAI_KEY = "${fakeSk}"\n`,
+    );
+    writeFileSync(
+      join(tFp, "_next", "static", "chunks", "main.js"),
+      `const k="${["AKIA", "JTESTKEYNOTREAL0"].join("")}";\n`,
+    );
+    const rFp = await run(tFp, join(root, "o-fp"));
+    if (rFp.summary.statusHint === "fail") {
+      throw new Error(
+        `benchmark-style placeholders must not FAIL: ${JSON.stringify(rFp.summary)} ${JSON.stringify(rFp.embeddedFindings)}`,
+      );
+    }
+
+    const tParser = join(root, "t-parser");
+    mkdirSync(join(tParser, "src", "parser"), { recursive: true });
+    writeFileSync(
+      join(tParser, "src", "parser", "config.ts"),
+      `export const OPENAI_KEY = "${fakeSk}";\n`,
+    );
+    const rParser = await run(tParser, join(root, "o-parser"));
+    if (rParser.summary.statusHint !== "fail") {
+      throw new Error(
+        `production src/parser credential must FAIL: ${JSON.stringify(rParser.summary)}`,
+      );
+    }
+
+    const tSpread = join(root, "t-spread");
+    mkdirSync(join(tSpread, "src"), { recursive: true });
+    writeFileSync(
+      join(tSpread, "src", "config.ts"),
+      `const config = { ...defaults, apiKey: "${fakeSk}" };\n`,
+    );
+    const rSpread = await run(tSpread, join(root, "o-spread"));
+    if (rSpread.summary.statusHint !== "fail") {
+      throw new Error(
+        `spread-syntax neighbor must not hide credential: ${JSON.stringify(rSpread.summary)}`,
+      );
+    }
+
+    const tWeak = join(root, "t-weak");
+    mkdirSync(join(tWeak, "src"), { recursive: true });
+    const weakLines = Array.from(
+      { length: 50 },
+      (_, i) =>
+        `const api_key = "abcdefghijklmnopqrstuvwxyz${String(i).padStart(2, "0")}";`,
+    ).join("\n");
+    writeFileSync(join(tWeak, "src", "a-config.ts"), `${weakLines}\n`);
+    writeFileSync(
+      join(tWeak, "src", "z-secret.ts"),
+      `export const OPENAI_KEY = "${fakeSk}";\n`,
+    );
+    const rWeak = await run(tWeak, join(root, "o-weak"));
+    if (rWeak.summary.statusHint !== "fail") {
+      throw new Error(
+        `weak quota must not hide later production credential: ${JSON.stringify(rWeak.summary)} ${JSON.stringify(rWeak.embeddedFindings)}`,
+      );
+    }
+
     console.log("aprf-auditor secrets-hygiene smoke OK");
   } finally {
     rmSync(root, { recursive: true, force: true });

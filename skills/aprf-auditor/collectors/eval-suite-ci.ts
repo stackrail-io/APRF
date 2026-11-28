@@ -20,6 +20,7 @@ import {
   readText,
   redact,
   rel,
+  walkCap,
   walkFiles,
   SCAN_EXTENSIONS,
 } from "./lib/fs.ts";
@@ -41,7 +42,34 @@ const SUITE_RE =
   /\b(eval[\s_-]*(suite|config|harness|registry)|promptfoo|offline[\s_-]*eval|golden[\s_-]*(set|suite)|journey[\s_-]*eval)\b/i;
 
 const CI_TRIGGER_RE =
-  /\b(workflow_dispatch|pull_request|push:|on:[\s\S]{0,80}(prompt|model|eval)|eval[\s_-]*(job|gate|ci)|promptfoo[\s_-]*eval)\b/i;
+  /\b(eval[\s_-]*(job|gate|ci)|promptfoo|redteam|npx promptfoo|pytest.*eval)\b/i;
+
+/** Filename / workflow name token — not a substring of "evaluation" or "retrieval". */
+const EVAL_WORKFLOW_TOKEN_RE =
+  /(^|[/\\._-])(eval|evals|promptfoo|redteam)([/\\._-]|$)/i;
+
+/** Root/config filenames that declare suites even when "promptfoo" is followed by "config". */
+function isEvalConfigFile(path: string): boolean {
+  return /(^|[/\\])(promptfooconfig|promptfoo\.config|evalconfig)(\.[^/\\]+)?$/i.test(
+    path,
+  );
+}
+
+function isEvalCiWorkflow(path: string, text: string): boolean {
+  if (
+    !/(\.github\/workflows|cicd|gitlab-ci|azure-pipelines|Jenkinsfile)/i.test(
+      path,
+    )
+  ) {
+    return false;
+  }
+  if (EVAL_WORKFLOW_TOKEN_RE.test(path)) return true;
+  const nameLine = /^name:\s*(.+)$/m.exec(text);
+  if (nameLine && EVAL_WORKFLOW_TOKEN_RE.test(`/${nameLine[1].trim()}/`)) {
+    return true;
+  }
+  return CI_TRIGGER_RE.test(text);
+}
 
 const JOURNEY_RE =
   /\b(critical[\s_-]*journey|journey[\s_-]*(id|map|registry)|customer[\s_-]*journey)\b/i;
@@ -95,7 +123,7 @@ function collectRefs(
 ): string[] {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [...SCAN_EXTENSIONS],
   });
   for (const f of files) {
@@ -112,10 +140,12 @@ function detectEvalSignals(targetPath: string, maxFiles: number): boolean {
   return (
     collectRefs(
       targetPath,
-      Math.min(maxFiles, 2000),
+      maxFiles,
       (path, text) =>
-        EVAL_PATH_RE.test(path) ||
-        /\b(promptfoo|openai|anthropic|llm|ChatCompletion)\b/i.test(text),
+        EVAL_WORKFLOW_TOKEN_RE.test(path) ||
+        SUITE_RE.test(path) ||
+        isEvalConfigFile(path) ||
+        /\b(promptfoo|redteam|eval[\s_-]*suite|npx promptfoo)\b/i.test(text),
       5,
     ).length > 0
   );
@@ -259,7 +289,6 @@ export function buildEvalSuiteCiReport(opts: {
     evlM1Satisfied = true;
   } else if (
     suiteSignalsPresent ||
-    opts.ciTriggers.found ||
     opts.journeyMaps.found ||
     opts.imported.found
   ) {
@@ -312,20 +341,16 @@ export function buildEvalSuiteCiReport(opts: {
 export const evalSuiteCiCollector: Collector = {
   id: PLUGIN_ID,
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
-    const maxFiles = ctx.maxFiles ?? 8000;
+    const maxFiles = walkCap(ctx.maxFiles);
     const evalSignals = detectEvalSignals(ctx.targetPath, maxFiles);
 
     const suiteRefs = collectRefs(
       ctx.targetPath,
       maxFiles,
-      (path, text) => {
-        if (!SUITE_RE.test(path) && !SUITE_RE.test(text)) return false;
-        return (
-          EVAL_PATH_RE.test(path) ||
-          EVAL_PATH_RE.test(text) ||
-          SUITE_RE.test(path)
-        );
-      },
+      (path, text) =>
+        SUITE_RE.test(path) ||
+        (SUITE_RE.test(text) &&
+          (EVAL_WORKFLOW_TOKEN_RE.test(path) || isEvalConfigFile(path))),
     );
     const journeyRefs = collectRefs(
       ctx.targetPath,
@@ -338,11 +363,7 @@ export const evalSuiteCiCollector: Collector = {
     const ciRefs = collectRefs(
       ctx.targetPath,
       maxFiles,
-      (path, text) =>
-        /(\.github\/workflows|cicd|gitlab-ci|azure-pipelines|Jenkinsfile)/i.test(
-          path,
-        ) &&
-        (SUITE_RE.test(text) || EVAL_PATH_RE.test(text) || CI_TRIGGER_RE.test(text)),
+      (path, text) => isEvalCiWorkflow(path, text),
       12,
     );
 

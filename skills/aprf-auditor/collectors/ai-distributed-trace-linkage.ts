@@ -21,6 +21,7 @@ import {
   redact,
   rel,
   walkFiles,
+  walkCap,
 } from "./lib/fs.ts";
 import {
   asBool,
@@ -39,7 +40,26 @@ const TRACE_CONFIG_RE =
   /\b(opentelemetry|otel|otlp|tracer[\s_-]*provider|distributed[\s_-]*trac|trace[\s_-]*parent|propagation)\b/i;
 
 const MODEL_SPAN_RE =
-  /\b(llm[\s_-]*span|model[\s_-]*span|gen[\s_-]*ai|openai|anthropic|completion[\s_-]*span|chat[\s_-]*span|embedding[\s_-]*span)\b/i;
+  /\b(llm[\s_-]*span|model[\s_-]*span|gen[\s_-]*ai|completion[\s_-]*span|chat[\s_-]*span|embedding[\s_-]*span)\b/i;
+
+const MODEL_CLIENT_RE = /\b(openai|anthropic|chatcompletions|chat_completions)\b/i;
+
+function modelSpanLinked(path: string, text: string): boolean {
+  const blob = path + "\n" + text;
+  if (MODEL_SPAN_RE.test(path) || MODEL_SPAN_RE.test(text)) {
+    return (
+      TRACE_CONFIG_RE.test(blob) ||
+      /\b(span|traceparent|tracer|otel)\b/i.test(blob)
+    );
+  }
+  if (MODEL_CLIENT_RE.test(text) || MODEL_CLIENT_RE.test(path)) {
+    return (
+      TRACE_CONFIG_RE.test(blob) &&
+      /\b(span|traceparent|tracer)\b/i.test(blob)
+    );
+  }
+  return false;
+}
 
 const TOOL_SPAN_RE =
   /\b(tool[\s_-]*span|tool[\s_-]*call|function[\s_-]*call|mcp[\s_-]*span|agent[\s_-]*tool)\b/i;
@@ -97,7 +117,7 @@ function collectRefs(
 ): string[] {
   const refs: string[] = [];
   const files = walkFiles(targetPath, {
-    maxFiles: Math.max(maxFiles, 5000),
+    maxFiles,
     extensions: [
       ".ts",
       ".js",
@@ -306,7 +326,7 @@ export function buildAiDistributedTraceLinkageReport(opts: {
 export const aiDistributedTraceLinkageCollector: Collector = {
   id: PLUGIN_ID,
   async collect(ctx: CollectorContext): Promise<CollectorResult> {
-    const maxFiles = ctx.maxFiles ?? 8000;
+    const maxFiles = walkCap(ctx.maxFiles);
 
     const traceConfig = collectRefs(
       ctx.targetPath,
@@ -317,7 +337,7 @@ export const aiDistributedTraceLinkageCollector: Collector = {
     const modelSpans = collectRefs(
       ctx.targetPath,
       maxFiles,
-      (path, text) => MODEL_SPAN_RE.test(path) || MODEL_SPAN_RE.test(text),
+      (path, text) => modelSpanLinked(path, text),
       10,
     );
     const toolSpans = collectRefs(
@@ -332,7 +352,7 @@ export const aiDistributedTraceLinkageCollector: Collector = {
       (path, text) =>
         (OUTCOME_RE.test(path) || OUTCOME_RE.test(text)) &&
         (TRACE_CONFIG_RE.test(path + text) ||
-          MODEL_SPAN_RE.test(path + text) ||
+          modelSpanLinked(path, text) ||
           /request[\s_-]*id|traceparent/i.test(path + text)),
       10,
     );

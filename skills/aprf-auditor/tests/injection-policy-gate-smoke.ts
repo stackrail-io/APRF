@@ -50,7 +50,8 @@ async function main() {
     join(targetDir, "policy", "tool_policy.py"),
     `
 def authorize_tool(user, tool_name):
-    """server-side policy — never trust model text alone for privileged tool calls"""
+    """server-side policy — never trust model text alone for privileged tool calls.
+    Also prevent credential injection via tool args."""
     return has_permission(user, f"tool.{tool_name}")
 `,
     "utf8",
@@ -240,6 +241,40 @@ def authorize_tool(user, tool_name):
   ) as InjectionPolicyReport;
   if (rNa.summary.statusHint !== "not_applicable") {
     throw new Error(`expected not_applicable, got ${JSON.stringify(rNa.summary)}`);
+  }
+
+  const credTarget = mkdtempSync(join(tmpdir(), "aprf-inj-cred-t-"));
+  mkdirSync(join(credTarget, "tests"), { recursive: true });
+  writeFileSync(
+    join(credTarget, "tests", "test_credential_injection.py"),
+    `
+def test_credential_injection():
+    """has_permission credential injection into the prompt"""
+    assert True
+`,
+    "utf8",
+  );
+  const credOut = mkdtempSync(join(tmpdir(), "aprf-inj-cred-o-"));
+  await injectionPolicyGateCollector.collect({
+    ...baseCtx,
+    targetPath: credTarget,
+    outputDir: credOut,
+  });
+  const rCred = JSON.parse(
+    readFileSync(
+      join(
+        credOut,
+        "imports",
+        "injection-policy-gate",
+        "injection-policy-gate-report.json",
+      ),
+      "utf8",
+    ),
+  ) as InjectionPolicyReport;
+  if (rCred.policyEngine.found || rCred.summary.statusHint === "partial") {
+    throw new Error(
+      `credential injection tests must not count as tool policy: ${JSON.stringify(rCred.summary)}`,
+    );
   }
 
   console.log("aprf-auditor injection-policy-gate smoke OK");
